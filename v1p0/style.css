@@ -765,81 +765,225 @@ tbody th {
     }
 }
 
-
 /* =================================
-   スマートフォン表示：バトルカード周辺のレスポンシブ調整
-   PC表示には影響しない（画面幅800px以下のみ）
+   スマホ表示専用レイアウト
+   PC表示には影響しない
    ================================= */
 @media (max-width: 800px) {
-    /* メイン枠の左右余白を少しだけ縮め、内容幅を確保 */
-    .main-container {
-        padding: 18px 14px 14px;
-        gap: 18px;
+    body {
+        margin: 10px auto;
+        padding: 8px;
     }
 
-    /* 下段は縦並び。子要素が親幅を超えないようにする */
-    .battle-lower-area {
-        grid-template-columns: minmax(0, 1fr);
-        gap: 18px;
+    .tool-wrapper {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* スマホ時だけタブを最上部へ */
+    .role-tabs {
+        order: -1;
         width: 100%;
+        margin: 0 0 10px 0;
+    }
+
+    .role-tab {
+        height: 42px;
+        border-top: 2px solid transparent;
+        border-bottom: 2px solid transparent;
+        border-radius: 5px 5px 0 0;
+    }
+
+    .role-tab.active.attack-tab {
+        border-top-color: #ef6b6b;
+        border-right-color: #ef6b6b;
+        border-left-color: #ef6b6b;
+        border-bottom-color: transparent;
+    }
+
+    .role-tab.active.defense-tab {
+        border-top-color: #5f9bd3;
+        border-right-color: #5f9bd3;
+        border-left-color: #5f9bd3;
+        border-bottom-color: transparent;
+    }
+
+    .main-container {
+        grid-template-columns: 1fr;
+        gap: 18px;
+        padding: 18px 14px 14px;
+    }
+
+    /* パラメータ入力＋効果による変動を横並び */
+    .parameter-area {
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.9fr);
+        gap: 12px;
+        align-items: start;
+        width: 100%;
+        padding-bottom: 0;
+    }
+
+    .parameter-input-area,
+    .effect-input-area {
         min-width: 0;
     }
 
-    /* 攻撃・防御カードともスマホでは3列にする */
+    .parameter-input-area h2,
+    .effect-input-area h2 {
+        margin-bottom: 10px;
+        font-size: 18px;
+        white-space: nowrap;
+    }
+
+    .parameter-input-area label {
+        transform: none;
+        gap: 6px;
+        min-height: 42px;
+    }
+
+    .parameter-input-area .attack-panel,
+    .parameter-input-area .defense-panel {
+        padding: 10px 8px;
+    }
+
+    .parameter-input-area .defense-panel {
+        margin-top: 8px;
+        gap: 2px;
+    }
+
+    .parameter-icon {
+        width: 42px;
+        height: 36px;
+    }
+
+    .parameter-area .number-control {
+        gap: 4px;
+    }
+
+    .parameter-area .number-control button {
+        width: 30px;
+        height: 30px;
+        font-size: 18px;
+    }
+
+    .parameter-area .number-control input {
+        width: 56px;
+        height: 30px;
+    }
+
+    .effect-panel label {
+        margin: 8px 0;
+        gap: 6px;
+        font-size: 15px;
+    }
+
+    /* ダメージ表 */
+    .damage-area {
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .damage-table th,
+    .damage-table td {
+        padding: 6px 3px;
+        font-size: 15px;
+    }
+
+    /* 上部分析欄 */
+    .analysis-values {
+        min-height: 46px;
+        height: auto;
+        padding: 6px 8px;
+        gap: 4px;
+    }
+
+    .analysis-values div {
+        gap: 6px;
+        min-width: 0;
+    }
+
+    .analysis-values span {
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    .analysis-values strong {
+        font-size: 17px;
+        white-space: nowrap;
+    }
+
+    .defense-analysis .analysis-item,
+    .defense-analysis .recommendation-item {
+        padding: 0 3px;
+        gap: 4px;
+    }
+
+    .defense-analysis .recommendation-item strong {
+        font-size: 14px;
+    }
+
+    /* 下段：カード→グラフの縦並び */
+    .battle-lower-area {
+        grid-template-columns: 1fr;
+        gap: 18px;
+        width: 100%;
+        padding-top: 16px;
+    }
+
+    /* スマホでは1列4枚 */
     .battle-card-area {
         width: 100%;
-        min-width: 0;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 10px 8px;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
     }
 
     .battle-card-item {
         width: 100%;
         min-width: 0;
+        gap: 6px;
     }
 
-    /* 120px固定を解除し、列幅に合わせて縮小 */
     .battle-card {
         width: 100%;
-        max-width: 120px;
+        max-width: none;
         height: auto;
-        margin: 0 auto;
+        border-width: 4px;
     }
 
-    /* カウンタもカード幅に追従 */
     .battle-card-counter {
         width: 100%;
-        max-width: 120px;
-        min-width: 0;
         gap: 3px;
-        margin: 0 auto;
     }
 
     .battle-card-counter button {
         width: 24px;
-        min-width: 24px;
-        height: 32px;
+        height: 30px;
+        font-size: 17px;
     }
 
     .battle-card-counter input {
-        width: auto;
+        width: 100%;
         min-width: 0;
+        height: 30px;
         flex: 1 1 auto;
-        height: 32px;
     }
 
-    /* 防御側のカード＋推奨行動エリアの固定高さを解除 */
+    .battle-card-reset-item {
+        align-items: center;
+    }
+
+    /* 防御側：カード＋推奨欄 */
     .defense-card-and-guide {
         width: 100%;
-        min-width: 0;
         height: auto;
-        gap: 14px;
+        gap: 12px;
     }
 
-    /* 推奨行動は6列のままだと狭すぎるため、3列×2段にする */
     .defense-choice-guide {
         width: 100%;
-        min-width: 0;
+        min-height: 0;
+        padding: 10px;
     }
 
     .defense-choice-grid {
@@ -849,21 +993,120 @@ tbody th {
 
     .defense-choice-cell {
         min-height: 92px;
+        padding: 6px 2px;
     }
 
-    /* グラフ側も必ず親幅内に収める */
-    .battle-result-area,
-    .damage-graph-area,
+    .defense-choice-cell strong {
+        font-size: 15px;
+    }
+
+    .defense-choice-cell small {
+        font-size: 11px;
+    }
+
+    /* グラフ */
+    .battle-result-area {
+        width: 100%;
+        height: auto;
+        gap: 8px;
+    }
+
+    .battle-result-area .damage-graph-area {
+        width: 100%;
+        height: 250px;
+        flex: 0 0 250px;
+        overflow: hidden;
+    }
+
     .damage-probability-graph {
         width: 100%;
-        min-width: 0;
         max-width: 100%;
+        overflow: hidden;
+    }
+
+    /* 下部分析欄の文字崩れ防止 */
+    .battle-result-area .analysis-values {
+        min-height: 48px;
+        height: auto;
+        padding: 6px 4px;
+    }
+
+    .future-analysis-values {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 2px;
+        padding: 6px 4px;
+    }
+
+    .future-analysis-values div {
+        min-width: 0;
+        gap: 3px;
+        flex-direction: column;
+    }
+
+    .future-analysis-values span {
+        font-size: 11px;
+        line-height: 1.15;
+        white-space: nowrap;
+    }
+
+    .future-analysis-values strong {
+        font-size: 16px;
+        line-height: 1.1;
+        white-space: nowrap;
     }
 }
 
-/* さらに狭い画面ではカードを2列にして可読性を優先 */
-@media (max-width: 380px) {
+/* かなり狭い端末向けの微調整 */
+@media (max-width: 430px) {
+    .main-container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .parameter-area {
+        grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.85fr);
+        gap: 8px;
+    }
+
+    .parameter-input-area h2,
+    .effect-input-area h2 {
+        font-size: 16px;
+    }
+
+    .parameter-icon {
+        width: 38px;
+        height: 32px;
+    }
+
+    .parameter-area .number-control input {
+        width: 50px;
+    }
+
     .battle-card-area {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px;
+    }
+
+    .battle-card {
+        border-width: 3px;
+    }
+
+    .battle-card-counter button {
+        width: 22px;
+        height: 28px;
+        font-size: 16px;
+    }
+
+    .battle-card-counter input {
+        height: 28px;
+        font-size: 13px;
+    }
+
+    .future-analysis-values span {
+        font-size: 10px;
+    }
+
+    .future-analysis-values strong {
+        font-size: 15px;
     }
 }
