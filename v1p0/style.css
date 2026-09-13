@@ -1110,3 +1110,44 @@ tbody th {
         font-size: 15px;
     }
 }
+
+/* =================================
+   スマホ表示 追加微調整 v3
+   ・上部タブと本体枠を密着
+   ・増加／軽減を横書き＋入力欄を下へ
+   PC表示には影響しない
+   ================================= */
+@media (max-width: 800px) {
+    /* タブと本体枠の隙間をなくす */
+    .role-tabs {
+        margin: 0 0 -2px 0;
+        z-index: 3;
+    }
+
+    .main-container {
+        margin-top: 0;
+    }
+
+    /* 効果による変動：文字を横書き、その下に入力欄 */
+    .effect-panel label {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        margin: 8px 0 12px;
+        white-space: nowrap;
+        line-height: 1.2;
+    }
+
+    .effect-panel .number-control {
+        justify-content: center;
+        width: 100%;
+    }
+}
+
+@media (max-width: 430px) {
+    .effect-panel label {
+        font-size: 15px;
+        margin: 7px 0 10px;
+    }
+}
