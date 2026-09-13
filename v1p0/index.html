@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ダメージ計算ツール</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<div class="tool-wrapper">
+
+    <div class="main-container attack-mode">
+
+        <!-- 攻撃側として計算するモード -->
+        <div class="mode-content active" data-role="attack">
+
+            <div class="parameter-area">
+
+                <div class="parameter-input-area">
+
+                    <h2>・パラメータ入力</h2>
+
+                    <section class="attack-panel">
+
+                        <label>
+                            <img src="../images/icon/Attack.png" alt="攻撃" class="parameter-icon">
+                            <div class="number-control">
+                                <button type="button" class="minus-button" data-target="attackPower1">−</button>
+                                <input type="number" id="attackPower1" value="1" min="0">
+                                <button type="button" class="plus-button" data-target="attackPower1">＋</button>
+                            </div>
+                        </label>
+
+                    </section>
+
+
+                    <section class="defense-panel">
+
+                        <label>
+                            <img src="../images/icon/Defense.png" alt="防御" class="parameter-icon">
+                            <div class="number-control">
+                                <button type="button" class="minus-button" data-target="defensePower1">−</button>
+                                <input type="number" id="defensePower1" value="1" min="0">
+                                <button type="button" class="plus-button" data-target="defensePower1">＋</button>
+                            </div>
+                        </label>
+
+                        <label>
+                            <img src="../images/icon/Hp.png" alt="HP" class="parameter-icon">
+                            <div class="number-control">
+                                <button type="button" class="minus-button" data-target="hp1">−</button>
+                                <input type="number" id="hp1" value="5" min="1">
+                                <button type="button" class="plus-button" data-target="hp1">＋</button>
+                            </div>
+                        </label>
+                        
+                    </section>
+
+                </div>
+
+
+                <div class="effect-input-area">
+
+                    <h2>・効果による変動</h2>
+
+                    <section class="effect-panel">
+
+                        <label>
+                            増加
+                            <div class="number-control">
+                                <button type="button" class="minus-button" data-target="damageAdd1">−</button>
+                                <input type="number" id="damageAdd1" value="0" min="0">
+                                <button type="button" class="plus-button" data-target="damageAdd1">＋</button>
+                            </div>
+                        </label>
+
+                        <label>
+                            軽減
+                            <div class="number-control">
+                                <button type="button" class="minus-button" data-target="damageReduce1">−</button>
+                                <input type="number" id="damageReduce1" value="0" min="0">
+                                <button type="button" class="plus-button" data-target="damageReduce1">＋</button>
+                            </div>
+                        </label>
+
+                    </section>
+
+                </div>
+
+            </div>
+
+            <div class="damage-area">
+                <table class="damage-table">
+                    <thead>
+                        <tr>
+                            <th colspan="2" rowspan="2"></th>
+                            <th colspan="6">防御</th>
+                        </tr>
+                        <tr>
+                            <th>1</th><th>2</th><th>3</th>
+                            <th>4</th><th>5</th><th>6</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+
+                <div class="analysis-values">
+                    <div>
+                        <span>期待値</span>
+                        <strong class="expected-damage">-</strong>
+                    </div>
+                    <div>
+                        <span>撃破率</span>
+                        <strong class="result-rate">-</strong>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 攻撃バトルカード -->
+            <div class="battle-lower-area">
+
+                <div class="battle-card-area attack-card-area">
+            
+                <div class="battle-card-item">
+                    <img src="../images/AtkCurd/Atk1.jpg" alt="攻撃カード1" class="battle-card battle-card-clickable" data-card-target="Atk1" role="button" tabindex="0" aria-label="攻撃カード1を1枚追加">
+                    <div class="number-control battle-card-counter">
+                        <button type="button" class="minus-button" data-target="Atk1">−</button>
+                        <input type="number" id="Atk1" value="0" min="0">
+                        <button type="button" class="plus-button" data-target="Atk1">＋</button>
+                    </div>
+                </div>
+            
+                <div class="battle-card-item">
+                    <img src="../images/AtkCurd/Atk2.jpg" alt="攻撃カード2" class="battle-card battle-card-clickable" data-card-target="Atk2" role="button" tabindex="0" aria-label="攻撃カード2を1枚追加">
+                    <div class="number-control battle-card-counter">
+                        <button type="button" class="minus-button" data-target="Atk2">−</button>
+                        <input type="number" id="Atk2" value="0" min="0">
+                        <button type="button" class="plus-button" data-target="Atk2">＋</button>
+                    </div>
+                </div>
+            
+                <div class="battle-card-item">
+                    <img src="../images/AtkCurd/Atk3.jpg" alt="攻撃カード3" class="battle-card battle-card-clickable" data-card-target="Atk3" role="button" tabindex="0" aria-label="攻撃カード3を1枚追加">
+                    <div class="number-control battle-card-counter">
+                        <button type="button" class="minus-button" data-target="Atk3">−</button>
+                        <input type="number" id="Atk3" value="0" min="0">
+                        <button type="button" class="plus-button" data-target="Atk3">＋</button>
+                    </div>
+                </div>
+            
+                <div class="battle-card-item">
+                    <img src="../images/AtkCurd/Atk4.jpg" alt="攻撃カード4" class="battle-card battle-card-clickable" data-card-target="Atk4" role="button" tabindex="0" aria-label="攻撃カード4を1枚追加">
+                    <div class="number-control battle-card-counter">
+                        <button type="button" class="minus-button" data-target="Atk4">−</button>
+                        <input type="number" id="Atk4" value="0" min="0">
+                        <button type="button" class="plus-button" data-target="Atk4">＋</button>
+                    </div>
+                </div>
+            
+                <div class="battle-card-item">
+                    <img src="../images/AtkCurd/Atk5.jpg" alt="攻撃カード5" class="battle-card battle-card-clickable" data-card-target="Atk5" role="button" tabindex="0" aria-label="攻撃カード5を1枚追加">
+                    <div class="number-control battle-card-counter">
+                        <button type="button" class="minus-button" data-target="Atk5">−</button>
+                        <input type="number" id="Atk5" value="0" min="0">
+                        <button type="button" class="plus-button" data-target="Atk5">＋</button>
+                    </div>
+                </div>
+            
+                <div class="battle-card-item">
+                    <img src="../images/AtkCurd/Atk6.jpg" alt="攻撃カード6" class="battle-card battle-card-clickable" data-card-target="Atk6" role="button" tabindex="0" aria-label="攻撃カード6を1枚追加">
+                    <div class="number-control battle-card-counter">
+                        <button type="button" class="minus-button" data-target="Atk6">−</button>
+                        <input type="number" id="Atk6" value="0" min="0">
+                        <button type="button" class="plus-button" data-target="Atk6">＋</button>
+                    </div>
+                </div>
+            
+                <div class="battle-card-item">
+                    <img src="../images/AtkCurd/Atk7.jpg" alt="攻撃カード7" class="battle-card battle-card-clickable" data-card-target="Atk7" role="button" tabindex="0" aria-label="攻撃カード7を1枚追加">
+                    <div class="number-control battle-card-counter">
+                        <button type="button" class="minus-button" data-target="Atk7">−</button>
+                        <input type="number" id="Atk7" value="0" min="0">
+                        <button type="button" class="plus-button" data-target="Atk7">＋</button>
+                    </div>
+                </div>
+            
+                <div class="battle-card-item battle-card-reset-item">
+                    <img src="../images/AtkCurd/AtkReset.jpg"
+                         alt="攻撃カード使用枚数をリセット"
+                         class="battle-card battle-card-reset"
+                         data-reset-cards="attack"
+                         role="button"
+                         tabindex="0"
+                         aria-label="攻撃カードの使用枚数をすべて0にリセット">
+                </div>
+            
+            </div>
+
+                <div class="battle-result-area">
+                    <div class="damage-graph-area">
+                        <svg class="damage-probability-graph" role="img" aria-label="ダメージ発生確率グラフ"></svg>
+                    </div>
+
+                    <div class="analysis-values future-analysis-values">
+                        <div>
+                            <span>ダメージ範囲</span>
+                            <strong class="future-damage-range">-</strong>
+                        </div>
+                        <div>
+                            <span>期待値</span>
+                            <strong class="future-expected-damage">-</strong>
+                        </div>
+                        <div>
+                            <span>撃破率</span>
+                            <strong class="future-result-rate">-</strong>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+        <!-- 攻撃側 mode-content 終了 -->
+
+        <!-- 防御側として計算するモード -->
+        <div class="mode-content" data-role="defense">
+
+            <div class="parameter-area">
+
+                <div class="parameter-input-area">
+
+                    <h2>・パラメータ入力</h2>
+
+                    <section class="attack-panel">
+
+                        <label>
+                            <img src="../images/icon/Attack.png" alt="攻撃" class="parameter-icon">
+                            <div class="number-control">
+                                <button type="button" class="minus-button" data-target="attackPower2">−</button>
+                                <input type="number" id="attackPower2" value="1" min="0">
+                                <button type="button" class="plus-button" data-target="attackPower2">＋</button>
+                            </div>
+                        </label>
+
+                    </section>
+
+
+                    <section class="defense-panel">
+
+                        <label>
+                            <img src="../images/icon/Defense.png" alt="防御" class="parameter-icon">
+                            <div class="number-control">
+                                <button type="button" class="minus-button" data-target="defensePower2">−</button>
+                                <input type="number" id="defensePower2" value="1" min="0">
+                                <button type="button" class="plus-button" data-target="defensePower2">＋</button>
+                            </div>
+                        </label>
+
+                        <label>
+                            <img src="../images/icon/Hp.png" alt="HP" class="parameter-icon">
+                            <div class="number-control">
+                                <button type="button" class="minus-button" data-target="hp2">−</button>
+                                <input type="number" id="hp2" value="5" min="1">
+                                <button type="button" class="plus-button" data-target="hp2">＋</button>
+                            </div>
+                        </label>
+
+                    </section>
+
+                </div>
+
+
+                <div class="effect-input-area">
+
+                    <h2>・効果による変動</h2>
+
+                    <section class="effect-panel">
+
+                        <label>
+                            増加
+                            <div class="number-control">
+                                <button type="button" class="minus-button" data-target="damageAdd2">−</button>
+                                <input type="number" id="damageAdd2" value="0" min="0">
+                                <button type="button" class="plus-button" data-target="damageAdd2">＋</button>
+                            </div>
+                        </label>
+
+                        <label>
+                            軽減
+                            <div class="number-control">
+                                <button type="button" class="minus-button" data-target="damageReduce2">−</button>
+                                <input type="number" id="damageReduce2" value="0" min="0">
+                                <button type="button" class="plus-button" data-target="damageReduce2">＋</button>
+                            </div>
+                        </label>
+
+                    </section>
+
+                </div>
+
+            </div>
+
+            <div class="damage-area">
+                <table class="damage-table">
+                    <thead>
+                        <tr>
+                            <th colspan="2" rowspan="2"></th>
+                            <th colspan="6">防御</th>
+                        </tr>
+                        <tr>
+                            <th>1</th><th>2</th><th>3</th>
+                            <th>4</th><th>5</th><th>6</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+
+                <div class="analysis-values defense-analysis">
+                    <div class="analysis-item">
+                        <span>期待値</span>
+                        <strong class="expected-damage">-</strong>
+                    </div>
+                    <div class="analysis-item">
+                        <span>生存率</span>
+                        <strong class="result-rate">-</strong>
+                    </div>
+                    <div class="recommendation-item">
+                        <span></span>
+                        <strong class="defense-recommendation">-</strong>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 防御バトルカード -->
+            <div class="battle-lower-area">
+
+                <div class="defense-card-and-guide">
+
+                <div class="battle-card-area defense-card-area">
+            
+                <div class="battle-card-item">
+                    <img src="../images/DefCurd/Def1.jpg" alt="防御カード1" class="battle-card battle-card-clickable" data-card-target="Def1" role="button" tabindex="0" aria-label="防御カード1を1枚追加">
+                    <div class="number-control battle-card-counter">
+                        <button type="button" class="minus-button" data-target="Def1">−</button>
+                        <input type="number" id="Def1" value="0" min="0">
+                        <button type="button" class="plus-button" data-target="Def1">＋</button>
+                    </div>
+                </div>
+            
+                <div class="battle-card-item">
+                    <img src="../images/DefCurd/Def2.jpg" alt="防御カード2" class="battle-card battle-card-clickable" data-card-target="Def2" role="button" tabindex="0" aria-label="防御カード2を1枚追加">
+                    <div class="number-control battle-card-counter">
+                        <button type="button" class="minus-button" data-target="Def2">−</button>
+                        <input type="number" id="Def2" value="0" min="0">
+                        <button type="button" class="plus-button" data-target="Def2">＋</button>
+                    </div>
+                </div>
+            
+                <div class="battle-card-item">
+                    <img src="../images/DefCurd/Def3.jpg" alt="防御カード3" class="battle-card battle-card-clickable" data-card-target="Def3" role="button" tabindex="0" aria-label="防御カード3を1枚追加">
+                    <div class="number-control battle-card-counter">
+                        <button type="button" class="minus-button" data-target="Def3">−</button>
+                        <input type="number" id="Def3" value="0" min="0">
+                        <button type="button" class="plus-button" data-target="Def3">＋</button>
+                    </div>
+                </div>
+            
+                <div class="battle-card-item battle-card-reset-item">
+                    <img src="../images/DefCurd/DefReset.jpg"
+                         alt="防御カード使用枚数をリセット"
+                         class="battle-card battle-card-reset"
+                         data-reset-cards="defense"
+                         role="button"
+                         tabindex="0"
+                         aria-label="防御カードの使用枚数をすべて0にリセット">
+                </div>
+            </div>
+
+                <div class="defense-choice-guide" aria-label="攻撃側の出目ごとの防御・回避推奨">
+                    <div class="defense-choice-guide-title">攻撃ダイスごとの推奨行動</div>
+                    <div class="defense-choice-grid"></div>
+                </div>
+
+                </div>
+
+                <div class="battle-result-area">
+                    <div class="damage-graph-area">
+                        <svg class="damage-probability-graph" role="img" aria-label="ダメージ発生確率グラフ"></svg>
+                    </div>
+
+                    <div class="analysis-values future-analysis-values">
+                        <div>
+                            <span>ダメージ範囲</span>
+                            <strong class="future-damage-range">-</strong>
+                        </div>
+                        <div>
+                            <span>期待値</span>
+                            <strong class="future-expected-damage">-</strong>
+                        </div>
+                        <div>
+                            <span>生存率</span>
+                            <strong class="future-result-rate">-</strong>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+        <!-- 防御側 mode-content 終了 -->
+
+    </div>
+
+
+    <!-- 左下の切り替えタブ -->
+    <div class="role-tabs">
+        <button type="button" class="role-tab active attack-tab" data-role="attack">攻撃時</button>
+        <button type="button" class="role-tab defense-tab" data-role="defense">防御時</button>
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

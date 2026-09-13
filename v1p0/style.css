@@ -1,0 +1,766 @@
+/* =================================
+   基本設定
+   ================================= */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: sans-serif;
+    max-width: 1160px;
+    margin: 30px auto;
+    padding: 20px;
+}
+
+
+/* =================================
+   ツール全体
+   ================================= */
+.tool-wrapper {
+    width: 100%;
+}
+
+.main-container {
+    position: relative;
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+    gap: 25px;
+    align-items: start;
+    width: 100%;
+    padding: 22px 25px 15px;
+    border: 3px solid #ef6b6b;
+    border-radius: 5px;
+    background: #fff;
+}
+
+.main-container.defense-mode {
+    border-color: #5f9bd3;
+}
+
+
+/* =================================
+   攻撃・防御モード切り替え
+   ================================= */
+.mode-content {
+    display: contents;
+}
+
+.mode-content:not(.active) {
+    display: none;
+}
+
+
+/* =================================
+   左側：パラメータ入力エリア
+   ================================= */
+.parameter-area {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-width: 0;
+    padding-top: 0;
+    padding-bottom: 6px;
+}
+
+/* 共通：入力行 */
+label {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin: 15px 0;
+}
+
+.parameter-area label {
+    font-size: 18px;
+}
+
+/* 見出し */
+.parameter-input-area h2,
+.effect-input-area h2 {
+    margin: 0 0 14px;
+}
+
+/* パラメータ入力内の各行
+   translateX の数値で、アイコン＋入力欄を左右に微調整 */
+.parameter-input-area label {
+    justify-content: center;
+    gap: 10px;
+    margin: 0;
+    min-height: 48px;
+    transform: translateX(18px);
+}
+
+/* アイコン
+   width  = アイコン用の横幅
+   height = アイコンの最大高さ */
+.parameter-icon {
+    width: 52px;
+    height: 42px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+
+/* =================================
+   パラメータの色付きパネル
+   ================================= */
+.attack-panel {
+    background-color: #fde7e7;
+    border-left: 8px solid #e88;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.defense-panel {
+    background-color: #e7f0fd;
+    border-left: 8px solid #69c;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.attack-panel h2 {
+    color: #b44;
+    margin: 0;
+}
+
+.defense-panel h2 {
+    color: #357;
+    margin: 0;
+}
+
+/* パラメータ入力欄にある攻撃パネル */
+.parameter-input-area .attack-panel {
+    padding: 15px 12px;
+}
+
+/* パラメータ入力欄にあるHP・防御パネル
+   gap の数値で、防御とHPの行間を調整 */
+.parameter-input-area .defense-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 14px 12px;
+}
+
+/* 効果による変動：増加・軽減 */
+.effect-panel label {
+    margin: 10px 0;
+}
+
+
+/* =================================
+   数値入力コントロール
+   ================================= */
+.number-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.number-control button {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.number-control input {
+    width: 70px;
+    height: 32px;
+    text-align: center !important;
+    -moz-appearance: textfield;
+}
+
+/* number入力の標準スピンボタンを非表示 */
+.number-control input::-webkit-inner-spin-button,
+.number-control input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+
+/* =================================
+   右側：ダメージ表
+   ================================= */
+.damage-area {
+    min-width: 0;
+    overflow: hidden;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+th,
+td {
+    border: 1px solid #aaa;
+    padding: 8px;
+    overflow: hidden;
+    text-align: center;
+    font-size: 18px;
+}
+
+thead th {
+    background-color: #e7f0fd;
+}
+
+tbody th {
+    background-color: #fde7e7;
+}
+
+.attack-label {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    font-size: 18px;
+    background-color: #fde7e7;
+}
+
+.damage-table thead tr:first-child th:first-child {
+    position: relative;
+    background-color: white;
+}
+
+/* 撃破可能なダメージ */
+.defeat {
+    background-color: #ffd9a8;
+}
+
+
+/* =================================
+   期待値・確率
+   ================================= */
+.analysis-values {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    height: 50px;
+    margin-top: 15px;
+    padding: 6px 12px;
+    background-color: #eefaf7;
+    border: 2px solid #9dd;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.analysis-values div {
+    display: flex;
+    flex: 1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.analysis-values span {
+    font-size: 17px;
+}
+
+.analysis-values strong {
+    font-size: 22px;
+}
+
+
+/* =================================
+   攻撃・防御 切り替えタブ
+   ※メイン枠の外側・下部に配置
+   ================================= */
+.role-tabs {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    width: 300px;
+    gap: 0;
+    margin-top: 0;
+    margin-left: 3px;
+}
+
+.role-tab {
+    flex: 1;
+    height: 38px;
+    border: 2px solid transparent;
+    border-top: 0;
+    border-radius: 0 0 5px 5px;
+    background-color: #eee;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.attack-tab {
+    background-color: #fde7e7;
+    color: #b44;
+}
+
+.defense-tab {
+    background-color: #e7f0fd;
+    color: #357;
+}
+
+/* 選択中タブ：背景色は維持し、外周だけ強調 */
+.role-tab.active.attack-tab {
+    border-top: 0;
+    border-right-color: #ef6b6b;
+    border-bottom-color: #ef6b6b;
+    border-left-color: #ef6b6b;
+    background-color: #fde7e7;
+}
+
+.role-tab.active.defense-tab {
+    border-top: 0;
+    border-right-color: #5f9bd3;
+    border-bottom-color: #5f9bd3;
+    border-left-color: #5f9bd3;
+    background-color: #e7f0fd;
+}
+
+
+/* =================================
+   画面幅 800px 以下
+   ================================= */
+@media (max-width: 800px) {
+    body {
+        margin: 15px auto;
+        padding: 10px;
+    }
+
+    .main-container {
+        grid-template-columns: 1fr;
+    }
+
+    .role-tabs {
+        width: 100%;
+    }
+}
+
+
+/* 防御側：期待値・生存率を左寄せし、右側に防御/回避の推奨を表示 */
+.defense-analysis {
+    justify-content: flex-start;
+    gap: 0;
+}
+
+.defense-analysis .analysis-item {
+    flex: 0 0 24%;
+    gap: 9px;
+    justify-content: flex-start;
+}
+
+.defense-analysis .recommendation-item {
+    flex: 1;
+    min-width: 0;
+    gap: 8px;
+    justify-content: flex-start;
+    padding-left: 10px;
+    border-left: 1px solid #9dd;
+}
+
+.defense-analysis .recommendation-item span {
+    flex-shrink: 0;
+    font-size: 15px;
+}
+
+.defense-analysis .recommendation-item strong {
+    min-width: 0;
+    font-size: 16px;
+    line-height: 1.15;
+    white-space: nowrap;
+}
+
+
+/* =================================
+   防御側：分析結果を3項目で均等配置
+   ================================= */
+.defense-analysis {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.defense-analysis .analysis-item,
+.defense-analysis .recommendation-item {
+    flex: 1 1 0;
+    min-width: 0;
+    margin: 0;
+    padding: 0 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-align: center;
+}
+
+.defense-analysis .analysis-item span,
+.defense-analysis .analysis-item strong,
+.defense-analysis .recommendation-item span,
+.defense-analysis .recommendation-item strong {
+    white-space: nowrap;
+}
+
+.defense-analysis .recommendation-item {
+    margin-left: 0;
+}
+
+/* =================================
+   バトルカード・ダメージ分布グラフ
+   ================================= */
+
+/* 下段全体：左にカード、右にグラフ */
+.battle-lower-area {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 510px minmax(0, 1fr);
+    gap: 25px;
+    align-items: start;
+    width: 100%;
+    margin-top: 5px;
+    padding-top: 20px;
+    border-top: 2px dashed #aaa;
+}
+
+/* カードエリア：4列 */
+.battle-card-area {
+    display: grid;
+    grid-template-columns: repeat(4, 120px);
+    justify-content: start;
+    gap: 10px;
+    min-width: 0;
+}
+
+/* カード1枚分：画像＋カウンタ */
+.battle-card-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+/* カード画像 共通 */
+.battle-card {
+    display: block;
+    width: 120px;
+    height: auto;
+    border: 5px solid #ef6b6b;
+    border-radius: 10px;
+}
+
+/* 防御側カードのみ青枠 */
+.defense-card-area .battle-card {
+    border-color: #5f9bd3;
+}
+
+/* カード下のカウンタ全体 */
+.battle-card-counter {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 120px;
+    gap: 4px;
+}
+
+/* カード下の－＋ボタン */
+.battle-card-counter button {
+    width: 26px;
+    height: 32px;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+/* カード下の数値入力欄 */
+.battle-card-counter input {
+    width: 52px;
+    height: 32px;
+    padding: 0;
+    text-align: center;
+}
+
+/* ダメージ発生確率グラフ */
+.damage-graph-area {
+    min-width: 0;
+    width: 100%;
+    height: 305px;
+    padding: 0;
+}
+
+.damage-probability-graph {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.damage-probability-graph .graph-grid {
+    stroke: #ddd;
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+}
+
+.damage-probability-graph .graph-axis {
+    stroke: #666;
+    stroke-width: 1.5;
+}
+
+.damage-probability-graph .graph-line {
+    fill: none;
+    stroke: #444;
+    stroke-width: 2.5;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+
+.attack-mode .damage-probability-graph .graph-line {
+    stroke: #ef6b6b;
+}
+
+.defense-mode .damage-probability-graph .graph-line {
+    stroke: #5f9bd3;
+}
+
+.damage-probability-graph .graph-label {
+    fill: #333;
+    font-size: 12px;
+    font-family: sans-serif;
+}
+
+.damage-probability-graph .graph-axis-title {
+    fill: #222;
+    font-size: 14px;
+    font-weight: bold;
+    font-family: sans-serif;
+}
+
+@media (max-width: 900px) {
+    .battle-lower-area {
+        grid-template-columns: 1fr;
+    }
+
+    .damage-graph-area {
+        height: 280px;
+    }
+}
+
+
+/* =================================
+   バトルカード右側：グラフ＋分析結果
+   ================================= */
+.battle-result-area {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    width: 100%;
+    height: 330px;
+    gap: 6px;
+}
+
+/* グラフ上端をカード画像の上端に合わせる */
+.battle-result-area .damage-graph-area {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    padding: 0;
+}
+
+/* 分析結果はグラフ下の空きスペースへ配置 */
+.battle-result-area .analysis-values {
+    flex: 0 0 46px;
+    height: 46px;
+    margin-top: 0;
+}
+
+
+/* バトルカード使用時：ダメージ範囲・期待値・確率を3項目で表示 */
+.future-analysis-values {
+    justify-content: space-between;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.future-analysis-values div {
+    min-width: 0;
+    gap: 8px;
+}
+
+.future-analysis-values span {
+    font-size: 15px;
+    white-space: nowrap;
+}
+
+.future-analysis-values strong {
+    font-size: 20px;
+    white-space: nowrap;
+}
+
+/* 軸の数値を少し大きく */
+.damage-probability-graph .graph-label {
+    font-size: 15px;
+}
+
+@media (max-width: 900px) {
+    .battle-result-area {
+        height: auto;
+        gap: 10px;
+    }
+
+    .battle-result-area .damage-graph-area {
+        height: 260px;
+        flex: 0 0 260px;
+    }
+}
+
+
+/* =================================
+   バトルカード：画像クリック操作
+   ================================= */
+
+/* 通常カード画像を押すと使用枚数を+1 */
+.battle-card-clickable,
+.battle-card-reset {
+    cursor: pointer;
+    user-select: none;
+}
+
+/* キーボード操作時にも選択位置が分かるようにする */
+.battle-card-clickable:focus,
+.battle-card-reset:focus {
+    outline: 3px solid #333;
+    outline-offset: 2px;
+}
+
+/* 押した感覚を軽く出す */
+.battle-card-clickable:active,
+.battle-card-reset:active {
+    transform: scale(0.98);
+}
+
+/* リセットカードはカウンタを持たないため画像上端を他カードと揃える */
+.battle-card-reset-item {
+    justify-content: flex-start;
+}
+
+
+/* =================================
+   防御側：攻撃出目ごとの防御 / 回避 指標
+   ================================= */
+.defense-card-and-guide {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+
+    /* 右側の「グラフ＋期待値」全体と下端をそろえる */
+    height: 330px;
+}
+
+.defense-choice-guide {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    width: 510px;
+    min-height: 0;
+    padding: 11px 12px 12px;
+    border: 2px solid #9fc3e6;
+    border-radius: 8px;
+    background: #f7fbff;
+}
+
+.defense-choice-guide-title {
+    margin-bottom: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1.2;
+    text-align: left;
+    color: #357;
+}
+
+.defense-choice-grid {
+    display: grid;
+    flex: 1 1 auto;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 6px;
+    align-items: stretch;
+}
+
+.defense-choice-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    height: 100%;
+    padding: 7px 3px;
+    border: 1px solid #b8c7d8;
+    border-radius: 6px;
+    background: #fff;
+    line-height: 1.2;
+}
+
+.defense-choice-die {
+    width: 100%;
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #d8e0e8;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.defense-choice-cell strong {
+    margin-bottom: 5px;
+    font-size: 17px;
+}
+
+.defense-choice-cell small {
+    display: block;
+    font-size: 12px;
+    line-height: 1.25;
+    white-space: nowrap;
+}
+
+/* 防御/回避の生存率：ラベルと数値を別幅にして縦位置・横位置を固定 */
+.defense-choice-cell .choice-rate-row {
+    display: grid;
+    grid-template-columns: 14px 1fr;
+    column-gap: 3px;
+    align-items: baseline;
+    width: 100%;
+    padding: 0 3px;
+    font-size: 12px;
+    line-height: 1.25;
+    white-space: nowrap;
+}
+
+.defense-choice-cell .choice-rate-label {
+    text-align: center;
+}
+
+.defense-choice-cell .choice-rate-value {
+    min-width: 0;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.defense-choice-cell.defense-choice {
+    background: #eaf3ff;
+    border-color: #5f9bd3;
+}
+
+.defense-choice-cell.evade-choice {
+    background: #fff8d9;
+    border-color: #f2cf62;
+}
+
+@media (max-width: 900px) {
+    .defense-choice-guide {
+        width: 100%;
+    }
+}
