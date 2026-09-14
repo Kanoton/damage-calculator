@@ -1263,7 +1263,7 @@ tbody th {
 /* ===== 文字サイズの調整：以下のpx値を変更してください ===== */
 #map-draft {
     --monster-name-size: 18px; /* モンスター名 */
-    --mission-event-size: 14px; /* ミッション・イベントの表 */
+    --mission-event-size: 16px; /* ミッション・イベントの表（見出しは除く） */
 }
 #map-draft .mp-name { font-size: var(--monster-name-size); overflow-wrap: anywhere; }
 #map-draft .mp-data-table,
@@ -1282,3 +1282,5 @@ tbody th {
     .main-container:not(.map-mode) { min-height: 0; }
     .role-tab { padding: 0 16px; }
 }
+
+#map-draft .mp-boss-icon{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;flex:0 0 26px;font-size:26px;line-height:1;color:#a77808;font-family:Arial,sans-serif}
