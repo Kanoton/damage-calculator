@@ -278,10 +278,10 @@ M0114,Shark_Pirate_Sprite.png,メカ海賊サメ,メカ海賊サメ,,1,普通,4,
 M0114,Shark_Pirate_Sprite.png,メカ海賊サメ,メカ海賊サメ,,1,困難,4,1,11,7
 M0114,Shark_Pirate_Sprite.png,メカ海賊サメ,メカ海賊サメ,,1,悪夢,4,1,11,7
 M0114,Shark_Pirate_Sprite.png,メカ海賊サメ,メカ海賊サメ,,1,狂気,4,1,11,7
-M0115,Warden_Sprite.png,ゴクチョー【真相】,ゴクチョー,1,1,普通,0,0,9,6
-M0115,Warden_Sprite.png,ゴクチョー【真相】,ゴクチョー,1,1,困難,0,0,10,6
-M0115,Warden_Sprite.png,ゴクチョー【真相】,ゴクチョー,1,1,悪夢,1,0,11,6
-M0115,Warden_Sprite.png,ゴクチョー【真相】,ゴクチョー,1,1,狂気,1,1,11,6
+M0115,Warden_Sprite.png,ゴクチョー【真相】,ゴクチョー,1,1,普通,3,10,229,
+M0115,Warden_Sprite.png,ゴクチョー【真相】,ゴクチョー,1,1,困難,3,10,230,
+M0115,Warden_Sprite.png,ゴクチョー【真相】,ゴクチョー,1,1,悪夢,4,10,231,
+M0115,Warden_Sprite.png,ゴクチョー【真相】,ゴクチョー,1,1,狂気,4,11,231,
 M0116,Warden_Sprite.png,ゴクチョー,ゴクチョー,,1,普通,0,0,9,6
 M0116,Warden_Sprite.png,ゴクチョー,ゴクチョー,,1,困難,0,0,10,6
 M0116,Warden_Sprite.png,ゴクチョー,ゴクチョー,,1,悪夢,1,0,11,6
