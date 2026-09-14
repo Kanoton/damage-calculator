@@ -1297,3 +1297,27 @@ tbody th {
 #map-draft .mp-gimmicks button{font-size:14px;padding:10px 12px;white-space:nowrap}
 
 #map-draft .mp-gimmicks button.mp-gimmick-complete{text-decoration:line-through;color:var(--mp-muted)}
+
+/* ===== マップタブの接続線・カード一覧の端揃え ===== */
+/* PCでは本体側の上辺を重ねず、防御タブと同じ境界にする */
+.role-tab.active.map-tab {
+    border-top: 0;
+    border-right-color: #39875d;
+    border-bottom-color: #39875d;
+    border-left-color: #39875d;
+}
+
+/* 不要なスクロールバー用余白と左右paddingを除き、列幅を均等に拡大 */
+#map-draft .mp-list {
+    padding-left: 0;
+    padding-right: 0;
+    scrollbar-gutter: auto;
+}
+
+/* スマートフォンではタブが本体上側に移るため、下辺を接続する */
+@media (max-width: 800px) {
+    .role-tab.active.map-tab {
+        border-top: 2px solid #39875d;
+        border-bottom: 2px solid transparent;
+    }
+}
