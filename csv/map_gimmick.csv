@@ -1,3 +1,4 @@
-﻿map_id,gimmick_id,表示名,monster_id,難易度,攻撃,防御,HP,攻撃下限,防御下限,HP下限,最大回数
-MAP0104,clue,手がかり,M0115,,0,-2,-20,0,0,0,5
-MAP0104,warden_defeated,ゴクチョー撃破,M0116,,1,0,0,,,,
+﻿map_id,gimmick_id,表示名,monster_id,難易度,攻撃,防御,HP,最大回数
+MAP0104,clue,手がかり,M0115,,0,-2,-20,5
+MAP0104,warden_defeated,ゴクチョー撃破,M0116,,1,1,1,
+MAP0001,elite_defeated,海賊精鋭2体撃破,M0001,,0,-6,0,1
