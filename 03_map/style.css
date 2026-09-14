@@ -1284,3 +1284,9 @@ tbody th {
 }
 
 #map-draft .mp-boss-icon{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;flex:0 0 26px;font-size:26px;line-height:1;color:#a77808;font-family:Arial,sans-serif}
+/* ボス画像：名前の右、反撃アイコンの左に表示 */
+#map-draft .mp-name img.mp-boss-icon {
+ width:26px; height:26px; min-width:26px; max-width:26px;
+ min-height:26px; max-height:26px; flex:0 0 26px;
+ object-fit:contain; background:transparent; border-radius:0;
+}
