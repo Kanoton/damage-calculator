@@ -1295,3 +1295,5 @@ tbody th {
 #map-draft .mp-gimmicks{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 #map-draft .mp-gimmicks[hidden]{display:none}
 #map-draft .mp-gimmicks button{font-size:14px;padding:10px 12px;white-space:nowrap}
+
+#map-draft .mp-gimmicks button.mp-gimmick-complete{text-decoration:line-through;color:var(--mp-muted)}
