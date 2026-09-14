@@ -1259,3 +1259,26 @@ tbody th {
 #map-draft .mp-data-table td{border:0;border-bottom:1px solid var(--mp-line);text-align:left}
 #map-draft .mp-data-table th{border:0;border-bottom:1px solid var(--mp-line)}
 #map-draft .mp-mission-section td:first-child,#map-draft .mp-event-section td:first-child{text-align:center}
+
+/* ===== 文字サイズの調整：以下のpx値を変更してください ===== */
+#map-draft {
+    --monster-name-size: 16px; /* モンスター名 */
+    --mission-event-size: 12px; /* ミッション・イベントの表（見出しは除く） */
+}
+#map-draft .mp-name { font-size: var(--monster-name-size); overflow-wrap: anywhere; }
+#map-draft .mp-data-table,
+#map-draft .mp-data-table th,
+#map-draft .mp-data-table td,
+#map-draft #mp-mission-body .mp-mission-counter-button,
+#map-draft .mp-missing { font-size: var(--mission-event-size); }
+
+/* タブ幅は文字数と左右余白から自動計算 */
+.role-tabs { width: max-content; max-width: 100%; flex-wrap: wrap; }
+.role-tab { flex: 0 0 auto; width: auto; min-width: max-content; padding: 0 22px; white-space: nowrap; }
+
+/* 計算画面は内容に合わせて広がり、枠内スクロールを発生させない */
+.main-container:not(.map-mode) { height: auto; min-height: 845px; overflow: visible; }
+@media (max-width:800px) {
+    .main-container:not(.map-mode) { min-height: 0; }
+    .role-tab { padding: 0 16px; }
+}

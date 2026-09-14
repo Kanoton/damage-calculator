@@ -1104,6 +1104,12 @@ function renderMapInformation(){
 }
 
 function render(){
+ // Hide Extreme unless at least one associated monster has an Extreme row.
+ const hasExtreme=data.stats.some(s=>data.maps[pick.value].ids.includes(s.monster_id)&&s['難易度']==='極限');
+ const previousDifficulty=difficulty.value;
+ const allowed=['普通','困難','悪夢','狂気',...(hasExtreme?['極限']:[])];
+ difficulty.replaceChildren(...allowed.map(value=>{const option=document.createElement('option');option.value=value;option.textContent=value;return option;}));
+ difficulty.value=allowed.includes(previousDifficulty)?previousDifficulty:'普通';
  const map=data.maps[pick.value],level=difficulty.value,scroll=list.scrollTop;
  renderMapInformation();
  const img=document.getElementById('mp-map-image');assignMapImage(img,map.image);img.alt=map.name+'のマップ';list.replaceChildren();
