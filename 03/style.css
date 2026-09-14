@@ -1,0 +1,1261 @@
+/* =================================
+   基本設定
+   ================================= */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: sans-serif;
+    max-width: 1160px;
+    margin: 30px auto;
+    padding: 20px;
+}
+
+
+/* =================================
+   ツール全体
+   ================================= */
+.tool-wrapper {
+    width: 100%;
+}
+
+.main-container {
+    position: relative;
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+    gap: 25px;
+    align-items: start;
+    width: 100%;
+    padding: 22px 25px 15px;
+    border: 3px solid #ef6b6b;
+    border-radius: 5px;
+    background: #fff;
+}
+
+.main-container.defense-mode {
+    border-color: #5f9bd3;
+}
+
+
+/* =================================
+   攻撃・防御モード切り替え
+   ================================= */
+.mode-content {
+    display: contents;
+}
+
+.mode-content:not(.active) {
+    display: none;
+}
+
+
+/* =================================
+   左側：パラメータ入力エリア
+   ================================= */
+.parameter-area {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    min-width: 0;
+    padding-top: 0;
+    padding-bottom: 6px;
+}
+
+/* 共通：入力行 */
+label {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin: 15px 0;
+}
+
+.parameter-area label {
+    font-size: 18px;
+}
+
+/* 見出し */
+.parameter-input-area h2,
+.effect-input-area h2 {
+    margin: 0 0 14px;
+}
+
+/* パラメータ入力内の各行
+   translateX の数値で、アイコン＋入力欄を左右に微調整 */
+.parameter-input-area label {
+    justify-content: center;
+    gap: 10px;
+    margin: 0;
+    min-height: 48px;
+    transform: translateX(18px);
+}
+
+/* アイコン
+   width  = アイコン用の横幅
+   height = アイコンの最大高さ */
+.parameter-icon {
+    width: 52px;
+    height: 42px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+
+/* =================================
+   パラメータの色付きパネル
+   ================================= */
+.attack-panel {
+    background-color: #fde7e7;
+    border-left: 8px solid #e88;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.defense-panel {
+    background-color: #e7f0fd;
+    border-left: 8px solid #69c;
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.attack-panel h2 {
+    color: #b44;
+    margin: 0;
+}
+
+.defense-panel h2 {
+    color: #357;
+    margin: 0;
+}
+
+/* パラメータ入力欄にある攻撃パネル */
+.parameter-input-area .attack-panel {
+    padding: 15px 12px;
+}
+
+/* パラメータ入力欄にあるHP・防御パネル
+   gap の数値で、防御とHPの行間を調整 */
+.parameter-input-area .defense-panel {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 14px 12px;
+}
+
+/* 効果による変動：増加・軽減 */
+.effect-panel label {
+    margin: 10px 0;
+}
+
+
+/* =================================
+   数値入力コントロール
+   ================================= */
+.number-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.number-control button {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.number-control input {
+    width: 70px;
+    height: 32px;
+    text-align: center !important;
+    -moz-appearance: textfield;
+}
+
+/* number入力の標準スピンボタンを非表示 */
+.number-control input::-webkit-inner-spin-button,
+.number-control input::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+
+/* =================================
+   右側：ダメージ表
+   ================================= */
+.damage-area {
+    min-width: 0;
+    overflow: hidden;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+th,
+td {
+    border: 1px solid #aaa;
+    padding: 8px;
+    overflow: hidden;
+    text-align: center;
+    font-size: 18px;
+}
+
+thead th {
+    background-color: #e7f0fd;
+}
+
+tbody th {
+    background-color: #fde7e7;
+}
+
+.attack-label {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    font-size: 18px;
+    background-color: #fde7e7;
+}
+
+.damage-table thead tr:first-child th:first-child {
+    position: relative;
+    background-color: white;
+}
+
+/* 撃破可能なダメージ */
+.defeat {
+    background-color: #ffd9a8;
+}
+
+
+/* =================================
+   期待値・確率
+   ================================= */
+.analysis-values {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    height: 50px;
+    margin-top: 15px;
+    padding: 6px 12px;
+    background-color: #eefaf7;
+    border: 2px solid #9dd;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.analysis-values div {
+    display: flex;
+    flex: 1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.analysis-values span {
+    font-size: 17px;
+}
+
+.analysis-values strong {
+    font-size: 22px;
+}
+
+
+/* =================================
+   攻撃・防御 切り替えタブ
+   ※メイン枠の外側・下部に配置
+   ================================= */
+.role-tabs {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    width: 300px;
+    gap: 0;
+    margin-top: 0;
+    margin-left: 3px;
+}
+
+.role-tab {
+    flex: 1;
+    height: 38px;
+    border: 2px solid transparent;
+    border-top: 0;
+    border-radius: 0 0 5px 5px;
+    background-color: #eee;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.attack-tab {
+    background-color: #fde7e7;
+    color: #b44;
+}
+
+.defense-tab {
+    background-color: #e7f0fd;
+    color: #357;
+}
+
+/* 選択中タブ：背景色は維持し、外周だけ強調 */
+.role-tab.active.attack-tab {
+    border-top: 0;
+    border-right-color: #ef6b6b;
+    border-bottom-color: #ef6b6b;
+    border-left-color: #ef6b6b;
+    background-color: #fde7e7;
+}
+
+.role-tab.active.defense-tab {
+    border-top: 0;
+    border-right-color: #5f9bd3;
+    border-bottom-color: #5f9bd3;
+    border-left-color: #5f9bd3;
+    background-color: #e7f0fd;
+}
+
+
+/* =================================
+   画面幅 800px 以下
+   ================================= */
+@media (max-width: 800px) {
+    body {
+        margin: 15px auto;
+        padding: 10px;
+    }
+
+    .main-container {
+        grid-template-columns: 1fr;
+    }
+
+    .role-tabs {
+        width: 100%;
+    }
+}
+
+
+/* 防御側：期待値・生存率を左寄せし、右側に防御/回避の推奨を表示 */
+.defense-analysis {
+    justify-content: flex-start;
+    gap: 0;
+}
+
+.defense-analysis .analysis-item {
+    flex: 0 0 24%;
+    gap: 9px;
+    justify-content: flex-start;
+}
+
+.defense-analysis .recommendation-item {
+    flex: 1;
+    min-width: 0;
+    gap: 8px;
+    justify-content: flex-start;
+    padding-left: 10px;
+    border-left: 1px solid #9dd;
+}
+
+.defense-analysis .recommendation-item span {
+    flex-shrink: 0;
+    font-size: 15px;
+}
+
+.defense-analysis .recommendation-item strong {
+    min-width: 0;
+    font-size: 16px;
+    line-height: 1.15;
+    white-space: nowrap;
+}
+
+
+/* =================================
+   防御側：分析結果を3項目で均等配置
+   ================================= */
+.defense-analysis {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.defense-analysis .analysis-item,
+.defense-analysis .recommendation-item {
+    flex: 1 1 0;
+    min-width: 0;
+    margin: 0;
+    padding: 0 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-align: center;
+}
+
+.defense-analysis .analysis-item span,
+.defense-analysis .analysis-item strong,
+.defense-analysis .recommendation-item span,
+.defense-analysis .recommendation-item strong {
+    white-space: nowrap;
+}
+
+.defense-analysis .recommendation-item {
+    margin-left: 0;
+}
+
+/* =================================
+   バトルカード・ダメージ分布グラフ
+   ================================= */
+
+/* 下段全体：左にカード、右にグラフ */
+.battle-lower-area {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 510px minmax(0, 1fr);
+    gap: 25px;
+    align-items: start;
+    width: 100%;
+    margin-top: 5px;
+    padding-top: 20px;
+    border-top: 2px dashed #aaa;
+}
+
+/* カードエリア：4列 */
+.battle-card-area {
+    display: grid;
+    grid-template-columns: repeat(4, 120px);
+    justify-content: start;
+    gap: 10px;
+    min-width: 0;
+}
+
+/* カード1枚分：画像＋カウンタ */
+.battle-card-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+/* カード画像 共通 */
+.battle-card {
+    display: block;
+    width: 120px;
+    height: auto;
+    border: 5px solid #ef6b6b;
+    border-radius: 10px;
+}
+
+/* 防御側カードのみ青枠 */
+.defense-card-area .battle-card {
+    border-color: #5f9bd3;
+}
+
+/* カード下のカウンタ全体 */
+.battle-card-counter {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 120px;
+    gap: 4px;
+}
+
+/* カード下の－＋ボタン */
+.battle-card-counter button {
+    width: 26px;
+    height: 32px;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+/* カード下の数値入力欄 */
+.battle-card-counter input {
+    width: 52px;
+    height: 32px;
+    padding: 0;
+    text-align: center;
+}
+
+/* ダメージ発生確率グラフ */
+.damage-graph-area {
+    min-width: 0;
+    width: 100%;
+    height: 305px;
+    padding: 0;
+}
+
+.damage-probability-graph {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.damage-probability-graph .graph-grid {
+    stroke: #ddd;
+    stroke-width: 1;
+    stroke-dasharray: 3 3;
+}
+
+.damage-probability-graph .graph-axis {
+    stroke: #666;
+    stroke-width: 1.5;
+}
+
+.damage-probability-graph .graph-line {
+    fill: none;
+    stroke: #444;
+    stroke-width: 2.5;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+
+.attack-mode .damage-probability-graph .graph-line {
+    stroke: #ef6b6b;
+}
+
+.defense-mode .damage-probability-graph .graph-line {
+    stroke: #5f9bd3;
+}
+
+.damage-probability-graph .graph-label {
+    fill: #333;
+    font-size: 12px;
+    font-family: sans-serif;
+}
+
+.damage-probability-graph .graph-axis-title {
+    fill: #222;
+    font-size: 14px;
+    font-weight: bold;
+    font-family: sans-serif;
+}
+
+@media (max-width: 900px) {
+    .battle-lower-area {
+        grid-template-columns: 1fr;
+    }
+
+    .damage-graph-area {
+        height: 280px;
+    }
+}
+
+
+/* =================================
+   バトルカード右側：グラフ＋分析結果
+   ================================= */
+.battle-result-area {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    width: 100%;
+    height: 330px;
+    gap: 6px;
+}
+
+/* グラフ上端をカード画像の上端に合わせる */
+.battle-result-area .damage-graph-area {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: auto;
+    padding: 0;
+}
+
+/* 分析結果はグラフ下の空きスペースへ配置 */
+.battle-result-area .analysis-values {
+    flex: 0 0 46px;
+    height: 46px;
+    margin-top: 0;
+}
+
+
+/* バトルカード使用時：ダメージ範囲・期待値・確率を3項目で表示 */
+.future-analysis-values {
+    justify-content: space-between;
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+.future-analysis-values div {
+    min-width: 0;
+    gap: 8px;
+}
+
+.future-analysis-values span {
+    font-size: 15px;
+    white-space: nowrap;
+}
+
+.future-analysis-values strong {
+    font-size: 20px;
+    white-space: nowrap;
+}
+
+/* 軸の数値を少し大きく */
+.damage-probability-graph .graph-label {
+    font-size: 15px;
+}
+
+@media (max-width: 900px) {
+    .battle-result-area {
+        height: auto;
+        gap: 10px;
+    }
+
+    .battle-result-area .damage-graph-area {
+        height: 260px;
+        flex: 0 0 260px;
+    }
+}
+
+
+/* =================================
+   バトルカード：画像クリック操作
+   ================================= */
+
+/* 通常カード画像を押すと使用枚数を+1 */
+.battle-card-clickable,
+.battle-card-reset {
+    cursor: pointer;
+    user-select: none;
+}
+
+/* キーボード操作時にも選択位置が分かるようにする */
+.battle-card-clickable:focus,
+.battle-card-reset:focus {
+    outline: 3px solid #333;
+    outline-offset: 2px;
+}
+
+/* 押した感覚を軽く出す */
+.battle-card-clickable:active,
+.battle-card-reset:active {
+    transform: scale(0.98);
+}
+
+/* リセットカードはカウンタを持たないため画像上端を他カードと揃える */
+.battle-card-reset-item {
+    justify-content: flex-start;
+}
+
+
+/* =================================
+   防御側：攻撃出目ごとの防御 / 回避 指標
+   ================================= */
+.defense-card-and-guide {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    min-width: 0;
+
+    /* 右側の「グラフ＋期待値」全体と下端をそろえる */
+    height: 330px;
+}
+
+.defense-choice-guide {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    width: 510px;
+    min-height: 0;
+    padding: 11px 12px 12px;
+    border: 2px solid #9fc3e6;
+    border-radius: 8px;
+    background: #f7fbff;
+}
+
+.defense-choice-guide-title {
+    margin-bottom: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1.2;
+    text-align: left;
+    color: #357;
+}
+
+.defense-choice-grid {
+    display: grid;
+    flex: 1 1 auto;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 6px;
+    align-items: stretch;
+}
+
+.defense-choice-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    height: 100%;
+    padding: 7px 3px;
+    border: 1px solid #b8c7d8;
+    border-radius: 6px;
+    background: #fff;
+    line-height: 1.2;
+}
+
+.defense-choice-die {
+    width: 100%;
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #d8e0e8;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.defense-choice-cell strong {
+    margin-bottom: 5px;
+    font-size: 17px;
+}
+
+.defense-choice-cell small {
+    display: block;
+    font-size: 12px;
+    line-height: 1.25;
+    white-space: nowrap;
+}
+
+/* 防御/回避の生存率：ラベルと数値を別幅にして縦位置・横位置を固定 */
+.defense-choice-cell .choice-rate-row {
+    display: grid;
+    grid-template-columns: 14px 1fr;
+    column-gap: 3px;
+    align-items: baseline;
+    width: 100%;
+    padding: 0 3px;
+    font-size: 12px;
+    line-height: 1.25;
+    white-space: nowrap;
+}
+
+.defense-choice-cell .choice-rate-label {
+    text-align: center;
+}
+
+.defense-choice-cell .choice-rate-value {
+    min-width: 0;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.defense-choice-cell.defense-choice {
+    background: #eaf3ff;
+    border-color: #5f9bd3;
+}
+
+.defense-choice-cell.evade-choice {
+    background: #fff8d9;
+    border-color: #f2cf62;
+}
+
+@media (max-width: 900px) {
+    .defense-choice-guide {
+        width: 100%;
+    }
+}
+
+/* =================================
+   スマホ表示専用レイアウト
+   PC表示には影響しない
+   ================================= */
+@media (max-width: 800px) {
+    body {
+        margin: 10px auto;
+        padding: 8px;
+    }
+
+    .tool-wrapper {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* スマホ時だけタブを最上部へ */
+    .role-tabs {
+        order: -1;
+        width: 100%;
+        margin: 0 0 10px 0;
+    }
+
+    .role-tab {
+        height: 42px;
+        border-top: 2px solid transparent;
+        border-bottom: 2px solid transparent;
+        border-radius: 5px 5px 0 0;
+    }
+
+    .role-tab.active.attack-tab {
+        border-top-color: #ef6b6b;
+        border-right-color: #ef6b6b;
+        border-left-color: #ef6b6b;
+        border-bottom-color: transparent;
+    }
+
+    .role-tab.active.defense-tab {
+        border-top-color: #5f9bd3;
+        border-right-color: #5f9bd3;
+        border-left-color: #5f9bd3;
+        border-bottom-color: transparent;
+    }
+
+    .main-container {
+        grid-template-columns: 1fr;
+        gap: 18px;
+        padding: 18px 14px 14px;
+    }
+
+    /* パラメータ入力＋効果による変動を横並び */
+    .parameter-area {
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.9fr);
+        gap: 12px;
+        align-items: start;
+        width: 100%;
+        padding-bottom: 0;
+    }
+
+    .parameter-input-area,
+    .effect-input-area {
+        min-width: 0;
+    }
+
+    .parameter-input-area h2,
+    .effect-input-area h2 {
+        margin-bottom: 10px;
+        font-size: 18px;
+        white-space: nowrap;
+    }
+
+    .parameter-input-area label {
+        transform: none;
+        gap: 6px;
+        min-height: 42px;
+    }
+
+    .parameter-input-area .attack-panel,
+    .parameter-input-area .defense-panel {
+        padding: 10px 8px;
+    }
+
+    .parameter-input-area .defense-panel {
+        margin-top: 8px;
+        gap: 2px;
+    }
+
+    .parameter-icon {
+        width: 42px;
+        height: 36px;
+    }
+
+    .parameter-area .number-control {
+        gap: 4px;
+    }
+
+    .parameter-area .number-control button {
+        width: 30px;
+        height: 30px;
+        font-size: 18px;
+    }
+
+    .parameter-area .number-control input {
+        width: 56px;
+        height: 30px;
+    }
+
+    .effect-panel label {
+        margin: 8px 0;
+        gap: 6px;
+        font-size: 15px;
+    }
+
+    /* ダメージ表 */
+    .damage-area {
+        width: 100%;
+        overflow: hidden;
+    }
+
+    .damage-table th,
+    .damage-table td {
+        padding: 6px 3px;
+        font-size: 15px;
+    }
+
+    /* 上部分析欄 */
+    .analysis-values {
+        min-height: 46px;
+        height: auto;
+        padding: 6px 8px;
+        gap: 4px;
+    }
+
+    .analysis-values div {
+        gap: 6px;
+        min-width: 0;
+    }
+
+    .analysis-values span {
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    .analysis-values strong {
+        font-size: 17px;
+        white-space: nowrap;
+    }
+
+    .defense-analysis .analysis-item,
+    .defense-analysis .recommendation-item {
+        padding: 0 3px;
+        gap: 4px;
+    }
+
+    .defense-analysis .recommendation-item strong {
+        font-size: 14px;
+    }
+
+    /* 下段：カード→グラフの縦並び */
+    .battle-lower-area {
+        grid-template-columns: 1fr;
+        gap: 18px;
+        width: 100%;
+        padding-top: 16px;
+    }
+
+    /* スマホでは1列4枚 */
+    .battle-card-area {
+        width: 100%;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .battle-card-item {
+        width: 100%;
+        min-width: 0;
+        gap: 6px;
+    }
+
+    .battle-card {
+        width: 100%;
+        max-width: none;
+        height: auto;
+        border-width: 4px;
+    }
+
+    .battle-card-counter {
+        width: 100%;
+        gap: 3px;
+    }
+
+    .battle-card-counter button {
+        width: 24px;
+        height: 30px;
+        font-size: 17px;
+    }
+
+    .battle-card-counter input {
+        width: 100%;
+        min-width: 0;
+        height: 30px;
+        flex: 1 1 auto;
+    }
+
+    .battle-card-reset-item {
+        align-items: center;
+    }
+
+    /* 防御側：カード＋推奨欄 */
+    .defense-card-and-guide {
+        width: 100%;
+        height: auto;
+        gap: 12px;
+    }
+
+    .defense-choice-guide {
+        width: 100%;
+        min-height: 0;
+        padding: 10px;
+    }
+
+    .defense-choice-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px;
+    }
+
+    .defense-choice-cell {
+        min-height: 92px;
+        padding: 6px 2px;
+    }
+
+    .defense-choice-cell strong {
+        font-size: 15px;
+    }
+
+    .defense-choice-cell small {
+        font-size: 11px;
+    }
+
+    /* グラフ */
+    .battle-result-area {
+        width: 100%;
+        height: auto;
+        gap: 8px;
+    }
+
+    .battle-result-area .damage-graph-area {
+        width: 100%;
+        height: 250px;
+        flex: 0 0 250px;
+        overflow: hidden;
+    }
+
+    .damage-probability-graph {
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
+    }
+
+    /* 下部分析欄の文字崩れ防止 */
+    .battle-result-area .analysis-values {
+        min-height: 48px;
+        height: auto;
+        padding: 6px 4px;
+    }
+
+    .future-analysis-values {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 2px;
+        padding: 6px 4px;
+    }
+
+    .future-analysis-values div {
+        min-width: 0;
+        gap: 3px;
+        flex-direction: column;
+    }
+
+    .future-analysis-values span {
+        font-size: 11px;
+        line-height: 1.15;
+        white-space: nowrap;
+    }
+
+    .future-analysis-values strong {
+        font-size: 16px;
+        line-height: 1.1;
+        white-space: nowrap;
+    }
+}
+
+/* かなり狭い端末向けの微調整 */
+@media (max-width: 430px) {
+    .main-container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .parameter-area {
+        grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.85fr);
+        gap: 8px;
+    }
+
+    .parameter-input-area h2,
+    .effect-input-area h2 {
+        font-size: 16px;
+    }
+
+    .parameter-icon {
+        width: 38px;
+        height: 32px;
+    }
+
+    .parameter-area .number-control input {
+        width: 50px;
+    }
+
+    .battle-card-area {
+        gap: 6px;
+    }
+
+    .battle-card {
+        border-width: 3px;
+    }
+
+    .battle-card-counter button {
+        width: 22px;
+        height: 28px;
+        font-size: 16px;
+    }
+
+    .battle-card-counter input {
+        height: 28px;
+        font-size: 13px;
+    }
+
+    .future-analysis-values span {
+        font-size: 10px;
+    }
+
+    .future-analysis-values strong {
+        font-size: 15px;
+    }
+}
+
+/* =================================
+   スマホ表示 追加微調整 v3
+   ・上部タブと本体枠を密着
+   ・増加／軽減を横書き＋入力欄を下へ
+   PC表示には影響しない
+   ================================= */
+@media (max-width: 800px) {
+    /* タブと本体枠の隙間をなくす */
+    .role-tabs {
+        margin: 0 0 -2px 0;
+        z-index: 3;
+    }
+
+    .main-container {
+        margin-top: 0;
+    }
+
+    /* 効果による変動：文字を横書き、その下に入力欄 */
+    .effect-panel label {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        margin: 8px 0 12px;
+        white-space: nowrap;
+        line-height: 1.2;
+    }
+
+    .effect-panel .number-control {
+        justify-content: center;
+        width: 100%;
+    }
+}
+
+@media (max-width: 430px) {
+    .effect-panel label {
+        font-size: 15px;
+        margin: 7px 0 10px;
+    }
+}
+
+
+#map-draft{--mp-bg:light-dark(#fff,#202725);--mp-text:light-dark(#25352f,#edf4ef);--mp-muted:light-dark(#66766d,#a5b7ac);--mp-line:light-dark(#dce7df,#43544a);--mp-soft:light-dark(#f0f8f2,#293c30);--mp-accent:light-dark(#39875d,#85cba0);font-family:Arial,'Meiryo',sans-serif;color:var(--mp-text);background:var(--mp-bg);border:2px solid var(--mp-accent);border-radius:7px;padding:26px;box-sizing:border-box}
+#map-draft *{box-sizing:border-box}#map-draft h1{font-size:24px;margin:0;font-weight:700}#map-draft h2{font-size:17px;margin:0;font-weight:700}#map-draft p{margin:0}#map-draft .mp-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:22px}#map-draft .mp-sub{color:var(--mp-muted);font-size:12px}#map-draft .mp-filters{display:flex;gap:18px;padding:18px;background:var(--mp-soft);border-radius:7px;margin-bottom:24px}#map-draft label{display:grid;gap:7px;font-size:13px;font-weight:700}#map-draft label:first-child{flex:1}#map-draft select{font:inherit;font-size:16px;color:var(--mp-text);background:var(--mp-bg);border:1px solid var(--mp-line);padding:10px 34px 10px 12px;border-radius:4px;width:100%}#map-draft .mp-cols{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(230px,1fr);gap:24px}#map-draft .mp-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}#map-draft button{font:inherit;font-size:12px;border:1px solid var(--mp-line);background:var(--mp-bg);color:var(--mp-text);padding:8px 12px;border-radius:4px;cursor:pointer}#map-draft .mp-map{background:#fff;border:1px solid var(--mp-line);border-radius:6px;padding:15px;display:flex;align-items:center;justify-content:center;min-height:310px}#map-draft .mp-map img{width:100%;max-height:340px;object-fit:contain}#map-draft .mp-note{font-size:12px;color:var(--mp-muted);margin-top:10px;line-height:1.7}#map-draft .mp-info{border-top:3px solid var(--mp-accent);padding-top:13px}#map-draft .mp-info dl{font-size:13px;line-height:1.8;margin:15px 0 24px}#map-draft .mp-info dt{color:var(--mp-muted);margin-top:10px}#map-draft .mp-info dd{margin:0}#map-draft .mp-missions{border-top:1px solid var(--mp-line);padding-top:18px}#map-draft .mp-empty{background:var(--mp-soft);border-radius:5px;padding:20px 15px;margin-top:14px;font-size:13px;line-height:1.9;color:var(--mp-muted)}#map-draft .mp-monsters{margin-top:28px;border-top:1px dashed var(--mp-line);padding-top:22px}#map-draft .mp-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}#map-draft .mp-monster{border:1px solid var(--mp-line);border-radius:6px;padding:13px;background:var(--mp-bg)}#map-draft .mp-name{display:flex;gap:10px;align-items:center;min-height:61px;font-size:14px;font-weight:700;margin-bottom:12px}#map-draft .mp-name img{width:58px;height:58px;object-fit:contain;background:#fff;border-radius:5px}#map-draft .mp-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:var(--mp-soft);padding:9px 3px;border-radius:4px;text-align:center}#map-draft .mp-stats span{display:block;color:var(--mp-muted);font-size:11px;margin-bottom:5px}#map-draft .mp-stats strong{font-size:17px;font-weight:700}#map-draft .mp-foot{margin-top:16px;font-size:12px;color:var(--mp-muted)}#map-draft.mp-large .mp-cols{grid-template-columns:1fr}#map-draft.mp-large .mp-map img{max-height:none}#map-draft.mp-large .mp-info{display:none}#map-draft.mp-rows .mp-list{grid-template-columns:1fr}#map-draft.mp-rows .mp-monster{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:15px}#map-draft.mp-rows .mp-name{margin:0}
+@media(max-width:680px){#map-draft{padding:16px}#map-draft .mp-cols{grid-template-columns:1fr}#map-draft .mp-list{grid-template-columns:repeat(2,minmax(0,1fr))}#map-draft .mp-top{align-items:flex-start}#map-draft .mp-map{min-height:220px}}@media(max-width:420px){#map-draft .mp-filters{flex-direction:column;gap:12px}#map-draft .mp-list{grid-template-columns:1fr}#map-draft .mp-top{flex-direction:column}#map-draft.mp-rows .mp-monster{grid-template-columns:1fr}}
+
+
+#map-draft{height:800px;max-width:1040px;padding:18px 20px 14px;display:flex;flex-direction:column;overflow:hidden;border-width:3px}
+#map-draft .mp-filters{flex:none;margin:0 0 15px;padding:10px 12px;gap:24px;align-items:center}
+#map-draft .mp-filters label{display:flex;align-items:center;gap:10px;white-space:nowrap;font-size:14px;min-width:0}
+#map-draft .mp-filters label:first-child{flex:1}#map-draft .mp-filters label:last-child{flex:0 1 215px}
+#map-draft select{width:auto;flex:1;min-width:0;padding:8px 26px 8px 10px}
+#map-draft .mp-subtabs{display:flex;gap:5px;border-bottom:2px solid var(--mp-accent);flex:none}
+#map-draft .mp-subtabs button{font-size:15px;font-weight:700;border-radius:5px 5px 0 0;padding:11px 22px;border-bottom:0;background:var(--mp-soft)}
+#map-draft .mp-subtabs button[aria-selected="true"]{background:var(--mp-accent);color:light-dark(#fff,#172d20);border-color:var(--mp-accent)}
+#map-draft .mp-view{flex:1;min-height:0;padding-top:14px;overflow:auto;overscroll-behavior:contain}
+#map-draft .mp-view[hidden]{display:none}
+#map-draft #mp-view-monsters{display:flex;flex-direction:column;overflow:hidden}
+#map-draft #mp-view-monsters[hidden]{display:none}
+#map-draft .mp-actionbar{display:flex;align-items:center;gap:12px;min-height:40px;margin-bottom:13px;flex:none;flex-wrap:wrap}
+#map-draft #mp-add{background:var(--mp-accent);color:light-dark(#fff,#172d20);border-color:var(--mp-accent);font-size:14px;font-weight:700;padding:10px 17px}
+#map-draft #mp-add:disabled{opacity:.45;cursor:default}
+#map-draft #mp-action-status{font-size:12px;color:var(--mp-muted)}
+#map-draft .mp-browse{display:grid;grid-template-columns:minmax(145px,1fr) minmax(0,3fr) minmax(145px,1fr);gap:13px;min-height:0;flex:1}
+#map-draft .mp-detail{border:1px solid var(--mp-line);border-radius:6px;background:var(--mp-soft);padding:13px;overflow:auto}
+#map-draft .mp-detail h2{font-size:14px;border-bottom:1px solid var(--mp-line);padding-bottom:10px;line-height:1.6;overflow-wrap:anywhere}
+#map-draft .mp-detail p{font-size:12px;color:var(--mp-muted);line-height:1.8;margin-top:14px}
+#map-draft .mp-detail-space{height:190px;margin-top:16px;border:1px dashed var(--mp-line);border-radius:4px}
+#map-draft .mp-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:start;overflow:auto;overscroll-behavior:contain;gap:10px;padding:2px 5px 6px 2px;scrollbar-gutter:stable}
+#map-draft button.mp-monster{padding:12px 9px;text-align:left;width:100%;border:1px solid var(--mp-line);background:var(--mp-bg);border-radius:6px;min-width:0}
+#map-draft button.mp-monster[aria-pressed="true"]{border-color:var(--mp-accent);box-shadow:inset 0 0 0 1px var(--mp-accent);background:var(--mp-soft)}
+#map-draft .mp-name{font-size:13px;gap:8px;line-height:1.5;margin-bottom:10px;min-height:54px}
+#map-draft .mp-name img{width:50px;height:50px;flex:none}
+#map-draft .mp-stats{display:flex;flex-wrap:nowrap;align-items:center;justify-content:space-between;gap:5px;padding:8px 4px;background:transparent}
+#map-draft .mp-stat{display:flex;gap:4px;align-items:center;white-space:nowrap}
+#map-draft .mp-stat strong{font-size:15px}#map-draft .mp-stat svg{width:16px;height:16px;flex:none}
+#map-draft .mp-stat[data-kind="攻撃"]{color:light-dark(#cb454e,#f6979c)}#map-draft .mp-stat[data-kind="防御"]{color:light-dark(#2477b5,#88c1ed)}#map-draft .mp-stat[data-kind="HP"]{color:light-dark(#c53a7c,#ef9dc5)}#map-draft .mp-stat[data-kind="コイン"]{color:light-dark(#936b0a,#e1c16c)}#map-draft .mp-stat strong{color:var(--mp-text)}
+#map-draft .mp-cols{grid-template-columns:minmax(0,1.65fr) minmax(220px,1fr);padding-right:6px}
+#map-draft .mp-map{min-height:340px}#map-draft .mp-map img{max-height:440px}
+#map-draft .mp-enlarged .mp-cols{grid-template-columns:1fr}#map-draft .mp-enlarged .mp-map img{max-height:none}#map-draft .mp-enlarged .mp-info{display:none}
+#mp-main-navigation{display:flex;max-width:1040px;font-family:Arial,'Meiryo',sans-serif}#mp-main-navigation span{width:150px;text-align:center;padding:10px 5px;font-size:15px;font-weight:700;border-radius:0 0 4px 4px}#mp-main-navigation .mp-attack{background:light-dark(#fce7e7,#482d2d);color:light-dark(#b84b4b,#e2a5a5)}#mp-main-navigation .mp-defense{background:light-dark(#e6effc,#283a50);color:light-dark(#35638c,#9cbbdd)}#mp-main-navigation .mp-current{background:light-dark(#eaf6ed,#293c30);color:light-dark(#39875d,#85cba0);border:2px solid light-dark(#39875d,#85cba0);border-top:0}
+@media(max-width:760px){#map-draft{padding:12px}#map-draft .mp-browse{grid-template-columns:1fr 1fr;overflow:auto;align-content:start}#map-draft .mp-list{grid-column:1/-1;grid-row:1;overflow:visible;padding-right:2px}#map-draft .mp-detail{min-height:230px;overflow:visible}#map-draft .mp-detail-space{height:100px}#map-draft .mp-cols{grid-template-columns:1fr}#map-draft .mp-filters{gap:12px}#map-draft .mp-filters label:last-child{flex-basis:170px}}
+@media(max-width:450px){#map-draft .mp-filters{flex-direction:column;align-items:stretch;gap:8px}#map-draft .mp-filters label:last-child{flex-basis:auto}#map-draft .mp-filters label{display:grid;grid-template-columns:56px 1fr}#map-draft select{width:100%}#map-draft .mp-subtabs button{font-size:13px;padding:11px 12px}#map-draft .mp-list{grid-template-columns:1fr}#map-draft .mp-detail{padding:9px}#map-draft .mp-name{font-size:14px}}
+
+#map-draft .mp-browse{display:flex;overflow:hidden;min-height:0}
+#map-draft .mp-list{grid-template-columns:repeat(3,minmax(0,1fr));width:100%;overflow:auto;flex:1;gap:12px}
+#map-draft .mp-stat img{width:26px;height:26px;object-fit:contain;flex:none}
+#map-draft .mp-stat strong{font-size:17px}
+#map-draft .mp-stat strong.mp-boosted{color:var(--mp-accent)}
+#map-draft .mp-actionbar{position:relative;overflow:visible;gap:10px}
+#map-draft .mp-actionbar>button,#map-draft #mp-buff{font-size:14px;padding:10px 15px}
+#map-draft .mp-buff-wrap{position:relative}
+#map-draft #mp-buff-options{position:absolute;top:calc(100% + 6px);left:0;z-index:20;background:var(--mp-bg);border:1px solid var(--mp-line);border-radius:6px;padding:6px;width:185px;box-shadow:0 5px 16px light-dark(#20372b22,#0007)}
+#map-draft #mp-buff-options[hidden]{display:none}
+#map-draft #mp-buff-options button{display:block;width:100%;text-align:left;border:0;font-size:14px;padding:11px 10px}
+#map-draft #mp-buff-options button:hover{background:var(--mp-soft)}
+#map-draft #mp-buff-status{font-size:13px;color:var(--mp-accent)}
+@media(max-width:760px){#map-draft .mp-list{grid-template-columns:repeat(2,minmax(0,1fr));overflow:auto}#map-draft .mp-stat img{width:23px;height:23px}}
+@media(max-width:450px){#map-draft .mp-list{grid-template-columns:1fr}#map-draft .mp-actionbar{gap:6px}#map-draft .mp-actionbar>button,#map-draft #mp-buff,#map-draft #mp-add{padding:10px 8px;font-size:12px}}
+
+
+#map-draft .mp-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;justify-content:normal}
+#map-draft .mp-stat{justify-content:flex-start;min-width:0}
+#map-draft .mp-name img.mp-reflect{width:26px;height:26px;object-fit:contain;background:transparent;border-radius:0;flex:none}
+
+
+#map-draft .mp-stat img,
+#map-draft .mp-name img.mp-reflect{
+ width:26px;height:26px;min-width:26px;max-width:26px;min-height:26px;max-height:26px;object-fit:contain;flex:0 0 26px;
+}
+
+#map-draft #mp-view-map{overflow:hidden}
+#map-draft .mp-map-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;height:100%;min-height:0}
+#map-draft .mp-map-only{min-height:0;display:flex;align-items:center;justify-content:center;padding-bottom:10px}
+#map-draft .mp-map-only .mp-map{padding:12px;width:100%;min-height:0;max-height:100%;border:0}
+#map-draft .mp-map-only .mp-map img{width:100%;max-height:590px;object-fit:contain}
+#map-draft .mp-map-details{overflow:auto;min-height:0;padding:3px 8px 14px 0;scrollbar-gutter:stable}
+#map-draft .mp-map-details h2{font-size:17px;margin:0 0 12px;border-left:4px solid var(--mp-accent);padding-left:10px}
+#map-draft .mp-event-section{margin-top:26px}
+#map-draft .mp-data-table{width:100%;border-collapse:collapse;table-layout:fixed;font-size:13px;line-height:1.65;color:var(--mp-text)}
+#map-draft .mp-data-table th{background:var(--mp-soft);text-align:left;font-weight:700;padding:9px 8px;border-bottom:1px solid var(--mp-line)}
+#map-draft .mp-data-table td{padding:10px 8px;border-bottom:1px solid var(--mp-line);vertical-align:top;overflow-wrap:anywhere}
+#map-draft .mp-counter-col{width:70px}#map-draft .mp-progress-col{width:58px}
+#map-draft .mp-mission-section td:nth-child(2),#map-draft .mp-mission-section th:nth-child(2),#map-draft .mp-event-section td:first-child,#map-draft .mp-event-section th:first-child{text-align:center;font-variant-numeric:tabular-nums}
+#map-draft .mp-missing{color:var(--mp-muted);font-size:13px;padding:12px 0}
+@media(max-width:680px){#map-draft #mp-view-map{overflow:auto}#map-draft .mp-map-layout{grid-template-columns:1fr;height:auto;gap:20px}#map-draft .mp-map-details{overflow:visible;padding-right:0}#map-draft .mp-map-only .mp-map img{max-height:310px}}
+
+#map-draft .mp-event-section td{padding-top:7px;padding-bottom:7px;line-height:1.5}#map-draft .mp-event-section td:nth-child(2){white-space:pre-line}#map-draft .mp-event-section td:first-child{vertical-align:middle}
+
+#map-draft #mp-mission-body tr{cursor:pointer;user-select:none}
+#map-draft #mp-mission-body tr:hover{background:var(--mp-soft)}
+#map-draft #mp-mission-body tr.mp-mission-done td{color:var(--mp-muted);text-decoration:line-through}
+#map-draft #mp-mission-body .mp-mission-counter-button{padding:0;border:0;border-radius:0;background:transparent;color:inherit;font:inherit;text-align:left;line-height:inherit;width:100%;text-decoration:inherit}
+#map-draft #mp-mission-body tr.mp-mission-done .mp-mission-counter-button{text-decoration:line-through}
+
+#map-draft .mp-mission-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}#map-draft .mp-mission-heading h2{margin-bottom:0}#map-draft #mp-mission-reset{font-size:12px;padding:7px 12px;flex:none}
+#map-draft .mp-mission-section td:nth-child(2),#map-draft .mp-mission-section th:nth-child(2){text-align:left}#map-draft .mp-mission-section td:first-child,#map-draft .mp-mission-section th:first-child{text-align:center;font-variant-numeric:tabular-nums}
+/* Shared fixed frame. Only each view's contents scroll. */
+.main-container{height:845px;overflow:auto}.main-container.map-mode{display:block;overflow:hidden;border-color:#39875d;padding:0}
+#map-draft{height:100%;width:100%;max-width:none;border:0;border-radius:0;background:#fff;--mp-bg:#fff;--mp-text:#25352f;--mp-muted:#66766d;--mp-line:#dce7df;--mp-soft:#f0f8f2;--mp-accent:#39875d}
+#map-draft:not(.active){display:none}.map-tab{background:#eaf6ed;color:#39875d}.role-tab.active.map-tab{border:2px solid #39875d;background:#eaf6ed;color:#39875d}
+#map-draft label{margin:0;justify-content:flex-start}#map-draft .mp-filters label{transform:none}#map-draft table th,#map-draft table td{height:auto}#map-draft h2{letter-spacing:normal}
+#monster-tooltip{position:fixed;z-index:1000;padding:6px 10px;border-radius:4px;background:#25352f;color:#fff;font-size:13px;pointer-events:none}#monster-tooltip[hidden]{display:none}
+@media(max-width:800px){.main-container{height:1000px}.role-tabs{flex-wrap:wrap}#map-draft{height:100%;padding:12px}}
+/* Keep map tables independent of combat table styling. */
+#map-draft .mp-data-table td{border:0;border-bottom:1px solid var(--mp-line);text-align:left}
+#map-draft .mp-data-table th{border:0;border-bottom:1px solid var(--mp-line)}
+#map-draft .mp-mission-section td:first-child,#map-draft .mp-event-section td:first-child{text-align:center}
