@@ -1368,3 +1368,9 @@ tbody th {
 .roster-card-top .roster-select{width:100%}
 
 #map-draft .monster-name-text img[hidden],.roster-name .monster-name-text img[hidden]{display:none}
+
+/* 撃破済みも出現履歴として残す */
+.roster-card.defeated{background:#ededed;border-color:#d3d3d3;color:#888;box-shadow:none}
+.roster-card.defeated .monster-name-text,.roster-card.defeated .roster-stat,.roster-card.defeated .roster-hp{text-decoration:line-through}
+.roster-card.defeated img{opacity:.45;filter:grayscale(1)}
+.roster-card.defeated button,.roster-card.defeated input{color:inherit;cursor:default}
