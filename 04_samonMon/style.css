@@ -1374,3 +1374,11 @@ tbody th {
 .roster-card.defeated .monster-name-text,.roster-card.defeated .roster-stat,.roster-card.defeated .roster-hp{text-decoration:line-through}
 .roster-card.defeated img{opacity:.45;filter:grayscale(1)}
 .roster-card.defeated button,.roster-card.defeated input{color:inherit;cursor:default}
+
+.roster-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}.roster-heading h2{margin:0}
+#roster-clear,.roster-delete{padding:5px 10px;background:#fff;border:1px solid #dce7df;border-radius:4px;color:#53665a;cursor:pointer}
+.roster-card-actions{position:absolute;right:8px;top:5px;display:flex;gap:5px}
+.roster-card-actions .roster-remove{position:static;margin:0}.roster-card-actions .roster-delete{padding:1px 5px;font-size:12px;line-height:1.4}
+.roster-card.defeated .roster-delete{cursor:pointer;color:#53665a}
+#roster-undo:disabled{opacity:.45;cursor:default}
+#mp-action-status{display:block;font-size:12px;color:#66766d;margin-bottom:8px}#mp-action-status:empty{display:none}

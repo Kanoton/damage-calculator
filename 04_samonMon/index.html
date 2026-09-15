@@ -415,7 +415,7 @@
  <div class="mp-filters"><label>マップ名<select id="mp-map-select"></select></label><label>難易度<select id="mp-difficulty"><option>普通</option><option>困難</option><option>悪夢</option><option>狂気</option><option>極限</option></select></label></div>
  <div class="mp-subtabs" role="tablist" aria-label="表示内容"><button type="button" id="mp-tab-monsters" role="tab" aria-controls="mp-view-monsters" aria-selected="true">出現モンスター</button><button type="button" id="mp-tab-map" role="tab" aria-controls="mp-view-map" aria-selected="false">マップ図・イベント</button></div>
  <section id="mp-view-monsters" class="mp-view" role="tabpanel" aria-labelledby="mp-tab-monsters">
-  <div class="mp-actionbar"><button type="button" data-buff="attack" aria-label="全モンスターの攻撃力を1加算">A+1</button><button type="button" data-buff="defense" aria-label="全モンスターの防御力を1加算">D+1</button><button type="button" data-buff="both" aria-label="全モンスターの攻撃力と防御力を1加算">A/D+1</button><button type="button" id="mp-reset">リセット</button><span id="mp-buff-status" aria-live="polite"></span><span id="mp-action-status" aria-live="polite"></span></div>
+  <span id="mp-buff-status" hidden></span><span id="mp-action-status" aria-live="polite"></span>
   <div class="mp-browse">
    <div class="mp-list" id="mp-monster-list" aria-label="モンスター選択"></div>
   </div>
@@ -444,7 +444,7 @@
 
 </div>
 
-<section class="map-roster" aria-labelledby="map-roster-heading"><h2 id="map-roster-heading">Map上のモンスター</h2><p class="map-roster-description">モンスター名をクリックで計算機に登録。残りHPは数値をクリックして編集（0で撃破）。</p><div class="roster-actionbar"><button type="button" data-roster-buff="attack">A+1</button><button type="button" data-roster-buff="defense">D+1</button><button type="button" data-roster-buff="both">A/D+1</button><button type="button" id="roster-reset" title="下の一覧のバフ・固有ギミックをリセット">リセット</button><div id="roster-gimmicks" aria-label="マップ固有ギミック"></div></div><p id="map-roster-empty" class="map-roster-empty">［マップ情報］の［出現モンスター］をクリックすると追加できます。</p><p id="roster-counts" class="map-roster-status"></p><p id="map-roster-status" class="map-roster-status" aria-live="polite"></p><div id="map-roster-list" class="map-roster-list"></div></section>
+<section class="map-roster" aria-labelledby="map-roster-heading"><div class="roster-heading"><h2 id="map-roster-heading">マップ上のモンスター</h2><button type="button" id="roster-clear" title="全モンスターと操作履歴を削除">全削除</button></div><p class="map-roster-description">モンスター名をクリックで計算機に登録。残りHPは数値をクリックして編集（0で撃破）。</p><div class="roster-actionbar"><button type="button" data-roster-buff="attack">A+1</button><button type="button" data-roster-buff="defense">D+1</button><button type="button" data-roster-buff="both">A/D+1</button><button type="button" id="roster-reset" title="下の一覧のバフ・固有ギミックをリセット">リセット</button><button type="button" id="roster-undo" disabled>１つもどす</button><div id="roster-gimmicks" aria-label="マップ固有ギミック"></div></div><p id="map-roster-empty" class="map-roster-empty">［マップ情報］の［出現モンスター］をクリックすると追加できます。</p><p id="roster-counts" class="map-roster-status"></p><div id="map-roster-list" class="map-roster-list"></div></section>
 <script src="script.js"></script>
 <div id="monster-tooltip" role="tooltip" hidden>テスト中</div>
 </body>
