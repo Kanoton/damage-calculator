@@ -1343,3 +1343,17 @@ tbody th {
 #map-draft #mp-spawn:disabled{opacity:.45;cursor:default}
 @media(max-width:760px){.map-roster-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:480px){.map-roster{padding:12px}.map-roster-list{grid-template-columns:1fr}}
+
+/* 出現中モンスターの操作とコンパクト表示 */
+.roster-actionbar{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.roster-actionbar button{padding:10px 12px;border:1px solid #dce7df;border-radius:4px;background:#fff;color:#25352f;cursor:pointer}
+#roster-gimmicks{display:flex;flex-wrap:wrap;gap:8px;margin-left:auto}
+#roster-gimmicks .mp-gimmick-complete{text-decoration:line-through;color:#66766d}
+.roster-card-top{display:flex;align-items:flex-start;gap:4px;padding:10px 10px 6px}
+.roster-card-top .roster-select{flex:1;min-width:0;width:auto;padding:0}
+.roster-card-top .roster-remove{flex:none;margin:0;padding:4px 6px;font-size:12px}
+.roster-card>.roster-stats{padding:0 10px 10px}
+.roster-hp{width:100%;min-width:0;max-width:65px;box-sizing:border-box;padding:3px 1px;border:1px solid transparent;border-bottom:1px dashed #81a992;background:transparent;color:inherit;font:inherit;font-weight:bold;appearance:textfield}
+.roster-hp::-webkit-inner-spin-button,.roster-hp::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.roster-hp:focus{outline:2px solid #39875d;border-radius:3px;background:#fff}
+.roster-actionbar button:focus-visible,.roster-select:focus-visible,.roster-remove:focus-visible{outline:2px solid #39875d;outline-offset:2px}
