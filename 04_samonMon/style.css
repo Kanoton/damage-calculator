@@ -1387,3 +1387,5 @@ tbody th {
 #mp-event-body tr{cursor:pointer}#mp-event-body tr.mp-event-done{background:#ededed;color:#888;text-decoration:line-through;cursor:default}
 #map-draft .mp-event-done button{cursor:default}#map-draft .mp-event-button:focus-visible{outline:2px solid #39875d;outline-offset:3px}
 #map-draft .mp-progress-col{width:5.5em}#mp-event-body td:first-child{overflow-wrap:anywhere}#mp-event-error:empty{display:none}#mp-event-error{color:#b43232;font-size:13px}
+
+#roster-error:empty{display:none}#roster-error{color:#b43232;font-size:13px}
