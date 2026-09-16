@@ -1263,7 +1263,7 @@ tbody th {
 /* ===== 文字サイズの調整：以下のpx値を変更してください ===== */
 #map-draft {
     --monster-name-size: 18px; /* モンスター名 */
-    --mission-event-size: 16px; /* ミッション・イベントの表（見出しは除く） */
+    --mission-event-size: 12px; /* ミッション・イベントの表（見出しは除く） */
 }
 #map-draft .mp-name { font-size: var(--monster-name-size); overflow-wrap: anywhere; }
 #map-draft .mp-data-table,
