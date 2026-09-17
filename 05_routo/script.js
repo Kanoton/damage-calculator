@@ -1219,9 +1219,8 @@ function renderRoster(){
  document.querySelectorAll('#mp-mission-body tr').forEach(updateMissionRow);
  const active=placedMonsters.find(e=>e.instanceId===selectedPlacedId);if(active)registerEnemy(active,false);
  roster.replaceChildren();rosterEmpty.hidden=placedMonsters.length>0;
- const order=data.maps[pick.value]?.ids||[];
  document.getElementById('roster-counts').textContent='累計 '+placedMonsters.length+'体 ／ 出現中 '+placedMonsters.filter(e=>!e.defeated).length+'体 ／ 撃破 '+placedMonsters.filter(e=>e.defeated).length+'体';
- [...placedMonsters].sort((a,b)=>order.indexOf(a.monsterId)-order.indexOf(b.monsterId)||a.instanceId-b.instanceId).forEach(enemy=>{
+ [...placedMonsters].sort((a,b)=>Number(!!a.defeated)-Number(!!b.defeated)||a.monsterId.localeCompare(b.monsterId,'en',{numeric:true})||a.instanceId-b.instanceId).forEach(enemy=>{
   const card=document.createElement('article');card.className='roster-card';card.classList.toggle('defeated',!!enemy.defeated);card.classList.toggle('selected',enemy.instanceId===selectedPlacedId);
   const select=document.createElement('button');select.type='button';select.disabled=!!enemy.defeated;select.className='roster-select';select.setAttribute('aria-pressed',String(enemy.instanceId===selectedPlacedId));select.setAttribute('aria-label',enemy.name+' #'+enemy.instanceId+'を計算機に登録');
   const heading=document.createElement('span');heading.className='roster-name';const portrait=document.createElement('img');portrait.className='roster-portrait';portrait.alt='';assignMapImage(portrait,enemy.image);const nameText=document.createElement('span');nameText.className='monster-name-text';nameText.textContent=enemy.name;heading.append(portrait,nameText);
