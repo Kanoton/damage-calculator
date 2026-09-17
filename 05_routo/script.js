@@ -1117,7 +1117,7 @@ root.querySelector('.mp-map-only').prepend(routeControls);
 const routeNote=document.createElement('p');routeNote.id='mp-route-note';routeNote.textContent='√決定後分岐';routeNote.hidden=true;root.querySelector('.mp-event-section h2').after(routeNote);
 function availableRoutes(){return (data.maps[pick.value]?.routes||[]).filter(r=>!r.levels.length||r.levels.includes(difficulty.value));}
 function ensureRoute(){const routes=availableRoutes(),context=JSON.stringify([pick.value,difficulty.value]);if(routeState.context!==context||!routes.some(r=>r.id===routeState.route)){routeState.context=context;routeState.route=(routes.find(r=>r.id==='COMMON')||routes[0])?.id||'';routeState.moved=false;}if(!routes.find(r=>r.id===routeState.route)?.movedImage)routeState.moved=false;return routes;}
-function routeRows(rows){return rows.filter(row=>row.map_id===pick.value&&routeLevelMatches(row,difficulty.value)&&(!row.route_id||row.route_id===routeState.route));}
+function routeRows(rows){const keepCommon=availableRoutes().some(route=>route.id==='COMMON');return rows.filter(row=>row.map_id===pick.value&&routeLevelMatches(row,difficulty.value)&&(!row.route_id||row.route_id===routeState.route||(keepCommon&&row.route_id==='COMMON')));}
 function currentMapImage(){const route=availableRoutes().find(r=>r.id===routeState.route);return route?(routeState.moved?route.movedImage:route.image):data.maps[pick.value]?.image;}
 function renderRouteControls(){
  const focused=document.activeElement?.closest('#mp-route-controls')?document.activeElement.dataset.routeFocus:null;
