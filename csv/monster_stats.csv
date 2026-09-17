@@ -1,8 +1,8 @@
 ﻿monster_id,image,info,モンスター名,種族,ボス,反撃,難易度,攻撃,防御,HP,コイン
-M0001,King_Gawu_Sprite.png,M0001_info_a.png,海賊王ガオー,海賊王ガオー,1,1,普通,5,6,88,
-M0001,King_Gawu_Sprite.png,M0001_info_a.png,海賊王ガオー,海賊王ガオー,1,1,困難,6,6,99,
-M0001,King_Gawu_Sprite.png,M0001_info_a.png,海賊王ガオー,海賊王ガオー,1,1,悪夢,6,6,111,
-M0001,King_Gawu_Sprite.png,M0001_info_a.png,海賊王ガオー,海賊王ガオー,1,1,狂気,7,6,122,
+M0001,King_Gawu_Sprite.png,M0001_info.png,海賊王ガオー,海賊王ガオー,1,1,普通,5,6,88,
+M0001,King_Gawu_Sprite.png,M0001_info.png,海賊王ガオー,海賊王ガオー,1,1,困難,6,6,99,
+M0001,King_Gawu_Sprite.png,M0001_info.png,海賊王ガオー,海賊王ガオー,1,1,悪夢,6,6,111,
+M0001,King_Gawu_Sprite.png,M0001_info.png,海賊王ガオー,海賊王ガオー,1,1,狂気,7,6,122,
 M0001,King_Gawu_Sprite.png,M0001_info.png,海賊王ガオー,海賊王ガオー,1,1,極限,7,6,155,
 M0002,King_Shark_Sprite.png,M0002_info.png,サメタラシ,サメタラシ,,1,狂気,5,2,22,12
 M0002,King_Shark_Sprite.png,,サメタラシ,サメタラシ,,1,極限,6,2,24,12
