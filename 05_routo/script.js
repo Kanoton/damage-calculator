@@ -1190,7 +1190,7 @@ function registerEnemy(enemy, switchTab=true){
  if(switchTab)document.querySelector('.role-tab[data-role="attack"]').click();
 }
 function clearRoster(){document.getElementById('roster-error').textContent='';defeatTotals.clear();executedEvents.clear();placedMonsters.length=0;selectedPlacedId=null;rosterBuff.attack=0;rosterBuff.defense=0;rosterCounts.clear();rosterNotice.textContent='';}
-function updateEnemy(enemy){if(enemy.defeated)return;enemy.attack=rosterStat(enemy.base,'攻撃');enemy.defense=rosterStat(enemy.base,'防御');enemy.hp=rosterStat(enemy.base,'HP')-enemy.damageTaken;}
+function updateEnemy(enemy){if(enemy.defeated)return;enemy.attack=rosterStat(enemy.base,'攻撃')+(enemy.manualAttack||0);enemy.defense=rosterStat(enemy.base,'防御')+(enemy.manualDefense||0);enemy.hp=rosterStat(enemy.base,'HP')-enemy.damageTaken;}
 function spawnGimmickMonsters(trigger){
  const matching=mapGimmicks().filter(r=>r.gimmick_id===trigger.gimmick_id&&(!r['難易度']||r['難易度']===difficulty.value));
  const configurations=new Map();matching.forEach(r=>{const ids=String(r['出現monster_id']||'').trim();if(ids)configurations.set(JSON.stringify([ids,String(r['出現数']||'').trim()]),r);});
@@ -1229,10 +1229,12 @@ function renderRoster(){
   if(enemy.reflect){const icon=document.createElement('img');icon.className='roster-icon';icon.alt='反撃可能';assignMapImage(icon,data.icons.reflect);nameText.append(icon);}
   const stats=document.createElement('span');stats.className='roster-stats';
   [['攻撃',enemy.attack],['防御',enemy.defense],['HP',enemy.hp],['コイン',enemy.coin]].forEach(([key,value])=>{const cell=document.createElement('span');cell.className='roster-stat';if(value!==null){const icon=document.createElement('img');icon.className='roster-icon';icon.alt=key;assignMapImage(icon,data.icons[key]);let amount;
-   if(key==='HP'){
-    amount=document.createElement('input');amount.type='number';amount.disabled=!!enemy.defeated;amount.min='0';amount.step='1';amount.value=value;amount.className='roster-hp';amount.setAttribute('aria-label',enemy.name+' #'+enemy.instanceId+'の残りHP');amount.title='残りHPを入力（0で撃破）';amount.addEventListener('focus',()=>amount.select());
-    let committed=false;const commit=()=>{if(committed)return;const hp=Number(amount.value);if(amount.value.trim()===''||!Number.isFinite(hp)||hp<0||!Number.isInteger(hp)){amount.value=enemy.hp;return;}committed=true;if(hp===enemy.hp)return;rememberRoster();if(hp===0){removeEnemy(enemy);rosterNotice.textContent=enemy.name+'を撃破しました。';}else{enemy.damageTaken=rosterStat(enemy.base,'HP')-hp;}renderRoster();};
-    amount.addEventListener('change',commit);amount.addEventListener('blur',commit);amount.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();commit();}if(event.key==='Escape'){amount.value=enemy.hp;amount.blur();}});icon.style.cursor='text';icon.addEventListener('click',()=>amount.focus());
+   if(key==='HP'||key==='攻撃'||key==='防御'){
+    const field=key==='HP'?'hp':key==='攻撃'?'attack':'defense';
+    const label=key==='HP'?'残りHP':key+'力';
+    amount=document.createElement('input');amount.type='number';amount.disabled=!!enemy.defeated;amount.min='0';amount.step='1';amount.value=value;amount.className='roster-hp';amount.setAttribute('aria-label',enemy.name+' #'+enemy.instanceId+'の'+label);amount.title=label+'を入力'+(key==='HP'?'（0で撃破）':'');amount.addEventListener('focus',()=>amount.select());
+    let committed=false;const commit=()=>{if(committed)return;const next=Number(amount.value);if(amount.value.trim()===''||!Number.isSafeInteger(next)||next<0){amount.value=enemy[field];return;}committed=true;if(next===enemy[field])return;rememberRoster();if(key==='HP'){if(next===0){removeEnemy(enemy);rosterNotice.textContent=enemy.name+'を撃破しました。';}else{enemy.damageTaken=rosterStat(enemy.base,'HP')-next;}}else{enemy[key==='攻撃'?'manualAttack':'manualDefense']=next-rosterStat(enemy.base,key);rosterNotice.textContent=enemy.name+' #'+enemy.instanceId+'の'+label+'を'+next+'に変更しました。';}renderRoster();};
+    amount.addEventListener('change',commit);amount.addEventListener('blur',commit);amount.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();commit();}if(event.key==='Escape'){amount.value=enemy[field];amount.blur();}});icon.style.cursor='text';icon.addEventListener('click',()=>amount.focus());
    }else{amount=document.createElement('strong');amount.textContent=value;}
    cell.append(icon,amount);}stats.append(cell);});
   select.append(heading);select.addEventListener('click',()=>{selectedPlacedId=enemy.instanceId;registerEnemy(enemy);renderRoster();rosterNotice.textContent=enemy.name+' #'+enemy.instanceId+'を計算機に登録しました。';});
