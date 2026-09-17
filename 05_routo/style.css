@@ -1413,3 +1413,7 @@ tbody th {
 #map-draft .has-route-switches .mp-map-stage{height:100%;min-height:0}
 #map-draft .has-route-switches #mp-map-image{height:100%;max-height:100%;object-fit:contain}
 @media(max-width:680px){#map-draft .has-route-switches .mp-map{flex:auto;height:330px}#map-draft .mp-route-group+.mp-route-group{padding-left:0;border-left:0}}
+
+/* Monster detail images retain their aspect ratio and fit within the viewport. */
+#monster-tooltip{padding:0;background:transparent;border:0;border-radius:0;max-width:calc(100vw - 16px);max-height:calc(100vh - 16px);line-height:0;filter:drop-shadow(0 4px 10px rgba(0,0,0,.28));pointer-events:none}
+#monster-tooltip img{display:block;object-fit:contain;max-width:100%;max-height:calc(100vh - 16px)}
