@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>アストラル☆パーティ ダメージ計算ツール</title>
     <link rel="stylesheet" href="style.css">
+<style>
+.map-roster .roster-actionbar{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.map-roster .roster-gimmick-controls{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.map-roster #roster-gimmicks{margin-left:0;display:flex;flex-wrap:wrap;gap:8px}
+.map-roster .roster-history-controls{display:flex;align-items:center;gap:8px;margin-left:auto}
+.map-roster #roster-reset[hidden]{display:none}
+</style>
 </head>
 
 <body>
@@ -444,7 +451,7 @@
 
 </div>
 
-<section class="map-roster" aria-labelledby="map-roster-heading"><div class="roster-heading"><h2 id="map-roster-heading">マップ上のモンスター</h2><button type="button" id="roster-clear" title="全モンスターと操作履歴を削除">全削除</button></div><p class="map-roster-description">モンスター名をクリックで計算機に登録。残りHPは数値をクリックして編集（0で撃破）。</p><div class="roster-actionbar"><button type="button" data-roster-buff="attack">A+1</button><button type="button" data-roster-buff="defense">D+1</button><button type="button" data-roster-buff="both">A/D+1</button><button type="button" id="roster-reset" title="下の一覧のバフ・固有ギミックをリセット">リセット</button><button type="button" id="roster-undo" disabled>１つもどす</button><div id="roster-gimmicks" aria-label="マップ固有ギミック"></div></div><p id="map-roster-empty" class="map-roster-empty">［マップ情報］の［出現モンスター］をクリックすると追加できます。</p><p id="roster-error" role="alert"></p><p id="roster-counts" class="map-roster-status"></p><div id="map-roster-list" class="map-roster-list"></div></section>
+<section class="map-roster" aria-labelledby="map-roster-heading"><div class="roster-heading"><h2 id="map-roster-heading">マップ上のモンスター</h2></div><p class="map-roster-description">モンスター名をクリックで計算機に登録。残りHPは数値をクリックして編集（0で撃破）。</p><div class="roster-actionbar"><div class="roster-gimmick-controls"><div id="roster-gimmicks" aria-label="マップ固有ギミック"></div><button type="button" id="roster-reset" title="下の一覧のバフ・固有ギミックをリセット" hidden>リセット</button></div><div class="roster-history-controls"><button type="button" id="roster-undo" disabled>１つもどす</button><button type="button" id="roster-clear" title="全モンスターと操作履歴を削除">全削除</button></div></div><p id="map-roster-empty" class="map-roster-empty">［マップ情報］の［出現モンスター］をクリックすると追加できます。</p><p id="roster-error" role="alert"></p><p id="roster-counts" class="map-roster-status"></p><div id="map-roster-list" class="map-roster-list"></div></section>
 <script src="script.js"></script>
 <div id="monster-tooltip" role="tooltip" hidden></div>
 </body>
