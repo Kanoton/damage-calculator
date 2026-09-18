@@ -1302,6 +1302,24 @@ function executeEvent(group){
  for(const {stats,count} of pending){for(let i=0;i<count;i++)placedMonsters.push({instanceId:nextPlacedId++,monsterId:stats.monster_id,name:stats['モンスター名'],mapName:data.maps[pick.value].name,mapId:pick.value,difficulty:difficulty.value,image:data.images[stats.image],base:{...stats},damageTaken:0,attack:rosterStat(stats,'攻撃'),defense:rosterStat(stats,'防御'),hp:rosterStat(stats,'HP'),coin:stats['コイン']===''?null:Number(stats['コイン']),boss:String(stats['ボス']).trim()==='1',reflect:String(stats['反撃']).trim()==='1'});}
  executedEvents.add(key);document.getElementById('mp-event-error').textContent='';renderRoster();
 }
+function libraryTruthKey(){return JSON.stringify([pick.value,difficulty.value,'','__library_truth__']);}
+function executeLibraryTruth(){
+ if(pick.value!=='MAP0104'||executedEvents.has(libraryTruthKey()))return;
+ const stats=data.stats.find(r=>r.monster_id==='M0115'&&r['難易度']===difficulty.value);
+ if(!stats||['攻撃','防御','HP'].some(k=>rosterStat(stats,k)===null||!Number.isFinite(rosterStat(stats,k)))||rosterStat(stats,'HP')<=0){document.getElementById('mp-event-error').textContent='ゴクチョー【真相】の現在の難易度の能力値を確認してください。';return;}
+ rememberRoster();
+ for(let i=placedMonsters.length-1;i>=0;i--){const enemy=placedMonsters[i];if(enemy.monsterId==='M0116'&&enemy.mapId===pick.value&&enemy.difficulty===difficulty.value){if(selectedPlacedId===enemy.instanceId)selectedPlacedId=null;placedMonsters.splice(i,1);}}
+ if(!placedMonsters.some(e=>e.monsterId==='M0115'&&e.mapId===pick.value&&e.difficulty===difficulty.value&&!e.defeated)){
+ placedMonsters.push({instanceId:nextPlacedId++,monsterId:stats.monster_id,name:stats['モンスター名'],mapName:data.maps[pick.value].name,mapId:pick.value,difficulty:difficulty.value,image:data.images[stats.image],base:{...stats},damageTaken:0,attack:rosterStat(stats,'攻撃'),defense:rosterStat(stats,'防御'),hp:rosterStat(stats,'HP'),coin:stats['コイン']===''?null:Number(stats['コイン']),boss:String(stats['ボス']).trim()==='1',reflect:String(stats['反撃']).trim()==='1'});
+ }
+ executedEvents.add(libraryTruthKey());document.getElementById('mp-event-error').textContent='';renderRoster();rosterNotice.textContent='真相発覚：ゴクチョーを削除し、ゴクチョー【真相】を出現させました。';
+}
+function appendLibraryTruthEvent(body){
+ if(pick.value!=='MAP0104')return;
+ const tr=document.createElement('tr');tr.dataset.eventKey=libraryTruthKey();const td=document.createElement('td');td.colSpan=2;
+ const button=document.createElement('button');button.type='button';button.className='mp-event-button';button.textContent='真相発覚';button.addEventListener('click',executeLibraryTruth);td.append(button);tr.append(td);body.append(tr);body.closest('table').hidden=false;document.getElementById('mp-event-empty').hidden=true;
+}
+
 function renderMapInformation(){
  eventPreview.reset();
  // CSV order is the display order; external mission/event IDs are not required.
@@ -1318,6 +1336,7 @@ function renderMapInformation(){
  const body=document.getElementById('mp-event-body');
  [...body.children].forEach((tr,i)=>{const group=groupedEvents[i];tr.dataset.eventKey=eventKey(group);const button=document.createElement('button');button.type='button';button.className='mp-event-button';button.textContent=group['内容'];button.setAttribute('aria-label',group['進捗']+' のイベントを実行');tr.children[1].replaceChildren(button);tr.addEventListener('click',()=>executeEvent(group));
  const files=eventImageFiles(group);if(files.length){tr.classList.add('mp-event-has-image');tr.title='マウスを乗せると出現位置を表示';let pointerInside=false;const show=()=>eventPreview.show(files,(data.maps[pick.value]?.name||'')+'：'+group['進捗']+' の出現位置');tr.addEventListener('mouseenter',()=>{pointerInside=true;show();});tr.addEventListener('mouseleave',()=>{pointerInside=false;eventPreview.reset();});tr.addEventListener('focusin',event=>{if(event.target.matches(':focus-visible'))show();});tr.addEventListener('focusout',event=>{if(!tr.contains(event.relatedTarget)&&!pointerInside)eventPreview.reset();});}});
+ appendLibraryTruthEvent(body);
  document.getElementById('mp-event-error').textContent='';updateEventRows();
 }
 
