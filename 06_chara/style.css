@@ -12,7 +12,6 @@ body {
     padding: 20px;
 }
 
-
 /* =================================
    ツール全体
    ================================= */
@@ -37,7 +36,6 @@ body {
     border-color: #5f9bd3;
 }
 
-
 /* =================================
    攻撃・防御モード切り替え
    ================================= */
@@ -48,7 +46,6 @@ body {
 .mode-content:not(.active) {
     display: none;
 }
-
 
 /* =================================
    左側：パラメータ入力エリア
@@ -101,7 +98,6 @@ label {
     flex-shrink: 0;
 }
 
-
 /* =================================
    パラメータの色付きパネル
    ================================= */
@@ -150,7 +146,6 @@ label {
     margin: 10px 0;
 }
 
-
 /* =================================
    数値入力コントロール
    ================================= */
@@ -184,7 +179,6 @@ label {
     -webkit-appearance: none;
     margin: 0;
 }
-
 
 /* =================================
    右側：ダメージ表
@@ -234,7 +228,6 @@ tbody th {
     background-color: #ffd9a8;
 }
 
-
 /* =================================
    期待値・確率
    ================================= */
@@ -268,7 +261,6 @@ tbody th {
 .analysis-values strong {
     font-size: 22px;
 }
-
 
 /* =================================
    攻撃・防御 切り替えタブ
@@ -323,7 +315,6 @@ tbody th {
     background-color: #e7f0fd;
 }
 
-
 /* =================================
    画面幅 800px 以下
    ================================= */
@@ -341,7 +332,6 @@ tbody th {
         width: 100%;
     }
 }
-
 
 /* 防御側：期待値・生存率を左寄せし、右側に防御/回避の推奨を表示 */
 .defense-analysis {
@@ -375,7 +365,6 @@ tbody th {
     line-height: 1.15;
     white-space: nowrap;
 }
-
 
 /* =================================
    防御側：分析結果を3項目で均等配置
@@ -549,7 +538,6 @@ tbody th {
     }
 }
 
-
 /* =================================
    バトルカード右側：グラフ＋分析結果
    ================================= */
@@ -576,7 +564,6 @@ tbody th {
     height: 46px;
     margin-top: 0;
 }
-
 
 /* バトルカード使用時：ダメージ範囲・期待値・確率を3項目で表示 */
 .future-analysis-values {
@@ -617,7 +604,6 @@ tbody th {
     }
 }
 
-
 /* =================================
    バトルカード：画像クリック操作
    ================================= */
@@ -646,7 +632,6 @@ tbody th {
 .battle-card-reset-item {
     justify-content: flex-start;
 }
-
 
 /* =================================
    防御側：攻撃出目ごとの防御 / 回避 指標
@@ -1152,11 +1137,9 @@ tbody th {
     }
 }
 
-
 #map-draft{--mp-bg:light-dark(#fff,#202725);--mp-text:light-dark(#25352f,#edf4ef);--mp-muted:light-dark(#66766d,#a5b7ac);--mp-line:light-dark(#dce7df,#43544a);--mp-soft:light-dark(#f0f8f2,#293c30);--mp-accent:light-dark(#39875d,#85cba0);font-family:Arial,'Meiryo',sans-serif;color:var(--mp-text);background:var(--mp-bg);border:2px solid var(--mp-accent);border-radius:7px;padding:26px;box-sizing:border-box}
 #map-draft *{box-sizing:border-box}#map-draft h1{font-size:24px;margin:0;font-weight:700}#map-draft h2{font-size:17px;margin:0;font-weight:700}#map-draft p{margin:0}#map-draft .mp-top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:22px}#map-draft .mp-sub{color:var(--mp-muted);font-size:12px}#map-draft .mp-filters{display:flex;gap:18px;padding:18px;background:var(--mp-soft);border-radius:7px;margin-bottom:24px}#map-draft label{display:grid;gap:7px;font-size:13px;font-weight:700}#map-draft label:first-child{flex:1}#map-draft select{font:inherit;font-size:16px;color:var(--mp-text);background:var(--mp-bg);border:1px solid var(--mp-line);padding:10px 34px 10px 12px;border-radius:4px;width:100%}#map-draft .mp-cols{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(230px,1fr);gap:24px}#map-draft .mp-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px}#map-draft button{font:inherit;font-size:12px;border:1px solid var(--mp-line);background:var(--mp-bg);color:var(--mp-text);padding:8px 12px;border-radius:4px;cursor:pointer}#map-draft .mp-map{background:#fff;border:1px solid var(--mp-line);border-radius:6px;padding:15px;display:flex;align-items:center;justify-content:center;min-height:310px}#map-draft .mp-map img{width:100%;max-height:340px;object-fit:contain}#map-draft .mp-note{font-size:12px;color:var(--mp-muted);margin-top:10px;line-height:1.7}#map-draft .mp-info{border-top:3px solid var(--mp-accent);padding-top:13px}#map-draft .mp-info dl{font-size:13px;line-height:1.8;margin:15px 0 24px}#map-draft .mp-info dt{color:var(--mp-muted);margin-top:10px}#map-draft .mp-info dd{margin:0}#map-draft .mp-missions{border-top:1px solid var(--mp-line);padding-top:18px}#map-draft .mp-empty{background:var(--mp-soft);border-radius:5px;padding:20px 15px;margin-top:14px;font-size:13px;line-height:1.9;color:var(--mp-muted)}#map-draft .mp-monsters{margin-top:28px;border-top:1px dashed var(--mp-line);padding-top:22px}#map-draft .mp-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}#map-draft .mp-monster{border:1px solid var(--mp-line);border-radius:6px;padding:13px;background:var(--mp-bg)}#map-draft .mp-name{display:flex;gap:10px;align-items:center;min-height:61px;font-size:14px;font-weight:700;margin-bottom:12px}#map-draft .mp-name img{width:58px;height:58px;object-fit:contain;background:#fff;border-radius:5px}#map-draft .mp-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:var(--mp-soft);padding:9px 3px;border-radius:4px;text-align:center}#map-draft .mp-stats span{display:block;color:var(--mp-muted);font-size:11px;margin-bottom:5px}#map-draft .mp-stats strong{font-size:17px;font-weight:700}#map-draft .mp-foot{margin-top:16px;font-size:12px;color:var(--mp-muted)}#map-draft.mp-large .mp-cols{grid-template-columns:1fr}#map-draft.mp-large .mp-map img{max-height:none}#map-draft.mp-large .mp-info{display:none}#map-draft.mp-rows .mp-list{grid-template-columns:1fr}#map-draft.mp-rows .mp-monster{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:15px}#map-draft.mp-rows .mp-name{margin:0}
 @media(max-width:680px){#map-draft{padding:16px}#map-draft .mp-cols{grid-template-columns:1fr}#map-draft .mp-list{grid-template-columns:repeat(2,minmax(0,1fr))}#map-draft .mp-top{align-items:flex-start}#map-draft .mp-map{min-height:220px}}@media(max-width:420px){#map-draft .mp-filters{flex-direction:column;gap:12px}#map-draft .mp-list{grid-template-columns:1fr}#map-draft .mp-top{flex-direction:column}#map-draft.mp-rows .mp-monster{grid-template-columns:1fr}}
-
 
 #map-draft{height:800px;max-width:1040px;padding:18px 20px 14px;display:flex;flex-direction:column;overflow:hidden;border-width:3px}
 #map-draft .mp-filters{flex:none;margin:0 0 15px;padding:10px 12px;gap:24px;align-items:center}
@@ -1211,11 +1194,9 @@ tbody th {
 @media(max-width:760px){#map-draft .mp-list{grid-template-columns:repeat(2,minmax(0,1fr));overflow:auto}#map-draft .mp-stat img{width:23px;height:23px}}
 @media(max-width:450px){#map-draft .mp-list{grid-template-columns:1fr}#map-draft .mp-actionbar{gap:6px}#map-draft .mp-actionbar>button,#map-draft #mp-buff,#map-draft #mp-add{padding:10px 8px;font-size:12px}}
 
-
 #map-draft .mp-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;justify-content:normal}
 #map-draft .mp-stat{justify-content:flex-start;min-width:0}
 #map-draft .mp-name img.mp-reflect{width:26px;height:26px;object-fit:contain;background:transparent;border-radius:0;flex:none}
-
 
 #map-draft .mp-stat img,
 #map-draft .mp-name img.mp-reflect{
@@ -1317,11 +1298,10 @@ tbody th {
 /* スマートフォンではタブが本体上側に移るため、下辺を接続する */
 @media (max-width: 800px) {
     .role-tab.active.map-tab {
-        border-top: 2px solid #39875d;
+        border-top: 0;
         border-bottom: 2px solid transparent;
     }
 }
-
 
 /* 枠外のMap上のモンスター。全タブ共通で表示する。 */
 .map-roster{margin-top:28px;padding:20px;border:2px solid #81a992;border-radius:6px;background:#fff;color:#25352f}
@@ -1419,9 +1399,9 @@ tbody th {
 #monster-tooltip img{display:block;object-fit:contain;max-width:100%;max-height:calc(100vh - 16px)}
 
 /* キャラクター：外枠の高さは既存のmain-containerと共通。画像一覧だけスクロール。 */
-.main-container.character-mode{display:block;overflow:hidden;padding:0;border-color:#d4ac37}
+.main-container.character-mode{display:block;height:845px;min-height:0;overflow:hidden;padding:0;border-color:#d4ac37}
 .character-tab{background:#fff7d9;color:#856615}
-.role-tab.active.character-tab{border:2px solid #d4ac37;background:#fff1b8;color:#725510}
+.role-tab.active.character-tab{border:2px solid #d4ac37;border-top:0;background:#fff1b8;color:#725510}
 #character-panel{height:100%;min-height:0;padding:18px 20px 14px;display:flex;flex-direction:column;gap:14px;color:#493e22}
 #character-panel:not(.active),#character-panel [hidden]{display:none}
 .character-subtabs{display:flex;flex-wrap:wrap;gap:5px;border-bottom:2px solid #d4ac37;flex:none}
@@ -1437,13 +1417,11 @@ tbody th {
 .character-asset{margin:0;min-width:0}
 .character-asset img{display:block;width:100%;height:auto}
 .character-asset figcaption{padding:15px;background:#fff8df;border:1px solid #e5d69f;border-radius:6px;font-size:14px}
-@media(max-width:800px){#character-panel{padding:12px}.character-subtabs button{padding:10px 14px}.chip-image-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:500px){.character-image-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.character-subtabs button{font-size:13px;padding:10px 12px}}
+@media(max-width:800px){#character-panel{padding:12px}.character-subtabs button{padding:10px 14px}}
+@media(max-width:500px){.character-subtabs button{font-size:13px;padding:10px 12px}}
 
-.main-container.character-mode{height:845px;min-height:0;overflow:hidden}
 @media(max-width:800px){.main-container.character-mode{height:1000px}}
 
 /* 一覧の列数 */
 .character-image-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
 .chip-image-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
-
