@@ -1432,7 +1432,7 @@ tbody th {
 .character-view{flex:1;min-height:0;display:flex;flex-direction:column;gap:12px;overflow:hidden}
 .character-status{margin:0;font-size:13px;color:#766943;flex:none}
 .character-status:empty{display:none}
-.character-image-grid,.chip-image-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-content:start;align-items:start}
+.character-image-grid,.chip-image-grid{display:grid;gap:12px;align-content:start;align-items:start}
 .character-image-grid,.chip-category-view{overflow:auto;min-height:0;flex:1;scrollbar-gutter:stable;overscroll-behavior:contain;padding-right:4px}
 .character-asset{margin:0;min-width:0}
 .character-asset img{display:block;width:100%;height:auto}
@@ -1442,3 +1442,8 @@ tbody th {
 
 .main-container.character-mode{height:845px;min-height:0;overflow:hidden}
 @media(max-width:800px){.main-container.character-mode{height:1000px}}
+
+/* 一覧の列数 */
+.character-image-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.chip-image-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+
