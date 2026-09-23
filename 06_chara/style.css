@@ -1425,3 +1425,20 @@ tbody th {
 /* 一覧の列数 */
 .character-image-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
 .chip-image-grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+
+/* 選択中キャラクター（B案）。右側は取得チップ用に予約。 */
+.character-select{display:block;width:100%;padding:0;border:0;background:transparent;cursor:pointer;text-align:left;border-radius:5px}
+.character-select[aria-pressed="true"]{outline:2px solid #b89224;outline-offset:-2px}
+.character-select:focus-visible{outline:3px solid #856615;outline-offset:2px}
+.selected-character{display:flex;align-items:center;gap:12px;margin-top:28px;padding:8px 12px;min-height:84px;border:2px solid #d4ac37;border-radius:5px;background:#fff;color:#493e22}
+.selected-character[hidden]{display:none}
+#selected-character-portrait{display:flex;align-items:center;justify-content:center;flex:none;padding:0;border:0;border-radius:4px;background:#fff8df;cursor:pointer}
+#selected-character-image{display:block;width:48px;height:64px;object-fit:contain}
+.selected-character-name{display:flex;flex-direction:column;gap:5px;max-width:150px;overflow-wrap:anywhere;font-size:15px}
+#selected-character-level{font-size:12px;color:#817862}
+.selected-character-stats{display:grid;grid-template-columns:repeat(2,minmax(45px,auto));gap:4px 12px;flex:none;font-size:16px;font-variant-numeric:tabular-nums}
+.selected-character-stats span{display:flex;align-items:center;gap:5px;white-space:nowrap}
+.selected-character-chips{flex:1;align-self:stretch;min-width:0}
+.selected-character:not([hidden])+.map-roster{margin-top:12px}
+@media(max-width:450px){.selected-character{padding:8px;gap:8px}.selected-character-name{max-width:100px}.selected-character-stats{gap:4px 8px}}
+.selected-character-stats img{width:22px;height:22px;object-fit:contain}
