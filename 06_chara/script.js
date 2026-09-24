@@ -1417,6 +1417,25 @@ const CHARACTER_CSV_SNAPSHOT = {"characters":"﻿id,name,images,list_img,initial
  const listStatus=document.getElementById('character-list-status'),chipStatus=document.getElementById('character-chip-status');
  let characters=[],chips=[],category='マーク',selectedCharacter=null,characterLevel=0;
  const selectedPanel=document.getElementById('selected-character');
+ const characterChips=new Map();
+ const selectedChips=document.querySelector('.selected-character-chips');
+ function renderSelectedChips(){
+  selectedChips.replaceChildren();
+  if(!selectedCharacter)return;
+  for(const chip of characterChips.get(selectedCharacter.id)||[]){
+   const button=document.createElement('button');button.type='button';button.className='selected-chip';
+   button.title=chip.name+'\n'+chip.effect+'\nクリックで削除';
+   button.setAttribute('aria-label',chip.name+'：'+chip.effect+'。クリックで削除');
+   const img=document.createElement('img');img.alt=chip.name;
+   img.src='../images/chip_icon/'+encodeURIComponent(String(chip.images).trim());
+   button.append(img);
+   button.addEventListener('click',()=>{
+    const owned=characterChips.get(selectedCharacter.id);
+    owned.splice(owned.indexOf(chip),1);renderSelectedChips();
+   });
+   selectedChips.append(button);
+  }
+ }
  function renderSelectedCharacter(){
   if(!selectedCharacter)return;
   selectedPanel.hidden=false;
@@ -1427,6 +1446,7 @@ const CHARACTER_CSV_SNAPSHOT = {"characters":"﻿id,name,images,list_img,initial
   document.getElementById('selected-character-portrait').setAttribute('aria-label',selectedCharacter.name+' Lv.'+characterLevel+'：クリックでレベルアップ、右クリックでレベルダウン');
   for(const stat of ['atk','def','hp','move'])document.getElementById('selected-character-'+stat).textContent=Number(selectedCharacter['lv'+characterLevel+'_'+stat]||0);
   root.querySelectorAll('.character-select').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.id===selectedCharacter.id)));
+  renderSelectedChips();
  }
  function selectCharacter(row){if(selectedCharacter?.id!==row.id){selectedCharacter=row;characterLevel=0;}renderSelectedCharacter();}
  function changeCharacterLevel(delta){if(!selectedCharacter)return;characterLevel=Math.max(0,Math.min(3,characterLevel+delta));renderSelectedCharacter();}
@@ -1447,6 +1467,18 @@ const CHARACTER_CSV_SNAPSHOT = {"characters":"﻿id,name,images,list_img,initial
    if(folder==='character_list'){
     const button=document.createElement('button');button.type='button';button.className='character-select';button.dataset.id=row.id;button.setAttribute('aria-label',row.name+'を選択');button.setAttribute('aria-pressed','false');
     button.append(item);button.addEventListener('click',()=>selectCharacter(row));target.append(button);
+   }else if(folder==='chip'){
+    const button=document.createElement('button');button.type='button';button.className='chip-select';
+    button.title=row.name+'\n'+row.effect;
+    button.setAttribute('aria-label',row.name+'：'+row.effect+'。選択中のキャラクターに追加');
+    button.append(item);
+    button.addEventListener('click',()=>{
+     if(!selectedCharacter){chipStatus.textContent='先にキャラクターを選択してください。';return;}
+     chipStatus.textContent='';
+     if(!characterChips.has(selectedCharacter.id))characterChips.set(selectedCharacter.id,[]);
+     characterChips.get(selectedCharacter.id).push(row);renderSelectedChips();
+    });
+    target.append(button);
    }else target.append(item);
   }
  }
