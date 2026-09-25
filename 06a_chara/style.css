@@ -1471,3 +1471,7 @@ tbody th {
 .selected-character:not([hidden])+.map-roster{margin-top:12px}
 @media(max-width:700px){.selected-character{grid-template-columns:48px minmax(0,1fr) minmax(75px,30%);padding:8px;column-gap:8px}#selected-character-name{max-width:95px}.selected-character-stats{gap:4px 8px}}
 .selected-character-stats img{width:22px;height:22px;object-fit:contain}
+
+#voice-input-toggle{margin-left:auto;border:1px solid #b59436;border-radius:5px;background:#fff8df;color:#644715;cursor:pointer;padding:5px 9px;font:inherit}
+#voice-input-toggle[aria-pressed="true"]{background:#e7f6e9;border-color:#319052;color:#145b2b}
+#voice-input-status{font-size:12px;color:#645a46;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
