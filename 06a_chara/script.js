@@ -1601,7 +1601,7 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
      if(!selectedCharacter){chipStatus.textContent='先にキャラクターを選択してください。';return;}
      chipStatus.textContent='';
      if(state().chips.includes(row.id)){state().chips=state().chips.filter(id=>id!==row.id);delete state().modes[row.id];}
-     else {state().chips.push(row.id);if(row.category==='チャージ')state().numbers['チャージ']=number(state(),'チャージ')+1;}
+     else state().chips.push(row.id);
      renderSelectedCharacter();
     });
    }
