@@ -1029,11 +1029,12 @@ document.querySelectorAll(".role-tab").forEach(tab => {
 // CSV files are read relative to soruce/ (source/ also works).
 // The bundled snapshot keeps the first release usable when opening index.html directly.
 function parseMapCSV(text){
+ const delimiter=text.split(/\r?\n/,1)[0].includes('\t')?'\t':',';
  const rows=[];let row=[],value='',quoted=false;
  for(let i=0;i<text.length;i++){
   const c=text[i];
   if(c==='"'){if(quoted&&text[i+1]==='"'){value+='"';i++;}else quoted=!quoted;}
-  else if(c===','&&!quoted){row.push(value);value='';}
+  else if(c===delimiter&&!quoted){row.push(value);value='';}
   else if((c==='\n'||c==='\r')&&!quoted){if(c==='\r'&&text[i+1]==='\n')i++;row.push(value);if(row.some(v=>v!==''))rows.push(row);row=[];value='';}
   else value+=c;
  }
