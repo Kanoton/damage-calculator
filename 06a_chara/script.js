@@ -1424,10 +1424,10 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
  const states=new Map();
  const byChip=new Map();
  const specialIcons={'対象のマーク':'マーク','攻撃対象はモンスター':'モンスター'};
- const getState=id=>{if(!states.has(id))states.set(id,{level:0,currentHp:null,chips:[],numbers:{},checks:{}});return states.get(id);};
+ const getState=id=>{if(!states.has(id))states.set(id,{level:0,currentHp:null,chips:[],numbers:{},modes:{}});return states.get(id);};
  const state=()=>getState(selectedCharacter.id);
  const number=(s,key)=>Math.max(0,Number(s.numbers[key])||0);
- const checked=(s,key)=>Boolean(s.checks[key]);
+ const modeFor=rule=>Number(state().modes[rule.chip_id])||0;
  const base=(stat)=>Number(selectedCharacter['lv'+state().level+'_'+stat]||0);
  function activeRules(){
   const ids=new Set(state().chips);
@@ -1438,18 +1438,18 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
   if(key==='hp_full')return state().currentHp>=maxHp;
   if(key==='hp_ratio<0.5')return state().currentHp<maxHp/2;
   if(key==='hp_ratio<=0.5')return state().currentHp<=maxHp/2;
-  if(key==='target_is_monster')return checked(state(),'攻撃対象はモンスター');
+  if(key==='target_is_monster')return modeFor(rule)>0;
   const match=key.match(/^(.+?)(>=|<=|>|<)(\d+(?:\.\d+)?)$/);
   if(match){const left=number(state(),match[1]),right=Number(match[3]);
    return match[2]==='>='?left>=right:match[2]==='<='?left<=right:match[2]==='>'?left>right:left<right;
   }
-  return checked(state(),key);
+  if(rule.chip_id==='112'&&key==='青き呪い')return modeFor(rule)===1;
+  if(rule.chip_id==='112'&&key==='赤き呪い')return modeFor(rule)===2;
+  return modeFor(rule)>0;
  }
  function triggerMatches(rule){
-  if(rule.trigger==='on_attack'||rule.trigger==='on_attack_after_mark')return checked(state(),'攻撃時');
-  if(rule.trigger==='on_skill_use')return checked(state(),'スキルによる強化');
-  if(rule.trigger==='on_next_move')return checked(state(),'次の移動強化');
-  return rule.trigger==='while_owned'||rule.trigger==='while_checked';
+  if(['on_attack','on_attack_after_mark','on_skill_use','on_next_move','while_checked'].includes(rule.trigger))return modeFor(rule)>0;
+  return rule.trigger==='while_owned';
  }
  function valueOf(rule,extraMaxHp){
   const amount=Number(rule.value)||0;
@@ -1483,25 +1483,20 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
   return icon;
  }
  function neededInputs(){
-  const numeric=new Set(),boolean=new Set();
+  const numeric=new Set();
   for(const rule of activeRules()){
    if(rule.kind==='counter_delta')numeric.add(rule.target);
    if(rule.source_key&&rule.source_key!=='追加最大HP')numeric.add(rule.source_key);
    if(rule.condition){
     const match=rule.condition.match(/^(.+?)(>=|<=|>|<)\d+(?:\.\d+)?$/);
     if(match&&match[1]!=='hp_ratio')numeric.add(match[1]);
-    else if(!['hp_full','hp_ratio<0.5','hp_ratio<=0.5'].includes(rule.condition))boolean.add(rule.condition==='target_is_monster'?'攻撃対象はモンスター':rule.condition);
    }
-   if(['on_attack','on_attack_after_mark'].includes(rule.trigger))boolean.add('攻撃時');
-   if(rule.trigger==='on_skill_use')boolean.add('スキルによる強化');
   }
-  // A target mark count has its own icon; the mark is held by the target, not the character.
-  return {numeric,boolean};
+  return numeric;
  }
  function renderConditions(){
   conditionsBox.replaceChildren();
-  const {numeric,boolean}=neededInputs();
-  for(const key of numeric){
+  for(const key of neededInputs()){
    const item=document.createElement('label');item.className='condition-item';item.title=key+'：アイコンを左クリックで+1、右クリックで-1';
    const button=document.createElement('button');button.type='button';button.className='condition-icon';button.setAttribute('aria-label',key+'を増やす');button.append(makeIcon(key));
    const input=document.createElement('input');input.type='number';input.min='0';input.inputMode='numeric';input.className='condition-number';input.setAttribute('aria-label',key+'の数');input.value=number(state(),key);
@@ -1510,13 +1505,6 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
    button.addEventListener('contextmenu',e=>{e.preventDefault();setValue(number(state(),key)-1);});
    input.addEventListener('change',()=>setValue(input.value));item.append(button,input);conditionsBox.append(item);
   }
-  for(const key of boolean){
-   const item=document.createElement('label');item.className='condition-item';item.title=key;
-   const icon=document.createElement('span');icon.className='condition-icon';icon.append(makeIcon(key));
-   const input=document.createElement('input');input.type='checkbox';input.checked=checked(state(),key);input.setAttribute('aria-label',key);
-   input.addEventListener('change',()=>{state().checks[key]=input.checked;updateStats();});
-   item.append(icon,input);conditionsBox.append(item);
-  }
  }
  function updateStats(){
   if(!selectedCharacter)return;
@@ -1524,13 +1512,32 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
   hpInput.max=totals.hp;hpInput.value=state().currentHp;
   for(const stat of ['atk','def','hp','move'])document.getElementById('selected-character-'+stat).textContent=totals[stat];
  }
+ function toggleable(id){return (byChip.get(id)||[]).some(rule=>{
+  if(!['modifier','event_modifier'].includes(rule.kind))return false;
+  if(['on_attack','on_attack_after_mark','on_skill_use','on_next_move','while_checked'].includes(rule.trigger))return true;
+  const condition=rule.condition;
+  return Boolean(condition&&!['hp_full','hp_ratio<0.5','hp_ratio<=0.5'].includes(condition)&&!/^.+?(?:>=|<=|>|<)\d+(?:\.\d+)?$/.test(condition));
+ });}
+ function updateChipListSelection(){
+  document.querySelectorAll('#chip-image-list .chip-select').forEach(button=>{
+   const owned=Boolean(selectedCharacter&&state().chips.includes(button.dataset.id));
+   button.setAttribute('aria-pressed',String(owned));
+   button.setAttribute('aria-label',(owned?'取得を解除：':'取得する：')+button.dataset.name);
+  });
+ }
  function renderOwned(){
   ownedBox.replaceChildren();
   for(const id of state().chips){
    const chip=chips.find(c=>c.id===id);if(!chip)continue;
-   const button=document.createElement('button');button.type='button';button.className='selected-chip';button.title=chip.name+'\n'+chip.effect+'\nクリックで削除';button.setAttribute('aria-label',chip.name+'を削除');
-   const img=document.createElement('img');img.alt=chip.name;img.src='../images/chip_icon/'+encodeURIComponent(chip.images);button.append(img);
-   button.addEventListener('click',()=>{state().chips=state().chips.filter(value=>value!==id);renderSelectedCharacter();});ownedBox.append(button);
+   const canToggle=toggleable(id),mode=Number(state().modes[id])||0;
+   const item=document.createElement(canToggle?'button':'span');item.className='selected-chip'+(mode?' is-active':'')+(id==='112'&&mode===1?' is-blue':'')+(id==='112'&&mode===2?' is-red':'');
+   if(canToggle){
+    item.type='button';item.setAttribute('aria-pressed',String(mode>0));
+    item.setAttribute('aria-label',chip.name+'：'+(id==='112'?(mode===1?'青き呪い':mode===2?'赤き呪い':'オフ'):(mode?'オン':'オフ'))+'。クリックで切り替え');
+    item.addEventListener('click',()=>{state().modes[id]=(mode+1)%(id==='112'?3:2);renderOwned();updateStats();});
+   }
+   item.title=chip.name+'\n'+chip.effect+(canToggle?'\nクリックで条件を切り替え':'');
+   const img=document.createElement('img');img.alt=chip.name;img.src='../images/chip_icon/'+encodeURIComponent(chip.images);item.append(img);ownedBox.append(item);
   }
   refreshChipLayout();
  }
@@ -1553,6 +1560,7 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
   document.getElementById('selected-character-portrait').setAttribute('aria-label',selectedCharacter.name+' Lv.'+state().level+'：クリックでレベルアップ、右クリックでレベルダウン');
   renderOwned();renderConditions();updateStats();
   root.querySelectorAll('.character-select').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.id===selectedCharacter.id)));
+  updateChipListSelection();
  }
  function selectCharacter(row){selectedCharacter=row;renderSelectedCharacter();}
  function changeCharacterLevel(delta){
@@ -1586,17 +1594,19 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
     button.className='character-select';button.setAttribute('aria-label',row.name+'を選択');button.setAttribute('aria-pressed','false');
     button.addEventListener('click',()=>selectCharacter(row));
    }else{
-    button.className='chip-select';button.title=row.name+'\n'+row.effect;button.setAttribute('aria-label',row.name+'：'+row.effect+'。取得する');
+    button.className='chip-select';button.dataset.name=row.name;button.title=row.name+'\n'+row.effect;button.setAttribute('aria-label',row.name+'：'+row.effect+'。取得する');button.setAttribute('aria-pressed',String(Boolean(selectedCharacter&&state().chips.includes(row.id))));
     button.addEventListener('click',()=>{
      if(!selectedCharacter){chipStatus.textContent='先にキャラクターを選択してください。';return;}
-     chipStatus.textContent='';if(!state().chips.includes(row.id))state().chips.push(row.id);
+     chipStatus.textContent='';
+     if(state().chips.includes(row.id)){state().chips=state().chips.filter(id=>id!==row.id);delete state().modes[row.id];}
+     else state().chips.push(row.id);
      renderSelectedCharacter();
     });
    }
    button.append(item);target.append(button);
   }
  }
- function renderChips(){renderImages(document.getElementById('chip-image-list'),chips.filter(row=>String(row.category).trim()===category),'chip','images');document.getElementById('chip-category-view').scrollTop=0;}
+ function renderChips(){renderImages(document.getElementById('chip-image-list'),chips.filter(row=>String(row.category).trim()===category),'chip','images');updateChipListSelection();document.getElementById('chip-category-view').scrollTop=0;}
  function wireTabs(tablist,onSelect){
   const tabs=[...tablist.querySelectorAll('[role="tab"]')];
   const select=tab=>{tabs.forEach(b=>{b.setAttribute('aria-selected',String(b===tab));b.tabIndex=b===tab?0:-1;});onSelect(tab);};
