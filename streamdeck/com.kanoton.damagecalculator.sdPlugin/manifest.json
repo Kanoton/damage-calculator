@@ -1,0 +1,121 @@
+{
+  "$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
+  "UUID": "com.kanoton.damagecalculator",
+  "Name": "Damage Calculator",
+  "Author": "Kanoton",
+  "Description": "ダメージ計算ツールの画面切り替えと音声入力を操作します。",
+  "Version": "1.0.0.0",
+  "SDKVersion": 2,
+  "Software": {
+    "MinimumVersion": "7.1"
+  },
+  "Nodejs": {
+    "Version": "24"
+  },
+  "OS": [
+    {
+      "Platform": "mac",
+      "MinimumVersion": "13"
+    },
+    {
+      "Platform": "windows",
+      "MinimumVersion": "10"
+    }
+  ],
+  "CodePath": "plugin.mjs",
+  "Icon": "imgs/plugin-icon",
+  "Category": "Damage Calculator",
+  "CategoryIcon": "imgs/action",
+  "Actions": [
+    {
+      "UUID": "com.kanoton.damagecalculator.voice",
+      "Name": "音声入力 ON/OFF",
+      "Icon": "imgs/action",
+      "Controllers": [
+        "Keypad"
+      ],
+      "States": [
+        {
+          "Image": "imgs/key",
+          "Name": "音声",
+          "FontSize": 12
+        }
+      ]
+    },
+    {
+      "UUID": "com.kanoton.damagecalculator.attack",
+      "Name": "攻撃時",
+      "Icon": "imgs/action",
+      "Controllers": [
+        "Keypad"
+      ],
+      "States": [
+        {
+          "Image": "imgs/key",
+          "Name": "攻撃",
+          "FontSize": 12
+        }
+      ]
+    },
+    {
+      "UUID": "com.kanoton.damagecalculator.defense",
+      "Name": "防御時",
+      "Icon": "imgs/action",
+      "Controllers": [
+        "Keypad"
+      ],
+      "States": [
+        {
+          "Image": "imgs/key",
+          "Name": "防御",
+          "FontSize": 12
+        }
+      ]
+    },
+    {
+      "UUID": "com.kanoton.damagecalculator.missions",
+      "Name": "ミッション・イベント",
+      "Icon": "imgs/action",
+      "Controllers": [
+        "Keypad"
+      ],
+      "States": [
+        {
+          "Image": "imgs/key",
+          "Name": "任務",
+          "FontSize": 12
+        }
+      ]
+    },
+    {
+      "UUID": "com.kanoton.damagecalculator.monsters",
+      "Name": "出現モンスター",
+      "Icon": "imgs/action",
+      "Controllers": [
+        "Keypad"
+      ],
+      "States": [
+        {
+          "Image": "imgs/key",
+          "Name": "敵",
+          "FontSize": 12
+        }
+      ]
+    },
+    {
+      "UUID": "com.kanoton.damagecalculator.chips",
+      "Name": "チップ",
+      "Icon": "imgs/action",
+      "Controllers": [
+        "Keypad"
+      ],
+      "States": [
+        {
+          "Image": "imgs/key",
+          "Name": "チップ",
+          "FontSize": 12
+        }
+      ]
+    }
+  ]
+}
