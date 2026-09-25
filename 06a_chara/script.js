@@ -1182,10 +1182,12 @@ document.getElementById('roster-undo').addEventListener('click',()=>{
  defeatTotals.clear();(previous.defeats||[]).forEach(([k,v])=>defeatTotals.set(k,v));executedEvents.clear();(previous.events||[]).forEach(key=>executedEvents.add(key));missionCounters.clear();(previous.missions||[]).forEach(([k,v])=>missionCounters.set(k,v));placedMonsters.splice(0,placedMonsters.length,...previous.monsters);Object.assign(rosterBuff,previous.buff);rosterCounts.clear();previous.counts.forEach(([k,v])=>rosterCounts.set(k,v));selectedPlacedId=previous.selected;nextPlacedId=previous.next;pick.value=previous.context.map;difficulty.value=previous.context.difficulty;rosterContext=previous.context;Object.assign(routeState,{context:JSON.stringify([pick.value,difficulty.value]),route:previous.context.route||'',moved:!!previous.context.moved});selected=null;render();
 });
 document.getElementById('roster-clear').addEventListener('click',()=>{clearRoster();rosterHistory.length=0;nextPlacedId=1;renderRoster();});
+let applyCharacterToCalculator=()=>{};
 function registerEnemy(enemy, switchTab=true){
  document.getElementById('defensePower1').value=enemy.defense;
  document.getElementById('hp1').value=enemy.hp;
  document.getElementById('attackPower2').value=enemy.attack;
+ applyCharacterToCalculator();
  calculateDamage(document.querySelector('[data-role="attack"].mode-content'),false);
  calculateDamage(document.querySelector('[data-role="defense"].mode-content'),true);
  // Clicking a roster monster always opens the attack calculator.
@@ -1425,9 +1427,9 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
  const states=new Map();
  const byChip=new Map();
  const specialIcons={'対象のマーク':'マーク','攻撃対象はモンスター':'モンスター'};
- const getState=id=>{if(!states.has(id))states.set(id,{level:0,currentHp:null,chips:[],numbers:{},modes:{}});return states.get(id);};
+ const getState=id=>{if(!states.has(id))states.set(id,{level:0,currentHp:null,chips:[],numbers:{},modes:{},manual:{atk:0,def:0}});return states.get(id);};
  const state=()=>getState(selectedCharacter.id);
- const number=(s,key)=>Math.max(0,Number(s.numbers[key])||0);
+ const number=(s,key)=>Math.min(key==='チャージ'?10:Infinity,Math.max(0,Number(s.numbers[key])||0));
  const modeFor=rule=>Number(state().modes[rule.chip_id])||0;
  const base=(stat)=>Number(selectedCharacter['lv'+state().level+'_'+stat]||0);
  function activeRules(){
@@ -1476,6 +1478,8 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
    if(!triggerMatches(rule)||!conditionMatches(rule,maxHp))continue;
    result[rule.target]+=valueOf(rule,maxBonus);
   }
+  result.atk+=state().manual?.atk||0;
+  result.def+=state().manual?.def||0;
   return result;
  }
  function makeIcon(key){
@@ -1501,8 +1505,8 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
   for(const key of neededInputs()){
    const item=document.createElement('label');item.className='condition-item';item.title=key+'：アイコンを左クリックで+1、右クリックで-1';
    const button=document.createElement('button');button.type='button';button.className='condition-icon';button.setAttribute('aria-label',key+'を増やす');button.append(makeIcon(key));
-   const input=document.createElement('input');input.type='number';input.min='0';input.inputMode='numeric';input.className='condition-number';input.setAttribute('aria-label',key+'の数');input.value=number(state(),key);
-   const setValue=value=>{state().numbers[key]=Math.max(0,Number(value)||0);input.value=state().numbers[key];updateStats();};
+   const input=document.createElement('input');input.type='number';input.min='0';if(key==='チャージ')input.max='10';input.inputMode='numeric';input.className='condition-number';input.setAttribute('aria-label',key+'の数');input.value=number(state(),key);
+   const setValue=value=>{state().numbers[key]=Math.min(key==='チャージ'?10:Infinity,Math.max(0,Number(value)||0));input.value=state().numbers[key];updateStats();};
    button.addEventListener('click',()=>setValue(number(state(),key)+1));
    button.addEventListener('contextmenu',e=>{e.preventDefault();setValue(number(state(),key)-1);});
    input.addEventListener('change',()=>setValue(input.value));item.append(button,input);conditionsBox.append(item);
@@ -1512,8 +1516,27 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
   if(!selectedCharacter)return;
   const totals=calculate();
   hpInput.max=totals.hp;hpInput.value=state().currentHp;
-  for(const stat of ['atk','def','hp','move'])document.getElementById('selected-character-'+stat).textContent=totals[stat];
+  for(const stat of ['atk','def'])document.getElementById('selected-character-'+stat).value=totals[stat];
+  for(const stat of ['hp','move'])document.getElementById('selected-character-'+stat).textContent=totals[stat];
+  applyCharacterToCalculator(totals);
+  calculateDamage(document.querySelector('[data-role="attack"].mode-content'),false);
+  calculateDamage(document.querySelector('[data-role="defense"].mode-content'),true);
  }
+ applyCharacterToCalculator=(totals=selectedCharacter&&calculate())=>{
+  if(!totals)return;
+  document.getElementById('attackPower1').value=totals.atk;
+  document.getElementById('defensePower2').value=totals.def;
+  document.getElementById('hp2').value=state().currentHp;
+ };
+ for(const stat of ['atk','def'])document.getElementById('selected-character-'+stat).addEventListener('change',event=>{
+  if(!selectedCharacter)return;
+  const desired=Number(event.target.value);
+  if(!Number.isFinite(desired)||desired<0){updateStats();return;}
+  const current=calculate()[stat],previous=state().manual?.[stat]||0;
+  state().manual??={atk:0,def:0};
+  state().manual[stat]=desired-(current-previous);
+  updateStats();
+ });
  function toggleable(id){return (byChip.get(id)||[]).some(rule=>{
   if(!['modifier','event_modifier'].includes(rule.kind))return false;
   if(['on_attack','on_attack_after_mark','on_skill_use','on_next_move','while_checked'].includes(rule.trigger))return true;
