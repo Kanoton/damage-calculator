@@ -1461,6 +1461,7 @@ tbody th {
 .selected-chip.is-active{border:3px solid #e39121;background:#fff0ce;box-shadow:0 0 0 1px #a35c08}
 .selected-chip.is-blue{border-color:#268ed4;box-shadow:0 0 0 1px #175884}
 .selected-chip.is-red{border-color:#d74552;box-shadow:0 0 0 1px #8d2532}
+.selected-chip.is-both{border:3px solid transparent;background:linear-gradient(#fff0ce,#fff0ce) padding-box,linear-gradient(135deg,#d74552 0 50%,#268ed4 50% 100%) border-box;box-shadow:0 0 0 1px #74439b}
 .selected-character-chips span.selected-chip{cursor:default}
 .chip-select{display:block;width:100%;padding:0;border:0;background:transparent;cursor:pointer;border-radius:5px}
 .chip-select:hover,.chip-select:focus-visible{outline:2px solid #b89224;outline-offset:-2px}
