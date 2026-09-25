@@ -25,3 +25,14 @@
 Stream Deckなしでも、`node com.kanoton.damagecalculator.sdPlugin/plugin.mjs --simulate attack` を実行すると、開いているページに攻撃時への切り替え操作を一度送れます。終了は Ctrl+C です。キー操作が届かない場合、プラグインが起動しているか、ローカルポート17371が利用可能か確認してください。
 
 開発資料: https://docs.elgato.com/streamdeck/sdk/references/manifest/ , https://docs.elgato.com/streamdeck/sdk/references/websocket/plugin/
+
+## アイコン更新時の再インストール（Windows）
+
+新しいZIPを展開し、その中の `streamdeck` フォルダをエクスプローラーで開きます。アドレス欄に `cmd` と入力して Enter を押し、以下を順に実行します。
+
+```bat
+streamdeck validate com.kanoton.damagecalculator.sdPlugin
+streamdeck pack com.kanoton.damagecalculator.sdPlugin
+```
+
+生成された `.streamDeckPlugin` ファイルを開いて更新版をインストールします。キー画像が以前のままなら、Stream Deckアプリを再起動し、該当キーを配置し直してください。プラグインのバージョンは `1.0.1.0` です。

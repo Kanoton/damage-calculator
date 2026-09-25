@@ -4,7 +4,7 @@
   "Name": "Damage Calculator",
   "Author": "Kanoton",
   "Description": "ダメージ計算ツールの画面切り替えと音声入力を操作します。",
-  "Version": "1.0.0.0",
+  "Version": "1.0.1.0",
   "SDKVersion": 2,
   "Software": {
     "MinimumVersion": "7.1"
@@ -36,11 +36,12 @@
       ],
       "States": [
         {
-          "Image": "imgs/key",
+          "Image": "imgs/voice",
           "Name": "音声",
           "FontSize": 12
         }
-      ]
+      ],
+      "DisableCaching": true
     },
     {
       "UUID": "com.kanoton.damagecalculator.attack",
@@ -51,11 +52,12 @@
       ],
       "States": [
         {
-          "Image": "imgs/key",
+          "Image": "imgs/attack",
           "Name": "攻撃",
           "FontSize": 12
         }
-      ]
+      ],
+      "DisableCaching": true
     },
     {
       "UUID": "com.kanoton.damagecalculator.defense",
@@ -66,11 +68,12 @@
       ],
       "States": [
         {
-          "Image": "imgs/key",
+          "Image": "imgs/defense",
           "Name": "防御",
           "FontSize": 12
         }
-      ]
+      ],
+      "DisableCaching": true
     },
     {
       "UUID": "com.kanoton.damagecalculator.missions",
@@ -81,11 +84,12 @@
       ],
       "States": [
         {
-          "Image": "imgs/key",
+          "Image": "imgs/missions",
           "Name": "任務",
           "FontSize": 12
         }
-      ]
+      ],
+      "DisableCaching": true
     },
     {
       "UUID": "com.kanoton.damagecalculator.monsters",
@@ -96,11 +100,12 @@
       ],
       "States": [
         {
-          "Image": "imgs/key",
+          "Image": "imgs/monsters",
           "Name": "敵",
           "FontSize": 12
         }
-      ]
+      ],
+      "DisableCaching": true
     },
     {
       "UUID": "com.kanoton.damagecalculator.chips",
@@ -111,11 +116,12 @@
       ],
       "States": [
         {
-          "Image": "imgs/key",
+          "Image": "imgs/chips",
           "Name": "チップ",
           "FontSize": 12
         }
-      ]
+      ],
+      "DisableCaching": true
     }
   ]
 }
