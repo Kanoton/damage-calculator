@@ -1532,7 +1532,18 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
    const img=document.createElement('img');img.alt=chip.name;img.src='../images/chip_icon/'+encodeURIComponent(chip.images);button.append(img);
    button.addEventListener('click',()=>{state().chips=state().chips.filter(value=>value!==id);renderSelectedCharacter();});ownedBox.append(button);
   }
+  refreshChipLayout();
  }
+ function refreshChipLayout(){
+  const count=ownedBox.children.length;
+  const width=Math.max(75,(ownedBox.clientWidth||320)-10),gap=4,normalSize=46;
+  const rows=count*normalSize+Math.max(0,count-1)*gap<=width?1:2;
+  const columns=Math.max(1,Math.ceil(count/rows));
+  const size=Math.max(20,Math.min(normalSize,Math.floor((width-gap*(columns-1))/columns)));
+  ownedBox.style.setProperty('--chip-rows',String(rows));
+  ownedBox.style.setProperty('--chip-size',size+'px');
+ }
+ if(typeof ResizeObserver!=='undefined')new ResizeObserver(refreshChipLayout).observe(ownedBox);
  function renderSelectedCharacter(){
   if(!selectedCharacter)return;
   selectedPanel.hidden=false;
@@ -1544,12 +1555,22 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
   root.querySelectorAll('.character-select').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.id===selectedCharacter.id)));
  }
  function selectCharacter(row){selectedCharacter=row;renderSelectedCharacter();}
- function changeCharacterLevel(delta){if(!selectedCharacter)return;state().level=Math.max(0,Math.min(3,state().level+delta));renderSelectedCharacter();}
+ function changeCharacterLevel(delta){
+  if(!selectedCharacter)return;
+  const oldLevel=state().level,oldMax=calculate().hp,oldCurrent=state().currentHp;
+  state().level=Math.max(0,Math.min(3,oldLevel+delta));
+  if(state().level>oldLevel){
+   const newMax=calculate().hp;
+   state().currentHp=Math.min(newMax,oldCurrent+Math.max(0,newMax-oldMax));
+  }
+  renderSelectedCharacter();
+ }
  const portraitButton=document.getElementById('selected-character-portrait');
  portraitButton.addEventListener('click',()=>changeCharacterLevel(1));
  portraitButton.addEventListener('contextmenu',event=>{event.preventDefault();changeCharacterLevel(-1);});
  portraitButton.addEventListener('keydown',event=>{if(event.key==='ArrowDown'){event.preventDefault();changeCharacterLevel(-1);}});
  hpInput.addEventListener('change',()=>{state().currentHp=Math.max(0,Number(hpInput.value)||0);updateStats();});
+ document.getElementById('selected-character-hp-fill').addEventListener('click',()=>{if(!selectedCharacter)return;state().currentHp=calculate().hp;updateStats();});
  const sorted=rows=>rows.slice().sort((a,b)=>Number(a.id)-Number(b.id));
  function renderImages(target,rows,folder,key){
   target.replaceChildren();

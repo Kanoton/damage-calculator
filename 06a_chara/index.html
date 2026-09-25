@@ -472,8 +472,10 @@
 <section id="selected-character" class="selected-character" aria-label="選択中のキャラクター" hidden>
  <button type="button" id="selected-character-portrait" title="クリック：レベルアップ／右クリック：レベルダウン（Lv0～3）"><img id="selected-character-image" alt=""></button>
  <div class="selected-character-details">
-  <div class="selected-character-identity"><strong id="selected-character-name"></strong><span id="selected-character-level">Lv.0</span><label class="selected-character-hp" title="現在HPを入力。最大HPはレベルとチップから計算"><img src="../images/icon/Hp.png" alt="HP"><input id="selected-character-current-hp" type="number" min="0" inputmode="numeric" aria-label="現在HP"> / <b id="selected-character-hp"></b></label></div>
-  <div class="selected-character-stats" aria-live="polite"><span title="攻撃力"><img src="../images/icon/Attack.png" alt="攻撃力"> <b id="selected-character-atk"></b></span><span title="防御力"><img src="../images/icon/Defense.png" alt="防御力"> <b id="selected-character-def"></b></span><span title="移動力">👟 <b id="selected-character-move"></b></span></div>
+  <div class="selected-character-main">
+   <div class="selected-character-identity"><strong id="selected-character-name"></strong><span id="selected-character-level">Lv.0</span><div class="selected-character-hp" title="現在HP / 最大HP"><button type="button" id="selected-character-hp-fill" title="クリックで現在HPを最大まで回復" aria-label="現在HPを最大まで回復"><img src="../images/icon/Hp.png" alt=""></button><input id="selected-character-current-hp" type="number" min="0" inputmode="numeric" aria-label="現在HP"> / <b id="selected-character-hp"></b></div></div>
+   <div class="selected-character-stats" aria-live="polite"><span title="攻撃力"><img src="../images/icon/Attack.png" alt="攻撃力"> <b id="selected-character-atk"></b></span><span title="防御力"><img src="../images/icon/Defense.png" alt="防御力"> <b id="selected-character-def"></b></span><span title="移動力">👟 <b id="selected-character-move"></b></span></div>
+  </div>
   <div id="selected-character-conditions" class="selected-character-conditions" aria-label="チップ効果の条件"></div>
  </div>
  <div class="selected-character-chips" aria-label="取得したチップ"></div>
