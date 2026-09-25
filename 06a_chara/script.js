@@ -1633,7 +1633,7 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
   try{const response=await fetch('../csv/chip_stat_rules.csv',{cache:'no-cache'});if(!response.ok)throw Error('chip_stat_rules.csv');return parseRules(await response.text());}
   catch(error){chipStatus.textContent='ルールCSVを取得できないため、同梱データを表示しています。';return CHIP_RULES_SNAPSHOT;}
  }
- Promise.all([load('characters','character_stats.csv',listStatus),load('chips','chip_list_for_stats.csv',chipStatus),loadRules()]).then(([a,b,c])=>{
+ Promise.all([load('characters','character_stats.csv',listStatus),load('chips','chip_list.csv',chipStatus),loadRules()]).then(([a,b,c])=>{
   characters=a;chips=b;rules=c;
   for(const rule of rules){if(!byChip.has(rule.chip_id))byChip.set(rule.chip_id,[]);byChip.get(rule.chip_id).push(rule);}
   renderImages(document.getElementById('character-image-list'),characters,'character_list','list_img');renderChips();
