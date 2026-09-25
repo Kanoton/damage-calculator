@@ -1447,6 +1447,8 @@ tbody th {
 .selected-character-hp input::-webkit-inner-spin-button,.selected-character-hp input::-webkit-outer-spin-button{appearance:none;margin:0}
 .selected-character-stats{display:flex;gap:4px 14px;flex:none;font-size:16px;font-variant-numeric:tabular-nums;white-space:nowrap;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
 .selected-character-stats span{display:flex;align-items:center;gap:5px;white-space:nowrap}
+.selected-character-stats input{width:46px;padding:2px;border:1px solid #d9c890;border-radius:3px;font:inherit;text-align:center;appearance:textfield}
+.selected-character-stats input::-webkit-inner-spin-button,.selected-character-stats input::-webkit-outer-spin-button{appearance:none;margin:0}
 .selected-character-conditions{display:flex;align-items:center;gap:4px 9px;min-width:0;overflow-x:auto;overflow-y:hidden;border-top:1px solid #e5d69f;scrollbar-width:thin}
 .condition-item{display:inline-flex;align-items:center;gap:3px;font-size:12px;white-space:nowrap}
 .condition-icon{width:22px;height:22px;flex:none;padding:0;border:0;background:transparent;cursor:pointer}
