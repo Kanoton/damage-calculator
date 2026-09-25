@@ -1,32 +1,32 @@
-group	effect_key	input_kind	icon_file
-スタック	コイン	number	スターライト.png
-スタック	マーク	number	マーク.png
-スタック	ヒール	number	ヒール.png
-スタック	チャージ	number	チャージ.png
-スタック	改造	number	改造.png
-スタック	ジェントル・フレイム	number	ジェントル・フレイム.png
-スタック	反撃	number	Reflect.png
-スタック	マインド	number	真犯人.png
-スタック	罪証	number	罪証.png
-所持数	スターコイン	number	Coin.png
-状態	青き呪い	checkbox	青き呪い.png
-状態	赤き呪い	checkbox	赤き呪い.png
-状態	問題生徒	checkbox	問題生徒.png
-状態	鴛鴦連理	checkbox	鴛鴦連理.png
-状態	次の移動強化	checkbox	真犯人.png
-状態	スキルによる強化	checkbox	真犯人.png
-状態	被ダメージ後	checkbox	真犯人.png
-状態	ティーポット	checkbox	真犯人.png
-状態	対象の移動力変化	checkbox	真犯人.png
-蓄積ボーナス	優雅の羽ボーナス	number	真犯人.png
-蓄積ボーナス	ギガントアンカーボーナス	number	真犯人.png
-蓄積ボーナス	呪いの剣ボーナス	number	真犯人.png
-蓄積ボーナス	永続攻撃・防御ボーナス	number	真犯人.png
-蓄積ボーナス	マインド変動ボーナス	number	真犯人.png
-追加素材	真犯人	未設定	真犯人.png
-追加素材	逆鱗	未設定	逆鱗.png
-追加素材	金鱗	未設定	金鱗.png
-追加素材	孔雀の羽ばたき	未設定	孔雀の羽ばたき.png
-追加素材	深層改造	未設定	深層改造.png
-追加素材	戦の呪い	未設定	戦の呪い.png
-追加素材	勇往邁進	未設定	勇往邁進.png
+group,effect_key,input_kind,icon_file
+スタック,コイン,number,スターライト.png
+スタック,マーク,number,マーク.png
+スタック,ヒール,number,ヒール.png
+スタック,チャージ,number,チャージ.png
+スタック,改造,number,改造.png
+スタック,ジェントル・フレイム,number,ジェントル・フレイム.png
+スタック,反撃,number,Reflect.png
+スタック,マインド,number,真犯人.png
+スタック,罪証,number,罪証.png
+所持数,スターコイン,number,Coin.png
+状態,青き呪い,checkbox,青き呪い.png
+状態,赤き呪い,checkbox,赤き呪い.png
+状態,問題生徒,checkbox,問題生徒.png
+状態,鴛鴦連理,checkbox,鴛鴦連理.png
+状態,次の移動強化,checkbox,真犯人.png
+状態,スキルによる強化,checkbox,真犯人.png
+状態,被ダメージ後,checkbox,真犯人.png
+状態,ティーポット,checkbox,真犯人.png
+状態,対象の移動力変化,checkbox,真犯人.png
+蓄積ボーナス,優雅の羽ボーナス,number,真犯人.png
+蓄積ボーナス,ギガントアンカーボーナス,number,真犯人.png
+蓄積ボーナス,呪いの剣ボーナス,number,真犯人.png
+蓄積ボーナス,永続攻撃・防御ボーナス,number,真犯人.png
+蓄積ボーナス,マインド変動ボーナス,number,真犯人.png
+追加素材,真犯人,未設定,真犯人.png
+追加素材,逆鱗,未設定,逆鱗.png
+追加素材,金鱗,未設定,金鱗.png
+追加素材,孔雀の羽ばたき,未設定,孔雀の羽ばたき.png
+追加素材,深層改造,未設定,深層改造.png
+追加素材,戦の呪い,未設定,戦の呪い.png
+追加素材,勇往邁進,未設定,勇往邁進.png
