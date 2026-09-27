@@ -1514,4 +1514,3 @@ tbody th {
 .condition-phase{display:inline-flex;align-items:center;gap:3px;flex:none;white-space:nowrap;font-size:12px;cursor:pointer}
 .condition-phase input{width:16px;height:16px;margin:0;accent-color:#b89224;cursor:pointer}
 .selected-character-conditions .condition-toggle{--chip-size:27px;flex:none;width:27px;height:27px;padding:1px}
-.selected-character-conditions .condition-toggle.is-both{border:3px solid #74439b;background:#f5ecff;box-shadow:0 0 0 1px #74439b}
