@@ -933,7 +933,7 @@ Array.from(modes).filter(mode => ["attack", "defense"].includes(mode.dataset.rol
         });
     });
 
-    // カード画像は左クリックで減らし、右クリックで増やす。
+    // カード画像は左クリックで増やし、右クリックで減らす。
     const changeCardFromImage = (image, delta) => {
         const input = document.getElementById(image.dataset.cardTarget);
         if (!input) return;
@@ -942,17 +942,17 @@ Array.from(modes).filter(mode => ["attack", "defense"].includes(mode.dataset.rol
     };
 
     mode.querySelectorAll(".battle-card-clickable").forEach(image => {
-        image.setAttribute("aria-label", image.alt + "：左クリックで1枚減らす、右クリックで1枚増やす");
-        image.title = "左クリック：−1 ／ 右クリック：＋1";
-        image.addEventListener("click", () => changeCardFromImage(image, -1));
+        image.setAttribute("aria-label", image.alt + "：左クリックで1枚増やす、右クリックで1枚減らす");
+        image.title = "左クリック：＋1 ／ 右クリック：−1";
+        image.addEventListener("click", () => changeCardFromImage(image, 1));
         image.addEventListener("contextmenu", event => {
             event.preventDefault();
-            changeCardFromImage(image, 1);
+            changeCardFromImage(image, -1);
         });
         image.addEventListener("keydown", event => {
             if (event.key === "Enter" || event.key === " ") {
                 event.preventDefault();
-                changeCardFromImage(image, event.shiftKey ? 1 : -1);
+                changeCardFromImage(image, event.shiftKey ? -1 : 1);
             }
         });
     });
