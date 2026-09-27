@@ -1204,7 +1204,21 @@ function spawnGimmickMonsters(trigger){
  }}catch(error){document.getElementById('roster-error').textContent=trigger['表示名']+'：'+error.message;return;}
  for(const {stats,count} of pending){for(let i=0;i<count;i++)placedMonsters.push({instanceId:nextPlacedId++,monsterId:stats.monster_id,name:stats['モンスター名'],mapName:data.maps[pick.value].name,mapId:pick.value,difficulty:difficulty.value,image:data.images[stats.image],base:{...stats},damageTaken:0,attack:rosterStat(stats,'攻撃'),defense:rosterStat(stats,'防御'),hp:rosterStat(stats,'HP'),coin:stats['コイン']===''?null:Number(stats['コイン']),boss:String(stats['ボス']).trim()==='1',reflect:String(stats['反撃']).trim()==='1'});}
 }
-function removeEnemy(enemy){if(enemy.defeated)return;decrementMonsterMissions(data.missions,missionCounters,enemy.mapId,enemy.monsterId,enemy.difficulty);applyDefeatGimmicks(data.gimmicks,defeatTotals,rosterCounts,enemy.mapId,enemy.difficulty,enemy.monsterId,spawnGimmickMonsters);enemy.defeated=true;enemy.hp=0;if(selectedPlacedId===enemy.instanceId)selectedPlacedId=null;}
+function removeEnemy(enemy){if(enemy.defeated)return;enemy.wardenReviveReady=enemy.mapId==='MAP0104'&&enemy.monsterId==='M0117'&&(rosterCounts.get('MAP0104:clue')||0)<2;decrementMonsterMissions(data.missions,missionCounters,enemy.mapId,enemy.monsterId,enemy.difficulty);applyDefeatGimmicks(data.gimmicks,defeatTotals,rosterCounts,enemy.mapId,enemy.difficulty,enemy.monsterId,spawnGimmickMonsters);enemy.defeated=true;enemy.hp=0;if(selectedPlacedId===enemy.instanceId)selectedPlacedId=null;}
+// 看守の復活待ちは撃破時の手がかり数で確定し、履歴にも保存する。
+function pendingWarden(){return [...placedMonsters].reverse().find(enemy=>enemy.wardenReviveReady&&enemy.defeated&&enemy.mapId===pick.value&&enemy.difficulty===difficulty.value);}
+function reviveWarden(){
+ if(pick.value!=='MAP0104')return;
+ const source=pendingWarden();if(!source)return;
+ const base={...source.base,HP:String(Number(source.base['HP'])+2)};
+ const hp=rosterStat(base,'HP'),attack=rosterStat(base,'攻撃'),defense=rosterStat(base,'防御');
+ if(![hp,attack,defense].every(Number.isFinite)||hp<=0){document.getElementById('roster-error').textContent='看守の復活後ステータスを確認してください。';return;}
+ rememberRoster();
+ source.wardenReviveReady=false;
+ placedMonsters.push({instanceId:nextPlacedId++,monsterId:source.monsterId,name:source.name,mapName:source.mapName,mapId:source.mapId,difficulty:source.difficulty,image:source.image,base,damageTaken:0,attack,defense,hp,coin:source.coin,boss:source.boss,reflect:source.reflect});
+ renderRoster();
+ rosterNotice.textContent='看守が最大HP＋2で復活しました。';
+}
 const rosterGimmicks=document.getElementById('roster-gimmicks');
 document.getElementById('roster-reset').addEventListener('click',()=>{if(!rosterBuff.attack&&!rosterBuff.defense&&![...rosterCounts.values()].some(Boolean))return;rememberRoster();rosterBuff.attack=0;rosterBuff.defense=0;rosterCounts.clear();renderRoster();rosterNotice.textContent='下の一覧のバフ・固有ギミックをリセットしました。';});
 // ターンやクールダウンは記録せず、ボタンを押した時だけ召喚する。
@@ -1250,6 +1264,11 @@ function renderRoster(){
   const done=executedEvents.has(libraryTruthKey());truth.disabled=done;truth.setAttribute('aria-pressed',String(done));
   truth.setAttribute('aria-label',done?'真相発覚（発動済み）':'真相発覚を発動');
   truth.addEventListener('click',executeLibraryTruth);rosterGimmicks.append(truth);
+  if(pendingWarden()){
+   const revive=document.createElement('button');revive.type='button';revive.className='roster-warden-revive';revive.textContent='看守復活';
+   revive.title='撃破から2ラウンド後に手動で押す。復活のたび最大HP＋2';
+   revive.addEventListener('click',reviveWarden);rosterGimmicks.append(revive);
+  }
  }
  const unique=new Map();mapGimmicks().forEach(row=>{if(!unique.has(row.gimmick_id))unique.set(row.gimmick_id,row);});
  document.getElementById('roster-reset').hidden=unique.size===0;
