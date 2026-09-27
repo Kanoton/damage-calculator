@@ -1164,12 +1164,13 @@ function renderGimmicks(){
 
 // Roster buffs and gimmicks are independent of the source list.
 const rosterBuff={attack:0,defense:0},rosterCounts=new Map();
+let rosterEvidenceConsider=false;
 window.addEventListener('character-evidence-change',()=>{if(pick.value==='MAP0104')renderRoster();});
 function rosterStat(stats,key){
  if(!stats||stats[key]===''||stats[key]===undefined)return null;
  let value=Number(stats[key])+(key==='攻撃'?rosterBuff.attack:key==='防御'?rosterBuff.defense:0);
  mapGimmicks().filter(r=>r.monster_id===stats.monster_id&&(!r['難易度']||r['難易度']===difficulty.value)).forEach(r=>{value+=Number(r[key]||0)*Math.min(gimmickMaximum(r),rosterCounts.get(gimmickKey(r))||0);});
- if(key==='攻撃'&&pick.value==='MAP0104'&&['M0115','M0116','M0117'].includes(stats.monster_id))value+=Number(window.getCharacterEvidenceStack?.()||0);
+ if(key==='攻撃'&&rosterEvidenceConsider&&pick.value==='MAP0104'&&['M0115','M0116','M0117'].includes(stats.monster_id))value+=Number(window.getCharacterEvidenceStack?.()||0);
  return value;
 }
 const defeatTotals=new Map();
@@ -1186,10 +1187,10 @@ const roster=document.getElementById('map-roster-list'),rosterEmpty=document.get
 // Undo snapshots last for this page session, until 全削除.
 const rosterHistory=[];
 let rosterContext={map:pick.value,difficulty:difficulty.value,route:'',moved:false};
-function rememberRoster(){document.getElementById('roster-error').textContent='';rosterHistory.push(structuredClone({monsters:placedMonsters,buff:rosterBuff,counts:[...rosterCounts],selected:selectedPlacedId,next:nextPlacedId,serials:[...monsterSerials],context:rosterContext,missions:[...missionCounters],events:[...executedEvents],defeats:[...defeatTotals],characterEvidence:window.captureCharacterEvidence?.()}));}
+function rememberRoster(){document.getElementById('roster-error').textContent='';rosterHistory.push(structuredClone({monsters:placedMonsters,buff:rosterBuff,counts:[...rosterCounts],selected:selectedPlacedId,next:nextPlacedId,serials:[...monsterSerials],context:rosterContext,missions:[...missionCounters],events:[...executedEvents],defeats:[...defeatTotals],characterEvidence:window.captureCharacterEvidence?.(),evidenceConsider:rosterEvidenceConsider})));}
 document.getElementById('roster-undo').addEventListener('click',()=>{
  document.getElementById('roster-error').textContent='';const previous=rosterHistory.pop();if(!previous)return;if(!data.maps[previous.context.map]){rosterHistory.length=0;renderRoster();return;}
- defeatTotals.clear();(previous.defeats||[]).forEach(([k,v])=>defeatTotals.set(k,v));executedEvents.clear();(previous.events||[]).forEach(key=>executedEvents.add(key));missionCounters.clear();(previous.missions||[]).forEach(([k,v])=>missionCounters.set(k,v));placedMonsters.splice(0,placedMonsters.length,...previous.monsters);Object.assign(rosterBuff,previous.buff);rosterCounts.clear();previous.counts.forEach(([k,v])=>rosterCounts.set(k,v));window.restoreCharacterEvidence?.(previous.characterEvidence);selectedPlacedId=previous.selected;window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:placedMonsters.find(enemy=>enemy.instanceId===selectedPlacedId&&!enemy.defeated)?{name:placedMonsters.find(enemy=>enemy.instanceId===selectedPlacedId).name,mapId:previous.context.map}:null}));nextPlacedId=previous.next;monsterSerials.clear();(previous.serials||[]).forEach(([id,serial])=>monsterSerials.set(id,serial));pick.value=previous.context.map;difficulty.value=previous.context.difficulty;rosterContext=previous.context;Object.assign(routeState,{context:JSON.stringify([pick.value,difficulty.value]),route:previous.context.route||'',moved:!!previous.context.moved});selected=null;render();
+ defeatTotals.clear();(previous.defeats||[]).forEach(([k,v])=>defeatTotals.set(k,v));executedEvents.clear();(previous.events||[]).forEach(key=>executedEvents.add(key));missionCounters.clear();(previous.missions||[]).forEach(([k,v])=>missionCounters.set(k,v));placedMonsters.splice(0,placedMonsters.length,...previous.monsters);Object.assign(rosterBuff,previous.buff);rosterCounts.clear();previous.counts.forEach(([k,v])=>rosterCounts.set(k,v));rosterEvidenceConsider=Boolean(previous.evidenceConsider);window.restoreCharacterEvidence?.(previous.characterEvidence);selectedPlacedId=previous.selected;window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:placedMonsters.find(enemy=>enemy.instanceId===selectedPlacedId&&!enemy.defeated)?{name:placedMonsters.find(enemy=>enemy.instanceId===selectedPlacedId).name,mapId:previous.context.map}:null}));nextPlacedId=previous.next;monsterSerials.clear();(previous.serials||[]).forEach(([id,serial])=>monsterSerials.set(id,serial));pick.value=previous.context.map;difficulty.value=previous.context.difficulty;rosterContext=previous.context;Object.assign(routeState,{context:JSON.stringify([pick.value,difficulty.value]),route:previous.context.route||'',moved:!!previous.context.moved});selected=null;render();
 });
 document.getElementById('roster-clear').addEventListener('click',()=>{clearRoster();rosterHistory.length=0;nextPlacedId=1;renderRoster();});
 function registerEnemy(enemy, switchTab=true){
@@ -1203,7 +1204,7 @@ function registerEnemy(enemy, switchTab=true){
  // Clicking a roster monster always opens the attack calculator.
  if(switchTab)document.querySelector('.role-tab[data-role="attack"]').click();
 }
-function clearRoster(){document.getElementById('roster-error').textContent='';defeatTotals.clear();executedEvents.clear();placedMonsters.length=0;monsterSerials.clear();selectedPlacedId=null;window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:null}));skillChoiceId=null;rosterBuff.attack=0;rosterBuff.defense=0;rosterCounts.clear();rosterNotice.textContent='';}
+function clearRoster(){document.getElementById('roster-error').textContent='';defeatTotals.clear();executedEvents.clear();placedMonsters.length=0;monsterSerials.clear();selectedPlacedId=null;window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:null}));skillChoiceId=null;rosterBuff.attack=0;rosterBuff.defense=0;rosterCounts.clear();rosterEvidenceConsider=false;rosterNotice.textContent='';}
 function updateEnemy(enemy){if(enemy.defeated)return;enemy.attack=rosterStat(enemy.base,'攻撃')+(enemy.manualAttack||0)+(enemy.eventAttack||0);enemy.defense=rosterStat(enemy.base,'防御')+(enemy.manualDefense||0)+(enemy.eventDefense||0);enemy.hp=rosterStat(enemy.base,'HP')-enemy.damageTaken;}
 function spawnGimmickMonsters(trigger){
  const matching=mapGimmicks().filter(r=>r.gimmick_id===trigger.gimmick_id&&(!r['難易度']||r['難易度']===difficulty.value));
@@ -1274,16 +1275,15 @@ function renderRoster(){
   const done=executedEvents.has(libraryTruthKey());truth.disabled=done;truth.setAttribute('aria-pressed',String(done));
   truth.setAttribute('aria-label',done?'真相発覚（発動済み）':'真相発覚を発動');
   truth.addEventListener('click',executeLibraryTruth);rosterGimmicks.append(truth);
-  const evidence=document.createElement('button');evidence.type='button';evidence.className='roster-evidence';
+  const evidence=document.createElement('button');evidence.type='button';evidence.className='roster-evidence'+(rosterEvidenceConsider?' is-active':'');
   const count=Number(window.getCharacterEvidenceStack?.()||0);
   const icon=document.createElement('img');icon.src='../images/icon/'+encodeURIComponent('罪証.png');icon.alt='';
-  evidence.append(icon,document.createTextNode('罪証 '+count));
+  evidence.append(icon,document.createTextNode('罪証考慮'));
   evidence.disabled=!window.hasSelectedCharacter?.();
-  evidence.title=evidence.disabled?'キャラクターを選択すると操作できます':'虫眼鏡と共有。左クリックで＋1、右クリックで−1';
-  evidence.setAttribute('aria-label','罪証 '+count+'スタック。左クリックで増加、右クリックで減少');
-  const changeEvidence=delta=>{if(!window.hasSelectedCharacter?.())return;rememberRoster();window.setCharacterEvidenceStack(count+delta);};
-  evidence.addEventListener('click',()=>changeEvidence(1));
-  evidence.addEventListener('contextmenu',event=>{event.preventDefault();changeEvidence(-1);});
+  evidence.setAttribute('aria-pressed',String(rosterEvidenceConsider));
+  evidence.title=evidence.disabled?'キャラクターを選択すると操作できます':('選択キャラクターの罪証 '+count+'スタックを対象モンスターの攻撃力に'+(rosterEvidenceConsider?'反映中':'反映しない'));
+  evidence.setAttribute('aria-label','罪証考慮：'+(rosterEvidenceConsider?'オン':'オフ')+'。選択キャラクターの罪証 '+count+'スタック');
+  evidence.addEventListener('click',()=>{rememberRoster();rosterEvidenceConsider=!rosterEvidenceConsider;renderRoster();});
   rosterGimmicks.append(evidence);
   if(pendingWarden()){
    const revive=document.createElement('button');revive.type='button';revive.className='roster-warden-revive';revive.textContent='看守復活';
@@ -1684,6 +1684,7 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
    conditionsBox.append(button);
   }
   const mapNumbers=mapKeywords.filter(row=>row.map_id===mapPicker.value&&row.input_kind==='number').map(row=>row.effect_key);
+  if(mapPicker.value==='MAP0104')mapNumbers.push('罪証');
   if(mapPicker.value==='MAP0007'&&currentOpponent?.name==='クジャク係'&&currentOpponent.mapId===mapPicker.value)mapNumbers.push('クジャク係の羽ばたき');
   for(const key of new Set([...neededInputs(),...mapNumbers])){
    const item=document.createElement('label');item.className='condition-item';item.title=key+'：アイコンを左クリックで+1、右クリックで-1';
