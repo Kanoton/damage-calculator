@@ -1732,7 +1732,14 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
    const text=document.createElement('span');text.textContent=values;
    entry.setAttribute('aria-label',label+' Lv0からLv3 '+values);entry.append(icon,text);stats.append(entry);
   }
-  const description=document.createElement('div');description.className='character-skill-text';description.textContent=ability;
+  const description=document.createElement('div');description.className='character-skill-text';
+  const lines=ability.split(/\r?\n/);
+  lines.forEach((line,index)=>{
+   const heading=/^(?:スキル|パッシブスキル)\s*[-－]\s*.+$/.test(line.trim())||/^[^\s。、！？：:（）()\[\]［］]{1,24}$/.test(line.trim());
+   if(heading){const strong=document.createElement('strong');strong.textContent=line;description.append(strong);}
+   else description.append(document.createTextNode(line));
+   if(index<lines.length-1)description.append(document.createTextNode('\n'));
+  });
   skillTooltip.append(stats,description);skillTooltip.hidden=false;skillTooltip.scrollTop=0;
   const box=button.getBoundingClientRect(),width=skillTooltip.offsetWidth,height=skillTooltip.offsetHeight,gap=10;
   let left=box.right+gap;if(left+width>window.innerWidth-8)left=box.left-width-gap;
