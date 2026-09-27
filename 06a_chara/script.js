@@ -1519,6 +1519,8 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
  const conditionsBox=document.getElementById('selected-character-conditions');
  const ownedBox=document.querySelector('.selected-character-chips');
  const hpInput=document.getElementById('selected-character-current-hp');
+ const STATUS_ICON_SNAPSHOT="group,effect_key,input_kind,icon_file\r\nスタック,コイン,number,スターライト.png\r\nスタック,マーク,number,マーク.png\r\nスタック,ヒール,number,ヒール.png\r\nスタック,チャージ,number,チャージ.png\r\nスタック,改造,number,改造.png\r\nスタック,ジェントル・フレイム,number,ジェントル・フレイム.png\r\nスタック,反撃,number,Reflect.png\r\nスタック,マインド,number,真犯人.png\r\nスタック,罪証,number,罪証.png\r\n所持数,スターコイン,number,Coin.png\r\n蓄積ボーナス,優雅の羽ボーナス,number,真犯人.png\r\n蓄積ボーナス,ギガントアンカーボーナス,number,真犯人.png\r\n蓄積ボーナス,呪いの剣ボーナス,number,真犯人.png\r\n蓄積ボーナス,永続攻撃・防御ボーナス,number,真犯人.png\r\n蓄積ボーナス,マインド変動ボーナス,number,真犯人.png\r\n蓄積ボーナス,反撃による永続ボーナス,number,Reflect.png\r\n蓄積ボーナス,鴛鴦連理解除ボーナス,number,鴛鴦連理.png\r\n蓄積ボーナス,マインド増加ボーナス,number,真犯人.png\r\n蓄積ボーナス,マインド減少ボーナス,number,真犯人.png\r\n追加素材,真犯人,未設定,真犯人.png\r\n追加素材,逆鱗,未設定,逆鱗.png\r\n追加素材,金鱗,未設定,金鱗.png\r\n追加素材,孔雀の羽ばたき,未設定,孔雀の羽ばたき.png\r\n追加素材,深層改造,未設定,深層改造.png\r\n追加素材,戦の呪い,未設定,戦の呪い.png\r\n追加素材,勇往邁進,未設定,勇往邁進.png\r\n";
+ let statusIcons=new Map();
  let characters=[],chips=[],rules=[],category='マーク',selectedCharacter=null;
  const states=new Map();
  const byChip=new Map();
@@ -1579,7 +1581,9 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
   return result;
  }
  function makeIcon(key){
-  const icon=document.createElement('img');icon.alt='';icon.src='../images/icon/'+encodeURIComponent(specialIcons[key]||key)+'.png';
+  const file=statusIcons.get(key)||statusIcons.get(specialIcons[key]);
+  if(!file)return Object.assign(document.createElement('span'),{className:'condition-fallback',textContent:key});
+  const icon=document.createElement('img');icon.alt='';icon.src='../images/icon/'+encodeURIComponent(file);
   icon.addEventListener('error',()=>{icon.replaceWith(Object.assign(document.createElement('span'),{className:'condition-fallback',textContent:key}));},{once:true});
   return icon;
  }
@@ -1764,8 +1768,16 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
   try{const response=await fetch('../csv/chip_stat_rules.csv',{cache:'no-cache'});if(!response.ok)throw Error('chip_stat_rules.csv');return parseRules(await response.text());}
   catch(error){chipStatus.textContent='ルールCSVを取得できないため、同梱データを表示しています。';return CHIP_RULES_SNAPSHOT;}
  }
- Promise.all([load('characters','character_stats.csv',listStatus),load('chips','chip_list.csv',chipStatus),loadRules()]).then(([a,b,c])=>{
-  characters=a;chips=b;rules=c;
+ async function loadStatusIcons(){
+  let csv=STATUS_ICON_SNAPSHOT;
+  if(location.protocol!=='file:'){
+   try{const response=await fetch('../csv/status_icon_map_all.csv',{cache:'no-cache'});if(!response.ok)throw Error('status_icon_map_all.csv');csv=await response.text();}
+   catch(error){console.warn('アイコン対応CSVを取得できないため、同梱データを使用します。',error);}
+  }
+  return new Map(parseMapCSV(csv).filter(row=>row.input_kind==='number'&&/^[^/\\]+\.png$/i.test(row.icon_file)).map(row=>[row.effect_key,row.icon_file]));
+ }
+ Promise.all([load('characters','character_stats.csv',listStatus),load('chips','chip_list.csv',chipStatus),loadRules(),loadStatusIcons()]).then(([a,b,c,d])=>{
+  characters=a;chips=b;rules=c;statusIcons=d;
   for(const rule of rules){if(!byChip.has(rule.chip_id))byChip.set(rule.chip_id,[]);byChip.get(rule.chip_id).push(rule);}
   renderImages(document.getElementById('character-image-list'),characters,'character_list','list_img');renderChips();
  });
