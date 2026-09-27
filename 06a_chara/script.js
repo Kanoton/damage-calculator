@@ -1741,11 +1741,12 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
  let numberPadInput=null,numberPadOriginal='',replaceNumberOnDigit=true;
  function positionNumberPad(){
   if(!numberPadInput||numberPad.hidden)return;
-  const field=numberPadInput.getBoundingClientRect(),panel=selectedPanel.getBoundingClientRect();
+  const field=numberPadInput.getBoundingClientRect();
+  const anchor=selectedPanel.contains(numberPadInput)?selectedPanel.getBoundingClientRect():field;
   const width=numberPad.offsetWidth,height=numberPad.offsetHeight;
   numberPad.style.left=Math.max(8,Math.min(field.left,window.innerWidth-width-8))+'px';
-  const below=panel.bottom+6;
-  numberPad.style.top=(below+height<=window.innerHeight-8?below:Math.max(8,panel.top-height-6))+'px';
+  const below=anchor.bottom+6;
+  numberPad.style.top=(below+height<=window.innerHeight-8?below:Math.max(8,anchor.top-height-6))+'px';
  }
  function closeNumberPad(){
   if(numberPadInput)numberPadInput.removeAttribute('aria-controls');
@@ -1757,17 +1758,17 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
   if(input.value==='')input.value=numberPadOriginal;
   const changed=input.value!==numberPadOriginal;
   closeNumberPad();
-  if(changed)input.dispatchEvent(new Event('change',{bubbles:true}));
+  if(changed){input.dispatchEvent(new Event('input',{bubbles:true}));input.dispatchEvent(new Event('change',{bubbles:true}));}
  }
- selectedPanel.addEventListener('focusin',event=>{
+ document.addEventListener('focusin',event=>{
   const input=event.target;
-  if(!(input instanceof HTMLInputElement)||input.type!=='number')return;
+  if(!(input instanceof HTMLInputElement)||input.type!=='number'||input.disabled||input.readOnly)return;
   if(numberPadInput&&numberPadInput!==input)commitNumberPad();
   numberPadInput=input;numberPadOriginal=input.value;replaceNumberOnDigit=true;
   input.select();input.setAttribute('aria-controls',numberPad.id);
   numberPad.hidden=false;positionNumberPad();
  });
- selectedPanel.addEventListener('keydown',event=>{
+ document.addEventListener('keydown',event=>{
   if(event.target!==numberPadInput)return;
   if(event.key==='Enter'){event.preventDefault();commitNumberPad();event.target.blur();}
   else if(event.key==='Escape'){event.preventDefault();numberPadInput.value=numberPadOriginal;closeNumberPad();event.target.blur();}
