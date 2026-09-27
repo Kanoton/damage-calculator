@@ -1714,7 +1714,7 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
  portraitButton.addEventListener('keydown',event=>{if(event.key==='ArrowDown'){event.preventDefault();changeCharacterLevel(-1);}});
  hpInput.addEventListener('change',()=>{state().currentHp=Math.max(0,Number(hpInput.value)||0);updateStats();});
  document.getElementById('selected-character-hp-fill').addEventListener('click',()=>{if(!selectedCharacter)return;state().currentHp=calculate().hp;updateStats();});
- const skillTooltip=document.createElement('aside');skillTooltip.id='character-skill-tooltip';skillTooltip.className='character-skill-tooltip';skillTooltip.setAttribute('role','tooltip');skillTooltip.hidden=true;skillTooltip.tabIndex=0;document.body.append(skillTooltip);
+ const skillTooltip=document.createElement('aside');skillTooltip.id='character-skill-tooltip';skillTooltip.className='character-skill-tooltip';skillTooltip.setAttribute('role','tooltip');skillTooltip.hidden=true;document.body.append(skillTooltip);
  let skillTooltipTimer;
  function hideSkillTooltip(){clearTimeout(skillTooltipTimer);skillTooltip.hidden=true;}
  function scheduleHideSkillTooltip(){clearTimeout(skillTooltipTimer);skillTooltipTimer=setTimeout(hideSkillTooltip,180);}
@@ -1731,10 +1731,6 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
   skillTooltip.style.left=Math.max(8,Math.min(left,window.innerWidth-width-8))+'px';
   skillTooltip.style.top=Math.max(8,Math.min(box.top,window.innerHeight-height-8))+'px';
  }
- skillTooltip.addEventListener('mouseenter',()=>clearTimeout(skillTooltipTimer));
- skillTooltip.addEventListener('mouseleave',scheduleHideSkillTooltip);
- skillTooltip.addEventListener('focus',()=>clearTimeout(skillTooltipTimer));
- skillTooltip.addEventListener('blur',scheduleHideSkillTooltip);
  document.addEventListener('keydown',event=>{if(event.key==='Escape')hideSkillTooltip();});
  document.getElementById('character-image-list').addEventListener('scroll',hideSkillTooltip);
  const sorted=rows=>rows.slice().sort((a,b)=>Number(a.id)-Number(b.id));
@@ -1750,7 +1746,7 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
    const button=document.createElement('button');button.type='button';button.dataset.id=row.id;
    if(folder==='character_list'){
     button.className='character-select';button.setAttribute('aria-label',row.name+'を選択');button.setAttribute('aria-pressed','false');
-    if(characterSkills.has(String(row.id))){button.setAttribute('aria-describedby','character-skill-tooltip');button.addEventListener('mouseenter',()=>showSkillTooltip(button,row));button.addEventListener('mouseleave',scheduleHideSkillTooltip);button.addEventListener('focus',()=>showSkillTooltip(button,row));button.addEventListener('blur',scheduleHideSkillTooltip);}
+    if(characterSkills.has(String(row.id))){button.setAttribute('aria-describedby','character-skill-tooltip');button.addEventListener('mouseenter',()=>showSkillTooltip(button,row));button.addEventListener('mouseleave',scheduleHideSkillTooltip);button.addEventListener('focus',()=>showSkillTooltip(button,row));button.addEventListener('blur',scheduleHideSkillTooltip);button.addEventListener('wheel',event=>{if(skillTooltip.hidden)return;const previous=skillTooltip.scrollTop;skillTooltip.scrollTop+=event.deltaY;if(skillTooltip.scrollTop!==previous)event.preventDefault();},{passive:false});}
     button.addEventListener('click',()=>selectCharacter(row));
    }else{
     button.className='chip-select';button.dataset.name=row.name;button.title=row.name+'\n'+row.effect;button.setAttribute('aria-label',row.name+'：'+row.effect+'。取得する');button.setAttribute('aria-pressed',String(Boolean(selectedCharacter&&state().chips.includes(row.id))));

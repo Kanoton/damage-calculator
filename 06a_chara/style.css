@@ -1495,7 +1495,7 @@ tbody th {
 #roster-gimmicks .roster-warden-revive{border-color:#b99a69;background:#fff7e9;color:#704e22;font-weight:bold}
 
 /* キャラクター能力：マウスオーバーとキーボードフォーカスで表示 */
-.character-skill-tooltip{position:fixed;z-index:10000;width:min(430px,calc(100vw - 16px));max-height:min(70vh,620px);overflow:auto;padding:14px 16px;border:2px solid #b89224;border-radius:8px;background:#fffdf6;color:#302819;box-shadow:0 8px 24px #0005;font-size:14px;line-height:1.55;overscroll-behavior:contain}
+.character-skill-tooltip{position:fixed;z-index:10000;width:min(430px,calc(100vw - 16px));max-height:min(70vh,620px);overflow:auto;pointer-events:none;user-select:none;padding:14px 16px;border:2px solid #b89224;border-radius:8px;background:#fffdf6;color:#302819;box-shadow:0 8px 24px #0005;font-size:14px;line-height:1.55;overscroll-behavior:contain}
 .character-skill-tooltip[hidden]{display:none}
 .character-skill-heading{display:block;margin-bottom:10px;font-size:17px}
 .character-skill-text{white-space:pre-wrap;overflow-wrap:anywhere}
