@@ -1509,6 +1509,20 @@ tbody th {
 .character-number-pad button{height:38px;border:1px solid #d9c890;border-radius:5px;background:#fff;color:#493e22;font:600 17px sans-serif;cursor:pointer}
 .character-number-pad button:hover,.character-number-pad button:focus-visible{background:#fff1c8;outline:2px solid #b89224}
 .character-number-pad button[data-key="確定"]{background:#f5dc8a}
+.character-number-pad.pad-theme-attack{border-color:#ef6b6b;background:#fff7f7}
+.character-number-pad.pad-theme-attack button{border-color:#efb1b1;color:#713333}
+.character-number-pad.pad-theme-attack button:hover,.character-number-pad.pad-theme-attack button:focus-visible{background:#fde7e7;outline-color:#ef6b6b}
+.character-number-pad.pad-theme-attack button[data-key="確定"]{background:#f7bcbc}
+.character-number-pad.pad-theme-defense{border-color:#5f9bd3;background:#f7fbff}
+.character-number-pad.pad-theme-defense button{border-color:#aac8e4;color:#294f72}
+.character-number-pad.pad-theme-defense button:hover,.character-number-pad.pad-theme-defense button:focus-visible{background:#e7f0fd;outline-color:#5f9bd3}
+.character-number-pad.pad-theme-defense button[data-key="確定"]{background:#bcd7ef}
+.character-number-pad.pad-theme-map{border-color:#6e9d80;background:#f6fbf7}
+.character-number-pad.pad-theme-map button{border-color:#b5d0bd;color:#28523a}
+.character-number-pad.pad-theme-map button:hover,.character-number-pad.pad-theme-map button:focus-visible{background:#e5f3e9;outline-color:#6e9d80}
+.character-number-pad.pad-theme-map button[data-key="確定"]{background:#c6e1cf}
+.character-number-pad.pad-theme-character{border-color:#d4ac37;background:#fffdf6}
+.character-number-pad.pad-theme-character button[data-key="確定"]{background:#f5dc8a}
 
 /* 条件欄の攻撃・移動チェックと状態切り替え */
 .condition-phase{display:inline-flex;align-items:center;gap:3px;flex:none;white-space:nowrap;font-size:12px;cursor:pointer}
