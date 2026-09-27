@@ -1490,3 +1490,6 @@ tbody th {
 /* 異変図書館の真相発覚はマップ固有ギミック欄の先頭に配置 */
 #roster-gimmicks .roster-truth{border-color:#7da89a;background:#eef8f4;color:#245643;font-weight:bold}
 #roster-gimmicks .roster-truth:disabled{opacity:.6;cursor:default}
+
+/* 看守の撃破後、手がかりが2未満だった場合の手動復活ボタン */
+#roster-gimmicks .roster-warden-revive{border-color:#b99a69;background:#fff7e9;color:#704e22;font-weight:bold}
