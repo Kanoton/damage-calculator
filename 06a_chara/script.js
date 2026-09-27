@@ -1533,7 +1533,7 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
  const states=new Map();
  const byChip=new Map();
  const specialIcons={'対象のマーク':'マーク','攻撃対象はモンスター':'モンスター'};
- const getState=id=>{if(!states.has(id))states.set(id,{level:0,currentHp:null,chips:[],numbers:{},modes:{},manual:{atk:0,def:0}});return states.get(id);};
+ const getState=id=>{if(!states.has(id))states.set(id,{level:0,currentHp:null,chips:[],numbers:{},modes:{},phases:{attack:false,move:false},manual:{atk:0,def:0}});return states.get(id);};
  const state=()=>getState(selectedCharacter.id);
  const number=(s,key)=>Math.min(key==='チャージ'?10:Infinity,Math.max(0,Number(s.numbers[key])||0));
  const modeFor=rule=>Number(state().modes[rule.chip_id])||0;
@@ -1552,12 +1552,15 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
   if(match){const left=number(state(),match[1]),right=Number(match[3]);
    return match[2]==='>='?left>=right:match[2]==='<='?left<=right:match[2]==='>'?left>right:left<right;
   }
+  if(key==='次の移動強化'&&rule.trigger==='on_next_move')return Boolean(state().phases?.move);
   if(rule.chip_id==='112'&&key==='青き呪い')return [2,3].includes(modeFor(rule));
   if(rule.chip_id==='112'&&key==='赤き呪い')return [1,3].includes(modeFor(rule));
   return modeFor(rule)>0;
  }
  function triggerMatches(rule){
-  if(['on_attack','on_attack_after_mark','on_skill_use','on_next_move','while_checked'].includes(rule.trigger))return modeFor(rule)>0;
+  if(['on_attack','on_attack_after_mark'].includes(rule.trigger))return Boolean(state().phases?.attack);
+  if(rule.trigger==='on_next_move')return Boolean(state().phases?.move);
+  if(['on_skill_use','while_checked'].includes(rule.trigger))return modeFor(rule)>0;
   return rule.trigger==='while_owned';
  }
  function valueOf(rule,extraMaxHp){
@@ -1610,6 +1613,33 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
  }
  function renderConditions(){
   conditionsBox.replaceChildren();
+  const ownedRules=activeRules();
+  for(const [key,label,triggers] of [['attack','攻撃時',['on_attack','on_attack_after_mark']],['move','移動時',['on_next_move']]]){
+   if(!ownedRules.some(rule=>triggers.includes(rule.trigger)))continue;
+   const field=document.createElement('label');field.className='condition-phase';
+   const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.checked=Boolean(state().phases?.[key]);checkbox.setAttribute('aria-label',label+'の効果を有効にする');
+   checkbox.addEventListener('change',()=>{state().phases??={attack:false,move:false};state().phases[key]=checkbox.checked;updateStats();});
+   field.append(checkbox,document.createTextNode(label));conditionsBox.append(field);
+  }
+  for(const id of state().chips){
+   if(!toggleable(id))continue;
+   const chip=chips.find(row=>row.id===id);if(!chip)continue;
+   const mode=Number(state().modes[id])||0;
+   const button=document.createElement('button');button.type='button';
+   button.className='selected-chip condition-toggle'+(mode?' is-active':'')+(id==='112'&&mode===1?' is-red':'')+(id==='112'&&mode===2?' is-blue':'')+(id==='112'&&mode===3?' is-both':'');
+   button.dataset.chipId=id;button.setAttribute('aria-pressed',String(mode>0));
+   const status=id==='112'?(mode===1?'赤き呪い':mode===2?'青き呪い':mode===3?'赤き呪いと青き呪い':'オフ'):(mode?'オン':'オフ');
+   button.setAttribute('aria-label',chip.name+'：'+status+'。クリックで切り替え');
+   button.title=chip.name+'：'+status+'\nクリックで条件を切り替え';
+   const img=document.createElement('img');img.alt='';img.src='../images/chip_icon/'+encodeURIComponent(chip.images);button.append(img);
+   button.addEventListener('click',()=>{
+    const focused=document.activeElement===button;
+    state().modes[id]=(mode+1)%(id==='112'?4:2);renderConditions();
+    if(focused)[...conditionsBox.querySelectorAll('.condition-toggle')].find(item=>item.dataset.chipId===id)?.focus();
+    updateStats();
+   });
+   conditionsBox.append(button);
+  }
   for(const key of neededInputs()){
    const item=document.createElement('label');item.className='condition-item';item.title=key+'：アイコンを左クリックで+1、右クリックで-1';
    const button=document.createElement('button');button.type='button';button.className='condition-icon';button.setAttribute('aria-label',key+'を増やす');button.append(makeIcon(key));
@@ -1647,9 +1677,9 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
  });
  function toggleable(id){return (byChip.get(id)||[]).some(rule=>{
   if(!['modifier','event_modifier'].includes(rule.kind))return false;
-  if(['on_attack','on_attack_after_mark','on_skill_use','on_next_move','while_checked'].includes(rule.trigger))return true;
+  if(['on_skill_use','while_checked'].includes(rule.trigger))return true;
   const condition=rule.condition;
-  return Boolean(condition&&!['hp_full','hp_ratio<0.5','hp_ratio<=0.5'].includes(condition)&&!/^.+?(?:>=|<=|>|<)\d+(?:\.\d+)?$/.test(condition));
+  return Boolean(condition&&!(rule.trigger==='on_next_move'&&condition==='次の移動強化')&&!['hp_full','hp_ratio<0.5','hp_ratio<=0.5'].includes(condition)&&!/^.+?(?:>=|<=|>|<)\d+(?:\.\d+)?$/.test(condition));
  });}
  function updateChipListSelection(){
   document.querySelectorAll('#chip-image-list .chip-select').forEach(button=>{
@@ -1663,14 +1693,8 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
   ownedBox.replaceChildren();
   for(const id of state().chips){
    const chip=chips.find(c=>c.id===id);if(!chip)continue;
-   const canToggle=toggleable(id),mode=Number(state().modes[id])||0;
-   const item=document.createElement(canToggle?'button':'span');item.className='selected-chip'+(mode?' is-active':'')+(id==='112'&&mode===1?' is-red':'')+(id==='112'&&mode===2?' is-blue':'')+(id==='112'&&mode===3?' is-both':'');
-   if(canToggle){
-    item.type='button';item.setAttribute('aria-pressed',String(mode>0));
-    item.setAttribute('aria-label',chip.name+'：'+(id==='112'?(mode===1?'赤き呪い':mode===2?'青き呪い':mode===3?'赤き呪いと青き呪い':'オフ'):(mode?'オン':'オフ'))+'。クリックで切り替え');
-    item.addEventListener('click',()=>{state().modes[id]=(mode+1)%(id==='112'?4:2);renderOwned();updateStats();});
-   }
-   item.title=chip.name+'\n'+chip.effect+(canToggle?'\nクリックで条件を切り替え':'');
+   const item=document.createElement('span');item.className='selected-chip';
+   item.title=chip.name+'\n'+chip.effect;
    const img=document.createElement('img');img.alt=chip.name;img.src='../images/chip_icon/'+encodeURIComponent(chip.images);item.append(img);ownedBox.append(item);
   }
   ownedBox.scrollLeft=previousScroll;
@@ -1842,7 +1866,12 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
     button.addEventListener('click',()=>{
      if(!selectedCharacter){chipStatus.textContent='先にキャラクターを選択してください。';return;}
      chipStatus.textContent='';
-     if(state().chips.includes(row.id)){state().chips=state().chips.filter(id=>id!==row.id);delete state().modes[row.id];}
+     if(state().chips.includes(row.id)){
+      state().chips=state().chips.filter(id=>id!==row.id);delete state().modes[row.id];
+      for(const [key,triggers] of [['attack',['on_attack','on_attack_after_mark']],['move',['on_next_move']]]){
+       if(!state().chips.some(id=>(byChip.get(id)||[]).some(rule=>triggers.includes(rule.trigger))))state().phases[key]=false;
+      }
+     }
      else state().chips.push(row.id);
      renderSelectedCharacter();
     });
