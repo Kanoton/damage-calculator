@@ -3,8 +3,8 @@
   "UUID": "com.kanoton.damagecalculator",
   "Name": "Damage Calculator",
   "Author": "Kanoton",
-  "Description": "ダメージ計算ツールの画面切り替えと音声入力を操作します。",
-  "Version": "1.0.1.0",
+  "Description": "ダメージ計算ツールの画面切り替えを操作します。",
+  "Version": "1.0.2.0",
   "SDKVersion": 2,
   "Software": {
     "MinimumVersion": "7.1"
@@ -29,19 +29,20 @@
   "Actions": [
     {
       "UUID": "com.kanoton.damagecalculator.voice",
-      "Name": "音声入力 ON/OFF",
+      "Name": "音声入力（一時停止中）",
       "Icon": "imgs/action",
       "Controllers": [
         "Keypad"
       ],
       "States": [
         {
-          "Image": "imgs/voice",
-          "Name": "音声",
+          "Image": "imgs/blank",
+          "Name": "",
           "FontSize": 12
         }
       ],
-      "DisableCaching": true
+      "DisableCaching": true,
+      "VisibleInActionsList": false
     },
     {
       "UUID": "com.kanoton.damagecalculator.attack",
