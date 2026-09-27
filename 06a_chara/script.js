@@ -1733,6 +1733,60 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
  portraitButton.addEventListener('click',()=>changeCharacterLevel(1));
  portraitButton.addEventListener('contextmenu',event=>{event.preventDefault();changeCharacterLevel(-1);});
  portraitButton.addEventListener('keydown',event=>{if(event.key==='ArrowDown'){event.preventDefault();changeCharacterLevel(-1);}});
+ const numberPad=document.createElement('div');numberPad.id='character-number-pad';numberPad.className='character-number-pad';numberPad.setAttribute('role','group');numberPad.setAttribute('aria-label','数値入力用テンキー');numberPad.hidden=true;
+ for(const label of ['1','2','3','4','5','6','7','8','9','消去','0','確定']){
+  const key=document.createElement('button');key.type='button';key.textContent=label;key.dataset.key=label;numberPad.append(key);
+ }
+ document.body.append(numberPad);
+ let numberPadInput=null,numberPadOriginal='',replaceNumberOnDigit=true;
+ function positionNumberPad(){
+  if(!numberPadInput||numberPad.hidden)return;
+  const field=numberPadInput.getBoundingClientRect(),panel=selectedPanel.getBoundingClientRect();
+  const width=numberPad.offsetWidth,height=numberPad.offsetHeight;
+  numberPad.style.left=Math.max(8,Math.min(field.left,window.innerWidth-width-8))+'px';
+  const below=panel.bottom+6;
+  numberPad.style.top=(below+height<=window.innerHeight-8?below:Math.max(8,panel.top-height-6))+'px';
+ }
+ function closeNumberPad(){
+  if(numberPadInput)numberPadInput.removeAttribute('aria-controls');
+  numberPadInput=null;numberPad.hidden=true;
+ }
+ function commitNumberPad(){
+  if(!numberPadInput)return;
+  const input=numberPadInput;
+  if(input.value==='')input.value=numberPadOriginal;
+  const changed=input.value!==numberPadOriginal;
+  closeNumberPad();
+  if(changed)input.dispatchEvent(new Event('change',{bubbles:true}));
+ }
+ selectedPanel.addEventListener('focusin',event=>{
+  const input=event.target;
+  if(!(input instanceof HTMLInputElement)||input.type!=='number')return;
+  if(numberPadInput&&numberPadInput!==input)commitNumberPad();
+  numberPadInput=input;numberPadOriginal=input.value;replaceNumberOnDigit=true;
+  input.select();input.setAttribute('aria-controls',numberPad.id);
+  numberPad.hidden=false;positionNumberPad();
+ });
+ selectedPanel.addEventListener('keydown',event=>{
+  if(event.target!==numberPadInput)return;
+  if(event.key==='Enter'){event.preventDefault();commitNumberPad();event.target.blur();}
+  else if(event.key==='Escape'){event.preventDefault();numberPadInput.value=numberPadOriginal;closeNumberPad();event.target.blur();}
+ });
+ numberPad.addEventListener('pointerdown',event=>event.preventDefault());
+ numberPad.addEventListener('click',event=>{
+  const key=event.target.closest('button[data-key]');if(!key||!numberPadInput)return;
+  const input=numberPadInput,label=key.dataset.key;
+  if(label==='確定'){commitNumberPad();input.blur();return;}
+  if(label==='消去'){input.value=replaceNumberOnDigit?'':input.value.slice(0,-1);}
+  else input.value=(replaceNumberOnDigit?'':input.value)+label;
+  replaceNumberOnDigit=false;input.focus();
+ });
+ document.addEventListener('pointerdown',event=>{
+  if(!numberPadInput||event.target===numberPadInput||numberPad.contains(event.target))return;
+  commitNumberPad();
+ },true);
+ window.addEventListener('resize',positionNumberPad);
+ window.addEventListener('scroll',positionNumberPad,true);
  hpInput.addEventListener('change',()=>{state().currentHp=Math.max(0,Number(hpInput.value)||0);updateStats();});
  document.getElementById('selected-character-hp-fill').addEventListener('click',()=>{if(!selectedCharacter)return;state().currentHp=calculate().hp;updateStats();});
  const skillTooltip=document.createElement('aside');skillTooltip.id='character-skill-tooltip';skillTooltip.className='character-skill-tooltip';skillTooltip.setAttribute('role','tooltip');skillTooltip.hidden=true;document.body.append(skillTooltip);
