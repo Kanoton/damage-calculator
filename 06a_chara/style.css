@@ -1486,3 +1486,7 @@ tbody th {
 .roster-skill-choices{display:flex;flex-wrap:wrap;gap:6px;margin:0 10px 8px;padding:7px;border:1px solid #c7ddce;border-radius:5px;background:#f4fbf5}
 .roster-skill-choice{display:flex;align-items:center;gap:5px;min-width:0;padding:3px 5px;border:1px solid #b5d0bd;border-radius:4px;background:#fff;color:#263c2d;font:inherit;font-size:12px;cursor:pointer}
 .roster-skill-choice img{width:28px;height:28px;object-fit:contain}
+
+/* 異変図書館の真相発覚はマップ固有ギミック欄の先頭に配置 */
+#roster-gimmicks .roster-truth{border-color:#7da89a;background:#eef8f4;color:#245643;font-weight:bold}
+#roster-gimmicks .roster-truth:disabled{opacity:.6;cursor:default}
