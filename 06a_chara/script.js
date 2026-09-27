@@ -1164,10 +1164,13 @@ function renderGimmicks(){
 
 // Roster buffs and gimmicks are independent of the source list.
 const rosterBuff={attack:0,defense:0},rosterCounts=new Map();
+window.addEventListener('character-evidence-change',()=>{if(pick.value==='MAP0104')renderRoster();});
 function rosterStat(stats,key){
  if(!stats||stats[key]===''||stats[key]===undefined)return null;
  let value=Number(stats[key])+(key==='攻撃'?rosterBuff.attack:key==='防御'?rosterBuff.defense:0);
- mapGimmicks().filter(r=>r.monster_id===stats.monster_id&&(!r['難易度']||r['難易度']===difficulty.value)).forEach(r=>{value+=Number(r[key]||0)*Math.min(gimmickMaximum(r),rosterCounts.get(gimmickKey(r))||0);});return value;
+ mapGimmicks().filter(r=>r.monster_id===stats.monster_id&&(!r['難易度']||r['難易度']===difficulty.value)).forEach(r=>{value+=Number(r[key]||0)*Math.min(gimmickMaximum(r),rosterCounts.get(gimmickKey(r))||0);});
+ if(key==='攻撃'&&pick.value==='MAP0104'&&['M0115','M0116','M0117'].includes(stats.monster_id))value+=Number(window.getCharacterEvidenceStack?.()||0);
+ return value;
 }
 const defeatTotals=new Map();
 const executedEvents=new Set();
@@ -1183,10 +1186,10 @@ const roster=document.getElementById('map-roster-list'),rosterEmpty=document.get
 // Undo snapshots last for this page session, until 全削除.
 const rosterHistory=[];
 let rosterContext={map:pick.value,difficulty:difficulty.value,route:'',moved:false};
-function rememberRoster(){document.getElementById('roster-error').textContent='';rosterHistory.push(structuredClone({monsters:placedMonsters,buff:rosterBuff,counts:[...rosterCounts],selected:selectedPlacedId,next:nextPlacedId,serials:[...monsterSerials],context:rosterContext,missions:[...missionCounters],events:[...executedEvents],defeats:[...defeatTotals]}));}
+function rememberRoster(){document.getElementById('roster-error').textContent='';rosterHistory.push(structuredClone({monsters:placedMonsters,buff:rosterBuff,counts:[...rosterCounts],selected:selectedPlacedId,next:nextPlacedId,serials:[...monsterSerials],context:rosterContext,missions:[...missionCounters],events:[...executedEvents],defeats:[...defeatTotals],characterEvidence:window.captureCharacterEvidence?.()}));}
 document.getElementById('roster-undo').addEventListener('click',()=>{
  document.getElementById('roster-error').textContent='';const previous=rosterHistory.pop();if(!previous)return;if(!data.maps[previous.context.map]){rosterHistory.length=0;renderRoster();return;}
- defeatTotals.clear();(previous.defeats||[]).forEach(([k,v])=>defeatTotals.set(k,v));executedEvents.clear();(previous.events||[]).forEach(key=>executedEvents.add(key));missionCounters.clear();(previous.missions||[]).forEach(([k,v])=>missionCounters.set(k,v));placedMonsters.splice(0,placedMonsters.length,...previous.monsters);Object.assign(rosterBuff,previous.buff);rosterCounts.clear();previous.counts.forEach(([k,v])=>rosterCounts.set(k,v));selectedPlacedId=previous.selected;window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:placedMonsters.find(enemy=>enemy.instanceId===selectedPlacedId&&!enemy.defeated)?{name:placedMonsters.find(enemy=>enemy.instanceId===selectedPlacedId).name,mapId:previous.context.map}:null}));nextPlacedId=previous.next;monsterSerials.clear();(previous.serials||[]).forEach(([id,serial])=>monsterSerials.set(id,serial));pick.value=previous.context.map;difficulty.value=previous.context.difficulty;rosterContext=previous.context;Object.assign(routeState,{context:JSON.stringify([pick.value,difficulty.value]),route:previous.context.route||'',moved:!!previous.context.moved});selected=null;render();
+ defeatTotals.clear();(previous.defeats||[]).forEach(([k,v])=>defeatTotals.set(k,v));executedEvents.clear();(previous.events||[]).forEach(key=>executedEvents.add(key));missionCounters.clear();(previous.missions||[]).forEach(([k,v])=>missionCounters.set(k,v));placedMonsters.splice(0,placedMonsters.length,...previous.monsters);Object.assign(rosterBuff,previous.buff);rosterCounts.clear();previous.counts.forEach(([k,v])=>rosterCounts.set(k,v));window.restoreCharacterEvidence?.(previous.characterEvidence);selectedPlacedId=previous.selected;window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:placedMonsters.find(enemy=>enemy.instanceId===selectedPlacedId&&!enemy.defeated)?{name:placedMonsters.find(enemy=>enemy.instanceId===selectedPlacedId).name,mapId:previous.context.map}:null}));nextPlacedId=previous.next;monsterSerials.clear();(previous.serials||[]).forEach(([id,serial])=>monsterSerials.set(id,serial));pick.value=previous.context.map;difficulty.value=previous.context.difficulty;rosterContext=previous.context;Object.assign(routeState,{context:JSON.stringify([pick.value,difficulty.value]),route:previous.context.route||'',moved:!!previous.context.moved});selected=null;render();
 });
 document.getElementById('roster-clear').addEventListener('click',()=>{clearRoster();rosterHistory.length=0;nextPlacedId=1;renderRoster();});
 function registerEnemy(enemy, switchTab=true){
@@ -1271,6 +1274,17 @@ function renderRoster(){
   const done=executedEvents.has(libraryTruthKey());truth.disabled=done;truth.setAttribute('aria-pressed',String(done));
   truth.setAttribute('aria-label',done?'真相発覚（発動済み）':'真相発覚を発動');
   truth.addEventListener('click',executeLibraryTruth);rosterGimmicks.append(truth);
+  const evidence=document.createElement('button');evidence.type='button';evidence.className='roster-evidence';
+  const count=Number(window.getCharacterEvidenceStack?.()||0);
+  const icon=document.createElement('img');icon.src='../images/icon/'+encodeURIComponent('罪証.png');icon.alt='';
+  evidence.append(icon,document.createTextNode('罪証 '+count));
+  evidence.disabled=!window.hasSelectedCharacter?.();
+  evidence.title=evidence.disabled?'キャラクターを選択すると操作できます':'虫眼鏡と共有。左クリックで＋1、右クリックで−1';
+  evidence.setAttribute('aria-label','罪証 '+count+'スタック。左クリックで増加、右クリックで減少');
+  const changeEvidence=delta=>{if(!window.hasSelectedCharacter?.())return;rememberRoster();window.setCharacterEvidenceStack(count+delta);};
+  evidence.addEventListener('click',()=>changeEvidence(1));
+  evidence.addEventListener('contextmenu',event=>{event.preventDefault();changeEvidence(-1);});
+  rosterGimmicks.append(evidence);
   if(pendingWarden()){
    const revive=document.createElement('button');revive.type='button';revive.className='roster-warden-revive';revive.textContent='看守復活';
    revive.title='撃破から2ラウンド後に手動で押す。復活のたび最大HP＋2';
@@ -1300,10 +1314,16 @@ function renderRoster(){
     const field=key==='HP'?'hp':key==='攻撃'?'attack':'defense';
     const label=key==='HP'?'残りHP':key+'力';
     amount=document.createElement('input');amount.type='number';amount.disabled=!!enemy.defeated;amount.min='0';amount.step='1';amount.value=value;amount.className='roster-hp';amount.setAttribute('aria-label',monsterDisplayName(enemy)+'の'+label);amount.title=label+'を入力'+(key==='HP'?'（0で撃破）':'');amount.addEventListener('focus',()=>amount.select());
-    let committed=false;const commit=()=>{if(committed)return;const next=Number(amount.value);if(amount.value.trim()===''||!Number.isSafeInteger(next)||next<0){amount.value=enemy[field];return;}committed=true;if(next===enemy[field])return;rememberRoster();if(key==='HP'){if(next===0){removeEnemy(enemy);rosterNotice.textContent=monsterDisplayName(enemy)+'を撃破しました。';}else{enemy.damageTaken=rosterStat(enemy.base,'HP')-next;}}else{enemy[key==='攻撃'?'manualAttack':'manualDefense']=next-rosterStat(enemy.base,key);rosterNotice.textContent=monsterDisplayName(enemy)+'の'+label+'を'+next+'に変更しました。';}renderRoster();};
-    amount.addEventListener('change',commit);amount.addEventListener('blur',commit);amount.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();commit();}if(event.key==='Escape'){amount.value=enemy[field];amount.blur();}});icon.style.cursor='text';icon.addEventListener('click',()=>amount.focus());
+    const commit=(value=amount.value)=>{const next=Number(value);if(String(value).trim()===''||!Number.isSafeInteger(next)||next<0){amount.value=enemy[field];return;}if(next===enemy[field])return;rememberRoster();if(key==='HP'){if(next===0){removeEnemy(enemy);rosterNotice.textContent=monsterDisplayName(enemy)+'を撃破しました。';}else{enemy.damageTaken=rosterStat(enemy.base,'HP')-next;}}else{enemy[key==='攻撃'?'manualAttack':'manualDefense']=next-rosterStat(enemy.base,key);rosterNotice.textContent=monsterDisplayName(enemy)+'の'+label+'を'+next+'に変更しました。';}
+    if(next===0&&key==='HP'){renderRoster();return;}
+    updateEnemy(enemy);amount.value=enemy[field];document.getElementById('roster-undo').disabled=false;
+    if(selectedPlacedId===enemy.instanceId)registerEnemy(enemy,false);
+   };
+    amount.addEventListener('change',()=>commit());amount.addEventListener('blur',()=>commit());amount.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();commit();}if(event.key==='Escape'){amount.value=enemy[field];amount.blur();}});const iconButton=document.createElement('button');iconButton.type='button';iconButton.disabled=!!enemy.defeated;iconButton.className='roster-stat-icon';iconButton.title=label+'：左クリックで＋1、右クリックで−1';iconButton.setAttribute('aria-label',monsterDisplayName(enemy)+'の'+label+'を増やす');iconButton.append(icon);
+    iconButton.addEventListener('click',()=>commit(enemy[field]+1));iconButton.addEventListener('contextmenu',event=>{event.preventDefault();commit(Math.max(0,enemy[field]-1));});
+    cell.append(iconButton,amount);amount=null;
    }else{amount=document.createElement('strong');amount.textContent=value;}
-   cell.append(icon,amount);}stats.append(cell);});
+   if(amount)cell.append(icon,amount);}stats.append(cell);});
   select.append(heading);select.addEventListener('click',()=>{selectedPlacedId=enemy.instanceId;registerEnemy(enemy);renderRoster();rosterNotice.textContent=monsterDisplayName(enemy)+'を計算機に登録しました。';});
   const remove=document.createElement('button');remove.type='button';remove.className='roster-remove';remove.textContent=enemy.defeated?'撃破済':'撃破';remove.disabled=!!enemy.defeated;remove.setAttribute('aria-label',monsterDisplayName(enemy)+'を撃破');remove.addEventListener('click',()=>{rememberRoster();removeEnemy(enemy);renderRoster();rosterNotice.textContent=monsterDisplayName(enemy)+'を撃破しました。';});
   const deleteButton=document.createElement('button');deleteButton.type='button';deleteButton.className='roster-delete';deleteButton.textContent='削除';deleteButton.setAttribute('aria-label',monsterDisplayName(enemy)+'を削除');deleteButton.addEventListener('click',()=>{rememberRoster();const i=placedMonsters.indexOf(enemy);if(i>=0)placedMonsters.splice(i,1);if(selectedPlacedId===enemy.instanceId){selectedPlacedId=null;window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:null}));}renderRoster();});
@@ -1537,6 +1557,11 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
  const specialIcons={'対象のマーク':'マーク','攻撃対象はモンスター':'モンスター','クジャク係の羽ばたき':'孔雀の羽ばたき'};
  const getState=id=>{if(!states.has(id))states.set(id,{level:0,currentHp:null,chips:[],numbers:{},modes:{},phases:{attack:false,move:false},manual:{atk:0,def:0}});return states.get(id);};
  const state=()=>getState(selectedCharacter.id);
+ window.hasSelectedCharacter=()=>Boolean(selectedCharacter);
+ window.captureCharacterEvidence=()=>selectedCharacter?{id:selectedCharacter.id,count:number(state(),'罪証')}:null;
+ window.restoreCharacterEvidence=snapshot=>{if(!snapshot)return;getState(snapshot.id).numbers['罪証']=snapshot.count;if(selectedCharacter?.id===snapshot.id){renderConditions();updateStats();}};
+ window.getCharacterEvidenceStack=()=>selectedCharacter?number(state(),'罪証'):0;
+ window.setCharacterEvidenceStack=value=>{if(!selectedCharacter)return;state().numbers['罪証']=Math.max(0,Math.floor(Number(value)||0));renderConditions();updateStats();window.dispatchEvent(new Event('character-evidence-change'));};
  const number=(s,key)=>Math.min(key==='チャージ'?10:Infinity,Math.max(0,Number(s.numbers[key])||0));
  const modeFor=rule=>Number(state().modes[rule.chip_id])||0;
  const base=(stat)=>Number(selectedCharacter['lv'+state().level+'_'+stat]||0);
@@ -1664,7 +1689,7 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
    const item=document.createElement('label');item.className='condition-item';item.title=key+'：アイコンを左クリックで+1、右クリックで-1';
    const button=document.createElement('button');button.type='button';button.className='condition-icon';button.setAttribute('aria-label',key+'を増やす');button.append(makeIcon(key));
    const input=document.createElement('input');input.type='number';input.min='0';if(key==='チャージ')input.max='10';input.inputMode='numeric';input.className='condition-number';input.setAttribute('aria-label',key+'の数');input.value=number(state(),key);
-   const setValue=value=>{state().numbers[key]=Math.min(key==='チャージ'?10:Infinity,Math.max(0,Number(value)||0));input.value=state().numbers[key];updateStats();};
+   const setValue=value=>{state().numbers[key]=Math.min(key==='チャージ'?10:Infinity,Math.max(0,Number(value)||0));input.value=state().numbers[key];updateStats();if(key==='罪証')window.dispatchEvent(new Event('character-evidence-change'));};
    button.addEventListener('click',()=>setValue(number(state(),key)+1));
    button.addEventListener('contextmenu',e=>{e.preventDefault();setValue(number(state(),key)-1);});
    input.addEventListener('change',()=>setValue(input.value));item.append(button,input);conditionsBox.append(item);
@@ -1765,6 +1790,7 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
   renderOwned();renderConditions();updateStats();
   root.querySelectorAll('.character-select').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.id===selectedCharacter.id)));
   updateChipListSelection();
+  window.dispatchEvent(new Event('character-evidence-change'));
  }
  function selectCharacter(row){selectedCharacter=row;renderSelectedCharacter();}
  function changeCharacterLevel(delta){
@@ -1837,7 +1863,16 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
  window.addEventListener('resize',positionNumberPad);
  window.addEventListener('scroll',positionNumberPad,true);
  hpInput.addEventListener('change',()=>{state().currentHp=Math.max(0,Number(hpInput.value)||0);updateStats();});
- document.getElementById('selected-character-hp-fill').addEventListener('click',()=>{if(!selectedCharacter)return;state().currentHp=calculate().hp;updateStats();});
+ const hpButton=document.getElementById('selected-character-hp-fill');
+ const changeHp=delta=>{if(!selectedCharacter)return;state().currentHp=Math.max(0,Math.min(calculate().hp,state().currentHp+delta));updateStats();};
+ hpButton.addEventListener('click',()=>changeHp(1));
+ hpButton.addEventListener('contextmenu',event=>{event.preventDefault();changeHp(-1);});
+ for(const stat of ['atk','def']){
+  const button=document.getElementById('selected-character-'+stat+'-button');
+  const change=delta=>{if(!selectedCharacter)return;const current=calculate()[stat],next=Math.max(0,current+delta);state().manual[stat]+=next-current;updateStats();};
+  button.addEventListener('click',()=>change(1));
+  button.addEventListener('contextmenu',event=>{event.preventDefault();change(-1);});
+ }
  const skillTooltip=document.createElement('aside');skillTooltip.id='character-skill-tooltip';skillTooltip.className='character-skill-tooltip';skillTooltip.setAttribute('role','tooltip');skillTooltip.hidden=true;document.body.append(skillTooltip);
  let skillTooltipTimer;
  function hideSkillTooltip(){clearTimeout(skillTooltipTimer);skillTooltip.hidden=true;}
