@@ -2,7 +2,8 @@ import http from 'node:http';
 
 const prefix = 'com.kanoton.damagecalculator';
 const commands = new Map([
-  [prefix + '.voice', 'voice'],
+  // 音声入力は一時停止中。復帰時は次の行を有効にします。
+  // [prefix + '.voice', 'voice'],
   [prefix + '.attack', 'attack'],
   [prefix + '.defense', 'defense'],
   [prefix + '.missions', 'missions'],
