@@ -1092,7 +1092,9 @@ function normalizeMapData(raw){
   maps[id]={name:base['マップ名'],image:'../images/Map/'+base.image,ids:[...new Set(raw.relations.filter(r=>r.map_id===id).map(r=>r.monster_id))],routes:[]};
   for(const row of rows){const route=String(row.route_id||'').trim();if(route)maps[id].routes.push({id:route,name:row['ルート名']||route,image:row.image?'../images/Map/'+row.image:maps[id].image,movedImage:row['移動先image']?'../images/Map/'+row['移動先image']:'',levels:String(row['ルート難易度']||'').split('|').map(v=>v.trim()).filter(Boolean)});}
  });
- return {maps,gimmicks:raw.gimmicks||[],stats:raw.stats,missions:raw.missions,events:raw.events,images:Object.fromEntries(raw.stats.map(s=>[s.image,'../images/Monster/'+s.image])),icons:{'攻撃':'../images/icon/Attack.png','防御':'../images/icon/Defense.png','HP':'../images/icon/Hp.png','コイン':'../images/icon/Coin.png',reflect:'../images/icon/Reflect.png'}};
+ const nativeMapByMonster={};
+ raw.relations.forEach(row=>{if(!Object.hasOwn(nativeMapByMonster,row.monster_id))nativeMapByMonster[row.monster_id]=row.map_id;});
+ return {maps,nativeMapByMonster,gimmicks:raw.gimmicks||[],stats:raw.stats,missions:raw.missions,events:raw.events,images:Object.fromEntries(raw.stats.map(s=>[s.image,'../images/Monster/'+s.image])),icons:{'攻撃':'../images/icon/Attack.png','防御':'../images/icon/Defense.png','HP':'../images/icon/Hp.png','コイン':'../images/icon/Coin.png',reflect:'../images/icon/Reflect.png'}};
 }
 function assignMapImage(image,url){
  const variants=[url,url.replace('../images/','../Image/'),url.replace('../images/','../Images/'),url.replace('/Icon/','/icon/'),url.replace('/Monster/','/MonsterImg/'),url.replace('/Map/','/MapImg/')];
@@ -1287,7 +1289,7 @@ function renderRoster(){
  const active=placedMonsters.find(e=>e.instanceId===selectedPlacedId);if(active)registerEnemy(active,false);
  roster.replaceChildren();rosterEmpty.hidden=placedMonsters.length>0;
  document.getElementById('roster-counts').textContent='累計 '+placedMonsters.length+'体 ／ 出現中 '+placedMonsters.filter(e=>!e.defeated).length+'体 ／ 撃破 '+placedMonsters.filter(e=>e.defeated).length+'体';
- [...placedMonsters].sort((a,b)=>Number(!!a.defeated)-Number(!!b.defeated)||a.monsterId.localeCompare(b.monsterId,'en',{numeric:true})||a.instanceId-b.instanceId).forEach(enemy=>{
+ [...placedMonsters].sort((a,b)=>Number(!!a.defeated)-Number(!!b.defeated)||Number(data.nativeMapByMonster[b.monsterId]===pick.value)-Number(data.nativeMapByMonster[a.monsterId]===pick.value)||a.monsterId.localeCompare(b.monsterId,'en',{numeric:true})||a.instanceId-b.instanceId).forEach(enemy=>{
   const card=document.createElement('article');card.className='roster-card';card.classList.toggle('defeated',!!enemy.defeated);card.classList.toggle('selected',enemy.instanceId===selectedPlacedId);
   const select=document.createElement('button');select.type='button';select.disabled=!!enemy.defeated;select.className='roster-select';select.setAttribute('aria-pressed',String(enemy.instanceId===selectedPlacedId));select.setAttribute('aria-label',monsterDisplayName(enemy)+'を計算機に登録');
   const heading=document.createElement('span');heading.className='roster-name';const portrait=document.createElement('img');portrait.className='roster-portrait';portrait.alt='';assignMapImage(portrait,enemy.image);const nameText=document.createElement('span');nameText.className='monster-name-text';nameText.textContent=monsterDisplayName(enemy);heading.append(portrait,nameText);
