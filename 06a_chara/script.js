@@ -933,28 +933,26 @@ Array.from(modes).filter(mode => ["attack", "defense"].includes(mode.dataset.rol
         });
     });
 
-    // カード画像をクリックすると、そのカードの使用枚数を+1
-    const addCardFromImage = image => {
-        const input =
-            document.getElementById(image.dataset.cardTarget);
-
-        if (!input) {
-            return;
-        }
-
-        input.value = Number(input.value) + 1;
+    // カード画像は左クリックで減らし、右クリックで増やす。
+    const changeCardFromImage = (image, delta) => {
+        const input = document.getElementById(image.dataset.cardTarget);
+        if (!input) return;
+        input.value = Math.max(0, Number(input.value || 0) + delta);
         input.dispatchEvent(new Event("input"));
     };
 
     mode.querySelectorAll(".battle-card-clickable").forEach(image => {
-        image.addEventListener("click", () => {
-            addCardFromImage(image);
+        image.setAttribute("aria-label", image.alt + "：左クリックで1枚減らす、右クリックで1枚増やす");
+        image.title = "左クリック：−1 ／ 右クリック：＋1";
+        image.addEventListener("click", () => changeCardFromImage(image, -1));
+        image.addEventListener("contextmenu", event => {
+            event.preventDefault();
+            changeCardFromImage(image, 1);
         });
-
         image.addEventListener("keydown", event => {
             if (event.key === "Enter" || event.key === " ") {
                 event.preventDefault();
-                addCardFromImage(image);
+                changeCardFromImage(image, event.shiftKey ? 1 : -1);
             }
         });
     });
@@ -1762,7 +1760,7 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
  }
  document.addEventListener('focusin',event=>{
   const input=event.target;
-  if(!(input instanceof HTMLInputElement)||input.type!=='number'||input.disabled||input.readOnly)return;
+  if(!(input instanceof HTMLInputElement)||input.type!=='number'||input.disabled||input.readOnly||input.closest('.battle-card-counter'))return;
   if(numberPadInput&&numberPadInput!==input)commitNumberPad();
   numberPadInput=input;numberPadOriginal=input.value;replaceNumberOnDigit=true;
   input.select();input.setAttribute('aria-controls',numberPad.id);
