@@ -1193,7 +1193,7 @@ function registerEnemy(enemy, switchTab=true){
  // Clicking a roster monster always opens the attack calculator.
  if(switchTab)document.querySelector('.role-tab[data-role="attack"]').click();
 }
-function clearRoster(){document.getElementById('roster-error').textContent='';defeatTotals.clear();executedEvents.clear();placedMonsters.length=0;selectedPlacedId=null;rosterBuff.attack=0;rosterBuff.defense=0;rosterCounts.clear();rosterNotice.textContent='';}
+function clearRoster(){document.getElementById('roster-error').textContent='';defeatTotals.clear();executedEvents.clear();placedMonsters.length=0;selectedPlacedId=null;skillChoiceId=null;rosterBuff.attack=0;rosterBuff.defense=0;rosterCounts.clear();rosterNotice.textContent='';}
 function updateEnemy(enemy){if(enemy.defeated)return;enemy.attack=rosterStat(enemy.base,'攻撃')+(enemy.manualAttack||0)+(enemy.eventAttack||0);enemy.defense=rosterStat(enemy.base,'防御')+(enemy.manualDefense||0)+(enemy.eventDefense||0);enemy.hp=rosterStat(enemy.base,'HP')-enemy.damageTaken;}
 function spawnGimmickMonsters(trigger){
  const matching=mapGimmicks().filter(r=>r.gimmick_id===trigger.gimmick_id&&(!r['難易度']||r['難易度']===difficulty.value));
@@ -1207,6 +1207,38 @@ function spawnGimmickMonsters(trigger){
 function removeEnemy(enemy){if(enemy.defeated)return;decrementMonsterMissions(data.missions,missionCounters,enemy.mapId,enemy.monsterId,enemy.difficulty);applyDefeatGimmicks(data.gimmicks,defeatTotals,rosterCounts,enemy.mapId,enemy.difficulty,enemy.monsterId,spawnGimmickMonsters);enemy.defeated=true;enemy.hp=0;if(selectedPlacedId===enemy.instanceId)selectedPlacedId=null;}
 const rosterGimmicks=document.getElementById('roster-gimmicks');
 document.getElementById('roster-reset').addEventListener('click',()=>{if(!rosterBuff.attack&&!rosterBuff.defense&&![...rosterCounts.values()].some(Boolean))return;rememberRoster();rosterBuff.attack=0;rosterBuff.defense=0;rosterCounts.clear();renderRoster();rosterNotice.textContent='下の一覧のバフ・固有ギミックをリセットしました。';});
+// ターンやクールダウンは記録せず、ボタンを押した時だけ召喚する。
+const summonSkills={
+ M0003:{map:'MAP0001',targets:['M0004']},
+ M0006:{map:'MAP0002',targets:['M0009','M0010']},
+ M0014:{map:'MAP0003',targets:['M0017']},
+ M0020:{map:'MAP0004',targets:['M0023']},
+ M0021:{map:'MAP0004',targets:['M0025']},
+ M0028:{map:'MAP0005',targets:['M0031']}
+};
+let skillChoiceId=null;
+function summonFromSkill(caster,targetId){
+ const skill=summonSkills[caster.monsterId];
+ if(!skill||caster.defeated||caster.mapId!==pick.value||caster.difficulty!==difficulty.value||skill.map!==pick.value||!skill.targets.includes(targetId))return;
+ const targetIds=[targetId];
+ if(caster.monsterId==='M0021'&&caster.hp<=rosterStat(caster.base,'HP')/2)targetIds.push('M0026');
+ const pending=[];
+ for(const id of targetIds){
+  const stats=data.stats.find(row=>row.monster_id===id&&row['難易度']===difficulty.value);
+  if(!stats||['攻撃','防御','HP'].some(key=>rosterStat(stats,key)===null||!Number.isFinite(rosterStat(stats,key)))||rosterStat(stats,'HP')<=0){
+   document.getElementById('roster-error').textContent=id+' の'+difficulty.value+'の召喚用ステータスを確認してください。';
+   return;
+  }
+  pending.push(stats);
+ }
+ rememberRoster();
+ for(const stats of pending){
+  placedMonsters.push({instanceId:nextPlacedId++,monsterId:stats.monster_id,name:stats['モンスター名'],mapName:data.maps[pick.value].name,mapId:pick.value,difficulty:difficulty.value,image:data.images[stats.image],base:{...stats},damageTaken:0,attack:rosterStat(stats,'攻撃'),defense:rosterStat(stats,'防御'),hp:rosterStat(stats,'HP'),coin:stats['コイン']===''?null:Number(stats['コイン']),boss:String(stats['ボス']).trim()==='1',reflect:String(stats['反撃']).trim()==='1'});
+ }
+ skillChoiceId=null;
+ renderRoster();
+ rosterNotice.textContent=caster.name+'のスキルで'+pending.map(stats=>stats['モンスター名']).join('・')+'を追加しました。';
+}
 function renderRoster(){
  let newlyDefeated;do{newlyDefeated=false;for(const enemy of placedMonsters){if(enemy.defeated)continue;updateEnemy(enemy);if(enemy.hp<=0){removeEnemy(enemy);newlyDefeated=true;}}}while(newlyDefeated);
  updateEventRows();
@@ -1244,7 +1276,33 @@ function renderRoster(){
   const remove=document.createElement('button');remove.type='button';remove.className='roster-remove';remove.textContent=enemy.defeated?'撃破済':'撃破';remove.disabled=!!enemy.defeated;remove.setAttribute('aria-label',enemy.name+' #'+enemy.instanceId+'を撃破');remove.addEventListener('click',()=>{rememberRoster();removeEnemy(enemy);renderRoster();rosterNotice.textContent=enemy.name+' #'+enemy.instanceId+'を撃破しました。';});
   const deleteButton=document.createElement('button');deleteButton.type='button';deleteButton.className='roster-delete';deleteButton.textContent='削除';deleteButton.setAttribute('aria-label',enemy.name+' #'+enemy.instanceId+'を削除');deleteButton.addEventListener('click',()=>{rememberRoster();const i=placedMonsters.indexOf(enemy);if(i>=0)placedMonsters.splice(i,1);if(selectedPlacedId===enemy.instanceId)selectedPlacedId=null;renderRoster();});
   const actions=document.createElement('div');actions.className='roster-card-actions';actions.append(remove,deleteButton);
-  const top=document.createElement('div');top.className='roster-card-top';top.append(select,actions);card.append(top,stats);roster.append(card);
+  const top=document.createElement('div');top.className='roster-card-top';top.append(select,actions);
+  const skill=summonSkills[enemy.monsterId];
+  if(skill&&skill.map===enemy.mapId&&!enemy.defeated){
+   top.classList.add('has-skill');
+   const skillButton=document.createElement('button');skillButton.type='button';skillButton.className='roster-skill';skillButton.textContent='スキル';
+   skillButton.setAttribute('aria-label',enemy.name+' #'+enemy.instanceId+'の召喚スキル');
+   if(enemy.monsterId==='M0021')skillButton.title='近くに魔法のティーポットがいない場合に使用（距離は手動確認）';
+   if(enemy.monsterId==='M0020')skillButton.title='「この人です」を3枚使用したら押す（カード枚数は手動管理）';
+   if(skill.targets.length>1){
+    const open=skillChoiceId===enemy.instanceId;skillButton.setAttribute('aria-expanded',String(open));
+    skillButton.addEventListener('click',()=>{skillChoiceId=open?null:enemy.instanceId;renderRoster();});
+   }else skillButton.addEventListener('click',()=>summonFromSkill(enemy,skill.targets[0]));
+   top.append(skillButton);
+  }
+  card.append(top);
+  if(skill&&skill.targets.length>1&&skillChoiceId===enemy.instanceId&&!enemy.defeated){
+   const choices=document.createElement('div');choices.className='roster-skill-choices';choices.setAttribute('role','group');choices.setAttribute('aria-label',enemy.name+'が召喚するモンスターを選択');
+   for(const id of skill.targets){
+    const target=data.stats.find(row=>row.monster_id===id&&row['難易度']===difficulty.value);if(!target)continue;
+    const choice=document.createElement('button');choice.type='button';choice.className='roster-skill-choice';choice.setAttribute('aria-label',target['モンスター名']+'を1体召喚');
+    const image=document.createElement('img');image.alt='';assignMapImage(image,data.images[target.image]);
+    const label=document.createElement('span');label.textContent=target['モンスター名'];choice.append(image,label);
+    choice.addEventListener('click',()=>summonFromSkill(enemy,id));choices.append(choice);
+   }
+   card.append(choices);
+  }
+  card.append(stats);roster.append(card);
  });
 }
 function spawnSelectedMonster(){
