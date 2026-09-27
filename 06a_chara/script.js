@@ -1661,6 +1661,7 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
   });
  }
  function renderOwned(){
+  const previousScroll=ownedBox.scrollLeft;
   ownedBox.replaceChildren();
   for(const id of state().chips){
    const chip=chips.find(c=>c.id===id);if(!chip)continue;
@@ -1674,18 +1675,38 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
    item.title=chip.name+'\n'+chip.effect+(canToggle?'\nクリックで条件を切り替え':'');
    const img=document.createElement('img');img.alt=chip.name;img.src='../images/chip_icon/'+encodeURIComponent(chip.images);item.append(img);ownedBox.append(item);
   }
-  refreshChipLayout();
+  ownedBox.scrollLeft=previousScroll;
  }
- function refreshChipLayout(){
-  const count=ownedBox.children.length;
-  const width=Math.max(75,(ownedBox.clientWidth||320)-10),gap=4,normalSize=46;
-  const rows=count*normalSize+Math.max(0,count-1)*gap<=width?1:2;
-  const columns=Math.max(1,Math.ceil(count/rows));
-  const size=Math.max(20,Math.min(normalSize,Math.floor((width-gap*(columns-1))/columns)));
-  ownedBox.style.setProperty('--chip-rows',String(rows));
-  ownedBox.style.setProperty('--chip-size',size+'px');
+ ownedBox.addEventListener('wheel',event=>{
+  if(ownedBox.scrollWidth<=ownedBox.clientWidth||Math.abs(event.deltaX)>Math.abs(event.deltaY))return;
+  const before=ownedBox.scrollLeft;
+  ownedBox.scrollLeft+=event.deltaY;
+  if(ownedBox.scrollLeft!==before)event.preventDefault();
+ },{passive:false});
+ let chipDrag=null,suppressChipClick=false;
+ ownedBox.addEventListener('pointerdown',event=>{
+  if(event.button!==0||event.pointerType==='touch')return;
+  chipDrag={id:event.pointerId,x:event.clientX,scroll:ownedBox.scrollLeft,active:false};
+ });
+ ownedBox.addEventListener('pointermove',event=>{
+  if(!chipDrag||event.pointerId!==chipDrag.id)return;
+  const delta=event.clientX-chipDrag.x;
+  if(Math.abs(delta)<=5&&!chipDrag.active)return;
+  if(!chipDrag.active){chipDrag.active=true;suppressChipClick=true;ownedBox.setPointerCapture(event.pointerId);}
+  ownedBox.scrollLeft=chipDrag.scroll-delta;event.preventDefault();
+ });
+ function finishChipDrag(event){
+  if(!chipDrag||event.pointerId!==chipDrag.id)return;
+  if(chipDrag.active&&ownedBox.hasPointerCapture(event.pointerId))ownedBox.releasePointerCapture(event.pointerId);
+  chipDrag=null;
+  setTimeout(()=>{suppressChipClick=false;},0);
  }
- if(typeof ResizeObserver!=='undefined')new ResizeObserver(refreshChipLayout).observe(ownedBox);
+ ownedBox.addEventListener('pointerup',finishChipDrag);
+ ownedBox.addEventListener('pointercancel',finishChipDrag);
+ ownedBox.addEventListener('click',event=>{
+  if(!suppressChipClick)return;
+  event.preventDefault();event.stopImmediatePropagation();suppressChipClick=false;
+ },true);
  function renderSelectedCharacter(){
   if(!selectedCharacter)return;
   selectedPanel.hidden=false;
