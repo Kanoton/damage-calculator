@@ -1723,9 +1723,18 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
   if(!ability)return;
   clearTimeout(skillTooltipTimer);
   skillTooltip.replaceChildren();
-  const heading=document.createElement('strong');heading.className='character-skill-heading';heading.textContent=row.name;
+  const levels=document.createElement('div');levels.className='character-skill-levels';levels.textContent='Lv0 / Lv1 / Lv2 / Lv3';
+  const stats=document.createElement('div');stats.className='character-skill-stats';
+  for(const [key,label,file] of [['atk','攻撃力','Attack.png'],['def','防御力','Defense.png'],['hp','HP','Hp.png'],['move','移動力',null]]){
+   const entry=document.createElement('span');entry.className='character-skill-stat';entry.title=label;
+   const icon=file?document.createElement('img'):document.createElement('span');
+   if(file){icon.src='../images/icon/'+file;icon.alt='';}else{icon.className='character-skill-move-icon';icon.textContent='👟';icon.setAttribute('aria-hidden','true');}
+   const values=[0,1,2,3].map(level=>row['lv'+level+'_'+key]??'—').join('/');
+   const text=document.createElement('span');text.textContent=values;
+   entry.setAttribute('aria-label',label+' Lv0からLv3 '+values);entry.append(icon,text);stats.append(entry);
+  }
   const description=document.createElement('div');description.className='character-skill-text';description.textContent=ability;
-  skillTooltip.append(heading,description);skillTooltip.hidden=false;skillTooltip.scrollTop=0;
+  skillTooltip.append(levels,stats,description);skillTooltip.hidden=false;skillTooltip.scrollTop=0;
   const box=button.getBoundingClientRect(),width=skillTooltip.offsetWidth,height=skillTooltip.offsetHeight,gap=10;
   let left=box.right+gap;if(left+width>window.innerWidth-8)left=box.left-width-gap;
   skillTooltip.style.left=Math.max(8,Math.min(left,window.innerWidth-width-8))+'px';

@@ -1497,5 +1497,9 @@ tbody th {
 /* キャラクター能力：マウスオーバーとキーボードフォーカスで表示 */
 .character-skill-tooltip{position:fixed;z-index:10000;width:min(430px,calc(100vw - 16px));max-height:min(70vh,620px);overflow:auto;pointer-events:none;user-select:none;padding:14px 16px;border:2px solid #b89224;border-radius:8px;background:#fffdf6;color:#302819;box-shadow:0 8px 24px #0005;font-size:14px;line-height:1.55;overscroll-behavior:contain}
 .character-skill-tooltip[hidden]{display:none}
-.character-skill-heading{display:block;margin-bottom:10px;font-size:17px}
+.character-skill-levels{margin-bottom:5px;font-size:12px;color:#655838}
+.character-skill-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 12px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #e1d3a7}
+.character-skill-stat{display:flex;align-items:center;gap:5px;min-width:0;font-size:14px;font-weight:600;white-space:nowrap}
+.character-skill-stat img,.character-skill-move-icon{width:19px;height:19px;flex:none;object-fit:contain}
+.character-skill-move-icon{font-size:17px;line-height:19px;text-align:center}
 .character-skill-text{white-space:pre-wrap;overflow-wrap:anywhere}
