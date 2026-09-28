@@ -1374,10 +1374,10 @@ function selectMonster(id){selected=id;list.querySelectorAll('button').forEach(b
 function updateMissionRow(tr){
  const key=tr.dataset.counterKey,maximum=Number(tr.dataset.maximum);
  const count=missionCounters.has(key)?missionCounters.get(key):maximum;
- tr.children[0].textContent=count;
+ tr.children[0].textContent=count+' / '+maximum;
  tr.classList.toggle('mp-mission-done',count===0);
  const control=tr.querySelector('button');
- control.setAttribute('aria-label',tr.dataset.description+'、残り'+count+'。クリックで1減らす、右クリックまたはShiftキーを押しながらEnterで1増やす');
+ control.setAttribute('aria-label',tr.dataset.description+'、残り'+count+' / '+maximum+'。クリックで1減らす、右クリックまたはShiftキーを押しながらEnterで1増やす');
 }
 function attachMissionCounter(tr,row){
  const key=missionCounterKey(row,difficulty.value);
