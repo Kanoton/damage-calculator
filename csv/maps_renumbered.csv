@@ -6,6 +6,7 @@ MAP0004,魔法学院,Layout_Magic_Academy.png,1,,,
 MAP0005,龍宮遊園地,Layout_Dragon_Palace_Amusement_Park.png,1,,,
 MAP0006,幽魂路地,Layout_Ghost_Alley.png,1,,,
 MAP0007,龍星の中庭,Layout_Garden_Courtyard.png,1,,,
+MAP0007,龍星の中庭,Layout_Garden_Courtyard.png,,COMMON,共通,,普通|困難|悪夢|狂気
 MAP0101,予選運動場,Layout_Qualifier's_Field.png,,,,
 MAP0102,トーナメント運動場,Layout_Knockout_Round_Stadium.png,,,,
 MAP0103,決勝大会場,Layout_Grand_Final_Arena.png,,,,
