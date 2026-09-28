@@ -1840,7 +1840,7 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
   if(!(input instanceof HTMLInputElement)||input.type!=='number'||input.disabled||input.readOnly||input.closest('.battle-card-counter'))return;
   if(numberPadInput&&numberPadInput!==input)commitNumberPad();
   numberPadInput=input;numberPadOriginal=input.value;replaceNumberOnDigit=true;
-  const role=input.closest('.mode-content')?.dataset.role||(selectedPanel.contains(input)?'character':'character');
+  const role=input.classList.contains('roster-hp')?'map':input.closest('.mode-content')?.dataset.role||(selectedPanel.contains(input)?'character':'character');
   numberPad.className='character-number-pad pad-theme-'+role;
   input.select();input.setAttribute('aria-controls',numberPad.id);
   numberPad.hidden=false;positionNumberPad();
