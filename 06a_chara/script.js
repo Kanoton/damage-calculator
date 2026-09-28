@@ -1072,7 +1072,7 @@ function eventBuff(row){
 }
 function groupMapEvents(events){
  const groups=new Map();for(const row of events){const progress=String(row['進捗']??'').trim(),route=String(row.route_id||'').trim(),key=JSON.stringify([route,progress]);if(!groups.has(key))groups.set(key,{進捗:progress,route_id:route,rows:[],内容:[]});const group=groups.get(key);group.rows.push(row);group['内容'].push(row['内容']);}
- return [...groups.values()].sort((a,b)=>{const an=a['進捗']!==''&&Number.isFinite(Number(a['進捗'])),bn=b['進捗']!==''&&Number.isFinite(Number(b['進捗']));return an&&bn?Number(a['進捗'])-Number(b['進捗']):an?-1:bn?1:0;}).map(g=>({...g,内容:g['内容'].join('\n')}));
+ return [...groups.values()].sort((a,b)=>{const ag=a['内容'].some(text=>String(text||'').trim()==='ゲームオーバー'),bg=b['内容'].some(text=>String(text||'').trim()==='ゲームオーバー');if(ag!==bg)return ag?1:-1;const an=a['進捗']!==''&&Number.isFinite(Number(a['進捗'])),bn=b['進捗']!==''&&Number.isFinite(Number(b['進捗']));return an&&bn?Number(a['進捗'])-Number(b['進捗']):an?-1:bn?1:0;}).map(g=>({...g,内容:g['内容'].join('\n')}));
 }
 function routeLevelMatches(row,level){return !String(row['難易度']||'').trim()||String(row['難易度']).split('|').map(v=>v.trim()).includes(level);}
 function missionCounterKey(row,level){return JSON.stringify([row.map_id,level,String(row.route_id||'').trim(),String(row.monster_id||'').trim(),Number(row['カウンタ']),String(row['内容']||''),String(row['報酬']||'')]);}
