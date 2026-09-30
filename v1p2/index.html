@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>キャラクター・チップ v1p2</title><link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+<header><h1>キャラクター・チップ <small>v1p2</small></h1><label>マップ <select id="map-select"></select></label></header>
+<nav class="tabs"><button class="active" data-view="characters">キャラ一覧</button><button data-view="chips">チップ</button></nav>
+<section id="characters" class="view"><p id="character-status"></p><div id="character-list" class="grid"></div></section>
+<section id="chips" class="view" hidden><div id="chip-tabs" class="chip-tabs"></div><p id="chip-status"></p><div id="chip-list" class="grid"></div></section>
+<section id="selected" hidden>
+ <div class="selected-head"><button id="portrait" title="クリックでレベルアップ、右クリックでレベルダウン"><img id="selected-image" alt=""></button><div><h2 id="selected-name"></h2><b id="level">Lv.0</b></div></div>
+ <div class="stats"><label>HP <input id="hp" type="number" min="0"></label><span>/ <b id="max-hp"></b></span><label>攻撃 <input id="atk" type="number" min="0"></label><label>防御 <input id="def" type="number" min="0"></label><span>移動 <b id="move"></b></span></div>
+ <div id="conditions" class="conditions"></div><h3>取得チップ</h3><div id="owned-chips" class="owned"></div>
+ <details><summary>能力</summary><pre id="ability"></pre></details>
+</section>
+</main><script src="script.js"></script></body></html>
