@@ -105,7 +105,7 @@ MAP0007,PEACOCK,普通|困難|悪夢|狂気,分岐時,M0048|M0051,1|2,クジャ�
 MAP0007,PEACOCK,普通|困難|悪夢|狂気,クジャク撃破,M0045|M0049,1|1,ヒメ、センズル係1体出現,0,0,Garden_Event_Fen.png
 MAP0007,PEACOCK,普通|困難|悪夢|狂気,上記から2ターン,M0048|M0049,1|1,クジャク係1体、センズル係1体出現,0,0,Garden_Event_Peacock_Last.png
 MAP0007,MANDARIN,普通|困難|悪夢|狂気,分岐時,M0047|M0051,2|2,オシドリ係2体、お出迎え係2体出現,0,0,Garden_Event_Lovebird.png
-MAP0007,MANDARIN,普通|困難|悪夢|狂気,オシドリ体撃破,M0046|M0049,1|1,ヒメ、センズル係1体出現,0,0,Garden_Event_Fen.png
+MAP0007,MANDARIN,普通|困難|悪夢|狂気,オシドリ2体撃破,M0046|M0049,1|1,ヒメ、センズル係1体出現,0,0,Garden_Event_Fen.png
 MAP0007,MANDARIN,普通|困難|悪夢|狂気,上記から2ターン,M0047|M0049,2|1,オシドリ係2体、センズル係1体出現,0,0,Garden_Event_Lovebird_Last.png
 MAP0007,PHOENIX,普通|困難|悪夢|狂気,分岐時,M0044|M0048|M0051,1|1|2,ダーク・フェニックス、クジャク係1体、お出迎え係2体出現,0,0,Garden_Event_Phoenix.png
 MAP0007,PHOENIX,普通|困難|悪夢|狂気,分岐後、3ターン,M0047,2,オシドリ係2体出現,0,0,Garden_Event_Phoenix_Add.png
