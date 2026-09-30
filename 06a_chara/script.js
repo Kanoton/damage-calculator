@@ -1126,7 +1126,7 @@ function renderRouteControls(){
  const focused=document.activeElement?.closest('#mp-route-controls')?document.activeElement.dataset.routeFocus:null;
  const routes=ensureRoute();routeNote.hidden=!(routes.length>1&&routeState.route==='COMMON');routeControls.replaceChildren();routeControls.hidden=routes.length===0;root.querySelector('.mp-map-only').classList.toggle('has-route-switches',routes.length>0);
  const makeGroup=(label,choices)=>{const group=document.createElement('div');group.className='mp-route-group';group.setAttribute('role','group');group.setAttribute('aria-label',label);for(const choice of choices){const button=document.createElement('button');button.type='button';button.textContent=choice.name;button.dataset.routeFocus=choice.key;button.setAttribute('aria-pressed',String(choice.active));button.addEventListener('click',()=>{choice.select();eventPreview.reset();render();});group.append(button);}routeControls.append(group);};
- if(routes.length)makeGroup('ルート表示',routes.map(r=>({name:r.name,key:'route:'+r.id,active:r.id===routeState.route,select:()=>{routeState.route=r.id;if(!r.movedImage)routeState.moved=false;}})));
+ if(routes.length)makeGroup('ルート表示',routes.map(r=>({name:r.name,key:'route:'+r.id,active:r.id===routeState.route,select:()=>{routeState.route=r.id;routeState.context=JSON.stringify([pick.value,difficulty.value]);if(!r.movedImage)routeState.moved=false;}})));
  if(routes.find(r=>r.id===routeState.route)?.movedImage)makeGroup('マップ表示',[{name:'共通マップ',key:'view:base',active:!routeState.moved,select:()=>routeState.moved=false},{name:'移動先マップ',key:'view:moved',active:routeState.moved,select:()=>routeState.moved=true}]);
  if(focused)[...routeControls.querySelectorAll('button')].find(b=>b.dataset.routeFocus===focused)?.focus();
 }
