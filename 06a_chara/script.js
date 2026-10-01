@@ -1156,7 +1156,7 @@ function renderGimmicks(){
  unique.forEach(row=>{
   const button=document.createElement('button');button.type='button';button.dataset.gimmick=row.gimmick_id;const max=gimmickMaximum(row);const count=gimmickCount(row);button.textContent=row['表示名']+(max===1?'':' '+count);button.classList.toggle('mp-gimmick-complete',count>=max);button.setAttribute('aria-pressed',String(count>0));button.setAttribute('aria-label',row['表示名']+' '+gimmickCount(row)+'、左クリックで増加、右クリックで減少');
   button.title='左クリック：＋1 ／ 右クリック：−1';
-  const change=delta=>{const current=gimmickCount(row),maximum=gimmickMaximum(row);gimmickCounts.set(gimmickKey(row),Math.max(0,Math.min(maximum,current+delta)));render();};
+  const change=delta=>{const current=gimmickCount(row),maximum=gimmickMaximum(row);const next=Math.max(0,Math.min(maximum,current+delta));if(next===current)return;if(pick.value==='MAP0104'&&row.gimmick_id==='warden_defeated'&&delta>0){rememberRoster();defeatActiveWardens();}gimmickCounts.set(gimmickKey(row),next);render();};
   button.addEventListener('click',()=>change(1));button.addEventListener('contextmenu',event=>{event.preventDefault();change(-1);});button.addEventListener('keydown',event=>{if(event.shiftKey&&event.key==='Enter'){event.preventDefault();change(-1);}});
   gimmickArea.append(button);if(focused===row.gimmick_id)button.focus();
  });
@@ -1195,7 +1195,7 @@ function executeProgressEvents(){if(!roundProgressReady())return;groupMapEvents(
 function changeProgress(delta){const next=Math.max(0,currentProgress+delta);if(next===currentProgress)return;rememberRoster();currentProgress=next;renderRoundProgress();executeProgressEvents();}
 document.getElementById('progress-minus').addEventListener('click',()=>changeProgress(-1));
 document.getElementById('progress-plus').addEventListener('click',()=>changeProgress(1));
-document.getElementById('turn-end').addEventListener('click',()=>{rememberRoster();currentRound+=1;currentProgress+=1;renderRoundProgress();executeProgressEvents();});
+document.getElementById('turn-end').addEventListener('click',()=>{rememberRoster();const clueCount=rosterCounts.get('MAP0104:clue')||0;currentRound+=1;currentProgress+=1;renderRoundProgress();executeProgressEvents();if(pick.value==='MAP0104'&&(currentRound>=8||clueCount>=4))executeLibraryTruth();});
 renderRoundProgress();
 window.addEventListener('character-selection-change',()=>{if(!roundProgressReady()){renderRoundProgress();return;}currentRound=1;currentProgress=1;renderRoundProgress();executeProgressEvents();});
 let rosterContext={map:pick.value,difficulty:difficulty.value,route:'',moved:false};
@@ -1227,6 +1227,7 @@ function spawnGimmickMonsters(trigger){
  }}catch(error){document.getElementById('roster-error').textContent=trigger['表示名']+'：'+error.message;return;}
  for(const {stats,count} of pending){for(let i=0;i<count;i++)addPlacedMonster({instanceId:nextPlacedId++,monsterId:stats.monster_id,name:stats['モンスター名'],mapName:data.maps[pick.value].name,mapId:pick.value,difficulty:difficulty.value,image:data.images[stats.image],base:{...stats},damageTaken:0,attack:rosterStat(stats,'攻撃'),defense:rosterStat(stats,'防御'),hp:rosterStat(stats,'HP'),coin:stats['コイン']===''?null:Number(stats['コイン']),boss:String(stats['ボス']).trim()==='1',reflect:String(stats['反撃']).trim()==='1'});}
 }
+function defeatActiveWardens(){const wardens=placedMonsters.filter(enemy=>enemy.mapId==='MAP0104'&&enemy.difficulty===difficulty.value&&enemy.monsterId==='M0116'&&!enemy.defeated);wardens.forEach(removeEnemy);return wardens.length;}
 function removeEnemy(enemy){if(enemy.defeated)return;enemy.wardenReviveReady=enemy.mapId==='MAP0104'&&enemy.monsterId==='M0117'&&(rosterCounts.get('MAP0104:clue')||0)<2;decrementMonsterMissions(data.missions,missionCounters,enemy.mapId,enemy.monsterId,enemy.difficulty);applyDefeatGimmicks(data.gimmicks,defeatTotals,rosterCounts,enemy.mapId,enemy.difficulty,enemy.monsterId,spawnGimmickMonsters);if(enemy.mapId==='MAP0006')executeGhostDefeatEvent(enemy.monsterId);enemy.defeated=true;enemy.hp=0;if(selectedPlacedId===enemy.instanceId){selectedPlacedId=null;window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:null}));}}
 // 看守の復活待ちは撃破時の手がかり数で確定し、履歴にも保存する。
 function pendingWarden(){return [...placedMonsters].reverse().find(enemy=>enemy.wardenReviveReady&&enemy.defeated&&enemy.mapId===pick.value&&enemy.difficulty===difficulty.value);}
