@@ -8,8 +8,8 @@ const root=document.getElementById('map-draft'),data=normalizeMapData(INITIAL_MA
 
 const eventPreview=createEventMapPreview(document.getElementById('mp-map-image'),document.getElementById('mp-event-image-layer'),file=>new Promise(resolve=>{
  // File names refer to images/MapEvent, including optional subfolders.
- const segments=file.replaceAll('\\','/').split('/');if(segments.some(part=>!part||part==='.'||part==='..')||file.includes(':')){resolve(null);return;}
- const url='../images/MapEvent/'+segments.map(encodeURIComponent).join('/');const img=new Image();img.onload=()=>resolve(url);img.onerror=()=>resolve(null);img.src=url;
+ const url=safeAssetUrl('../images/MapEvent/',file);if(!url){resolve(null);return;}
+ const img=new Image();img.onload=()=>resolve(url);img.onerror=()=>resolve(null);img.src=url;
 }));
 root.addEventListener('keydown',event=>{if(event.key==='Escape')eventPreview.reset();});
 document.querySelectorAll('.role-tab,.mp-subtabs button').forEach(button=>button.addEventListener('click',()=>eventPreview.reset()));
@@ -37,8 +37,6 @@ let selected=null;const buff={attack:0,defense:0};
 const gimmickCounts=new Map();
 const gimmickArea=document.createElement('div');gimmickArea.className='mp-gimmicks';gimmickArea.setAttribute('aria-label','マップ固有ギミック');
 function mapGimmicks(){return (data.gimmicks||[]).filter(r=>r.map_id===pick.value);}
-function gimmickKey(row){return row.map_id+':'+row.gimmick_id;}
-function gimmickMaximum(row){const raw=row['最大回数'];if(raw===undefined||String(raw).trim()==='')return Infinity;const number=Number(raw);return Number.isFinite(number)?Math.max(0,Math.floor(number)):Infinity;}
 function gimmickCount(row){return Math.min(gimmickMaximum(row),gimmickCounts.get(gimmickKey(row))??0);}
 function effectiveStat(stats,key){
  if(!stats||stats[key]===''||stats[key]===undefined)return null;
@@ -148,14 +146,7 @@ function reviveWarden(){
 const rosterGimmicks=document.getElementById('roster-gimmicks');
 document.getElementById('roster-reset').addEventListener('click',()=>{if(!rosterBuff.attack&&!rosterBuff.defense&&![...rosterCounts.values()].some(Boolean))return;rememberRoster();rosterBuff.attack=0;rosterBuff.defense=0;rosterCounts.clear();renderRoster();rosterNotice.textContent='下の一覧のバフ・固有ギミックをリセットしました。';});
 // ターンやクールダウンは記録せず、ボタンを押した時だけ召喚する。
-const summonSkills={
- M0003:{map:'MAP0001',targets:['M0004']},
- M0006:{map:'MAP0002',targets:['M0009','M0010']},
- M0014:{map:'MAP0003',targets:['M0017']},
- M0020:{map:'MAP0004',targets:['M0023']},
- M0021:{map:'MAP0004',targets:['M0025']},
- M0028:{map:'MAP0005',targets:['M0031']}
-};
+const summonSkills=MAP_SUMMON_SKILLS;
 let skillChoiceId=null;
 function summonFromSkill(caster,targetId){
  const skill=summonSkills[caster.monsterId];
@@ -320,24 +311,6 @@ document.getElementById('mp-mission-reset').addEventListener('click',()=>{
  const rows=routeRows(data.missions);if(!rows.some(row=>missionCounters.has(missionCounterKey(row,difficulty.value))&&missionCounters.get(missionCounterKey(row,difficulty.value))!==Number(row['カウンタ'])))return;
  rememberRoster();rows.forEach(row=>missionCounters.delete(missionCounterKey(row,difficulty.value)));document.querySelectorAll('#mp-mission-body tr').forEach(updateMissionRow);document.getElementById('roster-undo').disabled=false;
 });
-// 御魂の祭: 残っている刀剣霊・長戟霊を消し、消した数だけガオーを強化する。
-function absorbSoulSpirits(monsters,mapId,level){
- let removed=0;
- for(let i=monsters.length-1;i>=0;i--){
-  const enemy=monsters[i];
-  if(enemy.mapId===mapId&&enemy.difficulty===level&&!enemy.defeated&&['M0009','M0010'].includes(enemy.monsterId)){
-   monsters.splice(i,1);
-   removed++;
-  }
- }
- for(const enemy of monsters){
-  if(enemy.mapId===mapId&&enemy.difficulty===level&&!enemy.defeated&&enemy.monsterId==='M0006'){
-   enemy.eventAttack=(enemy.eventAttack||0)+removed;
-   enemy.eventDefense=(enemy.eventDefense||0)+removed;
-  }
- }
- return removed;
-}
 function eventKey(group){return JSON.stringify([pick.value,difficulty.value,group.route_id||'',group['進捗']]);}
 function updateEventRows(){document.querySelectorAll('#mp-event-body tr').forEach(tr=>{const done=executedEvents.has(tr.dataset.eventKey);tr.classList.toggle('mp-event-done',done);const button=tr.querySelector('button');if(button){button.disabled=done;button.setAttribute('aria-pressed',String(done));}});}
 function executeEvent(group,options={}){
@@ -452,7 +425,7 @@ function showMonsterTip(tile){
  hideMonsterTip();const tip=document.getElementById('monster-tooltip');if(!tip)return;
  const stats=data.stats.find(row=>row.monster_id===tile.dataset.id&&row['難易度']===difficulty.value);
  const file=String(stats?.info||stats?.['情報画像']||'').trim();if(!file)return;
- const segments=file.replaceAll('\\','/').split('/');if(file.includes(':')||segments.some(p=>!p||p==='.'||p==='..'))return;
+ const source=safeAssetUrl('../images/MonsterInfo/',file);if(!source)return;
  const version=monsterTipVersion,img=new Image();img.alt=stats['モンスター名']+'の説明画像';
  img.onload=()=>{if(version!==monsterTipVersion||!tile.isConnected||!img.naturalWidth||!img.naturalHeight)return;
  const margin=8,ratio=img.naturalWidth/img.naturalHeight,width=Math.min(438,img.naturalWidth,window.innerWidth-margin*2,(window.innerHeight-margin*2)*ratio),height=width/ratio;
@@ -463,7 +436,7 @@ function showMonsterTip(tile){
  img.style.width=width+'px';img.style.height=height+'px';tip.style.left=left+'px';tip.style.top=top+'px';tip.replaceChildren(img);tip.hidden=false;
  };
  img.onerror=()=>{if(version===monsterTipVersion)hideMonsterTip();};
- img.src='../images/MonsterInfo/'+segments.map(encodeURIComponent).join('/');
+ img.src=source;
 }
 window.addEventListener('resize',hideMonsterTip);
 document.addEventListener('scroll',hideMonsterTip,true);
