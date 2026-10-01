@@ -515,6 +515,17 @@ function buildDamageProbabilityGraphModel(damageCounts,maxDamage,totalCombinatio
  const yMax=Math.max(yTickStep,Math.ceil(maxProbability/yTickStep)*yTickStep);return {xMin,xMax,probabilities,maxProbability,yTickStep,yMax};
 }
 
+function createDamageGraphLayout(xMin,xMax,yMax){
+ const width=620,height=325,margin={top:10,right:15,bottom:35,left:50},plotWidth=width-margin.left-margin.right,plotHeight=height-margin.top-margin.bottom;
+ const xToSvg=damage=>xMax===xMin?margin.left+plotWidth/2:margin.left+((damage-xMin)/(xMax-xMin))*plotWidth,yToSvg=probability=>margin.top+plotHeight-(probability/yMax)*plotHeight;
+ return {width,height,margin,plotWidth,plotHeight,baselineY:margin.top+plotHeight,xToSvg,yToSvg};
+}
+function appendDamageGraphAxes(svgParts,{xMin,xMax,yMax,yTickStep},layout){
+ const {margin,plotWidth,plotHeight,xToSvg,yToSvg}=layout,yTickCount=Math.round(yMax/yTickStep);for(let i=0;i<=yTickCount;i++){const probability=yTickStep*i,y=yToSvg(probability);svgParts.push(`<line class="graph-grid" x1="${margin.left}" y1="${y}" x2="${margin.left+plotWidth}" y2="${y}"></line>`,`<text class="graph-label" x="${margin.left-8}" y="${y+4}" text-anchor="end">${probability.toFixed(0)}%</text>`);}
+ const xTickStep=xMax>25?5:1,firstXTick=xTickStep===1?xMin:Math.ceil(xMin/xTickStep)*xTickStep;for(let damage=firstXTick;damage<=xMax;damage+=xTickStep){const x=xToSvg(damage);svgParts.push(`<line class="graph-grid" x1="${x}" y1="${margin.top}" x2="${x}" y2="${margin.top+plotHeight}"></line>`,`<text class="graph-label" x="${x}" y="${margin.top+plotHeight+20}" text-anchor="middle">${damage}</text>`);}
+ svgParts.push(`<line class="graph-axis" x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${margin.top+plotHeight}"></line>`,`<line class="graph-axis" x1="${margin.left}" y1="${margin.top+plotHeight}" x2="${margin.left+plotWidth}" y2="${margin.top+plotHeight}"></line>`);
+}
+
 function renderDamageProbabilityGraph(
     calculator,
     damageCounts,
@@ -531,32 +542,8 @@ function renderDamageProbabilityGraph(
     // 横軸・確率列・縦軸目盛りは描画前に純粋なモデルとして組み立てる。
     const {xMin,xMax,probabilities,yTickStep,yMax}=buildDamageProbabilityGraphModel(damageCounts,maxDamage,totalCombinations);
 
-    const width = 620;
-    // 右側の表示エリアに近い縦横比にして、
-    // SVG内部の上下の空白を減らす
-    const height = 325;
-    const margin = {
-        top: 10,
-        right: 15,
-        bottom: 35,
-        left: 50
-    };
-
-    const plotWidth = width - margin.left - margin.right;
-    const plotHeight = height - margin.top - margin.bottom;
-
-    const xToSvg = damage => {
-        // 最小値と最大値が同じ場合でも0除算にならないよう中央に配置
-        if (xMax === xMin) {
-            return margin.left + plotWidth / 2;
-        }
-
-        return margin.left +
-            ((damage - xMin) / (xMax - xMin)) * plotWidth;
-    };
-
-    const yToSvg = probability =>
-        margin.top + plotHeight - (probability / yMax) * plotHeight;
+    const layout=createDamageGraphLayout(xMin,xMax,yMax);
+    const {width,height,margin,plotWidth,plotHeight,baselineY,xToSvg,yToSvg}=layout;
 
     const svgParts = [];
 
@@ -635,47 +622,7 @@ function renderDamageProbabilityGraph(
         );
     }
 
-    // 横方向グリッドと縦軸目盛り
-    const yTickCount = Math.round(yMax / yTickStep);
-    for (let i = 0; i <= yTickCount; i++) {
-        const probability = yTickStep * i;
-        const y = yToSvg(probability);
-
-        svgParts.push(
-            `<line class="graph-grid" x1="${margin.left}" y1="${y}" x2="${margin.left + plotWidth}" y2="${y}"></line>`,
-            `<text class="graph-label" x="${margin.left - 8}" y="${y + 4}" text-anchor="end">${probability.toFixed(0)}%</text>`
-        );
-    }
-
-    // 縦方向グリッドと横軸目盛り
-    // 最大値が25を超える場合は5刻み、それ以外は1刻み。
-    const xTickStep = xMax > 25 ? 5 : 1;
-
-    // 5刻み時は、表示範囲内にある最初の5の倍数から目盛りを開始する。
-    // 横軸そのものの最小値・最大値は従来どおり変えない。
-    const firstXTick =
-        xTickStep === 1
-            ? xMin
-            : Math.ceil(xMin / xTickStep) * xTickStep;
-
-    for (
-        let damage = firstXTick;
-        damage <= xMax;
-        damage += xTickStep
-    ) {
-        const x = xToSvg(damage);
-
-        svgParts.push(
-            `<line class="graph-grid" x1="${x}" y1="${margin.top}" x2="${x}" y2="${margin.top + plotHeight}"></line>`,
-            `<text class="graph-label" x="${x}" y="${margin.top + plotHeight + 20}" text-anchor="middle">${damage}</text>`
-        );
-    }
-
-    // 軸
-    svgParts.push(
-        `<line class="graph-axis" x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${margin.top + plotHeight}"></line>`,
-        `<line class="graph-axis" x1="${margin.left}" y1="${margin.top + plotHeight}" x2="${margin.left + plotWidth}" y2="${margin.top + plotHeight}"></line>`
-    );
+    appendDamageGraphAxes(svgParts,{xMin,xMax,yMax,yTickStep},layout);
 
     // マーカーなしの折れ線
     svgParts.push(
