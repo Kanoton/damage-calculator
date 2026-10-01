@@ -1131,7 +1131,7 @@ function renderRouteControls(){
  if(routes.find(r=>r.id===routeState.route)?.movedImage)makeGroup('マップ表示',[{name:'共通マップ',key:'view:base',active:!routeState.moved,select:()=>routeState.moved=false},{name:'移動先マップ',key:'view:moved',active:routeState.moved,select:()=>routeState.moved=true}]);
  if(focused)[...routeControls.querySelectorAll('button')].find(b=>b.dataset.routeFocus===focused)?.focus();
 }
-function populateMaps(){const previous=pick.value;pick.replaceChildren();const placeholder=document.createElement('option');placeholder.value='';placeholder.textContent='選択してください';pick.append(placeholder);Object.entries(data.maps).forEach(([id,map])=>{const option=document.createElement('option');option.value=id;option.textContent=map.name;pick.append(option);});pick.value=data.maps[previous]?previous:'';pick.disabled=!Object.keys(data.maps).length;}populateMaps();
+function populateMaps(){const previous=pick.value;pick.replaceChildren();const entries=Object.entries(data.maps);entries.forEach(([id,map])=>{const option=document.createElement('option');option.value=id;option.textContent=map.name;pick.append(option);});pick.value=data.maps[previous]?previous:(entries.at(-1)?.[0]||'');pick.disabled=!entries.length;}populateMaps();
 let monsterTipVersion=0;
 let selected=null;const buff={attack:0,defense:0};
 const gimmickCounts=new Map();
@@ -1539,7 +1539,7 @@ function render(){
  renderRoster();
 }
 root.querySelectorAll('[data-buff]').forEach(button=>button.addEventListener('click',()=>{const kind=button.dataset.buff;if(kind==='attack'||kind==='both')buff.attack++;if(kind==='defense'||kind==='both')buff.defense++;render();}));
-pick.addEventListener('change',()=>{rememberRoster();clearRoster();selected=null;render();renderRoundProgress();if(roundProgressReady())executeProgressEvents();list.scrollTop=0;});difficulty.addEventListener('change',()=>{rememberRoster();clearRoster();render();renderRoundProgress();if(roundProgressReady())executeProgressEvents();});
+pick.addEventListener('change',()=>{rememberRoster();clearRoster();selected=null;render();renderRoundProgress();list.scrollTop=0;});difficulty.addEventListener('change',()=>{rememberRoster();clearRoster();render();renderRoundProgress();});
 const tabs=[...document.querySelectorAll('.mp-subtabs [role="tab"]')];tabs.forEach((tab,index)=>{tab.addEventListener('click',()=>tabs.forEach(other=>{const active=other===tab;other.setAttribute('aria-selected',String(active));document.getElementById(other.getAttribute('aria-controls')).hidden=!active;}));tab.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();const next=e.key==='Home'?0:e.key==='End'?1:1-index;tabs[next].click();tabs[next].focus();}});});
 render();
 
