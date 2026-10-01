@@ -2003,6 +2003,7 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
  }
  mapPicker.addEventListener('change',()=>{currentOpponent=null;if(category==='マップ固有')renderChips();if(selectedCharacter){renderConditions();updateStats();}});
  clearCharacterAttackPhase=()=>{if(!selectedCharacter)return;state().phases??={attack:false,move:false};if(!state().phases.attack)return;state().phases.attack=false;renderConditions();updateStats();};
+ document.querySelectorAll('.role-tab').forEach(tab=>tab.addEventListener('click',()=>{if(tab.dataset.role==='map'||tab.dataset.role==='character')clearCharacterAttackPhase();}));
  window.addEventListener('character-opponent-change',event=>{currentOpponent=event.detail;if(selectedCharacter){renderConditions();updateStats();}});
  applyAttackTargetEffects=enemy=>{if(!selectedCharacter||!enemy||enemy.defeated)return;state().phases??={attack:false,move:false};state().phases.attack=true;const ids=new Set(state().chips);const markGain=(ids.has('36')?1:0)+(ids.has('37')?1:0);if(markGain)enemy.markStacks=(enemy.markStacks||0)+markGain;currentOpponent={name:enemy.name,mapId:enemy.mapId,markStacks:enemy.markStacks||0};};
  function wireTabs(tablist,onSelect){
@@ -2013,8 +2014,8 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
    tab.addEventListener('keydown',event=>{let next;if(event.key==='ArrowRight')next=(index+1)%tabs.length;else if(event.key==='ArrowLeft')next=(index+tabs.length-1)%tabs.length;else if(event.key==='Home')next=0;else if(event.key==='End')next=tabs.length-1;else return;event.preventDefault();tabs[next].focus();select(tabs[next]);});
   });
  }
- wireTabs(root.querySelector('.character-subtabs'),tab=>{clearCharacterAttackPhase();document.getElementById('character-list-view').hidden=tab.id!=='character-list-tab';document.getElementById('character-chip-view').hidden=tab.id!=='character-chip-tab';});
- wireTabs(root.querySelector('.chip-category-tabs'),tab=>{clearCharacterAttackPhase();category=tab.dataset.category;document.getElementById('chip-category-view').setAttribute('aria-labelledby',tab.id);renderChips();});
+ wireTabs(root.querySelector('.character-subtabs'),tab=>{document.getElementById('character-list-view').hidden=tab.id!=='character-list-tab';document.getElementById('character-chip-view').hidden=tab.id!=='character-chip-tab';});
+ wireTabs(root.querySelector('.chip-category-tabs'),tab=>{category=tab.dataset.category;document.getElementById('chip-category-view').setAttribute('aria-labelledby',tab.id);renderChips();});
  async function load(kind,file,status){
   if(location.protocol==='file:')return parseMapCSV(CHARACTER_CSV_SNAPSHOT[kind]);
   try{const response=await fetch('../csv/'+file,{cache:'no-cache'});if(!response.ok)throw Error(file);const rows=parseMapCSV(await response.text());if(rows.length&&!Object.hasOwn(rows[0],'id'))throw Error('Missing id');return rows;}
