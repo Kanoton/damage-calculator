@@ -8,7 +8,7 @@
 - js/map-utils.js: CSV解析、画像パス検証、ギミック計算などのマップ用共通関数
 - js/map-data.js: file:// 起動時のマップ系フォールバックデータと固定設定
 - js/roster-utils.js: Roster状態生成・モンスター追加・表示名・能力更新の共通処理
-- js/roster-view.js: Rosterカードの副作用を持たないDOM部品生成
+- js/roster-view.js: Rosterカード・能力値入力などのDOM部品生成（状態変更はコールバックで分離）
 - js/map-missions.js: ミッションカウンターの表示・操作
 - js/map-events.js: イベントキー、実行済み表示、イベント出現内容の検証・組み立て
 - js/map.js: マップ、モンスター、イベント、ラウンド管理（Roster状態は rosterState に集約）
