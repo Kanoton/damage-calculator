@@ -283,19 +283,12 @@ document.getElementById('mp-mission-reset').addEventListener('click',()=>{
  const rows=routeRows(data.missions);if(!rows.some(row=>missionCounters.has(missionCounterKey(row,difficulty.value))&&missionCounters.get(missionCounterKey(row,difficulty.value))!==Number(row['カウンタ'])))return;
  rememberRoster();rows.forEach(row=>missionCounters.delete(missionCounterKey(row,difficulty.value)));document.querySelectorAll('#mp-mission-body tr').forEach(updateMissionRow);document.getElementById('roster-undo').disabled=false;
 });
-function eventKey(group){return JSON.stringify([pick.value,difficulty.value,group.route_id||'',group['進捗']]);}
-function updateEventRows(){document.querySelectorAll('#mp-event-body tr').forEach(tr=>{const done=executedEvents.has(tr.dataset.eventKey);tr.classList.toggle('mp-event-done',done);const button=tr.querySelector('button');if(button){button.disabled=done;button.setAttribute('aria-pressed',String(done));}});}
+function eventKey(group){return mapEventKey(pick.value,difficulty.value,group);}
+function updateEventRows(){updateMapEventRows(root,executedEvents);}
 function executeEvent(group,options={}){
  const key=eventKey(group);if(executedEvents.has(key))return;
  const remember=options.remember!==false,rerender=options.render!==false;
- const pending=[];const buffDelta={attack:0,defense:0};
- try{for(const row of group.rows){
- const change=eventBuff(row);buffDelta.attack+=change.attack;buffDelta.defense+=change.defense;
- const ids=String(row.monster_id||'').split('|').map(x=>x.trim()).filter(Boolean),counts=String(row['出現数']||'').split('|').map(x=>x.trim());
- if(!ids.length){if(String(row['出現数']||'').trim())throw Error('モンスターIDが未登録です。');continue;}
- if(ids.length!==counts.length)throw Error('モンスターIDと出現数の個数が一致していません。');
- ids.forEach((id,i)=>{const count=Number(counts[i]);if(!counts[i]||!Number.isSafeInteger(count)||count<1)throw Error('出現数は1以上の整数で指定してください。');const stats=data.stats.find(r=>r.monster_id===id&&r['難易度']===difficulty.value);if(!stats)throw Error(id+' の'+difficulty.value+'のステータスが未登録です。');if(['攻撃','防御','HP'].some(k=>rosterStat(stats,k)===null||!Number.isFinite(rosterStat(stats,k))))throw Error(id+' の能力値が不足しています。');pending.push({stats,count});});
- }}catch(error){document.getElementById('mp-event-error').textContent=error.message;return;}
+ let pending,buffDelta;try{({pending,buffDelta}=collectEventChanges(group,data.stats,difficulty.value,rosterStat));}catch(error){document.getElementById('mp-event-error').textContent=error.message;return;}
  if(remember)rememberRoster();
  rosterBuff.attack+=buffDelta.attack;rosterBuff.defense+=buffDelta.defense;
  if(pick.value==='MAP0002'&&((difficulty.value==='悪夢'&&group['進捗']==='11')||(difficulty.value==='狂気'&&group['進捗']==='10'))){
@@ -312,7 +305,7 @@ function executeGhostDefeatEvent(monsterId){
  const group=groupMapEvents(routeRows(data.events)).find(item=>String(item['進捗']).trim()===progress);
  if(group)executeEvent(group,{remember:false,render:false});
 }
-function ghostSpawnKey(monsterId){return JSON.stringify(['MAP0006',difficulty.value,'ghost-spawn',monsterId]);}
+function ghostSpawnKey(monsterId){return ghostEventKey(difficulty.value,monsterId);}
 function spawnGhostBoss(monsterId,label){
  const key=ghostSpawnKey(monsterId);if(executedEvents.has(key))return;
  const stats=data.stats.find(r=>r.monster_id===monsterId&&r['難易度']===difficulty.value);
@@ -321,7 +314,7 @@ function spawnGhostBoss(monsterId,label){
  addPlacedMonster({instanceId:rosterState.nextId++,monsterId:stats.monster_id,name:stats['モンスター名'],mapName:data.maps[pick.value].name,mapId:pick.value,difficulty:difficulty.value,image:data.images[stats.image],base:{...stats},damageTaken:0,attack:rosterStat(stats,'攻撃'),defense:rosterStat(stats,'防御'),hp:rosterStat(stats,'HP'),coin:stats['コイン']===''?null:Number(stats['コイン']),boss:String(stats['ボス']).trim()==='1',reflect:String(stats['反撃']).trim()==='1'});
  executedEvents.add(key);renderRoster();rosterNotice.textContent=label+'を出現させました。';
 }
-function libraryTruthKey(){return JSON.stringify([pick.value,difficulty.value,'','__library_truth__']);}
+function libraryTruthKey(){return libraryEventKey(pick.value,difficulty.value);}
 function executeLibraryTruth(){
  if(pick.value!=='MAP0104'||executedEvents.has(libraryTruthKey()))return;
  const stats=data.stats.find(r=>r.monster_id==='M0115'&&r['難易度']===difficulty.value);
