@@ -11,6 +11,7 @@
 - js/roster-view.js: Rosterカード・能力値入力・召喚スキルなどのDOM部品生成（状態変更はコールバックで分離）
 - js/map-missions.js: ミッションカウンターの表示・操作
 - js/map-events.js: イベントキー、実行済み表示、イベント出現内容の検証・組み立て
+- js/map-gimmick-view.js: マップ固有ギミック・特殊操作ボタンのDOM生成
 - js/map.js: マップ、モンスター、イベント、ラウンド管理（Roster状態は rosterState に集約）
 - js/character-data.js: file:// 起動時に使用するキャラクター・チップ系フォールバックデータ
 - js/character.js: キャラクター、チップ、状態・能力管理
