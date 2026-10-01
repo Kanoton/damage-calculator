@@ -79,7 +79,7 @@ const rosterState=createRosterState({map:pick.value,difficulty:difficulty.value,
 function addPlacedMonster(enemy){return addRosterMonster(rosterState,enemy);}
 function monsterDisplayName(enemy){return rosterMonsterDisplayName(enemy);}
 const roster=document.getElementById('map-roster-list'),rosterEmpty=document.getElementById('map-roster-empty'),rosterNotice=document.createElement('span');
-const rosterError=rosterError,rosterUndo=rosterUndo,eventError=eventError;
+const rosterError=document.getElementById('roster-error'),rosterUndo=document.getElementById('roster-undo'),eventError=document.getElementById('mp-event-error');
 // Undo snapshots last for this page session, until 全削除.
 const roundDisplay=document.getElementById('current-round'),progressDisplay=document.getElementById('current-progress');
 function roundProgressReady(){return Boolean(data.maps[pick.value]&&hasSelectedCharacter());}
