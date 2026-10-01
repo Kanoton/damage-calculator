@@ -349,7 +349,3 @@ async function refreshCSV(){if(location.protocol==='file:')return;const files={m
 
 })();
 document.querySelectorAll('.parameter-icon').forEach(img=>assignMapImage(img,img.getAttribute('src').replace('/icon/','/Icon/')));
-   const displayName=monsterDisplayName(enemy),{card,select,nameText,actions,top}=createRosterCardShell(enemy,rosterState.selectedId,displayName,assignMapImage,data.icons);
-   actions.append(remove,deleteButton);
-   const {field:markField,button:markButton}=createRosterMarkControl(enemy,displayName);;markButton.addEventListener('click',event=>{event.stopPropagation();changeMark(1);});markButton.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();changeMark(-1);});nameText.append(markField);
-
