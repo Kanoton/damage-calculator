@@ -1188,12 +1188,15 @@ const roster=document.getElementById('map-roster-list'),rosterEmpty=document.get
 const rosterHistory=[];
 let currentRound=1,currentProgress=1;
 const roundDisplay=document.getElementById('current-round'),progressDisplay=document.getElementById('current-progress');
-function renderRoundProgress(){roundDisplay.textContent=currentRound;progressDisplay.textContent=currentProgress;}
-function changeProgress(delta){const next=Math.max(0,currentProgress+delta);if(next===currentProgress)return;rememberRoster();currentProgress=next;renderRoundProgress();}
+function roundProgressReady(){return Boolean(data.maps[pick.value]&&window.hasSelectedCharacter?.());}
+function renderRoundProgress(){roundDisplay.textContent=currentRound;progressDisplay.textContent=currentProgress;document.getElementById('round-progress-controls').hidden=!roundProgressReady();}
+function executeProgressEvents(){if(!roundProgressReady())return;groupMapEvents(routeRows(data.events)).filter(group=>Number(group['進捗'])===currentProgress).forEach(group=>executeEvent(group,{remember:false,render:false}));updateEventRows();renderRoster();}
+function changeProgress(delta){const next=Math.max(0,currentProgress+delta);if(next===currentProgress)return;rememberRoster();currentProgress=next;renderRoundProgress();executeProgressEvents();}
 document.getElementById('progress-minus').addEventListener('click',()=>changeProgress(-1));
 document.getElementById('progress-plus').addEventListener('click',()=>changeProgress(1));
-document.getElementById('turn-end').addEventListener('click',()=>{rememberRoster();currentRound+=1;currentProgress+=1;renderRoundProgress();});
+document.getElementById('turn-end').addEventListener('click',()=>{rememberRoster();currentRound+=1;currentProgress+=1;renderRoundProgress();executeProgressEvents();});
 renderRoundProgress();
+window.addEventListener('character-selection-change',()=>{if(!roundProgressReady()){renderRoundProgress();return;}currentRound=1;currentProgress=1;renderRoundProgress();executeProgressEvents();});
 let rosterContext={map:pick.value,difficulty:difficulty.value,route:'',moved:false};
 function rememberRoster(){document.getElementById('roster-error').textContent='';rosterHistory.push(structuredClone({monsters:placedMonsters,buff:rosterBuff,counts:[...rosterCounts],selected:selectedPlacedId,next:nextPlacedId,serials:[...monsterSerials],context:rosterContext,missions:[...missionCounters],events:[...executedEvents],defeats:[...defeatTotals],characterEvidence:window.captureCharacterEvidence?.(),evidenceConsider:rosterEvidenceConsider,round:currentRound,progress:currentProgress}));}
 document.getElementById('roster-undo').addEventListener('click',()=>{
@@ -1535,7 +1538,7 @@ function render(){
  renderRoster();
 }
 root.querySelectorAll('[data-buff]').forEach(button=>button.addEventListener('click',()=>{const kind=button.dataset.buff;if(kind==='attack'||kind==='both')buff.attack++;if(kind==='defense'||kind==='both')buff.defense++;render();}));
-pick.addEventListener('change',()=>{rememberRoster();clearRoster();selected=null;render();list.scrollTop=0;});difficulty.addEventListener('change',()=>{rememberRoster();clearRoster();render();});
+pick.addEventListener('change',()=>{rememberRoster();clearRoster();selected=null;render();renderRoundProgress();if(roundProgressReady())executeProgressEvents();list.scrollTop=0;});difficulty.addEventListener('change',()=>{rememberRoster();clearRoster();render();renderRoundProgress();if(roundProgressReady())executeProgressEvents();});
 const tabs=[...document.querySelectorAll('.mp-subtabs [role="tab"]')];tabs.forEach((tab,index)=>{tab.addEventListener('click',()=>tabs.forEach(other=>{const active=other===tab;other.setAttribute('aria-selected',String(active));document.getElementById(other.getAttribute('aria-controls')).hidden=!active;}));tab.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();const next=e.key==='Home'?0:e.key==='End'?1:1-index;tabs[next].click();tabs[next].focus();}});});
 render();
 
@@ -1823,7 +1826,7 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
   updateChipListSelection();
   window.dispatchEvent(new Event('character-evidence-change'));
  }
- function selectCharacter(row){selectedCharacter=row;renderSelectedCharacter();}
+ function selectCharacter(row){selectedCharacter=row;renderSelectedCharacter();window.dispatchEvent(new Event('character-selection-change'));}
  function changeCharacterLevel(delta){
   if(!selectedCharacter)return;
   const oldLevel=state().level,oldMax=calculate().hp,oldCurrent=state().currentHp;
