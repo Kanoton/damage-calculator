@@ -1550,7 +1550,7 @@ tbody th {
 .roster-evidence.is-active{background:#493e22;color:#fff;border-color:#493e22;box-shadow:inset 0 0 0 2px #d4ac37}
 .roster-evidence.is-active img{filter:drop-shadow(0 0 2px #fff)}
 
-.roster-mark{display:flex;align-items:center;justify-content:flex-end;gap:4px;margin:-2px 8px 2px 0;height:24px}
+.roster-mark{display:flex;align-items:center;gap:3px;align-self:center;flex:none;height:24px;margin:0 58px 0 0}
 .roster-mark-button{display:flex;align-items:center;justify-content:center;width:24px;height:24px;padding:1px;border:0;background:transparent;cursor:pointer}
 .roster-mark-button img{display:block;width:20px;height:20px;max-width:20px;object-fit:contain}
 .roster-mark strong{min-width:14px;font-size:13px;text-align:center;font-variant-numeric:tabular-nums}
