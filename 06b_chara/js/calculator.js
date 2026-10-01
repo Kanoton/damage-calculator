@@ -526,6 +526,14 @@ function appendDamageGraphAxes(svgParts,{xMin,xMax,yMax,yTickStep},layout){
  svgParts.push(`<line class="graph-axis" x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${margin.top+plotHeight}"></line>`,`<line class="graph-axis" x1="${margin.left}" y1="${margin.top+plotHeight}" x2="${margin.left+plotWidth}" y2="${margin.top+plotHeight}"></line>`);
 }
 
+function appendDamageGraphHpOverlay(svgParts,{calculator,probabilities,xMin,xMax,maxDamage,hp},layout){
+ const {margin,plotWidth,plotHeight,baselineY,xToSvg,yToSvg}=layout,isDefenseMode=calculator.dataset.role==='defense',hatchColor=isDefenseMode?'#5f9bd3':'#ef6b6b',hatchPatternId=isDefenseMode?'defense-defeat-hatch':'attack-defeat-hatch',probabilityClipId=isDefenseMode?'defense-probability-area':'attack-probability-area';
+ const areaPoints=[`${xToSvg(xMin)},${baselineY}`,...probabilities.map(item=>`${xToSvg(item.damage)},${yToSvg(item.probability)}`),`${xToSvg(xMax)},${baselineY}`].join(' ');
+ svgParts.push(`<defs><pattern id="${hatchPatternId}" patternUnits="userSpaceOnUse" width="8" height="8"><line x1="0" y1="8" x2="8" y2="0" stroke="${hatchColor}" stroke-width="1.5" stroke-opacity="0.30"></line></pattern><clipPath id="${probabilityClipId}"><polygon points="${areaPoints}"></polygon></clipPath></defs>`);
+ if(hp<=xMax){const hatchStartX=xToSvg(Math.max(hp,xMin)),hatchWidth=margin.left+plotWidth-hatchStartX;if(hatchWidth>0)svgParts.push(`<rect x="${hatchStartX}" y="${margin.top}" width="${hatchWidth}" height="${plotHeight}" fill="url(#${hatchPatternId})" clip-path="url(#${probabilityClipId})"></rect>`);}
+ if(hp>=xMin&&hp<=xMax){const hpX=xToSvg(hp),hpProbability=probabilities.find(item=>item.damage===hp)?.probability??0,hpY=yToSvg(hpProbability),atMax=maxDamage===hp;svgParts.push(`<line x1="${hpX}" y1="${hpY}" x2="${hpX}" y2="${baselineY}" stroke="${hatchColor}" stroke-width="${atMax?2.5:1.5}"${atMax?'':' stroke-dasharray="5 4"'} stroke-opacity="0.85"></line>`);}
+}
+
 function renderDamageProbabilityGraph(
     calculator,
     damageCounts,
@@ -543,84 +551,18 @@ function renderDamageProbabilityGraph(
     const {xMin,xMax,probabilities,yTickStep,yMax}=buildDamageProbabilityGraphModel(damageCounts,maxDamage,totalCombinations);
 
     const layout=createDamageGraphLayout(xMin,xMax,yMax);
-    const {width,height,margin,plotWidth,plotHeight,baselineY,xToSvg,yToSvg}=layout;
+    const {width,height,xToSvg,yToSvg}=layout;
 
     const svgParts = [];
 
-    // 折れ線と、その下側の領域を作るための座標
-    const linePoints = probabilities
-        .map(item => `${xToSvg(item.damage)},${yToSvg(item.probability)}`)
-        .join(" ");
-
-    const baselineY = margin.top + plotHeight;
-    const areaPoints = [
-        `${xToSvg(xMin)},${baselineY}`,
-        ...probabilities.map(
-            item => `${xToSvg(item.damage)},${yToSvg(item.probability)}`
-        ),
-        `${xToSvg(xMax)},${baselineY}`
-    ].join(" ");
+    // 折れ線の座標。HP以上の斜線領域は専用ヘルパーで生成する。
+    const linePoints=probabilities.map(item=>`${xToSvg(item.damage)},${yToSvg(item.probability)}`).join(' ');
 
     svgParts.push(
         `<title>ダメージ発生確率</title>`,
         `<desc>折れ線より下側のうち、攻撃・防御の両モードでHP以上の確率範囲を斜線で表示します。</desc>`
     );
-
-    // 攻撃・防御の両モード：HP以上の範囲を斜線で表示
-    const isDefenseMode = calculator.dataset.role === "defense";
-    const hatchColor = isDefenseMode ? "#5f9bd3" : "#ef6b6b";
-    const hatchPatternId = isDefenseMode
-        ? "defense-defeat-hatch"
-        : "attack-defeat-hatch";
-    const probabilityClipId = isDefenseMode
-        ? "defense-probability-area"
-        : "attack-probability-area";
-
-    // 斜線は「確率の折れ線より下」だけに表示する
-    svgParts.push(
-        `<defs>
-            <pattern id="${hatchPatternId}" patternUnits="userSpaceOnUse" width="8" height="8">
-                <line x1="0" y1="8" x2="8" y2="0" stroke="${hatchColor}" stroke-width="1.5" stroke-opacity="0.30"></line>
-            </pattern>
-            <clipPath id="${probabilityClipId}">
-                <polygon points="${areaPoints}"></polygon>
-            </clipPath>
-        </defs>`
-    );
-
-    // HPを境に、攻撃・防御の両モードで「ダメージ >= HP」の範囲を斜線で塗る
-    if (hp <= xMax) {
-        const hatchStartDamage = Math.max(hp, xMin);
-        const hatchStartX = xToSvg(hatchStartDamage);
-        const hatchWidth = margin.left + plotWidth - hatchStartX;
-
-        if (hatchWidth > 0) {
-            svgParts.push(
-                `<rect x="${hatchStartX}" y="${margin.top}" width="${hatchWidth}" height="${plotHeight}" fill="url(#${hatchPatternId})" clip-path="url(#${probabilityClipId})"></rect>`
-            );
-        }
-    }
-
-    // HPが横軸の表示範囲内にある場合は、
-    // HP地点の確率グラフとの交点から下端までだけ境界線を表示
-    if (hp >= xMin && hp <= xMax) {
-        const hpX = xToSvg(hp);
-        const hpProbability =
-            probabilities.find(item => item.damage === hp)?.probability ?? 0;
-        const hpY = yToSvg(hpProbability);
-
-        // 発生しうる最大ダメージがHPと等しい場合は、
-        // 斜線範囲が端で消えるため、境界を少し太い実線で強調する
-        const isMaxDamageAtHp = maxDamage === hp;
-        const boundaryStrokeWidth = isMaxDamageAtHp ? 2.5 : 1.5;
-        const boundaryDash = isMaxDamageAtHp
-            ? ""
-            : ' stroke-dasharray="5 4"';
-
-        svgParts.push(
-            `<line x1="${hpX}" y1="${hpY}" x2="${hpX}" y2="${baselineY}" stroke="${hatchColor}" stroke-width="${boundaryStrokeWidth}"${boundaryDash} stroke-opacity="0.85"></line>`
-        );
-    }
+    appendDamageGraphHpOverlay(svgParts,{calculator,probabilities,xMin,xMax,maxDamage,hp},layout);
 
     appendDamageGraphAxes(svgParts,{xMin,xMax,yMax,yTickStep},layout);
 
