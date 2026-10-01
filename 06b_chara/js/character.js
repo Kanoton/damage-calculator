@@ -131,10 +131,9 @@
   }
   for(const rule of mapKeywords.filter(row=>row.map_id===mapPicker.value&&row.input_kind==='checkbox')){
    const key=rule.effect_key,active=Boolean(state().modes[key]);
-   const button=document.createElement('button');button.type='button';button.className='selected-chip condition-toggle'+(active?' is-active':'');
-   button.setAttribute('aria-pressed',String(active));button.setAttribute('aria-label',key+'：'+(active?'オン':'オフ')+'。クリックで切り替え');
-   button.title=key+'：'+(active?'オン':'オフ')+'\nクリックで切り替え';button.append(makeIcon(key));
-   button.addEventListener('click',()=>{state().modes[key]=active?0:1;renderConditions();updateStats();});
+   const button=createMapConditionToggleView(key,active,makeIcon(key),()=>{
+    state().modes[key]=active?0:1;renderConditions();updateStats();
+   });
    conditionsBox.append(button);
   }
   const mapNumbers=mapKeywords.filter(row=>row.map_id===mapPicker.value&&row.input_kind==='number').map(row=>row.effect_key);
