@@ -1196,7 +1196,7 @@ function executeProgressEvents(){if(!roundProgressReady())return;groupMapEvents(
 function changeProgress(delta){const next=Math.max(0,currentProgress+delta);if(next===currentProgress)return;rememberRoster();currentProgress=next;renderRoundProgress();executeProgressEvents();}
 document.getElementById('progress-minus').addEventListener('click',()=>changeProgress(-1));
 document.getElementById('progress-plus').addEventListener('click',()=>changeProgress(1));
-document.getElementById('turn-end').addEventListener('click',()=>{rememberRoster();const clueCount=rosterCounts.get('MAP0104:clue')||0;placedMonsters.forEach(enemy=>{enemy.markStacks=Math.max(0,(enemy.markStacks||0)-1);});currentRound+=1;currentProgress+=1;renderRoundProgress();executeProgressEvents();if(pick.value==='MAP0104'&&(currentRound>=8||clueCount>=4))executeLibraryTruth();});
+document.getElementById('turn-end').addEventListener('click',()=>{rememberRoster();const clueCount=rosterCounts.get('MAP0104:clue')||0;placedMonsters.forEach(enemy=>{enemy.markStacks=Math.max(0,(enemy.markStacks||0)-1);});renderRoster();if(selectedPlacedId){const selectedEnemy=placedMonsters.find(enemy=>enemy.instanceId===selectedPlacedId&&!enemy.defeated);if(selectedEnemy)registerEnemy(selectedEnemy,false);}currentRound+=1;currentProgress+=1;renderRoundProgress();executeProgressEvents();if(pick.value==='MAP0104'&&(currentRound>=8||clueCount>=4))executeLibraryTruth();});
 renderRoundProgress();
 window.addEventListener('character-selection-change',()=>{if(!roundProgressReady()){renderRoundProgress();return;}currentRound=1;currentProgress=1;renderRoundProgress();executeProgressEvents();});
 let rosterContext={map:pick.value,difficulty:difficulty.value,route:'',moved:false};
@@ -1348,7 +1348,7 @@ function renderRoster(){
   const deleteButton=document.createElement('button');deleteButton.type='button';deleteButton.className='roster-delete';deleteButton.textContent='削除';deleteButton.setAttribute('aria-label',monsterDisplayName(enemy)+'を削除');deleteButton.addEventListener('click',()=>{rememberRoster();const i=placedMonsters.indexOf(enemy);if(i>=0)placedMonsters.splice(i,1);if(selectedPlacedId===enemy.instanceId){selectedPlacedId=null;window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:null}));}renderRoster();});
   const actions=document.createElement('div');actions.className='roster-card-actions';actions.append(remove,deleteButton);
   const markField=document.createElement('div');markField.className='roster-mark';markField.title='マーク：左クリックで＋1、右クリックで−1';const markButton=document.createElement('button');markButton.type='button';markButton.className='roster-mark-button';markButton.disabled=!!enemy.defeated;markButton.setAttribute('aria-label',monsterDisplayName(enemy)+'のマークを増やす');const markIcon=document.createElement('img');markIcon.src='../images/icon/'+encodeURIComponent('マーク.png');markIcon.alt='マーク';markButton.append(markIcon);const markValue=document.createElement('strong');markValue.textContent=String(enemy.markStacks||0);const changeMark=delta=>{if(enemy.defeated)return;const next=Math.max(0,(enemy.markStacks||0)+delta);if(next===(enemy.markStacks||0))return;rememberRoster();enemy.markStacks=next;if(selectedPlacedId===enemy.instanceId)registerEnemy(enemy,false);renderRoster();};markButton.addEventListener('click',event=>{event.stopPropagation();changeMark(1);});markButton.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();changeMark(-1);});markField.append(markButton,markValue);
-  const top=document.createElement('div');top.className='roster-card-top';top.append(select,actions);
+  const top=document.createElement('div');top.className='roster-card-top';top.append(select,markField,actions);
   const skill=summonSkills[enemy.monsterId];
   if(skill&&skill.map===enemy.mapId&&!enemy.defeated){
    top.classList.add('has-skill');
@@ -1362,7 +1362,7 @@ function renderRoster(){
    }else skillButton.addEventListener('click',()=>summonFromSkill(enemy,skill.targets[0]));
    top.append(skillButton);
   }
-  card.append(top,markField);
+  card.append(top);
   if(skill&&skill.targets.length>1&&skillChoiceId===enemy.instanceId&&!enemy.defeated){
    const choices=document.createElement('div');choices.className='roster-skill-choices';choices.setAttribute('role','group');choices.setAttribute('aria-label',monsterDisplayName(enemy)+'が召喚するモンスターを選択');
    for(const id of skill.targets){
