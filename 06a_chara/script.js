@@ -1156,7 +1156,7 @@ function renderGimmicks(){
  unique.forEach(row=>{
   const button=document.createElement('button');button.type='button';button.dataset.gimmick=row.gimmick_id;const max=gimmickMaximum(row);const count=gimmickCount(row);button.textContent=row['表示名']+(max===1?'':' '+count);button.classList.toggle('mp-gimmick-complete',count>=max);button.setAttribute('aria-pressed',String(count>0));button.setAttribute('aria-label',row['表示名']+' '+gimmickCount(row)+'、左クリックで増加、右クリックで減少');
   button.title='左クリック：＋1 ／ 右クリック：−1';
-  const change=delta=>{const current=gimmickCount(row),maximum=gimmickMaximum(row);const next=Math.max(0,Math.min(maximum,current+delta));if(next===current)return;if(pick.value==='MAP0104'&&row.gimmick_id==='warden_defeated'&&delta>0){rememberRoster();defeatActiveWardens();}gimmickCounts.set(gimmickKey(row),next);render();};
+  const change=delta=>{const current=gimmickCount(row),maximum=gimmickMaximum(row);const next=Math.max(0,Math.min(maximum,current+delta));if(next===current)return;if(pick.value==='MAP0104'&&row.gimmick_id==='warden_defeated'&&delta>0){rememberRoster();const defeated=defeatActiveWardens();if(!defeated)rosterCounts.set('MAP0104:warden_defeated',(rosterCounts.get('MAP0104:warden_defeated')||0)+1);render();return;}gimmickCounts.set(gimmickKey(row),next);render();};
   button.addEventListener('click',()=>change(1));button.addEventListener('contextmenu',event=>{event.preventDefault();change(-1);});button.addEventListener('keydown',event=>{if(event.shiftKey&&event.key==='Enter'){event.preventDefault();change(-1);}});
   gimmickArea.append(button);if(focused===row.gimmick_id)button.focus();
  });
