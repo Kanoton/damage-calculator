@@ -9,3 +9,10 @@ function createOwnedChipView(chip,chargeDelta,onCharge){
  }
  return item;
 }
+
+function createConditionPhaseView(label,checked,onChange){
+ const field=document.createElement('label');field.className='condition-phase';
+ const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.checked=checked;checkbox.setAttribute('aria-label',label+'の効果を有効にする');
+ checkbox.addEventListener('change',()=>onChange(checkbox.checked));field.append(checkbox,document.createTextNode(label));
+ return field;
+}
