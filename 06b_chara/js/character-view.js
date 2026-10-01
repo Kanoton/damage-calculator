@@ -26,3 +26,10 @@ function createChipConditionToggleView(chip,id,mode,onToggle){
  const img=document.createElement('img');img.alt='';img.src='../images/chip_icon/'+encodeURIComponent(chip.images);button.append(img);button.addEventListener('click',onToggle);
  return button;
 }
+
+function createMapConditionToggleView(key,active,icon,onToggle){
+ const button=document.createElement('button');button.type='button';button.className='selected-chip condition-toggle'+(active?' is-active':'');
+ button.setAttribute('aria-pressed',String(active));button.setAttribute('aria-label',key+'：'+(active?'オン':'オフ')+'。クリックで切り替え');
+ button.title=key+'：'+(active?'オン':'オフ')+'\nクリックで条件を切り替え';button.append(icon);button.addEventListener('click',onToggle);
+ return button;
+}
