@@ -759,8 +759,6 @@ function calculateDamage(calculator, isSurvival = false) {
     const tableBody = calculator.querySelector(".damage-table tbody");
     const grid=calculateDefenseDamageGrid(attackPower,defensePower,damageAdd,damageReduce,hp);
     renderDefenseDamageGrid(tableBody,grid,hp);
-    const {totalDamage,defeatCount,survivalCount,totalCombinations}=grid;
-
     // 上部の表・期待値・撃破率/生存率は、
     // ここまでの従来計算（カード効果なし）をそのまま使用する
 
