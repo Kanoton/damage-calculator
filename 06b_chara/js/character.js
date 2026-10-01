@@ -212,16 +212,12 @@
   ownedBox.replaceChildren();
   for(const id of state().chips){
    const chip=chips.find(c=>c.id===id);if(!chip)continue;
-   const item=document.createElement('span');item.className='selected-chip';
-   item.title=chip.name+'\n'+chip.effect;
-   const img=document.createElement('img');img.alt=chip.name;img.src='../images/chip_icon/'+encodeURIComponent(chip.images);item.append(img);
-   if(chip.category==='チャージ'&&id!=='57'){
-    item.classList.add('is-actionable');item.setAttribute('role','button');item.tabIndex=0;
-    const chargeDelta={'51':2,'52':2,'53':2,'54':2,'55':-6,'56':-5,'58':-4}[id]||0;
-    item.title=chip.name+'\n'+chip.effect+(chargeDelta?'\nクリック：チャージ'+(chargeDelta>0?'+':'')+chargeDelta:'');
-    const applyCharge=()=>{if(!chargeDelta)return;state().numbers['チャージ']=Math.max(0,Math.min(10,number(state(),'チャージ')+chargeDelta));renderConditions();updateStats();};
-    item.addEventListener('click',applyCharge);item.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();applyCharge();}});
-   }
+   const chargeDelta=chip.category==='チャージ'&&id!=='57'?({'51':2,'52':2,'53':2,'54':2,'55':-6,'56':-5,'58':-4}[id]||0):null;
+   const item=createOwnedChipView(chip,chargeDelta,()=>{
+    if(!chargeDelta)return;
+    state().numbers['チャージ']=Math.max(0,Math.min(10,number(state(),'チャージ')+chargeDelta));
+    renderConditions();updateStats();
+   });
    ownedBox.append(item);
   }
   ownedBox.scrollLeft=previousScroll;
