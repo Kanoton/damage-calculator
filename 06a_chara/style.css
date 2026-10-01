@@ -1537,3 +1537,12 @@ tbody th {
 .selected-character-stat-icon:focus-visible,.roster-stat-icon:focus-visible{outline:2px solid #856615;border-radius:3px}
 #roster-gimmicks .roster-evidence{display:inline-flex;align-items:center;gap:4px}
 .roster-evidence img{width:20px;height:20px;object-fit:contain}
+
+.round-progress-controls{display:flex;align-items:center;gap:12px;width:100%;margin-top:28px;padding:8px 10px;border:1px solid #d9c890;border-radius:5px;background:#fffdf6;color:#493e22;font-variant-numeric:tabular-nums}
+.round-progress-value{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.round-progress-value strong{min-width:24px;font-size:18px;text-align:center}
+.round-progress-value button,#turn-end{padding:5px 10px;border:1px solid #cdbb82;border-radius:4px;background:#fff;cursor:pointer;font:inherit}
+.round-progress-value button:hover,#turn-end:hover{background:#fff8df}
+#turn-end{margin-left:auto;font-weight:700}
+.round-progress-controls+.selected-character{margin-top:10px}
+@media(max-width:600px){.round-progress-controls{gap:6px;flex-wrap:wrap}.round-progress-value{gap:4px}#turn-end{margin-left:auto}}
