@@ -214,31 +214,10 @@ function renderRoster(){
   const deleteButton=createRosterActionButton('roster-delete','削除',displayName+'を削除');deleteButton.addEventListener('click',()=>{rememberRoster();const i=rosterState.monsters.indexOf(enemy);if(i>=0)rosterState.monsters.splice(i,1);if(rosterState.selectedId===enemy.instanceId){rosterState.selectedId=null;window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:null}));}renderRoster();});
    actions.append(remove,deleteButton);
    const {field:markField,button:markButton}=createRosterMarkControl(enemy,displayName);const changeMark=delta=>{if(enemy.defeated)return;const next=Math.max(0,(enemy.markStacks||0)+delta);if(next===(enemy.markStacks||0))return;rememberRoster();enemy.markStacks=next;if(rosterState.selectedId===enemy.instanceId)registerEnemy(enemy,false);renderRoster();};markButton.addEventListener('click',event=>{event.stopPropagation();changeMark(1);});markButton.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();changeMark(-1);});nameText.append(markField);
-  const skill=summonSkills[enemy.monsterId];
-  if(skill&&skill.map===enemy.mapId&&!enemy.defeated){
-   top.classList.add('has-skill');
-   const skillButton=document.createElement('button');skillButton.type='button';skillButton.className='roster-skill';skillButton.textContent='スキル';
-   skillButton.setAttribute('aria-label',monsterDisplayName(enemy)+'の召喚スキル');
-   if(enemy.monsterId==='M0021')skillButton.title='近くに魔法のティーポットがいない場合に使用（距離は手動確認）';
-   if(enemy.monsterId==='M0020')skillButton.title='「この人です」を3枚使用したら押す（カード枚数は手動管理）';
-   if(skill.targets.length>1){
-    const open=skillChoiceId===enemy.instanceId;skillButton.setAttribute('aria-expanded',String(open));
-    skillButton.addEventListener('click',()=>{skillChoiceId=open?null:enemy.instanceId;renderRoster();});
-   }else skillButton.addEventListener('click',()=>summonFromSkill(enemy,skill.targets[0]));
-   top.append(skillButton);
-  }
-  card.append(top);
-  if(skill&&skill.targets.length>1&&skillChoiceId===enemy.instanceId&&!enemy.defeated){
-   const choices=document.createElement('div');choices.className='roster-skill-choices';choices.setAttribute('role','group');choices.setAttribute('aria-label',monsterDisplayName(enemy)+'が召喚するモンスターを選択');
-   for(const id of skill.targets){
-    const target=data.stats.find(row=>row.monster_id===id&&row['難易度']===difficulty.value);if(!target)continue;
-    const choice=document.createElement('button');choice.type='button';choice.className='roster-skill-choice';choice.setAttribute('aria-label',target['モンスター名']+'を1体召喚');
-    const image=document.createElement('img');image.alt='';assignMapImage(image,data.images[target.image]);
-    const label=document.createElement('span');label.textContent=target['モンスター名'];choice.append(image,label);
-    choice.addEventListener('click',()=>summonFromSkill(enemy,id));choices.append(choice);
-   }
-   card.append(choices);
-  }
+  const skill=summonSkills[enemy.monsterId],skillOpen=skillChoiceId===enemy.instanceId;
+  const skillTargets=skill?.targets.map(id=>{const target=data.stats.find(row=>row.monster_id===id&&row['難易度']===difficulty.value);return target?{id,name:target['モンスター名'],image:data.images[target.image]}:null;})||[];
+  const skillView=createRosterSkillView(enemy,displayName,skill,skillOpen,skillTargets,assignMapImage,()=>{skillChoiceId=skillOpen?null:enemy.instanceId;renderRoster();},id=>summonFromSkill(enemy,id));
+  if(skillView.button){top.classList.add('has-skill');top.append(skillView.button);}card.append(top);if(skillView.choices)card.append(skillView.choices);
   card.append(stats);roster.append(card);
  });
 }
