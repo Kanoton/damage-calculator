@@ -732,6 +732,14 @@ function calculateDefenseDamageGrid(attackPower,defensePower,damageAdd,damageRed
 function renderDefenseDamageGrid(tableBody,grid,hp){
  tableBody.replaceChildren();for(const {attackDice,damages} of grid.rows){const row=document.createElement('tr');if(attackDice===1){const label=document.createElement('th');label.textContent='攻撃';label.rowSpan=6;label.classList.add('attack-label');row.append(label);}const attackCell=document.createElement('th');attackCell.textContent=attackDice;row.append(attackCell);damages.forEach(damage=>{const cell=document.createElement('td');cell.textContent=damage;if(damage>=hp)cell.classList.add('defeat');row.append(cell);});tableBody.append(row);}
 }
+function renderCardAwareSummary(calculator,result,isSurvival){
+ const range=calculator.querySelector('.future-damage-range'),expected=calculator.querySelector('.future-expected-damage'),rate=calculator.querySelector('.future-result-rate');
+ if(range)range.textContent=result.minDamage+'～'+result.maxDamage;if(expected)expected.textContent=result.expectedDamage.toFixed(2);if(rate)rate.textContent=((isSurvival?result.survivalProbability:result.defeatProbability)*100).toFixed(2)+'%';
+}
+function renderBaseDamageSummary(calculator,grid,isSurvival){
+ calculator.querySelector('.expected-damage').textContent=(grid.totalDamage/grid.totalCombinations).toFixed(2);const count=isSurvival?grid.survivalCount:grid.defeatCount;calculator.querySelector('.result-rate').textContent=((count/grid.totalCombinations)*100).toFixed(2)+'%';
+}
+
 function calculateDamage(calculator, isSurvival = false) {
     const attackPower =
         Number(calculator.querySelector('[id^="attackPower"]').value);
@@ -778,47 +786,10 @@ function calculateDamage(calculator, isSurvival = false) {
         hp
     );
 
-    const futureDamageRange =
-        calculator.querySelector(".future-damage-range");
-
-    if (futureDamageRange) {
-        futureDamageRange.textContent =
-            `${cardAwareResult.minDamage}～${cardAwareResult.maxDamage}`;
-    }
-
-    const futureExpectedDamage =
-        calculator.querySelector(".future-expected-damage");
-
-    if (futureExpectedDamage) {
-        futureExpectedDamage.textContent =
-            cardAwareResult.expectedDamage.toFixed(2);
-    }
-
-    const futureResultRate =
-        calculator.querySelector(".future-result-rate");
-
-    if (futureResultRate) {
-        const futureRate = isSurvival
-            ? cardAwareResult.survivalProbability * 100
-            : cardAwareResult.defeatProbability * 100;
-
-        futureResultRate.textContent =
-            futureRate.toFixed(2) + "%";
-    }
-
-    const expectedDamage =
-        totalDamage / totalCombinations;
-
-    calculator.querySelector(".expected-damage").textContent =
-        expectedDamage.toFixed(2);
+    renderCardAwareSummary(calculator,cardAwareResult,isSurvival);
+    renderBaseDamageSummary(calculator,grid,isSurvival);
 
     if (isSurvival) {
-        const survivalRate =
-            (survivalCount / totalCombinations) * 100;
-
-        calculator.querySelector(".result-rate").textContent =
-            survivalRate.toFixed(2) + "%";
-
         renderDefenseChoiceGuide(
             calculator,
             attackPower,
@@ -841,12 +812,6 @@ function calculateDamage(calculator, isSurvival = false) {
                     hp
                 );
         }
-    } else {
-        const defeatRate =
-            (defeatCount / totalCombinations) * 100;
-
-        calculator.querySelector(".result-rate").textContent =
-            defeatRate.toFixed(2) + "%";
     }
 }
 
