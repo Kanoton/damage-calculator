@@ -1546,3 +1546,6 @@ tbody th {
 #turn-end{margin-left:auto;font-weight:700}
 .round-progress-controls+.selected-character{margin-top:10px}
 @media(max-width:600px){.round-progress-controls{gap:6px;flex-wrap:wrap}.round-progress-value{gap:4px}#turn-end{margin-left:auto}}
+
+.roster-evidence.is-active{background:#493e22;color:#fff;border-color:#493e22;box-shadow:inset 0 0 0 2px #d4ac37}
+.roster-evidence.is-active img{filter:drop-shadow(0 0 2px #fff)}
