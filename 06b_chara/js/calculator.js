@@ -551,7 +551,7 @@ function renderDamageProbabilityGraph(
     const {xMin,xMax,probabilities,yTickStep,yMax}=buildDamageProbabilityGraphModel(damageCounts,maxDamage,totalCombinations);
 
     const layout=createDamageGraphLayout(xMin,xMax,yMax);
-    const {width,height,margin,plotWidth,plotHeight,baselineY,xToSvg,yToSvg}=layout;
+    const {width,height,xToSvg,yToSvg}=layout;
 
     const svgParts = [];
 
