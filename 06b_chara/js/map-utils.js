@@ -73,3 +73,16 @@ function assignMapImage(image,url){
  let index=0;image.onerror=()=>{index++;if(index<variants.length)image.src=variants[index];else {image.onerror=null;image.hidden=true;}};image.hidden=false;image.src=variants[0];
 }
 
+function safeAssetUrl(basePath,file){
+ const raw=String(file||'').trim();if(!raw||raw.includes(':'))return null;
+ const segments=raw.replaceAll('\\','/').split('/');if(segments.some(part=>!part||part==='.'||part==='..'))return null;
+ return basePath+segments.map(encodeURIComponent).join('/');
+}
+function gimmickKey(row){return row.map_id+':'+row.gimmick_id;}
+function gimmickMaximum(row){const raw=row['最大回数'];if(raw===undefined||String(raw).trim()==='')return Infinity;const value=Number(raw);return Number.isFinite(value)?Math.max(0,Math.floor(value)):Infinity;}
+function absorbSoulSpirits(monsters,mapId,level){
+ let removed=0;
+ for(let i=monsters.length-1;i>=0;i--){const enemy=monsters[i];if(enemy.mapId===mapId&&enemy.difficulty===level&&!enemy.defeated&&['M0009','M0010'].includes(enemy.monsterId)){monsters.splice(i,1);removed++;}}
+ for(const enemy of monsters){if(enemy.mapId===mapId&&enemy.difficulty===level&&!enemy.defeated&&enemy.monsterId==='M0006'){enemy.eventAttack=(enemy.eventAttack||0)+removed;enemy.eventDefense=(enemy.eventDefense||0)+removed;}}
+ return removed;
+}
