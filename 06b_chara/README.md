@@ -8,7 +8,8 @@
 - js/map-utils.js: CSV解析、マップ用共通関数
 - js/map-data.js: file:// 起動時に使用するマップ系フォールバックデータ
 - js/map.js: マップ、モンスター、イベント、ミッション、ラウンド管理
-- js/character.js: キャラクター、チップ、状態・能力管理とフォールバックデータ
+- js/character-data.js: file:// 起動時に使用するキャラクター・チップ系フォールバックデータ
+- js/character.js: キャラクター、チップ、状態・能力管理
 - streamdeck.js: Stream Deck 連携
 
 CSV と画像の正本は従来どおりリポジトリ直下の ../csv/ と ../images/ を参照します。
