@@ -1,0 +1,12 @@
+// Stateless DOM builders for roster cards.
+function createRosterCardShell(enemy,selectedId,displayName,assignImage,icons){
+ const card=document.createElement('article');card.className='roster-card';card.classList.toggle('defeated',!!enemy.defeated);card.classList.toggle('selected',enemy.instanceId===selectedId);
+ const select=document.createElement('button');select.type='button';select.disabled=!!enemy.defeated;select.className='roster-select';select.setAttribute('aria-pressed',String(enemy.instanceId===selectedId));select.setAttribute('aria-label',displayName+'を計算機に登録');
+ const heading=document.createElement('span');heading.className='roster-name';const portrait=document.createElement('img');portrait.className='roster-portrait';portrait.alt='';assignImage(portrait,enemy.image);const nameText=document.createElement('span');nameText.className='monster-name-text';nameText.textContent=displayName;heading.append(portrait,nameText);
+ if(enemy.boss){const icon=document.createElement('img');icon.className='roster-icon';icon.alt='マップボス';assignImage(icon,'../images/icon/Boss.png');nameText.append(icon);}if(enemy.reflect){const icon=document.createElement('img');icon.className='roster-icon';icon.alt='反撃可能';assignImage(icon,icons.reflect);nameText.append(icon);}
+ select.append(heading);const actions=document.createElement('div');actions.className='roster-card-actions';const top=document.createElement('div');top.className='roster-card-top';top.append(select,actions);card.append(top);return {card,select,nameText,actions,top};
+}
+function createRosterActionButton(className,text,label,disabled=false){const button=document.createElement('button');button.type='button';button.className=className;button.textContent=text;button.disabled=disabled;button.setAttribute('aria-label',label);return button;}
+function createRosterMarkControl(enemy,displayName){
+ const field=document.createElement('div');field.className='roster-mark';field.title='マーク：左クリックで＋1、右クリックで−1';const button=document.createElement('button');button.type='button';button.className='roster-mark-button';button.disabled=!!enemy.defeated;button.setAttribute('aria-label',displayName+'のマークを増やす');const icon=document.createElement('img');icon.src='../images/icon/'+encodeURIComponent('マーク.png');icon.alt='マーク';button.append(icon);const value=document.createElement('strong');value.textContent=String(enemy.markStacks||0);field.append(button,value);return {field,button};
+}
