@@ -1180,6 +1180,7 @@ const missionCounters=new Map();
 const placedMonsters=[];let nextPlacedId=1,selectedPlacedId=null;
 const monsterSerials=new Map();
 function addPlacedMonster(enemy){
+ enemy.markStacks=Math.max(0,Math.floor(Number(enemy.markStacks)||0));
  if(!enemy.boss){const serial=(monsterSerials.get(enemy.monsterId)||0)+1;monsterSerials.set(enemy.monsterId,serial);enemy.serial=serial;}
  placedMonsters.push(enemy);
 }
@@ -1195,7 +1196,7 @@ function executeProgressEvents(){if(!roundProgressReady())return;groupMapEvents(
 function changeProgress(delta){const next=Math.max(0,currentProgress+delta);if(next===currentProgress)return;rememberRoster();currentProgress=next;renderRoundProgress();executeProgressEvents();}
 document.getElementById('progress-minus').addEventListener('click',()=>changeProgress(-1));
 document.getElementById('progress-plus').addEventListener('click',()=>changeProgress(1));
-document.getElementById('turn-end').addEventListener('click',()=>{rememberRoster();const clueCount=rosterCounts.get('MAP0104:clue')||0;currentRound+=1;currentProgress+=1;renderRoundProgress();executeProgressEvents();if(pick.value==='MAP0104'&&(currentRound>=8||clueCount>=4))executeLibraryTruth();});
+document.getElementById('turn-end').addEventListener('click',()=>{rememberRoster();const clueCount=rosterCounts.get('MAP0104:clue')||0;placedMonsters.forEach(enemy=>{enemy.markStacks=Math.max(0,(enemy.markStacks||0)-1);});currentRound+=1;currentProgress+=1;renderRoundProgress();executeProgressEvents();if(pick.value==='MAP0104'&&(currentRound>=8||clueCount>=4))executeLibraryTruth();});
 renderRoundProgress();
 window.addEventListener('character-selection-change',()=>{if(!roundProgressReady()){renderRoundProgress();return;}currentRound=1;currentProgress=1;renderRoundProgress();executeProgressEvents();});
 let rosterContext={map:pick.value,difficulty:difficulty.value,route:'',moved:false};
@@ -1209,7 +1210,7 @@ function registerEnemy(enemy, switchTab=true){
  document.getElementById('defensePower1').value=enemy.defense;
  document.getElementById('hp1').value=enemy.hp;
  document.getElementById('attackPower2').value=enemy.attack;
- window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:{name:enemy.name,mapId:enemy.mapId}}));
+ window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:{name:enemy.name,mapId:enemy.mapId,markStacks:enemy.markStacks||0}}));
  applyCharacterToCalculator();
  calculateDamage(document.querySelector('[data-role="attack"].mode-content'),false);
  calculateDamage(document.querySelector('[data-role="defense"].mode-content'),true);
@@ -1346,6 +1347,7 @@ function renderRoster(){
   const remove=document.createElement('button');remove.type='button';remove.className='roster-remove';remove.textContent=enemy.defeated?'撃破済':'撃破';remove.disabled=!!enemy.defeated;remove.setAttribute('aria-label',monsterDisplayName(enemy)+'を撃破');remove.addEventListener('click',()=>{rememberRoster();removeEnemy(enemy);renderRoster();rosterNotice.textContent=monsterDisplayName(enemy)+'を撃破しました。';});
   const deleteButton=document.createElement('button');deleteButton.type='button';deleteButton.className='roster-delete';deleteButton.textContent='削除';deleteButton.setAttribute('aria-label',monsterDisplayName(enemy)+'を削除');deleteButton.addEventListener('click',()=>{rememberRoster();const i=placedMonsters.indexOf(enemy);if(i>=0)placedMonsters.splice(i,1);if(selectedPlacedId===enemy.instanceId){selectedPlacedId=null;window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:null}));}renderRoster();});
   const actions=document.createElement('div');actions.className='roster-card-actions';actions.append(remove,deleteButton);
+  const markField=document.createElement('label');markField.className='roster-mark';markField.title='マークスタック';const markIcon=document.createElement('img');markIcon.src='../images/icon/'+encodeURIComponent('マーク.png');markIcon.alt='マーク';const markInput=document.createElement('input');markInput.type='number';markInput.min='0';markInput.step='1';markInput.value=String(enemy.markStacks||0);markInput.disabled=!!enemy.defeated;markInput.setAttribute('aria-label',monsterDisplayName(enemy)+'のマークスタック');markInput.addEventListener('click',event=>event.stopPropagation());markInput.addEventListener('change',event=>{event.stopPropagation();const next=Math.max(0,Math.floor(Number(markInput.value)||0));if(next===(enemy.markStacks||0)){markInput.value=String(next);return;}rememberRoster();enemy.markStacks=next;if(selectedPlacedId===enemy.instanceId)registerEnemy(enemy,false);renderRoster();});markField.append(markIcon,markInput);
   const top=document.createElement('div');top.className='roster-card-top';top.append(select,actions);
   const skill=summonSkills[enemy.monsterId];
   if(skill&&skill.map===enemy.mapId&&!enemy.defeated){
@@ -1360,7 +1362,7 @@ function renderRoster(){
    }else skillButton.addEventListener('click',()=>summonFromSkill(enemy,skill.targets[0]));
    top.append(skillButton);
   }
-  card.append(top);
+  card.append(top,markField);
   if(skill&&skill.targets.length>1&&skillChoiceId===enemy.instanceId&&!enemy.defeated){
    const choices=document.createElement('div');choices.className='roster-skill-choices';choices.setAttribute('role','group');choices.setAttribute('aria-label',monsterDisplayName(enemy)+'が召喚するモンスターを選択');
    for(const id of skill.targets){
@@ -1629,7 +1631,7 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
  function valueOf(rule,extraMaxHp){
   const amount=Number(rule.value)||0;
   if(rule.formula==='fixed')return amount;
-  let source=rule.source_key==='追加最大HP'?extraMaxHp:number(state(),rule.source_key);
+  let source=rule.source_key==='追加最大HP'?extraMaxHp:rule.source_key==='対象のマーク'?(currentOpponent?.markStacks||0):number(state(),rule.source_key);
   if(rule.source_key==='対象のマーク'&&rule.trigger==='on_attack_after_mark')source++;
   if(rule.source_cap!=='')source=Math.min(source,Number(rule.source_cap));
   if(rule.formula==='per_stack')return source*amount;
@@ -1644,7 +1646,7 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
   const maxHp=Math.max(1,startingHp+maxBonus);
   if(state().currentHp===null)state().currentHp=maxHp;
   state().currentHp=Math.max(0,Math.min(maxHp,Number(state().currentHp)||0));
-  const result={atk:base('atk'),def:base('def'),move:base('move'),hp:maxHp,damageReduce:0};
+  const result={atk:base('atk'),def:base('def'),move:base('move'),hp:maxHp,damageReduce:0,damageAdd:currentOpponent?.markStacks>0?1:0};
   for(const rule of active){
    if(!['atk','def','move'].includes(rule.target))continue;
    if(!triggerMatches(rule)||!conditionMatches(rule,maxHp))continue;
@@ -1751,6 +1753,12 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
   const previousBonus=Number(reduction.dataset.mapKeywordBonus)||0;
   const manual=Number(reduction.value)-previousBonus;
   const bonus=totals.damageReduce||0;
+  const attackDamageAdd=document.getElementById('damageAdd1');
+  const previousMarkBonus=Number(attackDamageAdd.dataset.monsterMarkBonus)||0;
+  const manualDamageAdd=Number(attackDamageAdd.value)-previousMarkBonus;
+  const markBonus=totals.damageAdd||0;
+  attackDamageAdd.value=Math.max(0,Number.isFinite(manualDamageAdd)?manualDamageAdd:0)+markBonus;
+  attackDamageAdd.dataset.monsterMarkBonus=String(markBonus);
   reduction.value=Math.max(0,Number.isFinite(manual)?manual:0)+bonus;
   reduction.dataset.mapKeywordBonus=String(bonus);
  };
