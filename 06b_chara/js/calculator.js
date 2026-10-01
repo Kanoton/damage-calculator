@@ -740,79 +740,24 @@ function renderBaseDamageSummary(calculator,grid,isSurvival){
  calculator.querySelector('.expected-damage').textContent=(grid.totalDamage/grid.totalCombinations).toFixed(2);const count=isSurvival?grid.survivalCount:grid.defeatCount;calculator.querySelector('.result-rate').textContent=((count/grid.totalCombinations)*100).toFixed(2)+'%';
 }
 
-function calculateDamage(calculator, isSurvival = false) {
-    const attackPower =
-        Number(calculator.querySelector('[id^="attackPower"]').value);
-
-    const damageAdd =
-        Number(calculator.querySelector('[id^="damageAdd"]').value);
-
-    const hp =
-        Number(calculator.querySelector('[id^="hp"]').value);
-
-    const defensePower =
-        Number(calculator.querySelector('[id^="defensePower"]').value);
-
-    const damageReduce =
-        Number(calculator.querySelector('[id^="damageReduce"]').value);
-
-    const tableBody = calculator.querySelector(".damage-table tbody");
-    const grid=calculateDefenseDamageGrid(attackPower,defensePower,damageAdd,damageReduce,hp);
-    renderDefenseDamageGrid(tableBody,grid,hp);
-    // 上部の表・期待値・撃破率/生存率は、
-    // ここまでの従来計算（カード効果なし）をそのまま使用する
-
-    // 下部グラフ・下部の期待値/確率だけはカード効果を反映する
-    const cardAwareResult =
-        calculateCardAwareDamage(
-            calculator,
-            attackPower,
-            defensePower,
-            damageAdd,
-            damageReduce,
-            hp,
-            isSurvival
-        );
-
-    // cardAwareResult.damageCounts は「回数」ではなく確率そのものなので、
-    // totalCombinations = 1 として描画する
-    renderDamageProbabilityGraph(
-        calculator,
-        cardAwareResult.damageCounts,
-        cardAwareResult.maxDamage,
-        1,
-        hp
-    );
-
-    renderCardAwareSummary(calculator,cardAwareResult,isSurvival);
-    renderBaseDamageSummary(calculator,grid,isSurvival);
-
-    if (isSurvival) {
-        renderDefenseChoiceGuide(
-            calculator,
-            attackPower,
-            defensePower,
-            damageAdd,
-            damageReduce,
-            hp
-        );
-
-        const recommendation =
-            calculator.querySelector(".defense-recommendation");
-
-        if (recommendation) {
-            recommendation.textContent =
-                getDefenseRecommendation(
-                    attackPower,
-                    defensePower,
-                    damageAdd,
-                    damageReduce,
-                    hp
-                );
-        }
-    }
+function getCalculatorDamageInputs(calculator){return {attackPower:Number(calculator.querySelector('[id^="attackPower"]').value),damageAdd:Number(calculator.querySelector('[id^="damageAdd"]').value),hp:Number(calculator.querySelector('[id^="hp"]').value),defensePower:Number(calculator.querySelector('[id^="defensePower"]').value),damageReduce:Number(calculator.querySelector('[id^="damageReduce"]').value)};}
+function renderDefenseModeGuidance(calculator,{attackPower,defensePower,damageAdd,damageReduce,hp}){
+ renderDefenseChoiceGuide(calculator,attackPower,defensePower,damageAdd,damageReduce,hp);const recommendation=calculator.querySelector('.defense-recommendation');if(recommendation)recommendation.textContent=getDefenseRecommendation(attackPower,defensePower,damageAdd,damageReduce,hp);
 }
 
+function calculateDamage(calculator, isSurvival = false) {
+    const inputs=getCalculatorDamageInputs(calculator);
+    const {attackPower,defensePower,damageAdd,damageReduce,hp}=inputs;
+    const grid=calculateDefenseDamageGrid(attackPower,defensePower,damageAdd,damageReduce,hp);
+    renderDefenseDamageGrid(calculator.querySelector('.damage-table tbody'),grid,hp);
+
+    // 上部は従来の36通り計算、下部グラフとサマリーはカード効果込み。
+    const cardAwareResult=calculateCardAwareDamage(calculator,attackPower,defensePower,damageAdd,damageReduce,hp,isSurvival);
+    renderDamageProbabilityGraph(calculator,cardAwareResult.damageCounts,cardAwareResult.maxDamage,1,hp);
+    renderCardAwareSummary(calculator,cardAwareResult,isSurvival);
+    renderBaseDamageSummary(calculator,grid,isSurvival);
+    if(isSurvival)renderDefenseModeGuidance(calculator,inputs);
+}
 
 // 各モードを初期化
 const modes = document.querySelectorAll(".mode-content");
