@@ -112,10 +112,10 @@
   const ownedRules=activeRules();
   for(const [key,label,triggers] of [['attack','攻撃時',['on_attack','on_attack_after_mark']],['move','移動時',['on_next_move']]]){
    if(!ownedRules.some(rule=>triggers.includes(rule.trigger)))continue;
-   const field=document.createElement('label');field.className='condition-phase';
-   const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.checked=Boolean(state().phases?.[key]);checkbox.setAttribute('aria-label',label+'の効果を有効にする');
-   checkbox.addEventListener('change',()=>{state().phases??={attack:false,move:false};state().phases[key]=checkbox.checked;updateStats();});
-   field.append(checkbox,document.createTextNode(label));conditionsBox.append(field);
+   const field=createConditionPhaseView(label,Boolean(state().phases?.[key]),checked=>{
+    state().phases??={attack:false,move:false};state().phases[key]=checked;updateStats();
+   });
+   conditionsBox.append(field);
   }
   for(const id of state().chips){
    if(!toggleable(id))continue;
