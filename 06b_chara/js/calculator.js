@@ -508,6 +508,13 @@ function calculateCardAwareDamage(
 
 
 // ダメージごとの発生確率を、マーカーなしの折れ線グラフで描画
+function buildDamageProbabilityGraphModel(damageCounts,maxDamage,totalCombinations){
+ const damageValues=Array.from(damageCounts.keys()),xMin=damageValues.length?Math.min(...damageValues):0,xMax=Math.max(xMin,maxDamage),probabilities=[];let maxProbability=0;
+ for(let damage=xMin;damage<=xMax;damage++){const probability=((damageCounts.get(damage)||0)/totalCombinations)*100;probabilities.push({damage,probability});maxProbability=Math.max(maxProbability,probability);}
+ let yTickStep=1;if(maxProbability>=10){yTickStep=20;for(const candidate of [5,10,15,20]){if(Math.ceil(maxProbability/candidate)<=6){yTickStep=candidate;break;}}}
+ const yMax=Math.max(yTickStep,Math.ceil(maxProbability/yTickStep)*yTickStep);return {xMin,xMax,probabilities,maxProbability,yTickStep,yMax};
+}
+
 function renderDamageProbabilityGraph(
     calculator,
     damageCounts,
@@ -521,50 +528,8 @@ function renderDamageProbabilityGraph(
         return;
     }
 
-    // 横軸は「実際に発生する最小ダメージ」から開始し、
-    // 最大値は「実際に発生する最大ダメージ」まで表示する
-    const damageValues = Array.from(damageCounts.keys());
-    const xMin = damageValues.length > 0
-        ? Math.min(...damageValues)
-        : 0;
-    const xMax = Math.max(xMin, maxDamage);
-
-    const probabilities = [];
-    let maxProbability = 0;
-
-    for (let damage = xMin; damage <= xMax; damage++) {
-        const count = damageCounts.get(damage) || 0;
-        const probability = (count / totalCombinations) * 100;
-
-        probabilities.push({ damage, probability });
-        maxProbability = Math.max(maxProbability, probability);
-    }
-
-    // 縦軸：
-    // 最大発生確率が10%未満なら1%刻み。
-    // 10%以上なら5% / 10% / 15% / 20% から見やすい間隔を自動選択する。
-    let yTickStep;
-
-    if (maxProbability < 10) {
-        yTickStep = 1;
-    } else {
-        const yTickCandidates = [5, 10, 15, 20];
-        yTickStep = 20;
-
-        for (const candidate of yTickCandidates) {
-            // 目盛り数が多すぎない範囲（おおむね4～6本）で最小の刻みを採用
-            const tickCount = Math.ceil(maxProbability / candidate);
-            if (tickCount <= 6) {
-                yTickStep = candidate;
-                break;
-            }
-        }
-    }
-
-    const yMax = Math.max(
-        yTickStep,
-        Math.ceil(maxProbability / yTickStep) * yTickStep
-    );
+    // 横軸・確率列・縦軸目盛りは描画前に純粋なモデルとして組み立てる。
+    const {xMin,xMax,probabilities,yTickStep,yMax}=buildDamageProbabilityGraphModel(damageCounts,maxDamage,totalCombinations);
 
     const width = 620;
     // 右側の表示エリアに近い縦横比にして、
