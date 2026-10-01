@@ -723,6 +723,15 @@ function renderDamageProbabilityGraph(
 }
 
 
+
+function calculateDefenseDamageGrid(attackPower,defensePower,damageAdd,damageReduce,hp){
+ const rows=[],damageCounts=new Map();let totalDamage=0,defeatCount=0,survivalCount=0,maxDamage=0;
+ for(let attackDice=1;attackDice<=6;attackDice++){const damages=[];for(let defenseDice=1;defenseDice<=6;defenseDice++){const damage=getDefenseDamage(attackPower,defensePower,damageAdd,damageReduce,attackDice,defenseDice);damages.push(damage);totalDamage+=damage;damageCounts.set(damage,(damageCounts.get(damage)||0)+1);maxDamage=Math.max(maxDamage,damage);if(damage>=hp)defeatCount++;else survivalCount++;}rows.push({attackDice,damages});}
+ return {rows,damageCounts,totalDamage,defeatCount,survivalCount,maxDamage,totalCombinations:36};
+}
+function renderDefenseDamageGrid(tableBody,grid,hp){
+ tableBody.replaceChildren();for(const {attackDice,damages} of grid.rows){const row=document.createElement('tr');if(attackDice===1){const label=document.createElement('th');label.textContent='攻撃';label.rowSpan=6;label.classList.add('attack-label');row.append(label);}const attackCell=document.createElement('th');attackCell.textContent=attackDice;row.append(attackCell);damages.forEach(damage=>{const cell=document.createElement('td');cell.textContent=damage;if(damage>=hp)cell.classList.add('defeat');row.append(cell);});tableBody.append(row);}
+}
 function calculateDamage(calculator, isSurvival = false) {
     const attackPower =
         Number(calculator.querySelector('[id^="attackPower"]').value);
@@ -739,68 +748,10 @@ function calculateDamage(calculator, isSurvival = false) {
     const damageReduce =
         Number(calculator.querySelector('[id^="damageReduce"]').value);
 
-    const tableBody =
-        calculator.querySelector(".damage-table tbody");
-
-    tableBody.innerHTML = "";
-
-    let totalDamage = 0;
-    let defeatCount = 0;
-    let survivalCount = 0;
-    let maxDamage = 0;
-
-    const damageCounts = new Map();
-    const totalCombinations = 36;
-
-    for (let attackDice = 1; attackDice <= 6; attackDice++) {
-        const row = document.createElement("tr");
-
-        if (attackDice === 1) {
-            const attackLabel = document.createElement("th");
-            attackLabel.textContent = "攻撃";
-            attackLabel.rowSpan = 6;
-            attackLabel.classList.add("attack-label");
-            row.appendChild(attackLabel);
-        }
-
-        const attackCell = document.createElement("th");
-        attackCell.textContent = attackDice;
-        row.appendChild(attackCell);
-
-        for (let defenseDice = 1; defenseDice <= 6; defenseDice++) {
-            // 表・期待値・撃破率/生存率は従来どおり「防御」選択時で計算
-            const finalDamage = getDefenseDamage(
-                attackPower,
-                defensePower,
-                damageAdd,
-                damageReduce,
-                attackDice,
-                defenseDice
-            );
-
-            const cell = document.createElement("td");
-            cell.textContent = finalDamage;
-
-            if (finalDamage >= hp) {
-                cell.classList.add("defeat");
-                defeatCount++;
-            } else {
-                survivalCount++;
-            }
-
-            row.appendChild(cell);
-            totalDamage += finalDamage;
-
-            damageCounts.set(
-                finalDamage,
-                (damageCounts.get(finalDamage) || 0) + 1
-            );
-
-            maxDamage = Math.max(maxDamage, finalDamage);
-        }
-
-        tableBody.appendChild(row);
-    }
+    const tableBody = calculator.querySelector(".damage-table tbody");
+    const grid=calculateDefenseDamageGrid(attackPower,defensePower,damageAdd,damageReduce,hp);
+    renderDefenseDamageGrid(tableBody,grid,hp);
+    const {totalDamage,defeatCount,survivalCount,totalCombinations}=grid;
 
     // 上部の表・期待値・撃破率/生存率は、
     // ここまでの従来計算（カード効果なし）をそのまま使用する
