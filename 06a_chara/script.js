@@ -1982,7 +1982,7 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
        if(!state().chips.some(id=>(byChip.get(id)||[]).some(rule=>triggers.includes(rule.trigger))))state().phases[key]=false;
       }
      }
-     else state().chips.push(row.id);
+     else{state().chips.push(row.id);if(row.id==='36'||row.id==='37'){state().phases??={attack:false,move:false};state().phases.attack=false;}}
      renderSelectedCharacter();
     });
    }
@@ -2002,7 +2002,7 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
  }
  mapPicker.addEventListener('change',()=>{currentOpponent=null;if(category==='マップ固有')renderChips();if(selectedCharacter){renderConditions();updateStats();}});
  window.addEventListener('character-opponent-change',event=>{currentOpponent=event.detail;if(selectedCharacter){state().phases??={attack:false,move:false};state().phases.attack=Boolean(currentOpponent);renderConditions();updateStats();}});
- applyAttackTargetEffects=enemy=>{if(!selectedCharacter||!enemy||enemy.defeated)return;state().phases??={attack:false,move:false};state().phases.attack=true;const ids=new Set(state().chips);if(ids.has('36')||ids.has('37'))enemy.markStacks=(enemy.markStacks||0)+1;currentOpponent={name:enemy.name,mapId:enemy.mapId,markStacks:enemy.markStacks||0};};
+ applyAttackTargetEffects=enemy=>{if(!selectedCharacter||!enemy||enemy.defeated)return;state().phases??={attack:false,move:false};state().phases.attack=true;const ids=new Set(state().chips);const markGain=(ids.has('36')?1:0)+(ids.has('37')?1:0);if(markGain)enemy.markStacks=(enemy.markStacks||0)+markGain;currentOpponent={name:enemy.name,mapId:enemy.mapId,markStacks:enemy.markStacks||0};};
  function wireTabs(tablist,onSelect){
   const tabs=[...tablist.querySelectorAll('[role="tab"]')];
   const select=tab=>{tabs.forEach(b=>{b.setAttribute('aria-selected',String(b===tab));b.tabIndex=b===tab?0:-1;});onSelect(tab);};
