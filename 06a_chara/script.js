@@ -1104,6 +1104,7 @@ const INITIAL_MAP_DATA={"maps":[{"map_id":"MAP0001","マップ名":"夢想号","
 let applyCharacterToCalculator=()=>{};
 let applyAttackTargetEffects=()=>{};
 let clearCharacterAttackPhase=()=>{};
+let applyCharacterTurnStartEffects=()=>{};
 let hasSelectedCharacter=()=>false;
 (()=>{
 const root=document.getElementById('map-draft'),data=normalizeMapData(INITIAL_MAP_DATA),pick=document.getElementById('mp-map-select'),difficulty=document.getElementById('mp-difficulty'),list=document.getElementById('mp-monster-list'),status=document.getElementById('mp-action-status');
@@ -1198,7 +1199,7 @@ function executeProgressEvents(){if(!roundProgressReady())return;groupMapEvents(
 function changeProgress(delta){const next=Math.max(0,currentProgress+delta);if(next===currentProgress)return;rememberRoster();currentProgress=next;renderRoundProgress();executeProgressEvents();}
 document.getElementById('progress-minus').addEventListener('click',()=>changeProgress(-1));
 document.getElementById('progress-plus').addEventListener('click',()=>changeProgress(1));
-document.getElementById('turn-end').addEventListener('click',()=>{rememberRoster();const clueCount=rosterCounts.get('MAP0104:clue')||0;placedMonsters.forEach(enemy=>{enemy.markStacks=Math.max(0,(enemy.markStacks||0)-1);});renderRoster();if(selectedPlacedId){const selectedEnemy=placedMonsters.find(enemy=>enemy.instanceId===selectedPlacedId&&!enemy.defeated);if(selectedEnemy)registerEnemy(selectedEnemy,false);}currentRound+=1;currentProgress+=1;renderRoundProgress();executeProgressEvents();if(pick.value==='MAP0104'&&(currentRound>=8||clueCount>=4))executeLibraryTruth();});
+document.getElementById('turn-end').addEventListener('click',()=>{rememberRoster();applyCharacterTurnStartEffects();const clueCount=rosterCounts.get('MAP0104:clue')||0;placedMonsters.forEach(enemy=>{enemy.markStacks=Math.max(0,(enemy.markStacks||0)-1);});renderRoster();if(selectedPlacedId){const selectedEnemy=placedMonsters.find(enemy=>enemy.instanceId===selectedPlacedId&&!enemy.defeated);if(selectedEnemy)registerEnemy(selectedEnemy,false);}currentRound+=1;currentProgress+=1;renderRoundProgress();executeProgressEvents();if(pick.value==='MAP0104'&&(currentRound>=8||clueCount>=4))executeLibraryTruth();});
 renderRoundProgress();
 window.addEventListener('character-selection-change',()=>{if(!roundProgressReady()){renderRoundProgress();return;}currentRound=1;currentProgress=1;renderRoundProgress();executeProgressEvents();});
 let rosterContext={map:pick.value,difficulty:difficulty.value,route:'',moved:false};
@@ -1794,7 +1795,15 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
    const chip=chips.find(c=>c.id===id);if(!chip)continue;
    const item=document.createElement('span');item.className='selected-chip';
    item.title=chip.name+'\n'+chip.effect;
-   const img=document.createElement('img');img.alt=chip.name;img.src='../images/chip_icon/'+encodeURIComponent(chip.images);item.append(img);ownedBox.append(item);
+   const img=document.createElement('img');img.alt=chip.name;img.src='../images/chip_icon/'+encodeURIComponent(chip.images);item.append(img);
+   if(chip.category==='チャージ'&&id!=='57'){
+    item.classList.add('is-actionable');item.setAttribute('role','button');item.tabIndex=0;
+    const chargeDelta={'51':2,'52':2,'53':2,'54':2,'55':-6,'56':-5,'58':-4}[id]||0;
+    item.title=chip.name+'\n'+chip.effect+(chargeDelta?'\nクリック：チャージ'+(chargeDelta>0?'+':'')+chargeDelta:'');
+    const applyCharge=()=>{if(!chargeDelta)return;state().numbers['チャージ']=Math.max(0,Math.min(10,number(state(),'チャージ')+chargeDelta));renderConditions();updateStats();};
+    item.addEventListener('click',applyCharge);item.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();applyCharge();}});
+   }
+   ownedBox.append(item);
   }
   ownedBox.scrollLeft=previousScroll;
  }
@@ -2003,6 +2012,7 @@ const CHIP_RULES_SNAPSHOT=[{"rule_id":"R001","chip_id":"1","kind":"modifier","ta
  }
  mapPicker.addEventListener('change',()=>{currentOpponent=null;if(category==='マップ固有')renderChips();if(selectedCharacter){renderConditions();updateStats();}});
  clearCharacterAttackPhase=()=>{if(!selectedCharacter)return;state().phases??={attack:false,move:false};if(!state().phases.attack)return;state().phases.attack=false;renderConditions();updateStats();};
+ applyCharacterTurnStartEffects=()=>{if(!selectedCharacter||!state().chips.includes('57'))return;const charge=number(state(),'チャージ');if(charge>=6)return;state().numbers['チャージ']=6;renderConditions();updateStats();};
  document.querySelectorAll('.role-tab').forEach(tab=>tab.addEventListener('click',()=>{if(tab.dataset.role==='map'||tab.dataset.role==='character')clearCharacterAttackPhase();}));
  window.addEventListener('character-opponent-change',event=>{currentOpponent=event.detail;if(selectedCharacter){renderConditions();updateStats();}});
  applyAttackTargetEffects=enemy=>{if(!selectedCharacter||!enemy||enemy.defeated)return;state().phases??={attack:false,move:false};state().phases.attack=true;const ids=new Set(state().chips);const markGain=(ids.has('36')?1:0)+(ids.has('37')?1:0);if(markGain)enemy.markStacks=(enemy.markStacks||0)+markGain;currentOpponent={name:enemy.name,mapId:enemy.mapId,markStacks:enemy.markStacks||0};};
