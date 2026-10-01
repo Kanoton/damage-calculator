@@ -1,0 +1,475 @@
+let applyCharacterToCalculator=()=>{};
+let applyAttackTargetEffects=()=>{};
+let clearCharacterAttackPhase=()=>{};
+let applyCharacterTurnStartEffects=()=>{};
+let hasSelectedCharacter=()=>false;
+(()=>{
+const root=document.getElementById('map-draft'),data=normalizeMapData(INITIAL_MAP_DATA),pick=document.getElementById('mp-map-select'),difficulty=document.getElementById('mp-difficulty'),list=document.getElementById('mp-monster-list'),status=document.getElementById('mp-action-status');
+
+const eventPreview=createEventMapPreview(document.getElementById('mp-map-image'),document.getElementById('mp-event-image-layer'),file=>new Promise(resolve=>{
+ // File names refer to images/MapEvent, including optional subfolders.
+ const segments=file.replaceAll('\\','/').split('/');if(segments.some(part=>!part||part==='.'||part==='..')||file.includes(':')){resolve(null);return;}
+ const url='../images/MapEvent/'+segments.map(encodeURIComponent).join('/');const img=new Image();img.onload=()=>resolve(url);img.onerror=()=>resolve(null);img.src=url;
+}));
+root.addEventListener('keydown',event=>{if(event.key==='Escape')eventPreview.reset();});
+document.querySelectorAll('.role-tab,.mp-subtabs button').forEach(button=>button.addEventListener('click',()=>eventPreview.reset()));
+
+// Route choices change the view, never execute events or reset the roster.
+const routeState={context:'',route:'',moved:false};
+const routeControls=document.createElement('div');routeControls.id='mp-route-controls';routeControls.hidden=true;
+root.querySelector('.mp-map-only').prepend(routeControls);
+const routeNote=document.createElement('p');routeNote.id='mp-route-note';routeNote.textContent='√決定後分岐';routeNote.hidden=true;root.querySelector('.mp-event-section h2').after(routeNote);
+function availableRoutes(){return (data.maps[pick.value]?.routes||[]).filter(r=>!r.levels.length||r.levels.includes(difficulty.value));}
+function ensureRoute(){const routes=availableRoutes(),context=JSON.stringify([pick.value,difficulty.value]);if(routeState.context!==context||!routes.some(r=>r.id===routeState.route)){routeState.context=context;routeState.route=(routes.find(r=>r.id==='COMMON')||routes[0])?.id||'';routeState.moved=false;}if(!routes.find(r=>r.id===routeState.route)?.movedImage)routeState.moved=false;return routes;}
+function routeRows(rows){const keepCommon=availableRoutes().some(route=>route.id==='COMMON');return rows.filter(row=>{if(row.map_id!==pick.value||(rows!==data.missions&&!routeLevelMatches(row,difficulty.value)))return false;const route=String(row.route_id||'').trim();if(pick.value==='MAP0007'&&routeState.route&&routeState.route!=='COMMON'&&route==='COMMON'&&/^(クジャク|オシドリ)の試練に入る$/.test(String(row['報酬']||'').trim()))return false;return !route||route===routeState.route||(keepCommon&&route==='COMMON');});}
+function currentMapImage(){const route=availableRoutes().find(r=>r.id===routeState.route);return route?(routeState.moved?route.movedImage:route.image):data.maps[pick.value]?.image;}
+function renderRouteControls(){
+ const focused=document.activeElement?.closest('#mp-route-controls')?document.activeElement.dataset.routeFocus:null;
+ const routes=ensureRoute();routeNote.hidden=!(routes.length>1&&routeState.route==='COMMON');routeControls.replaceChildren();routeControls.hidden=routes.length===0;root.querySelector('.mp-map-only').classList.toggle('has-route-switches',routes.length>0);
+ const makeGroup=(label,choices)=>{const group=document.createElement('div');group.className='mp-route-group';group.setAttribute('role','group');group.setAttribute('aria-label',label);for(const choice of choices){const button=document.createElement('button');button.type='button';button.textContent=choice.name;button.dataset.routeFocus=choice.key;button.setAttribute('aria-pressed',String(choice.active));button.addEventListener('click',()=>{choice.select();eventPreview.reset();render();});group.append(button);}routeControls.append(group);};
+ if(routes.length)makeGroup('ルート表示',routes.map(r=>({name:r.name,key:'route:'+r.id,active:r.id===routeState.route,select:()=>{routeState.route=r.id;routeState.context=JSON.stringify([pick.value,difficulty.value]);if(!r.movedImage)routeState.moved=false;}})));
+ if(routes.find(r=>r.id===routeState.route)?.movedImage)makeGroup('マップ表示',[{name:'共通マップ',key:'view:base',active:!routeState.moved,select:()=>routeState.moved=false},{name:'移動先マップ',key:'view:moved',active:routeState.moved,select:()=>routeState.moved=true}]);
+ if(focused)[...routeControls.querySelectorAll('button')].find(b=>b.dataset.routeFocus===focused)?.focus();
+}
+function populateMaps(){const previous=pick.value;pick.replaceChildren();const entries=Object.entries(data.maps);entries.forEach(([id,map])=>{const option=document.createElement('option');option.value=id;option.textContent=map.name;pick.append(option);});pick.value=data.maps[previous]?previous:(entries.at(-1)?.[0]||'');pick.disabled=!entries.length;}populateMaps();
+let monsterTipVersion=0;
+let selected=null;const buff={attack:0,defense:0};
+const gimmickCounts=new Map();
+const gimmickArea=document.createElement('div');gimmickArea.className='mp-gimmicks';gimmickArea.setAttribute('aria-label','マップ固有ギミック');
+function mapGimmicks(){return (data.gimmicks||[]).filter(r=>r.map_id===pick.value);}
+function gimmickKey(row){return row.map_id+':'+row.gimmick_id;}
+function gimmickMaximum(row){const raw=row['最大回数'];if(raw===undefined||String(raw).trim()==='')return Infinity;const number=Number(raw);return Number.isFinite(number)?Math.max(0,Math.floor(number)):Infinity;}
+function gimmickCount(row){return Math.min(gimmickMaximum(row),gimmickCounts.get(gimmickKey(row))??0);}
+function effectiveStat(stats,key){
+ if(!stats||stats[key]===''||stats[key]===undefined)return null;
+ let value=Number(stats[key])+(key==='攻撃'?buff.attack:key==='防御'?buff.defense:0);
+
+ mapGimmicks().filter(r=>r.monster_id===stats.monster_id&&(!r['難易度']||r['難易度']===difficulty.value)).forEach(r=>{
+  value+=Number(r[key]||0)*gimmickCount(r);
+
+ });
+ return value;
+}
+function renderGimmicks(){
+ const focused=document.activeElement?.dataset?.gimmick;gimmickArea.replaceChildren();
+ const unique=new Map();mapGimmicks().forEach(r=>{if(!unique.has(r.gimmick_id))unique.set(r.gimmick_id,r);});
+ unique.forEach(row=>{
+  const button=document.createElement('button');button.type='button';button.dataset.gimmick=row.gimmick_id;const max=gimmickMaximum(row);const count=gimmickCount(row);button.textContent=row['表示名']+(max===1?'':' '+count);button.classList.toggle('mp-gimmick-complete',count>=max);button.setAttribute('aria-pressed',String(count>0));button.setAttribute('aria-label',row['表示名']+' '+gimmickCount(row)+'、左クリックで増加、右クリックで減少');
+  button.title='左クリック：＋1 ／ 右クリック：−1';
+  const change=delta=>{const current=gimmickCount(row),maximum=gimmickMaximum(row);const next=Math.max(0,Math.min(maximum,current+delta));if(next===current)return;if(pick.value==='MAP0104'&&row.gimmick_id==='warden_defeated'&&delta>0){rememberRoster();const defeated=defeatActiveWardens();if(!defeated)rosterCounts.set('MAP0104:warden_defeated',(rosterCounts.get('MAP0104:warden_defeated')||0)+1);render();return;}gimmickCounts.set(gimmickKey(row),next);render();};
+  button.addEventListener('click',()=>change(1));button.addEventListener('contextmenu',event=>{event.preventDefault();change(-1);});button.addEventListener('keydown',event=>{if(event.shiftKey&&event.key==='Enter'){event.preventDefault();change(-1);}});
+  gimmickArea.append(button);if(focused===row.gimmick_id)button.focus();
+ });
+ gimmickArea.hidden=unique.size===0;
+}
+
+// Roster buffs and gimmicks are independent of the source list.
+const rosterBuff={attack:0,defense:0},rosterCounts=new Map();
+let rosterEvidenceConsider=false;
+window.addEventListener('character-evidence-change',()=>{if(pick.value==='MAP0104')renderRoster();});
+function rosterStat(stats,key){
+ if(!stats||stats[key]===''||stats[key]===undefined)return null;
+ let value=Number(stats[key])+(key==='攻撃'?rosterBuff.attack:key==='防御'?rosterBuff.defense:0);
+ mapGimmicks().filter(r=>r.monster_id===stats.monster_id&&(!r['難易度']||r['難易度']===difficulty.value)).forEach(r=>{value+=Number(r[key]||0)*Math.min(gimmickMaximum(r),rosterCounts.get(gimmickKey(r))||0);});
+ if(key==='攻撃'&&rosterEvidenceConsider&&pick.value==='MAP0104'&&['M0115','M0116','M0117'].includes(stats.monster_id))value+=Number(window.getCharacterEvidenceStack?.()||0);
+ return value;
+}
+const defeatTotals=new Map();
+const executedEvents=new Set();
+const missionCounters=new Map();
+const placedMonsters=[];let nextPlacedId=1,selectedPlacedId=null;
+const monsterSerials=new Map();
+function addPlacedMonster(enemy){
+ enemy.markStacks=Math.max(0,Math.floor(Number(enemy.markStacks)||0));
+ if(!enemy.boss){const serial=(monsterSerials.get(enemy.monsterId)||0)+1;monsterSerials.set(enemy.monsterId,serial);enemy.serial=serial;}
+ placedMonsters.push(enemy);
+}
+function monsterDisplayName(enemy){return enemy.name+(enemy.boss?'':' '+enemy.serial);}
+const roster=document.getElementById('map-roster-list'),rosterEmpty=document.getElementById('map-roster-empty'),rosterNotice=document.createElement('span');
+// Undo snapshots last for this page session, until 全削除.
+const rosterHistory=[];
+let currentRound=1,currentProgress=1;
+const roundDisplay=document.getElementById('current-round'),progressDisplay=document.getElementById('current-progress');
+function roundProgressReady(){return Boolean(data.maps[pick.value]&&hasSelectedCharacter());}
+function renderRoundProgress(){roundDisplay.textContent=currentRound;progressDisplay.textContent=currentProgress;document.getElementById('round-progress-controls').hidden=!roundProgressReady();}
+function executeProgressEvents(){if(!roundProgressReady())return;groupMapEvents(routeRows(data.events)).filter(group=>Number(group['進捗'])===currentProgress).forEach(group=>executeEvent(group,{remember:false,render:false}));updateEventRows();renderRoster();}
+function changeProgress(delta){const next=Math.max(0,currentProgress+delta);if(next===currentProgress)return;rememberRoster();currentProgress=next;renderRoundProgress();executeProgressEvents();}
+document.getElementById('progress-minus').addEventListener('click',()=>changeProgress(-1));
+document.getElementById('progress-plus').addEventListener('click',()=>changeProgress(1));
+document.getElementById('turn-end').addEventListener('click',()=>{rememberRoster();applyCharacterTurnStartEffects();const clueCount=rosterCounts.get('MAP0104:clue')||0;placedMonsters.forEach(enemy=>{enemy.markStacks=Math.max(0,(enemy.markStacks||0)-1);});renderRoster();if(selectedPlacedId){const selectedEnemy=placedMonsters.find(enemy=>enemy.instanceId===selectedPlacedId&&!enemy.defeated);if(selectedEnemy)registerEnemy(selectedEnemy,false);}currentRound+=1;currentProgress+=1;renderRoundProgress();executeProgressEvents();if(pick.value==='MAP0104'&&(currentRound>=8||clueCount>=4))executeLibraryTruth();});
+renderRoundProgress();
+window.addEventListener('character-selection-change',()=>{if(!roundProgressReady()){renderRoundProgress();return;}currentRound=1;currentProgress=1;renderRoundProgress();executeProgressEvents();});
+let rosterContext={map:pick.value,difficulty:difficulty.value,route:'',moved:false};
+function rememberRoster(){document.getElementById('roster-error').textContent='';rosterHistory.push(structuredClone({monsters:placedMonsters,buff:rosterBuff,counts:[...rosterCounts],selected:selectedPlacedId,next:nextPlacedId,serials:[...monsterSerials],context:rosterContext,missions:[...missionCounters],events:[...executedEvents],defeats:[...defeatTotals],characterEvidence:window.captureCharacterEvidence?.(),evidenceConsider:rosterEvidenceConsider,round:currentRound,progress:currentProgress}));}
+document.getElementById('roster-undo').addEventListener('click',()=>{
+ document.getElementById('roster-error').textContent='';const previous=rosterHistory.pop();if(!previous)return;if(!data.maps[previous.context.map]){rosterHistory.length=0;renderRoster();return;}
+ defeatTotals.clear();(previous.defeats||[]).forEach(([k,v])=>defeatTotals.set(k,v));executedEvents.clear();(previous.events||[]).forEach(key=>executedEvents.add(key));missionCounters.clear();(previous.missions||[]).forEach(([k,v])=>missionCounters.set(k,v));placedMonsters.splice(0,placedMonsters.length,...previous.monsters);Object.assign(rosterBuff,previous.buff);rosterCounts.clear();previous.counts.forEach(([k,v])=>rosterCounts.set(k,v));rosterEvidenceConsider=Boolean(previous.evidenceConsider);currentRound=Math.max(1,Number(previous.round)||1);currentProgress=Math.max(0,Number(previous.progress)??1);renderRoundProgress();window.restoreCharacterEvidence?.(previous.characterEvidence);selectedPlacedId=previous.selected;window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:placedMonsters.find(enemy=>enemy.instanceId===selectedPlacedId&&!enemy.defeated)?{name:placedMonsters.find(enemy=>enemy.instanceId===selectedPlacedId).name,mapId:previous.context.map}:null}));nextPlacedId=previous.next;monsterSerials.clear();(previous.serials||[]).forEach(([id,serial])=>monsterSerials.set(id,serial));pick.value=previous.context.map;difficulty.value=previous.context.difficulty;rosterContext=previous.context;Object.assign(routeState,{context:JSON.stringify([pick.value,difficulty.value]),route:previous.context.route||'',moved:!!previous.context.moved});selected=null;render();
+});
+document.getElementById('roster-clear').addEventListener('click',()=>{clearRoster();rosterHistory.length=0;nextPlacedId=1;renderRoster();});
+function registerEnemy(enemy, switchTab=true){
+ if(switchTab)applyAttackTargetEffects(enemy);
+ document.getElementById('defensePower1').value=enemy.defense;
+ document.getElementById('hp1').value=enemy.hp;
+ document.getElementById('attackPower2').value=enemy.attack;
+ window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:{name:enemy.name,mapId:enemy.mapId,markStacks:enemy.markStacks||0}}));
+ applyCharacterToCalculator();
+ calculateDamage(document.querySelector('[data-role="attack"].mode-content'),false);
+ calculateDamage(document.querySelector('[data-role="defense"].mode-content'),true);
+ // Clicking a roster monster always opens the attack calculator.
+ if(switchTab)document.querySelector('.role-tab[data-role="attack"]').click();
+}
+function clearRoster(){document.getElementById('roster-error').textContent='';currentRound=1;currentProgress=1;renderRoundProgress();defeatTotals.clear();executedEvents.clear();placedMonsters.length=0;monsterSerials.clear();selectedPlacedId=null;window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:null}));skillChoiceId=null;rosterBuff.attack=0;rosterBuff.defense=0;rosterCounts.clear();rosterEvidenceConsider=false;rosterNotice.textContent='';}
+function updateEnemy(enemy){if(enemy.defeated)return;enemy.attack=rosterStat(enemy.base,'攻撃')+(enemy.manualAttack||0)+(enemy.eventAttack||0);enemy.defense=rosterStat(enemy.base,'防御')+(enemy.manualDefense||0)+(enemy.eventDefense||0);enemy.hp=rosterStat(enemy.base,'HP')-enemy.damageTaken;}
+function spawnGimmickMonsters(trigger){
+ const matching=mapGimmicks().filter(r=>r.gimmick_id===trigger.gimmick_id&&(!r['難易度']||r['難易度']===difficulty.value));
+ const configurations=new Map();matching.forEach(r=>{const ids=String(r['出現monster_id']||'').trim();if(ids)configurations.set(JSON.stringify([ids,String(r['出現数']||'').trim()]),r);});
+ const pending=[];try{for(const row of configurations.values()){
+ const ids=String(row['出現monster_id']).split('|').map(v=>v.trim()),amounts=String(row['出現数']||'').split('|').map(v=>v.trim());if(ids.length!==amounts.length)throw Error('出現IDと出現数の個数が一致していません。');
+ ids.forEach((id,index)=>{const count=Number(amounts[index]);if(!id||!amounts[index]||!Number.isSafeInteger(count)||count<1)throw Error('出現IDと1以上の出現数を指定してください。');const stats=data.stats.find(r=>r.monster_id===id&&r['難易度']===difficulty.value);if(!stats||['攻撃','防御','HP'].some(k=>rosterStat(stats,k)===null||!Number.isFinite(rosterStat(stats,k))))throw Error(id+' の'+difficulty.value+'のステータスが未登録です。');if(rosterStat(stats,'HP')<=0)throw Error(id+' の反映後HPが0以下のため出現できません。');pending.push({stats,count});});
+ }}catch(error){document.getElementById('roster-error').textContent=trigger['表示名']+'：'+error.message;return;}
+ for(const {stats,count} of pending){for(let i=0;i<count;i++)addPlacedMonster({instanceId:nextPlacedId++,monsterId:stats.monster_id,name:stats['モンスター名'],mapName:data.maps[pick.value].name,mapId:pick.value,difficulty:difficulty.value,image:data.images[stats.image],base:{...stats},damageTaken:0,attack:rosterStat(stats,'攻撃'),defense:rosterStat(stats,'防御'),hp:rosterStat(stats,'HP'),coin:stats['コイン']===''?null:Number(stats['コイン']),boss:String(stats['ボス']).trim()==='1',reflect:String(stats['反撃']).trim()==='1'});}
+}
+function defeatActiveWardens(){const wardens=placedMonsters.filter(enemy=>enemy.mapId==='MAP0104'&&enemy.difficulty===difficulty.value&&enemy.monsterId==='M0116'&&!enemy.defeated);wardens.forEach(removeEnemy);return wardens.length;}
+function removeEnemy(enemy){if(enemy.defeated)return;clearCharacterAttackPhase();enemy.wardenReviveReady=enemy.mapId==='MAP0104'&&enemy.monsterId==='M0117'&&(rosterCounts.get('MAP0104:clue')||0)<2;decrementMonsterMissions(data.missions,missionCounters,enemy.mapId,enemy.monsterId,enemy.difficulty);applyDefeatGimmicks(data.gimmicks,defeatTotals,rosterCounts,enemy.mapId,enemy.difficulty,enemy.monsterId,spawnGimmickMonsters);if(enemy.mapId==='MAP0006')executeGhostDefeatEvent(enemy.monsterId);enemy.defeated=true;enemy.hp=0;if(selectedPlacedId===enemy.instanceId){selectedPlacedId=null;window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:null}));}}
+// 看守の復活待ちは撃破時の手がかり数で確定し、履歴にも保存する。
+function pendingWarden(){return [...placedMonsters].reverse().find(enemy=>enemy.wardenReviveReady&&enemy.defeated&&enemy.mapId===pick.value&&enemy.difficulty===difficulty.value);}
+function reviveWarden(){
+ if(pick.value!=='MAP0104')return;
+ const source=pendingWarden();if(!source)return;
+ const base={...source.base,HP:String(Number(source.base['HP'])+2)};
+ const hp=rosterStat(base,'HP'),attack=rosterStat(base,'攻撃'),defense=rosterStat(base,'防御');
+ if(![hp,attack,defense].every(Number.isFinite)||hp<=0){document.getElementById('roster-error').textContent='看守の復活後ステータスを確認してください。';return;}
+ rememberRoster();
+ source.wardenReviveReady=false;
+ addPlacedMonster({instanceId:nextPlacedId++,monsterId:source.monsterId,name:source.name,mapName:source.mapName,mapId:source.mapId,difficulty:source.difficulty,image:source.image,base,damageTaken:0,attack,defense,hp,coin:source.coin,boss:source.boss,reflect:source.reflect});
+ renderRoster();
+ rosterNotice.textContent='看守が最大HP＋2で復活しました。';
+}
+const rosterGimmicks=document.getElementById('roster-gimmicks');
+document.getElementById('roster-reset').addEventListener('click',()=>{if(!rosterBuff.attack&&!rosterBuff.defense&&![...rosterCounts.values()].some(Boolean))return;rememberRoster();rosterBuff.attack=0;rosterBuff.defense=0;rosterCounts.clear();renderRoster();rosterNotice.textContent='下の一覧のバフ・固有ギミックをリセットしました。';});
+// ターンやクールダウンは記録せず、ボタンを押した時だけ召喚する。
+const summonSkills={
+ M0003:{map:'MAP0001',targets:['M0004']},
+ M0006:{map:'MAP0002',targets:['M0009','M0010']},
+ M0014:{map:'MAP0003',targets:['M0017']},
+ M0020:{map:'MAP0004',targets:['M0023']},
+ M0021:{map:'MAP0004',targets:['M0025']},
+ M0028:{map:'MAP0005',targets:['M0031']}
+};
+let skillChoiceId=null;
+function summonFromSkill(caster,targetId){
+ const skill=summonSkills[caster.monsterId];
+ if(!skill||caster.defeated||caster.mapId!==pick.value||caster.difficulty!==difficulty.value||skill.map!==pick.value||!skill.targets.includes(targetId))return;
+ const targetIds=[targetId];
+ if(caster.monsterId==='M0021'&&caster.hp<=rosterStat(caster.base,'HP')/2)targetIds.push('M0026');
+ const pending=[];
+ for(const id of targetIds){
+  const stats=data.stats.find(row=>row.monster_id===id&&row['難易度']===difficulty.value);
+  if(!stats||['攻撃','防御','HP'].some(key=>rosterStat(stats,key)===null||!Number.isFinite(rosterStat(stats,key)))||rosterStat(stats,'HP')<=0){
+   document.getElementById('roster-error').textContent=id+' の'+difficulty.value+'の召喚用ステータスを確認してください。';
+   return;
+  }
+  pending.push(stats);
+ }
+ rememberRoster();
+ for(const stats of pending){
+  addPlacedMonster({instanceId:nextPlacedId++,monsterId:stats.monster_id,name:stats['モンスター名'],mapName:data.maps[pick.value].name,mapId:pick.value,difficulty:difficulty.value,image:data.images[stats.image],base:{...stats},damageTaken:0,attack:rosterStat(stats,'攻撃'),defense:rosterStat(stats,'防御'),hp:rosterStat(stats,'HP'),coin:stats['コイン']===''?null:Number(stats['コイン']),boss:String(stats['ボス']).trim()==='1',reflect:String(stats['反撃']).trim()==='1'});
+ }
+ skillChoiceId=null;
+ renderRoster();
+ rosterNotice.textContent=monsterDisplayName(caster)+'のスキルで'+pending.map(stats=>stats['モンスター名']).join('・')+'を追加しました。';
+}
+function renderRoster(){
+ let newlyDefeated;do{newlyDefeated=false;for(const enemy of placedMonsters){if(enemy.defeated)continue;updateEnemy(enemy);if(enemy.hp<=0){removeEnemy(enemy);newlyDefeated=true;}}}while(newlyDefeated);
+ updateEventRows();
+ rosterContext={map:pick.value,difficulty:difficulty.value,route:routeState.route,moved:routeState.moved};document.getElementById('roster-undo').disabled=rosterHistory.length===0;
+ const focused=document.activeElement?.closest('#roster-gimmicks')?document.activeElement.dataset.gimmick:null;
+ rosterGimmicks.replaceChildren();
+ if(pick.value==='MAP0104'){
+  const truth=document.createElement('button');truth.type='button';truth.className='roster-truth';truth.textContent='真相発覚';
+  const done=executedEvents.has(libraryTruthKey());truth.disabled=done;truth.setAttribute('aria-pressed',String(done));
+  truth.setAttribute('aria-label',done?'真相発覚（発動済み）':'真相発覚を発動');
+  truth.addEventListener('click',executeLibraryTruth);rosterGimmicks.append(truth);
+  const evidence=document.createElement('button');evidence.type='button';evidence.className='roster-evidence'+(rosterEvidenceConsider?' is-active':'');
+  const count=Number(window.getCharacterEvidenceStack?.()||0);
+  const icon=document.createElement('img');icon.src='../images/icon/'+encodeURIComponent('罪証.png');icon.alt='';
+  evidence.append(icon,document.createTextNode('罪証考慮'));
+  evidence.disabled=!window.hasSelectedCharacter?.();
+  evidence.setAttribute('aria-pressed',String(rosterEvidenceConsider));
+  evidence.title=evidence.disabled?'キャラクターを選択すると操作できます':('選択キャラクターの罪証 '+count+'スタックを対象モンスターの攻撃力に'+(rosterEvidenceConsider?'反映中':'反映しない'));
+  evidence.setAttribute('aria-label','罪証考慮：'+(rosterEvidenceConsider?'オン':'オフ')+'。選択キャラクターの罪証 '+count+'スタック');
+  evidence.addEventListener('click',()=>{rememberRoster();rosterEvidenceConsider=!rosterEvidenceConsider;renderRoster();});
+  rosterGimmicks.append(evidence);
+  if(pendingWarden()){
+   const revive=document.createElement('button');revive.type='button';revive.className='roster-warden-revive';revive.textContent='看守復活';
+   revive.title='撃破から2ラウンド後に手動で押す。復活のたび最大HP＋2';
+   revive.addEventListener('click',reviveWarden);rosterGimmicks.append(revive);
+  }
+ }
+ if(pick.value==='MAP0006'){
+  const total=id=>defeatTotals.get(JSON.stringify([pick.value,difficulty.value,id]))||0;
+  const choices=[{unlock:'M0041',spawn:'M0042',label:'厄兆出現'},{unlock:'M0042',spawn:'M0043',label:'混乱出現'}];
+  choices.forEach(choice=>{if(total(choice.unlock)<1)return;const button=document.createElement('button');button.type='button';button.dataset.gimmick='ghost-spawn-'+choice.spawn;button.textContent=choice.label;const done=executedEvents.has(ghostSpawnKey(choice.spawn));button.disabled=done;button.setAttribute('aria-pressed',String(done));button.setAttribute('aria-label',done?choice.label+'（実行済み）':choice.label);button.addEventListener('click',()=>spawnGhostBoss(choice.spawn,choice.label.replace('出現','')));rosterGimmicks.append(button);});
+ }
+ const unique=new Map();mapGimmicks().forEach(row=>{if(!unique.has(row.gimmick_id))unique.set(row.gimmick_id,row);});
+ document.getElementById('roster-reset').hidden=unique.size===0;
+ unique.forEach(row=>{
+ const button=document.createElement('button');button.type='button';button.dataset.gimmick=row.gimmick_id;const maximum=gimmickMaximum(row),count=Math.min(maximum,rosterCounts.get(gimmickKey(row))||0);button.textContent=row['表示名']+(maximum===1?'':' '+count);button.classList.toggle('mp-gimmick-complete',count>=maximum);button.setAttribute('aria-pressed',String(count>0));button.title='左クリック：＋1 ／ 右クリック：−1';
+ const change=delta=>{const next=Math.max(0,Math.min(maximum,count+delta));if(next===count)return;rememberRoster();if(pick.value==='MAP0104'&&row.gimmick_id==='warden_defeated'&&delta>0){const defeated=defeatActiveWardens();if(!defeated){rosterCounts.set(gimmickKey(row),next);spawnGimmickMonsters(row);}renderRoster();return;}rosterCounts.set(gimmickKey(row),next);if(next>count)spawnGimmickMonsters(row);renderRoster();};button.addEventListener('click',()=>change(1));button.addEventListener('contextmenu',e=>{e.preventDefault();change(-1);});button.addEventListener('keydown',e=>{if(e.shiftKey&&e.key==='Enter'){e.preventDefault();change(-1);}});rosterGimmicks.append(button);if(focused===row.gimmick_id)button.focus();
+ });
+ 
+ document.querySelectorAll('#mp-mission-body tr').forEach(updateMissionRow);
+ const active=placedMonsters.find(e=>e.instanceId===selectedPlacedId);if(active)registerEnemy(active,false);
+ roster.replaceChildren();rosterEmpty.hidden=placedMonsters.length>0;
+ document.getElementById('roster-counts').textContent='累計 '+placedMonsters.length+'体 ／ 出現中 '+placedMonsters.filter(e=>!e.defeated).length+'体 ／ 撃破 '+placedMonsters.filter(e=>e.defeated).length+'体';
+ [...placedMonsters].sort((a,b)=>Number(!!a.defeated)-Number(!!b.defeated)||Number(data.nativeMapByMonster[b.monsterId]===pick.value)-Number(data.nativeMapByMonster[a.monsterId]===pick.value)||a.monsterId.localeCompare(b.monsterId,'en',{numeric:true})||a.instanceId-b.instanceId).forEach(enemy=>{
+  const card=document.createElement('article');card.className='roster-card';card.classList.toggle('defeated',!!enemy.defeated);card.classList.toggle('selected',enemy.instanceId===selectedPlacedId);
+  const select=document.createElement('button');select.type='button';select.disabled=!!enemy.defeated;select.className='roster-select';select.setAttribute('aria-pressed',String(enemy.instanceId===selectedPlacedId));select.setAttribute('aria-label',monsterDisplayName(enemy)+'を計算機に登録');
+  const heading=document.createElement('span');heading.className='roster-name';const portrait=document.createElement('img');portrait.className='roster-portrait';portrait.alt='';assignMapImage(portrait,enemy.image);const nameText=document.createElement('span');nameText.className='monster-name-text';nameText.textContent=monsterDisplayName(enemy);heading.append(portrait,nameText);
+  if(enemy.boss){const icon=document.createElement('img');icon.className='roster-icon';icon.alt='マップボス';assignMapImage(icon,'../images/icon/Boss.png');nameText.append(icon);}
+  if(enemy.reflect){const icon=document.createElement('img');icon.className='roster-icon';icon.alt='反撃可能';assignMapImage(icon,data.icons.reflect);nameText.append(icon);}
+  const stats=document.createElement('span');stats.className='roster-stats';
+  [['攻撃',enemy.attack],['防御',enemy.defense],['HP',enemy.hp],['コイン',enemy.coin]].forEach(([key,value])=>{const cell=document.createElement('span');cell.className='roster-stat';if(value!==null){const icon=document.createElement('img');icon.className='roster-icon';icon.alt=key;assignMapImage(icon,data.icons[key]);let amount;
+   if(key==='HP'||key==='攻撃'||key==='防御'){
+    const field=key==='HP'?'hp':key==='攻撃'?'attack':'defense';
+    const label=key==='HP'?'残りHP':key+'力';
+    amount=document.createElement('input');amount.type='number';amount.disabled=!!enemy.defeated;amount.min='0';amount.step='1';amount.value=value;amount.className='roster-hp';amount.setAttribute('aria-label',monsterDisplayName(enemy)+'の'+label);amount.title=label+'を入力'+(key==='HP'?'（0で撃破）':'');amount.addEventListener('focus',()=>amount.select());
+    const commit=(value=amount.value)=>{const next=Number(value);if(String(value).trim()===''||!Number.isSafeInteger(next)||next<0){amount.value=enemy[field];return;}if(next===enemy[field])return;rememberRoster();if(key==='HP'){if(next===0){removeEnemy(enemy);rosterNotice.textContent=monsterDisplayName(enemy)+'を撃破しました。';}else{enemy.damageTaken=rosterStat(enemy.base,'HP')-next;}}else{enemy[key==='攻撃'?'manualAttack':'manualDefense']=next-rosterStat(enemy.base,key);rosterNotice.textContent=monsterDisplayName(enemy)+'の'+label+'を'+next+'に変更しました。';}
+    if(next===0&&key==='HP'){renderRoster();return;}
+    updateEnemy(enemy);amount.value=enemy[field];document.getElementById('roster-undo').disabled=false;
+    if(selectedPlacedId===enemy.instanceId)registerEnemy(enemy,false);
+   };
+    amount.addEventListener('change',()=>commit());amount.addEventListener('blur',()=>commit());amount.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();commit();}if(event.key==='Escape'){amount.value=enemy[field];amount.blur();}});const iconButton=document.createElement('button');iconButton.type='button';iconButton.disabled=!!enemy.defeated;iconButton.className='roster-stat-icon';iconButton.title=label+'：左クリックで＋1、右クリックで−1';iconButton.setAttribute('aria-label',monsterDisplayName(enemy)+'の'+label+'を増やす');iconButton.append(icon);
+    iconButton.addEventListener('click',()=>commit(enemy[field]+1));iconButton.addEventListener('contextmenu',event=>{event.preventDefault();commit(Math.max(0,enemy[field]-1));});
+    cell.append(iconButton,amount);amount=null;
+   }else{amount=document.createElement('strong');amount.textContent=value;}
+   if(amount)cell.append(icon,amount);}stats.append(cell);});
+  select.append(heading);select.addEventListener('click',()=>{selectedPlacedId=enemy.instanceId;registerEnemy(enemy);renderRoster();rosterNotice.textContent=monsterDisplayName(enemy)+'を計算機に登録しました。';});
+  const remove=document.createElement('button');remove.type='button';remove.className='roster-remove';remove.textContent=enemy.defeated?'撃破済':'撃破';remove.disabled=!!enemy.defeated;remove.setAttribute('aria-label',monsterDisplayName(enemy)+'を撃破');remove.addEventListener('click',()=>{rememberRoster();removeEnemy(enemy);renderRoster();rosterNotice.textContent=monsterDisplayName(enemy)+'を撃破しました。';});
+  const deleteButton=document.createElement('button');deleteButton.type='button';deleteButton.className='roster-delete';deleteButton.textContent='削除';deleteButton.setAttribute('aria-label',monsterDisplayName(enemy)+'を削除');deleteButton.addEventListener('click',()=>{rememberRoster();const i=placedMonsters.indexOf(enemy);if(i>=0)placedMonsters.splice(i,1);if(selectedPlacedId===enemy.instanceId){selectedPlacedId=null;window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:null}));}renderRoster();});
+  const actions=document.createElement('div');actions.className='roster-card-actions';actions.append(remove,deleteButton);
+  const markField=document.createElement('div');markField.className='roster-mark';markField.title='マーク：左クリックで＋1、右クリックで−1';const markButton=document.createElement('button');markButton.type='button';markButton.className='roster-mark-button';markButton.disabled=!!enemy.defeated;markButton.setAttribute('aria-label',monsterDisplayName(enemy)+'のマークを増やす');const markIcon=document.createElement('img');markIcon.src='../images/icon/'+encodeURIComponent('マーク.png');markIcon.alt='マーク';markButton.append(markIcon);const markValue=document.createElement('strong');markValue.textContent=String(enemy.markStacks||0);const changeMark=delta=>{if(enemy.defeated)return;const next=Math.max(0,(enemy.markStacks||0)+delta);if(next===(enemy.markStacks||0))return;rememberRoster();enemy.markStacks=next;if(selectedPlacedId===enemy.instanceId)registerEnemy(enemy,false);renderRoster();};markButton.addEventListener('click',event=>{event.stopPropagation();changeMark(1);});markButton.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();changeMark(-1);});markField.append(markButton,markValue);
+  const nameRow=select.querySelector('.monster-name-text');if(nameRow)nameRow.append(markField);const top=document.createElement('div');top.className='roster-card-top';top.append(select,actions);
+  const skill=summonSkills[enemy.monsterId];
+  if(skill&&skill.map===enemy.mapId&&!enemy.defeated){
+   top.classList.add('has-skill');
+   const skillButton=document.createElement('button');skillButton.type='button';skillButton.className='roster-skill';skillButton.textContent='スキル';
+   skillButton.setAttribute('aria-label',monsterDisplayName(enemy)+'の召喚スキル');
+   if(enemy.monsterId==='M0021')skillButton.title='近くに魔法のティーポットがいない場合に使用（距離は手動確認）';
+   if(enemy.monsterId==='M0020')skillButton.title='「この人です」を3枚使用したら押す（カード枚数は手動管理）';
+   if(skill.targets.length>1){
+    const open=skillChoiceId===enemy.instanceId;skillButton.setAttribute('aria-expanded',String(open));
+    skillButton.addEventListener('click',()=>{skillChoiceId=open?null:enemy.instanceId;renderRoster();});
+   }else skillButton.addEventListener('click',()=>summonFromSkill(enemy,skill.targets[0]));
+   top.append(skillButton);
+  }
+  card.append(top);
+  if(skill&&skill.targets.length>1&&skillChoiceId===enemy.instanceId&&!enemy.defeated){
+   const choices=document.createElement('div');choices.className='roster-skill-choices';choices.setAttribute('role','group');choices.setAttribute('aria-label',monsterDisplayName(enemy)+'が召喚するモンスターを選択');
+   for(const id of skill.targets){
+    const target=data.stats.find(row=>row.monster_id===id&&row['難易度']===difficulty.value);if(!target)continue;
+    const choice=document.createElement('button');choice.type='button';choice.className='roster-skill-choice';choice.setAttribute('aria-label',target['モンスター名']+'を1体召喚');
+    const image=document.createElement('img');image.alt='';assignMapImage(image,data.images[target.image]);
+    const label=document.createElement('span');label.textContent=target['モンスター名'];choice.append(image,label);
+    choice.addEventListener('click',()=>summonFromSkill(enemy,id));choices.append(choice);
+   }
+   card.append(choices);
+  }
+  card.append(stats);roster.append(card);
+ });
+}
+function spawnSelectedMonster(){
+ if(!selected)return;
+ const stats=data.stats.find(s=>s.monster_id===selected&&s['難易度']===difficulty.value);
+ if(!stats){status.textContent='この難易度の能力値は未登録です。';return;}
+ const attack=rosterStat(stats,'攻撃'),defense=rosterStat(stats,'防御'),hp=rosterStat(stats,'HP');
+ if([attack,defense,hp].some(n=>n===null||!Number.isFinite(n))){status.textContent='能力値が不足しているため追加できません。';return;}
+ rememberRoster();
+ const enemy={instanceId:nextPlacedId++,monsterId:selected,name:stats['モンスター名'],mapName:data.maps[pick.value].name,mapId:pick.value,difficulty:difficulty.value,image:data.images[stats.image],attack,defense,hp,coin:stats['コイン']===''?null:Number(stats['コイン']),boss:String(stats['ボス']).trim()==='1',reflect:String(stats['反撃']).trim()==='1'};
+ enemy.base={...stats};enemy.damageTaken=0;addPlacedMonster(enemy);renderRoster();status.textContent=monsterDisplayName(enemy)+'をマップ上のモンスターに追加しました。';rosterNotice.textContent=placedMonsters.length+'体を登録中';
+}
+renderRoster();
+
+function selectMonster(id){selected=id;list.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.id===id)));status.textContent='';}
+
+function updateMissionRow(tr){
+ const key=tr.dataset.counterKey,maximum=Number(tr.dataset.maximum);
+ const count=missionCounters.has(key)?missionCounters.get(key):maximum;
+ tr.children[0].textContent=count+' / '+maximum;
+ tr.classList.toggle('mp-mission-done',count===0);
+ const control=tr.querySelector('button');
+ control.setAttribute('aria-label',tr.dataset.description+'、残り'+count+' / '+maximum+'。クリックで1減らす、右クリックまたはShiftキーを押しながらEnterで1増やす');
+}
+function attachMissionCounter(tr,row){
+ const key=missionCounterKey(row,difficulty.value);
+ tr.dataset.counterKey=key;tr.dataset.maximum=String(Number(row['カウンタ']));tr.dataset.description=row['内容'];
+ const button=document.createElement('button');button.type='button';button.className='mp-mission-counter-button';button.textContent=row['内容'];
+ tr.children[1].replaceChildren(button);
+ tr.children[0].setAttribute('aria-live','polite');
+ function change(delta){
+  const maximum=Number(tr.dataset.maximum),current=missionCounters.has(key)?missionCounters.get(key):maximum;
+  const next=Math.max(0,Math.min(maximum,current+delta));if(next===current)return;rememberRoster();missionCounters.set(key,next);updateMissionRow(tr);document.getElementById('roster-undo').disabled=false;
+ }
+ tr.addEventListener('click',()=>change(-1));
+ tr.addEventListener('contextmenu',event=>{event.preventDefault();change(1);});
+ button.addEventListener('keydown',event=>{if(event.shiftKey&&event.key==='Enter'){event.preventDefault();change(1);}});
+ updateMissionRow(tr);
+}
+
+document.getElementById('mp-mission-reset').addEventListener('click',()=>{
+ const rows=routeRows(data.missions);if(!rows.some(row=>missionCounters.has(missionCounterKey(row,difficulty.value))&&missionCounters.get(missionCounterKey(row,difficulty.value))!==Number(row['カウンタ'])))return;
+ rememberRoster();rows.forEach(row=>missionCounters.delete(missionCounterKey(row,difficulty.value)));document.querySelectorAll('#mp-mission-body tr').forEach(updateMissionRow);document.getElementById('roster-undo').disabled=false;
+});
+// 御魂の祭: 残っている刀剣霊・長戟霊を消し、消した数だけガオーを強化する。
+function absorbSoulSpirits(monsters,mapId,level){
+ let removed=0;
+ for(let i=monsters.length-1;i>=0;i--){
+  const enemy=monsters[i];
+  if(enemy.mapId===mapId&&enemy.difficulty===level&&!enemy.defeated&&['M0009','M0010'].includes(enemy.monsterId)){
+   monsters.splice(i,1);
+   removed++;
+  }
+ }
+ for(const enemy of monsters){
+  if(enemy.mapId===mapId&&enemy.difficulty===level&&!enemy.defeated&&enemy.monsterId==='M0006'){
+   enemy.eventAttack=(enemy.eventAttack||0)+removed;
+   enemy.eventDefense=(enemy.eventDefense||0)+removed;
+  }
+ }
+ return removed;
+}
+function eventKey(group){return JSON.stringify([pick.value,difficulty.value,group.route_id||'',group['進捗']]);}
+function updateEventRows(){document.querySelectorAll('#mp-event-body tr').forEach(tr=>{const done=executedEvents.has(tr.dataset.eventKey);tr.classList.toggle('mp-event-done',done);const button=tr.querySelector('button');if(button){button.disabled=done;button.setAttribute('aria-pressed',String(done));}});}
+function executeEvent(group,options={}){
+ const key=eventKey(group);if(executedEvents.has(key))return;
+ const remember=options.remember!==false,rerender=options.render!==false;
+ const pending=[];const buffDelta={attack:0,defense:0};
+ try{for(const row of group.rows){
+ const change=eventBuff(row);buffDelta.attack+=change.attack;buffDelta.defense+=change.defense;
+ const ids=String(row.monster_id||'').split('|').map(x=>x.trim()).filter(Boolean),counts=String(row['出現数']||'').split('|').map(x=>x.trim());
+ if(!ids.length){if(String(row['出現数']||'').trim())throw Error('モンスターIDが未登録です。');continue;}
+ if(ids.length!==counts.length)throw Error('モンスターIDと出現数の個数が一致していません。');
+ ids.forEach((id,i)=>{const count=Number(counts[i]);if(!counts[i]||!Number.isSafeInteger(count)||count<1)throw Error('出現数は1以上の整数で指定してください。');const stats=data.stats.find(r=>r.monster_id===id&&r['難易度']===difficulty.value);if(!stats)throw Error(id+' の'+difficulty.value+'のステータスが未登録です。');if(['攻撃','防御','HP'].some(k=>rosterStat(stats,k)===null||!Number.isFinite(rosterStat(stats,k))))throw Error(id+' の能力値が不足しています。');pending.push({stats,count});});
+ }}catch(error){document.getElementById('mp-event-error').textContent=error.message;return;}
+ if(remember)rememberRoster();
+ rosterBuff.attack+=buffDelta.attack;rosterBuff.defense+=buffDelta.defense;
+ if(pick.value==='MAP0002'&&((difficulty.value==='悪夢'&&group['進捗']==='11')||(difficulty.value==='狂気'&&group['進捗']==='10'))){
+  absorbSoulSpirits(placedMonsters,pick.value,difficulty.value);
+  if(selectedPlacedId!==null&&!placedMonsters.some(enemy=>enemy.instanceId===selectedPlacedId))selectedPlacedId=null;
+ }
+ for(const {stats,count} of pending){for(let i=0;i<count;i++)addPlacedMonster({instanceId:nextPlacedId++,monsterId:stats.monster_id,name:stats['モンスター名'],mapName:data.maps[pick.value].name,mapId:pick.value,difficulty:difficulty.value,image:data.images[stats.image],base:{...stats},damageTaken:0,attack:rosterStat(stats,'攻撃'),defense:rosterStat(stats,'防御'),hp:rosterStat(stats,'HP'),coin:stats['コイン']===''?null:Number(stats['コイン']),boss:String(stats['ボス']).trim()==='1',reflect:String(stats['反撃']).trim()==='1'});}
+ executedEvents.add(key);document.getElementById('mp-event-error').textContent='';if(rerender)renderRoster();
+}
+function executeGhostDefeatEvent(monsterId){
+ if(pick.value!=='MAP0006')return;
+ const progress=monsterId==='M0041'?'天崩撃破':monsterId==='M0042'?'厄兆撃破':'';
+ if(!progress)return;
+ const group=groupMapEvents(routeRows(data.events)).find(item=>String(item['進捗']).trim()===progress);
+ if(group)executeEvent(group,{remember:false,render:false});
+}
+function ghostSpawnKey(monsterId){return JSON.stringify(['MAP0006',difficulty.value,'ghost-spawn',monsterId]);}
+function spawnGhostBoss(monsterId,label){
+ const key=ghostSpawnKey(monsterId);if(executedEvents.has(key))return;
+ const stats=data.stats.find(r=>r.monster_id===monsterId&&r['難易度']===difficulty.value);
+ if(!stats||['攻撃','防御','HP'].some(k=>rosterStat(stats,k)===null||!Number.isFinite(rosterStat(stats,k)))||rosterStat(stats,'HP')<=0){document.getElementById('roster-error').textContent=label+'の現在の難易度の能力値を確認してください。';return;}
+ rememberRoster();
+ addPlacedMonster({instanceId:nextPlacedId++,monsterId:stats.monster_id,name:stats['モンスター名'],mapName:data.maps[pick.value].name,mapId:pick.value,difficulty:difficulty.value,image:data.images[stats.image],base:{...stats},damageTaken:0,attack:rosterStat(stats,'攻撃'),defense:rosterStat(stats,'防御'),hp:rosterStat(stats,'HP'),coin:stats['コイン']===''?null:Number(stats['コイン']),boss:String(stats['ボス']).trim()==='1',reflect:String(stats['反撃']).trim()==='1'});
+ executedEvents.add(key);renderRoster();rosterNotice.textContent=label+'を出現させました。';
+}
+function libraryTruthKey(){return JSON.stringify([pick.value,difficulty.value,'','__library_truth__']);}
+function executeLibraryTruth(){
+ if(pick.value!=='MAP0104'||executedEvents.has(libraryTruthKey()))return;
+ const stats=data.stats.find(r=>r.monster_id==='M0115'&&r['難易度']===difficulty.value);
+ if(!stats||['攻撃','防御','HP'].some(k=>rosterStat(stats,k)===null||!Number.isFinite(rosterStat(stats,k)))||rosterStat(stats,'HP')<=0){document.getElementById('roster-error').textContent='ゴクチョー【真相】の現在の難易度の能力値を確認してください。';return;}
+ rememberRoster();
+ for(let i=placedMonsters.length-1;i>=0;i--){const enemy=placedMonsters[i];if(enemy.monsterId==='M0116'&&enemy.mapId===pick.value&&enemy.difficulty===difficulty.value){if(selectedPlacedId===enemy.instanceId)selectedPlacedId=null;placedMonsters.splice(i,1);}}
+ if(!placedMonsters.some(e=>e.monsterId==='M0115'&&e.mapId===pick.value&&e.difficulty===difficulty.value&&!e.defeated)){
+ addPlacedMonster({instanceId:nextPlacedId++,monsterId:stats.monster_id,name:stats['モンスター名'],mapName:data.maps[pick.value].name,mapId:pick.value,difficulty:difficulty.value,image:data.images[stats.image],base:{...stats},damageTaken:0,attack:rosterStat(stats,'攻撃'),defense:rosterStat(stats,'防御'),hp:rosterStat(stats,'HP'),coin:stats['コイン']===''?null:Number(stats['コイン']),boss:String(stats['ボス']).trim()==='1',reflect:String(stats['反撃']).trim()==='1'});
+ }
+ executedEvents.add(libraryTruthKey());document.getElementById('roster-error').textContent='';renderRoster();rosterNotice.textContent='真相発覚：ゴクチョーを削除し、ゴクチョー【真相】を出現させました。';
+}
+function renderMapInformation(){
+ eventPreview.reset();
+ // CSV order is the display order; external mission/event IDs are not required.
+ const missions=routeRows(data.missions);
+ const events=routeRows(data.events);
+ function fill(id,emptyId,rows,columns){
+  const body=document.getElementById(id);body.replaceChildren();
+  rows.forEach(row=>{const tr=document.createElement('tr');columns.forEach(key=>{const td=document.createElement('td');td.textContent=row[key];tr.append(td);});if(id==='mp-mission-body')attachMissionCounter(tr,row);body.append(tr);});
+  body.closest('table').hidden=rows.length===0;document.getElementById(emptyId).hidden=rows.length!==0;
+ }
+ fill('mp-mission-body','mp-mission-empty',missions,['カウンタ','内容','報酬']);
+ const groupedEvents=groupMapEvents(events);
+ fill('mp-event-body','mp-event-empty',groupedEvents,['進捗','内容']);
+ const body=document.getElementById('mp-event-body');
+ [...body.children].forEach((tr,i)=>{const group=groupedEvents[i];tr.dataset.eventKey=eventKey(group);const button=document.createElement('button');button.type='button';button.className='mp-event-button';button.textContent=group['内容'];button.setAttribute('aria-label',group['進捗']+' のイベントを実行');tr.children[1].replaceChildren(button);tr.addEventListener('click',()=>executeEvent(group));
+ const files=eventImageFiles(group);if(files.length){tr.classList.add('mp-event-has-image');tr.title='マウスを乗せると出現位置を表示';let pointerInside=false;const show=()=>eventPreview.show(files,(data.maps[pick.value]?.name||'')+'：'+group['進捗']+' の出現位置');tr.addEventListener('mouseenter',()=>{pointerInside=true;show();});tr.addEventListener('mouseleave',()=>{pointerInside=false;eventPreview.reset();});tr.addEventListener('focusin',event=>{if(event.target.matches(':focus-visible'))show();});tr.addEventListener('focusout',event=>{if(!tr.contains(event.relatedTarget)&&!pointerInside)eventPreview.reset();});}});
+ document.getElementById('mp-event-error').textContent='';updateEventRows();
+}
+
+function render(){
+ hideMonsterTip();
+ if(!data.maps[pick.value]){routeControls.hidden=true;root.querySelector('.mp-map-only').classList.remove('has-route-switches');selected=null;list.replaceChildren();difficulty.replaceChildren();difficulty.disabled=true;const img=document.getElementById('mp-map-image');img.hidden=true;img.removeAttribute('src');img.alt='';renderMapInformation();status.textContent=Object.keys(data.maps).length?'マップを選択してください。':'表示対象のマップがありません。CSVの「表示」列を確認してください。';renderRoster();return;}
+ difficulty.disabled=false;
+
+ const previousDifficulty=difficulty.value;
+ const allowed=['普通','困難','悪夢','狂気'];
+ difficulty.replaceChildren(...allowed.map(value=>{const option=document.createElement('option');option.value=value;option.textContent=value;return option;}));
+ difficulty.value=allowed.includes(previousDifficulty)?previousDifficulty:'普通';
+ const map=data.maps[pick.value],level=difficulty.value,scroll=list.scrollTop;
+ renderRouteControls();
+ renderMapInformation();
+
+ const img=document.getElementById('mp-map-image');assignMapImage(img,currentMapImage());img.alt=map.name+'のマップ';list.replaceChildren();
+ const visibleRows=visibleMonsterRows(data,pick.value,level);
+ visibleRows.forEach(stats=>{const id=stats.monster_id;
+  const base=stats,tile=document.createElement('button');
+  tile.type='button';tile.className='mp-monster';tile.dataset.id=id;tile.setAttribute('aria-pressed','false');tile.setAttribute('aria-label',base['モンスター名']+'をマップに追加');tile.addEventListener('mouseenter',()=>showMonsterTip(tile));tile.addEventListener('mouseleave',hideMonsterTip);tile.addEventListener('focus',()=>showMonsterTip(tile));tile.addEventListener('blur',hideMonsterTip);
+  const name=document.createElement('div');name.className='mp-name';const pic=document.createElement('img');assignMapImage(pic,data.images[base.image]||'');pic.alt='';const nameText=document.createElement('span');nameText.className='monster-name-text';nameText.textContent=base['モンスター名'];name.append(pic,nameText);if(String((stats||base)['ボス']).trim()==='1'){const boss=document.createElement('img');boss.className='mp-boss-icon';boss.alt='マップボス';boss.title='マップボス';assignMapImage(boss,'../images/icon/Boss.png');nameText.append(boss);}if(String((stats||base)['反撃'])==='1'){const reflect=document.createElement('img');assignMapImage(reflect,data.icons.reflect);reflect.alt='反撃可能';reflect.className='mp-reflect';nameText.append(reflect);}
+  const values=document.createElement('div');values.className='mp-stats';
+  ['攻撃','防御','HP','コイン'].forEach(key=>{
+   if(key==='コイン'&&(!stats||stats[key]==='')){const blank=document.createElement('div');blank.className='mp-stat';blank.setAttribute('aria-hidden','true');values.append(blank);return;}
+   const cell=document.createElement('div'),icon=document.createElement('img'),number=document.createElement('strong');cell.className='mp-stat';cell.dataset.kind=key;
+   const adjusted=effectiveStat(stats,key);
+   const value=adjusted===null?'—':adjusted;
+   const extra=adjusted===null?0:adjusted-Number(stats[key]);
+   cell.setAttribute('aria-label',key+' '+(value==='—'?'未登録':value));assignMapImage(icon,data.icons[key]);icon.alt=key;number.textContent=value;
+   if(extra&&value!=='—')number.className='mp-boosted';cell.append(icon,number);values.append(cell);
+  });
+  tile.append(name,values);tile.addEventListener('click',()=>{selectMonster(id);spawnSelectedMonster();});list.append(tile);
+ });
+ selectMonster(visibleRows.some(row=>row.monster_id===selected)?selected:null);list.scrollTop=scroll;
+ document.getElementById('mp-buff-status').textContent=[buff.attack?'攻撃 ＋'+buff.attack:'',buff.defense?'防御 ＋'+buff.defense:''].filter(Boolean).join(' ／ ');
+ renderRoster();
+}
+root.querySelectorAll('[data-buff]').forEach(button=>button.addEventListener('click',()=>{const kind=button.dataset.buff;if(kind==='attack'||kind==='both')buff.attack++;if(kind==='defense'||kind==='both')buff.defense++;render();}));
+pick.addEventListener('change',()=>{rememberRoster();clearRoster();selected=null;render();renderRoundProgress();list.scrollTop=0;});difficulty.addEventListener('change',()=>{rememberRoster();clearRoster();render();renderRoundProgress();});
+const tabs=[...document.querySelectorAll('.mp-subtabs [role="tab"]')];tabs.forEach((tab,index)=>{tab.addEventListener('click',()=>tabs.forEach(other=>{const active=other===tab;other.setAttribute('aria-selected',String(active));document.getElementById(other.getAttribute('aria-controls')).hidden=!active;}));tab.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();const next=e.key==='Home'?0:e.key==='End'?1:1-index;tabs[next].click();tabs[next].focus();}});});
+render();
+
+function hideMonsterTip(){monsterTipVersion++;const tip=document.getElementById('monster-tooltip');if(tip){tip.hidden=true;tip.replaceChildren();}}
+function showMonsterTip(tile){
+ hideMonsterTip();const tip=document.getElementById('monster-tooltip');if(!tip)return;
+ const stats=data.stats.find(row=>row.monster_id===tile.dataset.id&&row['難易度']===difficulty.value);
+ const file=String(stats?.info||stats?.['情報画像']||'').trim();if(!file)return;
+ const segments=file.replaceAll('\\','/').split('/');if(file.includes(':')||segments.some(p=>!p||p==='.'||p==='..'))return;
+ const version=monsterTipVersion,img=new Image();img.alt=stats['モンスター名']+'の説明画像';
+ img.onload=()=>{if(version!==monsterTipVersion||!tile.isConnected||!img.naturalWidth||!img.naturalHeight)return;
+ const margin=8,ratio=img.naturalWidth/img.naturalHeight,width=Math.min(438,img.naturalWidth,window.innerWidth-margin*2,(window.innerHeight-margin*2)*ratio),height=width/ratio;
+ const box=tile.getBoundingClientRect(),gap=12;
+ let left=box.right+gap;if(left+width>window.innerWidth-margin)left=box.left-width-gap;
+ left=Math.max(margin,Math.min(left,window.innerWidth-width-margin));
+ const top=Math.max(margin,Math.min(box.top,window.innerHeight-height-margin));
+ img.style.width=width+'px';img.style.height=height+'px';tip.style.left=left+'px';tip.style.top=top+'px';tip.replaceChildren(img);tip.hidden=false;
+ };
+ img.onerror=()=>{if(version===monsterTipVersion)hideMonsterTip();};
+ img.src='../images/MonsterInfo/'+segments.map(encodeURIComponent).join('/');
+}
+window.addEventListener('resize',hideMonsterTip);
+document.addEventListener('scroll',hideMonsterTip,true);
+list.addEventListener('scroll',hideMonsterTip);root.addEventListener('keydown',e=>{if(e.key==='Escape')hideMonsterTip();});document.querySelectorAll('.role-tab').forEach(b=>b.addEventListener('click',hideMonsterTip));
+async function refreshCSV(){if(location.protocol==='file:')return;const files={maps:'maps_renumbered.csv',relations:'map_monsters_renumbered.csv',stats:'monster_stats.csv',missions:'map_mission.csv',events:'map_event.csv',gimmicks:'map_gimmick.csv'};const result=await Promise.allSettled(Object.entries(files).map(async([key,file])=>{const response=await fetch('../csv/'+file,{cache:'no-cache'});if(!response.ok)throw Error(file);const rows=parseMapCSV(await response.text());if(rows.length&&!Object.hasOwn(rows[0],key==='stats'?'monster_id':'map_id'))throw Error(file);return [key,rows];}));const raw={...INITIAL_MAP_DATA};result.forEach(item=>{if(item.status==='fulfilled')raw[item.value[0]]=item.value[1];});const next=normalizeMapData(raw);const previousMap=pick.value;Object.assign(data,next);populateMaps();if(pick.value!==previousMap){clearRoster();rosterHistory.length=0;}render();if(result.some(item=>item.status==='rejected'))status.textContent='一部のCSVを取得できないため同梱データを表示しています。';}refreshCSV();
+
+})();
+document.querySelectorAll('.parameter-icon').forEach(img=>assignMapImage(img,img.getAttribute('src').replace('/icon/','/Icon/')));
+
