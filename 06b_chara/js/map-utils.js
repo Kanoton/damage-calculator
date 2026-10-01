@@ -1,5 +1,5 @@
-// CSV files are read relative to soruce/ (source/ also works).
-// The bundled snapshot keeps the first release usable when opening index.html directly.
+// CSV files are read from ../csv/ relative to 06b_chara/.
+// Bundled snapshots keep the app usable when index.html is opened directly.
 function parseMapCSV(text){
  const delimiter=text.split(/\r?\n/,1)[0].includes('\t')?'\t':',';
  const rows=[];let row=[],value='',quoted=false;
@@ -69,7 +69,7 @@ function normalizeMapData(raw){
  return {maps,nativeMapByMonster,gimmicks:raw.gimmicks||[],stats:raw.stats,missions:raw.missions,events:raw.events,images:Object.fromEntries(raw.stats.map(s=>[s.image,'../images/Monster/'+s.image])),icons:{'攻撃':'../images/icon/Attack.png','防御':'../images/icon/Defense.png','HP':'../images/icon/Hp.png','コイン':'../images/icon/Coin.png',reflect:'../images/icon/Reflect.png'}};
 }
 function assignMapImage(image,url){
- const variants=[url,url.replace('../images/','../Image/'),url.replace('../images/','../Images/'),url.replace('/Icon/','/icon/'),url.replace('/Monster/','/MonsterImg/'),url.replace('/Map/','/MapImg/')];
+ const variants=[...new Set([url,url.replace('../images/','../Image/'),url.replace('../images/','../Images/'),url.replace('/Icon/','/icon/'),url.replace('/Monster/','/MonsterImg/'),url.replace('/Map/','/MapImg/')])];
  let index=0;image.onerror=()=>{index++;if(index<variants.length)image.src=variants[index];else {image.onerror=null;image.hidden=true;}};image.hidden=false;image.src=variants[0];
 }
 
