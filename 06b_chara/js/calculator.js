@@ -193,34 +193,35 @@ function addUniformCardBonus(distribution, minBonus, maxBonus, count) {
 
 // 攻撃カード込みの攻撃力分布を作成
 function getAttackPowerDistribution(calculator, baseAttackPower) {
-    const atk1 = getCardCount(calculator, "Atk1");
-    const atk2 = getCardCount(calculator, "Atk2");
-    const atk3 = getCardCount(calculator, "Atk3");
-    const atk4 = getCardCount(calculator, "Atk4");
-    const atk5 = getCardCount(calculator, "Atk5");
-    const atk6 = getCardCount(calculator, "Atk6");
-    const atk7 = getCardCount(calculator, "Atk7");
+    const cardCounts = Object.fromEntries(
+        Array.from({ length: 7 }, (_, index) => {
+            const id = `Atk${index + 1}`;
+            return [id, getCardCount(calculator, id)];
+        })
+    );
 
     let bonusDistribution = new Map([[0, 1]]);
 
     // ランダム増加カード
-    bonusDistribution =
-        addUniformCardBonus(bonusDistribution, 1, 3, atk1);
-
-    bonusDistribution =
-        addUniformCardBonus(bonusDistribution, 1, 6, atk2);
-
-    bonusDistribution =
-        addUniformCardBonus(bonusDistribution, 1, 10, atk3);
-
-    bonusDistribution =
-        addUniformCardBonus(bonusDistribution, 1, 20, atk4);
+    for (const [id, maxBonus] of [
+        ["Atk1", 3],
+        ["Atk2", 6],
+        ["Atk3", 10],
+        ["Atk4", 20]
+    ]) {
+        bonusDistribution = addUniformCardBonus(
+            bonusDistribution,
+            1,
+            maxBonus,
+            cardCounts[id]
+        );
+    }
 
     // 固定増加カード
     const fixedBonus =
-        atk5 * 3 +
-        atk6 * 5 +
-        atk7 * 6;
+        cardCounts.Atk5 * 3 +
+        cardCounts.Atk6 * 5 +
+        cardCounts.Atk7 * 6;
 
     const attackPowerDistribution = new Map();
 
@@ -233,7 +234,7 @@ function getAttackPowerDistribution(calculator, baseAttackPower) {
         // Atk7を1枚以上使用している場合は、
         // すべてのカード増加を反映した後の攻撃力を1.5倍
         // 小数点以下は切り捨て
-        if (atk7 >= 1) {
+        if (cardCounts.Atk7 >= 1) {
             finalAttackPower =
                 Math.floor(finalAttackPower * 1.5);
         }
@@ -251,23 +252,27 @@ function getAttackPowerDistribution(calculator, baseAttackPower) {
 
 // 防御カード込みの防御力分布を作成
 function getDefensePowerDistribution(calculator, baseDefensePower) {
-    const def1 = getCardCount(calculator, "Def1");
-    const def2 = getCardCount(calculator, "Def2");
-    const def3 = getCardCount(calculator, "Def3");
+    const cardCounts = Object.fromEntries(
+        Array.from({ length: 3 }, (_, index) => {
+            const id = `Def${index + 1}`;
+            return [id, getCardCount(calculator, id)];
+        })
+    );
 
     let bonusDistribution = new Map([[0, 1]]);
 
-    // Def1：1枚ごとに1～3
-    bonusDistribution =
-        addUniformCardBonus(bonusDistribution, 1, 3, def1);
-
-    // Def2：1枚ごとに1～6
-    bonusDistribution =
-        addUniformCardBonus(bonusDistribution, 1, 6, def2);
-
-    // Def3：1枚ごとに1～10
-    bonusDistribution =
-        addUniformCardBonus(bonusDistribution, 1, 10, def3);
+    for (const [id, maxBonus] of [
+        ["Def1", 3],
+        ["Def2", 6],
+        ["Def3", 10]
+    ]) {
+        bonusDistribution = addUniformCardBonus(
+            bonusDistribution,
+            1,
+            maxBonus,
+            cardCounts[id]
+        );
+    }
 
     const defensePowerDistribution = new Map();
 
