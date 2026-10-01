@@ -193,34 +193,35 @@ function addUniformCardBonus(distribution, minBonus, maxBonus, count) {
 
 // 攻撃カード込みの攻撃力分布を作成
 function getAttackPowerDistribution(calculator, baseAttackPower) {
-    const atk1 = getCardCount(calculator, "Atk1");
-    const atk2 = getCardCount(calculator, "Atk2");
-    const atk3 = getCardCount(calculator, "Atk3");
-    const atk4 = getCardCount(calculator, "Atk4");
-    const atk5 = getCardCount(calculator, "Atk5");
-    const atk6 = getCardCount(calculator, "Atk6");
-    const atk7 = getCardCount(calculator, "Atk7");
+    const counts = Object.fromEntries(
+        Array.from({ length: 7 }, (_, index) => {
+            const id = `Atk${index + 1}`;
+            return [id, getCardCount(calculator, id)];
+        })
+    );
 
     let bonusDistribution = new Map([[0, 1]]);
 
     // ランダム増加カード
-    bonusDistribution =
-        addUniformCardBonus(bonusDistribution, 1, 3, atk1);
-
-    bonusDistribution =
-        addUniformCardBonus(bonusDistribution, 1, 6, atk2);
-
-    bonusDistribution =
-        addUniformCardBonus(bonusDistribution, 1, 10, atk3);
-
-    bonusDistribution =
-        addUniformCardBonus(bonusDistribution, 1, 20, atk4);
+    for (const [id, maxBonus] of [
+        ["Atk1", 3],
+        ["Atk2", 6],
+        ["Atk3", 10],
+        ["Atk4", 20]
+    ]) {
+        bonusDistribution = addUniformCardBonus(
+            bonusDistribution,
+            1,
+            maxBonus,
+            counts[id]
+        );
+    }
 
     // 固定増加カード
     const fixedBonus =
-        atk5 * 3 +
-        atk6 * 5 +
-        atk7 * 6;
+        counts.Atk5 * 3 +
+        counts.Atk6 * 5 +
+        counts.Atk7 * 6;
 
     const attackPowerDistribution = new Map();
 
@@ -233,7 +234,7 @@ function getAttackPowerDistribution(calculator, baseAttackPower) {
         // Atk7を1枚以上使用している場合は、
         // すべてのカード増加を反映した後の攻撃力を1.5倍
         // 小数点以下は切り捨て
-        if (atk7 >= 1) {
+        if (counts.Atk7 >= 1) {
             finalAttackPower =
                 Math.floor(finalAttackPower * 1.5);
         }
@@ -251,23 +252,27 @@ function getAttackPowerDistribution(calculator, baseAttackPower) {
 
 // 防御カード込みの防御力分布を作成
 function getDefensePowerDistribution(calculator, baseDefensePower) {
-    const def1 = getCardCount(calculator, "Def1");
-    const def2 = getCardCount(calculator, "Def2");
-    const def3 = getCardCount(calculator, "Def3");
+    const counts = Object.fromEntries(
+        Array.from({ length: 3 }, (_, index) => {
+            const id = `Def${index + 1}`;
+            return [id, getCardCount(calculator, id)];
+        })
+    );
 
     let bonusDistribution = new Map([[0, 1]]);
 
-    // Def1：1枚ごとに1～3
-    bonusDistribution =
-        addUniformCardBonus(bonusDistribution, 1, 3, def1);
-
-    // Def2：1枚ごとに1～6
-    bonusDistribution =
-        addUniformCardBonus(bonusDistribution, 1, 6, def2);
-
-    // Def3：1枚ごとに1～10
-    bonusDistribution =
-        addUniformCardBonus(bonusDistribution, 1, 10, def3);
+    for (const [id, maxBonus] of [
+        ["Def1", 3],
+        ["Def2", 6],
+        ["Def3", 10]
+    ]) {
+        bonusDistribution = addUniformCardBonus(
+            bonusDistribution,
+            1,
+            maxBonus,
+            counts[id]
+        );
+    }
 
     const defensePowerDistribution = new Map();
 
@@ -1024,8 +1029,8 @@ document.querySelectorAll(".role-tab").forEach(tab => {
     });
 });
 
-// CSV files are read relative to soruce/ (source/ also works).
-// The bundled snapshot keeps the first release usable when opening index.html directly.
+// CSV files are read from ../csv/ relative to 06a_chara/.
+// Bundled snapshots keep the app usable when index.html is opened directly.
 function parseMapCSV(text){
  const delimiter=text.split(/\r?\n/,1)[0].includes('\t')?'\t':',';
  const rows=[];let row=[],value='',quoted=false;
@@ -1095,7 +1100,7 @@ function normalizeMapData(raw){
  return {maps,nativeMapByMonster,gimmicks:raw.gimmicks||[],stats:raw.stats,missions:raw.missions,events:raw.events,images:Object.fromEntries(raw.stats.map(s=>[s.image,'../images/Monster/'+s.image])),icons:{'攻撃':'../images/icon/Attack.png','防御':'../images/icon/Defense.png','HP':'../images/icon/Hp.png','コイン':'../images/icon/Coin.png',reflect:'../images/icon/Reflect.png'}};
 }
 function assignMapImage(image,url){
- const variants=[url,url.replace('../images/','../Image/'),url.replace('../images/','../Images/'),url.replace('/Icon/','/icon/'),url.replace('/Monster/','/MonsterImg/'),url.replace('/Map/','/MapImg/')];
+ const variants=[...new Set([url,url.replace('../images/','../Image/'),url.replace('../images/','../Images/'),url.replace('/Icon/','/icon/'),url.replace('/Monster/','/MonsterImg/'),url.replace('/Map/','/MapImg/')])];
  let index=0;image.onerror=()=>{index++;if(index<variants.length)image.src=variants[index];else {image.onerror=null;image.hidden=true;}};image.hidden=false;image.src=variants[0];
 }
 
