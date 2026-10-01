@@ -207,11 +207,7 @@ function renderRoster(){
  roster.replaceChildren();rosterEmpty.hidden=rosterState.monsters.length>0;
  document.getElementById('roster-counts').textContent='累計 '+rosterState.monsters.length+'体 ／ 出現中 '+rosterState.monsters.filter(e=>!e.defeated).length+'体 ／ 撃破 '+rosterState.monsters.filter(e=>e.defeated).length+'体';
  [...rosterState.monsters].sort((a,b)=>Number(!!a.defeated)-Number(!!b.defeated)||Number(data.nativeMapByMonster[b.monsterId]===pick.value)-Number(data.nativeMapByMonster[a.monsterId]===pick.value)||a.monsterId.localeCompare(b.monsterId,'en',{numeric:true})||a.instanceId-b.instanceId).forEach(enemy=>{
-  const card=document.createElement('article');card.className='roster-card';card.classList.toggle('defeated',!!enemy.defeated);card.classList.toggle('selected',enemy.instanceId===rosterState.selectedId);
-  const select=document.createElement('button');select.type='button';select.disabled=!!enemy.defeated;select.className='roster-select';select.setAttribute('aria-pressed',String(enemy.instanceId===rosterState.selectedId));select.setAttribute('aria-label',monsterDisplayName(enemy)+'を計算機に登録');
-  const heading=document.createElement('span');heading.className='roster-name';const portrait=document.createElement('img');portrait.className='roster-portrait';portrait.alt='';assignMapImage(portrait,enemy.image);const nameText=document.createElement('span');nameText.className='monster-name-text';nameText.textContent=monsterDisplayName(enemy);heading.append(portrait,nameText);
-  if(enemy.boss){const icon=document.createElement('img');icon.className='roster-icon';icon.alt='マップボス';assignMapImage(icon,'../images/icon/Boss.png');nameText.append(icon);}
-  if(enemy.reflect){const icon=document.createElement('img');icon.className='roster-icon';icon.alt='反撃可能';assignMapImage(icon,data.icons.reflect);nameText.append(icon);}
+   const displayName=monsterDisplayName(enemy),{card,select,nameText,actions,top}=createRosterCardShell(enemy,rosterState.selectedId,displayName,assignMapImage,data.icons);
   const stats=document.createElement('span');stats.className='roster-stats';
   [['攻撃',enemy.attack],['防御',enemy.defense],['HP',enemy.hp],['コイン',enemy.coin]].forEach(([key,value])=>{const cell=document.createElement('span');cell.className='roster-stat';if(value!==null){const icon=document.createElement('img');icon.className='roster-icon';icon.alt=key;assignMapImage(icon,data.icons[key]);let amount;
    if(key==='HP'||key==='攻撃'||key==='防御'){
@@ -228,12 +224,11 @@ function renderRoster(){
     cell.append(iconButton,amount);amount=null;
    }else{amount=document.createElement('strong');amount.textContent=value;}
    if(amount)cell.append(icon,amount);}stats.append(cell);});
-  select.append(heading);select.addEventListener('click',()=>{rosterState.selectedId=enemy.instanceId;registerEnemy(enemy);renderRoster();rosterNotice.textContent=monsterDisplayName(enemy)+'を計算機に登録しました。';});
-  const remove=document.createElement('button');remove.type='button';remove.className='roster-remove';remove.textContent=enemy.defeated?'撃破済':'撃破';remove.disabled=!!enemy.defeated;remove.setAttribute('aria-label',monsterDisplayName(enemy)+'を撃破');remove.addEventListener('click',()=>{rememberRoster();removeEnemy(enemy);renderRoster();rosterNotice.textContent=monsterDisplayName(enemy)+'を撃破しました。';});
-  const deleteButton=document.createElement('button');deleteButton.type='button';deleteButton.className='roster-delete';deleteButton.textContent='削除';deleteButton.setAttribute('aria-label',monsterDisplayName(enemy)+'を削除');deleteButton.addEventListener('click',()=>{rememberRoster();const i=rosterState.monsters.indexOf(enemy);if(i>=0)rosterState.monsters.splice(i,1);if(rosterState.selectedId===enemy.instanceId){rosterState.selectedId=null;window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:null}));}renderRoster();});
-  const actions=document.createElement('div');actions.className='roster-card-actions';actions.append(remove,deleteButton);
-  const markField=document.createElement('div');markField.className='roster-mark';markField.title='マーク：左クリックで＋1、右クリックで−1';const markButton=document.createElement('button');markButton.type='button';markButton.className='roster-mark-button';markButton.disabled=!!enemy.defeated;markButton.setAttribute('aria-label',monsterDisplayName(enemy)+'のマークを増やす');const markIcon=document.createElement('img');markIcon.src='../images/icon/'+encodeURIComponent('マーク.png');markIcon.alt='マーク';markButton.append(markIcon);const markValue=document.createElement('strong');markValue.textContent=String(enemy.markStacks||0);const changeMark=delta=>{if(enemy.defeated)return;const next=Math.max(0,(enemy.markStacks||0)+delta);if(next===(enemy.markStacks||0))return;rememberRoster();enemy.markStacks=next;if(rosterState.selectedId===enemy.instanceId)registerEnemy(enemy,false);renderRoster();};markButton.addEventListener('click',event=>{event.stopPropagation();changeMark(1);});markButton.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();changeMark(-1);});markField.append(markButton,markValue);
-  const nameRow=select.querySelector('.monster-name-text');if(nameRow)nameRow.append(markField);const top=document.createElement('div');top.className='roster-card-top';top.append(select,actions);
+  select.addEventListener('click',()=>{rosterState.selectedId=enemy.instanceId;registerEnemy(enemy);renderRoster();rosterNotice.textContent=monsterDisplayName(enemy)+'を計算機に登録しました。';});
+  const remove=createRosterActionButton('roster-remove',enemy.defeated?'撃破済':'撃破',displayName+'を撃破',!!enemy.defeated);remove.addEventListener('click',()=>{rememberRoster();removeEnemy(enemy);renderRoster();rosterNotice.textContent=monsterDisplayName(enemy)+'を撃破しました。';});
+  const deleteButton=createRosterActionButton('roster-delete','削除',displayName+'を削除');deleteButton.addEventListener('click',()=>{rememberRoster();const i=rosterState.monsters.indexOf(enemy);if(i>=0)rosterState.monsters.splice(i,1);if(rosterState.selectedId===enemy.instanceId){rosterState.selectedId=null;window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:null}));}renderRoster();});
+   actions.append(remove,deleteButton);
+   const {field:markField,button:markButton}=createRosterMarkControl(enemy,displayName);const changeMark=delta=>{if(enemy.defeated)return;const next=Math.max(0,(enemy.markStacks||0)+delta);if(next===(enemy.markStacks||0))return;rememberRoster();enemy.markStacks=next;if(rosterState.selectedId===enemy.instanceId)registerEnemy(enemy,false);renderRoster();};markButton.addEventListener('click',event=>{event.stopPropagation();changeMark(1);});markButton.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();changeMark(-1);});nameText.append(markField);
   const skill=summonSkills[enemy.monsterId];
   if(skill&&skill.map===enemy.mapId&&!enemy.defeated){
    top.classList.add('has-skill');
@@ -410,4 +405,7 @@ async function refreshCSV(){if(location.protocol==='file:')return;const files={m
 
 })();
 document.querySelectorAll('.parameter-icon').forEach(img=>assignMapImage(img,img.getAttribute('src').replace('/icon/','/Icon/')));
+   const displayName=monsterDisplayName(enemy),{card,select,nameText,actions,top}=createRosterCardShell(enemy,rosterState.selectedId,displayName,assignMapImage,data.icons);
+   actions.append(remove,deleteButton);
+   const {field:markField,button:markButton}=createRosterMarkControl(enemy,displayName);;markButton.addEventListener('click',event=>{event.stopPropagation();changeMark(1);});markButton.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();changeMark(-1);});nameText.append(markField);
 
