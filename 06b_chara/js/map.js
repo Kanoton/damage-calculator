@@ -75,15 +75,9 @@ function rosterStat(stats,key){
 const defeatTotals=new Map();
 const executedEvents=new Set();
 const missionCounters=new Map();
-const rosterState={
- monsters:[],nextId:1,selectedId:null,serials:new Map(),history:[],round:1,progress:1,context:{map:pick.value,difficulty:difficulty.value,route:'',moved:false}
-};
-function addPlacedMonster(enemy){
- enemy.markStacks=Math.max(0,Math.floor(Number(enemy.markStacks)||0));
- if(!enemy.boss){const serial=(rosterState.serials.get(enemy.monsterId)||0)+1;rosterState.serials.set(enemy.monsterId,serial);enemy.serial=serial;}
- rosterState.monsters.push(enemy);
-}
-function monsterDisplayName(enemy){return enemy.name+(enemy.boss?'':' '+enemy.serial);}
+const rosterState=createRosterState({map:pick.value,difficulty:difficulty.value,route:'',moved:false});
+function addPlacedMonster(enemy){return addRosterMonster(rosterState,enemy);}
+function monsterDisplayName(enemy){return rosterMonsterDisplayName(enemy);}
 const roster=document.getElementById('map-roster-list'),rosterEmpty=document.getElementById('map-roster-empty'),rosterNotice=document.createElement('span');
 // Undo snapshots last for this page session, until 全削除.
 const roundDisplay=document.getElementById('current-round'),progressDisplay=document.getElementById('current-progress');
@@ -116,7 +110,7 @@ function registerEnemy(enemy, switchTab=true){
  if(switchTab)document.querySelector('.role-tab[data-role="attack"]').click();
 }
 function clearRoster(){document.getElementById('roster-error').textContent='';rosterState.round=1;rosterState.progress=1;renderRoundProgress();defeatTotals.clear();executedEvents.clear();rosterState.monsters.length=0;rosterState.serials.clear();rosterState.selectedId=null;window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:null}));skillChoiceId=null;rosterBuff.attack=0;rosterBuff.defense=0;rosterCounts.clear();rosterEvidenceConsider=false;rosterNotice.textContent='';}
-function updateEnemy(enemy){if(enemy.defeated)return;enemy.attack=rosterStat(enemy.base,'攻撃')+(enemy.manualAttack||0)+(enemy.eventAttack||0);enemy.defense=rosterStat(enemy.base,'防御')+(enemy.manualDefense||0)+(enemy.eventDefense||0);enemy.hp=rosterStat(enemy.base,'HP')-enemy.damageTaken;}
+function updateEnemy(enemy){updateRosterEnemy(enemy,rosterStat);}
 function spawnGimmickMonsters(trigger){
  const matching=mapGimmicks().filter(r=>r.gimmick_id===trigger.gimmick_id&&(!r['難易度']||r['難易度']===difficulty.value));
  const configurations=new Map();matching.forEach(r=>{const ids=String(r['出現monster_id']||'').trim();if(ids)configurations.set(JSON.stringify([ids,String(r['出現数']||'').trim()]),r);});
@@ -282,29 +276,8 @@ renderRoster();
 
 function selectMonster(id){selected=id;list.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.id===id)));status.textContent='';}
 
-function updateMissionRow(tr){
- const key=tr.dataset.counterKey,maximum=Number(tr.dataset.maximum);
- const count=missionCounters.has(key)?missionCounters.get(key):maximum;
- tr.children[0].textContent=count+' / '+maximum;
- tr.classList.toggle('mp-mission-done',count===0);
- const control=tr.querySelector('button');
- control.setAttribute('aria-label',tr.dataset.description+'、残り'+count+' / '+maximum+'。クリックで1減らす、右クリックまたはShiftキーを押しながらEnterで1増やす');
-}
-function attachMissionCounter(tr,row){
- const key=missionCounterKey(row,difficulty.value);
- tr.dataset.counterKey=key;tr.dataset.maximum=String(Number(row['カウンタ']));tr.dataset.description=row['内容'];
- const button=document.createElement('button');button.type='button';button.className='mp-mission-counter-button';button.textContent=row['内容'];
- tr.children[1].replaceChildren(button);
- tr.children[0].setAttribute('aria-live','polite');
- function change(delta){
-  const maximum=Number(tr.dataset.maximum),current=missionCounters.has(key)?missionCounters.get(key):maximum;
-  const next=Math.max(0,Math.min(maximum,current+delta));if(next===current)return;rememberRoster();missionCounters.set(key,next);updateMissionRow(tr);document.getElementById('roster-undo').disabled=false;
- }
- tr.addEventListener('click',()=>change(-1));
- tr.addEventListener('contextmenu',event=>{event.preventDefault();change(1);});
- button.addEventListener('keydown',event=>{if(event.shiftKey&&event.key==='Enter'){event.preventDefault();change(1);}});
- updateMissionRow(tr);
-}
+function updateMissionRow(tr){updateMissionCounterRow(tr,missionCounters);}
+function attachMissionCounter(tr,row){attachMissionCounterRow(tr,row,difficulty.value,missionCounters,rememberRoster,()=>{document.getElementById('roster-undo').disabled=false;});}
 
 document.getElementById('mp-mission-reset').addEventListener('click',()=>{
  const rows=routeRows(data.missions);if(!rows.some(row=>missionCounters.has(missionCounterKey(row,difficulty.value))&&missionCounters.get(missionCounterKey(row,difficulty.value))!==Number(row['カウンタ'])))return;
