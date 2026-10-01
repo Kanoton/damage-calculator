@@ -170,36 +170,15 @@ function renderRoster(){
  const focused=document.activeElement?.closest('#roster-gimmicks')?document.activeElement.dataset.gimmick:null;
  rosterGimmicks.replaceChildren();
  if(pick.value==='MAP0104'){
-  const truth=document.createElement('button');truth.type='button';truth.className='roster-truth';truth.textContent='真相発覚';
-  const done=executedEvents.has(libraryTruthKey());truth.disabled=done;truth.setAttribute('aria-pressed',String(done));
-  truth.setAttribute('aria-label',done?'真相発覚（発動済み）':'真相発覚を発動');
-  truth.addEventListener('click',executeLibraryTruth);rosterGimmicks.append(truth);
-  const evidence=document.createElement('button');evidence.type='button';evidence.className='roster-evidence'+(rosterEvidenceConsider?' is-active':'');
-  const count=Number(window.getCharacterEvidenceStack?.()||0);
-  const icon=document.createElement('img');icon.src='../images/icon/'+encodeURIComponent('罪証.png');icon.alt='';
-  evidence.append(icon,document.createTextNode('罪証考慮'));
-  evidence.disabled=!window.hasSelectedCharacter?.();
-  evidence.setAttribute('aria-pressed',String(rosterEvidenceConsider));
-  evidence.title=evidence.disabled?'キャラクターを選択すると操作できます':('選択キャラクターの罪証 '+count+'スタックを対象モンスターの攻撃力に'+(rosterEvidenceConsider?'反映中':'反映しない'));
-  evidence.setAttribute('aria-label','罪証考慮：'+(rosterEvidenceConsider?'オン':'オフ')+'。選択キャラクターの罪証 '+count+'スタック');
-  evidence.addEventListener('click',()=>{rememberRoster();rosterEvidenceConsider=!rosterEvidenceConsider;renderRoster();});
-  rosterGimmicks.append(evidence);
-  if(pendingWarden()){
-   const revive=document.createElement('button');revive.type='button';revive.className='roster-warden-revive';revive.textContent='看守復活';
-   revive.title='撃破から2ラウンド後に手動で押す。復活のたび最大HP＋2';
-   revive.addEventListener('click',reviveWarden);rosterGimmicks.append(revive);
-  }
+  const controls=createLibraryGimmickControls({truthDone:executedEvents.has(libraryTruthKey()),evidenceEnabled:!!window.hasSelectedCharacter?.(),evidenceActive:rosterEvidenceConsider,evidenceCount:Number(window.getCharacterEvidenceStack?.()||0),wardenPending:!!pendingWarden(),onTruth:executeLibraryTruth,onEvidence:()=>{rememberRoster();rosterEvidenceConsider=!rosterEvidenceConsider;renderRoster();},onRevive:reviveWarden});rosterGimmicks.append(...controls);
  }
  if(pick.value==='MAP0006'){
-  const total=id=>defeatTotals.get(JSON.stringify([pick.value,difficulty.value,id]))||0;
-  const choices=[{unlock:'M0041',spawn:'M0042',label:'厄兆出現'},{unlock:'M0042',spawn:'M0043',label:'混乱出現'}];
-  choices.forEach(choice=>{if(total(choice.unlock)<1)return;const button=document.createElement('button');button.type='button';button.dataset.gimmick='ghost-spawn-'+choice.spawn;button.textContent=choice.label;const done=executedEvents.has(ghostSpawnKey(choice.spawn));button.disabled=done;button.setAttribute('aria-pressed',String(done));button.setAttribute('aria-label',done?choice.label+'（実行済み）':choice.label);button.addEventListener('click',()=>spawnGhostBoss(choice.spawn,choice.label.replace('出現','')));rosterGimmicks.append(button);});
+  const total=id=>defeatTotals.get(JSON.stringify([pick.value,difficulty.value,id]))||0,choices=[{unlock:'M0041',spawn:'M0042',label:'厄兆出現'},{unlock:'M0042',spawn:'M0043',label:'混乱出現'}];choices.forEach(choice=>{if(total(choice.unlock)<1)return;const done=executedEvents.has(ghostSpawnKey(choice.spawn));rosterGimmicks.append(createGhostSpawnButton(choice,done,()=>spawnGhostBoss(choice.spawn,choice.label.replace('出現',''))));});
  }
  const unique=new Map();mapGimmicks().forEach(row=>{if(!unique.has(row.gimmick_id))unique.set(row.gimmick_id,row);});
  document.getElementById('roster-reset').hidden=unique.size===0;
  unique.forEach(row=>{
- const button=document.createElement('button');button.type='button';button.dataset.gimmick=row.gimmick_id;const maximum=gimmickMaximum(row),count=Math.min(maximum,rosterCounts.get(gimmickKey(row))||0);button.textContent=row['表示名']+(maximum===1?'':' '+count);button.classList.toggle('mp-gimmick-complete',count>=maximum);button.setAttribute('aria-pressed',String(count>0));button.title='左クリック：＋1 ／ 右クリック：−1';
- const change=delta=>{const next=Math.max(0,Math.min(maximum,count+delta));if(next===count)return;rememberRoster();if(pick.value==='MAP0104'&&row.gimmick_id==='warden_defeated'&&delta>0){const defeated=defeatActiveWardens();if(!defeated){rosterCounts.set(gimmickKey(row),next);spawnGimmickMonsters(row);}renderRoster();return;}rosterCounts.set(gimmickKey(row),next);if(next>count)spawnGimmickMonsters(row);renderRoster();};button.addEventListener('click',()=>change(1));button.addEventListener('contextmenu',e=>{e.preventDefault();change(-1);});button.addEventListener('keydown',e=>{if(e.shiftKey&&e.key==='Enter'){e.preventDefault();change(-1);}});rosterGimmicks.append(button);if(focused===row.gimmick_id)button.focus();
+ const maximum=gimmickMaximum(row),count=Math.min(maximum,rosterCounts.get(gimmickKey(row))||0);const change=delta=>{const next=Math.max(0,Math.min(maximum,count+delta));if(next===count)return;rememberRoster();if(pick.value==='MAP0104'&&row.gimmick_id==='warden_defeated'&&delta>0){const defeated=defeatActiveWardens();if(!defeated){rosterCounts.set(gimmickKey(row),next);spawnGimmickMonsters(row);}renderRoster();return;}rosterCounts.set(gimmickKey(row),next);if(next>count)spawnGimmickMonsters(row);renderRoster();};const button=createRosterGimmickButton(row,maximum,count,change);rosterGimmicks.append(button);if(focused===row.gimmick_id)button.focus();
  });
  
  document.querySelectorAll('#mp-mission-body tr').forEach(updateMissionRow);
