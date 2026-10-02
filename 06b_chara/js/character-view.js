@@ -51,3 +51,24 @@ function createCharacterAssetView(row,folder,key){
  const button=document.createElement('button');button.type='button';button.dataset.id=row.id;
  return {item,button};
 }
+
+function createCharacterSkillTooltipView(row,ability){
+ const stats=document.createElement('div');stats.className='character-skill-stats';
+ for(const [key,label,file] of [['atk','攻撃力','Attack.png'],['def','防御力','Defense.png'],['hp','HP','Hp.png'],['move','移動力',null]]){
+  const entry=document.createElement('span');entry.className='character-skill-stat';entry.title=label;
+  const icon=file?document.createElement('img'):document.createElement('span');
+  if(file){icon.src='../images/icon/'+file;icon.alt='';}else{icon.className='character-skill-move-icon';icon.textContent='👟';icon.setAttribute('aria-hidden','true');}
+  const values=[0,1,2,3].map(level=>row['lv'+level+'_'+key]??'—').join(' / ');
+  const text=document.createElement('span');text.textContent=values;
+  entry.setAttribute('aria-label',label+' Lv0からLv3 '+values);entry.append(icon,text);stats.append(entry);
+ }
+ const description=document.createElement('div');description.className='character-skill-text';
+ const lines=ability.split(/\r?\n/);
+ lines.forEach((line,index)=>{
+  const heading=/^(?:スキル|パッシブスキル)\s*[-－]\s*.+$/.test(line.trim())||/^[^\s。、！？：:（）()\[\]［］]{1,24}$/.test(line.trim());
+  if(heading){const strong=document.createElement('strong');strong.textContent=line;description.append(strong);}
+  else description.append(document.createTextNode(line));
+  if(index<lines.length-1)description.append(document.createTextNode('\n'));
+ });
+ return {stats,description};
+}
