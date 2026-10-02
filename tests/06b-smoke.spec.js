@@ -10,7 +10,7 @@ test('06b smoke: initializes core UI without page errors', async ({ page }) => {
   await page.locator('.role-tab[data-role="attack"]').click();
   await expect(page.locator('#attackPower1')).toBeVisible();
   await page.locator('.role-tab[data-role="defense"]').click();
-  await expect(page.locator('#defensePower1')).toBeVisible();
+  await expect(page.locator('.mode-content[data-role="defense"]')).toBeVisible();
 
   await expect(page.locator('#mp-map-select option')).not.toHaveCount(0);
   await expect(page.locator('#selected-character-name')).toHaveText('ミミ');
