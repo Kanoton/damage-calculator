@@ -1,5 +1,7 @@
 # 06b_chara
 
+> 今後の追加・変更作業では、最初に [WORKING_GUIDE.md](../WORKING_GUIDE.md) を参照してください。構成、変更ルール、データの正本、テスト手順をまとめています。
+
 06a_chara の動作を維持したまま、保守性を改善するために JavaScript を責務別に分割した版です。
 
 ## JavaScript 構成
@@ -14,6 +16,11 @@
 - js/map-gimmick-view.js: マップ固有ギミック・特殊操作ボタンのDOM生成
 - js/map.js: マップ、モンスター、イベント、ラウンド管理（Roster状態は rosterState に集約）
 - js/character-data.js: file:// 起動時に使用するキャラクター・チップ系フォールバックデータ
+- js/character-view.js: キャラクター・チップ・条件UIのDOM生成
+- js/character-data-loader.js: キャラクター系CSV取得・パース・フォールバック選択
+- js/number-pad.js: 数値入力テンキー制御
+- js/character-tabs.js: キャラクター画面のタブ操作
+- js/character-skill-tooltip.js: スキルツールチップ制御
 - js/character.js: キャラクター、チップ、状態・能力管理
 - streamdeck.js: Stream Deck 連携
 
