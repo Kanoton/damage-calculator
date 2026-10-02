@@ -80,3 +80,17 @@ function createCharacterNumberPadView(){
  }
  return numberPad;
 }
+
+function createCharacterAbilityToggleView(key,active,icon,onToggle){
+ const button=document.createElement('button');button.type='button';button.className='selected-chip condition-toggle'+(active?' is-active':'');
+ button.setAttribute('aria-pressed',String(active));button.setAttribute('aria-label',key+'：'+(active?'オン':'オフ')+'。クリックで切り替え');
+ button.title=key+'：'+(active?'オン':'オフ')+'\nクリックで切り替え';button.append(icon);button.addEventListener('click',onToggle);
+ return button;
+}
+
+function createCharacterAbilityChoiceView(key,option,icon,onCycle){
+ const button=document.createElement('button');button.type='button';button.className='selected-chip condition-toggle'+(Number(option.value)?' is-active':'');
+ button.setAttribute('aria-label',key+'：'+option.label+'。クリックで切り替え');button.title=key+'：'+option.label+'\nクリックで切り替え';
+ button.append(icon,document.createTextNode(option.label));button.addEventListener('click',onCycle);
+ return button;
+}
