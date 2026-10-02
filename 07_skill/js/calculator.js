@@ -1,0 +1,744 @@
+// 通常の「防御」を選択した場合の最終ダメージ
+function getDefenseDamage(
+    attackPower,
+    defensePower,
+    damageAdd,
+    damageReduce,
+    attackDice,
+    defenseDice
+) {
+    const actualAttack = attackPower + attackDice;
+    const actualDefense = defensePower + defenseDice;
+
+    let damage = actualAttack - actualDefense;
+
+    // 1未満のダメージは1に補正
+    if (damage < 1) {
+        damage = 1;
+    }
+
+    let finalDamage = damage + damageAdd - damageReduce;
+
+    // 増加・軽減の計算後は0ダメージを許容する
+    // （負のダメージにはならないよう0を下限とする）
+    if (finalDamage < 0) {
+        finalDamage = 0;
+    }
+
+    return finalDamage;
+}
+
+
+// 「回避」を選択した場合の最終ダメージ
+function getEvadeDamage(
+    attackPower,
+    damageAdd,
+    damageReduce,
+    attackDice,
+    defenseDice
+) {
+    // 攻撃側の出目より大きい、または6なら回避成功
+    const evadeSuccess =
+        defenseDice > attackDice || defenseDice === 6;
+
+    if (evadeSuccess) {
+        // 回避成功時は増加・軽減も計算せず0ダメージ
+        return 0;
+    }
+
+    // 回避失敗時は防御力を0として計算
+    const actualAttack = attackPower + attackDice;
+    let damage = actualAttack;
+
+    if (damage < 1) {
+        damage = 1;
+    }
+
+    let finalDamage = damage + damageAdd - damageReduce;
+
+    // 増加・軽減の計算後は0ダメージを許容する
+    if (finalDamage < 0) {
+        finalDamage = 0;
+    }
+
+    return finalDamage;
+}
+
+
+// 防御側：攻撃ダイスの出目ごとに「防御」と「回避」を比較
+// 判定基準
+// 1. 「防御」で100%生存できる出目では、必ず防御を推奨
+// 2. 100%でない場合は、防御と回避の生存率を比較
+// 3. 回避の生存率が高ければ回避
+// 4. 生存率が同じなら、成功時に0ダメージとなる回避を推奨
+function getDefenseRecommendation(
+    attackPower,
+    defensePower,
+    damageAdd,
+    damageReduce,
+    hp
+) {
+    const evadeBetterDice = [];
+
+    for (let attackDice = 1; attackDice <= 6; attackDice++) {
+        let defenseSurvivalCount = 0;
+        let evadeSurvivalCount = 0;
+
+        for (let defenseDice = 1; defenseDice <= 6; defenseDice++) {
+            const defenseDamage = getDefenseDamage(
+                attackPower,
+                defensePower,
+                damageAdd,
+                damageReduce,
+                attackDice,
+                defenseDice
+            );
+
+            const evadeDamage = getEvadeDamage(
+                attackPower,
+                damageAdd,
+                damageReduce,
+                attackDice,
+                defenseDice
+            );
+
+            if (defenseDamage < hp) {
+                defenseSurvivalCount++;
+            }
+
+            if (evadeDamage < hp) {
+                evadeSurvivalCount++;
+            }
+        }
+
+        // その攻撃出目に対して「防御」で100%生存できるなら防御を選ぶ
+        if (defenseSurvivalCount === 6) {
+            continue;
+        }
+
+        // 防御が100%でない場合：
+        // 回避の生存率が高い、または同率なら回避を推奨
+        if (evadeSurvivalCount >= defenseSurvivalCount) {
+            evadeBetterDice.push(attackDice);
+        }
+    }
+
+    // 推奨表示は3パターンに限定
+    if (evadeBetterDice.length === 0) {
+        return "回避不要";
+    }
+
+    if (
+        evadeBetterDice.length === 1 &&
+        evadeBetterDice[0] === 6
+    ) {
+        return "攻撃ダイスが6の場合回避";
+    }
+
+    return "回避を選択";
+}
+
+
+// =================================
+// バトルカード効果
+// 下部グラフ・下部の期待値/確率だけに使用
+// =================================
+
+// 指定カードの使用枚数を取得
+function getCardCount(calculator, id) {
+    const input = calculator.querySelector(`#${id}`);
+
+    if (!input) {
+        return 0;
+    }
+
+    const value = Number(input.value);
+
+    if (!Number.isFinite(value)) {
+        return 0;
+    }
+
+    return Math.max(0, Math.floor(value));
+}
+
+
+// 「合計ボーナス値 → 発生確率」の分布に、
+// 1枚ごとのランダム増加を指定枚数ぶん畳み込む
+function addUniformCardBonus(distribution, minBonus, maxBonus, count) {
+    let result = distribution;
+
+    for (let use = 0; use < count; use++) {
+        const next = new Map();
+        const rangeSize = maxBonus - minBonus + 1;
+
+        for (const [currentBonus, currentProbability] of result) {
+            for (let bonus = minBonus; bonus <= maxBonus; bonus++) {
+                const newBonus = currentBonus + bonus;
+                const probability =
+                    currentProbability / rangeSize;
+
+                next.set(
+                    newBonus,
+                    (next.get(newBonus) || 0) + probability
+                );
+            }
+        }
+
+        result = next;
+    }
+
+    return result;
+}
+
+
+// 攻撃カード込みの攻撃力分布を作成
+function getAttackPowerDistribution(calculator, baseAttackPower) {
+    const cardCounts = Object.fromEntries(
+        Array.from({ length: 7 }, (_, index) => {
+            const id = `Atk${index + 1}`;
+            return [id, getCardCount(calculator, id)];
+        })
+    );
+
+    let bonusDistribution = new Map([[0, 1]]);
+
+    // ランダム増加カード
+    for (const [id, maxBonus] of [
+        ["Atk1", 3],
+        ["Atk2", 6],
+        ["Atk3", 10],
+        ["Atk4", 20]
+    ]) {
+        bonusDistribution = addUniformCardBonus(
+            bonusDistribution,
+            1,
+            maxBonus,
+            cardCounts[id]
+        );
+    }
+
+    // 固定増加カード
+    const fixedBonus =
+        cardCounts.Atk5 * 3 +
+        cardCounts.Atk6 * 5 +
+        cardCounts.Atk7 * 6;
+
+    const attackPowerDistribution = new Map();
+
+    for (const [randomBonus, probability] of bonusDistribution) {
+        let finalAttackPower =
+            baseAttackPower +
+            randomBonus +
+            fixedBonus;
+
+        // Atk7を1枚以上使用している場合は、
+        // すべてのカード増加を反映した後の攻撃力を1.5倍
+        // 小数点以下は切り捨て
+        if (cardCounts.Atk7 >= 1) {
+            finalAttackPower =
+                Math.floor(finalAttackPower * 1.5);
+        }
+
+        attackPowerDistribution.set(
+            finalAttackPower,
+            (attackPowerDistribution.get(finalAttackPower) || 0) +
+                probability
+        );
+    }
+
+    return attackPowerDistribution;
+}
+
+
+// 防御カード込みの防御力分布を作成
+function getDefensePowerDistribution(calculator, baseDefensePower) {
+    const cardCounts = Object.fromEntries(
+        Array.from({ length: 3 }, (_, index) => {
+            const id = `Def${index + 1}`;
+            return [id, getCardCount(calculator, id)];
+        })
+    );
+
+    let bonusDistribution = new Map([[0, 1]]);
+
+    for (const [id, maxBonus] of [
+        ["Def1", 3],
+        ["Def2", 6],
+        ["Def3", 10]
+    ]) {
+        bonusDistribution = addUniformCardBonus(
+            bonusDistribution,
+            1,
+            maxBonus,
+            cardCounts[id]
+        );
+    }
+
+    const defensePowerDistribution = new Map();
+
+    for (const [randomBonus, probability] of bonusDistribution) {
+        const finalDefensePower =
+            baseDefensePower +
+            randomBonus;
+
+        defensePowerDistribution.set(
+            finalDefensePower,
+            (defensePowerDistribution.get(finalDefensePower) || 0) +
+                probability
+        );
+    }
+
+    return defensePowerDistribution;
+}
+
+
+// 防御側：防御カードを考慮し、攻撃出目ごとの「防御 / 回避」を比較
+function getCardAwareDefenseChoices(
+    calculator,
+    attackPower,
+    defensePower,
+    damageAdd,
+    damageReduce,
+    hp
+) {
+    const defensePowerDistribution =
+        getDefensePowerDistribution(calculator, defensePower);
+
+    const choices = [];
+    const epsilon = 1e-10;
+
+    for (let attackDice = 1; attackDice <= 6; attackDice++) {
+        let defenseSurvivalProbability = 0;
+        let evadeSurvivalProbability = 0;
+
+        for (
+            const [cardDefensePower, cardProbability]
+            of defensePowerDistribution
+        ) {
+            for (let defenseDice = 1; defenseDice <= 6; defenseDice++) {
+                const diceProbability = cardProbability / 6;
+
+                const defenseDamage = getDefenseDamage(
+                    attackPower,
+                    cardDefensePower,
+                    damageAdd,
+                    damageReduce,
+                    attackDice,
+                    defenseDice
+                );
+
+                const evadeDamage = getEvadeDamage(
+                    attackPower,
+                    damageAdd,
+                    damageReduce,
+                    attackDice,
+                    defenseDice
+                );
+
+                if (defenseDamage < hp) {
+                    defenseSurvivalProbability += diceProbability;
+                }
+
+                if (evadeDamage < hp) {
+                    evadeSurvivalProbability += diceProbability;
+                }
+            }
+        }
+
+        let recommendation;
+
+        // 既存ルールを踏襲：防御で100%生存なら防御を優先。
+        // それ以外は生存率が高い方を選び、同率なら回避を推奨。
+        if (defenseSurvivalProbability >= 1 - epsilon) {
+            recommendation = "防御";
+        } else if (
+            evadeSurvivalProbability + epsilon >=
+            defenseSurvivalProbability
+        ) {
+            recommendation = "回避";
+        } else {
+            recommendation = "防御";
+        }
+
+        choices.push({
+            attackDice,
+            recommendation,
+            defenseSurvivalProbability,
+            evadeSurvivalProbability
+        });
+    }
+
+    return choices;
+}
+
+
+// 防御側：攻撃出目1～6ごとの推奨をカード下に表示
+function renderDefenseChoiceGuide(
+    calculator,
+    attackPower,
+    defensePower,
+    damageAdd,
+    damageReduce,
+    hp
+) {
+    const grid = calculator.querySelector(".defense-choice-grid");
+
+    if (!grid) {
+        return;
+    }
+
+    const choices = getCardAwareDefenseChoices(
+        calculator,
+        attackPower,
+        defensePower,
+        damageAdd,
+        damageReduce,
+        hp
+    );
+
+    grid.innerHTML = choices.map(choice => {
+        const defenseRate =
+            (choice.defenseSurvivalProbability * 100).toFixed(1);
+        const evadeRate =
+            (choice.evadeSurvivalProbability * 100).toFixed(1);
+        const choiceClass = choice.recommendation === "防御"
+            ? "defense-choice"
+            : "evade-choice";
+
+        return `
+            <div class="defense-choice-cell ${choiceClass}">
+                <div class="defense-choice-die">${choice.attackDice}</div>
+                <strong>${choice.recommendation}</strong>
+                <small class="choice-rate-row"><span class="choice-rate-label">防</span><span class="choice-rate-value">${defenseRate}%</span></small>
+                <small class="choice-rate-row"><span class="choice-rate-label">回</span><span class="choice-rate-value">${evadeRate}%</span></small>
+            </div>
+        `;
+    }).join("");
+}
+
+
+// 下部表示用：カード効果を含めたダメージ分布を計算
+function calculateCardAwareDamage(
+    calculator,
+    attackPower,
+    defensePower,
+    damageAdd,
+    damageReduce,
+    hp,
+    isSurvival
+) {
+    // 攻撃モードでは攻撃カードだけを反映
+    // 防御モードでは防御カードだけを反映
+    const attackPowerDistribution = isSurvival
+        ? new Map([[attackPower, 1]])
+        : getAttackPowerDistribution(calculator, attackPower);
+
+    const defensePowerDistribution = isSurvival
+        ? getDefensePowerDistribution(calculator, defensePower)
+        : new Map([[defensePower, 1]]);
+
+    const damageCounts = new Map();
+
+    let expectedDamage = 0;
+    let defeatProbability = 0;
+    let survivalProbability = 0;
+    let minDamage = Infinity;
+    let maxDamage = 0;
+
+    for (
+        const [cardAttackPower, attackPowerProbability]
+        of attackPowerDistribution
+    ) {
+        for (
+            const [cardDefensePower, defensePowerProbability]
+            of defensePowerDistribution
+        ) {
+            const cardProbability =
+                attackPowerProbability *
+                defensePowerProbability;
+
+            for (let attackDice = 1; attackDice <= 6; attackDice++) {
+                for (let defenseDice = 1; defenseDice <= 6; defenseDice++) {
+                    const finalDamage = getDefenseDamage(
+                        cardAttackPower,
+                        cardDefensePower,
+                        damageAdd,
+                        damageReduce,
+                        attackDice,
+                        defenseDice
+                    );
+
+                    const probability =
+                        cardProbability / 36;
+
+                    damageCounts.set(
+                        finalDamage,
+                        (damageCounts.get(finalDamage) || 0) +
+                            probability
+                    );
+
+                    expectedDamage +=
+                        finalDamage * probability;
+
+                    if (finalDamage >= hp) {
+                        defeatProbability += probability;
+                    } else {
+                        survivalProbability += probability;
+                    }
+
+                    minDamage =
+                        Math.min(minDamage, finalDamage);
+
+                    maxDamage =
+                        Math.max(maxDamage, finalDamage);
+                }
+            }
+        }
+    }
+
+    return {
+        damageCounts,
+        minDamage: Number.isFinite(minDamage) ? minDamage : 0,
+        maxDamage,
+        expectedDamage,
+        defeatProbability,
+        survivalProbability
+    };
+}
+
+
+// ダメージごとの発生確率を、マーカーなしの折れ線グラフで描画
+function buildDamageProbabilityGraphModel(damageCounts,maxDamage,totalCombinations){
+ const damageValues=Array.from(damageCounts.keys()),xMin=damageValues.length?Math.min(...damageValues):0,xMax=Math.max(xMin,maxDamage),probabilities=[];let maxProbability=0;
+ for(let damage=xMin;damage<=xMax;damage++){const probability=((damageCounts.get(damage)||0)/totalCombinations)*100;probabilities.push({damage,probability});maxProbability=Math.max(maxProbability,probability);}
+ let yTickStep=1;if(maxProbability>=10){yTickStep=20;for(const candidate of [5,10,15,20]){if(Math.ceil(maxProbability/candidate)<=6){yTickStep=candidate;break;}}}
+ const yMax=Math.max(yTickStep,Math.ceil(maxProbability/yTickStep)*yTickStep);return {xMin,xMax,probabilities,maxProbability,yTickStep,yMax};
+}
+
+function createDamageGraphLayout(xMin,xMax,yMax){
+ const width=620,height=325,margin={top:10,right:15,bottom:35,left:50},plotWidth=width-margin.left-margin.right,plotHeight=height-margin.top-margin.bottom;
+ const xToSvg=damage=>xMax===xMin?margin.left+plotWidth/2:margin.left+((damage-xMin)/(xMax-xMin))*plotWidth,yToSvg=probability=>margin.top+plotHeight-(probability/yMax)*plotHeight;
+ return {width,height,margin,plotWidth,plotHeight,baselineY:margin.top+plotHeight,xToSvg,yToSvg};
+}
+function appendDamageGraphAxes(svgParts,{xMin,xMax,yMax,yTickStep},layout){
+ const {margin,plotWidth,plotHeight,xToSvg,yToSvg}=layout,yTickCount=Math.round(yMax/yTickStep);for(let i=0;i<=yTickCount;i++){const probability=yTickStep*i,y=yToSvg(probability);svgParts.push(`<line class="graph-grid" x1="${margin.left}" y1="${y}" x2="${margin.left+plotWidth}" y2="${y}"></line>`,`<text class="graph-label" x="${margin.left-8}" y="${y+4}" text-anchor="end">${probability.toFixed(0)}%</text>`);}
+ const xTickStep=xMax>25?5:1,firstXTick=xTickStep===1?xMin:Math.ceil(xMin/xTickStep)*xTickStep;for(let damage=firstXTick;damage<=xMax;damage+=xTickStep){const x=xToSvg(damage);svgParts.push(`<line class="graph-grid" x1="${x}" y1="${margin.top}" x2="${x}" y2="${margin.top+plotHeight}"></line>`,`<text class="graph-label" x="${x}" y="${margin.top+plotHeight+20}" text-anchor="middle">${damage}</text>`);}
+ svgParts.push(`<line class="graph-axis" x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${margin.top+plotHeight}"></line>`,`<line class="graph-axis" x1="${margin.left}" y1="${margin.top+plotHeight}" x2="${margin.left+plotWidth}" y2="${margin.top+plotHeight}"></line>`);
+}
+
+function appendDamageGraphHpOverlay(svgParts,{calculator,probabilities,xMin,xMax,maxDamage,hp},layout){
+ const {margin,plotWidth,plotHeight,baselineY,xToSvg,yToSvg}=layout,isDefenseMode=calculator.dataset.role==='defense',hatchColor=isDefenseMode?'#5f9bd3':'#ef6b6b',hatchPatternId=isDefenseMode?'defense-defeat-hatch':'attack-defeat-hatch',probabilityClipId=isDefenseMode?'defense-probability-area':'attack-probability-area';
+ const areaPoints=[`${xToSvg(xMin)},${baselineY}`,...probabilities.map(item=>`${xToSvg(item.damage)},${yToSvg(item.probability)}`),`${xToSvg(xMax)},${baselineY}`].join(' ');
+ svgParts.push(`<defs><pattern id="${hatchPatternId}" patternUnits="userSpaceOnUse" width="8" height="8"><line x1="0" y1="8" x2="8" y2="0" stroke="${hatchColor}" stroke-width="1.5" stroke-opacity="0.30"></line></pattern><clipPath id="${probabilityClipId}"><polygon points="${areaPoints}"></polygon></clipPath></defs>`);
+ if(hp<=xMax){const hatchStartX=xToSvg(Math.max(hp,xMin)),hatchWidth=margin.left+plotWidth-hatchStartX;if(hatchWidth>0)svgParts.push(`<rect x="${hatchStartX}" y="${margin.top}" width="${hatchWidth}" height="${plotHeight}" fill="url(#${hatchPatternId})" clip-path="url(#${probabilityClipId})"></rect>`);}
+ if(hp>=xMin&&hp<=xMax){const hpX=xToSvg(hp),hpProbability=probabilities.find(item=>item.damage===hp)?.probability??0,hpY=yToSvg(hpProbability),atMax=maxDamage===hp;svgParts.push(`<line x1="${hpX}" y1="${hpY}" x2="${hpX}" y2="${baselineY}" stroke="${hatchColor}" stroke-width="${atMax?2.5:1.5}"${atMax?'':' stroke-dasharray="5 4"'} stroke-opacity="0.85"></line>`);}
+}
+
+function renderDamageProbabilityGraph(
+    calculator,
+    damageCounts,
+    maxDamage,
+    totalCombinations,
+    hp
+) {
+    const svg = calculator.querySelector(".damage-probability-graph");
+
+    if (!svg) {
+        return;
+    }
+
+    // 横軸・確率列・縦軸目盛りは描画前に純粋なモデルとして組み立てる。
+    const {xMin,xMax,probabilities,yTickStep,yMax}=buildDamageProbabilityGraphModel(damageCounts,maxDamage,totalCombinations);
+
+    const layout=createDamageGraphLayout(xMin,xMax,yMax);
+    const {width,height,xToSvg,yToSvg}=layout;
+
+    const svgParts = [];
+
+    // 折れ線の座標。HP以上の斜線領域は専用ヘルパーで生成する。
+    const linePoints=probabilities.map(item=>`${xToSvg(item.damage)},${yToSvg(item.probability)}`).join(' ');
+
+    svgParts.push(
+        `<title>ダメージ発生確率</title>`,
+        `<desc>折れ線より下側のうち、攻撃・防御の両モードでHP以上の確率範囲を斜線で表示します。</desc>`
+    );
+    appendDamageGraphHpOverlay(svgParts,{calculator,probabilities,xMin,xMax,maxDamage,hp},layout);
+
+    appendDamageGraphAxes(svgParts,{xMin,xMax,yMax,yTickStep},layout);
+
+    // マーカーなしの折れ線
+    svgParts.push(
+        `<polyline class="graph-line" points="${linePoints}"></polyline>`
+    );
+
+    svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    svg.innerHTML = svgParts.join("");
+}
+
+
+
+function calculateDefenseDamageGrid(attackPower,defensePower,damageAdd,damageReduce,hp){
+ const rows=[],damageCounts=new Map();let totalDamage=0,defeatCount=0,survivalCount=0,maxDamage=0;
+ for(let attackDice=1;attackDice<=6;attackDice++){const damages=[];for(let defenseDice=1;defenseDice<=6;defenseDice++){const damage=getDefenseDamage(attackPower,defensePower,damageAdd,damageReduce,attackDice,defenseDice);damages.push(damage);totalDamage+=damage;damageCounts.set(damage,(damageCounts.get(damage)||0)+1);maxDamage=Math.max(maxDamage,damage);if(damage>=hp)defeatCount++;else survivalCount++;}rows.push({attackDice,damages});}
+ return {rows,damageCounts,totalDamage,defeatCount,survivalCount,maxDamage,totalCombinations:36};
+}
+function renderDefenseDamageGrid(tableBody,grid,hp){
+ tableBody.replaceChildren();for(const {attackDice,damages} of grid.rows){const row=document.createElement('tr');if(attackDice===1){const label=document.createElement('th');label.textContent='攻撃';label.rowSpan=6;label.classList.add('attack-label');row.append(label);}const attackCell=document.createElement('th');attackCell.textContent=attackDice;row.append(attackCell);damages.forEach(damage=>{const cell=document.createElement('td');cell.textContent=damage;if(damage>=hp)cell.classList.add('defeat');row.append(cell);});tableBody.append(row);}
+}
+function renderCardAwareSummary(calculator,result,isSurvival){
+ const range=calculator.querySelector('.future-damage-range'),expected=calculator.querySelector('.future-expected-damage'),rate=calculator.querySelector('.future-result-rate');
+ if(range)range.textContent=result.minDamage+'～'+result.maxDamage;if(expected)expected.textContent=result.expectedDamage.toFixed(2);if(rate)rate.textContent=((isSurvival?result.survivalProbability:result.defeatProbability)*100).toFixed(2)+'%';
+}
+function renderBaseDamageSummary(calculator,grid,isSurvival){
+ calculator.querySelector('.expected-damage').textContent=(grid.totalDamage/grid.totalCombinations).toFixed(2);const count=isSurvival?grid.survivalCount:grid.defeatCount;calculator.querySelector('.result-rate').textContent=((count/grid.totalCombinations)*100).toFixed(2)+'%';
+}
+
+function getCalculatorDamageInputs(calculator){return {attackPower:Number(calculator.querySelector('[id^="attackPower"]').value),damageAdd:Number(calculator.querySelector('[id^="damageAdd"]').value),hp:Number(calculator.querySelector('[id^="hp"]').value),defensePower:Number(calculator.querySelector('[id^="defensePower"]').value),damageReduce:Number(calculator.querySelector('[id^="damageReduce"]').value)};}
+function renderDefenseModeGuidance(calculator,{attackPower,defensePower,damageAdd,damageReduce,hp}){
+ renderDefenseChoiceGuide(calculator,attackPower,defensePower,damageAdd,damageReduce,hp);const recommendation=calculator.querySelector('.defense-recommendation');if(recommendation)recommendation.textContent=getDefenseRecommendation(attackPower,defensePower,damageAdd,damageReduce,hp);
+}
+
+function calculateDamage(calculator, isSurvival = false) {
+    const inputs=getCalculatorDamageInputs(calculator);
+    const {attackPower,defensePower,damageAdd,damageReduce,hp}=inputs;
+    const grid=calculateDefenseDamageGrid(attackPower,defensePower,damageAdd,damageReduce,hp);
+    renderDefenseDamageGrid(calculator.querySelector('.damage-table tbody'),grid,hp);
+
+    // 上部は従来の36通り計算、下部グラフとサマリーはカード効果込み。
+    const cardAwareResult=calculateCardAwareDamage(calculator,attackPower,defensePower,damageAdd,damageReduce,hp,isSurvival);
+    renderDamageProbabilityGraph(calculator,cardAwareResult.damageCounts,cardAwareResult.maxDamage,1,hp);
+    renderCardAwareSummary(calculator,cardAwareResult,isSurvival);
+    renderBaseDamageSummary(calculator,grid,isSurvival);
+    if(isSurvival)renderDefenseModeGuidance(calculator,inputs);
+}
+
+// 各モードを初期化
+const modes = document.querySelectorAll(".mode-content");
+
+Array.from(modes).filter(mode => ["attack", "defense"].includes(mode.dataset.role)).forEach(mode => {
+    const isSurvival =
+        mode.dataset.role === "defense";
+
+    mode.querySelectorAll('input[type="number"]').forEach(input => {
+        input.addEventListener("input", () => {
+            calculateDamage(mode, isSurvival);
+        });
+    });
+
+    mode.querySelectorAll(".plus-button").forEach(button => {
+        button.addEventListener("click", () => {
+            const input =
+                document.getElementById(button.dataset.target);
+
+            input.value = Number(input.value) + 1;
+            input.dispatchEvent(new Event("input"));
+        });
+    });
+
+    mode.querySelectorAll(".minus-button").forEach(button => {
+        button.addEventListener("click", () => {
+            const input =
+                document.getElementById(button.dataset.target);
+
+            const newValue =
+                Number(input.value) - 1;
+
+            if (newValue >= 0) {
+                input.value = newValue;
+                input.dispatchEvent(new Event("input"));
+            }
+        });
+    });
+
+    // カード画像は左クリックで増やし、右クリックで減らす。
+    const changeCardFromImage = (image, delta) => {
+        const input = document.getElementById(image.dataset.cardTarget);
+        if (!input) return;
+        input.value = Math.max(0, Number(input.value || 0) + delta);
+        input.dispatchEvent(new Event("input"));
+    };
+
+    mode.querySelectorAll(".battle-card-clickable").forEach(image => {
+        image.setAttribute("aria-label", image.alt + "：左クリックで1枚増やす、右クリックで1枚減らす");
+        image.title = "左クリック：＋1 ／ 右クリック：−1";
+        image.addEventListener("click", () => changeCardFromImage(image, 1));
+        image.addEventListener("contextmenu", event => {
+            event.preventDefault();
+            changeCardFromImage(image, -1);
+        });
+        image.addEventListener("keydown", event => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                changeCardFromImage(image, event.shiftKey ? -1 : 1);
+            }
+        });
+    });
+
+    // Restカードを押すと、そのモードのカード使用枚数をすべて0に戻す
+    const resetCards = image => {
+        const prefix =
+            image.dataset.resetCards === "attack"
+                ? "Atk"
+                : "Def";
+
+        mode.querySelectorAll(`input[id^="${prefix}"]`).forEach(input => {
+            input.value = 0;
+        });
+
+        // 複数inputのinputイベントを連続発火させず、最後に1回だけ再計算する
+        calculateDamage(mode, isSurvival);
+    };
+
+    mode.querySelectorAll(".battle-card-reset").forEach(image => {
+        image.addEventListener("click", () => {
+            resetCards(image);
+        });
+
+        image.addEventListener("keydown", event => {
+            if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                resetCards(image);
+            }
+        });
+    });
+
+    calculateDamage(mode, isSurvival);
+});
+
+
+// 攻撃・防御タブの切り替え
+const mainContainer = document.querySelector(".main-container");
+
+document.querySelectorAll(".role-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+        const selectedRole = tab.dataset.role;
+        mainContainer.classList.toggle("map-mode", selectedRole === "map");
+        mainContainer.classList.toggle("character-mode", selectedRole === "character");
+
+        document.querySelectorAll(".role-tab").forEach(button => {
+            button.classList.toggle(
+                "active",
+                button.dataset.role === selectedRole
+            );
+        });
+
+        modes.forEach(mode => {
+            mode.classList.toggle(
+                "active",
+                mode.dataset.role === selectedRole
+            );
+        });
+
+        mainContainer.classList.toggle(
+            "attack-mode",
+            selectedRole === "attack"
+        );
+
+        mainContainer.classList.toggle(
+            "defense-mode",
+            selectedRole === "defense"
+        );
+    });
+});
+
