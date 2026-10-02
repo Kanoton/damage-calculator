@@ -89,7 +89,7 @@ test('07 skill: Z3000 and Al apply bonuses per threshold', async ({ page }) => {
 test('07 skill: Papara gains attack at half HP or lower', async ({ page }) => {
  await page.goto('/07_skill/');
  await selectCharacter(page,'7');
- const hp=page.locator('#selected-character-hp');
+ const hp=page.locator('#selected-character-current-hp');
  await hp.fill('5');await hp.dispatchEvent('change');
  await expect(page.locator('#selected-character-atk')).toHaveValue('5');
  await hp.fill('6');await hp.dispatchEvent('change');
