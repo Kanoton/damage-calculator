@@ -40,3 +40,14 @@ function createConditionNumberView(key,value,icon){
  const input=document.createElement('input');input.type='number';input.min='0';if(key==='チャージ')input.max='10';input.inputMode='numeric';input.className='condition-number';input.setAttribute('aria-label',key+'の数');input.value=value;
  item.append(button,input);return {item,button,input};
 }
+
+function createCharacterAssetView(row,folder,key){
+ const item=document.createElement('figure');item.className='character-asset';item.dataset.id=row.id;
+ const img=document.createElement('img');img.alt=row.name||'';img.loading='lazy';img.decoding='async';
+ const file=String(row[key]||row.images||'').trim();
+ const missing=()=>{const text=document.createElement('figcaption');text.textContent=img.alt+'：画像を読み込めませんでした。';item.replaceChildren(text);};
+ img.addEventListener('error',missing,{once:true});item.append(img);
+ if(file)img.src='../images/'+folder+'/'+encodeURIComponent(file);else missing();
+ const button=document.createElement('button');button.type='button';button.dataset.id=row.id;
+ return {item,button};
+}
