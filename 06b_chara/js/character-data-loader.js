@@ -1,4 +1,4 @@
-async function loadCharacterData({listStatus,chipStatus}){
+async function loadCharacterData({listStatus,chipStatus,statusIconSnapshot,characterSkillsSnapshot}){
  async function load(kind,file,status){
   if(location.protocol==='file:')return parseMapCSV(CHARACTER_CSV_SNAPSHOT[kind]);
   try{const response=await fetch('../csv/'+file,{cache:'no-cache'});if(!response.ok)throw Error(file);const rows=parseMapCSV(await response.text());if(rows.length&&!Object.hasOwn(rows[0],'id'))throw Error('Missing id');return rows;}
@@ -15,7 +15,7 @@ async function loadCharacterData({listStatus,chipStatus}){
   catch(error){chipStatus.textContent='ルールCSVを取得できないため、同梱データを表示しています。';return CHIP_RULES_SNAPSHOT;}
  }
  async function loadStatusIcons(){
-  let csv=STATUS_ICON_SNAPSHOT;
+  let csv=statusIconSnapshot;
   if(location.protocol!=='file:'){
    try{const response=await fetch('../csv/status_icon_map_all.csv',{cache:'no-cache'});if(!response.ok)throw Error('status_icon_map_all.csv');csv=await response.text();}
    catch(error){console.warn('アイコン対応CSVを取得できないため、同梱データを使用します。',error);}
@@ -24,7 +24,7 @@ async function loadCharacterData({listStatus,chipStatus}){
   return {mapKeywords:rows.filter(row=>row.group==='マップ固有'&&row.map_id&&['number','checkbox'].includes(row.input_kind)),statusIcons:new Map(rows.filter(row=>['number','checkbox'].includes(row.input_kind)&&/^(?:chip_icon\/)?[^/\\]+\.png$/i.test(row.icon_file)).map(row=>[row.effect_key,row.icon_file]))};
  }
  async function loadCharacterSkills(){
-  let csv=CHARACTER_SKILLS_SNAPSHOT;
+  let csv=characterSkillsSnapshot;
   if(location.protocol!=='file:'){
    try{const response=await fetch('../csv/character_skills.csv',{cache:'no-cache'});if(!response.ok)throw Error('character_skills.csv');csv=await response.text();}
    catch(error){console.warn('キャラクター能力CSVを取得できないため、同梱データを使用します。',error);}
