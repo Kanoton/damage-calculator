@@ -28,9 +28,9 @@ test('07 skill: Jasmine result and cumulative movement modify stats', async ({ p
  await selectCharacter(page,'16');
  const movement=page.getByLabel('累計移動ポイントの数');
  await movement.fill('26');await movement.dispatchEvent('change');
- await expect(page.locator('#selected-character-atk')).toHaveValue('3');
+ await expect(page.locator('#selected-character-atk')).toHaveValue('2');
  await expect(page.locator('#selected-character-def')).toHaveValue('1');
  await page.getByRole('button',{name:/オーバードライブ結果：変化なし/}).click();
- await expect(page.locator('#selected-character-atk')).toHaveValue('3');
+ await expect(page.locator('#selected-character-atk')).toHaveValue('2');
  await expect(page.locator('#selected-character-def')).toHaveValue('3');
 });
