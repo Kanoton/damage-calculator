@@ -377,13 +377,7 @@
  function renderImages(target,rows,folder,key){
   target.replaceChildren();
   for(const row of sorted(rows)){
-   const item=document.createElement('figure');item.className='character-asset';item.dataset.id=row.id;
-   const img=document.createElement('img');img.alt=row.name||'';img.loading='lazy';img.decoding='async';
-   const file=String(row[key]||row.images||'').trim();
-   const missing=()=>{const text=document.createElement('figcaption');text.textContent=img.alt+'：画像を読み込めませんでした。';item.replaceChildren(text);};
-   img.addEventListener('error',missing,{once:true});item.append(img);
-   if(file)img.src='../images/'+folder+'/'+encodeURIComponent(file);else missing();
-   const button=document.createElement('button');button.type='button';button.dataset.id=row.id;
+    const {item,button}=createCharacterAssetView(row,folder,key);
    if(folder==='character_list'){
     button.className='character-select';button.setAttribute('aria-label',row.name+'を選択');button.setAttribute('aria-pressed','false');
     if(characterSkills.has(String(row.id))){button.setAttribute('aria-describedby','character-skill-tooltip');button.addEventListener('mouseenter',()=>showSkillTooltip(button,row));button.addEventListener('mouseleave',scheduleHideSkillTooltip);button.addEventListener('focus',()=>showSkillTooltip(button,row));button.addEventListener('blur',scheduleHideSkillTooltip);button.addEventListener('wheel',event=>{if(skillTooltip.hidden)return;const previous=skillTooltip.scrollTop;skillTooltip.scrollTop+=event.deltaY;if(skillTooltip.scrollTop!==previous)event.preventDefault();},{passive:false});}
