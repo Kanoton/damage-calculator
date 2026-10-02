@@ -7,7 +7,9 @@ test('06b smoke: initializes core UI without page errors', async ({ page }) => {
   await page.goto('/06b_chara/');
   await expect(page.locator('#mp-map-select')).toBeVisible();
   await expect(page.locator('#selected-character')).toBeVisible();
+  await page.locator('.role-tab[data-role="attack"]').click();
   await expect(page.locator('#attackPower1')).toBeVisible();
+  await page.locator('.role-tab[data-role="defense"]').click();
   await expect(page.locator('#defensePower1')).toBeVisible();
 
   await expect(page.locator('#mp-map-select option')).not.toHaveCount(0);
@@ -20,7 +22,9 @@ test('06b smoke: initializes core UI without page errors', async ({ page }) => {
 
 test('06b smoke: calculator reacts to input', async ({ page }) => {
   await page.goto('/06b_chara/');
+  await page.locator('.role-tab[data-role="attack"]').click();
   const attack = page.locator('#attackPower1');
+  await expect(attack).toBeVisible();
   await attack.fill('10');
   await attack.dispatchEvent('input');
   await expect(attack).toHaveValue('10');
