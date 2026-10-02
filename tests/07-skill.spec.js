@@ -52,6 +52,7 @@ test('07 skill: compatible character abilities use shared controls and modifiers
  await expect(sword).toHaveValue('3');
 
  await selectCharacter(page,'24');
+ await expect(page.getByRole('button',{name:'精確無比を増やす'}).locator('img')).toHaveAttribute('src',/UT_Buff_125_Passive\.png$/);
  const precision=page.getByLabel('精確無比の数');
  await precision.fill('3');await precision.dispatchEvent('change');
  await expect(page.locator('#selected-character-atk')).toHaveValue('7');
