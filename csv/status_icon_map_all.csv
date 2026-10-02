@@ -8,6 +8,7 @@ group,effect_key,input_kind,icon_file,map_id,atk,def,move,damage_reduce,conditio
 スタック,反撃,number,Reflect.png
 スタック,マインド,number,chip_icon/201_スタンガン.png
 スタック,罪証,number,罪証.png
+スタック,精確無比,number,UT_Buff_125_Passive.png
 所持数,スターコイン,number,Coin.png
 蓄積ボーナス,優雅の羽ボーナス,number,chip_icon/021_優雅の羽.png
 蓄積ボーナス,ギガントアンカーボーナス,number,chip_icon/101_ギガントアンカー.png
