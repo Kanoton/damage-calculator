@@ -24,6 +24,22 @@
  window.getCharacterEvidenceStack=()=>selectedCharacter?number(state(),'罪証'):0;
  window.setCharacterEvidenceStack=value=>{if(!selectedCharacter)return;state().numbers['罪証']=Math.max(0,Math.floor(Number(value)||0));renderConditions();updateStats();window.dispatchEvent(new Event('character-evidence-change'));};
  const number=(s,key)=>Math.min(key==='チャージ'?10:Infinity,Math.max(0,Number(s.numbers[key])||0));
+ const abilityRules=()=>CHARACTER_ABILITY_RULES[String(selectedCharacter?.id)]||null;
+ const abilityControlValue=key=>Number(state().numbers[key])||0;
+ const abilityConditionMatches=condition=>!condition||abilityControlValue(condition.key)===Number(condition.equals);
+ const abilityModifierValue=rule=>{
+  if(!abilityConditionMatches(rule.when))return 0;
+  if(rule.formula==='fixed')return Number(rule.value)||0;
+  const source=abilityControlValue(rule.source);
+  if(rule.formula==='per_stack')return source*(Number(rule.value)||0);
+  if(rule.formula==='alternating_steps'){
+   const steps=Math.floor(source/(Number(rule.unit)||1)),order=Number(rule.order)||0;
+   return Math.max(0,Math.ceil((steps-order)/2));
+  }
+  return 0;
+ };
+ window.captureCharacterAbilityState=()=>selectedCharacter?{id:selectedCharacter.id,numbers:{...state().numbers}}:null;
+ window.restoreCharacterAbilityState=snapshot=>{if(!snapshot)return;getState(snapshot.id).numbers={...getState(snapshot.id).numbers,...snapshot.numbers};if(selectedCharacter?.id===snapshot.id){renderConditions();updateStats();}};
  const modeFor=rule=>Number(state().modes[rule.chip_id])||0;
  const base=(stat)=>Number(selectedCharacter['lv'+state().level+'_'+stat]||0);
  function activeRules(){
@@ -74,6 +90,9 @@
    if(!['atk','def','move'].includes(rule.target))continue;
    if(!triggerMatches(rule)||!conditionMatches(rule,maxHp))continue;
    result[rule.target]+=valueOf(rule,maxBonus);
+  }
+  for(const rule of abilityRules()?.modifiers||[]){
+   if(['atk','def','move'].includes(rule.target))result[rule.target]+=abilityModifierValue(rule);
   }
   for(const rule of mapKeywords.filter(row=>row.map_id===mapPicker.value)){
    let stacks=rule.input_kind==='checkbox'?(state().modes[rule.effect_key]?1:0):number(state(),rule.effect_key);
@@ -128,6 +147,22 @@
     updateStats();
    });
    conditionsBox.append(button);
+  }
+  for(const control of abilityRules()?.controls||[]){
+   if(control.type==='toggle'){
+    const active=Boolean(abilityControlValue(control.key));
+    conditionsBox.append(createCharacterAbilityToggleView(control.key,active,makeIcon(control.key),()=>{state().numbers[control.key]=active?0:1;renderConditions();updateStats();}));
+   }else if(control.type==='choice'){
+    const options=control.options||[],current=abilityControlValue(control.key),option=options.find(item=>Number(item.value)===current)||options[0];
+    conditionsBox.append(createCharacterAbilityChoiceView(control.key,option,makeIcon(control.key),()=>{const index=Math.max(0,options.indexOf(option));state().numbers[control.key]=Number(options[(index+1)%options.length]?.value)||0;renderConditions();updateStats();}));
+   }else if(control.type==='number'){
+    const view=createConditionNumberView(control.key,abilityControlValue(control.key),makeIcon(control.key));
+    if(control.max!==undefined)view.input.max=String(control.max);
+    const setValue=value=>{const min=Number(control.min)||0,max=control.max===undefined?Infinity:Number(control.max);state().numbers[control.key]=Math.max(min,Math.min(max,Math.floor(Number(value)||0)));view.input.value=state().numbers[control.key];updateStats();};
+    view.button.addEventListener('click',()=>setValue(abilityControlValue(control.key)+1));
+    view.button.addEventListener('contextmenu',event=>{event.preventDefault();setValue(abilityControlValue(control.key)-1);});
+    view.input.addEventListener('change',()=>setValue(view.input.value));conditionsBox.append(view.item);
+   }
   }
   for(const rule of mapKeywords.filter(row=>row.map_id===mapPicker.value&&row.input_kind==='checkbox')){
    const key=rule.effect_key,active=Boolean(state().modes[key]);
@@ -324,7 +359,13 @@
  }
  mapPicker.addEventListener('change',()=>{currentOpponent=null;if(category==='マップ固有')renderChips();if(selectedCharacter){renderConditions();updateStats();}});
  clearCharacterAttackPhase=()=>{if(!selectedCharacter)return;state().phases??={attack:false,move:false};if(!state().phases.attack)return;state().phases.attack=false;renderConditions();updateStats();};
- applyCharacterTurnStartEffects=()=>{if(!selectedCharacter||!state().chips.includes('57'))return;const charge=number(state(),'チャージ');if(charge>=6)return;state().numbers['チャージ']=6;renderConditions();updateStats();};
+ applyCharacterTurnStartEffects=()=>{
+  if(!selectedCharacter)return;
+  let changed=false;
+  if(state().chips.includes('57')){const charge=number(state(),'チャージ');if(charge<6){state().numbers['チャージ']=6;changed=true;}}
+  for(const effect of abilityRules()?.turnEnd||[]){const current=abilityControlValue(effect.key),next=Math.max(Number(effect.min)||0,current+(Number(effect.delta)||0));if(next!==current){state().numbers[effect.key]=next;changed=true;}}
+  if(changed){renderConditions();updateStats();}
+ };
  document.querySelectorAll('.role-tab').forEach(tab=>tab.addEventListener('click',()=>{if(tab.dataset.role==='map'||tab.dataset.role==='character')clearCharacterAttackPhase();}));
  window.addEventListener('character-opponent-change',event=>{currentOpponent=event.detail;if(selectedCharacter){renderConditions();updateStats();}});
  applyAttackTargetEffects=enemy=>{if(!selectedCharacter||!enemy||enemy.defeated)return;state().phases??={attack:false,move:false};state().phases.attack=true;const ids=new Set(state().chips);const markGain=(ids.has('36')?1:0)+(ids.has('37')?1:0);if(markGain)enemy.markStacks=(enemy.markStacks||0)+markGain;currentOpponent={name:enemy.name,mapId:enemy.mapId,markStacks:enemy.markStacks||0};};
