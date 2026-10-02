@@ -6,15 +6,13 @@ test('06b smoke: initializes core UI without page errors', async ({ page }) => {
 
   await page.goto('/06b_chara/');
   await expect(page.locator('#mp-map-select')).toBeVisible();
-  await expect(page.locator('#selected-character')).toBeHidden();
+  await expect(page.locator('#selected-character')).toBeVisible();
   await expect(page.locator('#attackPower1')).toBeVisible();
   await expect(page.locator('#defensePower1')).toBeVisible();
 
   await expect(page.locator('#mp-map-select option')).not.toHaveCount(0);
-  const characterChoice = page.locator('#character-image-list').locator('button, img').first();
-  await expect(characterChoice).toBeVisible();
-  await characterChoice.click();
-  await expect(page.locator('#selected-character')).toBeVisible();
+  await expect(page.locator('#selected-character-name')).toHaveText('ミミ');
+  await expect(page.locator('#character-image-list .character-select[data-id="1"]')).toHaveAttribute('aria-pressed','true');
   await expect(page.locator('#mp-monster-list').locator('button, option, img')).not.toHaveCount(0);
 
   expect(errors).toEqual([]);
