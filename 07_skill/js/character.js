@@ -323,7 +323,7 @@
   button.addEventListener('click',()=>change(1));
   button.addEventListener('contextmenu',event=>{event.preventDefault();change(-1);});
  }
- const skillTooltipController=setupCharacterSkillTooltip({characterSkills});
+ let skillTooltipController=null;
  const sorted=rows=>rows.slice().sort((a,b)=>Number(a.id)-Number(b.id));
  function renderImages(target,rows,folder,key){
   target.replaceChildren();
@@ -378,6 +378,7 @@
  wireCharacterTabs(root.querySelector('.chip-category-tabs'),tab=>{category=tab.dataset.category;document.getElementById('chip-category-view').setAttribute('aria-labelledby',tab.id);renderChips();});
  loadCharacterData({listStatus,chipStatus,statusIconSnapshot:STATUS_ICON_SNAPSHOT,characterSkillsSnapshot:CHARACTER_SKILLS_SNAPSHOT}).then(data=>{
   ({characters,chips,rules,statusIcons,mapKeywords,characterSkills}=data);
+  skillTooltipController=setupCharacterSkillTooltip({characterSkills});
   for(const rule of rules){if(!byChip.has(rule.chip_id))byChip.set(rule.chip_id,[]);byChip.get(rule.chip_id).push(rule);}
   renderImages(document.getElementById('character-image-list'),characters,'character_list','list_img');renderChips();
   const defaultCharacter=characters.find(row=>row.name==='ミミ');if(defaultCharacter)selectCharacter(defaultCharacter);
