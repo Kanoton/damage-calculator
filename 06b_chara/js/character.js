@@ -271,11 +271,8 @@
  portraitButton.addEventListener('click',()=>changeCharacterLevel(1));
  portraitButton.addEventListener('contextmenu',event=>{event.preventDefault();changeCharacterLevel(-1);});
  portraitButton.addEventListener('keydown',event=>{if(event.key==='ArrowDown'){event.preventDefault();changeCharacterLevel(-1);}});
- const numberPad=document.createElement('div');numberPad.id='character-number-pad';numberPad.className='character-number-pad';numberPad.setAttribute('role','group');numberPad.setAttribute('aria-label','数値入力用テンキー');numberPad.hidden=true;
- for(const label of ['1','2','3','4','5','6','7','8','9','消去','0','確定']){
-  const key=document.createElement('button');key.type='button';key.textContent=label;key.dataset.key=label;numberPad.append(key);
- }
- document.body.append(numberPad);
+  const numberPad=createCharacterNumberPadView();
+  document.body.append(numberPad);
  let numberPadInput=null,numberPadOriginal='',replaceNumberOnDigit=true;
  function positionNumberPad(){
   if(!numberPadInput||numberPad.hidden)return;
