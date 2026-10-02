@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 
 async function selectCharacter(page,id){
+ await page.locator('.role-tab.character-tab').click();
  await page.locator(`.character-select[data-id="${id}"]`).click();
 }
 
