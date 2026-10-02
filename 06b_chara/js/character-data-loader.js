@@ -21,7 +21,7 @@ async function loadCharacterData({listStatus,chipStatus}){
    catch(error){console.warn('アイコン対応CSVを取得できないため、同梱データを使用します。',error);}
   }
   const rows=parseMapCSV(csv);
-  return {mapKeywords:rows.filter(row=>row.group==='マップ固有'&&row.map_id&&['number','checkbox'].includes(row.input_kind)),statusIcons:new Map(rows.filter(row=>['number','checkbox'].includes(row.input_kind)&&/^(?:chip_icon\\/)?[^/\\\\]+\\.png$/i.test(row.icon_file)).map(row=>[row.effect_key,row.icon_file]))};
+  return {mapKeywords:rows.filter(row=>row.group==='マップ固有'&&row.map_id&&['number','checkbox'].includes(row.input_kind)),statusIcons:new Map(rows.filter(row=>['number','checkbox'].includes(row.input_kind)&&/^(?:chip_icon\/)?[^/\\]+\.png$/i.test(row.icon_file)).map(row=>[row.effect_key,row.icon_file]))};
  }
  async function loadCharacterSkills(){
   let csv=CHARACTER_SKILLS_SNAPSHOT;
