@@ -5,8 +5,8 @@ async function loadCharacterData({listStatus,chipStatus}){
   catch(error){status.textContent='CSVを取得できないため、同梱データを表示しています。';return parseMapCSV(CHARACTER_CSV_SNAPSHOT[kind]);}
  }
  function parseRules(text){
-  if(!text.split(/\\r?\\n/,1)[0].includes('\\t'))return parseMapCSV(text);
-  const lines=text.replace(/^\\uFEFF/,'').trim().split(/\\r?\\n/).map(line=>line.split('\\t'));
+  if(!text.split(/\r?\n/,1)[0].includes('\t'))return parseMapCSV(text);
+  const lines=text.replace(/^\uFEFF/,'').trim().split(/\r?\n/).map(line=>line.split('\t'));
   const headers=lines.shift();return lines.map(values=>Object.fromEntries(headers.map((header,i)=>[header,values[i]||''])));
  }
  async function loadRules(){
