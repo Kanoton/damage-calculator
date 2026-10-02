@@ -470,5 +470,6 @@
   characters=a;chips=b;rules=c;statusIcons=d;characterSkills=e;
   for(const rule of rules){if(!byChip.has(rule.chip_id))byChip.set(rule.chip_id,[]);byChip.get(rule.chip_id).push(rule);}
   renderImages(document.getElementById('character-image-list'),characters,'character_list','list_img');renderChips();
+  const defaultCharacter=characters.find(row=>row.name==='ミミ');if(defaultCharacter)selectCharacter(defaultCharacter);
  });
 })();
