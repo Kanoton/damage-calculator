@@ -6,10 +6,6 @@ test('06b smoke: initializes core UI without page errors', async ({ page }) => {
 
   await page.goto('/06b_chara/');
   await expect(page.locator('#mp-map-select')).toBeVisible();
-  await page.waitForTimeout(1000);
-  if (errors.length) console.log('PAGE_ERRORS', errors);
-  console.log('CHAR_STATUS', await page.locator('#character-list-status').textContent());
-  console.log('CHAR_COUNT', await page.locator('#character-image-list .character-select').count());
   await expect(page.locator('#selected-character')).toBeVisible();
   await page.locator('.role-tab[data-role="attack"]').click();
   await expect(page.locator('#attackPower1')).toBeVisible();
