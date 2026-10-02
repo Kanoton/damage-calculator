@@ -283,24 +283,7 @@
   button.addEventListener('click',()=>change(1));
   button.addEventListener('contextmenu',event=>{event.preventDefault();change(-1);});
  }
- const skillTooltip=document.createElement('aside');skillTooltip.id='character-skill-tooltip';skillTooltip.className='character-skill-tooltip';skillTooltip.setAttribute('role','tooltip');skillTooltip.hidden=true;document.body.append(skillTooltip);
- let skillTooltipTimer;
- function hideSkillTooltip(){clearTimeout(skillTooltipTimer);skillTooltip.hidden=true;}
- function scheduleHideSkillTooltip(){clearTimeout(skillTooltipTimer);skillTooltipTimer=setTimeout(hideSkillTooltip,180);}
- function showSkillTooltip(button,row){
-  const ability=characterSkills.get(String(row.id));
-  if(!ability)return;
-  clearTimeout(skillTooltipTimer);
-  skillTooltip.replaceChildren();
-   const {stats,description}=createCharacterSkillTooltipView(row,ability);
-  skillTooltip.append(stats,description);skillTooltip.hidden=false;skillTooltip.scrollTop=0;
-  const box=button.getBoundingClientRect(),width=skillTooltip.offsetWidth,height=skillTooltip.offsetHeight,gap=10;
-  let left=box.right+gap;if(left+width>window.innerWidth-8)left=box.left-width-gap;
-  skillTooltip.style.left=Math.max(8,Math.min(left,window.innerWidth-width-8))+'px';
-  skillTooltip.style.top=Math.max(8,Math.min(box.top,window.innerHeight-height-8))+'px';
- }
- document.addEventListener('keydown',event=>{if(event.key==='Escape')hideSkillTooltip();});
- document.getElementById('character-image-list').addEventListener('scroll',hideSkillTooltip);
+ const skillTooltipController=setupCharacterSkillTooltip({characterSkills});
  const sorted=rows=>rows.slice().sort((a,b)=>Number(a.id)-Number(b.id));
  function renderImages(target,rows,folder,key){
   target.replaceChildren();
@@ -308,7 +291,7 @@
     const {item,button}=createCharacterAssetView(row,folder,key);
    if(folder==='character_list'){
     button.className='character-select';button.setAttribute('aria-label',row.name+'を選択');button.setAttribute('aria-pressed','false');
-    if(characterSkills.has(String(row.id))){button.setAttribute('aria-describedby','character-skill-tooltip');button.addEventListener('mouseenter',()=>showSkillTooltip(button,row));button.addEventListener('mouseleave',scheduleHideSkillTooltip);button.addEventListener('focus',()=>showSkillTooltip(button,row));button.addEventListener('blur',scheduleHideSkillTooltip);button.addEventListener('wheel',event=>{if(skillTooltip.hidden)return;const previous=skillTooltip.scrollTop;skillTooltip.scrollTop+=event.deltaY;if(skillTooltip.scrollTop!==previous)event.preventDefault();},{passive:false});}
+    if(characterSkills.has(String(row.id))){button.setAttribute('aria-describedby','character-skill-tooltip');button.addEventListener('mouseenter',()=>skillTooltipController.show(button,row));button.addEventListener('mouseleave',skillTooltipController.scheduleHide);button.addEventListener('focus',()=>skillTooltipController.show(button,row));button.addEventListener('blur',skillTooltipController.scheduleHide);button.addEventListener('wheel',event=>{if(skillTooltipController.element.hidden)return;const previous=skillTooltipController.element.scrollTop;skillTooltipController.element.scrollTop+=event.deltaY;if(skillTooltipController.element.scrollTop!==previous)event.preventDefault();},{passive:false});}
     button.addEventListener('click',()=>selectCharacter(row));
    }else{
     button.className='chip-select';button.dataset.name=row.name;button.title=row.name+'\n'+row.effect;button.setAttribute('aria-label',row.name+'：'+row.effect+'。取得する');button.setAttribute('aria-pressed',String(Boolean(selectedCharacter&&state().chips.includes(row.id))));
