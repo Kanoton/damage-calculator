@@ -330,8 +330,8 @@
  applyAttackTargetEffects=enemy=>{if(!selectedCharacter||!enemy||enemy.defeated)return;state().phases??={attack:false,move:false};state().phases.attack=true;const ids=new Set(state().chips);const markGain=(ids.has('36')?1:0)+(ids.has('37')?1:0);if(markGain)enemy.markStacks=(enemy.markStacks||0)+markGain;currentOpponent={name:enemy.name,mapId:enemy.mapId,markStacks:enemy.markStacks||0};};
  wireCharacterTabs(root.querySelector('.character-subtabs'),tab=>{document.getElementById('character-list-view').hidden=tab.id!=='character-list-tab';document.getElementById('character-chip-view').hidden=tab.id!=='character-chip-tab';});
  wireCharacterTabs(root.querySelector('.chip-category-tabs'),tab=>{category=tab.dataset.category;document.getElementById('chip-category-view').setAttribute('aria-labelledby',tab.id);renderChips();});
- Promise.all([load('characters','character_stats.csv',listStatus),load('chips','chip_list.csv',chipStatus),loadRules(),loadStatusIcons(),loadCharacterSkills()]).then(([a,b,c,d,e])=>{
-  characters=a;chips=b;rules=c;statusIcons=d;characterSkills=e;
+ loadCharacterData({listStatus,chipStatus}).then(data=>{
+  ({characters,chips,rules,statusIcons,mapKeywords,characterSkills}=data);
   for(const rule of rules){if(!byChip.has(rule.chip_id))byChip.set(rule.chip_id,[]);byChip.get(rule.chip_id).push(rule);}
   renderImages(document.getElementById('character-image-list'),characters,'character_list','list_img');renderChips();
   const defaultCharacter=characters.find(row=>row.name==='ミミ');if(defaultCharacter)selectCharacter(defaultCharacter);
