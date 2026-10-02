@@ -35,3 +35,38 @@ test('07 skill: Jasmine result and cumulative movement modify stats', async ({ p
  await expect(page.locator('#selected-character-atk')).toHaveValue('2');
  await expect(page.locator('#selected-character-def')).toHaveValue('3');
 });
+
+
+test('07 skill: compatible character abilities use shared controls and modifiers', async ({ page }) => {
+ await page.goto('/07_skill/');
+
+ await selectCharacter(page,'12');
+ const energy=page.getByLabel('エネルギー保存の数');
+ await energy.fill('2');await energy.dispatchEvent('change');
+ await expect(page.locator('#selected-character-atk')).toHaveValue('5');
+ await expect(page.locator('#selected-character-def')).toHaveValue('4');
+
+ await selectCharacter(page,'14');
+ const sword=page.getByLabel('剣気の数');
+ await sword.fill('9');await sword.dispatchEvent('change');
+ await expect(sword).toHaveValue('3');
+
+ await selectCharacter(page,'24');
+ const precision=page.getByLabel('精確無比の数');
+ await precision.fill('3');await precision.dispatchEvent('change');
+ await expect(page.locator('#selected-character-atk')).toHaveValue('7');
+ await page.locator('#turn-end').click();
+ await expect(precision).toHaveValue('2');
+ await expect(page.locator('#selected-character-atk')).toHaveValue('5');
+
+ await selectCharacter(page,'25');
+ const awakening=page.getByLabel('覚醒の数');
+ await awakening.fill('8');await awakening.dispatchEvent('change');
+ await page.getByRole('button',{name:/真龍：オフ/}).click();
+ await expect(page.locator('#selected-character-atk')).toHaveValue('6');
+
+ await selectCharacter(page,'104');
+ const warmth=page.getByLabel('温もりの数');
+ await warmth.fill('5');await warmth.dispatchEvent('change');
+ await expect(page.locator('#selected-character-def')).toHaveValue('5');
+});

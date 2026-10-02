@@ -1,5 +1,29 @@
 // ===== キャラクター固有能力ルール =====
 const CHARACTER_ABILITY_RULES={
+ '12':{
+  controls:[{key:'エネルギー保存',type:'number',min:0,max:5}],
+  modifiers:[
+   {target:'atk',formula:'per_stack',source:'エネルギー保存',value:2},
+   {target:'def',formula:'per_stack',source:'エネルギー保存',value:2}
+  ]
+ },
+ '14':{
+  controls:[{key:'剣気',type:'number',min:0,max:3}],
+  modifiers:[]
+ },
+ '24':{
+  controls:[{key:'精確無比',type:'number',min:0,max:3}],
+  modifiers:[{target:'atk',formula:'per_stack',source:'精確無比',value:2}],
+  turnEnd:[{key:'精確無比',delta:-1,min:0}]
+ },
+ '25':{
+  controls:[{key:'覚醒',type:'number',min:0,max:8},{key:'真龍',type:'toggle'}],
+  modifiers:[{target:'atk',formula:'fixed',value:4,when:{key:'真龍',equals:1}}]
+ },
+ '104':{
+  controls:[{key:'温もり',type:'number',min:0,max:5}],
+  modifiers:[{target:'def',formula:'per_stack',source:'温もり',value:1}]
+ },
  '106':{
   controls:[{key:'推理タイム',type:'number',min:0,max:4}],
   modifiers:[{target:'atk',formula:'per_stack',source:'推理タイム',value:1}],
