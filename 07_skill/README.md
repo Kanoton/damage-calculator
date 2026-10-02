@@ -1,8 +1,8 @@
-# 06b_chara
+# 07_skill
 
 > 今後の追加・変更作業では、最初に [WORKING_GUIDE.md](../WORKING_GUIDE.md) を参照してください。構成、変更ルール、データの正本、テスト手順をまとめています。
 
-06a_chara の動作を維持したまま、保守性を改善するために JavaScript を責務別に分割した版です。
+直前の作業フォルダを基に、キャラクター固有スキルの状態管理とステータス補正を追加する版です。
 
 ## JavaScript 構成
 
@@ -16,6 +16,7 @@
 - js/map-gimmick-view.js: マップ固有ギミック・特殊操作ボタンのDOM生成
 - js/map.js: マップ、モンスター、イベント、ラウンド管理（Roster状態は rosterState に集約）
 - js/character-data.js: file:// 起動時に使用するキャラクター・チップ系フォールバックデータ
+- js/character-ability-rules.js: キャラクター固有能力の操作形式・補正・ターン終了効果
 - js/character-view.js: キャラクター・チップ・条件UIのDOM生成
 - js/character-data-loader.js: キャラクター系CSV取得・パース・フォールバック選択
 - js/number-pad.js: 数値入力テンキー制御
@@ -25,5 +26,3 @@
 - streamdeck.js: Stream Deck 連携
 
 CSV と画像の正本は従来どおりリポジトリ直下の ../csv/ と ../images/ を参照します。
-
-06a_chara は比較・ロールバック用として変更しません。
