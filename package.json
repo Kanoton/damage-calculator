@@ -1,7 +1,8 @@
 {
   "private": true,
   "scripts": {
-    "test:06b": "playwright test"
+    "test:06b": "playwright test",
+    "test:07": "playwright test tests/07-skill.spec.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.55.0"
