@@ -95,3 +95,15 @@ test('07 skill: Papara gains attack at half HP or lower', async ({ page }) => {
  await hp.fill('6');await hp.dispatchEvent('change');
  await expect(page.locator('#selected-character-atk')).toHaveValue('2');
 });
+
+
+test('07 skill: character list hover shows ability tooltip', async ({ page }) => {
+ await page.goto('/07_skill/');
+ await page.locator('.role-tab.character-tab').click();
+ const mimi=page.locator('.character-select[data-id="1"]');
+ await mimi.hover();
+ const tooltip=page.locator('#character-skill-tooltip');
+ await expect(tooltip).toBeVisible();
+ await expect(tooltip).toContainText('商品補充');
+ await expect(tooltip).toContainText('リサイクル');
+});
