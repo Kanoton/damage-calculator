@@ -70,3 +70,28 @@ test('07 skill: compatible character abilities use shared controls and modifiers
  await warmth.fill('5');await warmth.dispatchEvent('change');
  await expect(page.locator('#selected-character-def')).toHaveValue('5');
 });
+
+
+test('07 skill: Z3000 and Al apply bonuses per threshold', async ({ page }) => {
+ await page.goto('/07_skill/');
+ await selectCharacter(page,'9');
+ const defeats=page.getByLabel('モンスター撃破数の数');
+ await defeats.fill('5');await defeats.dispatchEvent('change');
+ await expect(page.locator('#selected-character-atk')).toHaveValue('3');
+
+ await selectCharacter(page,'21');
+ const starlight=page.getByLabel('スターライトの数');
+ await starlight.fill('13');await starlight.dispatchEvent('change');
+ await expect(page.locator('#selected-character-atk')).toHaveValue('3');
+ await expect(page.locator('#selected-character-def')).toHaveValue('3');
+});
+
+test('07 skill: Papara gains attack at half HP or lower', async ({ page }) => {
+ await page.goto('/07_skill/');
+ await selectCharacter(page,'7');
+ const hp=page.locator('#selected-character-current-hp');
+ await hp.fill('5');await hp.dispatchEvent('change');
+ await expect(page.locator('#selected-character-atk')).toHaveValue('5');
+ await hp.fill('6');await hp.dispatchEvent('change');
+ await expect(page.locator('#selected-character-atk')).toHaveValue('2');
+});

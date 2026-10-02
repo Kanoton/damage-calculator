@@ -26,12 +26,17 @@
  const number=(s,key)=>Math.min(key==='チャージ'?10:Infinity,Math.max(0,Number(s.numbers[key])||0));
  const abilityRules=()=>CHARACTER_ABILITY_RULES[String(selectedCharacter?.id)]||null;
  const abilityControlValue=key=>Number(state().numbers[key])||0;
- const abilityConditionMatches=condition=>!condition||abilityControlValue(condition.key)===Number(condition.equals);
+ const abilityConditionMatches=condition=>{
+  if(!condition)return true;
+  if(condition.key==='current_hp_ratio<=')return state().currentHp!==null&&state().currentHp<=base('hp')*Number(condition.value);
+  return abilityControlValue(condition.key)===Number(condition.equals);
+ };
  const abilityModifierValue=rule=>{
   if(!abilityConditionMatches(rule.when))return 0;
   if(rule.formula==='fixed')return Number(rule.value)||0;
   const source=abilityControlValue(rule.source);
   if(rule.formula==='per_stack')return source*(Number(rule.value)||0);
+  if(rule.formula==='floor_per_unit')return Math.floor(source/(Number(rule.unit)||1))*(Number(rule.value)||0);
   if(rule.formula==='alternating_steps'){
    const steps=Math.floor(source/(Number(rule.unit)||1)),order=Number(rule.order)||0;
    return Math.max(0,Math.ceil((steps-order)/2));

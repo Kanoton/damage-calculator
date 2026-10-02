@@ -1,5 +1,19 @@
 // ===== キャラクター固有能力ルール =====
 const CHARACTER_ABILITY_RULES={
+ '7':{
+  modifiers:[{target:'atk',formula:'fixed',value:3,when:{key:'current_hp_ratio<=',value:0.5}}]
+ },
+ '9':{
+  controls:[{key:'モンスター撃破数',type:'number',min:0}],
+  modifiers:[{target:'atk',formula:'floor_per_unit',source:'モンスター撃破数',unit:2,value:1}]
+ },
+ '21':{
+  controls:[{key:'スターライト',type:'number',min:0}],
+  modifiers:[
+   {target:'atk',formula:'floor_per_unit',source:'スターライト',unit:6,value:1},
+   {target:'def',formula:'floor_per_unit',source:'スターライト',unit:6,value:1}
+  ]
+ },
  '12':{
   controls:[{key:'エネルギー保存',type:'number',min:0,max:5}],
   modifiers:[
