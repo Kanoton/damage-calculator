@@ -72,3 +72,11 @@ function createCharacterSkillTooltipView(row,ability){
  });
  return {stats,description};
 }
+
+function createCharacterNumberPadView(){
+ const numberPad=document.createElement('div');numberPad.id='character-number-pad';numberPad.className='character-number-pad';numberPad.setAttribute('role','group');numberPad.setAttribute('aria-label','数値入力用テンキー');numberPad.hidden=true;
+ for(const label of ['1','2','3','4','5','6','7','8','9','消去','0','確定']){
+  const key=document.createElement('button');key.type='button';key.textContent=label;key.dataset.key=label;numberPad.append(key);
+ }
+ return numberPad;
+}
