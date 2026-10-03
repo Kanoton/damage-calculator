@@ -198,8 +198,15 @@ test('07 skill: edited monster HP stays stable when another monster is defeated'
  await page.goto('/07_skill/');
  const mapTab=page.locator('.role-tab[data-role="map"]');
  await mapTab.click();
- const monsterTiles=page.locator('#mp-monster-list .mp-monster');
- await expect(monsterTiles.first()).toBeVisible();
+ const mapSelect=page.locator('#mp-map-select');
+ for(const option of await mapSelect.locator('option').all()){
+  await mapSelect.selectOption(await option.getAttribute('value'));
+  await mapSelect.dispatchEvent('change');
+  if(await page.locator('#mp-monster-list .mp-monster:visible').count()>=2)break;
+ }
+ const monsterTiles=page.locator('#mp-monster-list .mp-monster:visible');
+ await expect(monsterTiles).toHaveCount(2,{timeout:5000}).catch(()=>{});
+ expect(await monsterTiles.count()).toBeGreaterThanOrEqual(2);
  await monsterTiles.first().click();
  await monsterTiles.nth(1).click();
  const hpInputs=page.locator('#map-roster-list input[aria-label$="の残りHP"]');
