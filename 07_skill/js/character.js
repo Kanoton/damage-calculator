@@ -161,9 +161,11 @@
     const options=control.options||[],current=abilityControlValue(control.key),option=options.find(item=>Number(item.value)===current)||options[0];
     conditionsBox.append(createCharacterAbilityChoiceView(control.key,option,makeIcon(control.key),()=>{const index=Math.max(0,options.indexOf(option));state().numbers[control.key]=Number(options[(index+1)%options.length]?.value)||0;renderConditions();updateStats();}));
    }else if(control.type==='number'){
-    const view=createConditionNumberView(control.key,abilityControlValue(control.key),makeIcon(control.key));
+    const current=abilityControlValue(control.key);
+    const iconKey=control.iconAtMax&&control.max!==undefined&&current>=Number(control.max)?control.iconAtMax:control.key;
+    const view=createConditionNumberView(control.key,current,makeIcon(iconKey));
     if(control.max!==undefined)view.input.max=String(control.max);
-    const setValue=value=>{const min=Number(control.min)||0,max=control.max===undefined?Infinity:Number(control.max);state().numbers[control.key]=Math.max(min,Math.min(max,Math.floor(Number(value)||0)));view.input.value=state().numbers[control.key];updateStats();};
+    const setValue=value=>{const min=Number(control.min)||0,max=control.max===undefined?Infinity:Number(control.max);state().numbers[control.key]=Math.max(min,Math.min(max,Math.floor(Number(value)||0)));renderConditions();updateStats();};
     view.button.addEventListener('click',()=>setValue(abilityControlValue(control.key)+1));
     view.button.addEventListener('contextmenu',event=>{event.preventDefault();setValue(abilityControlValue(control.key)-1);});
     view.input.addEventListener('change',()=>setValue(view.input.value));conditionsBox.append(view.item);
