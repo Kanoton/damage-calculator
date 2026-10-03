@@ -9,6 +9,13 @@ group,effect_key,input_kind,icon_file,map_id,atk,def,move,damage_reduce,conditio
 スタック,マインド,number,chip_icon/201_スタンガン.png
 スタック,罪証,number,罪証.png
 スタック,精確無比,number,UT_Buff_125_Passive.png
+スタック,エネルギー保存,number,UT_Buff_113_Passive.png
+スタック,剣気,number,UT_Buff_115.png
+スタック,累計移動ポイント,number,UT_Buff_117_Passive.png
+スタック,スターライト,number,UT_Buff_StarLight.png
+スタック,覚醒,number,UT_Buff_1026.png
+状態,真龍,checkbox,UT_Buff_1261204.png
+スタック,温もり,number,UT_Buff_304.png
 所持数,スターコイン,number,Coin.png
 蓄積ボーナス,優雅の羽ボーナス,number,chip_icon/021_優雅の羽.png
 蓄積ボーナス,ギガントアンカーボーナス,number,chip_icon/101_ギガントアンカー.png
