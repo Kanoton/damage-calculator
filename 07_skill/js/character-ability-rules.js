@@ -89,8 +89,8 @@ const CHARACTER_ABILITY_RULES={
   turnEnd:[{key:'精確無比',delta:-1,min:0}]
  },
  '25':{
-  controls:[{key:'覚醒',type:'number',min:0,max:8},{key:'真龍',type:'toggle'}],
-  modifiers:[{target:'atk',formula:'fixed',value:4,when:{key:'真龍',equals:1}}]
+  controls:[{key:'覚醒',type:'number',min:0,max:8,iconAtMax:'真龍'}],
+  modifiers:[{target:'atk',formula:'fixed',value:4,when:{key:'覚醒',equals:8}}]
  },
  '104':{
   controls:[{key:'温もり',type:'number',min:0,max:5}],
