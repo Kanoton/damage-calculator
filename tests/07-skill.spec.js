@@ -64,12 +64,19 @@ test('07 skill: compatible character abilities use shared controls and modifiers
  await expect(page.locator('#selected-character-atk')).toHaveValue('5');
 
  await selectCharacter(page,'25');
- await expect(page.getByRole('button',{name:'覚醒を増やす'}).locator('img')).toHaveAttribute('src',/UT_Buff_1026\.png$/);
- await expect(page.getByRole('button',{name:/真龍：オフ/}).locator('img')).toHaveAttribute('src',/UT_Buff_1261204\.png$/);
  const awakening=page.getByLabel('覚醒の数');
+ const awakeningButton=page.getByRole('button',{name:'覚醒を増やす'});
+ await expect(awakeningButton.locator('img')).toHaveAttribute('src',/UT_Buff_1026\.png$/);
+ await expect(page.getByRole('button',{name:/真龍/})).toHaveCount(0);
+ await awakening.fill('7');await awakening.dispatchEvent('change');
+ await expect(page.locator('#selected-character-atk')).toHaveValue('2');
+ await expect(awakeningButton.locator('img')).toHaveAttribute('src',/UT_Buff_1026\.png$/);
  await awakening.fill('8');await awakening.dispatchEvent('change');
- await page.getByRole('button',{name:/真龍：オフ/}).click();
  await expect(page.locator('#selected-character-atk')).toHaveValue('6');
+ await expect(awakeningButton.locator('img')).toHaveAttribute('src',/UT_Buff_1261204\.png$/);
+ await awakening.fill('7');await awakening.dispatchEvent('change');
+ await expect(page.locator('#selected-character-atk')).toHaveValue('2');
+ await expect(awakeningButton.locator('img')).toHaveAttribute('src',/UT_Buff_1026\.png$/);
 
  await selectCharacter(page,'104');
  await expect(page.getByRole('button',{name:'温もりを増やす'}).locator('img')).toHaveAttribute('src',/UT_Buff_304\.png$/);
