@@ -1,5 +1,44 @@
 // ===== キャラクター固有能力ルール =====
 const CHARACTER_ABILITY_RULES={
+ '4':{
+  controls:[{key:'前ターン被ダメなし',type:'toggle'}],
+  modifiers:[{target:'atk',formula:'fixed',value:3,when:{key:'前ターン被ダメなし',equals:1}}]
+ },
+ '6':{
+  controls:[
+   {key:'自己主張なし攻撃補正',type:'choice',options:[{value:0,label:'0'},{value:1,label:'+1'},{value:2,label:'+2'},{value:3,label:'-2'},{value:4,label:'-1'}]},
+   {key:'自己主張なし防御補正',type:'choice',options:[{value:0,label:'0'},{value:1,label:'+1'},{value:2,label:'+2'},{value:3,label:'-2'},{value:4,label:'-1'}]}
+  ],
+  modifiers:[
+   {target:'atk',formula:'fixed',value:1,when:{key:'自己主張なし攻撃補正',equals:1}},
+   {target:'atk',formula:'fixed',value:2,when:{key:'自己主張なし攻撃補正',equals:2}},
+   {target:'atk',formula:'fixed',value:-2,when:{key:'自己主張なし攻撃補正',equals:3}},
+   {target:'atk',formula:'fixed',value:-1,when:{key:'自己主張なし攻撃補正',equals:4}},
+   {target:'def',formula:'fixed',value:1,when:{key:'自己主張なし防御補正',equals:1}},
+   {target:'def',formula:'fixed',value:2,when:{key:'自己主張なし防御補正',equals:2}},
+   {target:'def',formula:'fixed',value:-2,when:{key:'自己主張なし防御補正',equals:3}},
+   {target:'def',formula:'fixed',value:-1,when:{key:'自己主張なし防御補正',equals:4}}
+  ]
+ },
+ '15':{
+  controls:[{key:'相手より多い手札',type:'number',min:0,max:3}],
+  modifiers:[{target:'atk',formula:'per_stack',source:'相手より多い手札',value:1}]
+ },
+ '26':{
+  controls:[{key:'吸収した影',type:'number',min:0}],
+  modifiers:[{target:'atk',formula:'per_stack',source:'吸収した影',value:1}]
+ },
+ '28':{
+  controls:[{key:'エリア拒止通過',type:'toggle'}],
+  modifiers:[{target:'atk',formula:'fixed',value:2,when:{key:'エリア拒止通過',equals:1}}]
+ },
+ '103':{
+  controls:[{key:'カクテル攻撃カード',type:'number',min:0,max:3},{key:'カクテル防御カード',type:'number',min:0,max:3}],
+  modifiers:[
+   {target:'atk',formula:'per_stack',source:'カクテル攻撃カード',value:1},
+   {target:'def',formula:'per_stack',source:'カクテル防御カード',value:1}
+  ]
+ },
  '7':{
   modifiers:[{target:'atk',formula:'fixed',value:3,when:{key:'current_hp_ratio<=',value:0.5}}]
  },
