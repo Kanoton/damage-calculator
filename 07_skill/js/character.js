@@ -165,7 +165,7 @@
     const iconKey=control.iconAtMax&&control.max!==undefined&&current>=Number(control.max)?control.iconAtMax:control.key;
     const view=createConditionNumberView(control.key,current,makeIcon(iconKey));
     if(control.max!==undefined)view.input.max=String(control.max);
-    const setValue=value=>{const min=Number(control.min)||0,max=control.max===undefined?Infinity:Number(control.max);state().numbers[control.key]=Math.max(min,Math.min(max,Math.floor(Number(value)||0)));renderConditions();updateStats();};
+    const setValue=value=>{const min=Number(control.min)||0,max=control.max===undefined?Infinity:Number(control.max);state().numbers[control.key]=Math.max(min,Math.min(max,Math.floor(Number(value)||0)));view.input.value=state().numbers[control.key];if(control.iconAtMax){const nextKey=state().numbers[control.key]>=max?control.iconAtMax:control.key;view.button.replaceChildren(makeIcon(nextKey));}updateStats();};
     view.button.addEventListener('click',()=>setValue(abilityControlValue(control.key)+1));
     view.button.addEventListener('contextmenu',event=>{event.preventDefault();setValue(abilityControlValue(control.key)-1);});
     view.input.addEventListener('change',()=>setValue(view.input.value));conditionsBox.append(view.item);
