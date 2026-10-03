@@ -1,5 +1,24 @@
 // ===== キャラクター固有能力ルール =====
 const CHARACTER_ABILITY_RULES={
+ '10':{
+  controls:[{key:'カウンター攻撃',type:'toggle'},{key:'このターンに受けたダメージ',type:'number',min:0}],
+  modifiers:[{target:'atk',formula:'per_stack',source:'このターンに受けたダメージ',value:1,when:{key:'カウンター攻撃',equals:1}}]
+ },
+ '17':{
+  controls:[{key:'真夜の一閃',type:'toggle'}],
+  modifiers:[{target:'atk',formula:'fixed',value:2,when:{key:'真夜の一閃',equals:1}}]
+ },
+ '23':{
+  controls:[{key:'狐光追加攻撃',type:'toggle'},{key:'狐光',type:'number',min:0}],
+  modifiers:[{target:'atk',formula:'per_stack',source:'狐光',value:1,when:{key:'狐光追加攻撃',equals:1}}]
+ },
+ '27':{
+  controls:[{key:'マーク持ちを攻撃',type:'toggle'},{key:'潜伏',type:'toggle'},{key:'対象のマーク',type:'number',min:0}],
+  modifiers:[
+   {target:'atk',formula:'fixed',value:3,when:{key:'マーク持ちを攻撃',equals:1}},
+   {target:'atk',formula:'per_stack',source:'対象のマーク',value:1,when:{key:'潜伏',equals:1}}
+  ]
+ },
  '4':{
   controls:[{key:'前ターン被ダメなし',type:'toggle'}],
   modifiers:[{target:'atk',formula:'fixed',value:3,when:{key:'前ターン被ダメなし',equals:1}}]
