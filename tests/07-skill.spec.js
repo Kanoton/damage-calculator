@@ -154,3 +154,34 @@ test('07 skill: additional character stat skills modify parameters', async ({ pa
  await expect(page.locator('#selected-character-atk')).toHaveValue('3');
  await expect(page.locator('#selected-character-def')).toHaveValue('2');
 });
+
+
+test('07 skill: contextual character attacks only apply when enabled', async ({ page }) => {
+ await page.goto('/07_skill/');
+
+ await selectCharacter(page,'10');
+ const damage=page.getByLabel('このターンに受けたダメージの数');
+ await damage.fill('4');await damage.dispatchEvent('change');
+ await expect(page.locator('#selected-character-atk')).toHaveValue('1');
+ await page.getByRole('button',{name:/カウンター攻撃：オフ/}).click();
+ await expect(page.locator('#selected-character-atk')).toHaveValue('5');
+
+ await selectCharacter(page,'17');
+ await page.getByRole('button',{name:/真夜の一閃：オフ/}).click();
+ await expect(page.locator('#selected-character-atk')).toHaveValue('3');
+
+ await selectCharacter(page,'23');
+ const foxfire=page.getByLabel('狐光の数');
+ await foxfire.fill('3');await foxfire.dispatchEvent('change');
+ await expect(page.locator('#selected-character-atk')).toHaveValue('2');
+ await page.getByRole('button',{name:/狐光追加攻撃：オフ/}).click();
+ await expect(page.locator('#selected-character-atk')).toHaveValue('5');
+
+ await selectCharacter(page,'27');
+ const marks=page.getByLabel('対象のマークの数');
+ await marks.fill('2');await marks.dispatchEvent('change');
+ await page.getByRole('button',{name:/マーク持ちを攻撃：オフ/}).click();
+ await expect(page.locator('#selected-character-atk')).toHaveValue('5');
+ await page.getByRole('button',{name:/潜伏：オフ/}).click();
+ await expect(page.locator('#selected-character-atk')).toHaveValue('7');
+});
