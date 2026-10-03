@@ -6,18 +6,18 @@ const CHARACTER_ABILITY_RULES={
  },
  '6':{
   controls:[
-   {key:'自己主張なし攻撃補正',type:'choice',options:[{value:0,label:'-2'},{value:1,label:'-1'},{value:2,label:'0'},{value:3,label:'+1'},{value:4,label:'+2'}]},
-   {key:'自己主張なし防御補正',type:'choice',options:[{value:0,label:'-2'},{value:1,label:'-1'},{value:2,label:'0'},{value:3,label:'+1'},{value:4,label:'+2'}]}
+   {key:'自己主張なし攻撃補正',type:'choice',options:[{value:0,label:'0'},{value:1,label:'+1'},{value:2,label:'+2'},{value:3,label:'-2'},{value:4,label:'-1'}]},
+   {key:'自己主張なし防御補正',type:'choice',options:[{value:0,label:'0'},{value:1,label:'+1'},{value:2,label:'+2'},{value:3,label:'-2'},{value:4,label:'-1'}]}
   ],
   modifiers:[
-   {target:'atk',formula:'fixed',value:-2,when:{key:'自己主張なし攻撃補正',equals:0}},
-   {target:'atk',formula:'fixed',value:-1,when:{key:'自己主張なし攻撃補正',equals:1}},
-   {target:'atk',formula:'fixed',value:1,when:{key:'自己主張なし攻撃補正',equals:3}},
-   {target:'atk',formula:'fixed',value:2,when:{key:'自己主張なし攻撃補正',equals:4}},
-   {target:'def',formula:'fixed',value:-2,when:{key:'自己主張なし防御補正',equals:0}},
-   {target:'def',formula:'fixed',value:-1,when:{key:'自己主張なし防御補正',equals:1}},
-   {target:'def',formula:'fixed',value:1,when:{key:'自己主張なし防御補正',equals:3}},
-   {target:'def',formula:'fixed',value:2,when:{key:'自己主張なし防御補正',equals:4}}
+   {target:'atk',formula:'fixed',value:1,when:{key:'自己主張なし攻撃補正',equals:1}},
+   {target:'atk',formula:'fixed',value:2,when:{key:'自己主張なし攻撃補正',equals:2}},
+   {target:'atk',formula:'fixed',value:-2,when:{key:'自己主張なし攻撃補正',equals:3}},
+   {target:'atk',formula:'fixed',value:-1,when:{key:'自己主張なし攻撃補正',equals:4}},
+   {target:'def',formula:'fixed',value:1,when:{key:'自己主張なし防御補正',equals:1}},
+   {target:'def',formula:'fixed',value:2,when:{key:'自己主張なし防御補正',equals:2}},
+   {target:'def',formula:'fixed',value:-2,when:{key:'自己主張なし防御補正',equals:3}},
+   {target:'def',formula:'fixed',value:-1,when:{key:'自己主張なし防御補正',equals:4}}
   ]
  },
  '15':{
