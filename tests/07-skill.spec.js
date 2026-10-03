@@ -27,6 +27,7 @@ test('07 skill: Nancy firewall toggles attack and defense bonuses', async ({ pag
 test('07 skill: Jasmine result and cumulative movement modify stats', async ({ page }) => {
  await page.goto('/07_skill/');
  await selectCharacter(page,'16');
+ await expect(page.getByRole('button',{name:'累計移動ポイントを増やす'}).locator('img')).toHaveAttribute('src',/UT_Buff_117_Passive\.png$/);
  const movement=page.getByLabel('累計移動ポイントの数');
  await movement.fill('26');await movement.dispatchEvent('change');
  await expect(page.locator('#selected-character-atk')).toHaveValue('2');
@@ -41,12 +42,14 @@ test('07 skill: compatible character abilities use shared controls and modifiers
  await page.goto('/07_skill/');
 
  await selectCharacter(page,'12');
+ await expect(page.getByRole('button',{name:'エネルギー保存を増やす'}).locator('img')).toHaveAttribute('src',/UT_Buff_113_Passive\.png$/);
  const energy=page.getByLabel('エネルギー保存の数');
  await energy.fill('2');await energy.dispatchEvent('change');
  await expect(page.locator('#selected-character-atk')).toHaveValue('5');
  await expect(page.locator('#selected-character-def')).toHaveValue('4');
 
  await selectCharacter(page,'14');
+ await expect(page.getByRole('button',{name:'剣気を増やす'}).locator('img')).toHaveAttribute('src',/UT_Buff_115\.png$/);
  const sword=page.getByLabel('剣気の数');
  await sword.fill('9');await sword.dispatchEvent('change');
  await expect(sword).toHaveValue('3');
@@ -61,12 +64,15 @@ test('07 skill: compatible character abilities use shared controls and modifiers
  await expect(page.locator('#selected-character-atk')).toHaveValue('5');
 
  await selectCharacter(page,'25');
+ await expect(page.getByRole('button',{name:'覚醒を増やす'}).locator('img')).toHaveAttribute('src',/UT_Buff_1026\.png$/);
+ await expect(page.getByRole('button',{name:/真龍：オフ/}).locator('img')).toHaveAttribute('src',/UT_Buff_1261204\.png$/);
  const awakening=page.getByLabel('覚醒の数');
  await awakening.fill('8');await awakening.dispatchEvent('change');
  await page.getByRole('button',{name:/真龍：オフ/}).click();
  await expect(page.locator('#selected-character-atk')).toHaveValue('6');
 
  await selectCharacter(page,'104');
+ await expect(page.getByRole('button',{name:'温もりを増やす'}).locator('img')).toHaveAttribute('src',/UT_Buff_304\.png$/);
  const warmth=page.getByLabel('温もりの数');
  await warmth.fill('5');await warmth.dispatchEvent('change');
  await expect(page.locator('#selected-character-def')).toHaveValue('5');
@@ -81,6 +87,7 @@ test('07 skill: Z3000 and Al apply bonuses per threshold', async ({ page }) => {
  await expect(page.locator('#selected-character-atk')).toHaveValue('3');
 
  await selectCharacter(page,'21');
+ await expect(page.getByRole('button',{name:'スターライトを増やす'}).locator('img')).toHaveAttribute('src',/UT_Buff_StarLight\.png$/);
  const starlight=page.getByLabel('スターライトの数');
  await starlight.fill('13');await starlight.dispatchEvent('change');
  await expect(page.locator('#selected-character-atk')).toHaveValue('3');
