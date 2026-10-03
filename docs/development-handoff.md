@@ -13,6 +13,8 @@ This is the durable handoff for continuing development, especially `07_skill`. O
 - Do not guess ambiguous game rules such as rounding, timing, target, stacking, or duration; confirm them first.
 - Unambiguous character parameter skills may be implemented directly; surface ambiguous ones for confirmation.
 - Prefer explicit repository icon mappings/assets over inferred filenames.
+- **Keep this handoff document itself up to date.** Whenever a task materially changes implemented behavior, confirmed game rules, development policy, known bugs, pending/ambiguous decisions, important file locations, or the continuation procedure, update `docs/development-handoff.md` as part of the same development task/PR whenever practical.
+- Do not wait for a separate request to maintain this file. Before finishing a substantial change, explicitly check whether this handoff needs updating.
 
 ## Current focus
 
@@ -120,4 +122,4 @@ Use PR history for exact diffs/rationale when touching the same areas.
 6. Make the smallest appropriate change.
 7. Confirm relevant CI.
 8. Merge only after CI passes.
-9. Update this handoff whenever implemented rules, development policy, or pending decisions materially change.
+9. Before finishing, explicitly check whether this handoff is affected. If implemented rules, development policy, known bugs, important file locations, continuation procedure, or pending decisions changed, update this document in the same task/PR whenever practical.
