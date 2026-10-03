@@ -192,3 +192,24 @@ test('07 skill: contextual character attacks only apply when enabled', async ({ 
  await page.getByRole('button',{name:/潜伏：オフ/}).click();
  await expect(page.locator('#selected-character-atk')).toHaveValue('7');
 });
+
+
+test('07 skill: edited monster HP stays stable when another monster is defeated', async ({ page }) => {
+ await page.goto('/07_skill/');
+ const mapTab=page.locator('.role-tab[data-role="map"]');
+ await mapTab.click();
+ const monsterTiles=page.locator('#mp-monster-list .mp-monster');
+ await expect(monsterTiles.first()).toBeVisible();
+ await monsterTiles.first().click();
+ await monsterTiles.nth(1).click();
+ const hpInputs=page.locator('#map-roster-list input[aria-label$="の残りHP"]');
+ await expect(hpInputs).toHaveCount(2);
+ const firstHp=Number(await hpInputs.first().inputValue());
+ expect(firstHp).toBeGreaterThan(1);
+ const editedHp=firstHp-1;
+ await hpInputs.first().fill(String(editedHp));
+ await hpInputs.first().dispatchEvent('change');
+ await expect(hpInputs.first()).toHaveValue(String(editedHp));
+ await page.locator('#map-roster-list .roster-remove').nth(1).click();
+ await expect(page.locator('#map-roster-list input[aria-label$="の残りHP"]').first()).toHaveValue(String(editedHp));
+});
