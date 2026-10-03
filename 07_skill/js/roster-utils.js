@@ -6,4 +6,4 @@ function addRosterMonster(state,enemy){
  state.monsters.push(enemy);return enemy;
 }
 function rosterMonsterDisplayName(enemy){return enemy.name+(enemy.boss?'':' '+enemy.serial);}
-function updateRosterEnemy(enemy,statValue){if(enemy.defeated)return;enemy.attack=statValue(enemy.base,'攻撃')+(enemy.manualAttack||0)+(enemy.eventAttack||0);enemy.defense=statValue(enemy.base,'防御')+(enemy.manualDefense||0)+(enemy.eventDefense||0);enemy.hp=statValue(enemy.base,'HP')-enemy.damageTaken;}
+function updateRosterEnemy(enemy,statValue){if(enemy.defeated)return;enemy.attack=statValue(enemy.base,'攻撃')+(enemy.manualAttack||0)+(enemy.eventAttack||0);enemy.defense=statValue(enemy.base,'防御')+(enemy.manualDefense||0)+(enemy.eventDefense||0);const maxHp=statValue(enemy.base,'HP');if(enemy.manualHp!==undefined&&enemy.manualHp!==null){enemy.manualHp=Math.min(maxHp,Math.max(0,Number(enemy.manualHp)||0));enemy.hp=enemy.manualHp;}else if(enemy.hp===undefined||enemy.hp===null)enemy.hp=maxHp-Math.max(0,Number(enemy.damageTaken)||0);else enemy.hp=Math.min(maxHp,Math.max(0,Number(enemy.hp)||0));enemy.damageTaken=Math.max(0,maxHp-enemy.hp);}
