@@ -213,7 +213,7 @@ test('07 skill: edited monster HP stays stable when another monster is defeated'
  const hpInputs=page.locator('#map-roster-list input[aria-label$="の残りHP"]');
  await expect(hpInputs).toHaveCount(2);
  const editedLabel=await hpInputs.first().getAttribute('aria-label');
- const editedInput=page.getByLabel(editedLabel);
+ const editedInput=page.locator('input[aria-label="'+editedLabel+'"]');
  const firstHp=Number(await editedInput.inputValue());
  expect(firstHp).toBeGreaterThan(1);
  const editedHp=firstHp-1;
@@ -221,5 +221,5 @@ test('07 skill: edited monster HP stays stable when another monster is defeated'
  await editedInput.dispatchEvent('change');
  await expect(editedInput).toHaveValue(String(editedHp));
  await page.locator('#map-roster-list .roster-remove').nth(1).click();
- await expect(page.getByLabel(editedLabel)).toHaveValue(String(editedHp));
+ await expect(page.locator('input[aria-label="'+editedLabel+'"]')).toHaveValue(String(editedHp));
 });
