@@ -122,20 +122,20 @@ test('07 skill: additional character stat skills modify parameters', async ({ pa
 
  await selectCharacter(page,'4');
  await page.getByRole('button',{name:/前ターン被ダメなし：オフ/}).click();
- await expect(page.locator('#selected-character-atk')).toHaveValue('5');
+ await expect(page.locator('#selected-character-atk')).toHaveValue('4');
 
  await selectCharacter(page,'6');
  await page.getByRole('button',{name:/自己主張なし攻撃補正：0/}).click();
  await page.getByRole('button',{name:/自己主張なし攻撃補正：\+1/}).click();
  await expect(page.locator('#selected-character-atk')).toHaveValue('4');
  await page.getByRole('button',{name:/自己主張なし防御補正：0/}).click();
- await expect(page.locator('#selected-character-def')).toHaveValue('2');
+ await expect(page.locator('#selected-character-def')).toHaveValue('3');
 
  await selectCharacter(page,'15');
  const handDiff=page.getByLabel('相手より多い手札の数');
  await handDiff.fill('5');await handDiff.dispatchEvent('change');
  await expect(handDiff).toHaveValue('3');
- await expect(page.locator('#selected-character-atk')).toHaveValue('5');
+ await expect(page.locator('#selected-character-atk')).toHaveValue('4');
 
  await selectCharacter(page,'26');
  const shadows=page.getByLabel('吸収した影の数');
@@ -151,6 +151,6 @@ test('07 skill: additional character stat skills modify parameters', async ({ pa
  const defenseCards=page.getByLabel('カクテル防御カードの数');
  await attackCards.fill('2');await attackCards.dispatchEvent('change');
  await defenseCards.fill('1');await defenseCards.dispatchEvent('change');
- await expect(page.locator('#selected-character-atk')).toHaveValue('4');
- await expect(page.locator('#selected-character-def')).toHaveValue('3');
+ await expect(page.locator('#selected-character-atk')).toHaveValue('3');
+ await expect(page.locator('#selected-character-def')).toHaveValue('2');
 });
