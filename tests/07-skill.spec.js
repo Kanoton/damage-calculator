@@ -198,6 +198,7 @@ test('07 skill: edited monster HP stays stable when another monster is defeated'
  await page.goto('/07_skill/');
  const mapTab=page.locator('.role-tab[data-role="map"]');
  await mapTab.click();
+ await page.locator('#mp-tab-monsters').click();
  const mapSelect=page.locator('#mp-map-select');
  for(const option of await mapSelect.locator('option').all()){
   await mapSelect.selectOption(await option.getAttribute('value'));
