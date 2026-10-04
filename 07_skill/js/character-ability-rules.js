@@ -11,7 +11,7 @@ const CHARACTER_ABILITY_RULES={
   modifiers:[{target:'atk',formula:'fixed',value:2,when:{key:'真夜の一閃',equals:1}}]
  },
  '23':{
-  activeSkills:[{key:'active',label:"三神憑依",cooldown:3,effects:[]}],
+  activeSkills:[{key:'active',label:"三神憑依",cooldown:3,inputStats:[{key:'三神憑依対象攻撃力',label:'憑依する味方の攻撃力'},{key:'三神憑依対象防御力',label:'憑依する味方の防御力'}],effects:[{type:'modify_stat',target:'self',stat:'atk',sourceKey:'三神憑依対象攻撃力',multiplier:0.5,duration:'turn'},{type:'modify_stat',target:'self',stat:'def',sourceKey:'三神憑依対象防御力',multiplier:0.5,duration:'turn'}]}],
   controls:[{key:'狐光追加攻撃',type:'toggle'},{key:'狐光',type:'number',min:0}],
   modifiers:[{target:'atk',formula:'per_stack',source:'狐光',value:1,when:{key:'狐光追加攻撃',equals:1}}]
  },
@@ -69,7 +69,7 @@ const CHARACTER_ABILITY_RULES={
   ]
  },
  '7':{
-  activeSkills:[{key:'active',label:"ひとくちだけ",cooldown:3,effects:[]}],
+  activeSkills:[{key:'active',label:"ひとくちだけ",cooldown:3,effects:[{type:'force_condition',key:'current_hp_ratio<=',duration:'turn'}]}],
   modifiers:[{target:'atk',formula:'fixed',value:3,when:{key:'current_hp_ratio<=',value:0.5}}]
  },
  '9':{
@@ -115,7 +115,7 @@ const CHARACTER_ABILITY_RULES={
   modifiers:[{target:'def',formula:'per_stack',source:'温もり',value:1}]
  },
  '106':{
-  activeSkills:[{key:'active',label:"怪力魔法",cooldown:2,effects:[]}],
+  activeSkills:[{key:'active',label:"怪力魔法",cooldown:2,target:'monster',effects:[{type:'damage_monster',value:2}]}],
   controls:[{key:'推理タイム',type:'number',min:0,max:4}],
   modifiers:[{target:'atk',formula:'per_stack',source:'推理タイム',value:1}],
   turnEnd:[{key:'推理タイム',delta:-1,min:0}]
@@ -175,10 +175,12 @@ const CHARACTER_ABILITY_RULES={
   activeSkills:[{key:'active',label:"アビサルゾーン",cooldown:3,effects:[]}],
  },
  '101':{
-  activeSkills:[{key:'active',label:"インターネットエンジェル",cooldown:3,effects:[]}],
+  activeSkills:[{key:'active',label:"インターネットエンジェル",cooldown:3,effects:[{type:'heal',target:'self',value:3,when:{key:'ファン',min:3}}]}],
+  controls:[{key:'ファン',type:'number',min:0}]
  },
  '102':{
-  activeSkills:[{key:'active',label:"愛情の過剰摂取",cooldown:3,effects:[]}],
+  activeSkills:[{key:'active',label:"愛情の過剰摂取",cooldown:3,effects:[{type:'modify_stat',target:'self',stat:'move',sourceKey:'愛',duration:'turn'},{type:'heal_from_control',target:'self',sourceKey:'愛'},{type:'modify_control',key:'愛',delta:-4,min:0}]}],
+  controls:[{key:'愛',type:'number',min:0,max:4,default:2}]
  },
  '105':{
   activeSkills:[{key:'active',label:"浮遊魔法",cooldown:3,effects:[]}],
