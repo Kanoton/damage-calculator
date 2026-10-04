@@ -1,5 +1,5 @@
 group,effect_key,input_kind,icon_file,map_id,atk,def,move,damage_reduce,condition
-スタック,コイン,number,UT_Buff/UT_Buff_StarLight.png
+スタック,コイン,number,スターライト.png
 スタック,マーク,number,マーク.png
 スタック,ヒール,number,UT_Buff/UT_Buff_Heal.png
 スタック,チャージ,number,UT_Buff/UT_Buff_Charge.png
