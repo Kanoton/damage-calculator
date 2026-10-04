@@ -10,6 +10,7 @@ This is the durable handoff for continuing development, especially `07_skill`. O
 - Use small focused branches/PRs and add regression tests for behavior changes.
 - For `07_skill` changes, confirm both `07 skill browser smoke` and `06b browser smoke` pass before merge.
 - Preserve unrelated behavior.
+- User preference: for requested changes that are ready to merge, complete the relevant checks, merge, and then report the result. Do not routinely stop at PR creation or ask for another merge confirmation. If checks fail, conflicts remain, or a genuinely ambiguous/destructive decision blocks progress, report the blocker.
 - Do not guess ambiguous game rules such as rounding, timing, target, stacking, or duration; confirm them first.
 - Unambiguous character parameter skills may be implemented directly; surface ambiguous ones for confirmation.
 - Prefer explicit repository icon mappings/assets over inferred filenames.
