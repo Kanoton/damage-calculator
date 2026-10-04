@@ -28,7 +28,8 @@
  const abilityControlValue=key=>Number(state().numbers[key])||0;
  const activeSkill=()=>abilityRules()?.activeSkills?.[0]||null;
  const activeSkillCooldown=skill=>Math.max(0,Number(state().skillCooldowns?.[skill?.key])||0);
- const activeEffectConditionMatches=condition=>!condition||(condition.key&&abilityControlValue(condition.key)>=(Number(condition.min)||0));
+ const activeEffectConditionMatches=condition=>!condition||(condition.key&&(condition.equals!==undefined?abilityControlValue(condition.key)===Number(condition.equals):abilityControlValue(condition.key)>=(Number(condition.min)||0)));
+ const activeEffectAllowed=effect=>activeEffectConditionMatches(effect.when)&&!activeEffectConditionMatches(effect.unless);
  const activeSkillStatBonus=stat=>(state().activeEffects||[]).filter(effect=>effect.type==='modify_stat'&&effect.target==='self'&&effect.stat===stat&&activeEffectConditionMatches(effect.when)).reduce((sum,effect)=>sum+(Number(effect.value)||0),0);
  const abilityConditionMatches=condition=>{
   if(!condition)return true;
@@ -332,13 +333,24 @@
  skillButton.addEventListener('click',()=>{
   const skill=activeSkill();if(!skill||activeSkillCooldown(skill)>0)return;
   state().activeEffects=(state().activeEffects||[]).filter(effect=>effect.source!==skill.key);
-  for(const effect of skill.effects||[]){
-   if(!activeEffectConditionMatches(effect.when))continue;
-   if(effect.type==='heal'&&effect.target==='self'){const maxHp=calculate().hp;state().currentHp=Math.min(maxHp,(Number(state().currentHp)||0)+(Number(effect.value)||0));continue;}
-   state().activeEffects.push({...effect,source:skill.key});
-  }
+  if(skill.target){window.dispatchEvent(new CustomEvent('character-skill-target-request',{detail:{target:skill.target,skillKey:skill.key,label:skill.label}}));return;}
+  applyActiveSkillEffects(skill);
   state().skillCooldowns[skill.key]=Math.max(0,Number(skill.cooldown)||0);
   updateStats();
+ });
+ function applyActiveSkillEffects(skill){
+  state().activeEffects=(state().activeEffects||[]).filter(effect=>effect.source!==skill.key);
+  for(const effect of skill.effects||[]){
+   if(!activeEffectAllowed(effect))continue;
+   if(effect.type==='heal'&&effect.target==='self'){const maxHp=calculate().hp;state().currentHp=Math.min(maxHp,(Number(state().currentHp)||0)+(Number(effect.value)||0));continue;}
+   if(effect.type==='modify_control'){const current=abilityControlValue(effect.key),next=Math.max(Number(effect.min)||0,Math.min(effect.max===undefined?Infinity:Number(effect.max),current+(Number(effect.delta)||0)));state().numbers[effect.key]=next;continue;}
+   if(effect.type==='damage_monster')continue;
+   state().activeEffects.push({...effect,source:skill.key});
+  }
+ }
+ window.addEventListener('character-skill-target-resolved',event=>{
+  const skill=activeSkill(),detail=event.detail||{};if(!skill||detail.skillKey!==skill.key||!detail.success||activeSkillCooldown(skill)>0)return;
+  applyActiveSkillEffects(skill);state().skillCooldowns[skill.key]=Math.max(0,Number(skill.cooldown)||0);renderConditions();updateStats();
  });
  setupCharacterNumberPad({selectedPanel});
  hpInput.addEventListener('change',()=>{state().currentHp=Math.max(0,Number(hpInput.value)||0);updateStats();});
