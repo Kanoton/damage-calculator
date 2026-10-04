@@ -122,7 +122,7 @@
   const file=statusIcons.get(key)||statusIcons.get(specialIcons[key]);
   if(!file)return Object.assign(document.createElement('span'),{className:'condition-fallback',textContent:key});
   const icon=document.createElement('img');icon.alt='';
-  const path=file.startsWith('chip_icon/')?file:'icon/'+file;
+  const path=file.startsWith('chip_icon/')||file.startsWith('UT_Buff/')?file:'icon/'+file;
   icon.src='../images/'+path.split('/').map(encodeURIComponent).join('/');
   icon.addEventListener('error',()=>{icon.replaceWith(Object.assign(document.createElement('span'),{className:'condition-fallback',textContent:key}));},{once:true});
   return icon;
