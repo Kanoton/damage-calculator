@@ -1,6 +1,6 @@
 # Development Handoff
 
-Last updated: 2026-10-03
+Last updated: 2026-10-05
 
 This is the durable handoff for continuing development, especially `07_skill`. On a new chat or machine, read this file, current `main`, and recent PRs before changing code.
 
@@ -145,6 +145,13 @@ All current character IDs now have an ability-rule entry for active-skill/CT met
 - #129 active skill CT tracking for all characters
 
 Use PR history for exact diffs/rationale when touching the same areas.
+
+## Project entry points
+
+- `README.md` documents startup, repository structure, verification commands, and the Issue/PR workflow.
+- `AGENTS.md` directs AI contributors to the working guide and this handoff before editing.
+- `.github/ISSUE_TEMPLATE/` and `.github/pull_request_template.md` capture reproducible bugs, confirmed game rules, acceptance criteria, and validation results.
+- This setup changes documentation/templates only; it does not change game behavior or the current working folder.
 
 ## Continuation checklist
 
