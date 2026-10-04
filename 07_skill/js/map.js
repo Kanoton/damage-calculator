@@ -164,6 +164,20 @@ function summonFromSkill(caster,targetId){
  renderRoster();
  rosterNotice.textContent=monsterDisplayName(caster)+'のスキルで'+pending.map(stats=>stats['モンスター名']).join('・')+'を追加しました。';
 }
+let characterSkillTargetRequest=null;
+window.addEventListener('character-skill-target-request',event=>{const detail=event.detail||{};if(detail.target!=='monster')return;characterSkillTargetRequest=detail;rosterNotice.textContent=detail.label+'：対象モンスターを選択してください。';renderRoster();});
+function resolveCharacterSkillTarget(enemy){
+ const request=characterSkillTargetRequest;if(!request||enemy.defeated)return false;
+ rememberRoster();
+ const skillEffects=window.getCharacterActiveSkillEffects?.(request.skillKey)||[];
+ const damage=skillEffects.filter(effect=>effect.type==='damage_monster').reduce((sum,effect)=>sum+(Number(effect.value)||0),0);
+ if(damage>0){enemy.manualHp=Math.max(0,enemy.hp-damage);enemy.hp=enemy.manualHp;enemy.damageTaken=Math.max(0,rosterStat(enemy.base,'HP')-enemy.hp);}
+ characterSkillTargetRequest=null;
+ renderRoster();
+ window.dispatchEvent(new CustomEvent('character-skill-target-resolved',{detail:{skillKey:request.skillKey,success:true,targetId:enemy.instanceId}}));
+ rosterNotice.textContent=request.label+'を'+monsterDisplayName(enemy)+'に使用しました。';
+ return true;
+}
 function renderRoster(){
  let newlyDefeated;do{newlyDefeated=false;for(const enemy of rosterState.monsters){if(enemy.defeated)continue;updateEnemy(enemy);if(enemy.hp<=0){removeEnemy(enemy);newlyDefeated=true;}}}while(newlyDefeated);
  updateEventRows();
@@ -189,7 +203,7 @@ function renderRoster(){
  [...rosterState.monsters].sort((a,b)=>Number(!!a.defeated)-Number(!!b.defeated)||Number(data.nativeMapByMonster[b.monsterId]===pick.value)-Number(data.nativeMapByMonster[a.monsterId]===pick.value)||a.monsterId.localeCompare(b.monsterId,'en',{numeric:true})||a.instanceId-b.instanceId).forEach(enemy=>{
    const displayName=monsterDisplayName(enemy),{card,select,nameText,actions,top}=createRosterCardShell(enemy,rosterState.selectedId,displayName,assignMapImage,data.icons);
   const stats=createRosterStats(enemy,displayName,assignMapImage,data.icons,({key,field,label,input,value})=>{const next=Number(value);if(String(value).trim()===''||!Number.isSafeInteger(next)||next<0){input.value=enemy[field];return;}if(next===enemy[field])return;rememberRoster();if(key==='HP'){if(next===0){removeEnemy(enemy);rosterNotice.textContent=displayName+'を撃破しました。';}else{enemy.manualHp=next;enemy.hp=next;enemy.damageTaken=Math.max(0,rosterStat(enemy.base,'HP')-next);}}else{enemy[key==='攻撃'?'manualAttack':'manualDefense']=next-rosterStat(enemy.base,key);rosterNotice.textContent=displayName+'の'+label+'を'+next+'に変更しました。';}if(next===0&&key==='HP'){renderRoster();return;}updateEnemy(enemy);input.value=enemy[field];rosterUndo.disabled=false;if(rosterState.selectedId===enemy.instanceId)registerEnemy(enemy,false);});
-  select.addEventListener('click',()=>{rosterState.selectedId=enemy.instanceId;registerEnemy(enemy);renderRoster();rosterNotice.textContent=monsterDisplayName(enemy)+'を計算機に登録しました。';});
+  select.addEventListener('click',()=>{if(resolveCharacterSkillTarget(enemy))return;rosterState.selectedId=enemy.instanceId;registerEnemy(enemy);renderRoster();rosterNotice.textContent=monsterDisplayName(enemy)+'を計算機に登録しました。';});
   const remove=createRosterActionButton('roster-remove',enemy.defeated?'撃破済':'撃破',displayName+'を撃破',!!enemy.defeated);remove.addEventListener('click',()=>{rememberRoster();removeEnemy(enemy);renderRoster();rosterNotice.textContent=monsterDisplayName(enemy)+'を撃破しました。';});
   const deleteButton=createRosterActionButton('roster-delete','削除',displayName+'を削除');deleteButton.addEventListener('click',()=>{rememberRoster();const i=rosterState.monsters.indexOf(enemy);if(i>=0)rosterState.monsters.splice(i,1);if(rosterState.selectedId===enemy.instanceId){rosterState.selectedId=null;window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:null}));}renderRoster();});
    actions.append(remove,deleteButton);
