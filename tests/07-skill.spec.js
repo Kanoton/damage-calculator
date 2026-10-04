@@ -24,6 +24,23 @@ test('07 skill: Nancy firewall toggles attack and defense bonuses', async ({ pag
  await expect(page.locator('#selected-character-def')).toHaveValue('3');
 });
 
+test('07 skill: every character exposes active skill CT management', async ({ page }) => {
+ await page.goto('/07_skill/');
+ const expected={1:3,2:2,3:3,4:3,5:3,6:3,7:3,8:3,9:4,10:3,11:3,12:3,13:3,14:3,15:3,16:4,17:3,18:3,19:3,20:3,21:3,22:3,23:3,24:2,25:3,26:3,27:3,28:3,29:3,101:3,102:3,103:3,104:2,105:3,106:2};
+ for(const [id,cooldown] of Object.entries(expected)){
+  await selectCharacter(page,id);
+  const skill=page.locator('#selected-character-skill'),ct=page.locator('#selected-character-ct');
+  await expect(skill).toBeVisible();
+  await expect(ct).toHaveText('CT 0');
+  await skill.click();
+  await expect(ct).toHaveText('CT '+cooldown);
+  await ct.click();
+  await expect(ct).toHaveText('CT '+(cooldown-1));
+  await ct.click({button:'right'});
+  await expect(ct).toHaveText('CT '+cooldown);
+ }
+});
+
 test('07 skill: Jasmine active skill applies turn effects and cooldown', async ({ page }) => {
  await page.goto('/07_skill/');
  await selectCharacter(page,'16');
