@@ -31,3 +31,12 @@ group,effect_key,input_kind,icon_file,map_id,atk,def,move,damage_reduce,conditio
 追加素材,深層改造,未設定,UT_Buff/UT_Buff_1033.png
 追加素材,戦の呪い,未設定,UT_Buff/UT_Buff_1041.png
 マップ固有,勇往邁進,number,UT_Buff/UT_Buff_CourageUp.png,MAP0007,2,0,0,2,
+キャラクター固有,前ターン被ダメなし,checkbox,UT_Buff/UT_Buff_ConcealedPresence.png
+キャラクター固有,モンスター撃破数,number,UT_Buff/UT_Buff_109_Break.png
+キャラクター固有,ファイアウォール,checkbox,UT_Buff/UT_Buff_120.png
+キャラクター固有,狐光,number,UT_Buff/UT_Buff_124.png
+キャラクター固有,潜伏,checkbox,UT_Buff/UT_Buff_127.png
+キャラクター固有,エリア拒止通過,checkbox,UT_Buff/UT_Buff_128_Skill.png
+キャラクター固有,カクテル攻撃カード,number,UT_Buff/UT_Buff_303_piano.png
+キャラクター固有,カクテル防御カード,number,UT_Buff/UT_Buff_303_piano.png
+キャラクター固有,推理タイム,number,UT_Buff/UT_Buff_306.png
