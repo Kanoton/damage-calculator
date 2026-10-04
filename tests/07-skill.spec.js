@@ -83,6 +83,51 @@ test('07 skill: Misaki manually targets a roster monster and applies Sakura Rets
  await expect(aura).toHaveValue('1');
 });
 
+test('07 skill: Kaisei Bonnie and Rinrin apply targeted monster effects', async ({ page }) => {
+ await page.goto('/07_skill/');
+ await page.locator('.role-tab[data-role="map"]').click();
+ await page.locator('#mp-tab-monsters').click();
+ const mapSelect=page.locator('#mp-map-select');
+ for(const option of await mapSelect.locator('option').all()){
+  await mapSelect.selectOption(await option.getAttribute('value'));await mapSelect.dispatchEvent('change');
+  if(await page.locator('#mp-monster-list .mp-monster:visible').count())break;
+ }
+ await page.locator('#mp-monster-list .mp-monster:visible').first().click();
+ const target=page.locator('#map-roster-list .roster-select').first();
+
+ await selectCharacter(page,'13');
+ await page.getByRole('button',{name:'フェイト・エコーを発動'}).click();
+ await target.click();
+ await expect(page.locator('.roster-fate-echo').first()).toContainText('フェイト・エコー2');
+ await expect(page.locator('#selected-character-ct')).toHaveText('CT 3');
+ await target.click();
+ await expect(page.locator('#damageAdd1')).toHaveValue('1');
+ await page.locator('#turn-end').click();
+ await expect(page.locator('.roster-fate-echo').first()).toContainText('フェイト・エコー1');
+ await page.locator('#turn-end').click();
+ await expect(page.locator('.roster-fate-echo')).toHaveCount(0);
+ await expect(page.locator('#damageAdd1')).toHaveValue('0');
+
+ await selectCharacter(page,'27');
+ await page.getByRole('button',{name:'ミッション：インシークレットを発動'}).click();
+ await target.click();
+ await expect(page.locator('.roster-mark strong').first()).toHaveText('1');
+ await expect(page.locator('#selected-character-ct')).toHaveText('CT 3');
+
+ await selectCharacter(page,'28');
+ const defense=page.locator('#map-roster-list input[aria-label$="の防御力"]').first();
+ const before=Number(await defense.inputValue());
+ await page.getByRole('button',{name:'インターセプトタックルを発動'}).click();
+ await target.click();
+ await expect(defense).toHaveValue(String(Math.max(0,before-2)));
+ await expect(page.locator('#selected-character-atk')).toHaveValue('4');
+ await page.locator('#turn-end').click();
+ await expect(defense).toHaveValue(String(Math.max(0,before-2)));
+ await page.locator('#turn-end').click();
+ await expect(defense).toHaveValue(String(before));
+ await expect(page.locator('#selected-character-atk')).toHaveValue('2');
+});
+
 test('07 skill: every character exposes active skill CT management', async ({ page }) => {
  await page.goto('/07_skill/');
  const expected={1:3,2:2,3:3,4:3,5:3,6:3,7:3,8:3,9:4,10:3,11:3,12:3,13:3,14:3,15:3,16:4,17:3,18:3,19:3,20:3,21:3,22:3,23:3,24:2,25:3,26:3,27:3,28:3,29:3,101:3,102:3,103:3,104:2,105:3,106:2};
@@ -92,7 +137,7 @@ test('07 skill: every character exposes active skill CT management', async ({ pa
   await expect(skill).toBeVisible();
   await expect(ct).toHaveText('CT 0');
   await skill.click();
-  if(id==='14'){
+  if(['13','14','27','28'].includes(id)){
    await expect(ct).toHaveText('CT 0');
    continue;
   }

@@ -1572,3 +1572,5 @@ tbody th {
 .map-roster.is-character-skill-targeting .roster-card:not(.defeated){border-color:#39875d;box-shadow:0 0 0 2px #b9dcc6;background:#f5fbf7}
 .map-roster.is-character-skill-targeting .roster-card:not(.defeated) .roster-select{cursor:crosshair}
 .map-roster.is-character-skill-targeting .roster-card:not(.defeated) .roster-select:hover{background:#e4f4e9}
+
+.roster-fate-echo{display:inline-flex;align-items:center;gap:3px;margin-left:5px;padding:1px 5px;border:1px solid #89ae98;border-radius:10px;background:#eef8f2;color:#315a40;font-size:11px;font-weight:normal;white-space:nowrap}.roster-fate-echo strong{font-size:12px}

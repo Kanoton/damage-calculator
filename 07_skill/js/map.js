@@ -88,7 +88,7 @@ function executeProgressEvents(){if(!roundProgressReady())return;groupMapEvents(
 function changeProgress(delta){const next=Math.max(0,rosterState.progress+delta);if(next===rosterState.progress)return;rememberRoster();rosterState.progress=next;renderRoundProgress();executeProgressEvents();}
 document.getElementById('progress-minus').addEventListener('click',()=>changeProgress(-1));
 document.getElementById('progress-plus').addEventListener('click',()=>changeProgress(1));
-document.getElementById('turn-end').addEventListener('click',()=>{rememberRoster();applyCharacterTurnStartEffects();const clueCount=rosterCounts.get('MAP0104:clue')||0;rosterState.monsters.forEach(enemy=>{enemy.markStacks=Math.max(0,(enemy.markStacks||0)-1);});renderRoster();if(rosterState.selectedId){const selectedEnemy=rosterState.monsters.find(enemy=>enemy.instanceId===rosterState.selectedId&&!enemy.defeated);if(selectedEnemy)registerEnemy(selectedEnemy,false);}rosterState.round+=1;rosterState.progress+=1;renderRoundProgress();executeProgressEvents();if(pick.value==='MAP0104'&&(rosterState.round>=8||clueCount>=4))executeLibraryTruth();});
+document.getElementById('turn-end').addEventListener('click',()=>{rememberRoster();applyCharacterTurnStartEffects();const clueCount=rosterCounts.get('MAP0104:clue')||0;rosterState.monsters.forEach(enemy=>{enemy.markStacks=Math.max(0,(enemy.markStacks||0)-1);enemy.fateEchoStacks=Math.max(0,(enemy.fateEchoStacks||0)-1);if(enemy.skillDefenseTurns>0){enemy.skillDefenseTurns-=1;if(enemy.skillDefenseTurns<=0)enemy.skillDefenseModifier=0;}});renderRoster();if(rosterState.selectedId){const selectedEnemy=rosterState.monsters.find(enemy=>enemy.instanceId===rosterState.selectedId&&!enemy.defeated);if(selectedEnemy)registerEnemy(selectedEnemy,false);}rosterState.round+=1;rosterState.progress+=1;renderRoundProgress();executeProgressEvents();if(pick.value==='MAP0104'&&(rosterState.round>=8||clueCount>=4))executeLibraryTruth();});
 renderRoundProgress();
 window.addEventListener('character-selection-change',()=>{if(!roundProgressReady()){renderRoundProgress();return;}rosterState.round=1;rosterState.progress=1;renderRoundProgress();executeProgressEvents();});
 
@@ -103,7 +103,7 @@ function registerEnemy(enemy, switchTab=true){
  document.getElementById('defensePower1').value=enemy.defense;
  document.getElementById('hp1').value=enemy.hp;
  document.getElementById('attackPower2').value=enemy.attack;
- window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:{name:enemy.name,mapId:enemy.mapId,markStacks:enemy.markStacks||0}}));
+ window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:{name:enemy.name,mapId:enemy.mapId,markStacks:enemy.markStacks||0,fateEchoStacks:enemy.fateEchoStacks||0}}));
  applyCharacterToCalculator();
  calculateDamage(document.querySelector('[data-role="attack"].mode-content'),false);
  calculateDamage(document.querySelector('[data-role="defense"].mode-content'),true);
@@ -111,7 +111,7 @@ function registerEnemy(enemy, switchTab=true){
  if(switchTab)document.querySelector('.role-tab[data-role="attack"]').click();
 }
 function clearRoster(){rosterError.textContent='';rosterState.round=1;rosterState.progress=1;renderRoundProgress();defeatTotals.clear();executedEvents.clear();rosterState.monsters.length=0;rosterState.serials.clear();rosterState.selectedId=null;window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:null}));skillChoiceId=null;rosterBuff.attack=0;rosterBuff.defense=0;rosterCounts.clear();rosterEvidenceConsider=false;rosterNotice.textContent='';}
-function updateEnemy(enemy){updateRosterEnemy(enemy,rosterStat);}
+function updateEnemy(enemy){updateRosterEnemy(enemy,rosterStat);enemy.defense=Math.max(0,enemy.defense+(Number(enemy.skillDefenseModifier)||0));}
 function spawnGimmickMonsters(trigger){
  const matching=mapGimmicks().filter(r=>r.gimmick_id===trigger.gimmick_id&&(!r['難易度']||r['難易度']===difficulty.value));
  const configurations=new Map();matching.forEach(r=>{const ids=String(r['出現monster_id']||'').trim();if(ids)configurations.set(JSON.stringify([ids,String(r['出現数']||'').trim()]),r);});
@@ -180,6 +180,11 @@ function resolveCharacterSkillTarget(enemy){
  const skillEffects=window.getCharacterActiveSkillEffects?.(request.skillKey)||[];
  const damage=skillEffects.filter(effect=>effect.type==='damage_monster').reduce((sum,effect)=>sum+(Number(effect.value)||0),0);
  if(damage>0){enemy.manualHp=Math.max(0,enemy.hp-damage);enemy.hp=enemy.manualHp;enemy.damageTaken=Math.max(0,rosterStat(enemy.base,'HP')-enemy.hp);}
+ for(const effect of skillEffects){
+  if(effect.type==='modify_monster_mark')enemy.markStacks=Math.max(0,(enemy.markStacks||0)+(Number(effect.delta)||0));
+  if(effect.type==='fate_echo')enemy.fateEchoStacks=Math.max(0,Number(effect.stacks)||0);
+  if(effect.type==='modify_monster_def'){enemy.skillDefenseModifier=Number(effect.value)||0;enemy.skillDefenseTurns=Math.max(0,Number(effect.durationTurns)||0);}
+ }
  characterSkillTargetRequest=null;
  renderCharacterSkillTargetUi();
  renderRoster();
@@ -217,6 +222,7 @@ function renderRoster(){
   const deleteButton=createRosterActionButton('roster-delete','削除',displayName+'を削除');deleteButton.addEventListener('click',()=>{rememberRoster();const i=rosterState.monsters.indexOf(enemy);if(i>=0)rosterState.monsters.splice(i,1);if(rosterState.selectedId===enemy.instanceId){rosterState.selectedId=null;window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:null}));}renderRoster();});
    actions.append(remove,deleteButton);
    const {field:markField,button:markButton}=createRosterMarkControl(enemy,displayName);const changeMark=delta=>{if(enemy.defeated)return;const next=Math.max(0,(enemy.markStacks||0)+delta);if(next===(enemy.markStacks||0))return;rememberRoster();enemy.markStacks=next;if(rosterState.selectedId===enemy.instanceId)registerEnemy(enemy,false);renderRoster();};markButton.addEventListener('click',event=>{event.stopPropagation();changeMark(1);});markButton.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();changeMark(-1);});nameText.append(markField);
+  if((enemy.fateEchoStacks||0)>0){const fate=document.createElement('span');fate.className='roster-fate-echo';fate.title='フェイト・エコー：受けるダメージ+1、ターン終了時に1減少';const label=document.createElement('span');label.textContent='フェイト・エコー';const value=document.createElement('strong');value.textContent=String(enemy.fateEchoStacks);fate.append(label,value);nameText.append(fate);}
   const skill=summonSkills[enemy.monsterId],skillOpen=skillChoiceId===enemy.instanceId;
   const skillTargets=skill?.targets.map(id=>{const target=data.stats.find(row=>row.monster_id===id&&row['難易度']===difficulty.value);return target?{id,name:target['モンスター名'],image:data.images[target.image]}:null;})||[];
   const skillView=createRosterSkillView(enemy,displayName,skill,skillOpen,skillTargets,assignMapImage,()=>{skillChoiceId=skillOpen?null:enemy.instanceId;renderRoster();},id=>summonFromSkill(enemy,id));
