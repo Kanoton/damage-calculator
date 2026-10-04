@@ -22,6 +22,14 @@ This is the durable handoff for continuing development, especially `07_skill`. O
 
 Recent work centers on character parameter skills, status icons, contextual attack modifiers, active skills/cooldowns, monster roster HP/stat management, and regression coverage.
 
+### Character-target planning data
+
+`csv/character_target_requirements.csv` is a planning inventory, not runtime configuration. It records 12 related characters, original ability text, CT, target/range descriptions, required inputs, existing implementation, unresolved rules, manual scope, and the source commit. Keep `csv/character_skills.csv` authoritative for game descriptions. Rows include single-target skills, group effects, passage effects, and a proximity passive; these must not all be wired to the same activation flow.
+
+Before implementing character targets, decide how participating players are registered (including whether multiple instances of the same character are supported). Existing state is keyed by character ID; it does not establish a participating-player roster. Use stable target identity, defer CT/effect changes until target confirmation, and preserve cancellation without mutation. Target eligibility, effect expiry, snapshot timing, stacking, and movement-die versus movement-stat semantics marked in the CSV need confirmation before affected effects are implemented.
+
+Suggested sequence: explicit participating-character selection and cancel/confirm flow; Lulu Heal-stack assignment; Ren one-use shield/counter state; Al shared Starlight; Jill card-count effects; Teru target-stat snapshot; Dorothy passage/expiry behavior. The sequence is a proposal, not confirmation of unresolved game rules. No character-target effect is implemented by adding this inventory.
+
 ## Character ability implementation
 
 Primary files:
