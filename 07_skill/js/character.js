@@ -48,6 +48,7 @@
   }
   return 0;
  };
+ window.getCharacterActiveSkillEffects=skillKey=>{const skill=activeSkill();return skill?.key===skillKey?(skill.effects||[]).map(effect=>({...effect})):[];};
  window.captureCharacterAbilityState=()=>selectedCharacter?{id:selectedCharacter.id,numbers:{...state().numbers},skillCooldowns:{...state().skillCooldowns},activeEffects:(state().activeEffects||[]).map(effect=>({...effect}))}:null;
  window.restoreCharacterAbilityState=snapshot=>{if(!snapshot)return;const target=getState(snapshot.id);target.numbers={...target.numbers,...snapshot.numbers};target.skillCooldowns={...target.skillCooldowns,...snapshot.skillCooldowns};target.activeEffects=(snapshot.activeEffects||[]).map(effect=>({...effect}));if(selectedCharacter?.id===snapshot.id){renderConditions();updateStats();}};
  const modeFor=rule=>Number(state().modes[rule.chip_id])||0;
