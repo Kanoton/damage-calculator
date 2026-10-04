@@ -179,7 +179,7 @@ const CHARACTER_ABILITY_RULES={
   controls:[{key:'ファン',type:'number',min:0}]
  },
  '102':{
-  activeSkills:[{key:'active',label:"愛情の過剰摂取",cooldown:3,effects:[{type:'modify_stat',target:'self',stat:'move',sourceKey:'愛',duration:'turn'},{type:'heal_from_control',target:'self',sourceKey:'愛'},{type:'modify_control',key:'愛',delta:-4,min:0}]}],
+  activeSkills:[{key:'active',label:"愛情の過剰摂取",cooldown:3,effects:[{type:'modify_stat',target:'self',stat:'move',sourceKey:'愛',duration:'turn'},{type:'heal_from_control',target:'self',sourceKey:'愛'},{type:'increase_max_hp',value:1,when:{key:'愛',min:4}},{type:'increase_control_max',key:'愛',value:1,when:{key:'愛',min:4}},{type:'modify_control',key:'愛',delta:-4,min:0}]}],
   controls:[{key:'愛',type:'number',min:0,max:4,default:2}]
  },
  '105':{
