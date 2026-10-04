@@ -18,7 +18,7 @@ This is the durable handoff for continuing development, especially `07_skill`. O
 
 ## Current focus
 
-Recent work centers on character parameter skills, status icons, contextual attack modifiers, monster roster HP/stat management, and regression coverage.
+Recent work centers on character parameter skills, status icons, contextual attack modifiers, active skills/cooldowns, monster roster HP/stat management, and regression coverage.
 
 ## Character ability implementation
 
@@ -38,7 +38,7 @@ Key behavior:
 - 12 Hime: Energy Storage 0-5; each -> ATK +2 / DEF +2.
 - 14 Misaki: Sword Aura 0-3 tracked; no modifier yet.
 - 15 Nardis: hand advantage capped at 3 -> ATK +1 each.
-- 16 Jasmine: Overdrive result <10 -> DEF +2, >=10 -> ATK +2; every 13 cumulative movement alternates ATK/DEF.
+- 16 Jasmine: active Overdrive has CT 4; activation gives MOVE +3 / DEF -3 for the turn, then the temporary effects expire at turn end and CT decreases by 1. Existing Overdrive result <10 -> DEF +2, >=10 -> ATK +2; every 13 cumulative movement alternates ATK/DEF.
 - 17 Luka: Midnight Slash attack context -> ATK +2.
 - 18 Nancy Lo: Firewall -> ATK +2 / DEF +2.
 - 21 Al: every 6 Starlight -> ATK +1 / DEF +1.
@@ -53,6 +53,16 @@ Key behavior:
 - 106 Tachibana Sherry: Deduction Time 0-4 -> ATK +1 each; turn end -1.
 
 Modifier engine supports fixed, per-stack, floor-per-unit, alternating-step, equality-condition, and current-HP-ratio rules.
+
+## Active skill and cooldown architecture
+
+- Active skills are declarative `activeSkills` entries on character ability rules.
+- The selected-character UI places the `スキル` button in the open area to the right of HP, and `CT n` on the same stat row after ATK / DEF / MOVE.
+- Current cooldown is stored per skill, not only per character. CT 0 means usable; activation sets CT to that skill's configured maximum; each turn end decreases positive CT by 1.
+- Turn-duration effects are stored separately from permanent/manual modifiers and expire at turn end.
+- The first supported generic effect is `modify_stat` targeting self. Keep the effect-dispatch model extensible so future skills can add effects such as monster damage, healing, stack/status changes, target stat changes, and target selection without character-specific button code.
+- Jasmine Overdrive is the first implementation: CT 4, MOVE +3 / DEF -3 for one turn.
+
 
 ## Status icons
 
@@ -89,7 +99,6 @@ Required behavior:
 Review current game data before implementing:
 - Teru (23): Three Gods Possession adds half another character's ATK/DEF; rounding needs confirmation.
 - Dorothy (104): ally-pass ATK +1 behavior and Warmth=5 DEF-to-ATK/consume-all effect remain incomplete.
-- Jasmine (16): one-turn DEF -3 part of Overdrive is omitted.
 - Hime (12): Qigong Training ATK +4 while Energy Storage is active is omitted.
 - Ame-chan (102): possible max HP +1 at Love >=4 needs max-HP support/confirmation.
 - Pandaman (10): hamburger-related passive max HP +2 is omitted.
