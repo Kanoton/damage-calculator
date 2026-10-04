@@ -34,7 +34,7 @@ Key behavior:
 - 4 Alanna: no damage previous turn -> ATK +3.
 - 6 Padman: selectable temporary ATK/DEF adjustment -2..+2.
 - 7 Papara: current HP <= half max HP -> ATK +3.
-- 9 Z3000: every 2 monster defeats -> ATK +1.
+- 9 Z3000: every 2 monster defeats -> ATK +1. Active Pull In (CT 4) manually targets a monster and deals 5 direct damage; range and the conditional follow-up attack remain manual/not simulated.
 - 10 Pandaman: counterattack mode; ATK increases by damage received that turn.
 - 12 Hime: Energy Storage 0-5; each -> ATK +2 / DEF +2. Active Qigong Training (CT 3) heals self 2 HP up to max HP and, if Energy Storage is active when used, gives ATK +4 for that turn.
 - 14 Misaki: Sword Aura 0-3 tracked. Active Sakura Retsukuzan uses manual roster target selection (range is not auto-validated), deals 2 direct damage through roster HP/defeat handling, gains +1 Sword Aura normally, or consumes 2 when used at 3 stacks. The card reward at max stacks is not represented.
@@ -109,6 +109,15 @@ Required behavior:
 - Regression coverage exists for edit HP -> defeat another monster -> HP remains stable.
 
 ## Known incomplete / ambiguous rules
+
+- Z3000 (9): Pull In's 5 direct damage is implemented. The 7-space range is intentionally manual; the optional immediate attack when ATK >= 7 is not represented as a separate combat action.
+- Papara (7): Bite-sized healing needs confirmation for half-damage rounding and the skill's exact duration before tying the passive HP-threshold override to it.
+- Character-target active skills (Ren 8, Lulu 11, Al 21, Teru 23, Jill 103, Dorothy 104, and related effects) need a shared manual character-target selection flow before their target effects can be safely implemented.
+- Moses (24): Weakness can be manually targeted, but its combat-die-0 effect is not represented by the current outgoing-damage calculator.
+- Chouten-chan/Ame-chan (101/102): Fan/Love state is not yet modeled. Ame's Love cap growth and permanent max-HP growth need persistent state support; shared-passive state semantics should be confirmed before implementation.
+- Nancy Lo (18): Hacking depends on target distance and initiating a forced combat; those actions are not represented by the current skill target resolver.
+- Sherry (106): Mighty Magic requires spatial area/destination handling for multiple monsters, which the current manual single-monster target flow does not model.
+
 
 Review current game data before implementing:
 - Teru (23): Three Gods Possession adds half another character's ATK/DEF; rounding needs confirmation.

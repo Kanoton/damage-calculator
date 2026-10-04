@@ -73,7 +73,7 @@ const CHARACTER_ABILITY_RULES={
   modifiers:[{target:'atk',formula:'fixed',value:3,when:{key:'current_hp_ratio<=',value:0.5}}]
  },
  '9':{
-  activeSkills:[{key:'active',label:"引き寄せる",cooldown:4,effects:[]}],
+  activeSkills:[{key:'active',label:"引き寄せる",cooldown:4,target:'monster',effects:[{type:'damage_monster',value:5}]}],
   controls:[{key:'モンスター撃破数',type:'number',min:0}],
   modifiers:[{target:'atk',formula:'floor_per_unit',source:'モンスター撃破数',unit:2,value:1}]
  },
