@@ -1430,7 +1430,7 @@ tbody th {
 .character-select{display:block;width:100%;padding:0;border:0;background:transparent;cursor:pointer;text-align:left;border-radius:5px}
 .character-select[aria-pressed="true"]{outline:2px solid #b89224;outline-offset:-2px}
 .character-select:focus-visible{outline:3px solid #856615;outline-offset:2px}
-.selected-character{display:grid;grid-template-columns:48px minmax(0,340px) minmax(75px,1fr);grid-template-rows:64px 36px;column-gap:10px;row-gap:2px;align-items:start;width:100%;height:118px;margin-top:28px;padding:6px 10px;border:2px solid #d4ac37;border-radius:5px;background:#fff;color:#493e22;overflow:hidden}
+.selected-character{display:grid;grid-template-columns:48px minmax(0,320px) minmax(75px,1fr);grid-template-rows:64px 36px;column-gap:10px;row-gap:2px;align-items:start;width:100%;height:118px;margin-top:28px;padding:6px 10px;border:2px solid #d4ac37;border-radius:5px;background:#fff;color:#493e22;overflow:hidden}
 .selected-character[hidden]{display:none}
 #selected-character-portrait{grid-column:1;grid-row:1;display:flex;align-items:flex-start;justify-content:center;align-self:start;flex:none;padding:0;border:0;border-radius:4px;background:#fff8df;cursor:pointer}
 #selected-character-image{display:block;width:48px;height:64px;object-fit:contain}
