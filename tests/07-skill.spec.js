@@ -421,7 +421,7 @@ test('07 skill: Papara active skill forces half-HP attack bonus until turn end',
 test('07 skill: Teru possession accepts ally stats and adds half for the turn', async ({ page }) => {
  await page.goto('/07_skill/');await selectCharacter(page,'23');
  const atk=page.locator('#selected-character-atk'),def=page.locator('#selected-character-def');const beforeAtk=Number(await atk.inputValue()),beforeDef=Number(await def.inputValue());
- page.once('dialog',async dialog=>{await dialog.accept('5');});page.once('dialog',async dialog=>{await dialog.accept('3');});
+ let dialogIndex=0;page.on('dialog',async dialog=>{await dialog.accept(dialogIndex++===0?'5':'3');});
  await page.getByRole('button',{name:'三神憑依を発動'}).click();
  await expect(atk).toHaveValue(String(beforeAtk+2.5));await expect(def).toHaveValue(String(beforeDef+1.5));
  await page.locator('#turn-end').click();await expect(atk).toHaveValue(String(beforeAtk));await expect(def).toHaveValue(String(beforeDef));
