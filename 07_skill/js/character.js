@@ -96,7 +96,7 @@
   const maxHp=Math.max(1,startingHp+maxBonus);
   if(state().currentHp===null)state().currentHp=maxHp;
   state().currentHp=Math.max(0,Math.min(maxHp,Number(state().currentHp)||0));
-  const result={atk:base('atk'),def:base('def'),move:base('move'),hp:maxHp,damageReduce:0,damageAdd:currentOpponent?.markStacks>0?1:0};
+  const result={atk:base('atk'),def:base('def'),move:base('move'),hp:maxHp,damageReduce:0,damageAdd:(currentOpponent?.markStacks>0?1:0)+(currentOpponent?.fateEchoStacks>0?1:0)};
   for(const rule of active){
    if(!['atk','def','move'].includes(rule.target))continue;
    if(!triggerMatches(rule)||!conditionMatches(rule,maxHp))continue;
@@ -410,7 +410,7 @@
   if(!selectedCharacter)return;
   let changed=false;
   const beforeEffects=state().activeEffects.length;
-  state().activeEffects=state().activeEffects.filter(effect=>effect.duration!=='turn');
+  state().activeEffects=state().activeEffects.filter(effect=>effect.duration!=='turn').map(effect=>effect.durationTurns?{...effect,durationTurns:effect.durationTurns-1}:effect).filter(effect=>!effect.durationTurns||effect.durationTurns>0);
   if(state().activeEffects.length!==beforeEffects)changed=true;
   if(state().chips.includes('57')){const charge=number(state(),'チャージ');if(charge<6){state().numbers['チャージ']=6;changed=true;}}
   for(const effect of abilityRules()?.turnEnd||[]){const current=abilityControlValue(effect.key),next=Math.max(Number(effect.min)||0,current+(Number(effect.delta)||0));if(next!==current){state().numbers[effect.key]=next;changed=true;}}
