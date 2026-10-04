@@ -1,5 +1,5 @@
 group,effect_key,input_kind,icon_file,map_id,atk,def,move,damage_reduce,condition
-スタック,コイン,number,UT_Buff/UT_Buff/UT_Buff_StarLight.png
+スタック,コイン,number,UT_Buff/UT_Buff_StarLight.png
 スタック,マーク,number,マーク.png
 スタック,ヒール,number,UT_Buff/UT_Buff_Heal.png
 スタック,チャージ,number,UT_Buff/UT_Buff_Charge.png
@@ -28,6 +28,6 @@ group,effect_key,input_kind,icon_file,map_id,atk,def,move,damage_reduce,conditio
 マップ固有,逆鱗,number,逆鱗.png,MAP0005,2,0,0,2,
 マップ固有,金鱗,number,金鱗.png,MAP0005,1,1,0,0,
 マップ固有,孔雀の羽ばたき,number,孔雀の羽ばたき.png,MAP0007,2,2,0,0,excess_over_peacock
-追加素材,深層改造,未設定,深層UT_Buff/UT_Buff_Gaizao.png
+追加素材,深層改造,未設定,深層改造.png
 追加素材,戦の呪い,未設定,戦の呪い.png
 マップ固有,勇往邁進,number,UT_Buff/UT_Buff_CourageUp.png,MAP0007,2,0,0,2,
