@@ -34,12 +34,13 @@
  const abilityConditionMatches=condition=>{
   if(!condition)return true;
   if(condition.key==='current_hp_ratio<=')return state().currentHp!==null&&state().currentHp<=base('hp')*Number(condition.value);
+  if(condition.key==='target_mark')return (Number(currentOpponent?.markStacks)||0)>=(Number(condition.min)||0);
   return abilityControlValue(condition.key)===Number(condition.equals);
  };
  const abilityModifierValue=rule=>{
   if(!abilityConditionMatches(rule.when))return 0;
   if(rule.formula==='fixed')return Number(rule.value)||0;
-  const source=abilityControlValue(rule.source);
+  const source=rule.source==='target_mark'?(Number(currentOpponent?.markStacks)||0):abilityControlValue(rule.source);
   if(rule.formula==='per_stack')return source*(Number(rule.value)||0);
   if(rule.formula==='floor_per_unit')return Math.floor(source/(Number(rule.unit)||1))*(Number(rule.value)||0);
   if(rule.formula==='alternating_steps'){

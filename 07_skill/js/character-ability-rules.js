@@ -17,10 +17,10 @@ const CHARACTER_ABILITY_RULES={
  },
  '27':{
   activeSkills:[{key:'active',label:"ミッション：インシークレット",cooldown:3,target:'monster',effects:[{type:'modify_monster_mark',delta:1}]}],
-  controls:[{key:'マーク持ちを攻撃',type:'toggle'},{key:'潜伏',type:'toggle'},{key:'対象のマーク',type:'number',min:0}],
+  controls:[{key:'潜伏',type:'toggle'}],
   modifiers:[
-   {target:'atk',formula:'fixed',value:3,when:{key:'マーク持ちを攻撃',equals:1}},
-   {target:'atk',formula:'per_stack',source:'対象のマーク',value:1,when:{key:'潜伏',equals:1}}
+   {target:'atk',formula:'fixed',value:3,when:{key:'target_mark',min:1}},
+   {target:'atk',formula:'per_stack',source:'target_mark',value:1,when:{key:'潜伏',equals:1}}
   ]
  },
  '4':{
