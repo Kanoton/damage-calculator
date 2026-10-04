@@ -72,7 +72,7 @@ Modifier engine supports fixed, per-stack, floor-per-unit, alternating-step, equ
 
 ## Status icons
 
-Mappings live in `csv/status_icon_map_all.csv`. Confirmed status/buff assets should reference `images/UT_Buff` explicitly via `UT_Buff/<file>`; unresolved legacy `images/icon` references are tracked in `docs/icon-migration.md` and must not be guessed from similar filenames. Recent mappings:
+Mappings live in `csv/status_icon_map_all.csv`. Confirmed status/buff assets should reference `images/UT_Buff` explicitly via `UT_Buff/<file>`. The previously unresolved legacy icon mappings were user-confirmed and completed; `docs/icon-migration.md` records the mapping table. Character skill tooltip Attack/Defense/HP icons also load from `images/UT_Buff`. Recent mappings:
 - Energy Storage -> `UT_Buff_113_Passive.png`
 - Sword Aura -> `UT_Buff_115.png`
 - cumulative movement -> `UT_Buff_117_Passive.png`
