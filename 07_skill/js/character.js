@@ -15,7 +15,7 @@
  const states=new Map();
  const byChip=new Map();
  const specialIcons={'対象のマーク':'マーク','攻撃対象はモンスター':'モンスター','クジャク係の羽ばたき':'孔雀の羽ばたき'};
- const getState=id=>{if(!states.has(id))states.set(id,{level:0,currentHp:null,chips:[],numbers:{},modes:{},phases:{attack:false,move:false},manual:{atk:0,def:0}});return states.get(id);};
+ const getState=id=>{if(!states.has(id))states.set(id,{level:0,currentHp:null,chips:[],numbers:{},modes:{},phases:{attack:false,move:false},manual:{atk:0,def:0},skillCooldowns:{},activeEffects:[]});const value=states.get(id);value.skillCooldowns??={};value.activeEffects??=[];return value;};
  const state=()=>getState(selectedCharacter.id);
  window.hasSelectedCharacter=()=>Boolean(selectedCharacter);
  hasSelectedCharacter=window.hasSelectedCharacter;
@@ -26,6 +26,9 @@
  const number=(s,key)=>Math.min(key==='チャージ'?10:Infinity,Math.max(0,Number(s.numbers[key])||0));
  const abilityRules=()=>CHARACTER_ABILITY_RULES[String(selectedCharacter?.id)]||null;
  const abilityControlValue=key=>Number(state().numbers[key])||0;
+ const activeSkill=()=>abilityRules()?.activeSkills?.[0]||null;
+ const activeSkillCooldown=skill=>Math.max(0,Number(state().skillCooldowns?.[skill?.key])||0);
+ const activeSkillStatBonus=stat=>(state().activeEffects||[]).filter(effect=>effect.type==='modify_stat'&&effect.target==='self'&&effect.stat===stat).reduce((sum,effect)=>sum+(Number(effect.value)||0),0);
  const abilityConditionMatches=condition=>{
   if(!condition)return true;
   if(condition.key==='current_hp_ratio<=')return state().currentHp!==null&&state().currentHp<=base('hp')*Number(condition.value);
@@ -43,8 +46,8 @@
   }
   return 0;
  };
- window.captureCharacterAbilityState=()=>selectedCharacter?{id:selectedCharacter.id,numbers:{...state().numbers}}:null;
- window.restoreCharacterAbilityState=snapshot=>{if(!snapshot)return;getState(snapshot.id).numbers={...getState(snapshot.id).numbers,...snapshot.numbers};if(selectedCharacter?.id===snapshot.id){renderConditions();updateStats();}};
+ window.captureCharacterAbilityState=()=>selectedCharacter?{id:selectedCharacter.id,numbers:{...state().numbers},skillCooldowns:{...state().skillCooldowns},activeEffects:(state().activeEffects||[]).map(effect=>({...effect}))}:null;
+ window.restoreCharacterAbilityState=snapshot=>{if(!snapshot)return;const target=getState(snapshot.id);target.numbers={...target.numbers,...snapshot.numbers};target.skillCooldowns={...target.skillCooldowns,...snapshot.skillCooldowns};target.activeEffects=(snapshot.activeEffects||[]).map(effect=>({...effect}));if(selectedCharacter?.id===snapshot.id){renderConditions();updateStats();}};
  const modeFor=rule=>Number(state().modes[rule.chip_id])||0;
  const base=(stat)=>Number(selectedCharacter['lv'+state().level+'_'+stat]||0);
  function activeRules(){
@@ -99,6 +102,7 @@
   for(const rule of abilityRules()?.modifiers||[]){
    if(['atk','def','move'].includes(rule.target))result[rule.target]+=abilityModifierValue(rule);
   }
+  for(const stat of ['atk','def','move'])result[stat]+=activeSkillStatBonus(stat);
   for(const rule of mapKeywords.filter(row=>row.map_id===mapPicker.value)){
    let stacks=rule.input_kind==='checkbox'?(state().modes[rule.effect_key]?1:0):number(state(),rule.effect_key);
    if(rule.condition==='excess_over_peacock')stacks=currentOpponent?.name==='クジャク係'&&currentOpponent.mapId===mapPicker.value?Math.max(0,stacks-number(state(),'クジャク係の羽ばたき')):0;
@@ -191,12 +195,18 @@
    input.addEventListener('change',()=>setValue(input.value));item.append(button,input);conditionsBox.append(item);
   }
  }
+ function updateActiveSkillUi(){
+  const skill=activeSkill(),button=document.getElementById('selected-character-skill'),ctWrap=document.getElementById('selected-character-ct-wrap'),ct=document.getElementById('selected-character-ct');
+  button.hidden=!skill;ctWrap.hidden=!skill;if(!skill)return;
+  const cooldown=activeSkillCooldown(skill);ct.textContent=String(cooldown);button.textContent='スキル';button.title=skill.label+'を発動';button.setAttribute('aria-label',skill.label+'を発動');button.disabled=cooldown>0;
+ }
  function updateStats(){
   if(!selectedCharacter)return;
   const totals=calculate();
   hpInput.max=totals.hp;hpInput.value=state().currentHp;
   for(const stat of ['atk','def'])document.getElementById('selected-character-'+stat).value=totals[stat];
   for(const stat of ['hp','move'])document.getElementById('selected-character-'+stat).textContent=totals[stat];
+  updateActiveSkillUi();
   applyCharacterToCalculator(totals);
   calculateDamage(document.querySelector('[data-role="attack"].mode-content'),false);
   calculateDamage(document.querySelector('[data-role="defense"].mode-content'),true);
@@ -313,6 +323,14 @@
  portraitButton.addEventListener('click',()=>changeCharacterLevel(1));
  portraitButton.addEventListener('contextmenu',event=>{event.preventDefault();changeCharacterLevel(-1);});
  portraitButton.addEventListener('keydown',event=>{if(event.key==='ArrowDown'){event.preventDefault();changeCharacterLevel(-1);}});
+ const skillButton=document.getElementById('selected-character-skill');
+ skillButton.addEventListener('click',()=>{
+  const skill=activeSkill();if(!skill||activeSkillCooldown(skill)>0)return;
+  state().activeEffects=(state().activeEffects||[]).filter(effect=>effect.source!==skill.key);
+  for(const effect of skill.effects||[])state().activeEffects.push({...effect,source:skill.key});
+  state().skillCooldowns[skill.key]=Math.max(0,Number(skill.cooldown)||0);
+  updateStats();
+ });
  setupCharacterNumberPad({selectedPanel});
  hpInput.addEventListener('change',()=>{state().currentHp=Math.max(0,Number(hpInput.value)||0);updateStats();});
  const hpButton=document.getElementById('selected-character-hp-fill');
@@ -369,6 +387,10 @@
  applyCharacterTurnStartEffects=()=>{
   if(!selectedCharacter)return;
   let changed=false;
+  const beforeEffects=state().activeEffects.length;
+  state().activeEffects=state().activeEffects.filter(effect=>effect.duration!=='turn');
+  if(state().activeEffects.length!==beforeEffects)changed=true;
+  for(const [key,value] of Object.entries(state().skillCooldowns)){const next=Math.max(0,(Number(value)||0)-1);if(next!==value){state().skillCooldowns[key]=next;changed=true;}}
   if(state().chips.includes('57')){const charge=number(state(),'チャージ');if(charge<6){state().numbers['チャージ']=6;changed=true;}}
   for(const effect of abilityRules()?.turnEnd||[]){const current=abilityControlValue(effect.key),next=Math.max(Number(effect.min)||0,current+(Number(effect.delta)||0));if(next!==current){state().numbers[effect.key]=next;changed=true;}}
   if(changed){renderConditions();updateStats();}

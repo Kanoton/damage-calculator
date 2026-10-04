@@ -24,6 +24,30 @@ test('07 skill: Nancy firewall toggles attack and defense bonuses', async ({ pag
  await expect(page.locator('#selected-character-def')).toHaveValue('3');
 });
 
+test('07 skill: Jasmine active skill applies turn effects and cooldown', async ({ page }) => {
+ await page.goto('/07_skill/');
+ await selectCharacter(page,'16');
+ const skill=page.getByRole('button',{name:'オーバードライブを発動'});
+ await expect(page.locator('#selected-character-ct-wrap')).toBeVisible();
+ await expect(page.locator('#selected-character-ct')).toHaveText('0');
+ await expect(page.locator('#selected-character-move')).toHaveText('0');
+ await expect(page.locator('#selected-character-def')).toHaveValue('0');
+ await skill.click();
+ await expect(page.locator('#selected-character-move')).toHaveText('3');
+ await expect(page.locator('#selected-character-def')).toHaveValue('-3');
+ await expect(page.locator('#selected-character-ct')).toHaveText('4');
+ await expect(skill).toBeDisabled();
+ await page.locator('#turn-end').click();
+ await expect(page.locator('#selected-character-move')).toHaveText('0');
+ await expect(page.locator('#selected-character-def')).toHaveValue('0');
+ await expect(page.locator('#selected-character-ct')).toHaveText('3');
+ await page.locator('#turn-end').click();
+ await page.locator('#turn-end').click();
+ await page.locator('#turn-end').click();
+ await expect(page.locator('#selected-character-ct')).toHaveText('0');
+ await expect(skill).toBeEnabled();
+});
+
 test('07 skill: Jasmine result and cumulative movement modify stats', async ({ page }) => {
  await page.goto('/07_skill/');
  await selectCharacter(page,'16');

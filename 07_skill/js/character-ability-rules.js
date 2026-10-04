@@ -109,6 +109,7 @@ const CHARACTER_ABILITY_RULES={
   ]
  },
  '16':{
+  activeSkills:[{key:'overdrive',label:'オーバードライブ',cooldown:4,effects:[{type:'modify_stat',target:'self',stat:'move',value:3,duration:'turn'},{type:'modify_stat',target:'self',stat:'def',value:-3,duration:'turn'}]}],
   controls:[
    {key:'オーバードライブ結果',type:'choice',options:[{value:0,label:'変化なし'},{value:1,label:'10未満'},{value:2,label:'10以上'}]},
    {key:'累計移動ポイント',type:'number',min:0}
