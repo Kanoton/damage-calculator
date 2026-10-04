@@ -57,7 +57,7 @@ function createCharacterSkillTooltipView(row,ability){
  for(const [key,label,file] of [['atk','攻撃力','Attack.png'],['def','防御力','Defense.png'],['hp','HP','Hp.png'],['move','移動力',null]]){
   const entry=document.createElement('span');entry.className='character-skill-stat';entry.title=label;
   const icon=file?document.createElement('img'):document.createElement('span');
-  if(file){icon.src='../images/icon/'+file;icon.alt='';}else{icon.className='character-skill-move-icon';icon.textContent='👟';icon.setAttribute('aria-hidden','true');}
+  if(file){icon.src='../images/UT_Buff/'+file;icon.alt='';}else{icon.className='character-skill-move-icon';icon.textContent='👟';icon.setAttribute('aria-hidden','true');}
   const values=[0,1,2,3].map(level=>row['lv'+level+'_'+key]??'—').join(' / ');
   const text=document.createElement('span');text.textContent=values;
   entry.setAttribute('aria-label',label+' Lv0からLv3 '+values);entry.append(icon,text);stats.append(entry);
