@@ -112,7 +112,7 @@ Required behavior:
 
 - Z3000 (9): Pull In's 5 direct damage is implemented. The 7-space range is intentionally manual; the optional immediate attack when ATK >= 7 is not represented as a separate combat action.
 - Papara (7): Bite-sized healing is intentionally not simulated. Activating the skill forces the existing half-HP-or-lower ATK +3 condition through the end of the current turn.
-- Character-target active skills (Ren 8, Lulu 11, Al 21, Teru 23, Jill 103, Dorothy 104, and related effects) need a shared manual character-target selection flow before their target effects can be safely implemented.
+- Character-target active skills (Ren 8, Lulu 11, Al 21, Jill 103, Dorothy 104, and related effects) need a shared manual character-target selection flow before their target effects can be safely implemented.
 - Moses (24): Weakness can be manually targeted, but its combat-die-0 effect is not represented by the current outgoing-damage calculator.
 - Chouten-chan/Ame-chan (101/102): Fan and Love are manual stack controls. Internet Angel references Fan for its 3+ Fan self-heal; Love Overdose snapshots Love for this-turn movement/healing, consumes 4 Love, and at 4+ permanently raises max HP and the Love cap by 1. Coin/card/other-character rewards remain outside the calculator.
 - Nancy Lo (18): Hacking depends on target distance and initiating a forced combat; those actions are not represented by the current skill target resolver.
