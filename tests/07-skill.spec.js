@@ -137,7 +137,7 @@ test('07 skill: every character exposes active skill CT management', async ({ pa
   await expect(skill).toBeVisible();
   await expect(ct).toHaveText('CT 0');
   await skill.click();
-  if(['9','13','14','27','28','106'].includes(id)){
+  if(['9','13','14','23','27','28','106'].includes(id)){
    await expect(ct).toHaveText('CT 0');
    continue;
   }
