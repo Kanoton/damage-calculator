@@ -70,6 +70,10 @@ Modifier engine supports fixed, per-stack, floor-per-unit, alternating-step, equ
 - Kaisei Fate Echo manually targets a monster, starts a visible Fate Echo counter at 2 beside Mark, adds +1 damage received while active, decrements at each turn end, and disappears at 0. Coin/card rewards are not simulated.
 
 
+## Battle card images
+
+Attack/Defense battle-card artwork in `07_skill/index.html` and `06b_chara/index.html` uses `images/UT_HandCard`. The user-confirmed mapping is: Atk1/2/3/4/5/6/7 -> UT_HandCard_10001/10003/10005/10007/10008/10009/10010.png; Def1/2/3 -> UT_HandCard_10002/10004/10006.png; reset images remain named AtkReset.jpg / DefReset.jpg but also live in UT_HandCard. Do not restore references to the legacy AtkCard/DefCard folders.
+
 ## Status icons
 
 Mappings live in `csv/status_icon_map_all.csv`. Confirmed status/buff assets should reference `images/UT_Buff` explicitly via `UT_Buff/<file>`. The previously unresolved legacy icon mappings were user-confirmed and completed; `docs/icon-migration.md` records the mapping table. Character skill tooltip Attack/Defense/HP icons also load from `images/UT_Buff`. Recent mappings:
