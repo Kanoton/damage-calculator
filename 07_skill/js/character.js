@@ -410,7 +410,7 @@
   if(!selectedCharacter)return;
   let changed=false;
   const beforeEffects=state().activeEffects.length;
-  state().activeEffects=state().activeEffects.filter(effect=>effect.duration!=='turn').map(effect=>effect.durationTurns?{...effect,durationTurns:effect.durationTurns-1}:effect).filter(effect=>!effect.durationTurns||effect.durationTurns>0);
+  state().activeEffects=state().activeEffects.filter(effect=>effect.duration!=='turn').map(effect=>effect.durationTurns?{...effect,durationTurns:effect.durationTurns-1}:effect).filter(effect=>effect.durationTurns===undefined||effect.durationTurns>0);
   if(state().activeEffects.length!==beforeEffects)changed=true;
   if(state().chips.includes('57')){const charge=number(state(),'チャージ');if(charge<6){state().numbers['チャージ']=6;changed=true;}}
   for(const effect of abilityRules()?.turnEnd||[]){const current=abilityControlValue(effect.key),next=Math.max(Number(effect.min)||0,current+(Number(effect.delta)||0));if(next!==current){state().numbers[effect.key]=next;changed=true;}}
