@@ -386,3 +386,25 @@ test('07 skill: edited monster HP stays stable when another monster is defeated'
  await page.locator('#map-roster-list .roster-remove').nth(1).click();
  await expect(page.locator('input[aria-label="'+editedLabel+'"]')).toHaveValue(String(editedHp));
 });
+
+
+test('07 skill: Z3000 Pull In manually targets a monster and deals 5 damage', async ({ page }) => {
+ await page.goto('/07_skill/');
+ await page.locator('.role-tab[data-role="map"]').click();
+ await page.locator('#mp-tab-monsters').click();
+ const mapSelect=page.locator('#mp-map-select');
+ for(const option of await mapSelect.locator('option').all()){
+  await mapSelect.selectOption(await option.getAttribute('value'));await mapSelect.dispatchEvent('change');
+  if(await page.locator('#mp-monster-list .mp-monster:visible').count())break;
+ }
+ await page.locator('#mp-monster-list .mp-monster:visible').first().click();
+ const target=page.locator('#map-roster-list .roster-select').first(),hp=page.locator('#map-roster-list input[aria-label$="の残りHP"]').first();
+ const before=Number(await hp.inputValue());
+ await selectCharacter(page,'9');
+ await page.getByRole('button',{name:'引き寄せるを発動'}).click();
+ await expect(page.locator('#character-skill-target-banner')).toContainText('引き寄せる：対象のモンスターを選択してください');
+ await page.locator('.role-tab[data-role="map"]').click();
+ await target.click();
+ if(before>5)await expect(hp).toHaveValue(String(before-5));else await expect(page.locator('#map-roster-list .roster-card').first()).toHaveClass(/defeated/);
+ await expect(page.locator('#selected-character-ct')).toHaveText('CT 4');
+});
