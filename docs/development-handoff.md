@@ -76,7 +76,7 @@ Attack/Defense battle-card artwork in `07_skill/index.html` and `06b_chara/index
 
 ## Status icons
 
-Mappings live in `csv/status_icon_map_all.csv`. Confirmed status/buff assets should reference `images/UT_Buff` explicitly via `UT_Buff/<file>`. The previously unresolved legacy icon mappings were user-confirmed and completed; `docs/icon-migration.md` records the mapping table. Character skill tooltip Attack/Defense/HP icons also load from `images/UT_Buff`. Direct 07_skill stat UI references use `UT_Buff/Attack.png`, `Defense.png`, `Hp.png`, and `run.png`; roster marks use `UT_Buff_Lock.png`. `Boss.png` remains a legacy `images/icon` reference until a confirmed UT_Buff replacement is provided. Recent mappings:
+Mappings live in `csv/status_icon_map_all.csv`. Confirmed status/buff assets should reference `images/UT_Buff` explicitly via `UT_Buff/<file>`. The previously unresolved legacy icon mappings were user-confirmed and completed; `docs/icon-migration.md` records the mapping table. Character skill tooltip Attack/Defense/HP icons also load from `images/UT_Buff`. Direct 07_skill stat UI references use `UT_Buff/Attack.png`, `Defense.png`, `Hp.png`, and `run.png`; roster marks use `UT_Buff_Lock.png`. `Boss.png` also uses `images/UT_Buff/Boss.png`; 07_skill no longer intentionally depends on the legacy `images/icon` folder. Recent mappings:
 - Energy Storage -> `UT_Buff_113_Passive.png`
 - Sword Aura -> `UT_Buff_115.png`
 - cumulative movement -> `UT_Buff_117_Passive.png`
