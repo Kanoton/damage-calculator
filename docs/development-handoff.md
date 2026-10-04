@@ -1,6 +1,6 @@
 # Development Handoff
 
-Last updated: 2026-10-03
+Last updated: 2026-10-05
 
 This is the durable handoff for continuing development, especially `07_skill`. On a new chat or machine, read this file, current `main`, and recent PRs before changing code.
 
@@ -10,6 +10,7 @@ This is the durable handoff for continuing development, especially `07_skill`. O
 - Use small focused branches/PRs and add regression tests for behavior changes.
 - For `07_skill` changes, confirm both `07 skill browser smoke` and `06b browser smoke` pass before merge.
 - Preserve unrelated behavior.
+- User preference: for requested changes that are ready to merge, complete the relevant checks, merge, and then report the result. Do not routinely stop at PR creation or ask for another merge confirmation. If checks fail, conflicts remain, or a genuinely ambiguous/destructive decision blocks progress, report the blocker.
 - Do not guess ambiguous game rules such as rounding, timing, target, stacking, or duration; confirm them first.
 - Unambiguous character parameter skills may be implemented directly; surface ambiguous ones for confirmation.
 - Prefer explicit repository icon mappings/assets over inferred filenames.
@@ -145,6 +146,13 @@ All current character IDs now have an ability-rule entry for active-skill/CT met
 - #129 active skill CT tracking for all characters
 
 Use PR history for exact diffs/rationale when touching the same areas.
+
+## Project entry points
+
+- `README.md` documents startup, repository structure, verification commands, and the Issue/PR workflow.
+- `AGENTS.md` directs AI contributors to the working guide and this handoff before editing.
+- `.github/ISSUE_TEMPLATE/` and `.github/pull_request_template.md` capture reproducible bugs, confirmed game rules, acceptance criteria, and validation results.
+- This setup changes documentation/templates only; it does not change game behavior or the current working folder.
 
 ## Continuation checklist
 

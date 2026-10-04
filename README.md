@@ -1,1 +1,65 @@
-# image-web-app
+# アストラルパーティー補助アプリ
+
+ダメージ計算、攻撃・防御カードの確率確認、マップ・モンスター管理、キャラクター・チップ・固有スキルの状態管理を支援するアプリです。
+
+## 現在の開発対象
+
+現在の作業フォルダは **`07_skill/`** です。新しい作業依頼で別フォルダが指定された場合は、その指定を優先します。既存の世代フォルダは比較・回帰確認のため残します。
+
+## 起動
+
+このリポジトリを取得し、リポジトリのルートで実行します。静的アプリなので、通常の利用に npm のインストールは不要です。
+
+```sh
+git clone https://github.com/Kanoton/damage-calculator.git
+cd damage-calculator
+python3 -m http.server 4173 --bind 127.0.0.1
+```
+
+ブラウザで http://127.0.0.1:4173/07_skill/ を開きます。サーバーを終了するには Ctrl+C を押します。
+
+`07_skill/index.html` を直接開く `file://` 起動にも対応しています。その場合やデータ取得に失敗した場合は同梱スナップショットを使用するため、CSV更新時は両経路の整合性を確認してください。
+
+## 開発資料
+
+- [WORKING_GUIDE.md](WORKING_GUIDE.md): 作業開始手順、構成、互換要件、検証方法
+- [docs/development-handoff.md](docs/development-handoff.md): 実装済みルール、既知の未実装事項、継続開発の引き継ぎ
+- [docs/icon-migration.md](docs/icon-migration.md): 確認済み画像マッピング
+- [streamdeck/README.md](streamdeck/README.md): Stream Deck連携
+- [AGENTS.md](AGENTS.md): AIによる作業の入口
+
+## 主要ディレクトリ
+
+| パス | 用途 |
+| --- | --- |
+| `07_skill/` | 現行の画面・計算・状態管理 |
+| `06b_chara/` | 既存smoke testの対象 |
+| `csv/` | 正本のゲームデータ |
+| `images/` | 正本の画像 |
+| `tests/` | Playwrightテスト |
+| `scripts/` | 構文チェック |
+| `docs/` | 引き継ぎ・調査資料 |
+
+## 検証
+
+CIに合わせて Node.js 22、npm、Python 3 を用意します。
+
+```sh
+npm install
+npx playwright install --with-deps chromium
+npm run check:07
+npm run test:06b
+npm run test:07
+```
+
+現在の `test:06b` は Playwright の全テストを実行します。`test:07` は固有能力テストのみを実行します。`check:07` は個別JSとHTMLの読み込み順で連結したJSを構文チェックします。
+
+## プロジェクトの進め方
+
+1. 作業ガイドと引き継ぎ書を読み、対象フォルダ・正本データ・関連テストを確認する。
+2. 不具合または機能要望を Issue に記録する。曖昧なゲームルールは確認事項として残し、推測で実装しない。
+3. 小さなブランチ・PR単位で変更する。新しい世代フォルダはユーザーの指示がある場合に作成する。
+4. 必要な検証とdiff確認を行い、実装や方針が変わった場合は引き継ぎ書も更新する。
+5. 関連CIの成功を確認してからマージする。
+
+固有スキルにはCTのみ管理するものや、範囲・移動・報酬などを手動扱いにするものがあります。詳細は引き継ぎ書の「Known incomplete / ambiguous rules」を参照してください。
