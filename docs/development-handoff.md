@@ -57,10 +57,11 @@ Modifier engine supports fixed, per-stack, floor-per-unit, alternating-step, equ
 
 ## Active skill and cooldown architecture
 
-- Active skills are declarative `activeSkills` entries on character ability rules.
+- Active skills are declarative `activeSkills` entries on character ability rules. Every current character has active-skill name/CT metadata from `csv/character_skills.csv`, so skill/CT management is available even when the skill effect itself is not simulated by the calculator.
 - The selected-character UI places `スキル` and `CT n` vertically in the open area to the right of HP/stats, with the chip area pulled left to reduce unused space.
 - Current cooldown is stored per skill, not only per character. CT 0 means usable and activation sets CT to that skill's configured maximum. Do not automatically decrement CT at turn end; the `CT n` display is a button for manual adjustment: left click -1, right click +1. This intentionally avoids hard-coding character-specific cooldown-reduction conditions.
 - Turn-duration effects are stored separately from permanent/manual modifiers and expire at turn end.
+- Do not block active-skill/CT coverage on whether the calculator can simulate the skill effect; an empty `effects` list is valid for CT-only tracking.
 - The first supported generic effect is `modify_stat` targeting self. Keep the effect-dispatch model extensible so future skills can add effects such as monster damage, healing, stack/status changes, target stat changes, and target selection without character-specific button code.
 - Jasmine Overdrive is the first implementation: CT 4, MOVE +3 / DEF -3 for one turn.
 
@@ -107,7 +108,7 @@ Review current game data before implementing:
 - Tono Hanna (105): movement +2 to another character may require movement-target support.
 - Tachibana Sherry (106): Hanna damage reduction is not represented.
 
-No current ability-rule entry: `1,2,3,5,8,11,13,19,20,22,29,101,102,105`. Do not assume all require controls; first determine whether their skills affect calculations supported by `07_skill`.
+All current character IDs now have an ability-rule entry for active-skill/CT metadata. Characters without supported calculator effects may intentionally have CT-only active skill entries; do not infer additional effect controls from that.
 
 ## Important recent PRs
 
@@ -120,6 +121,8 @@ No current ability-rule entry: `1,2,3,5,8,11,13,19,20,22,29,101,102,105`. Do not
 - #122 Mamushi automatic True Dragon at Awakening 8
 - #123 monster HP stability and roster numeric-input commit fix
 - #126 active skill cooldown framework
+- #127 manual CT controls and stacked skill/CT layout
+- #128 active-skill spacing and character stat floor
 
 Use PR history for exact diffs/rationale when touching the same areas.
 
