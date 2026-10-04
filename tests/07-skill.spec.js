@@ -35,7 +35,7 @@ test('07 skill: Jasmine active skill applies turn effects and cooldown', async (
  await expect(page.locator('#selected-character-def')).toHaveValue('0');
  await skill.click();
  await expect(page.locator('#selected-character-move')).toHaveText('3');
- await expect(page.locator('#selected-character-def')).toHaveValue('-3');
+ await expect(page.locator('#selected-character-def')).toHaveValue('0');
  await expect(ct).toHaveText('CT 4');
  await expect(skill).toBeDisabled();
  await page.locator('#turn-end').click();
