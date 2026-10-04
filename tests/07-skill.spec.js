@@ -337,10 +337,21 @@ test('07 skill: contextual character attacks only apply when enabled', async ({ 
  await expect(page.locator('#selected-character-atk')).toHaveValue('5');
 
  await selectCharacter(page,'27');
- const marks=page.getByLabel('対象のマークの数');
- await marks.fill('2');await marks.dispatchEvent('change');
- await page.getByRole('button',{name:/マーク持ちを攻撃：オフ/}).click();
+ await expect(page.getByLabel('対象のマークの数')).toHaveCount(0);
+ await expect(page.getByRole('button',{name:/マーク持ちを攻撃/})).toHaveCount(0);
+ await page.locator('.role-tab[data-role="map"]').click();
+ await page.locator('#mp-tab-monsters').click();
+ const mapSelect=page.locator('#mp-map-select');
+ for(const option of await mapSelect.locator('option').all()){
+  await mapSelect.selectOption(await option.getAttribute('value'));await mapSelect.dispatchEvent('change');
+  if(await page.locator('#mp-monster-list .mp-monster:visible').count())break;
+ }
+ await page.locator('#mp-monster-list .mp-monster:visible').first().click();
+ const mark=page.locator('#map-roster-list .roster-mark button').first();
+ await mark.click();await mark.click();
+ await page.locator('#map-roster-list .roster-select').first().click();
  await expect(page.locator('#selected-character-atk')).toHaveValue('5');
+ await page.locator('.role-tab[data-role="character"]').click();
  await page.getByRole('button',{name:/潜伏：オフ/}).click();
  await expect(page.locator('#selected-character-atk')).toHaveValue('7');
 });
