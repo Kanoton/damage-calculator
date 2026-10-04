@@ -39,7 +39,7 @@ Key behavior:
 - 12 Hime: Energy Storage 0-5; each -> ATK +2 / DEF +2.
 - 14 Misaki: Sword Aura 0-3 tracked; no modifier yet.
 - 15 Nardis: hand advantage capped at 3 -> ATK +1 each.
-- 16 Jasmine: active Overdrive has CT 4; activation gives MOVE +3 / DEF -3 for the turn, then the temporary effects expire at turn end. CT is adjusted manually rather than automatically because additional game conditions can reduce it. Existing Overdrive result <10 -> DEF +2, >=10 -> ATK +2; every 13 cumulative movement alternates ATK/DEF.
+- 16 Jasmine: active Overdrive has CT 4; activation gives MOVE +3 / DEF -3 for the turn, with calculated character parameters clamped to their normal minimum of 0, then the temporary effects expire at turn end. CT is adjusted manually rather than automatically because additional game conditions can reduce it. Existing Overdrive result <10 -> DEF +2, >=10 -> ATK +2; every 13 cumulative movement alternates ATK/DEF.
 - 17 Luka: Midnight Slash attack context -> ATK +2.
 - 18 Nancy Lo: Firewall -> ATK +2 / DEF +2.
 - 21 Al: every 6 Starlight -> ATK +1 / DEF +1.
