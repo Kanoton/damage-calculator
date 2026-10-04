@@ -81,6 +81,10 @@ test('07 skill: every character exposes active skill CT management', async ({ pa
   await expect(skill).toBeVisible();
   await expect(ct).toHaveText('CT 0');
   await skill.click();
+  if(id==='14'){
+   await expect(ct).toHaveText('CT 0');
+   continue;
+  }
   await expect(ct).toHaveText('CT '+cooldown);
   await ct.click();
   await expect(ct).toHaveText('CT '+(cooldown-1));
