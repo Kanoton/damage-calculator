@@ -111,6 +111,7 @@
   }
   result.atk+=state().manual?.atk||0;
   result.def+=state().manual?.def||0;
+  result.atk=Math.max(0,result.atk);result.def=Math.max(0,result.def);result.move=Math.max(0,result.move);
   return result;
  }
  function makeIcon(key){
