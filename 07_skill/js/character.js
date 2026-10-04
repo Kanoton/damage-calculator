@@ -345,7 +345,7 @@
   if(skill.target){window.dispatchEvent(new CustomEvent('character-skill-target-request',{detail:{target:skill.target,skillKey:skill.key,label:skill.label}}));return;}
   applyActiveSkillEffects(skill);
   state().skillCooldowns[skill.key]=Math.max(0,Number(skill.cooldown)||0);
-  updateStats();
+  renderConditions();updateStats();
  });
  function applyActiveSkillEffects(skill){
   state().activeEffects=(state().activeEffects||[]).filter(effect=>effect.source!==skill.key);
