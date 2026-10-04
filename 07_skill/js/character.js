@@ -29,7 +29,7 @@
  const activeSkill=()=>abilityRules()?.activeSkills?.[0]||null;
  const activeSkillCooldown=skill=>Math.max(0,Number(state().skillCooldowns?.[skill?.key])||0);
  const activeEffectConditionMatches=condition=>!condition||(condition.key&&(condition.equals!==undefined?abilityControlValue(condition.key)===Number(condition.equals):abilityControlValue(condition.key)>=(Number(condition.min)||0)));
- const activeEffectAllowed=effect=>activeEffectConditionMatches(effect.when)&&!activeEffectConditionMatches(effect.unless);
+ const activeEffectAllowed=effect=>activeEffectConditionMatches(effect.when)&&(!effect.unless||!activeEffectConditionMatches(effect.unless));
  const activeSkillStatBonus=stat=>(state().activeEffects||[]).filter(effect=>effect.type==='modify_stat'&&effect.target==='self'&&effect.stat===stat&&activeEffectConditionMatches(effect.when)).reduce((sum,effect)=>sum+(Number(effect.value)||0),0);
  const abilityConditionMatches=condition=>{
   if(!condition)return true;
