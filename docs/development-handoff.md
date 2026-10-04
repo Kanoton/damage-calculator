@@ -37,7 +37,7 @@ Key behavior:
 - 9 Z3000: every 2 monster defeats -> ATK +1.
 - 10 Pandaman: counterattack mode; ATK increases by damage received that turn.
 - 12 Hime: Energy Storage 0-5; each -> ATK +2 / DEF +2. Active Qigong Training (CT 3) heals self 2 HP up to max HP and, if Energy Storage is active when used, gives ATK +4 for that turn.
-- 14 Misaki: Sword Aura 0-3 tracked; no modifier yet.
+- 14 Misaki: Sword Aura 0-3 tracked. Active Sakura Retsukuzan uses manual roster target selection (range is not auto-validated), deals 2 direct damage through roster HP/defeat handling, gains +1 Sword Aura normally, or consumes 2 when used at 3 stacks. The card reward at max stacks is not represented.
 - 15 Nardis: hand advantage capped at 3 -> ATK +1 each.
 - 16 Jasmine: active Overdrive has CT 4; activation gives MOVE +3 / DEF -3 for the turn, with calculated character parameters clamped to their normal minimum of 0, then the temporary effects expire at turn end. CT is adjusted manually rather than automatically because additional game conditions can reduce it. Existing Overdrive result <10 -> DEF +2, >=10 -> ATK +2; every 13 cumulative movement alternates ATK/DEF.
 - 17 Luka: Midnight Slash attack context -> ATK +2.
@@ -61,6 +61,7 @@ Modifier engine supports fixed, per-stack, floor-per-unit, alternating-step, equ
 - The selected-character UI places `スキル` and `CT n` vertically in the open area to the right of HP/stats, with the chip area pulled left to reduce unused space.
 - Current cooldown is stored per skill, not only per character. CT 0 means usable and activation sets CT to that skill's configured maximum. Do not automatically decrement CT at turn end; the `CT n` display is a button for manual adjustment: left click -1, right click +1. This intentionally avoids hard-coding character-specific cooldown-reduction conditions.
 - Turn-duration effects are stored separately from permanent/manual modifiers and expire at turn end.
+- Any active skill that specifies a monster or character target must use explicit manual target selection regardless of whether the game rule has a range limit. Do not auto-validate skill range; the user is responsible for choosing a legal target. Targeted skills should not consume CT/apply effects until a target is actually selected.
 - Do not block active-skill/CT coverage on whether the calculator can simulate the skill effect; an empty `effects` list is valid for CT-only tracking.
 - Supported generic active effects currently include `modify_stat` targeting self and `heal` targeting self; active effects may carry simple control-value conditions evaluated at activation.
 - The first supported generic effect is `modify_stat` targeting self. Keep the effect-dispatch model extensible so future skills can add effects such as monster damage, healing, stack/status changes, target stat changes, and target selection without character-specific button code.
@@ -100,7 +101,6 @@ Required behavior:
 ## Known incomplete / ambiguous rules
 
 Review current game data before implementing:
-- Misaki (14): Sakura Retsukuzan should target a monster within 6 spaces, deal 2 direct damage, and change Sword Aura (+1 normally; at max stacks consume 2 and grant a card). Direct roster damage/defeat handling is not yet wired into character active skills, and range/target selection needs an explicit UI/architecture decision before implementation.
 - Teru (23): Three Gods Possession adds half another character's ATK/DEF; rounding needs confirmation.
 - Dorothy (104): ally-pass ATK +1 behavior and Warmth=5 DEF-to-ATK/consume-all effect remain incomplete.
 - Ame-chan (102): possible max HP +1 at Love >=4 needs max-HP support/confirmation.
