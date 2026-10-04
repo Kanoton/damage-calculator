@@ -8,7 +8,7 @@ function createRosterCardShell(enemy,selectedId,displayName,assignImage,icons){
 }
 function createRosterActionButton(className,text,label,disabled=false){const button=document.createElement('button');button.type='button';button.className=className;button.textContent=text;button.disabled=disabled;button.setAttribute('aria-label',label);return button;}
 function createRosterMarkControl(enemy,displayName){
- const field=document.createElement('div');field.className='roster-mark';field.title='マーク：左クリックで＋1、右クリックで−1';const button=document.createElement('button');button.type='button';button.className='roster-mark-button';button.disabled=!!enemy.defeated;button.setAttribute('aria-label',displayName+'のマークを増やす');const icon=document.createElement('img');icon.src='../images/icon/'+encodeURIComponent('マーク.png');icon.alt='マーク';button.append(icon);const value=document.createElement('strong');value.textContent=String(enemy.markStacks||0);field.append(button,value);return {field,button};
+ const field=document.createElement('div');field.className='roster-mark';field.title='マーク：左クリックで＋1、右クリックで−1';const button=document.createElement('button');button.type='button';button.className='roster-mark-button';button.disabled=!!enemy.defeated;button.setAttribute('aria-label',displayName+'のマークを増やす');const icon=document.createElement('img');icon.src='../images/UT_Buff/UT_Buff_Lock.png';icon.alt='マーク';button.append(icon);const value=document.createElement('strong');value.textContent=String(enemy.markStacks||0);field.append(button,value);return {field,button};
 }
 
 function createRosterStats(enemy,displayName,assignImage,icons,onCommit){
