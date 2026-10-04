@@ -16,7 +16,7 @@ const CHARACTER_ABILITY_RULES={
   modifiers:[{target:'atk',formula:'per_stack',source:'狐光',value:1,when:{key:'狐光追加攻撃',equals:1}}]
  },
  '27':{
-  activeSkills:[{key:'active',label:"ミッション：インシークレット",cooldown:3,effects:[]}],
+  activeSkills:[{key:'active',label:"ミッション：インシークレット",cooldown:3,target:'monster',effects:[{type:'modify_monster_mark',delta:1}]}],
   controls:[{key:'マーク持ちを攻撃',type:'toggle'},{key:'潜伏',type:'toggle'},{key:'対象のマーク',type:'number',min:0}],
   modifiers:[
    {target:'atk',formula:'fixed',value:3,when:{key:'マーク持ちを攻撃',equals:1}},
@@ -56,7 +56,7 @@ const CHARACTER_ABILITY_RULES={
   modifiers:[{target:'atk',formula:'per_stack',source:'吸収した影',value:1}]
  },
  '28':{
-  activeSkills:[{key:'active',label:"インターセプトタックル",cooldown:3,effects:[]}],
+  activeSkills:[{key:'active',label:"インターセプトタックル",cooldown:3,target:'monster',effects:[{type:'modify_monster_def',value:-2,durationTurns:2},{type:'modify_stat',target:'self',stat:'atk',value:2,durationTurns:2}]}],
   controls:[{key:'エリア拒止通過',type:'toggle'}],
   modifiers:[{target:'atk',formula:'fixed',value:2,when:{key:'エリア拒止通過',equals:1}}]
  },
@@ -160,7 +160,7 @@ const CHARACTER_ABILITY_RULES={
   activeSkills:[{key:'active',label:"癒しの粘液",cooldown:3,effects:[]}],
  },
  '13':{
-  activeSkills:[{key:'active',label:"フェイト・エコー",cooldown:3,effects:[]}],
+  activeSkills:[{key:'active',label:"フェイト・エコー",cooldown:3,target:'monster',effects:[{type:'fate_echo',stacks:2,damageAdd:1}]}],
  },
  '19':{
   activeSkills:[{key:'active',label:"軌道エアバースト",cooldown:3,effects:[]}],
