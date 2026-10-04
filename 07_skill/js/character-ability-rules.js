@@ -1,18 +1,22 @@
 // ===== キャラクター固有能力ルール =====
 const CHARACTER_ABILITY_RULES={
  '10':{
+  activeSkills:[{key:'active',label:"食べ放題",cooldown:3,effects:[]}],
   controls:[{key:'カウンター攻撃',type:'toggle'},{key:'このターンに受けたダメージ',type:'number',min:0}],
   modifiers:[{target:'atk',formula:'per_stack',source:'このターンに受けたダメージ',value:1,when:{key:'カウンター攻撃',equals:1}}]
  },
  '17':{
+  activeSkills:[{key:'active',label:"真夜の一閃",cooldown:3,effects:[]}],
   controls:[{key:'真夜の一閃',type:'toggle'}],
   modifiers:[{target:'atk',formula:'fixed',value:2,when:{key:'真夜の一閃',equals:1}}]
  },
  '23':{
+  activeSkills:[{key:'active',label:"三神憑依",cooldown:3,effects:[]}],
   controls:[{key:'狐光追加攻撃',type:'toggle'},{key:'狐光',type:'number',min:0}],
   modifiers:[{target:'atk',formula:'per_stack',source:'狐光',value:1,when:{key:'狐光追加攻撃',equals:1}}]
  },
  '27':{
+  activeSkills:[{key:'active',label:"ミッション：インシークレット",cooldown:3,effects:[]}],
   controls:[{key:'マーク持ちを攻撃',type:'toggle'},{key:'潜伏',type:'toggle'},{key:'対象のマーク',type:'number',min:0}],
   modifiers:[
    {target:'atk',formula:'fixed',value:3,when:{key:'マーク持ちを攻撃',equals:1}},
@@ -20,10 +24,12 @@ const CHARACTER_ABILITY_RULES={
   ]
  },
  '4':{
+  activeSkills:[{key:'active',label:"アイアン・メイデン",cooldown:3,effects:[]}],
   controls:[{key:'前ターン被ダメなし',type:'toggle'}],
   modifiers:[{target:'atk',formula:'fixed',value:3,when:{key:'前ターン被ダメなし',equals:1}}]
  },
  '6':{
+  activeSkills:[{key:'active',label:"マジで怒ったぞ",cooldown:3,effects:[]}],
   controls:[
    {key:'自己主張なし攻撃補正',type:'choice',options:[{value:0,label:'0'},{value:1,label:'+1'},{value:2,label:'+2'},{value:3,label:'-2'},{value:4,label:'-1'}]},
    {key:'自己主張なし防御補正',type:'choice',options:[{value:0,label:'0'},{value:1,label:'+1'},{value:2,label:'+2'},{value:3,label:'-2'},{value:4,label:'-1'}]}
@@ -40,18 +46,22 @@ const CHARACTER_ABILITY_RULES={
   ]
  },
  '15':{
+  activeSkills:[{key:'active',label:"クィーン プリビレッジ",cooldown:3,effects:[]}],
   controls:[{key:'相手より多い手札',type:'number',min:0,max:3}],
   modifiers:[{target:'atk',formula:'per_stack',source:'相手より多い手札',value:1}]
  },
  '26':{
+  activeSkills:[{key:'active',label:"暗影融合",cooldown:3,effects:[]}],
   controls:[{key:'吸収した影',type:'number',min:0}],
   modifiers:[{target:'atk',formula:'per_stack',source:'吸収した影',value:1}]
  },
  '28':{
+  activeSkills:[{key:'active',label:"インターセプトタックル",cooldown:3,effects:[]}],
   controls:[{key:'エリア拒止通過',type:'toggle'}],
   modifiers:[{target:'atk',formula:'fixed',value:2,when:{key:'エリア拒止通過',equals:1}}]
  },
  '103':{
+  activeSkills:[{key:'active',label:"カクテルを作る",cooldown:3,effects:[]}],
   controls:[{key:'カクテル攻撃カード',type:'number',min:0,max:3},{key:'カクテル防御カード',type:'number',min:0,max:3}],
   modifiers:[
    {target:'atk',formula:'per_stack',source:'カクテル攻撃カード',value:1},
@@ -59,13 +69,16 @@ const CHARACTER_ABILITY_RULES={
   ]
  },
  '7':{
+  activeSkills:[{key:'active',label:"ひとくちだけ",cooldown:3,effects:[]}],
   modifiers:[{target:'atk',formula:'fixed',value:3,when:{key:'current_hp_ratio<=',value:0.5}}]
  },
  '9':{
+  activeSkills:[{key:'active',label:"引き寄せる",cooldown:4,effects:[]}],
   controls:[{key:'モンスター撃破数',type:'number',min:0}],
   modifiers:[{target:'atk',formula:'floor_per_unit',source:'モンスター撃破数',unit:2,value:1}]
  },
  '21':{
+  activeSkills:[{key:'active',label:"強者の機欄",cooldown:3,effects:[]}],
   controls:[{key:'スターライト',type:'number',min:0}],
   modifiers:[
    {target:'atk',formula:'floor_per_unit',source:'スターライト',unit:6,value:1},
@@ -73,6 +86,7 @@ const CHARACTER_ABILITY_RULES={
   ]
  },
  '12':{
+  activeSkills:[{key:'active',label:"気功修練",cooldown:3,effects:[]}],
   controls:[{key:'エネルギー保存',type:'number',min:0,max:5}],
   modifiers:[
    {target:'atk',formula:'per_stack',source:'エネルギー保存',value:2},
@@ -80,28 +94,34 @@ const CHARACTER_ABILITY_RULES={
   ]
  },
  '14':{
+  activeSkills:[{key:'active',label:"桜裂空斬",cooldown:3,effects:[]}],
   controls:[{key:'剣気',type:'number',min:0,max:3}],
   modifiers:[]
  },
  '24':{
+  activeSkills:[{key:'active',label:"弱点反撃",cooldown:2,effects:[]}],
   controls:[{key:'精確無比',type:'number',min:0,max:3}],
   modifiers:[{target:'atk',formula:'per_stack',source:'精確無比',value:2}],
   turnEnd:[{key:'精確無比',delta:-1,min:0}]
  },
  '25':{
+  activeSkills:[{key:'active',label:"連鎖反応",cooldown:3,effects:[]}],
   controls:[{key:'覚醒',type:'number',min:0,max:8,iconAtMax:'真龍'}],
   modifiers:[{target:'atk',formula:'fixed',value:4,when:{key:'覚醒',equals:8}}]
  },
  '104':{
+  activeSkills:[{key:'active',label:"本当の私",cooldown:2,effects:[]}],
   controls:[{key:'温もり',type:'number',min:0,max:5}],
   modifiers:[{target:'def',formula:'per_stack',source:'温もり',value:1}]
  },
  '106':{
+  activeSkills:[{key:'active',label:"怪力魔法",cooldown:2,effects:[]}],
   controls:[{key:'推理タイム',type:'number',min:0,max:4}],
   modifiers:[{target:'atk',formula:'per_stack',source:'推理タイム',value:1}],
   turnEnd:[{key:'推理タイム',delta:-1,min:0}]
  },
  '18':{
+  activeSkills:[{key:'active',label:"ハッキング",cooldown:3,effects:[]}],
   controls:[{key:'ファイアウォール',type:'toggle'}],
   modifiers:[
    {target:'atk',formula:'fixed',value:2,when:{key:'ファイアウォール',equals:1}},
@@ -121,4 +141,46 @@ const CHARACTER_ABILITY_RULES={
    {target:'def',formula:'alternating_steps',source:'累計移動ポイント',unit:13,order:1}
   ]
  }
+ '1':{
+  activeSkills:[{key:'active',label:"商品補充",cooldown:3,effects:[]}],
+ },
+ '2':{
+  activeSkills:[{key:'active',label:"ネットショッピング",cooldown:2,effects:[]}],
+ },
+ '3':{
+  activeSkills:[{key:'active',label:"トラブル・メーカー",cooldown:3,effects:[]}],
+ },
+ '5':{
+  activeSkills:[{key:'active',label:"忍術連撃",cooldown:3,effects:[]}],
+ },
+ '8':{
+  activeSkills:[{key:'active',label:"子供の特権",cooldown:3,effects:[]}],
+ },
+ '11':{
+  activeSkills:[{key:'active',label:"癒しの粘液",cooldown:3,effects:[]}],
+ },
+ '13':{
+  activeSkills:[{key:'active',label:"フェイト・エコー",cooldown:3,effects:[]}],
+ },
+ '19':{
+  activeSkills:[{key:'active',label:"軌道エアバースト",cooldown:3,effects:[]}],
+ },
+ '20':{
+  activeSkills:[{key:'active',label:"白沢よ、福を与えよ",cooldown:3,effects:[]}],
+ },
+ '22':{
+  activeSkills:[{key:'active',label:"ライフ・ブック",cooldown:3,effects:[]}],
+ },
+ '29':{
+  activeSkills:[{key:'active',label:"アビサルゾーン",cooldown:3,effects:[]}],
+ },
+ '101':{
+  activeSkills:[{key:'active',label:"インターネットエンジェル",cooldown:3,effects:[]}],
+ },
+ '102':{
+  activeSkills:[{key:'active',label:"愛情の過剰摂取",cooldown:3,effects:[]}],
+ },
+ '105':{
+  activeSkills:[{key:'active',label:"浮遊魔法",cooldown:3,effects:[]}],
+ },
 };
