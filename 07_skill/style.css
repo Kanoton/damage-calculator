@@ -1430,27 +1430,31 @@ tbody th {
 .character-select{display:block;width:100%;padding:0;border:0;background:transparent;cursor:pointer;text-align:left;border-radius:5px}
 .character-select[aria-pressed="true"]{outline:2px solid #b89224;outline-offset:-2px}
 .character-select:focus-visible{outline:3px solid #856615;outline-offset:2px}
-.selected-character{display:grid;grid-template-columns:48px minmax(0,340px) minmax(75px,1fr);grid-template-rows:64px 36px;column-gap:10px;row-gap:2px;align-items:start;width:100%;height:118px;margin-top:28px;padding:6px 10px;border:2px solid #d4ac37;border-radius:5px;background:#fff;color:#493e22;overflow:hidden}
+.selected-character{display:grid;grid-template-columns:48px minmax(0,280px) minmax(75px,1fr);grid-template-rows:64px 36px;column-gap:10px;row-gap:2px;align-items:start;width:100%;height:118px;margin-top:28px;padding:6px 10px;border:2px solid #d4ac37;border-radius:5px;background:#fff;color:#493e22;overflow:hidden}
 .selected-character[hidden]{display:none}
 #selected-character-portrait{grid-column:1;grid-row:1;display:flex;align-items:flex-start;justify-content:center;align-self:start;flex:none;padding:0;border:0;border-radius:4px;background:#fff8df;cursor:pointer}
 #selected-character-image{display:block;width:48px;height:64px;object-fit:contain}
 .selected-character-details{display:contents}
-.selected-character-main{grid-column:2;grid-row:1;display:flex;flex-direction:column;justify-content:flex-start;gap:5px;min-width:0}
-.selected-character-identity{display:flex;align-items:center;gap:6px;font-size:15px;white-space:nowrap;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+.selected-character-main{position:relative;grid-column:2;grid-row:1;display:flex;flex-direction:column;justify-content:flex-start;gap:5px;min-width:0}
+.selected-character-identity{display:flex;padding-right:72px;align-items:center;gap:6px;font-size:15px;white-space:nowrap;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
 #selected-character-name{max-width:130px;overflow:hidden;text-overflow:ellipsis}
 #selected-character-level{font-size:12px;color:#817862}
-#selected-character-skill{margin-left:auto;padding:3px 12px;border:1px solid #d4ac37;border-radius:4px;background:#fff8df;color:#493e22;font:inherit;font-weight:700;cursor:pointer}
+.selected-character-skill-controls{position:absolute;right:0;top:0;display:flex;flex-direction:column;align-items:stretch;gap:3px;min-width:64px;z-index:2}
+.selected-character-skill-controls[hidden]{display:none}
+#selected-character-skill{padding:3px 12px;border:1px solid #d4ac37;border-radius:4px;background:#fff8df;color:#493e22;font:inherit;font-weight:700;cursor:pointer}
 #selected-character-skill:hover:not(:disabled){background:#fff0c2}
 #selected-character-skill:disabled{opacity:.5;cursor:not-allowed}
 #selected-character-skill:focus-visible{outline:2px solid #856615;outline-offset:2px}
-#selected-character-ct-wrap{font-weight:700}
+#selected-character-ct{padding:1px 7px;border:1px solid #d9c890;border-radius:4px;background:#fff;color:#493e22;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+#selected-character-ct:hover{background:#fff8df}
+#selected-character-ct:focus-visible{outline:2px solid #856615;outline-offset:2px}
 .selected-character-hp{display:flex;align-items:center;gap:4px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .selected-character-hp button{width:22px;height:22px;padding:0;border:0;background:transparent;cursor:pointer}
 .selected-character-hp button:focus-visible{outline:2px solid #856615}
 .selected-character-hp img{display:block;width:20px;height:20px;object-fit:contain}
 .selected-character-hp input{width:45px;padding:2px;border:1px solid #d9c890;border-radius:3px;font:inherit;text-align:center;appearance:textfield}
 .selected-character-hp input::-webkit-inner-spin-button,.selected-character-hp input::-webkit-outer-spin-button{appearance:none;margin:0}
-.selected-character-stats{display:flex;gap:4px 14px;flex:none;font-size:16px;font-variant-numeric:tabular-nums;white-space:nowrap;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+.selected-character-stats{display:flex;padding-right:72px;gap:4px 14px;flex:none;font-size:16px;font-variant-numeric:tabular-nums;white-space:nowrap;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
 .selected-character-stats span{display:flex;align-items:center;gap:5px;white-space:nowrap}
 .selected-character-stats input{width:46px;padding:2px;border:1px solid #d9c890;border-radius:3px;font:inherit;text-align:center;appearance:textfield}
 .selected-character-stats input::-webkit-inner-spin-button,.selected-character-stats input::-webkit-outer-spin-button{appearance:none;margin:0}
@@ -1474,7 +1478,7 @@ tbody th {
 .chip-select:hover,.chip-select:focus-visible{outline:2px solid #b89224;outline-offset:-2px}
 .chip-select[aria-pressed="true"]{outline:4px solid #b89224;outline-offset:-4px;background:#fff4ce}
 .selected-character:not([hidden])+.map-roster{margin-top:12px}
-@media(max-width:700px){.selected-character{grid-template-columns:48px minmax(0,1fr) minmax(75px,30%);padding:8px;column-gap:8px}#selected-character-name{max-width:95px}.selected-character-stats{gap:4px 8px}}
+@media(max-width:700px){.selected-character{grid-template-columns:48px minmax(0,1fr) minmax(75px,34%);padding:8px;column-gap:8px}#selected-character-name{max-width:95px}.selected-character-stats{gap:4px 8px}}
 .selected-character-stats img{width:22px;height:22px;object-fit:contain}
 
 /* 音声入力は一時停止中。復帰時は以下のスタイルと streamdeck-voice.disabled.js を参照。

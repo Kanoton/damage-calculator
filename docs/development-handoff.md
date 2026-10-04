@@ -13,6 +13,7 @@ This is the durable handoff for continuing development, especially `07_skill`. O
 - Do not guess ambiguous game rules such as rounding, timing, target, stacking, or duration; confirm them first.
 - Unambiguous character parameter skills may be implemented directly; surface ambiguous ones for confirmation.
 - Prefer explicit repository icon mappings/assets over inferred filenames.
+- When a requested change is clear and safe to implement, do not stop at a declaration of intended work. Proceed through implementation and relevant tests/CI, then report completed results. If the result is not desired, roll back/revise from the last good state based on the user's feedback. Still stop for genuinely ambiguous rules, destructive/high-risk actions, or other cases that require confirmation.
 - **Keep this handoff document itself up to date.** Whenever a task materially changes implemented behavior, confirmed game rules, development policy, known bugs, pending/ambiguous decisions, important file locations, or the continuation procedure, update `docs/development-handoff.md` as part of the same development task/PR whenever practical.
 - Do not wait for a separate request to maintain this file. Before finishing a substantial change, explicitly check whether this handoff needs updating.
 
@@ -38,7 +39,7 @@ Key behavior:
 - 12 Hime: Energy Storage 0-5; each -> ATK +2 / DEF +2.
 - 14 Misaki: Sword Aura 0-3 tracked; no modifier yet.
 - 15 Nardis: hand advantage capped at 3 -> ATK +1 each.
-- 16 Jasmine: active Overdrive has CT 4; activation gives MOVE +3 / DEF -3 for the turn, then the temporary effects expire at turn end and CT decreases by 1. Existing Overdrive result <10 -> DEF +2, >=10 -> ATK +2; every 13 cumulative movement alternates ATK/DEF.
+- 16 Jasmine: active Overdrive has CT 4; activation gives MOVE +3 / DEF -3 for the turn, then the temporary effects expire at turn end. CT is adjusted manually rather than automatically because additional game conditions can reduce it. Existing Overdrive result <10 -> DEF +2, >=10 -> ATK +2; every 13 cumulative movement alternates ATK/DEF.
 - 17 Luka: Midnight Slash attack context -> ATK +2.
 - 18 Nancy Lo: Firewall -> ATK +2 / DEF +2.
 - 21 Al: every 6 Starlight -> ATK +1 / DEF +1.
@@ -57,8 +58,8 @@ Modifier engine supports fixed, per-stack, floor-per-unit, alternating-step, equ
 ## Active skill and cooldown architecture
 
 - Active skills are declarative `activeSkills` entries on character ability rules.
-- The selected-character UI places the `スキル` button in the open area to the right of HP, and `CT n` on the same stat row after ATK / DEF / MOVE.
-- Current cooldown is stored per skill, not only per character. CT 0 means usable; activation sets CT to that skill's configured maximum; each turn end decreases positive CT by 1.
+- The selected-character UI places `スキル` and `CT n` vertically in the open area to the right of HP/stats, with the chip area pulled left to reduce unused space.
+- Current cooldown is stored per skill, not only per character. CT 0 means usable and activation sets CT to that skill's configured maximum. Do not automatically decrement CT at turn end; the `CT n` display is a button for manual adjustment: left click -1, right click +1. This intentionally avoids hard-coding character-specific cooldown-reduction conditions.
 - Turn-duration effects are stored separately from permanent/manual modifiers and expire at turn end.
 - The first supported generic effect is `modify_stat` targeting self. Keep the effect-dispatch model extensible so future skills can add effects such as monster damage, healing, stack/status changes, target stat changes, and target selection without character-specific button code.
 - Jasmine Overdrive is the first implementation: CT 4, MOVE +3 / DEF -3 for one turn.
@@ -118,6 +119,7 @@ No current ability-rule entry: `1,2,3,5,8,11,13,19,20,22,29,101,102,105`. Do not
 - #121 contextual attack modifiers
 - #122 Mamushi automatic True Dragon at Awakening 8
 - #123 monster HP stability and roster numeric-input commit fix
+- #126 active skill cooldown framework
 
 Use PR history for exact diffs/rationale when touching the same areas.
 
