@@ -137,7 +137,7 @@ test('07 skill: every character exposes active skill CT management', async ({ pa
   await expect(skill).toBeVisible();
   await expect(ct).toHaveText('CT 0');
   await skill.click();
-  if(['9','13','14','27','28'].includes(id)){
+  if(['9','13','14','23','27','28','106'].includes(id)){
    await expect(ct).toHaveText('CT 0');
    continue;
   }
@@ -407,4 +407,38 @@ test('07 skill: Z3000 Pull In manually targets a monster and deals 5 damage', as
  await target.click();
  if(before>5)await expect(hp).toHaveValue(String(before-5));else await expect(page.locator('#map-roster-list .roster-card').first()).toHaveClass(/defeated/);
  await expect(page.locator('#selected-character-ct')).toHaveText('CT 4');
+});
+
+
+test('07 skill: Papara active skill forces half-HP attack bonus until turn end', async ({ page }) => {
+ await page.goto('/07_skill/');await selectCharacter(page,'7');
+ const hp=page.locator('#selected-character-current-hp');await hp.fill('10');await hp.dispatchEvent('change');
+ await expect(page.locator('#selected-character-atk')).toHaveValue('2');
+ await page.getByRole('button',{name:'ひとくちだけを発動'}).click();await expect(page.locator('#selected-character-atk')).toHaveValue('5');
+ await page.locator('#turn-end').click();await expect(page.locator('#selected-character-atk')).toHaveValue('2');
+});
+
+test('07 skill: Teru possession accepts ally stats and adds half for the turn', async ({ page }) => {
+ await page.goto('/07_skill/');await selectCharacter(page,'23');
+ const atk=page.locator('#selected-character-atk'),def=page.locator('#selected-character-def');const beforeAtk=Number(await atk.inputValue()),beforeDef=Number(await def.inputValue());
+ let dialogIndex=0;page.on('dialog',async dialog=>{await dialog.accept(dialogIndex++===0?'5':'3');});
+ await page.getByRole('button',{name:'三神憑依を発動'}).click();
+ await expect(atk).toHaveValue(String(beforeAtk+2.5));await expect(def).toHaveValue(String(beforeDef+1.5));
+ await page.locator('#turn-end').click();await expect(atk).toHaveValue(String(beforeAtk));await expect(def).toHaveValue(String(beforeDef));
+});
+
+test('07 skill: Chouten fan count and Ame love are manually managed and referenced', async ({ page }) => {
+ await page.goto('/07_skill/');await selectCharacter(page,'101');
+ const fan=page.getByLabel('ファンの数'),hp=page.locator('#selected-character-current-hp');await fan.fill('3');await fan.dispatchEvent('change');await hp.fill('1');await hp.dispatchEvent('change');
+ await page.getByRole('button',{name:'インターネットエンジェルを発動'}).click();await expect(hp).toHaveValue('4');
+ await selectCharacter(page,'102');const love=page.getByLabel('愛の数');await expect(love).toHaveValue('2');await love.fill('4');await love.dispatchEvent('change');
+ const ameHp=page.locator('#selected-character-current-hp');await ameHp.fill('1');await ameHp.dispatchEvent('change');const baseMove=Number(await page.locator('#selected-character-move').textContent()),baseMaxHp=Number(await page.locator('#selected-character-hp').textContent());
+ await page.getByRole('button',{name:'愛情の過剰摂取を発動'}).click();await expect(page.locator('#selected-character-move')).toHaveText(String(baseMove+4));await expect(love).toHaveValue('0');await expect(love).toHaveAttribute('max','5');await expect(page.locator('#selected-character-hp')).toHaveText(String(baseMaxHp+1));
+});
+
+test('07 skill: Sherry Mighty Magic manually targets a monster and deals 2 damage', async ({ page }) => {
+ await page.goto('/07_skill/');await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-tab-monsters').click();
+ const mapSelect=page.locator('#mp-map-select');for(const option of await mapSelect.locator('option').all()){await mapSelect.selectOption(await option.getAttribute('value'));await mapSelect.dispatchEvent('change');if(await page.locator('#mp-monster-list .mp-monster:visible').count())break;}
+ await page.locator('#mp-monster-list .mp-monster:visible').first().click();const hp=page.locator('#map-roster-list input[aria-label$="の残りHP"]').first(),target=page.locator('#map-roster-list .roster-select').first();const before=Number(await hp.inputValue());
+ await selectCharacter(page,'106');await page.getByRole('button',{name:'怪力魔法を発動'}).click();await target.click();if(before>2)await expect(hp).toHaveValue(String(before-2));else await expect(page.locator('#map-roster-list .roster-card').first()).toHaveClass(/defeated/);await expect(page.locator('#selected-character-ct')).toHaveText('CT 2');
 });

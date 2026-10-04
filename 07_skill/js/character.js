@@ -15,7 +15,7 @@
  const states=new Map();
  const byChip=new Map();
  const specialIcons={'対象のマーク':'マーク','攻撃対象はモンスター':'モンスター','クジャク係の羽ばたき':'孔雀の羽ばたき'};
- const getState=id=>{if(!states.has(id))states.set(id,{level:0,currentHp:null,chips:[],numbers:{},modes:{},phases:{attack:false,move:false},manual:{atk:0,def:0},skillCooldowns:{},activeEffects:[]});const value=states.get(id);value.skillCooldowns??={};value.activeEffects??=[];return value;};
+ const getState=id=>{if(!states.has(id))states.set(id,{level:0,currentHp:null,chips:[],numbers:{},modes:{},phases:{attack:false,move:false},manual:{atk:0,def:0},skillCooldowns:{},activeEffects:[],maxHpBonus:0,controlMaxBonuses:{}});const value=states.get(id);value.skillCooldowns??={};value.activeEffects??=[];value.maxHpBonus??=0;value.controlMaxBonuses??={};return value;};
  const state=()=>getState(selectedCharacter.id);
  window.hasSelectedCharacter=()=>Boolean(selectedCharacter);
  hasSelectedCharacter=window.hasSelectedCharacter;
@@ -25,15 +25,16 @@
  window.setCharacterEvidenceStack=value=>{if(!selectedCharacter)return;state().numbers['罪証']=Math.max(0,Math.floor(Number(value)||0));renderConditions();updateStats();window.dispatchEvent(new Event('character-evidence-change'));};
  const number=(s,key)=>Math.min(key==='チャージ'?10:Infinity,Math.max(0,Number(s.numbers[key])||0));
  const abilityRules=()=>CHARACTER_ABILITY_RULES[String(selectedCharacter?.id)]||null;
- const abilityControlValue=key=>Number(state().numbers[key])||0;
+ const abilityControlValue=key=>{const stored=state().numbers[key];if(stored!==undefined)return Number(stored)||0;const control=abilityRules()?.controls?.find(item=>item.key===key);return Number(control?.default)||0;};
  const activeSkill=()=>abilityRules()?.activeSkills?.[0]||null;
  const activeSkillCooldown=skill=>Math.max(0,Number(state().skillCooldowns?.[skill?.key])||0);
  const activeEffectConditionMatches=condition=>!condition||(condition.key&&(condition.equals!==undefined?abilityControlValue(condition.key)===Number(condition.equals):abilityControlValue(condition.key)>=(Number(condition.min)||0)));
  const activeEffectAllowed=effect=>activeEffectConditionMatches(effect.when)&&(!effect.unless||!activeEffectConditionMatches(effect.unless));
- const activeSkillStatBonus=stat=>(state().activeEffects||[]).filter(effect=>effect.type==='modify_stat'&&effect.target==='self'&&effect.stat===stat&&activeEffectConditionMatches(effect.when)).reduce((sum,effect)=>sum+(Number(effect.value)||0),0);
+ const activeSkillStatBonus=stat=>(state().activeEffects||[]).filter(effect=>effect.type==='modify_stat'&&effect.target==='self'&&effect.stat===stat&&activeEffectConditionMatches(effect.when)).reduce((sum,effect)=>sum+(effect.resolvedValue!==undefined?Number(effect.resolvedValue):(effect.sourceKey?abilityControlValue(effect.sourceKey)*(effect.multiplier===undefined?1:Number(effect.multiplier)):(Number(effect.value)||0))),0);
+ const activeConditionForced=key=>(state().activeEffects||[]).some(effect=>effect.type==='force_condition'&&effect.key===key);
  const abilityConditionMatches=condition=>{
   if(!condition)return true;
-  if(condition.key==='current_hp_ratio<=')return state().currentHp!==null&&state().currentHp<=base('hp')*Number(condition.value);
+  if(condition.key==='current_hp_ratio<=')return activeConditionForced('current_hp_ratio<=')||(state().currentHp!==null&&state().currentHp<=base('hp')*Number(condition.value));
   if(condition.key==='target_mark')return (Number(currentOpponent?.markStacks)||0)>=(Number(condition.min)||0);
   return abilityControlValue(condition.key)===Number(condition.equals);
  };
@@ -50,8 +51,8 @@
   return 0;
  };
  window.getCharacterActiveSkillEffects=skillKey=>{const skill=activeSkill();return skill?.key===skillKey?(skill.effects||[]).map(effect=>({...effect})):[];};
- window.captureCharacterAbilityState=()=>selectedCharacter?{id:selectedCharacter.id,numbers:{...state().numbers},skillCooldowns:{...state().skillCooldowns},activeEffects:(state().activeEffects||[]).map(effect=>({...effect}))}:null;
- window.restoreCharacterAbilityState=snapshot=>{if(!snapshot)return;const target=getState(snapshot.id);target.numbers={...target.numbers,...snapshot.numbers};target.skillCooldowns={...target.skillCooldowns,...snapshot.skillCooldowns};target.activeEffects=(snapshot.activeEffects||[]).map(effect=>({...effect}));if(selectedCharacter?.id===snapshot.id){renderConditions();updateStats();}};
+ window.captureCharacterAbilityState=()=>selectedCharacter?{id:selectedCharacter.id,numbers:{...state().numbers},skillCooldowns:{...state().skillCooldowns},activeEffects:(state().activeEffects||[]).map(effect=>({...effect})),maxHpBonus:Number(state().maxHpBonus)||0,controlMaxBonuses:{...state().controlMaxBonuses}}:null;
+ window.restoreCharacterAbilityState=snapshot=>{if(!snapshot)return;const target=getState(snapshot.id);target.numbers={...target.numbers,...snapshot.numbers};target.skillCooldowns={...target.skillCooldowns,...snapshot.skillCooldowns};target.activeEffects=(snapshot.activeEffects||[]).map(effect=>({...effect}));target.maxHpBonus=Number(snapshot.maxHpBonus)||0;target.controlMaxBonuses={...target.controlMaxBonuses,...snapshot.controlMaxBonuses};if(selectedCharacter?.id===snapshot.id){renderConditions();updateStats();}};
  const modeFor=rule=>Number(state().modes[rule.chip_id])||0;
  const base=(stat)=>Number(selectedCharacter['lv'+state().level+'_'+stat]||0);
  function activeRules(){
@@ -92,7 +93,7 @@
  }
  function calculate(){
   const active=activeRules().filter(r=>r.kind==='modifier'||r.kind==='event_modifier');
-  const startingHp=base('hp');
+  const startingHp=base('hp')+(Number(state().maxHpBonus)||0);
   const maxBonus=active.filter(r=>r.target==='max_hp'&&triggerMatches(r)&&conditionMatches(r,startingHp)).reduce((sum,r)=>sum+valueOf(r,0),0);
   const maxHp=Math.max(1,startingHp+maxBonus);
   if(state().currentHp===null)state().currentHp=maxHp;
@@ -171,10 +172,11 @@
     conditionsBox.append(createCharacterAbilityChoiceView(control.key,option,makeIcon(control.key),()=>{const index=Math.max(0,options.indexOf(option));state().numbers[control.key]=Number(options[(index+1)%options.length]?.value)||0;renderConditions();updateStats();}));
    }else if(control.type==='number'){
     const current=abilityControlValue(control.key);
-    const iconKey=control.iconAtMax&&control.max!==undefined&&current>=Number(control.max)?control.iconAtMax:control.key;
+    const effectiveMax=control.max===undefined?undefined:Number(control.max)+(Number(state().controlMaxBonuses?.[control.key])||0);
+    const iconKey=control.iconAtMax&&effectiveMax!==undefined&&current>=effectiveMax?control.iconAtMax:control.key;
     const view=createConditionNumberView(control.key,current,makeIcon(iconKey));
-    if(control.max!==undefined)view.input.max=String(control.max);
-    const setValue=value=>{const min=Number(control.min)||0,max=control.max===undefined?Infinity:Number(control.max);state().numbers[control.key]=Math.max(min,Math.min(max,Math.floor(Number(value)||0)));view.input.value=state().numbers[control.key];if(control.iconAtMax){const nextKey=state().numbers[control.key]>=max?control.iconAtMax:control.key;view.button.replaceChildren(makeIcon(nextKey));}updateStats();};
+    if(effectiveMax!==undefined)view.input.max=String(effectiveMax);
+    const setValue=value=>{const min=Number(control.min)||0,max=effectiveMax===undefined?Infinity:effectiveMax;state().numbers[control.key]=Math.max(min,Math.min(max,Math.floor(Number(value)||0)));view.input.value=state().numbers[control.key];if(control.iconAtMax){const nextKey=state().numbers[control.key]>=max?control.iconAtMax:control.key;view.button.replaceChildren(makeIcon(nextKey));}updateStats();};
     view.button.addEventListener('click',()=>setValue(abilityControlValue(control.key)+1));
     view.button.addEventListener('contextmenu',event=>{event.preventDefault();setValue(abilityControlValue(control.key)-1);});
     view.input.addEventListener('change',()=>setValue(view.input.value));conditionsBox.append(view.item);
@@ -334,20 +336,28 @@
  ctButton.addEventListener('contextmenu',event=>{event.preventDefault();changeActiveSkillCooldown(1);});
  skillButton.addEventListener('click',()=>{
   const skill=activeSkill();if(!skill||activeSkillCooldown(skill)>0)return;
+  if(skill.inputStats){
+   const values={};
+   for(const input of skill.inputStats){const raw=window.prompt(input.label,String(abilityControlValue(input.key)));if(raw===null)return;const value=Number(raw);if(!Number.isFinite(value)||value<0)return;values[input.key]=value;}
+   Object.assign(state().numbers,values);
+  }
   state().activeEffects=(state().activeEffects||[]).filter(effect=>effect.source!==skill.key);
   if(skill.target){window.dispatchEvent(new CustomEvent('character-skill-target-request',{detail:{target:skill.target,skillKey:skill.key,label:skill.label}}));return;}
   applyActiveSkillEffects(skill);
   state().skillCooldowns[skill.key]=Math.max(0,Number(skill.cooldown)||0);
-  updateStats();
+  renderConditions();updateStats();
  });
  function applyActiveSkillEffects(skill){
   state().activeEffects=(state().activeEffects||[]).filter(effect=>effect.source!==skill.key);
   for(const effect of skill.effects||[]){
    if(!activeEffectAllowed(effect))continue;
    if(effect.type==='heal'&&effect.target==='self'){const maxHp=calculate().hp;state().currentHp=Math.min(maxHp,(Number(state().currentHp)||0)+(Number(effect.value)||0));continue;}
+   if(effect.type==='heal_from_control'&&effect.target==='self'){const maxHp=calculate().hp;state().currentHp=Math.min(maxHp,(Number(state().currentHp)||0)+abilityControlValue(effect.sourceKey));continue;}
+   if(effect.type==='increase_max_hp'){state().maxHpBonus=(Number(state().maxHpBonus)||0)+(Number(effect.value)||0);continue;}
+   if(effect.type==='increase_control_max'){state().controlMaxBonuses[effect.key]=(Number(state().controlMaxBonuses[effect.key])||0)+(Number(effect.value)||0);continue;}
    if(effect.type==='modify_control'){const current=abilityControlValue(effect.key),next=Math.max(Number(effect.min)||0,Math.min(effect.max===undefined?Infinity:Number(effect.max),current+(Number(effect.delta)||0)));state().numbers[effect.key]=next;continue;}
    if(effect.type==='damage_monster')continue;
-   state().activeEffects.push({...effect,source:skill.key});
+   state().activeEffects.push({...effect,...(effect.sourceKey?{resolvedValue:abilityControlValue(effect.sourceKey)*(effect.multiplier===undefined?1:Number(effect.multiplier))}:{}),source:skill.key});
   }
  }
  window.addEventListener('character-skill-target-resolved',event=>{

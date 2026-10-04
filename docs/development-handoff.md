@@ -111,18 +111,18 @@ Required behavior:
 ## Known incomplete / ambiguous rules
 
 - Z3000 (9): Pull In's 5 direct damage is implemented. The 7-space range is intentionally manual; the optional immediate attack when ATK >= 7 is not represented as a separate combat action.
-- Papara (7): Bite-sized healing needs confirmation for half-damage rounding and the skill's exact duration before tying the passive HP-threshold override to it.
-- Character-target active skills (Ren 8, Lulu 11, Al 21, Teru 23, Jill 103, Dorothy 104, and related effects) need a shared manual character-target selection flow before their target effects can be safely implemented.
+- Papara (7): Bite-sized healing is intentionally not simulated. Activating the skill forces the existing half-HP-or-lower ATK +3 condition through the end of the current turn.
+- Character-target active skills (Ren 8, Lulu 11, Al 21, Jill 103, Dorothy 104, and related effects) need a shared manual character-target selection flow before their target effects can be safely implemented.
 - Moses (24): Weakness can be manually targeted, but its combat-die-0 effect is not represented by the current outgoing-damage calculator.
-- Chouten-chan/Ame-chan (101/102): Fan/Love state is not yet modeled. Ame's Love cap growth and permanent max-HP growth need persistent state support; shared-passive state semantics should be confirmed before implementation.
+- Chouten-chan/Ame-chan (101/102): Fan and Love are manual stack controls. Internet Angel references Fan for its 3+ Fan self-heal; Love Overdose snapshots Love for this-turn movement/healing, consumes 4 Love, and at 4+ permanently raises max HP and the Love cap by 1. Coin/card/other-character rewards remain outside the calculator.
 - Nancy Lo (18): Hacking depends on target distance and initiating a forced combat; those actions are not represented by the current skill target resolver.
-- Sherry (106): Mighty Magic requires spatial area/destination handling for multiple monsters, which the current manual single-monster target flow does not model.
+- Sherry (106): Mighty Magic uses the manual monster-target flow and deals 2 direct damage to the selected monster. Spatial throw/destination and multi-monster area handling are intentionally manual.
 
 
 Review current game data before implementing:
-- Teru (23): Three Gods Possession adds half another character's ATK/DEF; rounding needs confirmation.
+- Teru (23): Three Gods Possession prompts for the possessed ally's ATK/DEF when activated and adds exactly half of each to Teru until turn end. Character selection itself is deferred; odd values may therefore produce .5 stats.
 - Dorothy (104): ally-pass ATK +1 behavior and Warmth=5 DEF-to-ATK/consume-all effect remain incomplete.
-- Ame-chan (102): possible max HP +1 at Love >=4 needs max-HP support/confirmation.
+
 - Pandaman (10): hamburger-related passive max HP +2 is omitted.
 - Tono Hanna (105): movement +2 to another character may require movement-target support.
 - Tachibana Sherry (106): Hanna damage reduction is not represented.
