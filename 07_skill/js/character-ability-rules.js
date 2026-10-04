@@ -140,7 +140,7 @@ const CHARACTER_ABILITY_RULES={
    {target:'atk',formula:'alternating_steps',source:'累計移動ポイント',unit:13,order:0},
    {target:'def',formula:'alternating_steps',source:'累計移動ポイント',unit:13,order:1}
   ]
- }
+ },
  '1':{
   activeSkills:[{key:'active',label:"商品補充",cooldown:3,effects:[]}],
  },
