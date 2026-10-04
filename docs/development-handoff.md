@@ -47,7 +47,7 @@ Key behavior:
 - 24 Moses: Precision 0-3 -> ATK +2 each; turn end -1.
 - 25 Mamushi: Awakening 0-8. At 8, icon automatically changes to True Dragon and ATK +4 applies automatically. No separate True Dragon toggle. Below 8 reverts both.
 - 26 Sumikage: absorbed Shadow count -> ATK +1 each.
-- 27 Bonnie: marked target -> ATK +3; Stealth additionally adds target Mark stacks to ATK. Active Mission: In Secret manually targets a monster and adds Mark +1; ally/Stealth handling and Star Coin reward are not simulated.
+- 27 Bonnie: the currently selected attack-target monster's Mark stacks are the source of all Mark-based bonuses. Mark >=1 automatically gives ATK +3; while the manual Stealth toggle is active, add that target monster's Mark stack count to ATK. Do not create a Bonnie-side Mark count or a manual 'marked target' toggle. Active Mission: In Secret manually targets a monster and adds Mark +1; Star Coin/card/event rewards are not simulated.
 - 28 Rinrin: Area Denial passage -> ATK +2. Active Intercept Tackle manually targets a monster; the target gets DEF -2 and Rinrin gets ATK +2 for 2 turns. Range/movement legality remains manual.
 - 103 Jill: Cocktail attack/defense cards, max 3 each -> corresponding ATK/DEF +1 each.
 - 104 Dorothy: Warmth 0-5 -> DEF +1 each.
