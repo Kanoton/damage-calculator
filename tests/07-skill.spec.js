@@ -432,8 +432,8 @@ test('07 skill: Chouten fan count and Ame love are manually managed and referenc
  const fan=page.getByLabel('ファンの数'),hp=page.locator('#selected-character-current-hp');await fan.fill('3');await fan.dispatchEvent('change');await hp.fill('1');await hp.dispatchEvent('change');
  await page.getByRole('button',{name:'インターネットエンジェルを発動'}).click();await expect(hp).toHaveValue('4');
  await selectCharacter(page,'102');const love=page.getByLabel('愛の数');await expect(love).toHaveValue('2');await love.fill('4');await love.dispatchEvent('change');
- const ameHp=page.locator('#selected-character-current-hp');await ameHp.fill('1');await ameHp.dispatchEvent('change');const baseMove=Number(await page.locator('#selected-character-move').textContent());
- await page.getByRole('button',{name:'愛情の過剰摂取を発動'}).click();await expect(page.locator('#selected-character-move')).toHaveText(String(baseMove+4));await expect(love).toHaveValue('0');
+ const ameHp=page.locator('#selected-character-current-hp');await ameHp.fill('1');await ameHp.dispatchEvent('change');const baseMove=Number(await page.locator('#selected-character-move').textContent()),baseMaxHp=Number(await page.locator('#selected-character-hp').textContent());
+ await page.getByRole('button',{name:'愛情の過剰摂取を発動'}).click();await expect(page.locator('#selected-character-move')).toHaveText(String(baseMove+4));await expect(love).toHaveValue('0');await expect(love).toHaveAttribute('max','5');await expect(page.locator('#selected-character-hp')).toHaveText(String(baseMaxHp+1));
 });
 
 test('07 skill: Sherry Mighty Magic manually targets a monster and deals 2 damage', async ({ page }) => {
