@@ -51,8 +51,8 @@
   return 0;
  };
  window.getCharacterActiveSkillEffects=skillKey=>{const skill=activeSkill();return skill?.key===skillKey?(skill.effects||[]).map(effect=>({...effect})):[];};
- window.captureCharacterAbilityState=()=>selectedCharacter?{id:selectedCharacter.id,numbers:{...state().numbers},skillCooldowns:{...state().skillCooldowns},activeEffects:(state().activeEffects||[]).map(effect=>({...effect}))}:null;
- window.restoreCharacterAbilityState=snapshot=>{if(!snapshot)return;const target=getState(snapshot.id);target.numbers={...target.numbers,...snapshot.numbers};target.skillCooldowns={...target.skillCooldowns,...snapshot.skillCooldowns};target.activeEffects=(snapshot.activeEffects||[]).map(effect=>({...effect}));if(selectedCharacter?.id===snapshot.id){renderConditions();updateStats();}};
+ window.captureCharacterAbilityState=()=>selectedCharacter?{id:selectedCharacter.id,numbers:{...state().numbers},skillCooldowns:{...state().skillCooldowns},activeEffects:(state().activeEffects||[]).map(effect=>({...effect})),maxHpBonus:Number(state().maxHpBonus)||0,controlMaxBonuses:{...state().controlMaxBonuses}}:null;
+ window.restoreCharacterAbilityState=snapshot=>{if(!snapshot)return;const target=getState(snapshot.id);target.numbers={...target.numbers,...snapshot.numbers};target.skillCooldowns={...target.skillCooldowns,...snapshot.skillCooldowns};target.activeEffects=(snapshot.activeEffects||[]).map(effect=>({...effect}));target.maxHpBonus=Number(snapshot.maxHpBonus)||0;target.controlMaxBonuses={...target.controlMaxBonuses,...snapshot.controlMaxBonuses};if(selectedCharacter?.id===snapshot.id){renderConditions();updateStats();}};
  const modeFor=rule=>Number(state().modes[rule.chip_id])||0;
  const base=(stat)=>Number(selectedCharacter['lv'+state().level+'_'+stat]||0);
  function activeRules(){
@@ -175,8 +175,8 @@
     const effectiveMax=control.max===undefined?undefined:Number(control.max)+(Number(state().controlMaxBonuses?.[control.key])||0);
     const iconKey=control.iconAtMax&&effectiveMax!==undefined&&current>=effectiveMax?control.iconAtMax:control.key;
     const view=createConditionNumberView(control.key,current,makeIcon(iconKey));
-    if(control.max!==undefined)view.input.max=String(control.max);
-    const setValue=value=>{const min=Number(control.min)||0,max=control.max===undefined?Infinity:Number(control.max);state().numbers[control.key]=Math.max(min,Math.min(max,Math.floor(Number(value)||0)));view.input.value=state().numbers[control.key];if(control.iconAtMax){const nextKey=state().numbers[control.key]>=max?control.iconAtMax:control.key;view.button.replaceChildren(makeIcon(nextKey));}updateStats();};
+    if(effectiveMax!==undefined)view.input.max=String(effectiveMax);
+    const setValue=value=>{const min=Number(control.min)||0,max=effectiveMax===undefined?Infinity:effectiveMax;state().numbers[control.key]=Math.max(min,Math.min(max,Math.floor(Number(value)||0)));view.input.value=state().numbers[control.key];if(control.iconAtMax){const nextKey=state().numbers[control.key]>=max?control.iconAtMax:control.key;view.button.replaceChildren(makeIcon(nextKey));}updateStats();};
     view.button.addEventListener('click',()=>setValue(abilityControlValue(control.key)+1));
     view.button.addEventListener('contextmenu',event=>{event.preventDefault();setValue(abilityControlValue(control.key)-1);});
     view.input.addEventListener('change',()=>setValue(view.input.value));conditionsBox.append(view.item);
