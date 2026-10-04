@@ -24,6 +24,54 @@ test('07 skill: Nancy firewall toggles attack and defense bonuses', async ({ pag
  await expect(page.locator('#selected-character-def')).toHaveValue('3');
 });
 
+test('07 skill: Hime Qigong Training heals and conditionally buffs attack for the turn', async ({ page }) => {
+ await page.goto('/07_skill/');
+ await selectCharacter(page,'12');
+ const hp=page.locator('#selected-character-current-hp'),energy=page.getByLabel('エネルギー保存の数'),skill=page.getByRole('button',{name:'気功修練を発動'});
+ const maxHp=Number(await page.locator('#selected-character-hp').textContent());
+ await hp.fill(String(Math.max(0,maxHp-3)));await hp.dispatchEvent('change');
+ await skill.click();
+ await expect(hp).toHaveValue(String(Math.min(maxHp,maxHp-1)));
+ await expect(page.locator('#selected-character-atk')).toHaveValue('1');
+ await page.locator('#selected-character-ct').click();await page.locator('#selected-character-ct').click();await page.locator('#selected-character-ct').click();
+ await energy.fill('1');await energy.dispatchEvent('change');
+ await hp.fill(String(Math.max(0,maxHp-2)));await hp.dispatchEvent('change');
+ await skill.click();
+ await expect(hp).toHaveValue(String(maxHp));
+ await expect(page.locator('#selected-character-atk')).toHaveValue('7');
+ await page.locator('#turn-end').click();
+ await expect(page.locator('#selected-character-atk')).toHaveValue('3');
+});
+
+test('07 skill: Misaki manually targets a roster monster and applies Sakura Retsukuzan', async ({ page }) => {
+ await page.goto('/07_skill/');
+ await selectCharacter(page,'14');
+ await page.locator('.role-tab[data-role="map"]').click();
+ await page.locator('#mp-tab-monsters').click();
+ const mapSelect=page.locator('#mp-map-select');
+ for(const option of await mapSelect.locator('option').all()){
+  await mapSelect.selectOption(await option.getAttribute('value'));await mapSelect.dispatchEvent('change');
+  if(await page.locator('#mp-monster-list .mp-monster:visible').count())break;
+ }
+ await page.locator('#mp-monster-list .mp-monster:visible').first().click();
+ const target=page.locator('#map-roster-list .roster-select').first(),hp=page.locator('#map-roster-list input[aria-label$="の残りHP"]').first();
+ const before=Number(await hp.inputValue());
+ await page.locator('.role-tab.character-tab').click();
+ const aura=page.getByLabel('剣気の数'),skill=page.getByRole('button',{name:'桜裂空斬を発動'});
+ await skill.click();
+ await page.locator('.role-tab[data-role="map"]').click();
+ await target.click();
+ if(before>2)await expect(hp).toHaveValue(String(before-2));else await expect(page.locator('#map-roster-list .roster-card').first()).toHaveClass(/defeated/);
+ await expect(aura).toHaveValue('1');
+ await expect(page.locator('#selected-character-ct')).toHaveText('CT 3');
+ await page.locator('#selected-character-ct').click();await page.locator('#selected-character-ct').click();await page.locator('#selected-character-ct').click();
+ await aura.fill('3');await aura.dispatchEvent('change');
+ await skill.click();await page.locator('.role-tab[data-role="map"]').click();
+ const nextTarget=page.locator('#map-roster-list .roster-select:not(:disabled)').first();
+ if(await nextTarget.count())await nextTarget.click();
+ await expect(aura).toHaveValue('1');
+});
+
 test('07 skill: every character exposes active skill CT management', async ({ page }) => {
  await page.goto('/07_skill/');
  const expected={1:3,2:2,3:3,4:3,5:3,6:3,7:3,8:3,9:4,10:3,11:3,12:3,13:3,14:3,15:3,16:4,17:3,18:3,19:3,20:3,21:3,22:3,23:3,24:2,25:3,26:3,27:3,28:3,29:3,101:3,102:3,103:3,104:2,105:3,106:2};
@@ -33,6 +81,10 @@ test('07 skill: every character exposes active skill CT management', async ({ pa
   await expect(skill).toBeVisible();
   await expect(ct).toHaveText('CT 0');
   await skill.click();
+  if(id==='14'){
+   await expect(ct).toHaveText('CT 0');
+   continue;
+  }
   await expect(ct).toHaveText('CT '+cooldown);
   await ct.click();
   await expect(ct).toHaveText('CT '+(cooldown-1));

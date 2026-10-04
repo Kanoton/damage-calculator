@@ -86,7 +86,7 @@ const CHARACTER_ABILITY_RULES={
   ]
  },
  '12':{
-  activeSkills:[{key:'active',label:"気功修練",cooldown:3,effects:[]}],
+  activeSkills:[{key:'active',label:"気功修練",cooldown:3,effects:[{type:'heal',target:'self',value:2},{type:'modify_stat',target:'self',stat:'atk',value:4,duration:'turn',when:{key:'エネルギー保存',min:1}}]}],
   controls:[{key:'エネルギー保存',type:'number',min:0,max:5}],
   modifiers:[
    {target:'atk',formula:'per_stack',source:'エネルギー保存',value:2},
@@ -94,7 +94,7 @@ const CHARACTER_ABILITY_RULES={
   ]
  },
  '14':{
-  activeSkills:[{key:'active',label:"桜裂空斬",cooldown:3,effects:[]}],
+  activeSkills:[{key:'active',label:"桜裂空斬",cooldown:3,target:'monster',effects:[{type:'damage_monster',value:2},{type:'modify_control',key:'剣気',delta:1,max:3,unless:{key:'剣気',equals:3}},{type:'modify_control',key:'剣気',delta:-2,min:0,when:{key:'剣気',equals:3}}]}],
   controls:[{key:'剣気',type:'number',min:0,max:3}],
   modifiers:[]
  },
