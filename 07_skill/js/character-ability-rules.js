@@ -86,7 +86,7 @@ const CHARACTER_ABILITY_RULES={
   ]
  },
  '12':{
-  activeSkills:[{key:'active',label:"気功修練",cooldown:3,effects:[]}],
+  activeSkills:[{key:'active',label:"気功修練",cooldown:3,effects:[{type:'heal',target:'self',value:2},{type:'modify_stat',target:'self',stat:'atk',value:4,duration:'turn',when:{key:'エネルギー保存',min:1}}]}],
   controls:[{key:'エネルギー保存',type:'number',min:0,max:5}],
   modifiers:[
    {target:'atk',formula:'per_stack',source:'エネルギー保存',value:2},
