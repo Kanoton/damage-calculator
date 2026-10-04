@@ -165,7 +165,15 @@ function summonFromSkill(caster,targetId){
  rosterNotice.textContent=monsterDisplayName(caster)+'のスキルで'+pending.map(stats=>stats['モンスター名']).join('・')+'を追加しました。';
 }
 let characterSkillTargetRequest=null;
-window.addEventListener('character-skill-target-request',event=>{const detail=event.detail||{};if(detail.target!=='monster')return;characterSkillTargetRequest=detail;rosterNotice.textContent=detail.label+'：対象モンスターを選択してください。';renderRoster();});
+const targetBanner=document.getElementById('character-skill-target-banner'),targetMessage=document.getElementById('character-skill-target-message'),targetCancel=document.getElementById('character-skill-target-cancel'),rosterSection=document.querySelector('.map-roster');
+function renderCharacterSkillTargetUi(){
+ const active=characterSkillTargetRequest?.target==='monster';
+ targetBanner.hidden=!active;rosterSection.classList.toggle('is-character-skill-targeting',active);
+ if(active)targetMessage.textContent='🎯 '+characterSkillTargetRequest.label+'：対象のモンスターを選択してください';
+}
+function cancelCharacterSkillTarget(){if(!characterSkillTargetRequest)return;characterSkillTargetRequest=null;renderCharacterSkillTargetUi();rosterNotice.textContent='スキルの対象選択をキャンセルしました。';}
+targetCancel.addEventListener('click',cancelCharacterSkillTarget);
+window.addEventListener('character-skill-target-request',event=>{const detail=event.detail||{};if(detail.target!=='monster')return;characterSkillTargetRequest=detail;rosterNotice.textContent=detail.label+'：対象モンスターを選択してください。';renderCharacterSkillTargetUi();renderRoster();});
 function resolveCharacterSkillTarget(enemy){
  const request=characterSkillTargetRequest;if(!request||enemy.defeated)return false;
  rememberRoster();
@@ -173,6 +181,7 @@ function resolveCharacterSkillTarget(enemy){
  const damage=skillEffects.filter(effect=>effect.type==='damage_monster').reduce((sum,effect)=>sum+(Number(effect.value)||0),0);
  if(damage>0){enemy.manualHp=Math.max(0,enemy.hp-damage);enemy.hp=enemy.manualHp;enemy.damageTaken=Math.max(0,rosterStat(enemy.base,'HP')-enemy.hp);}
  characterSkillTargetRequest=null;
+ renderCharacterSkillTargetUi();
  renderRoster();
  window.dispatchEvent(new CustomEvent('character-skill-target-resolved',{detail:{skillKey:request.skillKey,success:true,targetId:enemy.instanceId}}));
  rosterNotice.textContent=request.label+'を'+monsterDisplayName(enemy)+'に使用しました。';
