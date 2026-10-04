@@ -196,9 +196,9 @@
   }
  }
  function updateActiveSkillUi(){
-  const skill=activeSkill(),button=document.getElementById('selected-character-skill'),ctWrap=document.getElementById('selected-character-ct-wrap'),ct=document.getElementById('selected-character-ct');
-  button.hidden=!skill;ctWrap.hidden=!skill;if(!skill)return;
-  const cooldown=activeSkillCooldown(skill);ct.textContent=String(cooldown);button.textContent='スキル';button.title=skill.label+'を発動';button.setAttribute('aria-label',skill.label+'を発動');button.disabled=cooldown>0;
+  const skill=activeSkill(),controls=document.getElementById('selected-character-skill-controls'),button=document.getElementById('selected-character-skill'),ct=document.getElementById('selected-character-ct');
+  controls.hidden=!skill;if(!skill)return;
+  const cooldown=activeSkillCooldown(skill);ct.textContent='CT '+cooldown;ct.setAttribute('aria-label','CT '+cooldown+'：左クリックで1減らす、右クリックで1増やす');button.textContent='スキル';button.title=skill.label+'を発動';button.setAttribute('aria-label',skill.label+'を発動');button.disabled=cooldown>0;
  }
  function updateStats(){
   if(!selectedCharacter)return;
@@ -323,7 +323,10 @@
  portraitButton.addEventListener('click',()=>changeCharacterLevel(1));
  portraitButton.addEventListener('contextmenu',event=>{event.preventDefault();changeCharacterLevel(-1);});
  portraitButton.addEventListener('keydown',event=>{if(event.key==='ArrowDown'){event.preventDefault();changeCharacterLevel(-1);}});
- const skillButton=document.getElementById('selected-character-skill');
+ const skillButton=document.getElementById('selected-character-skill'),ctButton=document.getElementById('selected-character-ct');
+ const changeActiveSkillCooldown=delta=>{const skill=activeSkill();if(!skill)return;state().skillCooldowns[skill.key]=Math.max(0,activeSkillCooldown(skill)+delta);updateStats();};
+ ctButton.addEventListener('click',()=>changeActiveSkillCooldown(-1));
+ ctButton.addEventListener('contextmenu',event=>{event.preventDefault();changeActiveSkillCooldown(1);});
  skillButton.addEventListener('click',()=>{
   const skill=activeSkill();if(!skill||activeSkillCooldown(skill)>0)return;
   state().activeEffects=(state().activeEffects||[]).filter(effect=>effect.source!==skill.key);
@@ -390,7 +393,6 @@
   const beforeEffects=state().activeEffects.length;
   state().activeEffects=state().activeEffects.filter(effect=>effect.duration!=='turn');
   if(state().activeEffects.length!==beforeEffects)changed=true;
-  for(const [key,value] of Object.entries(state().skillCooldowns)){const next=Math.max(0,(Number(value)||0)-1);if(next!==value){state().skillCooldowns[key]=next;changed=true;}}
   if(state().chips.includes('57')){const charge=number(state(),'チャージ');if(charge<6){state().numbers['チャージ']=6;changed=true;}}
   for(const effect of abilityRules()?.turnEnd||[]){const current=abilityControlValue(effect.key),next=Math.max(Number(effect.min)||0,current+(Number(effect.delta)||0));if(next!==current){state().numbers[effect.key]=next;changed=true;}}
   if(changed){renderConditions();updateStats();}
