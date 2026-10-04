@@ -47,8 +47,8 @@ Key behavior:
 - 24 Moses: Precision 0-3 -> ATK +2 each; turn end -1.
 - 25 Mamushi: Awakening 0-8. At 8, icon automatically changes to True Dragon and ATK +4 applies automatically. No separate True Dragon toggle. Below 8 reverts both.
 - 26 Sumikage: absorbed Shadow count -> ATK +1 each.
-- 27 Bonnie: marked target -> ATK +3; Stealth additionally adds target Mark stacks to ATK.
-- 28 Rinrin: Area Denial passage -> ATK +2.
+- 27 Bonnie: marked target -> ATK +3; Stealth additionally adds target Mark stacks to ATK. Active Mission: In Secret manually targets a monster and adds Mark +1; ally/Stealth handling and Star Coin reward are not simulated.
+- 28 Rinrin: Area Denial passage -> ATK +2. Active Intercept Tackle manually targets a monster; the target gets DEF -2 and Rinrin gets ATK +2 for 2 turns. Range/movement legality remains manual.
 - 103 Jill: Cocktail attack/defense cards, max 3 each -> corresponding ATK/DEF +1 each.
 - 104 Dorothy: Warmth 0-5 -> DEF +1 each.
 - 106 Tachibana Sherry: Deduction Time 0-4 -> ATK +1 each; turn end -1.
@@ -67,6 +67,7 @@ Modifier engine supports fixed, per-stack, floor-per-unit, alternating-step, equ
 - Supported generic active effects currently include `modify_stat` targeting self and `heal` targeting self; active effects may carry simple control-value conditions evaluated at activation.
 - The first supported generic effect is `modify_stat` targeting self. Keep the effect-dispatch model extensible so future skills can add effects such as monster damage, healing, stack/status changes, target stat changes, and target selection without character-specific button code.
 - Jasmine Overdrive is the first implementation: CT 4, MOVE +3 / DEF -3 for one turn.
+- Kaisei Fate Echo manually targets a monster, starts a visible Fate Echo counter at 2 beside Mark, adds +1 damage received while active, decrements at each turn end, and disappears at 0. Coin/card rewards are not simulated.
 
 
 ## Status icons
@@ -106,7 +107,6 @@ Review current game data before implementing:
 - Dorothy (104): ally-pass ATK +1 behavior and Warmth=5 DEF-to-ATK/consume-all effect remain incomplete.
 - Ame-chan (102): possible max HP +1 at Love >=4 needs max-HP support/confirmation.
 - Pandaman (10): hamburger-related passive max HP +2 is omitted.
-- Rinrin (28): monster DEF -2 is a target-side effect and is omitted.
 - Tono Hanna (105): movement +2 to another character may require movement-target support.
 - Tachibana Sherry (106): Hanna damage reduction is not represented.
 
