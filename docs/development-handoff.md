@@ -190,3 +190,9 @@ Use PR history for exact diffs/rationale when touching the same areas.
 7. Confirm relevant CI.
 8. Merge only after CI passes.
 9. Before finishing, explicitly check whether this handoff is affected. If implemented rules, development policy, known bugs, important file locations, continuation procedure, or pending decisions changed, update this document in the same task/PR whenever practical.
+
+## Character card source images
+
+- Store `UT_Hero_Card2_*.png` source images under `images/UT_Hero_Card2/`.
+- The 48 images accidentally uploaded to the repository root were moved into this directory with filenames and binary contents preserved.
+- This asset organization does not change runtime image references or character-card rendering.
