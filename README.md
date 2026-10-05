@@ -27,6 +27,15 @@ python3 -m http.server 4173 --bind 127.0.0.1
 - [docs/icon-migration.md](docs/icon-migration.md): 確認済み画像マッピング
 - [streamdeck/README.md](streamdeck/README.md): Stream Deck連携
 - [AGENTS.md](AGENTS.md): AIによる作業の入口
+- [動画からマップイベント情報を出力する](docs/map-event-output/README.md): 動画の渡し方、素材の保存先、承認済みサンプル、CSV・緑枠図・ランダム表示の出力手順
+
+## マップイベント動画の解析
+
+このプロジェクトを参照するAIへ `異変図書館_普通_01.mp4` のようにマップ名・難易度を付けた動画を渡してください。記載を忘れた場合や曖昧な場合はAIが確認します。中央上部の進捗を読み取り、正本CSV・参照画像に照合して候補CSVとマップ図をZIPで出力します。
+
+図はモンスターを載せず、固定出現には緑枠、ランダムと確定したものには「ランダム出現」を載せます。既存のオレンジ破線参考図は保持します。詳細と新しいチャット向けの依頼文は[出力手順](docs/map-event-output/README.md)を参照してください。
+
+補助スクリプトはAIが読み取った観測JSONから成果物を生成します。動画の自動認識やGitHubへの動画アップロードによる自動実行は行いません。
 
 ## 主要ディレクトリ
 

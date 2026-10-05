@@ -1,0 +1,235 @@
+{
+  "schema_version": 1,
+  "map_id": "MAP0104",
+  "map_name": "異変図書館",
+  "difficulty": "普通",
+  "route_id": "",
+  "base_image": "images/Map/Layout_Anomalous_Library.png",
+  "source_commit": "ef757a1e5e50d5b8df072b693f36280b8813b8d2",
+  "video": "AstralParty_INT 2026-10-05 20-22-48_10x_silent.mp4",
+  "input_conditions": {
+    "speed_multiplier": 10,
+    "audio": false,
+    "camera": "利用者指定：全出現を含む自動画面推移",
+    "random_spawn": false
+  },
+  "accepted_on": "2026-10-06",
+  "events": [
+    {
+      "status": "confirmed",
+      "progress": 1,
+      "monsters": [
+        {
+          "id": "M0116",
+          "count": 1
+        },
+        {
+          "id": "M0117",
+          "count": 1
+        },
+        {
+          "id": "M0025",
+          "count": 3
+        }
+      ],
+      "content": "ゴクチョー1体、看守1体、魔法のティーポット3体出現",
+      "attack_bonus": 0,
+      "defense_bonus": 0,
+      "spawn_mode": "fixed",
+      "image": "Library_Normal_Event_01.png",
+      "evidence": {
+        "content_source": "利用者承認（進捗1は既存資料補完）",
+        "video_time_seconds": null
+      },
+      "positions": [
+        [
+          372,
+          156
+        ],
+        [
+          805,
+          156
+        ],
+        [
+          589,
+          264
+        ],
+        [
+          372,
+          805
+        ],
+        [
+          805,
+          805
+        ]
+      ],
+      "position_source": "images/MapEvent/Library_Event_01.png"
+    },
+    {
+      "status": "confirmed",
+      "progress": 4,
+      "monsters": [
+        {
+          "id": "M0118",
+          "count": 3
+        },
+        {
+          "id": "M0119",
+          "count": 1
+        }
+      ],
+      "content": "グリーティーポット3体、大怪盗1体出現",
+      "attack_bonus": 0,
+      "defense_bonus": 0,
+      "spawn_mode": "fixed",
+      "image": "Library_Normal_Event_04.png",
+      "evidence": {
+        "content_source": "動画通知と利用者承認",
+        "video_time_seconds": 25.3
+      },
+      "positions": [
+        [
+          48,
+          156
+        ],
+        [
+          805,
+          372
+        ],
+        [
+          372,
+          588
+        ],
+        [
+          1021,
+          697
+        ]
+      ],
+      "position_source": "images/MapEvent/Library_Event_04.png"
+    },
+    {
+      "status": "confirmed",
+      "progress": 4,
+      "monsters": [],
+      "content": "全モンスターにA+1/D+1",
+      "attack_bonus": 1,
+      "defense_bonus": 1,
+      "spawn_mode": "none",
+      "image": "",
+      "evidence": {
+        "content_source": "動画通知と利用者承認",
+        "video_time_seconds": 25.3
+      }
+    },
+    {
+      "status": "confirmed",
+      "progress": 7,
+      "monsters": [
+        {
+          "id": "M0117",
+          "count": 1
+        },
+        {
+          "id": "M0024",
+          "count": 2
+        },
+        {
+          "id": "M0119",
+          "count": 1
+        }
+      ],
+      "content": "看守1体、ゼリーウィザード2体、大怪盗1体出現",
+      "attack_bonus": 0,
+      "defense_bonus": 0,
+      "spawn_mode": "fixed",
+      "image": "Library_Normal_Event_07.png",
+      "evidence": {
+        "content_source": "動画通知と利用者承認",
+        "video_time_seconds": 45.3
+      },
+      "positions": [
+        [
+          264,
+          48
+        ],
+        [
+          913,
+          48
+        ],
+        [
+          372,
+          913
+        ],
+        [
+          805,
+          913
+        ]
+      ],
+      "position_source": "images/MapEvent/Library_Event_07.png"
+    },
+    {
+      "status": "confirmed",
+      "progress": 10,
+      "monsters": [
+        {
+          "id": "M0117",
+          "count": 1
+        },
+        {
+          "id": "M0024",
+          "count": 2
+        }
+      ],
+      "content": "看守1体、ゼリーウィザード2体出現",
+      "attack_bonus": 0,
+      "defense_bonus": 0,
+      "spawn_mode": "fixed",
+      "image": "Library_Normal_Event_10.png",
+      "evidence": {
+        "content_source": "動画通知と利用者承認",
+        "video_time_seconds": 67.3
+      },
+      "positions": [
+        [
+          589,
+          264
+        ],
+        [
+          264,
+          805
+        ],
+        [
+          913,
+          805
+        ]
+      ],
+      "position_source": "images/MapEvent/Library_Event_10.png"
+    },
+    {
+      "status": "confirmed",
+      "progress": 10,
+      "monsters": [],
+      "content": "全モンスターにA+1/D+1",
+      "attack_bonus": 1,
+      "defense_bonus": 1,
+      "spawn_mode": "none",
+      "image": "",
+      "evidence": {
+        "content_source": "動画通知と利用者承認",
+        "video_time_seconds": 67.3
+      }
+    }
+  ],
+  "reference_images": [
+    "docs/map-event-output/samples/library-normal/reference/Library_Normal_Event_01_draft.png",
+    "docs/map-event-output/samples/library-normal/reference/Library_Normal_Event_04_draft.png",
+    "docs/map-event-output/samples/library-normal/reference/Library_Normal_Event_07_draft.png",
+    "docs/map-event-output/samples/library-normal/reference/Library_Normal_Event_10_draft.png"
+  ],
+  "notes": [
+    "進捗1も利用者が承認した確定情報。全数は既存資料を補完して承認された。",
+    "出現マスは既存MapEvent参照図の座標を使用。全個体を動画単独で独立検証したという意味ではない。",
+    "このマップにランダム要素はない。進捗10より後は今回の録画では未観測。",
+    "出現と強化はCSVのとおり別行に記録。適用順序の追加確認は不要。"
+  ]
+}

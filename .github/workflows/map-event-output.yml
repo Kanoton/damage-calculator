@@ -1,0 +1,39 @@
+name: Map event output
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/map_event_output.py'
+      - 'scripts/requirements-map-event.txt'
+      - 'tests/map_event_output/**'
+      - 'docs/map-event-output/**'
+      - 'images/Map/**'
+      - 'images/MapEvent/assets/**'
+      - 'csv/map_event.csv'
+      - 'csv/monster_stats.csv'
+      - 'csv/maps_renumbered_v1p1.csv'
+      - '.github/workflows/map-event-output.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/map_event_output.py'
+      - 'scripts/requirements-map-event.txt'
+      - 'tests/map_event_output/**'
+      - 'docs/map-event-output/**'
+      - 'images/Map/**'
+      - 'images/MapEvent/assets/**'
+      - 'csv/map_event.csv'
+      - 'csv/monster_stats.csv'
+      - 'csv/maps_renumbered_v1p1.csv'
+      - '.github/workflows/map-event-output.yml'
+
+jobs:
+  output:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r scripts/requirements-map-event.txt
+      - run: python -m unittest discover -s tests/map_event_output -v
