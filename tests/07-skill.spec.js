@@ -5,6 +5,75 @@ async function selectCharacter(page,id){
  await page.locator(`.character-select[data-id="${id}"]`).click();
 }
 
+async function selectChipCategory(page,category){
+ await page.locator('#character-chip-tab').click();
+ await page.locator(`.chip-category-tabs [data-category="${category}"]`).click();
+}
+
+test('07 skill: Extra Battery lowers only the owner CT cap and restores it on removal', async ({ page }) => {
+ await page.goto('/07_skill/');
+ await selectCharacter(page,'1');
+ const skill=page.locator('#selected-character-skill'),ct=page.locator('#selected-character-ct');
+ await skill.click();await expect(ct).toHaveText('CT 3');
+ await selectChipCategory(page,'共通');
+ const battery=page.locator('.chip-select[data-id="15"]');
+ await battery.click();await expect(ct).toHaveText('CT 2');
+ await ct.click({button:'right'});await expect(ct).toHaveText('CT 2');
+ await ct.click();await ct.click();await skill.click();await expect(ct).toHaveText('CT 2');
+ await page.locator('#character-list-tab').click();await selectCharacter(page,'2');
+ await skill.click();await expect(ct).toHaveText('CT 2');
+ await selectCharacter(page,'1');await expect(ct).toHaveText('CT 2');
+ await selectChipCategory(page,'共通');await battery.click();
+ await expect(ct).toHaveText('CT 2');
+ await ct.click();await ct.click();await skill.click();await expect(ct).toHaveText('CT 3');
+});
+
+test('07 skill: Extra Battery cap also applies after monster target confirmation', async ({ page }) => {
+ await page.goto('/07_skill/');
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-tab-monsters').click();
+ const mapSelect=page.locator('#mp-map-select');
+ for(const option of await mapSelect.locator('option').all()){
+  await mapSelect.selectOption(await option.getAttribute('value'));await mapSelect.dispatchEvent('change');
+  if(await page.locator('#mp-monster-list .mp-monster:visible').count())break;
+ }
+ await page.locator('#mp-monster-list .mp-monster:visible').first().click();
+ await selectCharacter(page,'9');
+ await selectChipCategory(page,'共通');await page.locator('.chip-select[data-id="15"]').click();
+ await page.locator('#selected-character-skill').click();
+ await expect(page.locator('#selected-character-ct')).toHaveText('CT 0');
+ await page.locator('.role-tab[data-role="map"]').click();
+ await page.locator('#map-roster-list .roster-select').first().click();
+ await expect(page.locator('#selected-character-ct')).toHaveText('CT 3');
+});
+
+test('07 skill: charge consumption requires full cost and Lightning Core reduces remaining CT', async ({ page }) => {
+ await page.goto('/07_skill/');await selectCharacter(page,'1');
+ const ct=page.locator('#selected-character-ct');
+ await page.locator('#selected-character-skill').click();
+ await selectChipCategory(page,'チャージ');
+ for(const [id,cost,name] of [['55',6,'エアバッグ'],['56',5,'ライトニングコア'],['58',4,'レールガン']]){
+  const chip=page.locator(`.chip-select[data-id="${id}"]`);await chip.click();
+  const charge=page.getByLabel('チャージの数'),owned=page.locator('.selected-character-chips .selected-chip').filter({has:page.getByAltText(name,{exact:true})});
+  await charge.fill(String(cost-1));await charge.dispatchEvent('change');
+  const before=await ct.textContent();
+  await owned.click();await expect(charge).toHaveValue(String(cost-1));await expect(ct).toHaveText(before);
+  await owned.focus();await owned.press('Enter');await expect(charge).toHaveValue(String(cost-1));await expect(ct).toHaveText(before);
+  await charge.fill(String(cost));await charge.dispatchEvent('change');
+  await owned.click();await expect(charge).toHaveValue('0');
+  await expect(ct).toHaveText(id==='56'?'CT 2':before);
+  await chip.click();
+ }
+ await page.locator('.chip-select[data-id="56"]').click();
+ const charge=page.getByLabel('チャージの数'),core=page.locator('.selected-character-chips .selected-chip').filter({has:page.getByAltText('ライトニングコア',{exact:true})});
+ await ct.click();await ct.click();await expect(ct).toHaveText('CT 0');
+ await charge.fill('5');await charge.dispatchEvent('change');await core.focus();await core.press(' ');
+ await expect(ct).toHaveText('CT 0');await expect(charge).toHaveValue('0');
+ await page.locator('.chip-select[data-id="51"]').click();
+ await charge.fill('9');await charge.dispatchEvent('change');
+ await page.locator('.selected-character-chips .selected-chip').filter({has:page.getByAltText('エネルギー回収',{exact:true})}).click();
+ await expect(charge).toHaveValue('10');
+});
+
 test('07 skill: Sherry reasoning stacks modify attack and decay on turn end', async ({ page }) => {
  await page.goto('/07_skill/');
  await selectCharacter(page,'106');
