@@ -1,6 +1,6 @@
 # Development Handoff
 
-Last updated: 2026-10-05
+Last updated: 2026-10-06
 
 This is the durable handoff for continuing development, especially `07_skill`. On a new chat or machine, read this file, current `main`, and recent PRs before changing code.
 
@@ -19,6 +19,16 @@ This is the durable handoff for continuing development, especially `07_skill`. O
 - Do not wait for a separate request to maintain this file. Before finishing a substantial change, explicitly check whether this handoff needs updating.
 
 ## Current focus
+
+### Map event video output
+
+`docs/map-event-output/README.md` is the durable instruction for AI-assisted video analysis. `AGENTS.md` routes video-only attachments to it when this repository is the task context. Resolve map/difficulty from filename or folder; ask if either is missing, ambiguous, or inconsistent. Use the central upper progress track and event icon positions, not Round.
+
+Reference data remains in `csv/` and `images/`. Green-frame and random-label assets are in `images/MapEvent/assets/`. Approved Library/normal observations and diagrams are in `docs/map-event-output/samples/library-normal/`; the Dragon random-label-only example is separate in `samples/random/`. Library progress 1 (M0116×1, M0117×1, M0025×3) was accepted as confirmed on 2026-10-06. Progress 4/7/10 spawns and progress 4/10 global ATK+1/DEF+1 were also accepted. Library has no random component for this task. Position coordinates still come from existing reference diagrams; do not claim every location was independently verified from video.
+
+`scripts/map_event_output.py` renders a reviewed observation JSON into candidate/pending CSVs, monster-free green-frame/random-label PNGs, preserved reference images, and a ZIP. It does not recognize video or alter runtime data. Use `scripts/requirements-map-event.txt`; validate with `python3 -m unittest discover -s tests/map_event_output -v`. AI should read video/create observations and include evidence/report files; users need only supply video and identify map/difficulty. New chats still need this repository as context.
+
+No source `csv/map_event.csv`, existing MapEvent diagrams, calculator processing order, or bundled fallbacks were changed by adding this workflow. Reconcile existing multi-difficulty rows before importing candidates; never blindly append duplicates. Missing assets/unknown IDs are reported rather than substituted.
 
 Recent work centers on character parameter skills, status icons, contextual attack modifiers, active skills/cooldowns, monster roster HP/stat management, and regression coverage.
 
