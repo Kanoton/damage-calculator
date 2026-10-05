@@ -120,6 +120,8 @@ CI定義は `.github/workflows/06b-smoke.yml`、テスト本体は `tests/06b-sm
 
 ゲーム動画からイベントCSV・マップ図を作成する依頼は、`docs/map-event-output/README.md` を入口にしてください。動画だけの添付でも、このプロジェクトを参照する文脈なら解析依頼として扱います。マップ名・難易度がファイル名等にない場合は確認します。
 
+中央上部の進捗列の末尾にある赤い×はゲームオーバーの進捗です。直前の数値とマス順から読み取り、出現モンスター・画像なしの「ゲームオーバー」行を候補CSVへ含めます。今回の異変図書館・普通は17の次が×なので18と承認済みです。全イベントと終了進捗を確認して動画を途中で止める場合があり、終了画面がないことだけでは終了進捗を未確認にしません。
+
 正本は従来どおり `csv/`、`images/` です。緑枠／ランダム表示素材は `images/MapEvent/assets/`、承認済み観測JSONと図のサンプルは `docs/map-event-output/samples/` にあります。`scripts/map_event_output.py` は観測JSONから候補CSV・モンスターなしのPNG・ZIPを生成し、正本のCSVとアプリ実装は変更しません。Python依存は `scripts/requirements-map-event.txt` です。
 
 検証は `python3 -m unittest discover -s tests/map_event_output -v` を使用します。CSVやアプリへ結果を反映する依頼の場合は、本ガイドの通常のフォールバック・画像参照・ブラウザ検証も実施します。

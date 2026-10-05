@@ -37,7 +37,7 @@ class OutputTests(unittest.TestCase):
         self.assertFalse((out / 'map_event_pending.csv').exists())
         with (out / 'map_event_candidates.csv').open(encoding='utf-8-sig') as f:
             rows = list(csv.DictReader(f))
-        self.assertEqual(len(rows), 6)
+        self.assertEqual(len(rows), 7)
         self.assertEqual(rows[0]['進捗'], '1')
         self.assertEqual(rows[0]['monster_id'], 'M0116|M0117|M0025')
         self.assertEqual(rows[0]['出現数'], '1|1|3')
@@ -62,7 +62,21 @@ class OutputTests(unittest.TestCase):
         with (out / 'map_event_pending.csv').open(encoding='utf-8-sig') as f:
             self.assertEqual(len(list(csv.DictReader(f))), 1)
         with (out / 'map_event_candidates.csv').open(encoding='utf-8-sig') as f:
-            self.assertEqual(len(list(csv.DictReader(f))), 5)
+            self.assertEqual(len(list(csv.DictReader(f))), 6)
+
+    def test_game_over_is_numeric_csv_row_without_spawn_or_image(self):
+        self.render()
+        out = self.directory / 'output'
+        with (out / 'map_event_candidates.csv').open(encoding='utf-8-sig') as f:
+            rows = list(csv.DictReader(f))
+        endpoint = [r for r in rows if r['内容'] == 'ゲームオーバー']
+        self.assertEqual(len(endpoint), 1)
+        self.assertEqual(endpoint[0], {'map_id': 'MAP0104', 'route_id': '', '難易度': '普通',
+                                     '進捗': '18', 'monster_id': '', '出現数': '', '内容': 'ゲームオーバー',
+                                     '攻撃加算': '0', '防御加算': '0', '出現位置画像': ''})
+        self.assertEqual(len(list((out / 'MapEvent').glob('*.png'))), 4)
+        event = next(e for e in self.data['events'] if e.get('kind') == 'game_over')
+        self.assertEqual(event['progress'], event['evidence']['previous_progress'] + event['evidence']['marker_offset'])
 
     def test_random_label_contains_no_monster_and_matches_separate_sample(self):
         self.data.update(map_id='MAP0005', base_image='images/Map/Layout_Dragon_Palace_Amusement_Park.png')
