@@ -27,7 +27,8 @@
  const abilityRules=()=>CHARACTER_ABILITY_RULES[String(selectedCharacter?.id)]||null;
  const abilityControlValue=key=>{const stored=state().numbers[key];if(stored!==undefined)return Number(stored)||0;const control=abilityRules()?.controls?.find(item=>item.key===key);return Number(control?.default)||0;};
  const activeSkill=()=>abilityRules()?.activeSkills?.[0]||null;
- const activeSkillCooldown=skill=>Math.max(0,Number(state().skillCooldowns?.[skill?.key])||0);
+ const activeSkillMaxCooldown=skill=>Math.max(0,(Number(skill?.cooldown)||0)-(state().chips.includes('15')?1:0));
+ const activeSkillCooldown=skill=>Math.min(activeSkillMaxCooldown(skill),Math.max(0,Number(state().skillCooldowns?.[skill?.key])||0));
  const activeEffectConditionMatches=condition=>!condition||(condition.key&&(condition.equals!==undefined?abilityControlValue(condition.key)===Number(condition.equals):abilityControlValue(condition.key)>=(Number(condition.min)||0)));
  const activeEffectAllowed=effect=>activeEffectConditionMatches(effect.when)&&(!effect.unless||!activeEffectConditionMatches(effect.unless));
  const activeSkillStatBonus=stat=>(state().activeEffects||[]).filter(effect=>effect.type==='modify_stat'&&effect.target==='self'&&effect.stat===stat&&activeEffectConditionMatches(effect.when)).reduce((sum,effect)=>sum+(effect.resolvedValue!==undefined?Number(effect.resolvedValue):(effect.sourceKey?abilityControlValue(effect.sourceKey)*(effect.multiplier===undefined?1:Number(effect.multiplier)):(Number(effect.value)||0))),0);
@@ -205,7 +206,7 @@
  function updateActiveSkillUi(){
   const skill=activeSkill(),controls=document.getElementById('selected-character-skill-controls'),button=document.getElementById('selected-character-skill'),ct=document.getElementById('selected-character-ct');
   controls.hidden=!skill;if(!skill)return;
-  const cooldown=activeSkillCooldown(skill);ct.textContent='CT '+cooldown;ct.setAttribute('aria-label','CT '+cooldown+'：左クリックで1減らす、右クリックで1増やす');button.textContent='スキル';button.title=skill.label+'を発動';button.setAttribute('aria-label',skill.label+'を発動');button.disabled=cooldown>0;
+  const cooldown=activeSkillCooldown(skill);state().skillCooldowns[skill.key]=cooldown;ct.textContent='CT '+cooldown;ct.title='CT上限 '+activeSkillMaxCooldown(skill)+'：左クリックで1減らす／右クリックで1増やす';ct.setAttribute('aria-label','CT '+cooldown+'：左クリックで1減らす、右クリックで1増やす');button.textContent='スキル';button.title=skill.label+'を発動';button.setAttribute('aria-label',skill.label+'を発動');button.disabled=cooldown>0;
  }
  function updateStats(){
   if(!selectedCharacter)return;
@@ -266,7 +267,10 @@
    const chargeDelta=chip.category==='チャージ'&&id!=='57'?({'51':2,'52':2,'53':2,'54':2,'55':-6,'56':-5,'58':-4}[id]||0):null;
    const item=createOwnedChipView(chip,chargeDelta,()=>{
     if(!chargeDelta)return;
-    state().numbers['チャージ']=Math.max(0,Math.min(10,number(state(),'チャージ')+chargeDelta));
+    const charge=number(state(),'チャージ');
+    if(chargeDelta<0&&charge<-chargeDelta)return;
+    state().numbers['チャージ']=Math.max(0,Math.min(10,charge+chargeDelta));
+    if(id==='56'){const skill=activeSkill();if(skill)state().skillCooldowns[skill.key]=Math.max(0,activeSkillCooldown(skill)-1);}
     renderConditions();updateStats();
    });
    ownedBox.append(item);
@@ -331,7 +335,7 @@
  portraitButton.addEventListener('contextmenu',event=>{event.preventDefault();changeCharacterLevel(-1);});
  portraitButton.addEventListener('keydown',event=>{if(event.key==='ArrowDown'){event.preventDefault();changeCharacterLevel(-1);}});
  const skillButton=document.getElementById('selected-character-skill'),ctButton=document.getElementById('selected-character-ct');
- const changeActiveSkillCooldown=delta=>{const skill=activeSkill();if(!skill)return;state().skillCooldowns[skill.key]=Math.max(0,activeSkillCooldown(skill)+delta);updateStats();};
+ const changeActiveSkillCooldown=delta=>{const skill=activeSkill();if(!skill)return;state().skillCooldowns[skill.key]=Math.min(activeSkillMaxCooldown(skill),Math.max(0,activeSkillCooldown(skill)+delta));updateStats();};
  ctButton.addEventListener('click',()=>changeActiveSkillCooldown(-1));
  ctButton.addEventListener('contextmenu',event=>{event.preventDefault();changeActiveSkillCooldown(1);});
  skillButton.addEventListener('click',()=>{
@@ -344,7 +348,7 @@
   state().activeEffects=(state().activeEffects||[]).filter(effect=>effect.source!==skill.key);
   if(skill.target){window.dispatchEvent(new CustomEvent('character-skill-target-request',{detail:{target:skill.target,skillKey:skill.key,label:skill.label}}));return;}
   applyActiveSkillEffects(skill);
-  state().skillCooldowns[skill.key]=Math.max(0,Number(skill.cooldown)||0);
+  state().skillCooldowns[skill.key]=activeSkillMaxCooldown(skill);
   renderConditions();updateStats();
  });
  function applyActiveSkillEffects(skill){
@@ -362,7 +366,7 @@
  }
  window.addEventListener('character-skill-target-resolved',event=>{
   const skill=activeSkill(),detail=event.detail||{};if(!skill||detail.skillKey!==skill.key||!detail.success||activeSkillCooldown(skill)>0)return;
-  applyActiveSkillEffects(skill);state().skillCooldowns[skill.key]=Math.max(0,Number(skill.cooldown)||0);renderConditions();updateStats();
+  applyActiveSkillEffects(skill);state().skillCooldowns[skill.key]=activeSkillMaxCooldown(skill);renderConditions();updateStats();
  });
  setupCharacterNumberPad({selectedPanel});
  hpInput.addEventListener('change',()=>{state().currentHp=Math.max(0,Number(hpInput.value)||0);updateStats();});
