@@ -5,6 +5,8 @@ function createOwnedChipView(chip,chargeDelta,onCharge){
  if(chargeDelta!==null){
   item.classList.add('is-actionable');item.setAttribute('role','button');item.tabIndex=0;
   if(chargeDelta)item.title+='\nクリック：チャージ'+(chargeDelta>0?'+':'')+chargeDelta;
+  if(chargeDelta<0)item.title+='（'+(-chargeDelta)+'以上必要）';
+  if(chip.id==='56')item.title+='、CT-1';
   item.addEventListener('click',onCharge);item.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();onCharge();}});
  }
  return item;
