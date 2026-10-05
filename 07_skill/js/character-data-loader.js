@@ -31,6 +31,15 @@ async function loadCharacterData({listStatus,chipStatus,statusIconSnapshot,chara
   }
   return new Map(parseMapCSV(csv).filter(row=>row.id&&row.ability).map(row=>[row.id,row.ability]));
  }
- const [characters,chips,rules,icons,characterSkills]=await Promise.all([load('characters','character_stats.csv',listStatus),load('chips','chip_list.csv',chipStatus),loadRules(),loadStatusIcons(),loadCharacterSkills()]);
+ async function loadCharacterCardImages(){
+  let csv=CHARACTER_HERO_CARD_CSV_SNAPSHOT;
+  if(location.protocol!=='file:'){
+   try{const response=await fetch('csv/character_hero_card_mapping.csv',{cache:'no-cache'});if(!response.ok)throw Error('character_hero_card_mapping.csv');csv=await response.text();}
+   catch(error){console.warn('キャラ画像対応CSVを取得できないため、同梱データを使用します。',error);}
+  }
+  return new Map(parseMapCSV(csv).filter(row=>row.id&&/^UT_Hero_Card2_[\w]+\.png$/.test(row.hero_card_img)).map(row=>[row.id,row.hero_card_img]));
+ }
+ const [characters,chips,rules,icons,characterSkills,cardImages]=await Promise.all([load('characters','character_stats.csv',listStatus),load('chips','chip_list.csv',chipStatus),loadRules(),loadStatusIcons(),loadCharacterSkills(),loadCharacterCardImages()]);
+ for(const row of characters)row.hero_card_img=cardImages.get(String(row.id))||'';
  return {characters,chips,rules,statusIcons:icons.statusIcons,mapKeywords:icons.mapKeywords,characterSkills};
 }
