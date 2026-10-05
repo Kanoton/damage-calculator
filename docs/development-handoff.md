@@ -66,6 +66,9 @@ Modifier engine supports fixed, per-stack, floor-per-unit, alternating-step, equ
 
 ## Active skill and cooldown architecture
 
+- Extra Battery (chip 15) reduces the owning character's active skill CT maximum by 1, with a minimum of 0. Activation (including target confirmation) uses the reduced maximum. Manual CT increments stop at the effective maximum. Acquiring the chip clamps any current CT above the new maximum; removing it restores the maximum without adding to remaining CT.
+- Clicking Lightning Core (chip 56) consumes exactly 5 Charge and reduces the owner's remaining skill CT by 1, floored at 0. This remains a manual click; it does not automatically fire on skill activation or track card-use allowance.
+- Charge consumption clicks (Airbag 55: 6, Lightning Core 56: 5, Railgun 58: 4) do nothing when Charge is below their full cost, including keyboard activation. Existing +2 Charge clicks and the 10-stack cap are preserved. Airbag/Railgun clicks currently manage Charge only; their damage effects are not simulated by these handlers. Electric Glove's click still grants +2; turn-end consumption/damage is not implemented here.
 - Active skills are declarative `activeSkills` entries on character ability rules. Every current character has active-skill name/CT metadata from `csv/character_skills.csv`, so skill/CT management is available even when the skill effect itself is not simulated by the calculator.
 - The selected-character UI places `スキル` and `CT n` vertically in the open area to the right of HP/stats, with the chip area pulled left to reduce unused space.
 - Current cooldown is stored per skill, not only per character. CT 0 means usable and activation sets CT to that skill's configured maximum. Do not automatically decrement CT at turn end; the `CT n` display is a button for manual adjustment: left click -1, right click +1. This intentionally avoids hard-coding character-specific cooldown-reduction conditions.
