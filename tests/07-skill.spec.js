@@ -344,6 +344,49 @@ test('07 skill: character list hover shows ability tooltip', async ({ page }) =>
  await expect(tooltip).toContainText('リサイクル');
 });
 
+test('07 skill: character cards use Hero Card2 artwork and live stats while preserving selection', async ({ page }) => {
+ await page.route('**/csv/character_stats.csv',async route=>{
+  const response=await route.fetch();const csv=await response.text();
+  await route.fulfill({response,body:csv.replace('12,10,9,1,1,0,11','12,10,19,7,6,0,11')});
+ });
+ await page.goto('/07_skill/');await page.locator('.role-tab.character-tab').click();
+ await expect(page.locator('.character-select')).toHaveCount(35);
+ const mimi=page.locator('.character-select[data-id="1"]');
+ await expect(mimi.locator('.character-list-image')).toHaveAttribute('src','../images/UT_Hero_Card2/UT_Hero_Card2_108.png');
+ await expect.poll(()=>mimi.locator('.character-list-image').evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);
+ await expect(mimi.locator('.character-list-name')).toHaveText('ミミ');
+ for(const [key,value] of [['lv0_atk','7'],['lv0_def','6'],['lv0_hp','19']])await expect(mimi.locator(`[data-stat="${key}"]`)).toHaveText(value);
+ await expect(mimi.locator('[data-stat="initial_coin"]')).toHaveText('12+10');
+ await mimi.hover();await expect(page.locator('#character-skill-tooltip')).toContainText('商品補充');
+ const parunan=page.locator('.character-select[data-id="2"]');await parunan.click();
+ await expect(page.locator('#selected-character-name')).toHaveText('パルナン');
+ await expect(parunan).toHaveAttribute('aria-pressed','true');
+ await mimi.focus();await mimi.press('Enter');await expect(page.locator('#selected-character-name')).toHaveText('ミミ');
+ await expect(page.locator('#selected-character-atk')).toHaveValue('7');
+ await expect(page.locator('#selected-character-current-hp')).toHaveValue('19');
+ await expect(page.locator('.character-select[data-id="4"] [data-stat="initial_coin"]')).toHaveText('6');
+});
+
+test('07 skill: character image mapping falls back when its CSV cannot be fetched', async ({ page }) => {
+ await page.route('**/07_skill/csv/character_hero_card_mapping.csv',route=>route.abort());
+ await page.goto('/07_skill/');await page.locator('.role-tab.character-tab').click();
+ await expect(page.locator('.character-select[data-id="106"] .character-list-image')).toHaveAttribute('src','../images/UT_Hero_Card2/UT_Hero_Card2_306.png');
+ await selectCharacter(page,'106');await expect(page.locator('#selected-character-name')).toHaveText('橘シェリー');
+});
+
+test('07 skill: file protocol keeps character cards, tooltip and selection', async ({ page }) => {
+ const path=require('path'),{pathToFileURL}=require('url');
+ await page.goto(pathToFileURL(path.resolve(__dirname,'../07_skill/index.html')).href);
+ await page.locator('.role-tab.character-tab').click();
+ await expect(page.locator('.character-select')).toHaveCount(35);
+ const mimi=page.locator('.character-select[data-id="1"]');
+ await expect(mimi.locator('.character-list-image')).toHaveAttribute('src','../images/UT_Hero_Card2/UT_Hero_Card2_108.png');
+ await expect(mimi.locator('[data-stat="lv0_hp"]')).toHaveText('9');
+ await mimi.hover();await expect(page.locator('#character-skill-tooltip')).toContainText('商品補充');
+ await page.locator('.character-select[data-id="2"]').click();
+ await expect(page.locator('#selected-character-name')).toHaveText('パルナン');
+});
+
 
 test('07 skill: additional character stat skills modify parameters', async ({ page }) => {
  await page.goto('/07_skill/');

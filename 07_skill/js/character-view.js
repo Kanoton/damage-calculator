@@ -44,12 +44,37 @@ function createConditionNumberView(key,value,icon){
 }
 
 function createCharacterAssetView(row,folder,key){
+ if(folder==='character_list')return createCharacterListCardView(row);
  const item=document.createElement('figure');item.className='character-asset';item.dataset.id=row.id;
  const img=document.createElement('img');img.alt=row.name||'';img.loading='lazy';img.decoding='async';
  const file=String(row[key]||row.images||'').trim();
  const missing=()=>{const text=document.createElement('figcaption');text.textContent=img.alt+'：画像を読み込めませんでした。';item.replaceChildren(text);};
  img.addEventListener('error',missing,{once:true});item.append(img);
  if(file)img.src='../images/'+folder+'/'+encodeURIComponent(file);else missing();
+ const button=document.createElement('button');button.type='button';button.dataset.id=row.id;
+ return {item,button};
+}
+
+function createCharacterListCardView(row){
+ const item=document.createElement('figure');item.className='character-asset character-list-card';item.dataset.id=row.id;
+ const portrait=document.createElement('div');portrait.className='character-list-portrait';
+ const img=document.createElement('img');img.className='character-list-image';img.alt=row.name||'';img.loading='lazy';img.decoding='async';
+ const missing=()=>{const text=document.createElement('span');text.className='character-list-image-missing';text.textContent='画像なし';portrait.replaceChildren(text);};
+ img.addEventListener('error',missing,{once:true});portrait.append(img);
+ if(row.hero_card_img)img.src='../images/UT_Hero_Card2/'+encodeURIComponent(row.hero_card_img);else missing();
+ const details=document.createElement('div');details.className='character-list-details';
+ const name=document.createElement('strong');name.className='character-list-name';name.textContent=row.name||'';
+ const stats=document.createElement('div');stats.className='character-list-stats';
+ for(const [key,label,icon] of [['lv0_atk','攻撃力','Attack.png'],['lv0_def','防御力','Defense.png'],['lv0_hp','HP','Hp.png'],['initial_coin','初期コイン','Coin.png']]){
+  const entry=document.createElement('span');entry.className='character-list-stat';entry.dataset.stat=key;
+  const value=String(row[key]??'—');const bonus=key==='initial_coin'?Number(row.lv1_coin_bonus||0):0;
+  entry.title=label+(bonus?'（Lv1コイン加算 +'+bonus+'）':'');entry.setAttribute('aria-label',label+' '+value+(bonus?'、Lv1コイン加算 '+bonus:''));
+  const image=document.createElement('img');image.className='character-list-stat-icon';image.src='../images/UT_Buff/'+icon;image.alt='';
+  const text=document.createElement('span');text.textContent=value;entry.append(image,text);
+  if(bonus){const extra=document.createElement('small');extra.className='character-list-coin-bonus';extra.textContent='+'+bonus;entry.append(extra);}
+  stats.append(entry);
+ }
+ details.append(name,stats);item.append(portrait,details);
  const button=document.createElement('button');button.type='button';button.dataset.id=row.id;
  return {item,button};
 }

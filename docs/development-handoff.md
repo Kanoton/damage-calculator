@@ -196,3 +196,11 @@ Use PR history for exact diffs/rationale when touching the same areas.
 - Store `UT_Hero_Card2_*.png` source images under `images/UT_Hero_Card2/`.
 - The 48 images accidentally uploaded to the repository root were moved into this directory with filenames and binary contents preserved.
 - This asset organization does not change runtime image references or character-card rendering.
+
+### 07_skill character list rendering
+
+- Only `07_skill` builds character-list cards from Hero Card2 artwork plus `csv/character_stats.csv`: name, Lv0 ATK/DEF/HP, initial coin, and a nonzero Lv1 coin bonus.
+- The user-confirmed 35-character artwork mapping lives in `07_skill/csv/character_hero_card_mapping.csv`; `CHARACTER_HERO_CARD_CSV_SNAPSHOT` in `07_skill/js/character-data.js` provides identical file:// and fetch-failure fallback. Update both when changing the mapping. Image numbers do not equal character IDs.
+- `character-data-loader.js` joins artwork filenames by character ID. `character-view.js` creates the list cards; `character.js` keeps its existing hover/focus tooltip and click/keyboard selection handlers.
+- Shared character stats and older generations retain their existing `list_img` and rendering. Selected-character controls, portraits, abilities, level changes, chips, and CT behavior are unchanged. Cards show base Lv0 stats rather than the selected character's current modifiers.
+
