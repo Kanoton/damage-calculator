@@ -11,7 +11,8 @@
     "speed_multiplier": 10,
     "audio": false,
     "camera": "利用者指定：全出現を含む自動画面推移",
-    "random_spawn": false
+    "random_spawn": false,
+    "recording_cutoff_reason": "全進捗イベントの発生と終了進捗表示の確認が済んだため途中終了（利用者の説明）"
   },
   "accepted_on": "2026-10-06",
   "events": [
@@ -218,6 +219,25 @@
         "content_source": "動画通知と利用者承認",
         "video_time_seconds": 67.3
       }
+    },
+    {
+      "status": "confirmed",
+      "kind": "game_over",
+      "progress": 18,
+      "monsters": [],
+      "content": "ゲームオーバー",
+      "attack_bonus": 0,
+      "defense_bonus": 0,
+      "spawn_mode": "none",
+      "image": "",
+      "evidence": {
+        "content_source": "中央上部の進捗列の赤い×と利用者の説明（2026-10-06）",
+        "image": "docs/map-event-output/samples/library-normal/evidence/progress18_game_over.png",
+        "previous_progress": 17,
+        "marker_offset": 1,
+        "terminal_marker": "red_cross",
+        "interpretation": "17の次のマスが赤い×なので終了予定の進捗は18。実際の終了場面の観測ではない。"
+      }
     }
   ],
   "reference_images": [
@@ -229,7 +249,7 @@
   "notes": [
     "進捗1も利用者が承認した確定情報。全数は既存資料を補完して承認された。",
     "出現マスは既存MapEvent参照図の座標を使用。全個体を動画単独で独立検証したという意味ではない。",
-    "このマップにランダム要素はない。進捗10より後は今回の録画では未観測。",
+    "このマップにランダム要素はない。終了進捗18は中央上部の17の次にある赤い×と利用者の説明から確定。実際のゲームオーバー場面まで録画する必要はない。",
     "出現と強化はCSVのとおり別行に記録。適用順序の追加確認は不要。"
   ]
 }
