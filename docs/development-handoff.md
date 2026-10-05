@@ -204,3 +204,5 @@ Use PR history for exact diffs/rationale when touching the same areas.
 - `character-data-loader.js` joins artwork filenames by character ID. `character-view.js` creates the list cards; `character.js` keeps its existing hover/focus tooltip and click/keyboard selection handlers.
 - Shared character stats and older generations retain their existing `list_img` and rendering. Selected-character controls, portraits, abilities, level changes, chips, and CT behavior are unchanged. Cards show base Lv0 stats rather than the selected character's current modifiers.
 
+
+- `07_skill` character-list cards use five columns on desktop (over 1000px), four at 801–1000px, two at 501–800px, and one at 500px or narrower. Portraits, spacing, and stat cells are compact; existing tooltip and selection handlers are unchanged.
