@@ -206,7 +206,7 @@
  function updateActiveSkillUi(){
   const skill=activeSkill(),controls=document.getElementById('selected-character-skill-controls'),button=document.getElementById('selected-character-skill'),ct=document.getElementById('selected-character-ct');
   controls.hidden=!skill;if(!skill)return;
-  const cooldown=activeSkillCooldown(skill);state().skillCooldowns[skill.key]=cooldown;ct.textContent='CT '+cooldown;ct.title='CT上限 '+activeSkillMaxCooldown(skill)+'：左クリックで1減らす／右クリックで1増やす';ct.setAttribute('aria-label','CT '+cooldown+'：左クリックで1減らす、右クリックで1増やす');button.textContent='スキル';button.title=skill.label+'を発動';button.setAttribute('aria-label',skill.label+'を発動');button.disabled=cooldown>0;
+  const cooldown=activeSkillCooldown(skill);state().skillCooldowns[skill.key]=cooldown;ct.textContent='CT '+cooldown+' / '+activeSkillMaxCooldown(skill);ct.title='CT上限 '+activeSkillMaxCooldown(skill)+'：左クリックで1減らす／右クリックで1増やす';ct.setAttribute('aria-label','CT '+cooldown+'、上限 '+activeSkillMaxCooldown(skill)+'：左クリックで1減らす、右クリックで1増やす');button.textContent='スキル';button.title=skill.label+'を発動';button.setAttribute('aria-label',skill.label+'を発動');button.disabled=cooldown>0;
  }
  function updateStats(){
   if(!selectedCharacter)return;
