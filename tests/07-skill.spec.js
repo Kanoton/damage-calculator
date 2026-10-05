@@ -14,18 +14,18 @@ test('07 skill: Extra Battery lowers only the owner CT cap and restores it on re
  await page.goto('/07_skill/');
  await selectCharacter(page,'1');
  const skill=page.locator('#selected-character-skill'),ct=page.locator('#selected-character-ct');
- await skill.click();await expect(ct).toHaveText('CT 3');
+ await skill.click();await expect(ct).toHaveText('CT 3 / 3');
  await selectChipCategory(page,'共通');
  const battery=page.locator('.chip-select[data-id="15"]');
- await battery.click();await expect(ct).toHaveText('CT 2');
- await ct.click({button:'right'});await expect(ct).toHaveText('CT 2');
- await ct.click();await ct.click();await skill.click();await expect(ct).toHaveText('CT 2');
+ await battery.click();await expect(ct).toHaveText('CT 2 / 2');
+ await ct.click({button:'right'});await expect(ct).toHaveText('CT 2 / 2');
+ await ct.click();await ct.click();await skill.click();await expect(ct).toHaveText('CT 2 / 2');
  await page.locator('#character-list-tab').click();await selectCharacter(page,'2');
- await skill.click();await expect(ct).toHaveText('CT 2');
- await selectCharacter(page,'1');await expect(ct).toHaveText('CT 2');
+ await skill.click();await expect(ct).toHaveText('CT 2 / 2');
+ await selectCharacter(page,'1');await expect(ct).toHaveText('CT 2 / 2');
  await selectChipCategory(page,'共通');await battery.click();
- await expect(ct).toHaveText('CT 2');
- await ct.click();await ct.click();await skill.click();await expect(ct).toHaveText('CT 3');
+ await expect(ct).toHaveText('CT 2 / 3');
+ await ct.click();await ct.click();await skill.click();await expect(ct).toHaveText('CT 3 / 3');
 });
 
 test('07 skill: Extra Battery cap also applies after monster target confirmation', async ({ page }) => {
@@ -40,10 +40,10 @@ test('07 skill: Extra Battery cap also applies after monster target confirmation
  await selectCharacter(page,'9');
  await selectChipCategory(page,'共通');await page.locator('.chip-select[data-id="15"]').click();
  await page.locator('#selected-character-skill').click();
- await expect(page.locator('#selected-character-ct')).toHaveText('CT 0');
+ await expect(page.locator('#selected-character-ct')).toHaveText(/^CT 0 \/ \d+$/);
  await page.locator('.role-tab[data-role="map"]').click();
  await page.locator('#map-roster-list .roster-select').first().click();
- await expect(page.locator('#selected-character-ct')).toHaveText('CT 3');
+ await expect(page.locator('#selected-character-ct')).toHaveText(/^CT 3 \/ \d+$/);
 });
 
 test('07 skill: charge consumption requires full cost and Lightning Core reduces remaining CT', async ({ page }) => {
@@ -60,14 +60,14 @@ test('07 skill: charge consumption requires full cost and Lightning Core reduces
   await owned.focus();await owned.press('Enter');await expect(charge).toHaveValue(String(cost-1));await expect(ct).toHaveText(before);
   await charge.fill(String(cost));await charge.dispatchEvent('change');
   await owned.click();await expect(charge).toHaveValue('0');
-  await expect(ct).toHaveText(id==='56'?'CT 2':before);
+  await expect(ct).toHaveText(id==='56'?'CT 2 / 3':before);
   await chip.click();
  }
  await page.locator('.chip-select[data-id="56"]').click();
  const charge=page.getByLabel('チャージの数'),core=page.locator('.selected-character-chips .selected-chip').filter({has:page.getByAltText('ライトニングコア',{exact:true})});
- await ct.click();await ct.click();await expect(ct).toHaveText('CT 0');
+ await ct.click();await ct.click();await expect(ct).toHaveText(/^CT 0 \/ \d+$/);
  await charge.fill('5');await charge.dispatchEvent('change');await core.focus();await core.press(' ');
- await expect(ct).toHaveText('CT 0');await expect(charge).toHaveValue('0');
+ await expect(ct).toHaveText(/^CT 0 \/ \d+$/);await expect(charge).toHaveValue('0');
  await page.locator('.chip-select[data-id="51"]').click();
  await charge.fill('9');await charge.dispatchEvent('change');
  await page.locator('.selected-character-chips .selected-chip').filter({has:page.getByAltText('エネルギー回収',{exact:true})}).click();
@@ -135,7 +135,7 @@ test('07 skill: Misaki manually targets a roster monster and applies Sakura Rets
  await expect(page.locator('.role-tab.character-tab')).toHaveClass(/active/);
  await page.locator('#character-skill-target-cancel').click();
  await expect(banner).toBeHidden();
- await expect(page.locator('#selected-character-ct')).toHaveText('CT 0');
+ await expect(page.locator('#selected-character-ct')).toHaveText(/^CT 0 \/ \d+$/);
  await skill.click();
  await expect(banner).toBeVisible();
  await page.locator('.role-tab[data-role="map"]').click();
@@ -143,7 +143,7 @@ test('07 skill: Misaki manually targets a roster monster and applies Sakura Rets
  await expect(banner).toBeHidden();
  if(before>2)await expect(hp).toHaveValue(String(before-2));else await expect(page.locator('#map-roster-list .roster-card').first()).toHaveClass(/defeated/);
  await expect(aura).toHaveValue('1');
- await expect(page.locator('#selected-character-ct')).toHaveText('CT 3');
+ await expect(page.locator('#selected-character-ct')).toHaveText(/^CT 3 \/ \d+$/);
  await page.locator('#selected-character-ct').click();await page.locator('#selected-character-ct').click();await page.locator('#selected-character-ct').click();
  await aura.fill('3');await aura.dispatchEvent('change');
  await skill.click();await page.locator('.role-tab[data-role="map"]').click();
@@ -168,7 +168,7 @@ test('07 skill: Kaisei Bonnie and Rinrin apply targeted monster effects', async 
  await page.getByRole('button',{name:'フェイト・エコーを発動'}).click();
  await target.click();
  await expect(page.locator('.roster-fate-echo').first()).toContainText('フェイト・エコー2');
- await expect(page.locator('#selected-character-ct')).toHaveText('CT 3');
+ await expect(page.locator('#selected-character-ct')).toHaveText(/^CT 3 \/ \d+$/);
  await target.click();
  await expect(page.locator('#damageAdd1')).toHaveValue('1');
  await page.locator('#turn-end').click();
@@ -181,7 +181,7 @@ test('07 skill: Kaisei Bonnie and Rinrin apply targeted monster effects', async 
  await page.getByRole('button',{name:'ミッション：インシークレットを発動'}).click();
  await target.click();
  await expect(page.locator('.roster-mark strong').first()).toHaveText('1');
- await expect(page.locator('#selected-character-ct')).toHaveText('CT 3');
+ await expect(page.locator('#selected-character-ct')).toHaveText(/^CT 3 \/ \d+$/);
 
  await selectCharacter(page,'28');
  const defense=page.locator('#map-roster-list input[aria-label$="の防御力"]').first();
@@ -204,17 +204,17 @@ test('07 skill: every character exposes active skill CT management', async ({ pa
   await selectCharacter(page,id);
   const skill=page.locator('#selected-character-skill'),ct=page.locator('#selected-character-ct');
   await expect(skill).toBeVisible();
-  await expect(ct).toHaveText('CT 0');
+  await expect(ct).toHaveText('CT 0 / '+cooldown);
   await skill.click();
   if(['9','13','14','23','27','28','106'].includes(id)){
-   await expect(ct).toHaveText('CT 0');
+   await expect(ct).toHaveText('CT 0 / '+cooldown);
    continue;
   }
-  await expect(ct).toHaveText('CT '+cooldown);
+  await expect(ct).toHaveText('CT '+cooldown+' / '+cooldown);
   await ct.click();
-  await expect(ct).toHaveText('CT '+(cooldown-1));
+  await expect(ct).toHaveText('CT '+(cooldown-1)+' / '+cooldown);
   await ct.click({button:'right'});
-  await expect(ct).toHaveText('CT '+cooldown);
+  await expect(ct).toHaveText('CT '+cooldown+' / '+cooldown);
  }
 });
 
@@ -224,24 +224,24 @@ test('07 skill: Jasmine active skill applies turn effects and cooldown', async (
  const skill=page.getByRole('button',{name:'オーバードライブを発動'});
  const ct=page.locator('#selected-character-ct');
  await expect(page.locator('#selected-character-skill-controls')).toBeVisible();
- await expect(ct).toHaveText('CT 0');
+ await expect(ct).toHaveText(/^CT 0 \/ \d+$/);
  await expect(page.locator('#selected-character-move')).toHaveText('0');
  await expect(page.locator('#selected-character-def')).toHaveValue('0');
  await skill.click();
  await expect(page.locator('#selected-character-move')).toHaveText('3');
  await expect(page.locator('#selected-character-def')).toHaveValue('0');
- await expect(ct).toHaveText('CT 4');
+ await expect(ct).toHaveText(/^CT 4 \/ \d+$/);
  await expect(skill).toBeDisabled();
  await page.locator('#turn-end').click();
  await expect(page.locator('#selected-character-move')).toHaveText('0');
  await expect(page.locator('#selected-character-def')).toHaveValue('0');
- await expect(ct).toHaveText('CT 4');
+ await expect(ct).toHaveText(/^CT 4 \/ \d+$/);
  await ct.click();
- await expect(ct).toHaveText('CT 3');
+ await expect(ct).toHaveText(/^CT 3 \/ \d+$/);
  await ct.click({button:'right'});
- await expect(ct).toHaveText('CT 4');
+ await expect(ct).toHaveText(/^CT 4 \/ \d+$/);
  await ct.click();await ct.click();await ct.click();await ct.click();
- await expect(ct).toHaveText('CT 0');
+ await expect(ct).toHaveText(/^CT 0 \/ \d+$/);
  await expect(skill).toBeEnabled();
 });
 
@@ -475,7 +475,7 @@ test('07 skill: Z3000 Pull In manually targets a monster and deals 5 damage', as
  await page.locator('.role-tab[data-role="map"]').click();
  await target.click();
  if(before>5)await expect(hp).toHaveValue(String(before-5));else await expect(page.locator('#map-roster-list .roster-card').first()).toHaveClass(/defeated/);
- await expect(page.locator('#selected-character-ct')).toHaveText('CT 4');
+ await expect(page.locator('#selected-character-ct')).toHaveText(/^CT 4 \/ \d+$/);
 });
 
 
@@ -509,5 +509,5 @@ test('07 skill: Sherry Mighty Magic manually targets a monster and deals 2 damag
  await page.goto('/07_skill/');await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-tab-monsters').click();
  const mapSelect=page.locator('#mp-map-select');for(const option of await mapSelect.locator('option').all()){await mapSelect.selectOption(await option.getAttribute('value'));await mapSelect.dispatchEvent('change');if(await page.locator('#mp-monster-list .mp-monster:visible').count())break;}
  await page.locator('#mp-monster-list .mp-monster:visible').first().click();const hp=page.locator('#map-roster-list input[aria-label$="の残りHP"]').first(),target=page.locator('#map-roster-list .roster-select').first();const before=Number(await hp.inputValue());
- await selectCharacter(page,'106');await page.getByRole('button',{name:'怪力魔法を発動'}).click();await target.click();if(before>2)await expect(hp).toHaveValue(String(before-2));else await expect(page.locator('#map-roster-list .roster-card').first()).toHaveClass(/defeated/);await expect(page.locator('#selected-character-ct')).toHaveText('CT 2');
+ await selectCharacter(page,'106');await page.getByRole('button',{name:'怪力魔法を発動'}).click();await target.click();if(before>2)await expect(hp).toHaveValue(String(before-2));else await expect(page.locator('#map-roster-list .roster-card').first()).toHaveClass(/defeated/);await expect(page.locator('#selected-character-ct')).toHaveText(/^CT 2 \/ \d+$/);
 });
