@@ -66,6 +66,8 @@ Modifier engine supports fixed, per-stack, floor-per-unit, alternating-step, equ
 
 ## Active skill and cooldown architecture
 
+- CT is displayed as `CT remaining / maximum`, including Extra Battery's effective maximum. The accessible label states both values. Additional CT-shortening effects are deferred at the user's request.
+
 - Extra Battery (chip 15) reduces the owning character's active skill CT maximum by 1, with a minimum of 0. Activation (including target confirmation) uses the reduced maximum. Manual CT increments stop at the effective maximum. Acquiring the chip clamps any current CT above the new maximum; removing it restores the maximum without adding to remaining CT.
 - Clicking Lightning Core (chip 56) consumes exactly 5 Charge and reduces the owner's remaining skill CT by 1, floored at 0. This remains a manual click; it does not automatically fire on skill activation or track card-use allowance.
 - Charge consumption clicks (Airbag 55: 6, Lightning Core 56: 5, Railgun 58: 4) do nothing when Charge is below their full cost, including keyboard activation. Existing +2 Charge clicks and the 10-stack cap are preserved. Airbag/Railgun clicks currently manage Charge only; their damage effects are not simulated by these handlers. Electric Glove's click still grants +2; turn-end consumption/damage is not implemented here.
