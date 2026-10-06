@@ -5,10 +5,11 @@ function getDefenseDamage(
     damageAdd,
     damageReduce,
     attackDice,
-    defenseDice
+    defenseDice,
+    ignoreDefenseOnAttackSix = false
 ) {
     const actualAttack = attackPower + attackDice;
-    const actualDefense = defensePower + defenseDice;
+    const actualDefense = (ignoreDefenseOnAttackSix && attackDice === 6 ? 0 : defensePower) + defenseDice;
 
     let damage = actualAttack - actualDefense;
 
@@ -465,7 +466,8 @@ function calculateCardAwareDamage(
                         damageAdd,
                         damageReduce,
                         attackDice,
-                        defenseDice
+                        defenseDice,
+                        !isSurvival && calculator.dataset.role === 'attack' && calculator.dataset.ignoreDefenseOnAttackSix === 'true'
                     );
 
                     const probability =
@@ -578,9 +580,9 @@ function renderDamageProbabilityGraph(
 
 
 
-function calculateDefenseDamageGrid(attackPower,defensePower,damageAdd,damageReduce,hp){
+function calculateDefenseDamageGrid(attackPower,defensePower,damageAdd,damageReduce,hp,ignoreDefenseOnAttackSix=false){
  const rows=[],damageCounts=new Map();let totalDamage=0,defeatCount=0,survivalCount=0,maxDamage=0;
- for(let attackDice=1;attackDice<=6;attackDice++){const damages=[];for(let defenseDice=1;defenseDice<=6;defenseDice++){const damage=getDefenseDamage(attackPower,defensePower,damageAdd,damageReduce,attackDice,defenseDice);damages.push(damage);totalDamage+=damage;damageCounts.set(damage,(damageCounts.get(damage)||0)+1);maxDamage=Math.max(maxDamage,damage);if(damage>=hp)defeatCount++;else survivalCount++;}rows.push({attackDice,damages});}
+ for(let attackDice=1;attackDice<=6;attackDice++){const damages=[];for(let defenseDice=1;defenseDice<=6;defenseDice++){const damage=getDefenseDamage(attackPower,defensePower,damageAdd,damageReduce,attackDice,defenseDice,ignoreDefenseOnAttackSix);damages.push(damage);totalDamage+=damage;damageCounts.set(damage,(damageCounts.get(damage)||0)+1);maxDamage=Math.max(maxDamage,damage);if(damage>=hp)defeatCount++;else survivalCount++;}rows.push({attackDice,damages});}
  return {rows,damageCounts,totalDamage,defeatCount,survivalCount,maxDamage,totalCombinations:36};
 }
 function renderDefenseDamageGrid(tableBody,grid,hp){
@@ -602,7 +604,7 @@ function renderDefenseModeGuidance(calculator,{attackPower,defensePower,damageAd
 function calculateDamage(calculator, isSurvival = false) {
     const inputs=getCalculatorDamageInputs(calculator);
     const {attackPower,defensePower,damageAdd,damageReduce,hp}=inputs;
-    const grid=calculateDefenseDamageGrid(attackPower,defensePower,damageAdd,damageReduce,hp);
+    const grid=calculateDefenseDamageGrid(attackPower,defensePower,damageAdd,damageReduce,hp,!isSurvival&&calculator.dataset.role==='attack'&&calculator.dataset.ignoreDefenseOnAttackSix==='true');
     renderDefenseDamageGrid(calculator.querySelector('.damage-table tbody'),grid,hp);
 
     // 上部は従来の36通り計算、下部グラフとサマリーはカード効果込み。

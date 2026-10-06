@@ -114,6 +114,65 @@ test('07 skill: Rinrin cancellation and one undo preserve all targets and a sing
  await page.locator('#turn-end').click();await page.locator('#turn-end').click();await expect(atk).toHaveValue('2');await expect(defense).toHaveValue('5');
 });
 
+
+test('07 skill: Padman signed adjustments clamp independently and use the confirmed icon',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'6');
+ const configs=[['攻撃','atk'],['防御','def'],['移動','move']];
+ for(const [name,stat] of configs){
+  const key='自己主張なし'+name+'補正',input=page.getByLabel(key+'の数'),button=page.getByRole('button',{name:key+'を増やす',exact:true});
+  await expect(input).toHaveValue('0');await expect(input).toHaveAttribute('min','-2');await expect(input).toHaveAttribute('max','2');
+  const icon=button.locator('img');await expect(icon).toHaveAttribute('src','../images/UT_Buff/UT_Buff_105_Break.png');
+  await expect.poll(()=>icon.evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);
+  const value=page.locator('#selected-character-'+stat),base=Number(stat==='move'?await value.textContent():await value.inputValue());
+  const expectValue=expected=>stat==='move'?expect(value).toHaveText(String(expected)):expect(value).toHaveValue(String(expected));
+  await button.click({button:'right'});await expect(input).toHaveValue('-1');await expectValue(Math.max(0,base-1));
+  await button.click({button:'right'});await button.click({button:'right'});await expect(input).toHaveValue('-2');await expectValue(Math.max(0,base-2));
+  await input.fill('99');await input.dispatchEvent('change');await expect(input).toHaveValue('2');await expectValue(base+2);
+  await button.click();await expect(input).toHaveValue('2');
+  await input.fill('-99');await input.dispatchEvent('change');await expect(input).toHaveValue('-2');
+  await input.fill('0');await input.dispatchEvent('change');await expectValue(base);
+ }
+ const attack=page.getByLabel('自己主張なし攻撃補正の数'),defense=page.getByLabel('自己主張なし防御補正の数');
+ await attack.fill('-1');await attack.dispatchEvent('change');await defense.fill('2');await defense.dispatchEvent('change');
+ await expect(page.locator('#selected-character-atk')).toHaveValue('1');await expect(page.locator('#selected-character-def')).toHaveValue('4');
+ await selectCharacter(page,'1');await selectCharacter(page,'6');
+ await expect(attack).toHaveValue('-1');await expect(defense).toHaveValue('2');
+});
+
+test('07 skill: Padman icon fallback works when the status CSV cannot be fetched',async({page})=>{
+ await page.route('**/csv/status_icon_map_all.csv',route=>route.abort());
+ await page.goto('/07_skill/');await selectCharacter(page,'6');
+ for(const stat of ['攻撃','防御','移動']){
+  await expect(page.getByRole('button',{name:'自己主張なし'+stat+'補正を増やす',exact:true}).locator('img')).toHaveAttribute('src','../images/UT_Buff/UT_Buff_105_Break.png');
+ }
+});
+
+
+test('07 skill: Padman attack die six ignores only base defense in table and probabilities',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'6');
+ const attack=page.locator('.mode-content[data-role="attack"]'),defense=page.locator('.mode-content[data-role="defense"]');
+ await page.locator('.role-tab[data-role="attack"]').click();
+ for(const [id,value] of [['attackPower1','2'],['defensePower1','8'],['hp1','5'],['damageAdd1','0'],['damageReduce1','0']]){
+  await page.locator('#'+id).fill(value);await page.locator('#'+id).dispatchEvent('input');
+ }
+ const rows=attack.locator('.damage-table tbody tr');
+ for(let i=0;i<5;i++)for(const cell of await rows.nth(i).locator('td').all())await expect(cell).toHaveText('1');
+ await expect(rows.nth(5).locator('td')).toHaveText(['7','6','5','4','3','2']);
+ await expect(attack.locator('.expected-damage')).toHaveText('1.58');await expect(attack.locator('.result-rate')).toHaveText('8.33%');
+ await expect(attack.locator('.future-expected-damage')).toHaveText('1.58');await expect(attack.locator('.future-result-rate')).toHaveText('8.33%');
+ // Added damage/reduction still apply; defense dice 1 and 6 produce different results.
+ expect(await page.evaluate(()=>[getDefenseDamage(2,8,3,1,6,1,true),getDefenseDamage(2,8,3,1,6,6,true),getDefenseDamage(2,8,3,1,5,1,true)])).toEqual([9,4,3]);
+ await page.locator('.role-tab[data-role="defense"]').click();
+ for(const [id,value] of [['attackPower2','2'],['defensePower2','8'],['hp2','5'],['damageAdd2','0'],['damageReduce2','0']]){
+  await page.locator('#'+id).fill(value);await page.locator('#'+id).dispatchEvent('input');
+ }
+ await expect(defense.locator('.damage-table tbody tr').nth(5).locator('td')).toHaveText(['1','1','1','1','1','1']);
+ await selectCharacter(page,'1');
+ await page.locator('.role-tab[data-role="attack"]').click();await page.locator('#attackPower1').fill('2');await page.locator('#attackPower1').dispatchEvent('input');
+ await expect(rows.nth(5).locator('td')).toHaveText(['1','1','1','1','1','1']);
+ await expect(attack.locator('.expected-damage')).toHaveText('1.00');await expect(attack.locator('.future-expected-damage')).toHaveText('1.00');
+});
+
 async function selectChipCategory(page,category){
  await page.locator('#character-chip-tab').click();
  await page.locator(`.chip-category-tabs [data-category="${category}"]`).click();
@@ -506,10 +565,11 @@ test('07 skill: additional character stat skills modify parameters', async ({ pa
  await expect(page.locator('#selected-character-atk')).toHaveValue('4');
 
  await selectCharacter(page,'6');
- await page.getByRole('button',{name:/自己主張なし攻撃補正：0/}).click();
- await page.getByRole('button',{name:/自己主張なし攻撃補正：\+1/}).click();
+ const padAttack=page.getByLabel('自己主張なし攻撃補正の数');
+ await padAttack.fill('2');await padAttack.dispatchEvent('change');
  await expect(page.locator('#selected-character-atk')).toHaveValue('4');
- await page.getByRole('button',{name:/自己主張なし防御補正：0/}).click();
+ const padDefense=page.getByLabel('自己主張なし防御補正の数');
+ await padDefense.fill('1');await padDefense.dispatchEvent('change');
  await expect(page.locator('#selected-character-def')).toHaveValue('3');
 
  await selectCharacter(page,'15');
