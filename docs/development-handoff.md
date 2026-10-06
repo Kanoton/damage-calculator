@@ -53,7 +53,7 @@ Implemented IDs: `4,6,7,9,10,12,14,15,16,17,18,21,23,24,25,26,27,28,103,104,106`
 
 Key behavior:
 - 4 Alanna: no damage previous turn -> ATK +3.
-- 6 Padman: independent signed numeric ATK/DEF/MOVE adjustments from -2 to +2 (default 0), with left-click +1/right-click -1 and bounded direct entry. All three use `UT_Buff/UT_Buff_105_Break.png` via the status CSV and matching 07 fallback. Final stats retain their normal zero floor. The die-6 ignore-defense effect and next-attack fixed die remain unimplemented; the current per-die damage enumeration can support die-6 branching, but whether the defense die is also ignored needs confirmation before implementation.
+- 6 Padman: independent signed numeric ATK/DEF/MOVE adjustments from -2 to +2 (default 0), with left-click +1/right-click -1 and bounded direct entry. All three use `UT_Buff/UT_Buff_105_Break.png` via the status CSV and matching 07 fallback. Final stats retain their normal zero floor. Padman's outgoing attack ignores the opponent's pre-die defense stat only when the attack die is 6; the defense die, damage additions/reductions, and minimum-damage rules still apply. Both the 36-outcome table and card-aware probability calculations use this rule, which clears when another character is selected and never affects defense mode. The next-attack fixed die after a roll below 2 remains unimplemented.
 - 7 Papara: current HP <= half max HP -> ATK +3.
 - 9 Z3000: every 2 monster defeats -> ATK +1. Active Pull In (CT 4) manually targets a monster and deals 5 direct damage; range and the conditional follow-up attack remain manual/not simulated.
 - 10 Pandaman: counterattack mode; ATK increases by damage received that turn.

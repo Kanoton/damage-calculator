@@ -222,6 +222,7 @@
  }
  applyCharacterToCalculator=(totals=selectedCharacter&&calculate())=>{
   if(!totals)return;
+  document.querySelector('[data-role="attack"].mode-content').dataset.ignoreDefenseOnAttackSix=String(Boolean(abilityRules()?.ignoreDefenseOnAttackSix));
   document.getElementById('attackPower1').value=totals.atk;
   document.getElementById('defensePower2').value=totals.def;
   document.getElementById('hp2').value=state().currentHp;

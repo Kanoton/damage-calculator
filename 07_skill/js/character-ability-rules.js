@@ -29,6 +29,7 @@ const CHARACTER_ABILITY_RULES={
   modifiers:[{target:'atk',formula:'fixed',value:3,when:{key:'前ターン被ダメなし',equals:1}}]
  },
  '6':{
+  ignoreDefenseOnAttackSix:true,
   activeSkills:[{key:'active',label:"マジで怒ったぞ",cooldown:3,effects:[]}],
   controls:[
    {key:'自己主張なし攻撃補正',type:'number',min:-2,max:2},

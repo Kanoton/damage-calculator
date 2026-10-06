@@ -147,6 +147,32 @@ test('07 skill: Padman icon fallback works when the status CSV cannot be fetched
  }
 });
 
+
+test('07 skill: Padman attack die six ignores only base defense in table and probabilities',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'6');
+ const attack=page.locator('.mode-content[data-role="attack"]'),defense=page.locator('.mode-content[data-role="defense"]');
+ await page.locator('.role-tab[data-role="attack"]').click();
+ for(const [id,value] of [['attackPower1','2'],['defensePower1','8'],['hp1','5'],['damageAdd1','0'],['damageReduce1','0']]){
+  await page.locator('#'+id).fill(value);await page.locator('#'+id).dispatchEvent('input');
+ }
+ const rows=attack.locator('.damage-table tbody tr');
+ for(let i=0;i<5;i++)for(const cell of await rows.nth(i).locator('td').all())await expect(cell).toHaveText('1');
+ await expect(rows.nth(5).locator('td')).toHaveText(['7','6','5','4','3','2']);
+ await expect(attack.locator('.expected-damage')).toHaveText('1.58');await expect(attack.locator('.result-rate')).toHaveText('8.33%');
+ await expect(attack.locator('.future-expected-damage')).toHaveText('1.58');await expect(attack.locator('.future-result-rate')).toHaveText('8.33%');
+ // Added damage/reduction still apply; defense dice 1 and 6 produce different results.
+ expect(await page.evaluate(()=>[getDefenseDamage(2,8,3,1,6,1,true),getDefenseDamage(2,8,3,1,6,6,true),getDefenseDamage(2,8,3,1,5,1,true)])).toEqual([9,4,3]);
+ await page.locator('.role-tab[data-role="defense"]').click();
+ for(const [id,value] of [['attackPower2','2'],['defensePower2','8'],['hp2','5'],['damageAdd2','0'],['damageReduce2','0']]){
+  await page.locator('#'+id).fill(value);await page.locator('#'+id).dispatchEvent('input');
+ }
+ await expect(defense.locator('.damage-table tbody tr').nth(5).locator('td')).toHaveText(['1','1','1','1','1','1']);
+ await selectCharacter(page,'1');
+ await page.locator('.role-tab[data-role="attack"]').click();await page.locator('#attackPower1').fill('2');await page.locator('#attackPower1').dispatchEvent('input');
+ await expect(rows.nth(5).locator('td')).toHaveText(['1','1','1','1','1','1']);
+ await expect(attack.locator('.expected-damage')).toHaveText('1.00');await expect(attack.locator('.future-expected-damage')).toHaveText('1.00');
+});
+
 async function selectChipCategory(page,category){
  await page.locator('#character-chip-tab').click();
  await page.locator(`.chip-category-tabs [data-category="${category}"]`).click();
