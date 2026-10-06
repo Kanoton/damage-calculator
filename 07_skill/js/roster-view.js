@@ -27,3 +27,13 @@ function createRosterSkillView(enemy,displayName,skill,isOpen,targets,assignImag
  for(const target of targets){if(!target)continue;const choice=document.createElement('button');choice.type='button';choice.className='roster-skill-choice';choice.setAttribute('aria-label',target.name+'を1体召喚');const image=document.createElement('img');image.alt='';assignImage(image,target.image);const label=document.createElement('span');label.textContent=target.name;choice.append(image,label);choice.addEventListener('click',()=>onSummon(target.id));choices.append(choice);}
  return {button,choices};
 }
+
+function createRosterCharacterStatusControl(enemy,displayName,config){
+ const field=document.createElement('span');field.className='roster-character-status roster-status-'+config.key;
+ const button=document.createElement('button');button.type='button';button.className='roster-status-button';button.disabled=!!enemy.defeated;
+ const value=config.stack?Math.max(0,Number(enemy[config.key])||0):Boolean(enemy[config.key]);
+ button.setAttribute('aria-label',displayName+'の'+config.label+(config.stack?'を増やす':'：'+(value?'オン':'オフ')));
+ if(!config.stack)button.setAttribute('aria-pressed',String(value));button.title=config.label+(config.stack?'：左クリックで＋1、右クリックで−1':'：クリックで切り替え');
+ if(config.icon){const icon=document.createElement('img');icon.src='../images/UT_Buff/'+config.icon;icon.alt=config.label;button.append(icon);}else button.textContent=config.label;
+ field.append(button);if(config.stack){const count=document.createElement('strong');count.textContent=String(value);field.append(count);}return {field,button};
+}

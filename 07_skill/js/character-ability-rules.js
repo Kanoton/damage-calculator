@@ -6,9 +6,7 @@ const CHARACTER_ABILITY_RULES={
   modifiers:[{target:'atk',formula:'per_stack',source:'このターンに受けたダメージ',value:1,when:{key:'カウンター攻撃',equals:1}}]
  },
  '17':{
-  activeSkills:[{key:'active',label:"真夜の一閃",cooldown:3,effects:[]}],
-  controls:[{key:'真夜の一閃',type:'toggle'}],
-  modifiers:[{target:'atk',formula:'fixed',value:2,when:{key:'真夜の一閃',equals:1}}]
+  activeSkills:[{key:'active',label:"真夜の一閃",cooldown:3,target:'monster',multipleTargets:true,effects:[{type:'damage_monster',sourceStat:'atk',offset:2}]}]
  },
  '23':{
   activeSkills:[{key:'active',label:"三神憑依",cooldown:3,inputStats:[{key:'三神憑依対象攻撃力',label:'憑依する味方の攻撃力'},{key:'三神憑依対象防御力',label:'憑依する味方の防御力'}],effects:[{type:'modify_stat',target:'self',stat:'atk',sourceKey:'三神憑依対象攻撃力',multiplier:0.5,duration:'turn'},{type:'modify_stat',target:'self',stat:'def',sourceKey:'三神憑依対象防御力',multiplier:0.5,duration:'turn'}]}],
@@ -16,8 +14,8 @@ const CHARACTER_ABILITY_RULES={
   modifiers:[{target:'atk',formula:'per_stack',source:'狐光',value:1,when:{key:'狐光追加攻撃',equals:1}}]
  },
  '27':{
-  activeSkills:[{key:'active',label:"ミッション：インシークレット",cooldown:3,target:'monster',effects:[{type:'modify_monster_mark',delta:1}]}],
-  controls:[{key:'潜伏',type:'toggle'}],
+  activeSkills:[{key:'active',label:"ミッション：インシークレット",cooldown:3,target:'monster',effects:[{type:'modify_monster_mark',delta:1},{type:'set_monster_status',key:'investigationTarget',value:true}]}],
+  controls:[{key:'潜伏',type:'toggle'},{key:'潜入調査',type:'choice',cycle:false,options:[{value:0,label:'フェーズ・ワン',iconKey:'フェーズ・ワン'},{value:1,label:'フェーズ・ツー',iconKey:'フェーズ・ツー'},{value:2,label:'フェーズ・スリー',iconKey:'フェーズ・スリー'},{value:3,label:'真相解明',iconKey:'真相解明'}]}],
   modifiers:[
    {target:'atk',formula:'fixed',value:3,when:{key:'target_mark',min:1}},
    {target:'atk',formula:'per_stack',source:'target_mark',value:1,when:{key:'潜伏',equals:1}}
@@ -48,9 +46,7 @@ const CHARACTER_ABILITY_RULES={
   modifiers:[{target:'atk',formula:'per_stack',source:'相手より多い手札',value:1}]
  },
  '26':{
-  activeSkills:[{key:'active',label:"暗影融合",cooldown:3,effects:[]}],
-  controls:[{key:'吸収した影',type:'number',min:0}],
-  modifiers:[{target:'atk',formula:'per_stack',source:'吸収した影',value:1}]
+  activeSkills:[{key:'active',label:"暗影融合",cooldown:3,inputStats:[{key:'吸収した影',label:'吸収した影の数',integer:true}],effects:[{type:'modify_stat',target:'self',stat:'atk',sourceKey:'吸収した影',duration:'turn'}]}]
  },
  '28':{
   activeSkills:[{key:'active',label:"インターセプトタックル",cooldown:3,target:'monster',multipleTargets:true,effects:[{type:'modify_monster_def',value:-2,durationTurns:2},{type:'modify_stat',target:'self',stat:'atk',value:2,durationTurns:2}]}],
@@ -59,11 +55,8 @@ const CHARACTER_ABILITY_RULES={
  },
  '103':{
   activeSkills:[{key:'active',label:"カクテルを作る",cooldown:3,effects:[]}],
-  controls:[{key:'カクテル攻撃カード',type:'number',min:0,max:3},{key:'カクテル防御カード',type:'number',min:0,max:3}],
-  modifiers:[
-   {target:'atk',formula:'per_stack',source:'カクテル攻撃カード',value:1},
-   {target:'def',formula:'per_stack',source:'カクテル防御カード',value:1}
-  ]
+  controls:[{key:'一生を変えるカクテル',type:'toggle',duration:'turn'}],
+  modifiers:[{target:'move',formula:'fixed',value:3,when:{key:'一生を変えるカクテル',equals:1}}]
  },
  '7':{
   activeSkills:[{key:'active',label:"ひとくちだけ",cooldown:3,effects:[{type:'force_condition',key:'current_hp_ratio<=',duration:'turn'}]}],
@@ -96,7 +89,7 @@ const CHARACTER_ABILITY_RULES={
   modifiers:[]
  },
  '24':{
-  activeSkills:[{key:'active',label:"弱点反撃",cooldown:2,effects:[]}],
+  activeSkills:[{key:'active',label:"弱点反撃",cooldown:2,target:'monster',effects:[{type:'set_monster_status',key:'weakness',value:true}]}],
   controls:[{key:'精確無比',type:'number',min:0,max:3}],
   modifiers:[{target:'atk',formula:'per_stack',source:'精確無比',value:2}],
   turnEnd:[{key:'精確無比',delta:-1,min:0}]
@@ -107,9 +100,9 @@ const CHARACTER_ABILITY_RULES={
   modifiers:[{target:'atk',formula:'fixed',value:4,when:{key:'覚醒',equals:8}}]
  },
  '104':{
-  activeSkills:[{key:'active',label:"本当の私",cooldown:2,effects:[]}],
-  controls:[{key:'温もり',type:'number',min:0,max:5}],
-  modifiers:[{target:'def',formula:'per_stack',source:'温もり',value:1}]
+  activeSkills:[{key:'active',label:"本当の私",cooldown:2,effects:[{type:'modify_stat',target:'self',stat:'atk',sourceStat:'def',duration:'turn',when:{key:'温もり',equals:5}}]}],
+  controls:[{key:'温もり',type:'number',min:0,max:5},{key:'本当の私',type:'toggle',duration:'turn'}],
+  modifiers:[{target:'def',formula:'per_stack',source:'温もり',value:1},{target:'atk',formula:'fixed',value:1,when:{key:'本当の私',equals:1}}]
  },
  '106':{
   activeSkills:[{key:'active',label:"怪力魔法",cooldown:2,target:'monster',multipleTargets:true,effects:[{type:'damage_monster',value:2}]}],
@@ -126,17 +119,9 @@ const CHARACTER_ABILITY_RULES={
   ]
  },
  '16':{
-  activeSkills:[{key:'overdrive',label:'オーバードライブ',cooldown:4,effects:[{type:'modify_stat',target:'self',stat:'move',value:3,duration:'turn'},{type:'modify_stat',target:'self',stat:'def',value:-3,duration:'turn'}]}],
-  controls:[
-   {key:'オーバードライブ結果',type:'choice',options:[{value:0,label:'変化なし'},{value:1,label:'10未満'},{value:2,label:'10以上'}]},
-   {key:'累計移動ポイント',type:'number',min:0}
-  ],
-  modifiers:[
-   {target:'def',formula:'fixed',value:2,when:{key:'オーバードライブ結果',equals:1}},
-   {target:'atk',formula:'fixed',value:2,when:{key:'オーバードライブ結果',equals:2}},
-   {target:'atk',formula:'alternating_steps',source:'累計移動ポイント',unit:13,order:0},
-   {target:'def',formula:'alternating_steps',source:'累計移動ポイント',unit:13,order:1}
-  ]
+  activeSkills:[{key:'overdrive',label:'オーバードライブ',cooldown:4,inputStats:[{key:'オーバードライブ出目',label:'オーバードライブのダイスの出目',integer:true}],effects:[{type:'modify_stat',target:'self',stat:'move',value:3,duration:'turn'},{type:'modify_stat',target:'self',stat:'def',value:-3,duration:'turn'},{type:'modify_stat',target:'self',stat:'def',value:2,duration:'turn',when:{key:'オーバードライブ出目',min:0,max:9}},{type:'modify_stat',target:'self',stat:'atk',value:2,duration:'turn',when:{key:'オーバードライブ出目',min:10}}]}],
+  controls:[{key:'累計移動ポイント',type:'number',min:0}],
+  modifiers:[{target:'atk',formula:'alternating_steps',source:'累計移動ポイント',unit:13,order:0},{target:'def',formula:'alternating_steps',source:'累計移動ポイント',unit:13,order:1}]
  },
  '1':{
   activeSkills:[{key:'active',label:"商品補充",cooldown:3,effects:[]}],
@@ -152,6 +137,8 @@ const CHARACTER_ABILITY_RULES={
  },
  '8':{
   activeSkills:[{key:'active',label:"子供の特権",cooldown:3,effects:[]}],
+  controls:[{key:'ジュジュシールド',type:'toggle'}],
+  modifiers:[{target:'damageReduce',formula:'fixed',value:99,when:{key:'ジュジュシールド',equals:1}}]
  },
  '11':{
   activeSkills:[{key:'active',label:"癒しの粘液",cooldown:3,effects:[]}],
@@ -167,12 +154,13 @@ const CHARACTER_ABILITY_RULES={
  },
  '22':{
   activeSkills:[{key:'active',label:"ライフ・ブック",cooldown:3,effects:[]}],
+  controls:[{key:'ライフ・ブック',type:'number',min:0}]
  },
  '29':{
   activeSkills:[{key:'active',label:"アビサルゾーン",cooldown:3,effects:[]}],
  },
  '101':{
-  activeSkills:[{key:'active',label:"インターネットエンジェル",cooldown:3,effects:[{type:'heal',target:'self',value:3,when:{key:'ファン',min:3}}]}],
+  activeSkills:[{key:'active',label:"インターネットエンジェル",cooldown:3,effects:[{type:'heal',target:'self',value:3,when:{key:'ファン',min:3}},{type:'reduce_fan_attack',when:{key:'ファン',min:9}}]}],
   controls:[{key:'ファン',type:'number',min:0}]
  },
  '102':{
@@ -180,6 +168,8 @@ const CHARACTER_ABILITY_RULES={
   controls:[{key:'愛',type:'number',min:0,max:4,default:2}]
  },
  '105':{
-  activeSkills:[{key:'active',label:"浮遊魔法",cooldown:3,effects:[]}],
+  activeSkills:[{key:'active',label:"浮遊魔法",cooldown:3,effects:[{type:'modify_stat',target:'self',stat:'move',value:2,duration:'turn'}]}],
+  controls:[{key:'人形制作',type:'number',min:0,max:7,iconAtMax:'人形完成'},{key:'親友を守る',type:'toggle'}],
+  modifiers:[{target:'damageReduce',formula:'fixed',value:1,when:{key:'親友を守る',equals:1}}]
  },
 };
