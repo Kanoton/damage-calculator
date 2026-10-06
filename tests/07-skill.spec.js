@@ -332,6 +332,34 @@ test('07 skill: party levels are independent and self stats stay linked after dr
  await page.locator('#selected-self-tab').click();await page.locator('.character-select[data-id="2"]').click();await expect(slot('2')).toHaveAttribute('data-slot','3');await expect(slot('2').locator('.party-slot-order')).toHaveText('3rd自分');await expect(page.locator('.party-member-slot[data-slot="1"]')).toHaveAttribute('data-character-id','');
 });
 
+test('07 skill: party identity, HP-first stats and compact self chips stay inside the fixed frame',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'1');
+ const frame=page.locator('#selected-character'),before=await frame.boundingBox();
+ await selectChipCategory(page,'共通');
+ const choices=page.locator('#chip-image-list .chip-select'),ids=[];
+ for(let i=0;i<12;i++){const choice=choices.nth(i);ids.push(await choice.getAttribute('data-id'));await choice.click();}
+ await page.locator('#selected-party-tab').click();
+ const self=page.locator('.party-member-slot[data-character-id="1"]');
+ await expect(self.locator('.party-slot-identity .party-slot-level')).toHaveText('Lv.0');
+ expect(await self.locator('.party-slot-stat').evaluateAll(nodes=>nodes.map(n=>n.dataset.stat))).toEqual(['hp','atk','def','move']);
+ await expect(self.locator('[data-stat="move"] b')).toHaveText(await page.locator('#selected-character-move').textContent());
+ expect(await self.locator('.party-slot-chip').evaluateAll(nodes=>nodes.map(n=>n.dataset.chipId))).toEqual(ids);
+ const nameBounds=await self.locator('.party-slot-name').boundingBox(),lvBounds=await self.locator('.party-slot-level').boundingBox();expect(lvBounds.x).toBeGreaterThanOrEqual(nameBounds.x+nameBounds.width);expect(lvBounds.y).toBeLessThan(nameBounds.y+nameBounds.height);
+ await page.locator('#character-list-tab').click();await page.locator('.character-select[data-id="2"]').click();
+ const ally=page.locator('.party-member-slot[data-character-id="2"]');await expect(ally.locator('.party-slot-chips')).toHaveCount(0);
+ for(let i=0;i<3;i++)await ally.locator('.party-slot-level').click();await expect(ally.locator('[data-stat="move"] b')).toHaveText('1');
+ await self.dragTo(page.locator('.party-member-slot[data-slot="4"]'));await expect(self).toHaveAttribute('data-slot','4');await expect(self.locator('.party-slot-chip')).toHaveCount(12);
+ for(const width of [1280,600,375]){
+  await page.setViewportSize({width,height:1000});
+  const ptBounds=await frame.boundingBox();expect(ptBounds.height).toBe(118);
+  const layout=await self.evaluate(slot=>{const s=slot.getBoundingClientRect(),details=slot.querySelector('.party-slot-details'),list=slot.querySelector('.party-slot-chips'),l=list.getBoundingClientRect(),d=details.getBoundingClientRect();return {fits:l.left>=s.left&&l.right<=s.right+1&&d.top>=s.top&&d.bottom<=s.bottom+1,sizes:[...list.querySelectorAll('img')].map(img=>{const r=img.getBoundingClientRect();return {width:r.width,height:r.height};})};});
+  expect(layout.fits).toBe(true);for(const size of layout.sizes){expect(size.width).toBeLessThanOrEqual(14);expect(size.height).toBeLessThanOrEqual(14);}
+  await page.locator('#selected-self-tab').click();const ownBounds=await frame.boundingBox();expect(ownBounds.width).toBe(ptBounds.width);expect(ownBounds.height).toBe(ptBounds.height);await page.locator('#selected-party-tab').click();
+ }
+ await page.setViewportSize({width:1280,height:720});expect((await frame.boundingBox()).width).toBe(before.width);
+ await selectChipCategory(page,'共通');await page.locator('.chip-select[data-id="'+ids[0]+'"]').click();await page.locator('#selected-party-tab').click();await expect(self.locator('.party-slot-chip')).toHaveCount(11);await expect(self.locator('.party-slot-chip[data-chip-id="'+ids[0]+'"]')).toHaveCount(0);
+});
+
 test('07 skill: self and 2x2 party preserve the exact outer frame and personal controls',async({page})=>{
  await page.goto('/07_skill/');await selectCharacter(page,'16');
  const frame=page.locator('#selected-character');
