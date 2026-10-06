@@ -128,6 +128,7 @@ function createPartyMemberView(row,index,parameters,isSelf,onLevelChange,ownedCh
  slot.title=row?'ドラッグで順番変更'+(isSelf?'':'／枠を右クリックでPT登録解除'):'キャラ一覧からクリックで登録';
  const order=document.createElement('span');order.className='party-slot-order';order.textContent=['1st','2nd','3rd','4th'][index];if(isSelf){const self=document.createElement('small');self.textContent='自分';order.append(self);}slot.append(order);
  const details=document.createElement('div');details.className='party-slot-details';
+ let chipList=null;
  const identity=document.createElement('div');identity.className='party-slot-identity';
  const name=document.createElement('strong');name.className='party-slot-name';name.textContent=row?.name||'未登録';identity.append(name);details.append(identity);
  if(row){
@@ -148,8 +149,8 @@ function createPartyMemberView(row,index,parameters,isSelf,onLevelChange,ownedCh
     const item=document.createElement('span');item.className='party-slot-chip';item.dataset.chipId=chip.id;item.setAttribute('role','listitem');item.title=chip.name+'\n'+chip.effect;
     const image=document.createElement('img');image.src='../images/chip_icon/'+encodeURIComponent(chip.images);image.alt=chip.name;image.draggable=false;item.append(image);list.append(item);
    }
-   details.append(list);
+   chipList=list;
   }
  }
- slot.append(details);return slot;
+ slot.append(details);if(chipList){slot.classList.add('has-self-chips');slot.append(chipList);}return slot;
 }
