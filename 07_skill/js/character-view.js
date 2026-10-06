@@ -135,10 +135,10 @@ const partyChipGridResizeObserver=new ResizeObserver(entries=>{
  }
 });
 
-function createPartyMemberView(row,index,parameters,isSelf,onLevelChange,ownedChips=[]){
+function createPartyMemberView(row,index,parameters,isSelf,onLevelChange,ownedChips=[],onStatChange){
  const slot=document.createElement('div');slot.className='party-member-slot';slot.dataset.slot=String(index+1);slot.dataset.characterId=row?.id||'';slot.tabIndex=0;slot.draggable=Boolean(row);slot.setAttribute('role','group');
  slot.setAttribute('aria-label',(index+1)+'番目'+(isSelf?'（自分）':'')+'：'+(row?.name||'未登録'));
- slot.title=row?'ドラッグで順番変更'+(isSelf?'':'／枠を右クリックでPT登録解除'):'キャラ一覧からクリックで登録';
+ slot.title=row?'名前・枠をクリックでチップ編集対象を選択／ドラッグで順番変更'+(isSelf?'':'／枠を右クリックでPT登録解除'):'キャラ一覧からクリックで登録';
  const order=document.createElement('span');order.className='party-slot-order';order.textContent=['1st','2nd','3rd','4th'][index];if(isSelf){const self=document.createElement('small');self.textContent='自分';order.append(self);}slot.append(order);
  const details=document.createElement('div');details.className='party-slot-details';
  let chipList=null;
@@ -153,11 +153,13 @@ function createPartyMemberView(row,index,parameters,isSelf,onLevelChange,ownedCh
   const level=document.createElement('button');level.type='button';level.className='party-slot-level';level.textContent='Lv.'+parameters.level;level.setAttribute('aria-label',row.name+' Lv.'+parameters.level+'：'+levelTitle);wireLevel(level);identity.append(level);
   for(const [key,label,icon] of [['hp','HP','Hp.png'],['atk','攻撃力','Attack.png'],['def','防御力','Defense.png'],['move','移動力','run.png']]){
    const stat=document.createElement('span');stat.className='party-slot-stat';stat.dataset.stat=key;stat.title=label;stat.setAttribute('aria-label',label+' '+(key==='hp'?parameters.currentHp+' / '+parameters.hp:parameters[key]));
-   const image=document.createElement('img');image.src='../images/UT_Buff/'+icon;image.alt=label;image.draggable=false;const value=document.createElement('b');value.textContent=key==='hp'?parameters.currentHp+'/'+parameters.hp:parameters[key];stat.append(image,value);stats.append(stat);
+   const button=document.createElement('button');button.type='button';button.className='party-slot-stat-icon';button.setAttribute('aria-label',row.name+'の'+(key==='hp'?'現在HP':label)+'を増やす');button.title=label+'：左クリックで＋1／右クリックで−1';
+   const image=document.createElement('img');image.src='../images/UT_Buff/'+icon;image.alt=label;image.draggable=false;button.append(image);button.addEventListener('click',event=>{event.stopPropagation();onStatChange?.(key,1);});button.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();onStatChange?.(key,-1);});
+   const value=document.createElement('b');value.textContent=key==='hp'?parameters.currentHp+'/'+parameters.hp:parameters[key];stat.append(button,value);stats.append(stat);
   }
   details.append(stats);
-  if(isSelf&&ownedChips.length){
-   const list=document.createElement('div');list.className='party-slot-chips';list.setAttribute('role','list');list.setAttribute('aria-label','自キャラの取得済みチップ');list.style.setProperty('--party-chip-count',String(ownedChips.length));
+  if(ownedChips.length){
+   const list=document.createElement('div');list.className='party-slot-chips';list.setAttribute('role','list');list.setAttribute('aria-label',row.name+'の取得済みチップ');list.style.setProperty('--party-chip-count',String(ownedChips.length));
    for(const chip of ownedChips){
     const item=document.createElement('span');item.className='party-slot-chip';item.dataset.chipId=chip.id;item.setAttribute('role','listitem');item.title=chip.name+'\n'+chip.effect;
     const image=document.createElement('img');image.src='../images/chip_icon/'+encodeURIComponent(chip.images);image.alt=chip.name;image.draggable=false;item.append(image);list.append(item);

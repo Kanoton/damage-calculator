@@ -65,6 +65,7 @@ function renderGimmicks(){
 const rosterBuff={attack:0,defense:0},rosterCounts=new Map();
 let rosterEvidenceConsider=false;
 window.addEventListener('character-evidence-change',()=>{if(pick.value==='MAP0104')renderRoster();});
+window.addEventListener('party-members-change',()=>{if(data)renderRoster();});
 function rosterStat(stats,key){
  if(!stats||stats[key]===''||stats[key]===undefined)return null;
  let value=Number(stats[key])+(key==='攻撃'?rosterBuff.attack:key==='防御'?rosterBuff.defense:0);
@@ -247,8 +248,8 @@ function renderRoster(){
   const remove=createRosterActionButton('roster-remove',enemy.defeated?'撃破済':'撃破',displayName+'を撃破',!!enemy.defeated);remove.addEventListener('click',()=>{rememberRoster();removeEnemy(enemy);renderRoster();rosterNotice.textContent=monsterDisplayName(enemy)+'を撃破しました。';});
   const deleteButton=createRosterActionButton('roster-delete','削除',displayName+'を削除');deleteButton.addEventListener('click',()=>{rememberRoster();const i=rosterState.monsters.indexOf(enemy);if(i>=0)rosterState.monsters.splice(i,1);if(rosterState.selectedId===enemy.instanceId){rosterState.selectedId=null;window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:null}));}renderRoster();});
    actions.append(remove,deleteButton);
-  const statusControls=[],statusCharacterId=String(window.captureCharacterAbilityState?.()?.id||'');
-  for(const config of [{characterId:'24',key:'weakness',label:'弱点'},{characterId:'27',key:'investigationTarget',label:'調査対象',icon:'UT_Buff_127_Skill.png'},{characterId:'29',key:'erosionStacks',label:'エロ',icon:'UT_Buff_129_Skill.png',stack:true},{characterId:'101',key:'fan',label:'ファン',icon:'UT_Buff_301.png'}].filter(config=>config.characterId===statusCharacterId)){
+  const statusControls=[],statusCharacterIds=new Set(window.getPartyCharacterIds?.()||[String(window.captureCharacterAbilityState?.()?.id||'')]);
+  for(const config of [{characterId:'24',key:'weakness',label:'弱点'},{characterId:'27',key:'investigationTarget',label:'調査対象',icon:'UT_Buff_127_Skill.png'},{characterId:'29',key:'erosionStacks',label:'エロ',icon:'UT_Buff_129_Skill.png',stack:true},{characterId:'101',key:'fan',label:'ファン',icon:'UT_Buff_301.png'}].filter(config=>statusCharacterIds.has(config.characterId))){
    const view=createRosterCharacterStatusControl(enemy,displayName,config);
    const change=delta=>{if(enemy.defeated)return;const current=config.stack?(Number(enemy[config.key])||0):!!enemy[config.key],next=config.stack?Math.max(0,current+delta):!current;if(current===next)return;rememberRoster();enemy[config.key]=next;renderRoster();};
    view.button.addEventListener('click',event=>{event.stopPropagation();change(1);});if(config.stack)view.button.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();change(-1);});

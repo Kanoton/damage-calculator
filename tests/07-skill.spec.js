@@ -368,6 +368,41 @@ test('07 skill: party identity, HP-first stats and compact self chips stay insid
  await selectChipCategory(page,'共通');await page.locator('.chip-select[data-id="'+ids[0]+'"]').click();await page.locator('#selected-party-tab').click();await expect(self.locator('.party-slot-chip')).toHaveCount(11);await expect(self.locator('.party-slot-chip[data-chip-id="'+ids[0]+'"]')).toHaveCount(0);
 });
 
+test('07 skill: PT editing isolates chips, modifiers and icon HP from self and other members',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'27');
+ const ownAtk=await page.locator('#selected-character-atk').inputValue(),round=await page.locator('#current-round').textContent();
+ await page.locator('#selected-party-tab').click();await page.locator('.character-select[data-id="1"]').click();await page.locator('.character-select[data-id="2"]').click();
+ const slot=id=>page.locator('.party-member-slot[data-character-id="'+id+'"]'),stat=(id,key)=>slot(id).locator('[data-stat="'+key+'"] b'),icon=(id,key)=>slot(id).locator('[data-stat="'+key+'"] button');
+ await slot('1').locator('.party-slot-name').click();await expect(slot('1')).toHaveAttribute('aria-current','true');await selectChipCategory(page,'共通');
+ for(const id of ['1','4','7','10','9','13'])await page.locator('.chip-select[data-id="'+id+'"]').click();
+ await expect(stat('1','atk')).toHaveText('4');await expect(stat('1','def')).toHaveText('2');await expect(stat('1','move')).toHaveText('1');await expect(stat('1','hp')).toHaveText('9/14');await expect(slot('1').locator('.party-slot-chip')).toHaveCount(6);
+ await expect(slot('2').locator('.party-slot-chip')).toHaveCount(0);await expect(slot('27').locator('.party-slot-chip')).toHaveCount(0);await expect(page.locator('#selected-character-atk')).toHaveValue(ownAtk);await expect(slot('1').locator('input')).toHaveCount(0);
+ for(let i=0;i<3;i++)await icon('1','hp').click({button:'right'});await expect(stat('1','hp')).toHaveText('6/14');await expect(stat('1','atk')).toHaveText('8');await icon('1','hp').click();await expect(stat('1','atk')).toHaveText('4');
+ await icon('1','atk').click();await icon('1','def').click();await icon('1','move').click();await expect(stat('1','atk')).toHaveText('5');await expect(stat('1','def')).toHaveText('3');await expect(stat('1','move')).toHaveText('2');
+ await slot('1').dragTo(page.locator('.party-member-slot[data-slot="4"]'));await expect(slot('1')).toHaveAttribute('aria-current','true');await expect(page.locator('.chip-select[data-id="1"]')).toHaveAttribute('aria-pressed','true');
+ await page.locator('.chip-select[data-id="1"]').click();await expect(stat('1','atk')).toHaveText('4');await expect(slot('1').locator('.party-slot-chip')).toHaveCount(5);
+ for(let i=0;i<20;i++)await icon('1','hp').click();await expect(stat('1','hp')).toHaveText('14/14');await page.locator('.chip-select[data-id="7"]').click();await expect(stat('1','hp')).toHaveText('12/12');
+ await slot('2').locator('.party-slot-name').click();await expect(page.locator('.chip-select[data-id="4"]')).toHaveAttribute('aria-pressed','false');await page.locator('.chip-select[data-id="4"]').click();await expect(stat('2','move')).toHaveText('1');await expect(stat('1','move')).toHaveText('2');
+ await slot('27').locator('.party-slot-name').click();await page.locator('.chip-select[data-id="1"]').click();await expect(page.locator('#selected-character-atk')).toHaveValue(String(Number(ownAtk)+1));await expect(stat('1','atk')).toHaveText('3');
+ await slot('1').locator('.party-slot-name').click();await slot('1').locator('.party-slot-name').click({button:'right'});await expect(slot('1')).toHaveCount(0);await expect(slot('27')).toHaveAttribute('aria-current','true');await expect(page.locator('.chip-select[data-id="1"]')).toHaveAttribute('aria-pressed','true');
+ await expect(page.locator('#current-round')).toHaveText(round);await page.locator('#selected-self-tab').click();await expect(page.locator('#selected-character-name')).toHaveText('ボニー');
+});
+
+test('07 skill: monster status buttons combine self and PT membership and preserve hidden values',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'27');await page.locator('#selected-party-tab').click();
+ for(const id of ['29','24','101'])await page.locator('.character-select[data-id="'+id+'"]').click();
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-tab-monsters').click();
+ const maps=page.locator('#mp-map-select');for(const option of await maps.locator('option').all()){await maps.selectOption(await option.getAttribute('value'));await maps.dispatchEvent('change');if(await page.locator('#mp-monster-list .mp-monster:visible').count())break;}
+ await page.locator('#mp-monster-list .mp-monster:visible').first().click();
+ const card=page.locator('#map-roster-list .roster-card').first();await expect(card.locator('.roster-mark')).toHaveCount(5);
+ expect(await card.locator('.roster-character-status').evaluateAll(nodes=>nodes.map(n=>[...n.classList].find(c=>c.startsWith('roster-status-'))))).toEqual(['roster-status-weakness','roster-status-investigationTarget','roster-status-erosionStacks','roster-status-fan']);
+ await card.locator('.roster-status-investigationTarget button').click();await card.locator('.roster-status-erosionStacks button').click();await expect(card.locator('.roster-status-erosionStacks strong')).toHaveText('1');
+ const round=await page.locator('#current-round').textContent(),count=await page.locator('#roster-counts').textContent();
+ await page.locator('.role-tab[data-role="character"]').click();await page.locator('.party-member-slot[data-character-id="29"] .party-slot-name').click();await expect(page.locator('#selected-character-name')).toHaveText('ボニー');
+ await page.locator('.party-member-slot[data-character-id="29"] .party-slot-name').click({button:'right'});await expect(card.locator('.roster-status-erosionStacks')).toHaveCount(0);await expect(card.locator('.roster-status-investigationTarget button')).toHaveAttribute('aria-pressed','true');
+ await page.locator('.character-select[data-id="29"]').click();await expect(card.locator('.roster-status-erosionStacks strong')).toHaveText('1');await expect(page.locator('#roster-counts')).toHaveText(count);await expect(page.locator('#current-round')).toHaveText(round);
+});
+
 test('07 skill: self and 2x2 party preserve the exact outer frame and personal controls',async({page})=>{
  await page.goto('/07_skill/');await selectCharacter(page,'16');
  const frame=page.locator('#selected-character');

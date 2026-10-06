@@ -7,7 +7,8 @@
  const ownedBox=document.querySelector('.selected-character-chips');
  const hpInput=document.getElementById('selected-character-current-hp');
  const partyGrid=document.getElementById('selected-party-grid'),selfTab=document.getElementById('selected-self-tab'),partyTab=document.getElementById('selected-party-tab');
- const partySlots=[null,null,null,null],partyLevels=new Map();let partyMode=false,draggedPartyIndex=null;
+ const partySlots=[null,null,null,null],partyStates=new Map();let partyMode=false,draggedPartyIndex=null,partyEditId=null;
+ const getPartyState=id=>{const key=String(id);if(!partyStates.has(key))partyStates.set(key,{level:0,currentHp:null,chips:[],manual:{atk:0,def:0,move:0}});return partyStates.get(key);};
  const STATUS_ICON_SNAPSHOT="group,effect_key,input_kind,icon_file,map_id,atk,def,move,damage_reduce,condition\r\nスタック,コイン,number,UT_Buff/Coin.png\r\nスタック,マーク,number,UT_Buff/UT_Buff_Lock.png\r\nスタック,ヒール,number,UT_Buff/UT_Buff_Heal.png\r\nスタック,チャージ,number,UT_Buff/UT_Buff_Charge.png\r\nスタック,改造,number,UT_Buff/UT_Buff_Gaizao.png\r\nスタック,ジェントル・フレイム,number,UT_Buff/UT_Buff_1049.png\r\nスタック,反撃,number,UT_Buff/UT_Buff_Counter.png\r\nスタック,マインド,number,chip_icon/201_スタンガン.png\r\nスタック,罪証,number,UT_Buff/UT_Buff_Crime.png\r\nスタック,精確無比,number,UT_Buff/UT_Buff_125_Passive.png\r\nスタック,エネルギー保存,number,UT_Buff/UT_Buff_113_Passive.png\r\nスタック,剣気,number,UT_Buff/UT_Buff_115.png\r\nスタック,累計移動ポイント,number,UT_Buff/UT_Buff_117_Passive.png\r\nスタック,スターライト,number,UT_Buff/UT_Buff_StarLight.png\r\nスタック,覚醒,number,UT_Buff/UT_Buff_1026.png\r\n状態,真龍,checkbox,UT_Buff/UT_Buff_1261204.png\r\nスタック,温もり,number,UT_Buff/UT_Buff_304_piano.png\r\n所持数,スターコイン,number,UT_Buff/Coin.png\r\n蓄積ボーナス,優雅の羽ボーナス,number,chip_icon/021_優雅の羽.png\r\n蓄積ボーナス,ギガントアンカーボーナス,number,chip_icon/101_ギガントアンカー.png\r\n蓄積ボーナス,呪いの剣ボーナス,number,chip_icon/111_呪いの剣.png\r\n蓄積ボーナス,反撃による永続ボーナス,number,UT_Buff/UT_Buff_Counter.png\r\n蓄積ボーナス,鴛鴦連理解除ボーナス,number,UT_Buff/UT_Buff_1047.png\r\n蓄積ボーナス,マインド増加ボーナス,number,chip_icon/207_原初の意識.png\r\n蓄積ボーナス,マインド減少ボーナス,number,chip_icon/207_原初の意識.png\r\nマップ固有,真犯人,checkbox,UT_Buff/UT_Buff_1067.png,MAP0104,2,0,2,2,\r\nマップ固有,逆鱗,number,UT_Buff/UT_Buff_1026.png,MAP0005,2,0,0,2,\r\nマップ固有,金鱗,number,UT_Buff/UT_Buff_1027.png,MAP0005,1,1,0,0,\r\nマップ固有,孔雀の羽ばたき,number,UT_Buff/UT_Buff_1046.png,MAP0007,2,2,0,0,excess_over_peacock\r\n追加素材,深層改造,未設定,UT_Buff/UT_Buff_1033.png\r\n追加素材,戦の呪い,未設定,UT_Buff/UT_Buff_1041.png\r\nマップ固有,勇往邁進,number,UT_Buff/UT_Buff_CourageUp.png,MAP0007,2,0,0,2,\r\nキャラクター固有,前ターン被ダメなし,checkbox,UT_Buff/UT_Buff_ConcealedPresence.png\nキャラクター固有,モンスター撃破数,number,UT_Buff/UT_Buff_109_Break.png\nキャラクター固有,ファイアウォール,checkbox,UT_Buff/UT_Buff_120.png\nキャラクター固有,狐光,number,UT_Buff/UT_Buff_124.png\nキャラクター固有,潜伏,checkbox,UT_Buff/UT_Buff_127.png\nキャラクター固有,エリア拒止通過,checkbox,UT_Buff/UT_Buff_128_Skill.png\nキャラクター固有,カクテル攻撃カード,number,UT_Buff/UT_Buff_303_piano.png\nキャラクター固有,カクテル防御カード,number,UT_Buff/UT_Buff_303_piano.png\nキャラクター固有,推理タイム,number,UT_Buff/UT_Buff_306.png\nキャラクター固有,自己主張なし攻撃補正,number,UT_Buff/UT_Buff_105_Break.png\r\nキャラクター固有,自己主張なし防御補正,number,UT_Buff/UT_Buff_105_Break.png\r\nキャラクター固有,自己主張なし移動補正,number,UT_Buff/UT_Buff_105_Break.png\r\nキャラクター固有,ジュジュシールド,checkbox,UT_Buff/UT_Buff_Shield.png\nキャラクター固有,ライフ・ブック,number,UT_Buff/UT_Buff_121_Passive.png\nキャラクター固有,フェーズ・ワン,checkbox,UT_Buff/UT_Event_12702.png\nキャラクター固有,フェーズ・ツー,checkbox,UT_Buff/UT_Event_12703.png\nキャラクター固有,フェーズ・スリー,checkbox,UT_Buff/UT_Event_12704.png\nキャラクター固有,真相解明,checkbox,UT_Buff/UT_Event_12705.png\nキャラクター固有,ファン,number,UT_Buff/UT_Buff_301.png\nキャラクター固有,愛,number,UT_Buff/UT_Buff_302_Passive.png\nキャラクター固有,一生を変えるカクテル,checkbox,UT_Buff/UT_Buff_303.png\nキャラクター固有,本当の私,checkbox,UT_Buff/UT_Buff_304.png\nキャラクター固有,人形制作,number,UT_Buff/UT_Buff_305_1.png\nキャラクター固有,人形完成,checkbox,UT_Buff/UT_Buff_305_Awake.png\nキャラクター固有,親友を守る,checkbox,UT_Buff/UT_Platform_306.png\n";
  let statusIcons=new Map(),mapKeywords=[];
  let currentOpponent=null;
@@ -19,6 +20,8 @@
  const specialIcons={'対象のマーク':'マーク','攻撃対象はモンスター':'モンスター','クジャク係の羽ばたき':'孔雀の羽ばたき'};
  const getState=id=>{if(!states.has(id))states.set(id,{level:0,currentHp:null,chips:[],numbers:{},modes:{},phases:{attack:false,move:false},manual:{atk:0,def:0},skillCooldowns:{},activeEffects:[],maxHpBonus:0,controlMaxBonuses:{}});const value=states.get(id);value.skillCooldowns??={};value.activeEffects??=[];value.maxHpBonus??=0;value.controlMaxBonuses??={};return value;};
  const state=()=>getState(selectedCharacter.id);
+ const chipOwnerState=()=>partyMode&&partyEditId&&String(partyEditId)!==String(selectedCharacter?.id)?getPartyState(partyEditId):state();
+ window.getPartyCharacterIds=()=>partySlots.filter(id=>id!==null).map(String);
  window.hasSelectedCharacter=()=>Boolean(selectedCharacter);
  hasSelectedCharacter=window.hasSelectedCharacter;
  window.captureCharacterEvidence=()=>selectedCharacter?{id:selectedCharacter.id,count:number(state(),'罪証')}:null;
@@ -117,8 +120,7 @@
    for(const stat of ['atk','def','move'])result[stat]+=stacks*(Number(rule[stat])||0);
    result.damageReduce+=stacks*(Number(rule.damage_reduce)||0);
   }
-  result.atk+=state().manual?.atk||0;
-  result.def+=state().manual?.def||0;
+  for(const stat of ['atk','def','move'])result[stat]+=state().manual?.[stat]||0;
   result.atk=Math.max(0,result.atk);result.def=Math.max(0,result.def);result.move=Math.max(0,result.move);
   return result;
  }
@@ -267,7 +269,7 @@
  });}
  function updateChipListSelection(){
   document.querySelectorAll('#chip-image-list .chip-select').forEach(button=>{
-   const owned=Boolean(selectedCharacter&&state().chips.includes(button.dataset.id));
+   const owned=Boolean(selectedCharacter&&chipOwnerState().chips.includes(button.dataset.id));
    button.setAttribute('aria-pressed',String(owned));
    button.setAttribute('aria-label',(owned?'取得を解除：':'取得する：')+button.dataset.name);
   });
@@ -321,18 +323,37 @@
   event.preventDefault();event.stopImmediatePropagation();suppressChipClick=false;
  },true);
 
+ function calculatePartyMember(row){
+  const member=getPartyState(row.id),baseValue=stat=>Number(row['lv'+member.level+'_'+stat])||0;
+  const active=member.chips.flatMap(id=>byChip.get(id)||[]).filter(rule=>['modifier','event_modifier'].includes(rule.kind)&&rule.trigger==='while_owned');
+  const matches=(rule,maxHp)=>!rule.condition||rule.condition==='hp_full'&&(member.currentHp===null||member.currentHp>=maxHp)||rule.condition==='hp_ratio<0.5'&&member.currentHp!==null&&member.currentHp<maxHp/2||rule.condition==='hp_ratio<=0.5'&&member.currentHp!==null&&member.currentHp<=maxHp/2;
+  const value=(rule,maxBonus)=>{const amount=Number(rule.value)||0;if(rule.formula==='fixed')return amount;if(rule.source_key!=='追加最大HP')return 0;const source=rule.source_cap===''?maxBonus:Math.min(maxBonus,Number(rule.source_cap));if(rule.formula==='per_stack')return source*amount;if(rule.formula==='floor_per_unit')return Math.floor(source/(Number(rule.unit)||1))*amount;if(rule.formula==='percent_of_ceil')return Math.ceil(source*amount);return 0;};
+  const maxBonus=active.filter(rule=>rule.target==='max_hp'&&matches(rule,baseValue('hp'))).reduce((sum,rule)=>sum+value(rule,0),0),maxHp=Math.max(1,baseValue('hp')+maxBonus);
+  if(member.currentHp===null)member.currentHp=maxHp;member.currentHp=Math.max(0,Math.min(maxHp,member.currentHp));
+  const result={level:member.level,hp:maxHp,currentHp:member.currentHp};
+  for(const stat of ['atk','def','move'])result[stat]=Math.max(0,baseValue(stat)+(member.manual[stat]||0)+active.filter(rule=>rule.target===stat&&matches(rule,maxHp)).reduce((sum,rule)=>sum+value(rule,maxBonus),0));
+  return result;
+ }
+ function editPartyMember(id){partyEditId=String(id);renderParty();updateChipListSelection();const row=characters.find(item=>String(item.id)===partyEditId);chipStatus.textContent='チップ編集対象：'+(row?.name||'自キャラ');}
+ function changePartyStat(row,isSelf,key,delta){
+  if(isSelf){if(key==='hp'){changeHp(delta);return;}const current=calculate()[key];state().manual[key]=(state().manual[key]||0)+Math.max(0,current+delta)-current;updateStats();return;}
+  const member=getPartyState(row.id),totals=calculatePartyMember(row);if(key==='hp')member.currentHp=Math.max(0,Math.min(totals.hp,member.currentHp+delta));else member.manual[key]+=Math.max(0,totals[key]+delta)-totals[key];renderParty();
+ }
  function renderParty(){
   partyGrid.replaceChildren();
   const slots=partySlots;
   slots.forEach((id,index)=>{
    const row=characters.find(item=>String(item.id)===String(id));
    const isSelf=Boolean(row&&String(id)===String(selectedCharacter?.id));
-   const level=isSelf?state().level:(partyLevels.get(String(id))||0);
-   const parameters=row?(isSelf?{...calculate(),level,currentHp:state().currentHp}:{level,atk:Number(row['lv'+level+'_atk'])||0,def:Number(row['lv'+level+'_def'])||0,move:Number(row['lv'+level+'_move'])||0,hp:Number(row['lv'+level+'_hp'])||0,currentHp:Number(row['lv'+level+'_hp'])||0}):null;
+   const member=row&&!isSelf?getPartyState(id):null;
+   const level=isSelf?state().level:(member?.level||0);
+   const parameters=row?(isSelf?{...calculate(),level,currentHp:state().currentHp}:calculatePartyMember(row)):null;
    const slot=createPartyMemberView(row,index,parameters,isSelf,delta=>{
     if(isSelf){changeCharacterLevel(delta);return;}
-    partyLevels.set(String(id),Math.max(0,Math.min(3,level+delta)));renderParty();
-   },isSelf?state().chips.map(chipId=>chips.find(chip=>chip.id===chipId)).filter(Boolean):[]);
+    const oldMax=calculatePartyMember(row).hp,oldHp=member.currentHp;member.level=Math.max(0,Math.min(3,level+delta));const newMax=calculatePartyMember(row).hp;if(member.level>level)member.currentHp=Math.min(newMax,oldHp+Math.max(0,newMax-oldMax));renderParty();
+   },row?(isSelf?state():member).chips.map(chipId=>chips.find(chip=>chip.id===chipId)).filter(Boolean):[],(key,delta)=>changePartyStat(row,isSelf,key,delta));
+   const editing=Boolean(row&&String(id)===String(partyEditId||selectedCharacter?.id));slot.classList.toggle('is-editing',editing);slot.dataset.editing=String(editing);if(editing)slot.setAttribute('aria-current','true');
+   if(row){slot.addEventListener('click',()=>editPartyMember(id));slot.addEventListener('keydown',event=>{if(event.target===slot&&['Enter',' '].includes(event.key)){event.preventDefault();editPartyMember(id);}});}
    slot.addEventListener('contextmenu',event=>{event.preventDefault();if(!isSelf)removePartyMember(id);});
    slot.addEventListener('dragstart',event=>{if(!row)return;draggedPartyIndex=index;event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('application/x-07-party-slot',String(index));slot.classList.add('is-dragging');});
    slot.addEventListener('dragover',event=>{if(draggedPartyIndex===null)return;event.preventDefault();event.dataTransfer.dropEffect='move';slot.classList.add('is-drop-target');});
@@ -348,9 +369,10 @@
    const row=characters.find(item=>String(item.id)===String(button.dataset.id));
    button.setAttribute('aria-label',(row?.name||'キャラクター')+(partyMode?'をPTに登録':'を選択'));
   });
+  if(selectedCharacter)updateChipListSelection();
  }
  function setPartyMode(active){
-  partyMode=Boolean(active&&selectedCharacter);selectedPanel.classList.toggle('is-party-view',partyMode);partyGrid.hidden=!partyMode;
+  partyMode=Boolean(active&&selectedCharacter);if(!partyMode){partyEditId=null;chipStatus.textContent='';}selectedPanel.classList.toggle('is-party-view',partyMode);partyGrid.hidden=!partyMode;
   selfTab.setAttribute('aria-selected',String(!partyMode));partyTab.setAttribute('aria-selected',String(partyMode));selfTab.tabIndex=partyMode?-1:0;partyTab.tabIndex=partyMode?0:-1;
   listStatus.textContent=partyMode?'PT登録：キャラをクリックで追加、右クリックで解除（自分を含めて最大4人）':'';
   renderParty();
@@ -361,12 +383,12 @@
   if(partySlots.some(member=>String(member)===id)){listStatus.textContent=row.name+'は登録済みです。';return;}
   const empty=partySlots.indexOf(null);
   if(empty<0){listStatus.textContent='PTは自分を含めて4人までです。右クリックでメンバーを解除できます。';return;}
-  partySlots[empty]=row.id;partyLevels.set(id,0);renderParty();listStatus.textContent=row.name+'を'+(empty+1)+'番目に登録しました。右クリックで解除できます。';
+  partySlots[empty]=row.id;partyStates.set(id,{level:0,currentHp:null,chips:[],manual:{atk:0,def:0,move:0}});renderParty();window.dispatchEvent(new Event('party-members-change'));listStatus.textContent=row.name+'を'+(empty+1)+'番目に登録しました。右クリックで解除できます。';
  }
  function removePartyMember(id){
   if(id===null||id===undefined||String(id)===String(selectedCharacter?.id))return;
   const index=partySlots.findIndex(member=>String(member)===String(id));if(index<0)return;
-  const row=characters.find(item=>String(item.id)===String(id));partySlots[index]=null;partyLevels.delete(String(id));renderParty();listStatus.textContent=(row?.name||'メンバー')+'のPT登録を解除しました。';
+  const row=characters.find(item=>String(item.id)===String(id));partySlots[index]=null;partyStates.delete(String(id));if(partyEditId===String(id)){partyEditId=null;chipStatus.textContent='';}renderParty();window.dispatchEvent(new Event('party-members-change'));listStatus.textContent=(row?.name||'メンバー')+'のPT登録を解除しました。';
  }
  selfTab.addEventListener('click',()=>setPartyMode(false));partyTab.addEventListener('click',()=>setPartyMode(true));
  for(const tab of [selfTab,partyTab])tab.addEventListener('keydown',event=>{if(!['ArrowUp','ArrowDown','Home','End'].includes(event.key))return;event.preventDefault();const target=event.key==='Home'?selfTab:event.key==='End'?partyTab:tab===selfTab?partyTab:selfTab;target.click();target.focus();});
@@ -386,7 +408,7 @@
  function selectCharacter(row,openParty=false){
   const ownIndex=partySlots.findIndex(id=>String(id)===String(selectedCharacter?.id));
   for(let i=0;i<partySlots.length;i++)if(String(partySlots[i])===String(row.id))partySlots[i]=null;
-  partyLevels.delete(String(row.id));partySlots[ownIndex<0?0:ownIndex]=row.id;
+  partyStates.delete(String(row.id));partyEditId=null;partySlots[ownIndex<0?0:ownIndex]=row.id;
   selectedCharacter=row;renderSelectedCharacter();window.dispatchEvent(new Event('character-selection-change'));if(openParty)setPartyMode(true);
  }
  function changeCharacterLevel(delta){
@@ -462,9 +484,12 @@
     button.addEventListener('click',()=>{if(partyMode)registerPartyMember(row);else selectCharacter(row,true);});
     button.addEventListener('contextmenu',event=>{if(!partyMode)return;event.preventDefault();removePartyMember(row.id);});
    }else{
-    button.className='chip-select';button.dataset.name=row.name;button.title=row.name+'\n'+row.effect;button.setAttribute('aria-label',row.name+'：'+row.effect+'。取得する');button.setAttribute('aria-pressed',String(Boolean(selectedCharacter&&state().chips.includes(row.id))));
+    button.className='chip-select';button.dataset.name=row.name;button.title=row.name+'\n'+row.effect;button.setAttribute('aria-label',row.name+'：'+row.effect+'。取得する');button.setAttribute('aria-pressed',String(Boolean(selectedCharacter&&chipOwnerState().chips.includes(row.id))));
     button.addEventListener('click',()=>{
      if(!selectedCharacter){chipStatus.textContent='先にキャラクターを選択してください。';return;}
+     if(chipOwnerState()!==state()){
+      const member=chipOwnerState();if(member.chips.includes(row.id))member.chips=member.chips.filter(id=>id!==row.id);else member.chips.push(row.id);renderParty();return;
+     }
      chipStatus.textContent='';
      if(state().chips.includes(row.id)){
       state().chips=state().chips.filter(id=>id!==row.id);delete state().modes[row.id];
