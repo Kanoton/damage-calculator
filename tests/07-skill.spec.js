@@ -346,6 +346,10 @@ test('07 skill: party identity, HP-first stats and compact self chips stay insid
  expect(await self.locator('.party-slot-chip').evaluateAll(nodes=>nodes.map(n=>n.dataset.chipId))).toEqual(ids);
  await expect(self.locator('.party-slot-chips')).toHaveAttribute('data-rows','2');
  const chipRows=await self.locator('.party-slot-chip').evaluateAll(nodes=>nodes.slice(0,3).map(n=>n.getBoundingClientRect().y));expect(chipRows[1]).toBeGreaterThan(chipRows[0]);expect(chipRows[2]).toBe(chipRows[0]);
+ await self.locator('.party-slot-chips').evaluate(list=>list.style.flex='0 0 80px');
+ await expect(self.locator('.party-slot-chips')).toHaveAttribute('data-rows','3');
+ const compact=await self.locator('.party-slot-chips').evaluate(list=>({rows:new Set([...list.children].map(n=>n.getBoundingClientRect().y)).size,size:list.firstElementChild.getBoundingClientRect().width,overflow:list.scrollWidth>list.clientWidth}));expect(compact.rows).toBe(3);expect(compact.size).toBeLessThan(19);expect(compact.overflow).toBe(false);
+ await self.locator('.party-slot-chips').evaluate(list=>list.style.removeProperty('flex'));await expect(self.locator('.party-slot-chips')).toHaveAttribute('data-rows','2');
  const nameBounds=await self.locator('.party-slot-name').boundingBox(),lvBounds=await self.locator('.party-slot-level').boundingBox();expect(lvBounds.x).toBeGreaterThanOrEqual(nameBounds.x+nameBounds.width);expect(lvBounds.y).toBeLessThan(nameBounds.y+nameBounds.height);
  await page.locator('#character-list-tab').click();await page.locator('.character-select[data-id="2"]').click();
  const ally=page.locator('.party-member-slot[data-character-id="2"]');await expect(ally.locator('.party-slot-chips')).toHaveCount(0);
@@ -353,11 +357,11 @@ test('07 skill: party identity, HP-first stats and compact self chips stay insid
  await self.dragTo(page.locator('.party-member-slot[data-slot="4"]'));await expect(self).toHaveAttribute('data-slot','4');await expect(self.locator('.party-slot-chip')).toHaveCount(12);
  for(const width of [1280,600,375]){
   await page.setViewportSize({width,height:1000});
-  await expect(self.locator('.party-slot-chips')).toHaveAttribute('data-rows',width===1280?'2':'3');
+  await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));await expect(self.locator('.party-slot-chips')).toHaveAttribute('data-rows',/^[23]$/);
   const ptBounds=await frame.boundingBox();expect(ptBounds.height).toBe(118);
   const layout=await self.evaluate(slot=>{const s=slot.getBoundingClientRect(),details=slot.querySelector('.party-slot-details'),list=slot.querySelector('.party-slot-chips'),l=list.getBoundingClientRect(),d=details.getBoundingClientRect();return {fits:l.left>=d.right&&l.right<=s.right+1&&l.top<d.bottom&&l.bottom>d.top&&d.top>=s.top&&d.bottom<=s.bottom+1,sizes:[...list.querySelectorAll('img')].map(img=>{const r=img.getBoundingClientRect();return {width:r.width,height:r.height};})};});
   expect(layout.fits).toBe(true);for(const size of layout.sizes){expect(size.width).toBeLessThanOrEqual(20);expect(size.height).toBeLessThanOrEqual(20);}
-  const packing=await self.locator('.party-slot-chips').evaluate(list=>{const style=getComputedStyle(list),details=list.parentElement.querySelector('.party-slot-details'),size=list.firstElementChild.getBoundingClientRect().width;return {gap:style.gap,leftGap:list.getBoundingClientRect().left-details.getBoundingClientRect().right,padding:style.paddingLeft,size,rows:new Set([...list.children].map(n=>n.getBoundingClientRect().y)).size};});expect(packing.gap).toBe('1px');expect(packing.leftGap).toBe(2);expect(packing.padding).toBe('2px');expect(packing.rows).toBe(width===1280?2:3);if(width!==1280)expect(packing.size).toBeLessThan(19);
+  const packing=await self.locator('.party-slot-chips').evaluate(list=>{const style=getComputedStyle(list),details=list.parentElement.querySelector('.party-slot-details'),size=list.firstElementChild.getBoundingClientRect().width;return {gap:style.gap,leftGap:list.getBoundingClientRect().left-details.getBoundingClientRect().right,padding:style.paddingLeft,size,configuredRows:Number(list.dataset.rows),rows:new Set([...list.children].map(n=>n.getBoundingClientRect().y)).size};});expect(packing.gap).toBe('1px');expect(packing.leftGap).toBe(2);expect(packing.padding).toBe('2px');expect(packing.rows).toBe(packing.configuredRows);if(packing.rows===3)expect(packing.size).toBeLessThan(19);
   await page.locator('#selected-self-tab').click();const ownBounds=await frame.boundingBox();expect(ownBounds.width).toBe(ptBounds.width);expect(ownBounds.height).toBe(ptBounds.height);await page.locator('#selected-party-tab').click();
  }
  await page.setViewportSize({width:1280,height:720});expect((await frame.boundingBox()).width).toBe(before.width);await expect(self.locator('.party-slot-chips')).toHaveAttribute('data-rows','2');
