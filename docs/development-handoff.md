@@ -67,11 +67,11 @@ Key behavior:
 - 23 Teru: Fox Light follow-up attack; ATK +1 per Fox Light stack in that context.
 - 24 Moses: Precision 0-3 -> ATK +2 each; turn end -1.
 - 25 Mamushi: Awakening 0-8. At 8, icon automatically changes to True Dragon and ATK +4 applies automatically. No separate True Dragon toggle. Below 8 reverts both.
-- 26 Sumikage: absorbed Shadow count -> ATK +1 each.
+- 26 Sumikage: skill activation prompts for absorbed Shadow count; snapshot ATK +1 per Shadow expires at turn end. No persistent Shadow control.
 - 27 Bonnie: the currently selected attack-target monster's Mark stacks are the source of all Mark-based bonuses. Mark >=1 automatically gives ATK +3; while the manual Stealth toggle is active, add that target monster's Mark stack count to ATK. Do not create a Bonnie-side Mark count or a manual 'marked target' toggle. Active Mission: In Secret manually targets a monster and adds Mark +1; Star Coin/card/event rewards are not simulated.
 - 28 Rinrin: Area Denial passage -> ATK +2. Active Intercept Tackle manually selects multiple monster instances with toggle clicks and OK beside Cancel. Each selected monster gets DEF -2, while Rinrin gets ATK +2 once per confirmation regardless of target count. After one turn-end click both changes remain; after the second they expire, preserving independent manual/passive modifiers. Cancellation changes no stats or CT; a single undo restores the entire batch and CT. Range/movement legality remains manual.
-- 103 Jill: Cocktail attack/defense cards, max 3 each -> corresponding ATK/DEF +1 each.
-- 104 Dorothy: Warmth 0-5 -> DEF +1 each.
+- 103 Jill: cocktail-card stack controls removed. Life-changing Cocktail toggle grants MOVE +3 and clears at turn end.
+- 104 Dorothy: Warmth 0-5 -> DEF +1 each, UT_Buff_304_piano.png. True Self toggle grants ATK +1 and clears at turn end. Skill activation at Warmth 5 snapshots current DEF as additional ATK until turn end.
 - 106 Tachibana Sherry: Deduction Time 0-4 -> ATK +1 each; turn end -1.
 
 Modifier engine supports fixed, per-stack, floor-per-unit, alternating-step, equality-condition, and current-HP-ratio rules.
@@ -85,7 +85,7 @@ Modifier engine supports fixed, per-stack, floor-per-unit, alternating-step, equ
 - Charge consumption clicks (Airbag 55: 6, Lightning Core 56: 5, Railgun 58: 4) do nothing when Charge is below their full cost, including keyboard activation. Existing +2 Charge clicks and the 10-stack cap are preserved. Airbag/Railgun clicks currently manage Charge only; their damage effects are not simulated by these handlers. Electric Glove's click still grants +2; turn-end consumption/damage is not implemented here.
 - Active skills are declarative `activeSkills` entries on character ability rules. Every current character has active-skill name/CT metadata from `csv/character_skills.csv`, so skill/CT management is available even when the skill effect itself is not simulated by the calculator.
 - The selected-character UI places `スキル` and `CT n` vertically in the open area to the right of HP/stats, with the chip area pulled left to reduce unused space.
-- Current cooldown is stored per skill, not only per character. CT 0 means usable and activation sets CT to that skill's configured maximum. Do not automatically decrement CT at turn end; the `CT n` display is a button for manual adjustment: left click -1, right click +1. This intentionally avoids hard-coding character-specific cooldown-reduction conditions.
+- Current cooldown is stored per skill, not only per character. CT 0 means usable and activation sets CT to that skill's configured maximum. At each turn-end click decrement the selected character's skill CT by 1, with a zero floor. The `CT n` display remains a manual adjustment button (left -1/right +1), and Z3000 defeats reduce CT by 2 in addition. This supersedes the earlier manual-only CT policy.
 - Turn-duration effects are stored separately from permanent/manual modifiers and expire at turn end.
 - Any active skill that specifies a monster or character target must use explicit manual target selection regardless of whether the game rule has a range limit. Do not auto-validate skill range; the user is responsible for choosing a legal target. Targeted skills should not consume CT/apply effects until a target is actually selected.
 - Entering monster target selection must not automatically switch tabs. Show a persistent target-selection banner above the monster roster, visually highlight selectable active monster cards, and provide a cancel action. Canceling does not consume CT or apply effects; the banner/highlight clears after cancel or successful selection.
@@ -209,6 +209,27 @@ Use PR history for exact diffs/rationale when touching the same areas.
 
 ## Monster target selection scope review
 
-- Sherry and Rinrin enable `multipleTargets` in active-skill metadata. Other implemented targeted skills retain immediate single-click confirmation.
+- Sherry, Rinrin, and Luka enable `multipleTargets` in active-skill metadata. Other implemented targeted skills retain immediate single-click confirmation.
 - Rinrin's source description affects all monsters passed during the tackle; her manual DEF -2 target implementation now supports multiple targets. The self ATK +2 is applied once, and existing two-turn effect timers remove only these skill modifiers after two turn-end clicks.
 - Pandaman's area taunt and Lulu's area movement reduction are not simulated. Luka's passage damage, Megas's random/area damage, Sykes's zone effects, and Bonnie's investigation phases also have multi-monster scope, but those effects are not the existing single-target active-skill selection flow. Do not claim Sherry is the only multi-monster ability in the game.
+
+## Character workflows and persistent monster statuses (2026-10-06)
+
+This section supersedes older manual-only CT and placeholder-control notes above.
+
+- Turn end now reduces the selected character's CT by 1 (floor 0) and expires its turn effects/toggles. Manual CT controls and chip cap/reductions remain available. Z3000 gains one defeat count and CT -2 per actual newly defeated monster while selected; a skill that defeats its target sets CT before defeat processing, so that same kill correctly reduces its new CT. Undo restores CT, counts, active effects, current HP, and monster status state.
+- Ren: Juju Shield manual toggle, UT_Buff_Shield.png; while enabled it contributes damage reduction 99. Consumption remains a manual toggle-off action.
+- Jasmine: Overdrive prompts for a nonnegative integer die result. Below 10 gives DEF +2; 10+ gives ATK +2, alongside existing MOVE +3/DEF -3. All skill modifiers expire on turn end, leaving cumulative-movement modifiers intact. Canceled/empty/invalid input starts no CT or effects.
+- Luka: no persistent Night Slash toggle. Skill uses multi-monster selection with toggle clicks/OK and deals current calculated ATK +2 direct damage to each selected monster; no self ATK buff. Range/movement remain manual.
+- Rin: Life Book numeric counter, UT_Buff_121_Passive.png; tracking only.
+- Teru: skill already prompts for ally ATK/DEF and snapshots one half of each for the turn; no separate possession toggle. Foxfire controls remain independent.
+- Moses: each roster monster has a persistent Weakness toggle. Weak Point Counter can also target and enable it. Against Moses only, a weak opponent's combat die is 0: outgoing table columns all show 0; incoming table rows and defense-choice labels all show 0. The 36-outcome table, card probabilities, evade comparisons and recommendations use the same die behavior. Other characters retain normal dice.
+- Sumikage: absorbed Shadows entered only when activating Dark Fusion; ATK +1 each until turn end.
+- Bonnie: roster Investigation Target toggle, UT_Buff_127_Skill.png, persists through turn end. Her targeted skill enables it and adds the existing Mark +1. Infiltration Investigation sits after Stealth: left/right advances/returns across Phase One/Two/Three/Truth (UT_Event_12702..12705.png), default Phase One, bounded at endpoints. It tracks the phase without automatically executing map/area rewards.
+- Sykes: persistent per-monster Erosion count, UT_Buff_129_Skill.png; left +1/right -1. Each stack contributes one extra damage when that monster is the attack target. It is not decremented at turn end.
+- KAngel: Fan uses UT_Buff_301.png. Each monster's persistent Fan toggle contributes one to the displayed Fan total; defeated Fan monsters remain counted. The total also permits manual additions for other fans. At skill activation with Fan >=9, each live Fan monster receives one permanent ATK -1 at most once per individual. Fan monsters attacking KAngel/Ame additionally have ATK -1 in combat; this stacks with the skill's permanent reduction. Field resets/deletion remove those roster entries; defeat alone does not remove Fan count.
+- Ame: Love uses UT_Buff_302_Passive.png. Existing activation snapshot MOVE/heal, Love -4 (floor 0), and at initial Love >=4 permanent max HP/control cap +1 are retained.
+- Jill: Life-changing Cocktail toggle, UT_Buff_303.png, gives MOVE +3 while on and clears at turn end.
+- Dorothy: True Self toggle, UT_Buff_304.png, gives ATK +1 until turn end. Skill at Warmth 5 snapshots current DEF (including existing modifiers) as additional ATK for the turn; subsequent edits do not alter the snapshot. Warmth is not automatically consumed by this requested workflow.
+- Hanna: Doll Making 0..7, UT_Buff_305_1.png, changes to Doll Complete/UT_Buff_305_Awake.png at 7. Float skill grants MOVE +2 until turn end. Protect Friend toggle, UT_Platform_306.png, adds damage reduction 1 while enabled.
+- Requested character icon mappings are in the canonical status CSV and identical 07 fallback. Weakness, Investigation Target, Erosion, Fan and permanent Fan reduction live on monster instance objects and are included in existing roster undo snapshots.

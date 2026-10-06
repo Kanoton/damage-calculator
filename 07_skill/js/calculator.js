@@ -77,7 +77,8 @@ function getDefenseRecommendation(
     defensePower,
     damageAdd,
     damageReduce,
-    hp
+    hp,
+    zeroAttackDice = false
 ) {
     const evadeBetterDice = [];
 
@@ -91,7 +92,7 @@ function getDefenseRecommendation(
                 defensePower,
                 damageAdd,
                 damageReduce,
-                attackDice,
+                zeroAttackDice ? 0 : attackDice,
                 defenseDice
             );
 
@@ -99,7 +100,7 @@ function getDefenseRecommendation(
                 attackPower,
                 damageAdd,
                 damageReduce,
-                attackDice,
+                zeroAttackDice ? 0 : attackDice,
                 defenseDice
             );
 
@@ -324,7 +325,7 @@ function getCardAwareDefenseChoices(
                     cardDefensePower,
                     damageAdd,
                     damageReduce,
-                    attackDice,
+                    calculator.dataset.zeroAttackDice === 'true' ? 0 : attackDice,
                     defenseDice
                 );
 
@@ -332,7 +333,7 @@ function getCardAwareDefenseChoices(
                     attackPower,
                     damageAdd,
                     damageReduce,
-                    attackDice,
+                    calculator.dataset.zeroAttackDice === 'true' ? 0 : attackDice,
                     defenseDice
                 );
 
@@ -362,7 +363,7 @@ function getCardAwareDefenseChoices(
         }
 
         choices.push({
-            attackDice,
+            attackDice:calculator.dataset.zeroAttackDice === 'true' ? 0 : attackDice,
             recommendation,
             defenseSurvivalProbability,
             evadeSurvivalProbability
@@ -465,8 +466,8 @@ function calculateCardAwareDamage(
                         cardDefensePower,
                         damageAdd,
                         damageReduce,
-                        attackDice,
-                        defenseDice,
+                        calculator.dataset.zeroAttackDice === 'true' ? 0 : attackDice,
+                        calculator.dataset.zeroDefenseDice === 'true' ? 0 : defenseDice,
                         !isSurvival && calculator.dataset.role === 'attack' && calculator.dataset.ignoreDefenseOnAttackSix === 'true'
                     );
 
@@ -580,9 +581,9 @@ function renderDamageProbabilityGraph(
 
 
 
-function calculateDefenseDamageGrid(attackPower,defensePower,damageAdd,damageReduce,hp,ignoreDefenseOnAttackSix=false){
+function calculateDefenseDamageGrid(attackPower,defensePower,damageAdd,damageReduce,hp,ignoreDefenseOnAttackSix=false,zeroAttackDice=false,zeroDefenseDice=false){
  const rows=[],damageCounts=new Map();let totalDamage=0,defeatCount=0,survivalCount=0,maxDamage=0;
- for(let attackDice=1;attackDice<=6;attackDice++){const damages=[];for(let defenseDice=1;defenseDice<=6;defenseDice++){const damage=getDefenseDamage(attackPower,defensePower,damageAdd,damageReduce,attackDice,defenseDice,ignoreDefenseOnAttackSix);damages.push(damage);totalDamage+=damage;damageCounts.set(damage,(damageCounts.get(damage)||0)+1);maxDamage=Math.max(maxDamage,damage);if(damage>=hp)defeatCount++;else survivalCount++;}rows.push({attackDice,damages});}
+ for(let attackDice=1;attackDice<=6;attackDice++){const damages=[];for(let defenseDice=1;defenseDice<=6;defenseDice++){const damage=getDefenseDamage(attackPower,defensePower,damageAdd,damageReduce,zeroAttackDice?0:attackDice,zeroDefenseDice?0:defenseDice,ignoreDefenseOnAttackSix);damages.push(damage);totalDamage+=damage;damageCounts.set(damage,(damageCounts.get(damage)||0)+1);maxDamage=Math.max(maxDamage,damage);if(damage>=hp)defeatCount++;else survivalCount++;}rows.push({attackDice:zeroAttackDice?0:attackDice,damages});}
  return {rows,damageCounts,totalDamage,defeatCount,survivalCount,maxDamage,totalCombinations:36};
 }
 function renderDefenseDamageGrid(tableBody,grid,hp){
@@ -598,13 +599,14 @@ function renderBaseDamageSummary(calculator,grid,isSurvival){
 
 function getCalculatorDamageInputs(calculator){return {attackPower:Number(calculator.querySelector('[id^="attackPower"]').value),damageAdd:Number(calculator.querySelector('[id^="damageAdd"]').value),hp:Number(calculator.querySelector('[id^="hp"]').value),defensePower:Number(calculator.querySelector('[id^="defensePower"]').value),damageReduce:Number(calculator.querySelector('[id^="damageReduce"]').value)};}
 function renderDefenseModeGuidance(calculator,{attackPower,defensePower,damageAdd,damageReduce,hp}){
- renderDefenseChoiceGuide(calculator,attackPower,defensePower,damageAdd,damageReduce,hp);const recommendation=calculator.querySelector('.defense-recommendation');if(recommendation)recommendation.textContent=getDefenseRecommendation(attackPower,defensePower,damageAdd,damageReduce,hp);
+ renderDefenseChoiceGuide(calculator,attackPower,defensePower,damageAdd,damageReduce,hp);const recommendation=calculator.querySelector('.defense-recommendation');if(recommendation)recommendation.textContent=getDefenseRecommendation(attackPower,defensePower,damageAdd,damageReduce,hp,calculator.dataset.zeroAttackDice==='true');
 }
 
 function calculateDamage(calculator, isSurvival = false) {
     const inputs=getCalculatorDamageInputs(calculator);
     const {attackPower,defensePower,damageAdd,damageReduce,hp}=inputs;
-    const grid=calculateDefenseDamageGrid(attackPower,defensePower,damageAdd,damageReduce,hp,!isSurvival&&calculator.dataset.role==='attack'&&calculator.dataset.ignoreDefenseOnAttackSix==='true');
+    const grid=calculateDefenseDamageGrid(attackPower,defensePower,damageAdd,damageReduce,hp,!isSurvival&&calculator.dataset.role==='attack'&&calculator.dataset.ignoreDefenseOnAttackSix==='true',calculator.dataset.zeroAttackDice==='true',calculator.dataset.zeroDefenseDice==='true');
+    calculator.querySelectorAll('.damage-table thead tr:last-child th').forEach((cell,index)=>cell.textContent=calculator.dataset.zeroDefenseDice==='true'?'0':String(index+1));
     renderDefenseDamageGrid(calculator.querySelector('.damage-table tbody'),grid,hp);
 
     // 上部は従来の36通り計算、下部グラフとサマリーはカード効果込み。

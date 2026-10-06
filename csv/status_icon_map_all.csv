@@ -15,7 +15,7 @@ group,effect_key,input_kind,icon_file,map_id,atk,def,move,damage_reduce,conditio
 スタック,スターライト,number,UT_Buff/UT_Buff_StarLight.png
 スタック,覚醒,number,UT_Buff/UT_Buff_1026.png
 状態,真龍,checkbox,UT_Buff/UT_Buff_1261204.png
-スタック,温もり,number,UT_Buff/UT_Buff_304.png
+スタック,温もり,number,UT_Buff/UT_Buff_304_piano.png
 所持数,スターコイン,number,UT_Buff/Coin.png
 蓄積ボーナス,優雅の羽ボーナス,number,chip_icon/021_優雅の羽.png
 蓄積ボーナス,ギガントアンカーボーナス,number,chip_icon/101_ギガントアンカー.png
@@ -43,3 +43,16 @@ group,effect_key,input_kind,icon_file,map_id,atk,def,move,damage_reduce,conditio
 キャラクター固有,自己主張なし攻撃補正,number,UT_Buff/UT_Buff_105_Break.png
 キャラクター固有,自己主張なし防御補正,number,UT_Buff/UT_Buff_105_Break.png
 キャラクター固有,自己主張なし移動補正,number,UT_Buff/UT_Buff_105_Break.png
+キャラクター固有,ジュジュシールド,checkbox,UT_Buff/UT_Buff_Shield.png
+キャラクター固有,ライフ・ブック,number,UT_Buff/UT_Buff_121_Passive.png
+キャラクター固有,フェーズ・ワン,checkbox,UT_Buff/UT_Event_12702.png
+キャラクター固有,フェーズ・ツー,checkbox,UT_Buff/UT_Event_12703.png
+キャラクター固有,フェーズ・スリー,checkbox,UT_Buff/UT_Event_12704.png
+キャラクター固有,真相解明,checkbox,UT_Buff/UT_Event_12705.png
+キャラクター固有,ファン,number,UT_Buff/UT_Buff_301.png
+キャラクター固有,愛,number,UT_Buff/UT_Buff_302_Passive.png
+キャラクター固有,一生を変えるカクテル,checkbox,UT_Buff/UT_Buff_303.png
+キャラクター固有,本当の私,checkbox,UT_Buff/UT_Buff_304.png
+キャラクター固有,人形制作,number,UT_Buff/UT_Buff_305_1.png
+キャラクター固有,人形完成,checkbox,UT_Buff/UT_Buff_305_Awake.png
+キャラクター固有,親友を守る,checkbox,UT_Buff/UT_Platform_306.png
