@@ -587,7 +587,7 @@ function calculateDefenseDamageGrid(attackPower,defensePower,damageAdd,damageRed
  return {rows,damageCounts,totalDamage,defeatCount,survivalCount,maxDamage,totalCombinations:36};
 }
 function renderDefenseDamageGrid(tableBody,grid,hp){
- tableBody.replaceChildren();for(const {attackDice,damages} of grid.rows){const row=document.createElement('tr');if(attackDice===1){const label=document.createElement('th');label.textContent='攻撃';label.rowSpan=6;label.classList.add('attack-label');row.append(label);}const attackCell=document.createElement('th');attackCell.textContent=attackDice;row.append(attackCell);damages.forEach(damage=>{const cell=document.createElement('td');cell.textContent=damage;if(damage>=hp)cell.classList.add('defeat');row.append(cell);});tableBody.append(row);}
+ tableBody.replaceChildren();for(const [index,{attackDice,damages}] of grid.rows.entries()){const row=document.createElement('tr');if(index===0){const label=document.createElement('th');label.textContent='攻撃';label.rowSpan=6;label.classList.add('attack-label');row.append(label);}const attackCell=document.createElement('th');attackCell.textContent=attackDice;row.append(attackCell);damages.forEach(damage=>{const cell=document.createElement('td');cell.textContent=damage;if(damage>=hp)cell.classList.add('defeat');row.append(cell);});tableBody.append(row);}
 }
 function renderCardAwareSummary(calculator,result,isSurvival){
  const range=calculator.querySelector('.future-damage-range'),expected=calculator.querySelector('.future-expected-damage'),rate=calculator.querySelector('.future-result-rate');
