@@ -1595,9 +1595,6 @@ tbody th {
 
 .roster-fate-echo{display:inline-flex;align-items:center;gap:3px;margin-left:5px;padding:1px 5px;border:1px solid #89ae98;border-radius:10px;background:#eef8f2;color:#315a40;font-size:11px;font-weight:normal;white-space:nowrap}.roster-fate-echo strong{font-size:12px}
 
-.roster-character-statuses{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:4px 8px}
-.roster-character-status{display:inline-flex;align-items:center;gap:3px}
-.roster-status-button{border:1px solid #53616e;border-radius:5px;background:#202a32;color:#fff;min-width:28px;min-height:28px;padding:2px;cursor:pointer}
-.roster-status-button img{width:25px;height:25px;object-fit:contain;vertical-align:middle}
-.roster-status-button[aria-pressed="true"]{border-color:#ecc970;box-shadow:0 0 0 1px #ecc970}
+.roster-status-button{font-size:10px;color:inherit}
+.roster-status-button[aria-pressed="true"]{box-shadow:0 0 0 1px #c99826;border-radius:3px}
 .roster-status-button:disabled{opacity:.55;cursor:default}
