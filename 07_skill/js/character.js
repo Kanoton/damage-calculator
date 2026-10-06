@@ -345,8 +345,7 @@
    for(const input of skill.inputStats){const raw=window.prompt(input.label,String(abilityControlValue(input.key)));if(raw===null)return;const value=Number(raw);if(!Number.isFinite(value)||value<0)return;values[input.key]=value;}
    Object.assign(state().numbers,values);
   }
-  state().activeEffects=(state().activeEffects||[]).filter(effect=>effect.source!==skill.key);
-  if(skill.target){window.dispatchEvent(new CustomEvent('character-skill-target-request',{detail:{target:skill.target,skillKey:skill.key,label:skill.label}}));return;}
+  if(skill.target){window.dispatchEvent(new CustomEvent('character-skill-target-request',{detail:{target:skill.target,skillKey:skill.key,label:skill.label,characterId:selectedCharacter.id,multipleTargets:!!skill.multipleTargets}}));return;}
   applyActiveSkillEffects(skill);
   state().skillCooldowns[skill.key]=activeSkillMaxCooldown(skill);
   renderConditions();updateStats();
@@ -365,7 +364,7 @@
   }
  }
  window.addEventListener('character-skill-target-resolved',event=>{
-  const skill=activeSkill(),detail=event.detail||{};if(!skill||detail.skillKey!==skill.key||!detail.success||activeSkillCooldown(skill)>0)return;
+  const skill=activeSkill(),detail=event.detail||{};if(!skill||detail.characterId!==selectedCharacter.id||detail.skillKey!==skill.key||!detail.success||activeSkillCooldown(skill)>0)return;
   applyActiveSkillEffects(skill);state().skillCooldowns[skill.key]=activeSkillMaxCooldown(skill);renderConditions();updateStats();
  });
  setupCharacterNumberPad({selectedPanel});

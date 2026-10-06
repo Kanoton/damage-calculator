@@ -142,7 +142,7 @@ Required behavior:
 - Moses (24): Weakness can be manually targeted, but its combat-die-0 effect is not represented by the current outgoing-damage calculator.
 - Chouten-chan/Ame-chan (101/102): Fan and Love are manual stack controls. Internet Angel references Fan for its 3+ Fan self-heal; Love Overdose snapshots Love for this-turn movement/healing, consumes 4 Love, and at 4+ permanently raises max HP and the Love cap by 1. Coin/card/other-character rewards remain outside the calculator.
 - Nancy Lo (18): Hacking depends on target distance and initiating a forced combat; those actions are not represented by the current skill target resolver.
-- Sherry (106): Mighty Magic uses the manual monster-target flow and deals 2 direct damage to the selected monster. Spatial throw/destination and multi-monster area handling are intentionally manual.
+- Sherry (106): Mighty Magic uses manual multiple-monster selection: click the same roster name buttons to toggle distinct monster instances, then OK beside Cancel confirms. Empty selection disables OK; selecting/deselecting/canceling has no HP/CT effect. Confirmation deals 2 direct damage to each selected active monster and starts CT exactly once. One undo restores the entire batch and CT. Character changes, roster clear/map changes, or undo cancel pending selection; removed/defeated targets are pruned. Spatial throw/destination and range/area legality remain manual.
 
 
 Review current game data before implementing:
@@ -206,3 +206,9 @@ Use PR history for exact diffs/rationale when touching the same areas.
 
 
 - `07_skill` character-list cards use five columns on desktop (over 1000px), four at 801–1000px, two at 501–800px, and one at 500px or narrower. Card widths/column counts stay fixed while portraits are 58×94px and cards have a 104px minimum height. The parameter grid is anchored to the portrait's bottom edge; names occupy the remaining space above it, centered vertically. Names use 15px text, stat values 12px, and coin bonuses 10px directly beside the coin count (no auto left margin). Existing tooltip and selection handlers are unchanged.
+
+## Monster target selection scope review
+
+- Only Sherry currently enables `multipleTargets` in active-skill metadata. Other implemented targeted skills retain immediate single-click confirmation.
+- Rinrin's source description affects all monsters passed during the tackle; her current manual DEF -2 target implementation remains single-target and needs a separate multiple-target update if requested.
+- Pandaman's area taunt and Lulu's area movement reduction are not simulated. Luka's passage damage, Megas's random/area damage, Sykes's zone effects, and Bonnie's investigation phases also have multi-monster scope, but those effects are not the existing single-target active-skill selection flow. Do not claim Sherry is the only multi-monster ability in the game.

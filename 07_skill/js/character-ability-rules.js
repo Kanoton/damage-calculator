@@ -115,7 +115,7 @@ const CHARACTER_ABILITY_RULES={
   modifiers:[{target:'def',formula:'per_stack',source:'温もり',value:1}]
  },
  '106':{
-  activeSkills:[{key:'active',label:"怪力魔法",cooldown:2,target:'monster',effects:[{type:'damage_monster',value:2}]}],
+  activeSkills:[{key:'active',label:"怪力魔法",cooldown:2,target:'monster',multipleTargets:true,effects:[{type:'damage_monster',value:2}]}],
   controls:[{key:'推理タイム',type:'number',min:0,max:4}],
   modifiers:[{target:'atk',formula:'per_stack',source:'推理タイム',value:1}],
   turnEnd:[{key:'推理タイム',delta:-1,min:0}]

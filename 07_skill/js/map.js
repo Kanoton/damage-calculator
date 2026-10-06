@@ -94,7 +94,7 @@ window.addEventListener('character-selection-change',()=>{if(!roundProgressReady
 
 function rememberRoster(){rosterError.textContent='';rosterState.history.push(structuredClone({monsters:rosterState.monsters,buff:rosterBuff,counts:[...rosterCounts],selected:rosterState.selectedId,next:rosterState.nextId,serials:[...rosterState.serials],context:rosterState.context,missions:[...missionCounters],events:[...executedEvents],defeats:[...defeatTotals],characterEvidence:window.captureCharacterEvidence?.(),characterAbilities:window.captureCharacterAbilityState?.(),evidenceConsider:rosterEvidenceConsider,round:rosterState.round,progress:rosterState.progress}));}
 rosterUndo.addEventListener('click',()=>{
- rosterError.textContent='';const previous=rosterState.history.pop();if(!previous)return;if(!data.maps[previous.context.map]){rosterState.history.length=0;renderRoster();return;}
+ rosterError.textContent='';const previous=rosterState.history.pop();if(!previous)return;cancelCharacterSkillTarget();if(!data.maps[previous.context.map]){rosterState.history.length=0;renderRoster();return;}
  defeatTotals.clear();(previous.defeats||[]).forEach(([k,v])=>defeatTotals.set(k,v));executedEvents.clear();(previous.events||[]).forEach(key=>executedEvents.add(key));missionCounters.clear();(previous.missions||[]).forEach(([k,v])=>missionCounters.set(k,v));rosterState.monsters.splice(0,rosterState.monsters.length,...previous.monsters);Object.assign(rosterBuff,previous.buff);rosterCounts.clear();previous.counts.forEach(([k,v])=>rosterCounts.set(k,v));rosterEvidenceConsider=Boolean(previous.evidenceConsider);rosterState.round=Math.max(1,Number(previous.round)||1);rosterState.progress=Math.max(0,Number(previous.progress)??1);renderRoundProgress();window.restoreCharacterEvidence?.(previous.characterEvidence);window.restoreCharacterAbilityState?.(previous.characterAbilities);rosterState.selectedId=previous.selected;window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:rosterState.monsters.find(enemy=>enemy.instanceId===rosterState.selectedId&&!enemy.defeated)?{name:rosterState.monsters.find(enemy=>enemy.instanceId===rosterState.selectedId).name,mapId:previous.context.map}:null}));rosterState.nextId=previous.next;rosterState.serials.clear();(previous.serials||[]).forEach(([id,serial])=>rosterState.serials.set(id,serial));pick.value=previous.context.map;difficulty.value=previous.context.difficulty;rosterState.context=previous.context;Object.assign(routeState,{context:JSON.stringify([pick.value,difficulty.value]),route:previous.context.route||'',moved:!!previous.context.moved});selected=null;render();
 });
 document.getElementById('roster-clear').addEventListener('click',()=>{clearRoster();rosterState.history.length=0;rosterState.nextId=1;renderRoster();});
@@ -110,7 +110,7 @@ function registerEnemy(enemy, switchTab=true){
  // Clicking a roster monster always opens the attack calculator.
  if(switchTab)document.querySelector('.role-tab[data-role="attack"]').click();
 }
-function clearRoster(){rosterError.textContent='';rosterState.round=1;rosterState.progress=1;renderRoundProgress();defeatTotals.clear();executedEvents.clear();rosterState.monsters.length=0;rosterState.serials.clear();rosterState.selectedId=null;window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:null}));skillChoiceId=null;rosterBuff.attack=0;rosterBuff.defense=0;rosterCounts.clear();rosterEvidenceConsider=false;rosterNotice.textContent='';}
+function clearRoster(){characterSkillTargetRequest=null;renderCharacterSkillTargetUi();rosterError.textContent='';rosterState.round=1;rosterState.progress=1;renderRoundProgress();defeatTotals.clear();executedEvents.clear();rosterState.monsters.length=0;rosterState.serials.clear();rosterState.selectedId=null;window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:null}));skillChoiceId=null;rosterBuff.attack=0;rosterBuff.defense=0;rosterCounts.clear();rosterEvidenceConsider=false;rosterNotice.textContent='';}
 function updateEnemy(enemy){updateRosterEnemy(enemy,rosterStat);enemy.defense=Math.max(0,enemy.defense+(Number(enemy.skillDefenseModifier)||0));}
 function spawnGimmickMonsters(trigger){
  const matching=mapGimmicks().filter(r=>r.gimmick_id===trigger.gimmick_id&&(!r['難易度']||r['難易度']===difficulty.value));
@@ -165,19 +165,20 @@ function summonFromSkill(caster,targetId){
  rosterNotice.textContent=monsterDisplayName(caster)+'のスキルで'+pending.map(stats=>stats['モンスター名']).join('・')+'を追加しました。';
 }
 let characterSkillTargetRequest=null;
-const targetBanner=document.getElementById('character-skill-target-banner'),targetMessage=document.getElementById('character-skill-target-message'),targetCancel=document.getElementById('character-skill-target-cancel'),rosterSection=document.querySelector('.map-roster');
+const targetBanner=document.getElementById('character-skill-target-banner'),targetMessage=document.getElementById('character-skill-target-message'),targetCancel=document.getElementById('character-skill-target-cancel'),targetOk=document.getElementById('character-skill-target-ok'),rosterSection=document.querySelector('.map-roster');
 function renderCharacterSkillTargetUi(){
  const active=characterSkillTargetRequest?.target==='monster';
  targetBanner.hidden=!active;rosterSection.classList.toggle('is-character-skill-targeting',active);
- if(active)targetMessage.textContent='🎯 '+characterSkillTargetRequest.label+'：対象のモンスターを選択してください';
+ const multiple=active&&characterSkillTargetRequest.multipleTargets;
+ if(active)for(const id of characterSkillTargetRequest.selectedIds)if(!rosterState.monsters.some(enemy=>enemy.instanceId===id&&!enemy.defeated))characterSkillTargetRequest.selectedIds.delete(id);
+ targetOk.hidden=!multiple;targetOk.disabled=!multiple||characterSkillTargetRequest.selectedIds.size===0;
+ if(active)targetMessage.textContent='🎯 '+characterSkillTargetRequest.label+'：対象のモンスターを選択してください'+(multiple?'（'+characterSkillTargetRequest.selectedIds.size+'体選択中・再クリックで解除・OKで確定）':'');
 }
-function cancelCharacterSkillTarget(){if(!characterSkillTargetRequest)return;characterSkillTargetRequest=null;renderCharacterSkillTargetUi();rosterNotice.textContent='スキルの対象選択をキャンセルしました。';}
+function cancelCharacterSkillTarget(){if(!characterSkillTargetRequest)return;characterSkillTargetRequest=null;renderCharacterSkillTargetUi();renderRoster();rosterNotice.textContent='スキルの対象選択をキャンセルしました。';}
 targetCancel.addEventListener('click',cancelCharacterSkillTarget);
-window.addEventListener('character-skill-target-request',event=>{const detail=event.detail||{};if(detail.target!=='monster')return;characterSkillTargetRequest=detail;rosterNotice.textContent=detail.label+'：対象モンスターを選択してください。';renderCharacterSkillTargetUi();renderRoster();});
-function resolveCharacterSkillTarget(enemy){
- const request=characterSkillTargetRequest;if(!request||enemy.defeated)return false;
- rememberRoster();
- const skillEffects=window.getCharacterActiveSkillEffects?.(request.skillKey)||[];
+window.addEventListener('character-selection-change',cancelCharacterSkillTarget);
+window.addEventListener('character-skill-target-request',event=>{const detail=event.detail||{};if(detail.target!=='monster')return;characterSkillTargetRequest={...detail,selectedIds:new Set()};rosterNotice.textContent=detail.label+'：対象モンスターを選択してください。';renderCharacterSkillTargetUi();renderRoster();});
+function applyCharacterSkillTargetEffects(enemy,skillEffects){
  const damage=skillEffects.filter(effect=>effect.type==='damage_monster').reduce((sum,effect)=>sum+(Number(effect.value)||0),0);
  if(damage>0){enemy.manualHp=Math.max(0,enemy.hp-damage);enemy.hp=enemy.manualHp;enemy.damageTaken=Math.max(0,rosterStat(enemy.base,'HP')-enemy.hp);}
  for(const effect of skillEffects){
@@ -185,15 +186,32 @@ function resolveCharacterSkillTarget(enemy){
   if(effect.type==='fate_echo')enemy.fateEchoStacks=Math.max(0,Number(effect.stacks)||0);
   if(effect.type==='modify_monster_def'){enemy.skillDefenseModifier=Number(effect.value)||0;enemy.skillDefenseTurns=Math.max(0,Number(effect.durationTurns)||0);}
  }
+}
+function commitCharacterSkillTargets(enemies){
+ const request=characterSkillTargetRequest;if(!request||!enemies.length)return false;
+ const caster=window.captureCharacterAbilityState?.();
+ if(!caster||caster.id!==request.characterId||(Number(caster.skillCooldowns[request.skillKey])||0)>0){cancelCharacterSkillTarget();return false;}
+ const targets=[...new Set(enemies)].filter(enemy=>rosterState.monsters.includes(enemy)&&!enemy.defeated);if(!targets.length)return false;
+ const names=targets.map(monsterDisplayName),skillEffects=window.getCharacterActiveSkillEffects?.(request.skillKey)||[];
+ rememberRoster();
+ for(const enemy of targets)applyCharacterSkillTargetEffects(enemy,skillEffects);
  characterSkillTargetRequest=null;
  renderCharacterSkillTargetUi();
  renderRoster();
- window.dispatchEvent(new CustomEvent('character-skill-target-resolved',{detail:{skillKey:request.skillKey,success:true,targetId:enemy.instanceId}}));
- rosterNotice.textContent=request.label+'を'+monsterDisplayName(enemy)+'に使用しました。';
+ window.dispatchEvent(new CustomEvent('character-skill-target-resolved',{detail:{characterId:request.characterId,skillKey:request.skillKey,success:true,targetId:targets[0].instanceId,targetIds:targets.map(enemy=>enemy.instanceId)}}));
+ rosterNotice.textContent=request.label+'を'+names.join('・')+'に使用しました。';
  return true;
+}
+targetOk.addEventListener('click',()=>{const request=characterSkillTargetRequest;if(!request?.multipleTargets)return;commitCharacterSkillTargets(rosterState.monsters.filter(enemy=>request.selectedIds.has(enemy.instanceId)&&!enemy.defeated));});
+function resolveCharacterSkillTarget(enemy){
+ const request=characterSkillTargetRequest;if(!request||enemy.defeated)return false;
+ if(!request.multipleTargets)return commitCharacterSkillTargets([enemy]);
+ if(request.selectedIds.has(enemy.instanceId))request.selectedIds.delete(enemy.instanceId);else request.selectedIds.add(enemy.instanceId);
+ renderCharacterSkillTargetUi();renderRoster();roster.querySelector('[data-skill-target-id="'+enemy.instanceId+'"]')?.focus();return true;
 }
 function renderRoster(){
  let newlyDefeated;do{newlyDefeated=false;for(const enemy of rosterState.monsters){if(enemy.defeated)continue;updateEnemy(enemy);if(enemy.hp<=0){removeEnemy(enemy);newlyDefeated=true;}}}while(newlyDefeated);
+ renderCharacterSkillTargetUi();
  updateEventRows();
  rosterState.context={map:pick.value,difficulty:difficulty.value,route:routeState.route,moved:routeState.moved};rosterUndo.disabled=rosterState.history.length===0;
  const focused=document.activeElement?.closest('#roster-gimmicks')?document.activeElement.dataset.gimmick:null;
@@ -216,6 +234,7 @@ function renderRoster(){
  document.getElementById('roster-counts').textContent='累計 '+rosterState.monsters.length+'体 ／ 出現中 '+rosterState.monsters.filter(e=>!e.defeated).length+'体 ／ 撃破 '+rosterState.monsters.filter(e=>e.defeated).length+'体';
  [...rosterState.monsters].sort((a,b)=>Number(!!a.defeated)-Number(!!b.defeated)||Number(data.nativeMapByMonster[b.monsterId]===pick.value)-Number(data.nativeMapByMonster[a.monsterId]===pick.value)||a.monsterId.localeCompare(b.monsterId,'en',{numeric:true})||a.instanceId-b.instanceId).forEach(enemy=>{
    const displayName=monsterDisplayName(enemy),{card,select,nameText,actions,top}=createRosterCardShell(enemy,rosterState.selectedId,displayName,assignMapImage,data.icons);
+  if(characterSkillTargetRequest?.multipleTargets&&!enemy.defeated){const selected=characterSkillTargetRequest.selectedIds.has(enemy.instanceId);card.classList.toggle('is-skill-target-selected',selected);select.dataset.skillTargetId=enemy.instanceId;select.setAttribute('aria-pressed',String(selected));select.setAttribute('aria-label',displayName+(selected?'をスキル対象から解除':'をスキル対象に選択'));}
   const stats=createRosterStats(enemy,displayName,assignMapImage,data.icons,({key,field,label,input,value})=>{const next=Number(value);if(String(value).trim()===''||!Number.isSafeInteger(next)||next<0){input.value=enemy[field];return;}if(next===enemy[field])return;rememberRoster();if(key==='HP'){if(next===0){removeEnemy(enemy);rosterNotice.textContent=displayName+'を撃破しました。';}else{enemy.manualHp=next;enemy.hp=next;enemy.damageTaken=Math.max(0,rosterStat(enemy.base,'HP')-next);}}else{enemy[key==='攻撃'?'manualAttack':'manualDefense']=next-rosterStat(enemy.base,key);rosterNotice.textContent=displayName+'の'+label+'を'+next+'に変更しました。';}if(next===0&&key==='HP'){renderRoster();return;}updateEnemy(enemy);input.value=enemy[field];rosterUndo.disabled=false;if(rosterState.selectedId===enemy.instanceId)registerEnemy(enemy,false);});
   select.addEventListener('click',()=>{if(resolveCharacterSkillTarget(enemy))return;rosterState.selectedId=enemy.instanceId;registerEnemy(enemy);renderRoster();rosterNotice.textContent=monsterDisplayName(enemy)+'を計算機に登録しました。';});
   const remove=createRosterActionButton('roster-remove',enemy.defeated?'撃破済':'撃破',displayName+'を撃破',!!enemy.defeated);remove.addEventListener('click',()=>{rememberRoster();removeEnemy(enemy);renderRoster();rosterNotice.textContent=monsterDisplayName(enemy)+'を撃破しました。';});
