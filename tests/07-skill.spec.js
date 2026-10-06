@@ -236,6 +236,9 @@ test('07 skill: persistent monster statuses survive turn end and weakness zeros 
  await expect(attack.locator('.damage-table thead tr:last-child th')).toHaveText(['1','2','3','4','5','6']);
  await selectCharacter(page,'27');await page.getByRole('button',{name:'ミッション：インシークレットを発動'}).click();await page.locator('.role-tab[data-role="map"]').click();await card.locator('.roster-select').click();
  await expect(card.locator('.roster-status-investigationTarget button')).toHaveAttribute('aria-pressed','true');
+ await selectCharacter(page,'14');await page.getByRole('button',{name:'桜裂空斬を発動'}).click();await page.locator('.role-tab[data-role="map"]').click();await card.locator('.roster-select').click();
+ await expect(card.locator('input[aria-label$="の残りHP"]')).toHaveValue('1');
+ await page.locator('#roster-undo').click();await expect(card.locator('input[aria-label$="の残りHP"]')).toHaveValue('5');await expect(card.locator('.roster-status-erosionStacks strong')).toHaveText('2');
 });
 
 test('07 skill: fans include defeated monsters and both attack penalties persist without repeated stacking',async({page})=>{
@@ -244,8 +247,10 @@ test('07 skill: fans include defeated monsters and both attack penalties persist
  for(let i=0;i<3;i++)await cards.nth(i).locator('.roster-status-fan button').click();
  await expect(page.getByLabel('ファンの数')).toHaveValue('3');
  const enemyAttack=cards.first().locator('input[aria-label$="の攻撃力"]');await enemyAttack.fill('5');await enemyAttack.dispatchEvent('change');
+ const secondAttack=cards.nth(1).locator('input[aria-label$="の攻撃力"]');await secondAttack.fill('0');await secondAttack.dispatchEvent('change');
  await page.getByLabel('ファンの数').fill('9');await page.getByLabel('ファンの数').dispatchEvent('change');
- await page.getByRole('button',{name:'インターネットエンジェルを発動'}).click();await expect(enemyAttack).toHaveValue('4');
+ await page.getByRole('button',{name:'インターネットエンジェルを発動'}).click();await expect(enemyAttack).toHaveValue('4');await expect(secondAttack).toHaveValue('0');
+ await secondAttack.fill('5');await secondAttack.dispatchEvent('change');await expect(secondAttack).toHaveValue('5');
  await cards.first().locator('.roster-select').click();await expect(page.locator('#attackPower2')).toHaveValue('3');
  for(let i=0;i<3;i++)await page.locator('#turn-end').click();await expect(enemyAttack).toHaveValue('4');await expect(page.locator('#attackPower2')).toHaveValue('3');
  await page.getByRole('button',{name:'インターネットエンジェルを発動'}).click();await expect(enemyAttack).toHaveValue('4');
