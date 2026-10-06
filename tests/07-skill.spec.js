@@ -122,14 +122,15 @@ test('07 skill: Padman signed adjustments clamp independently and use the confir
   const key='自己主張なし'+name+'補正',input=page.getByLabel(key+'の数'),button=page.getByRole('button',{name:key+'を増やす',exact:true});
   await expect(input).toHaveValue('0');await expect(input).toHaveAttribute('min','-2');await expect(input).toHaveAttribute('max','2');
   const icon=button.locator('img');await expect(icon).toHaveAttribute('src','../images/UT_Buff/UT_Buff_105_Break.png');
-  expect(await icon.evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);
-  const value=page.locator('#selected-character-'+stat),base=Number(await value.inputValue());
-  await button.click({button:'right'});await expect(input).toHaveValue('-1');await expect(value).toHaveValue(String(Math.max(0,base-1)));
-  await button.click({button:'right'});await button.click({button:'right'});await expect(input).toHaveValue('-2');await expect(value).toHaveValue(String(Math.max(0,base-2)));
-  await input.fill('99');await input.dispatchEvent('change');await expect(input).toHaveValue('2');await expect(value).toHaveValue(String(base+2));
+  await expect.poll(()=>icon.evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);
+  const value=page.locator('#selected-character-'+stat),base=Number(stat==='move'?await value.textContent():await value.inputValue());
+  const expectValue=expected=>stat==='move'?expect(value).toHaveText(String(expected)):expect(value).toHaveValue(String(expected));
+  await button.click({button:'right'});await expect(input).toHaveValue('-1');await expectValue(Math.max(0,base-1));
+  await button.click({button:'right'});await button.click({button:'right'});await expect(input).toHaveValue('-2');await expectValue(Math.max(0,base-2));
+  await input.fill('99');await input.dispatchEvent('change');await expect(input).toHaveValue('2');await expectValue(base+2);
   await button.click();await expect(input).toHaveValue('2');
   await input.fill('-99');await input.dispatchEvent('change');await expect(input).toHaveValue('-2');
-  await input.fill('0');await input.dispatchEvent('change');await expect(value).toHaveValue(String(base));
+  await input.fill('0');await input.dispatchEvent('change');await expectValue(base);
  }
  const attack=page.getByLabel('自己主張なし攻撃補正の数'),defense=page.getByLabel('自己主張なし防御補正の数');
  await attack.fill('-1');await attack.dispatchEvent('change');await defense.fill('2');await defense.dispatchEvent('change');
