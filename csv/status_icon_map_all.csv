@@ -40,3 +40,6 @@ group,effect_key,input_kind,icon_file,map_id,atk,def,move,damage_reduce,conditio
 キャラクター固有,カクテル攻撃カード,number,UT_Buff/UT_Buff_303_piano.png
 キャラクター固有,カクテル防御カード,number,UT_Buff/UT_Buff_303_piano.png
 キャラクター固有,推理タイム,number,UT_Buff/UT_Buff_306.png
+キャラクター,自己主張なし攻撃補正,number,UT_Buff/UT_Buff_105_Break.png
+キャラクター,自己主張なし防御補正,number,UT_Buff/UT_Buff_105_Break.png
+キャラクター,自己主張なし移動補正,number,UT_Buff/UT_Buff_105_Break.png
