@@ -122,6 +122,19 @@ function createCharacterAbilityChoiceView(key,option,icon,onCycle){
  return button;
 }
 
+const partyChipGridResizeObserver=new ResizeObserver(entries=>{
+ for(const {target:list,contentRect} of entries){
+  if(!list.isConnected){partyChipGridResizeObserver.unobserve(list);continue;}
+  const count=list.children.length,width=Math.floor(contentRect.width),height=Math.floor(contentRect.height);
+  if(!count||width<=0||height<=0)continue;
+  const normalSize=Math.max(1,Math.floor((height-1)/2));
+  const columns=Math.max(0,Math.floor((width+1)/(normalSize+1)));
+  const rows=count<=columns*2?2:3,neededColumns=Math.ceil(count/rows);
+  const size=rows===2?normalSize:Math.max(6,Math.min(Math.floor((height-2)/3),Math.floor((width-neededColumns+1)/neededColumns)));
+  list.dataset.rows=String(rows);list.style.setProperty('--party-chip-rows',String(rows));list.style.setProperty('--party-chip-size',size+'px');
+ }
+});
+
 function createPartyMemberView(row,index,parameters,isSelf,onLevelChange,ownedChips=[]){
  const slot=document.createElement('div');slot.className='party-member-slot';slot.dataset.slot=String(index+1);slot.dataset.characterId=row?.id||'';slot.tabIndex=0;slot.draggable=Boolean(row);slot.setAttribute('role','group');
  slot.setAttribute('aria-label',(index+1)+'番目'+(isSelf?'（自分）':'')+'：'+(row?.name||'未登録'));
@@ -152,5 +165,8 @@ function createPartyMemberView(row,index,parameters,isSelf,onLevelChange,ownedCh
    chipList=list;
   }
  }
- slot.append(details);if(chipList){slot.classList.add('has-self-chips');slot.append(chipList);}return slot;
+ if(chipList){
+  const body=document.createElement('div');body.className='party-slot-body';body.append(details,chipList);slot.classList.add('has-self-chips');slot.append(body);partyChipGridResizeObserver.observe(chipList);
+ }else slot.append(details);
+ return slot;
 }
