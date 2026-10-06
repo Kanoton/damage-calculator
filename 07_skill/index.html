@@ -477,14 +477,19 @@
 </section>
 <section id="selected-character" class="selected-character" aria-label="選択中のキャラクター" hidden>
  <button type="button" id="selected-character-portrait" title="クリック：レベルアップ／右クリック：レベルダウン（Lv0～3）"><img id="selected-character-image" alt=""></button>
- <div class="selected-character-details">
+ <div id="selected-character-details" class="selected-character-details">
   <div class="selected-character-main">
    <div class="selected-character-identity"><strong id="selected-character-name"></strong><span id="selected-character-level">Lv.0</span><div class="selected-character-hp" title="現在HP / 最大HP"><button type="button" id="selected-character-hp-fill" title="左クリックで現在HP＋1／右クリックで−1" aria-label="現在HPを増やす"><img src="../images/UT_Buff/Hp.png" alt=""></button><input id="selected-character-current-hp" type="number" min="0" inputmode="numeric" aria-label="現在HP"> / <b id="selected-character-hp"></b></div></div><div id="selected-character-skill-controls" class="selected-character-skill-controls" hidden><button type="button" id="selected-character-skill">スキル</button><button type="button" id="selected-character-ct" title="左クリックでCTを1減らす／右クリックで1増やす" aria-label="CTを1減らす">CT 0</button></div>
    <div class="selected-character-stats" aria-live="polite"><span title="攻撃力"><button type="button" id="selected-character-atk-button" class="selected-character-stat-icon" title="攻撃力：左クリックで＋1／右クリックで−1" aria-label="攻撃力を増やす"><img src="../images/UT_Buff/Attack.png" alt=""></button> <input id="selected-character-atk" type="number" min="0" inputmode="numeric" aria-label="キャラクターの攻撃力"></span><span title="防御力"><button type="button" id="selected-character-def-button" class="selected-character-stat-icon" title="防御力：左クリックで＋1／右クリックで−1" aria-label="防御力を増やす"><img src="../images/UT_Buff/Defense.png" alt=""></button> <input id="selected-character-def" type="number" min="0" inputmode="numeric" aria-label="キャラクターの防御力"></span><span title="移動力"><img src="../images/UT_Buff/run.png" alt="移動力" class="selected-character-stat-icon"> <b id="selected-character-move"></b></span></div>
   </div>
   <div id="selected-character-conditions" class="selected-character-conditions" aria-label="チップ効果の条件"></div>
  </div>
- <div class="selected-character-chips" aria-label="取得したチップ"></div>
+ <div id="selected-character-chips" class="selected-character-chips" aria-label="取得したチップ"></div>
+ <div id="selected-party-grid" class="selected-party-grid" role="tabpanel" aria-labelledby="selected-party-tab" hidden></div>
+ <div class="selected-character-member-tabs" role="tablist" aria-label="自キャラとPT">
+  <button type="button" id="selected-self-tab" role="tab" aria-controls="selected-character-portrait selected-character-details selected-character-chips" aria-selected="true">自キャラ</button>
+  <button type="button" id="selected-party-tab" role="tab" aria-controls="selected-party-grid" aria-selected="false" tabindex="-1">PT</button>
+ </div>
 </section>
 <section class="map-roster" aria-labelledby="map-roster-heading"><div class="roster-heading"><h2 id="map-roster-heading">マップ上のモンスター</h2></div><div id="character-skill-target-banner" class="character-skill-target-banner" role="status" hidden><strong id="character-skill-target-message"></strong><div class="character-skill-target-actions"><button type="button" id="character-skill-target-cancel">キャンセル</button><button type="button" id="character-skill-target-ok" hidden disabled>OK</button></div></div><p class="map-roster-description">モンスター名をクリックで計算機に登録。残りHPは数値をクリックして編集（0で撃破）。</p><div class="roster-actionbar"><div class="roster-gimmick-controls"><div id="roster-gimmicks" aria-label="マップ固有ギミック"></div><button type="button" id="roster-reset" title="下の一覧のバフ・固有ギミックをリセット" hidden>リセット</button></div><div class="roster-history-controls"><button type="button" id="roster-undo" disabled>１つもどす</button><button type="button" id="roster-clear" title="全モンスターと操作履歴を削除">全削除</button></div></div><p id="map-roster-empty" class="map-roster-empty">［マップ情報］の［出現モンスター］をクリックすると追加できます。</p><p id="roster-error" role="alert"></p><p id="roster-counts" class="map-roster-status"></p><div id="map-roster-list" class="map-roster-list"></div></section>
 <script src="js/calculator.js"></script>

@@ -53,7 +53,10 @@ test('07 skill: Sherry cancellation and removed targets consume no HP or CT',asy
 
 async function selectCharacter(page,id){
  await page.locator('.role-tab.character-tab').click();
+ await page.locator('#selected-self-tab').click();
+ await page.locator('#character-list-tab').click();
  await page.locator(`.character-select[data-id="${id}"]`).click();
+ await page.locator('#selected-self-tab').click();
 }
 
 test('07 skill: Sherry batch can defeat one target and damage another',async({page})=>{
@@ -277,6 +280,42 @@ test('07 skill: fans include defeated monsters and both attack penalties persist
  await page.getByRole('button',{name:'インターネットエンジェルを発動'}).click();await expect(enemyAttack).toHaveValue('4');
  await page.locator('.role-tab[data-role="map"]').click();await cards.nth(2).locator('.roster-remove').click();await expect(page.getByLabel('ファンの数')).toHaveValue('9');
  await selectCharacter(page,'1');await expect(page.locator('#attackPower2')).toHaveValue('4');await selectCharacter(page,'102');await expect(page.locator('#attackPower2')).toHaveValue('3');
+});
+
+
+test('07 skill: party registration automatically opens with self first and three unique optional members',async({page})=>{
+ await page.goto('/07_skill/');await page.locator('.role-tab.character-tab').click();
+ const select=id=>page.locator('.character-select[data-id="'+id+'"]'),grid=page.locator('#selected-party-grid'),slots=grid.locator('.party-member-slot');
+ await select('16').click();await expect(page.locator('#selected-party-tab')).toHaveAttribute('aria-selected','true');await expect(grid).toBeVisible();
+ await expect(slots).toHaveCount(4);await expect(slots.nth(0)).toHaveAttribute('data-character-id','16');
+ await expect(grid.locator('.party-slot-order')).toHaveText(['1st自分','2nd','3rd','4th']);
+ const roundBefore=await page.locator('#current-round').textContent(),progressBefore=await page.locator('#current-progress').textContent();
+ await select('16').click();await expect(slots.nth(1)).toHaveAttribute('data-character-id','');
+ await select('1').click();await select('1').click();await select('2').focus();await select('2').press('Enter');await select('3').click();
+await expect(slots.nth(1)).toHaveAttribute('data-character-id','1');await expect(slots.nth(2)).toHaveAttribute('data-character-id','2');await expect(slots.nth(3)).toHaveAttribute('data-character-id','3');
+ await select('4').click();await expect(slots.nth(3)).toHaveAttribute('data-character-id','3');
+ await expect(page.locator('#selected-character-name')).toHaveText('ジャスミン');await expect(page.locator('#current-round')).toHaveText(roundBefore);await expect(page.locator('#current-progress')).toHaveText(progressBefore);
+ await slots.nth(2).click({button:'right'});await expect(slots.nth(2)).toHaveAttribute('data-character-id','');
+ await select('4').click();await expect(slots.nth(2)).toHaveAttribute('data-character-id','4');await select('1').click({button:'right'});await expect(slots.nth(1)).toHaveAttribute('data-character-id','');
+ await slots.nth(0).click({button:'right'});await expect(slots.nth(0)).toHaveAttribute('data-character-id','16');
+ await page.locator('#selected-self-tab').click();await select('3').click();
+ await expect(slots.nth(0)).toHaveAttribute('data-character-id','3');await expect(slots.nth(3)).toHaveAttribute('data-character-id','');await expect(slots.nth(2)).toHaveAttribute('data-character-id','4');
+});
+
+test('07 skill: self and 2x2 party preserve the exact outer frame and personal controls',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'16');
+ const frame=page.locator('#selected-character');
+ const frameBounds=()=>frame.evaluate(el=>{const r=el.getBoundingClientRect();return {x:r.x+window.scrollX,y:r.y+window.scrollY,width:r.width,height:r.height};});
+ const before=await frameBounds();
+ const atk=page.locator('#selected-character-atk');await atk.fill('7');await atk.dispatchEvent('change');
+ await page.locator('#selected-party-tab').click();const partyBounds=await frameBounds();expect(partyBounds).toEqual(before);
+ const slots=page.locator('#selected-party-grid .party-member-slot'),bounds=await slots.evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height};}));
+ expect(bounds[0].y).toBe(bounds[1].y);expect(bounds[2].y).toBe(bounds[3].y);expect(bounds[0].x).toBe(bounds[2].x);expect(bounds[1].x).toBe(bounds[3].x);expect(bounds[1].x).toBeGreaterThan(bounds[0].x);expect(bounds[2].y).toBeGreaterThan(bounds[0].y);
+ await page.locator('.character-select[data-id="1"]').click();await page.locator('#selected-self-tab').click();await expect(atk).toHaveValue('7');await expect(page.locator('#selected-character-portrait')).toBeVisible();
+ await page.locator('#selected-self-tab').focus();await page.locator('#selected-self-tab').press('ArrowDown');await expect(page.locator('#selected-party-tab')).toBeFocused();await expect(page.locator('#selected-party-tab')).toHaveAttribute('aria-selected','true');
+ for(const width of [600,375]){
+  await page.setViewportSize({width,height:1000});const pt=await frame.boundingBox();await page.locator('#selected-self-tab').click();const self=await frame.boundingBox();expect(pt.width).toBe(self.width);expect(pt.height).toBe(self.height);expect(self.height).toBe(118);await page.locator('#selected-party-tab').click();
+ }
 });
 
 async function selectChipCategory(page,category){
@@ -621,7 +660,7 @@ test('07 skill: character cards use Hero Card2 artwork and live stats while pres
  const parunan=page.locator('.character-select[data-id="2"]');await parunan.click();
  await expect(page.locator('#selected-character-name')).toHaveText('パルナン');
  await expect(parunan).toHaveAttribute('aria-pressed','true');
- await mimi.focus();await mimi.press('Enter');await expect(page.locator('#selected-character-name')).toHaveText('ミミ');
+ await page.locator('#selected-self-tab').click();await mimi.focus();await mimi.press('Enter');await expect(page.locator('#selected-character-name')).toHaveText('ミミ');
  await expect(page.locator('#selected-character-atk')).toHaveValue('7');
  await expect(page.locator('#selected-character-current-hp')).toHaveValue('19');
  await expect(page.locator('.character-select[data-id="4"] [data-stat="initial_coin"]')).toHaveText('6');

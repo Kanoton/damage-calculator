@@ -1598,3 +1598,20 @@ tbody th {
 .roster-status-button{font-size:10px;color:inherit}
 .roster-status-button[aria-pressed="true"]{box-shadow:0 0 0 1px #c99826;border-radius:3px}
 .roster-status-button:disabled{opacity:.55;cursor:default}
+
+/* Keep the selected-character frame dimensions while reserving its right edge for tabs. */
+.selected-character{grid-template-columns:48px minmax(0,320px) minmax(75px,1fr) 50px}
+.selected-character-conditions{grid-column:1 / -2}
+.selected-character-member-tabs{grid-column:4;grid-row:1 / -1;display:flex;flex-direction:column;gap:4px;height:100%;min-height:0;border-left:1px solid #e5d69f;padding-left:4px}
+.selected-character-member-tabs button{flex:1;min-height:0;width:100%;padding:1px;border:1px solid #d4ac37;border-radius:4px;background:#fffaf0;color:#493e22;font:inherit;font-size:10px;white-space:nowrap;cursor:pointer}
+.selected-character-member-tabs button[aria-selected="true"]{background:#f7d96a;font-weight:700}
+.selected-character-member-tabs button:focus-visible,.party-member-slot:focus-visible{outline:2px solid #856615;outline-offset:-2px}
+.selected-party-grid{grid-column:1 / 4;grid-row:1 / -1;height:100%;min-width:0;min-height:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr));gap:2px 8px}
+.selected-character [hidden]{display:none}
+.selected-character.is-party-view > #selected-character-portrait,.selected-character.is-party-view > .selected-character-details,.selected-character.is-party-view > .selected-character-chips{display:none}
+.party-member-slot{display:flex;align-items:center;gap:7px;min-width:0;min-height:0;padding:2px 6px;border:1px solid #e5d69f;border-radius:4px;background:#fffaf0;color:#493e22;text-align:left;font:inherit;overflow:hidden;cursor:pointer}
+.party-slot-order{flex:none;width:27px;font-size:12px;font-weight:700}
+.party-slot-order small{display:block;font-size:9px;font-weight:normal}
+.party-member-slot img{width:30px;height:40px;flex:none;object-fit:contain}
+.party-slot-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
+@media(max-width:700px){.selected-character{grid-template-columns:48px minmax(0,1fr) minmax(75px,34%) 50px}.party-member-slot{padding:2px;gap:4px}.party-member-slot img{width:24px;height:36px}.party-slot-name{font-size:11px}.party-slot-order{width:23px;font-size:11px}}
