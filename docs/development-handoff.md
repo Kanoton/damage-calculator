@@ -55,17 +55,17 @@ Key behavior:
 - 4 Alanna: no damage previous turn -> ATK +3.
 - 6 Padman: independent signed numeric ATK/DEF/MOVE adjustments from -2 to +2 (default 0), with left-click +1/right-click -1 and bounded direct entry. All three use `UT_Buff/UT_Buff_105_Break.png` via the status CSV and matching 07 fallback. Final stats retain their normal zero floor. Padman's outgoing attack ignores the opponent's pre-die defense stat only when the attack die is 6; the defense die, damage additions/reductions, and minimum-damage rules still apply. Both the 36-outcome table and card-aware probability calculations use this rule, which clears when another character is selected and never affects defense mode. The next-attack fixed die after a roll below 2 remains unimplemented.
 - 7 Papara: current HP <= half max HP -> ATK +3.
-- 9 Z3000: every 2 monster defeats -> ATK +1. Active Pull In (CT 4) manually targets a monster and deals 5 direct damage; range and the conditional follow-up attack remain manual/not simulated.
+- 9 Z3000: every 2 monster defeats -> ATK +1. Active Pull In (CT 4) manually targets a monster and deals 5 direct damage; each actual defeat adds to the counter and reduces CT by 2; range and the conditional follow-up attack remain manual/not simulated.
 - 10 Pandaman: counterattack mode; ATK increases by damage received that turn.
 - 12 Hime: Energy Storage 0-5; each -> ATK +2 / DEF +2. Active Qigong Training (CT 3) heals self 2 HP up to max HP and, if Energy Storage is active when used, gives ATK +4 for that turn.
 - 14 Misaki: Sword Aura 0-3 tracked. Active Sakura Retsukuzan uses manual roster target selection (range is not auto-validated), deals 2 direct damage through roster HP/defeat handling, gains +1 Sword Aura normally, or consumes 2 when used at 3 stacks. The card reward at max stacks is not represented.
 - 15 Nardis: hand advantage capped at 3 -> ATK +1 each.
-- 16 Jasmine: active Overdrive has CT 4; activation gives MOVE +3 / DEF -3 for the turn, with calculated character parameters clamped to their normal minimum of 0, then the temporary effects expire at turn end. CT is adjusted manually rather than automatically because additional game conditions can reduce it. Existing Overdrive result <10 -> DEF +2, >=10 -> ATK +2; every 13 cumulative movement alternates ATK/DEF.
-- 17 Luka: Midnight Slash attack context -> ATK +2.
+- 16 Jasmine: active Overdrive has CT 4; activation gives MOVE +3 / DEF -3 for the turn, with calculated character parameters clamped to their normal minimum of 0, then the temporary effects expire at turn end. Activation prompts for the die result: <10 adds DEF +2, >=10 adds ATK +2 for the turn. CT decrements on turn end, and manual controls remain available. Every 13 cumulative movement alternates ATK/DEF.
+- 17 Luka: Midnight Slash selects multiple monsters and deals current ATK +2 direct damage to each. No persistent self ATK context button.
 - 18 Nancy Lo: Firewall -> ATK +2 / DEF +2.
 - 21 Al: every 6 Starlight -> ATK +1 / DEF +1.
 - 23 Teru: Fox Light follow-up attack; ATK +1 per Fox Light stack in that context.
-- 24 Moses: Precision 0-3 -> ATK +2 each; turn end -1.
+- 24 Moses: Precision 0-3 -> ATK +2 each; turn end -1. Persistent monster Weakness sets its combat die to 0 against Moses in both battle modes.
 - 25 Mamushi: Awakening 0-8. At 8, icon automatically changes to True Dragon and ATK +4 applies automatically. No separate True Dragon toggle. Below 8 reverts both.
 - 26 Sumikage: skill activation prompts for absorbed Shadow count; snapshot ATK +1 per Shadow expires at turn end. No persistent Shadow control.
 - 27 Bonnie: the currently selected attack-target monster's Mark stacks are the source of all Mark-based bonuses. Mark >=1 automatically gives ATK +3; while the manual Stealth toggle is active, add that target monster's Mark stack count to ATK. Do not create a Bonnie-side Mark count or a manual 'marked target' toggle. Active Mission: In Secret manually targets a monster and adds Mark +1; Star Coin/card/event rewards are not simulated.
@@ -102,7 +102,7 @@ Attack/Defense battle-card artwork in `07_skill/index.html` and `06b_chara/index
 
 ## Character status icons
 
-Confirmed character-specific status mappings use UT_Buff assets: Alanna `前ターン被ダメなし` -> `UT_Buff_ConcealedPresence.png`; Z3000 `モンスター撃破数` -> `UT_Buff_109_Break.png`; Nancy Lo `ファイアウォール` -> `UT_Buff_120.png`; Teru `狐光` -> `UT_Buff_124.png`; Bonnie `潜伏` -> `UT_Buff_127.png`; Rinrin `エリア拒止通過` -> `UT_Buff_128_Skill.png`; Jill cocktail attack/defense controls -> `UT_Buff_303_piano.png`; Sherry `推理タイム` -> `UT_Buff_306.png`. Kaisei Fate Echo on monsters uses `UT_Buff_114_Max.png`.
+Confirmed character-specific status mappings use UT_Buff assets: Alanna `前ターン被ダメなし` -> `UT_Buff_ConcealedPresence.png`; Z3000 `モンスター撃破数` -> `UT_Buff_109_Break.png`; Nancy Lo `ファイアウォール` -> `UT_Buff_120.png`; Teru `狐光` -> `UT_Buff_124.png`; Bonnie `潜伏` -> `UT_Buff_127.png`; Rinrin `エリア拒止通過` -> `UT_Buff_128_Skill.png`; Jill Life-changing Cocktail toggle -> `UT_Buff_303.png`; Sherry `推理タイム` -> `UT_Buff_306.png`. Kaisei Fate Echo on monsters uses `UT_Buff_114_Max.png`.
 
 ## Status icons
 
@@ -139,19 +139,19 @@ Required behavior:
 - Z3000 (9): Pull In's 5 direct damage is implemented. The 7-space range is intentionally manual; the optional immediate attack when ATK >= 7 is not represented as a separate combat action.
 - Papara (7): Bite-sized healing is intentionally not simulated. Activating the skill forces the existing half-HP-or-lower ATK +3 condition through the end of the current turn.
 - Character-target active skills (Ren 8, Lulu 11, Al 21, Jill 103, Dorothy 104, and related effects) need a shared manual character-target selection flow before their target effects can be safely implemented.
-- Moses (24): Weakness can be manually targeted, but its combat-die-0 effect is not represented by the current outgoing-damage calculator.
-- Chouten-chan/Ame-chan (101/102): Fan and Love are manual stack controls. Internet Angel references Fan for its 3+ Fan self-heal; Love Overdose snapshots Love for this-turn movement/healing, consumes 4 Love, and at 4+ permanently raises max HP and the Love cap by 1. Coin/card/other-character rewards remain outside the calculator.
+- Moses (24): Weakness targeting and combat-die-0 are implemented in both calculators; automatic counterattack actions remain outside the simulator.
+- Chouten-chan/Ame-chan (101/102): Fan combines persistent roster flags (including defeated monsters) with manual additions; Love is a manual stack control. Internet Angel references Fan for its 3+ self-heal and 9+ permanent once-per-monster Fan ATK reduction; Love Overdose snapshots Love for this-turn movement/healing, consumes 4 Love, and at 4+ permanently raises max HP and the Love cap by 1. Coin/card/other-character rewards remain outside the calculator.
 - Nancy Lo (18): Hacking depends on target distance and initiating a forced combat; those actions are not represented by the current skill target resolver.
 - Sherry (106): Mighty Magic uses manual multiple-monster selection: click the same roster name buttons to toggle distinct monster instances, then OK beside Cancel confirms. Empty selection disables OK; selecting/deselecting/canceling has no HP/CT effect. Confirmation deals 2 direct damage to each selected active monster and starts CT exactly once. One undo restores the entire batch and CT. Character changes, roster clear/map changes, or undo cancel pending selection; removed/defeated targets are pruned. Spatial throw/destination and range/area legality remain manual.
 
 
 Review current game data before implementing:
 - Teru (23): Three Gods Possession prompts for the possessed ally's ATK/DEF when activated and adds exactly half of each to Teru until turn end. Character selection itself is deferred; odd values may therefore produce .5 stats.
-- Dorothy (104): ally-pass ATK +1 behavior and Warmth=5 DEF-to-ATK/consume-all effect remain incomplete.
+- Dorothy (104): True Self manually represents ally-pass ATK +1 for the turn. Warmth=5 DEF-to-ATK is implemented; the requested workflow does not automatically consume Warmth.
 
 - Pandaman (10): hamburger-related passive max HP +2 is omitted.
-- Tono Hanna (105): movement +2 to another character may require movement-target support.
-- Tachibana Sherry (106): Hanna damage reduction is not represented.
+- Tono Hanna (105): requested Float MOVE +2 for the turn is implemented. Selecting another character for ally movement effects remains outside this calculator.
+- Tachibana Sherry (106): Hanna now has a manual Protect Friend toggle for damage reduction 1; proximity legality remains manual.
 
 All current character IDs now have an ability-rule entry for active-skill/CT metadata. Characters without supported calculator effects may intentionally have CT-only active skill entries; do not infer additional effect controls from that.
 
@@ -211,7 +211,7 @@ Use PR history for exact diffs/rationale when touching the same areas.
 
 - Sherry, Rinrin, and Luka enable `multipleTargets` in active-skill metadata. Other implemented targeted skills retain immediate single-click confirmation.
 - Rinrin's source description affects all monsters passed during the tackle; her manual DEF -2 target implementation now supports multiple targets. The self ATK +2 is applied once, and existing two-turn effect timers remove only these skill modifiers after two turn-end clicks.
-- Pandaman's area taunt and Lulu's area movement reduction are not simulated. Luka's passage damage, Megas's random/area damage, Sykes's zone effects, and Bonnie's investigation phases also have multi-monster scope, but those effects are not the existing single-target active-skill selection flow. Do not claim Sherry is the only multi-monster ability in the game.
+- Pandaman's area taunt and Lulu's area movement reduction are not simulated. Luka's passage damage is supported through explicit multiple targets. Megas's random/area damage, Sykes's zone effects, and Bonnie's investigation phases also have multi-monster scope, but those effects are not the existing single-target active-skill selection flow. Do not claim Sherry is the only multi-monster ability in the game.
 
 ## Character workflows and persistent monster statuses (2026-10-06)
 
