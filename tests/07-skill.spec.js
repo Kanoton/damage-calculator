@@ -352,7 +352,7 @@ test('07 skill: party identity, HP-first stats and compact self chips stay insid
  for(const width of [1280,600,375]){
   await page.setViewportSize({width,height:1000});
   const ptBounds=await frame.boundingBox();expect(ptBounds.height).toBe(118);
-  const layout=await self.evaluate(slot=>{const s=slot.getBoundingClientRect(),details=slot.querySelector('.party-slot-details'),list=slot.querySelector('.party-slot-chips'),l=list.getBoundingClientRect(),d=details.getBoundingClientRect();return {fits:l.left>=s.left&&l.right<=s.right+1&&d.top>=s.top&&d.bottom<=s.bottom+1,sizes:[...list.querySelectorAll('img')].map(img=>{const r=img.getBoundingClientRect();return {width:r.width,height:r.height};})};});
+  const layout=await self.evaluate(slot=>{const s=slot.getBoundingClientRect(),details=slot.querySelector('.party-slot-details'),list=slot.querySelector('.party-slot-chips'),l=list.getBoundingClientRect(),d=details.getBoundingClientRect();return {fits:l.left>=d.right&&l.right<=s.right+1&&l.top<d.bottom&&l.bottom>d.top&&d.top>=s.top&&d.bottom<=s.bottom+1,sizes:[...list.querySelectorAll('img')].map(img=>{const r=img.getBoundingClientRect();return {width:r.width,height:r.height};})};});
   expect(layout.fits).toBe(true);for(const size of layout.sizes){expect(size.width).toBeLessThanOrEqual(14);expect(size.height).toBeLessThanOrEqual(14);}
   await page.locator('#selected-self-tab').click();const ownBounds=await frame.boundingBox();expect(ownBounds.width).toBe(ptBounds.width);expect(ownBounds.height).toBe(ptBounds.height);await page.locator('#selected-party-tab').click();
  }
