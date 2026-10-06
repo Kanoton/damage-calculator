@@ -328,11 +328,11 @@
    const row=characters.find(item=>String(item.id)===String(id));
    const isSelf=Boolean(row&&String(id)===String(selectedCharacter?.id));
    const level=isSelf?state().level:(partyLevels.get(String(id))||0);
-   const parameters=row?(isSelf?{...calculate(),level,currentHp:state().currentHp}:{level,atk:Number(row['lv'+level+'_atk'])||0,def:Number(row['lv'+level+'_def'])||0,hp:Number(row['lv'+level+'_hp'])||0,currentHp:Number(row['lv'+level+'_hp'])||0}):null;
+   const parameters=row?(isSelf?{...calculate(),level,currentHp:state().currentHp}:{level,atk:Number(row['lv'+level+'_atk'])||0,def:Number(row['lv'+level+'_def'])||0,move:Number(row['lv'+level+'_move'])||0,hp:Number(row['lv'+level+'_hp'])||0,currentHp:Number(row['lv'+level+'_hp'])||0}):null;
    const slot=createPartyMemberView(row,index,parameters,isSelf,delta=>{
     if(isSelf){changeCharacterLevel(delta);return;}
     partyLevels.set(String(id),Math.max(0,Math.min(3,level+delta)));renderParty();
-   });
+   },isSelf?state().chips.map(chipId=>chips.find(chip=>chip.id===chipId)).filter(Boolean):[]);
    slot.addEventListener('contextmenu',event=>{event.preventDefault();if(!isSelf)removePartyMember(id);});
    slot.addEventListener('dragstart',event=>{if(!row)return;draggedPartyIndex=index;event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('application/x-07-party-slot',String(index));slot.classList.add('is-dragging');});
    slot.addEventListener('dragover',event=>{if(draggedPartyIndex===null)return;event.preventDefault();event.dataTransfer.dropEffect='move';slot.classList.add('is-drop-target');});
