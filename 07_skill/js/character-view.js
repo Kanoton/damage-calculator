@@ -122,11 +122,25 @@ function createCharacterAbilityChoiceView(key,option,icon,onCycle){
  return button;
 }
 
-function createPartyMemberView(row,index){
- const slot=document.createElement('button');slot.type='button';slot.className='party-member-slot';slot.dataset.slot=String(index+1);slot.dataset.characterId=row?.id||'';
- slot.setAttribute('aria-label',(index+1)+'番目'+(index===0?'（自分）':'')+'：'+(row?.name||'未登録')+(index>0&&row?'。右クリックで解除':''));
- slot.title=index===0?'自分のキャラクター':row?'右クリックでPT登録を解除':'キャラ一覧からクリックで登録';
- const order=document.createElement('span');order.className='party-slot-order';order.textContent=['1st','2nd','3rd','4th'][index];if(index===0){const self=document.createElement('small');self.textContent='自分';order.append(self);}slot.append(order);
- if(row){const image=document.createElement('img');image.src='../images/character/'+encodeURIComponent(row.images);image.alt=row.name;slot.append(image);}
- const name=document.createElement('strong');name.className='party-slot-name';name.textContent=row?.name||'未登録';slot.append(name);return slot;
+function createPartyMemberView(row,index,parameters,isSelf,onLevelChange){
+ const slot=document.createElement('div');slot.className='party-member-slot';slot.dataset.slot=String(index+1);slot.dataset.characterId=row?.id||'';slot.tabIndex=0;slot.draggable=Boolean(row);slot.setAttribute('role','group');
+ slot.setAttribute('aria-label',(index+1)+'番目'+(isSelf?'（自分）':'')+'：'+(row?.name||'未登録'));
+ slot.title=row?'ドラッグで順番変更'+(isSelf?'':'／枠を右クリックでPT登録解除'):'キャラ一覧からクリックで登録';
+ const order=document.createElement('span');order.className='party-slot-order';order.textContent=['1st','2nd','3rd','4th'][index];if(isSelf){const self=document.createElement('small');self.textContent='自分';order.append(self);}slot.append(order);
+ const details=document.createElement('div');details.className='party-slot-details';
+ const name=document.createElement('strong');name.className='party-slot-name';name.textContent=row?.name||'未登録';details.append(name);
+ if(row){
+  const levelTitle='左クリックでレベルアップ／右クリックでレベルダウン（Lv0～3）';
+  const wireLevel=button=>{button.title=levelTitle;button.addEventListener('click',event=>{event.stopPropagation();onLevelChange(1);});button.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();onLevelChange(-1);});button.addEventListener('keydown',event=>{if(event.key==='ArrowDown'){event.preventDefault();event.stopPropagation();onLevelChange(-1);}});};
+  const portrait=document.createElement('button');portrait.type='button';portrait.className='party-slot-portrait';portrait.setAttribute('aria-label',row.name+'のレベル変更');
+  const image=document.createElement('img');image.src='../images/character/'+encodeURIComponent(row.images);image.alt=row.name;image.draggable=false;portrait.append(image);wireLevel(portrait);slot.append(portrait);
+  const stats=document.createElement('div');stats.className='party-slot-stats';
+  const level=document.createElement('button');level.type='button';level.className='party-slot-level';level.textContent='Lv.'+parameters.level;level.setAttribute('aria-label',row.name+' Lv.'+parameters.level+'：'+levelTitle);wireLevel(level);stats.append(level);
+  for(const [key,label,icon] of [['atk','攻撃力','Attack.png'],['def','防御力','Defense.png'],['hp','HP','Hp.png']]){
+   const stat=document.createElement('span');stat.className='party-slot-stat';stat.dataset.stat=key;stat.title=label;stat.setAttribute('aria-label',label+' '+(key==='hp'?parameters.currentHp+' / '+parameters.hp:parameters[key]));
+   const image=document.createElement('img');image.src='../images/UT_Buff/'+icon;image.alt=label;image.draggable=false;const value=document.createElement('b');value.textContent=key==='hp'?parameters.currentHp+'/'+parameters.hp:parameters[key];stat.append(image,value);stats.append(stat);
+  }
+  details.append(stats);
+ }
+ slot.append(details);return slot;
 }

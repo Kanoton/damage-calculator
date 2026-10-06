@@ -302,6 +302,36 @@ await expect(slots.nth(1)).toHaveAttribute('data-character-id','1');await expect
  await expect(slots.nth(0)).toHaveAttribute('data-character-id','3');await expect(slots.nth(3)).toHaveAttribute('data-character-id','');await expect(slots.nth(2)).toHaveAttribute('data-character-id','4');
 });
 
+test('07 skill: party levels are independent and self stats stay linked after dragging',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'16');
+ await page.locator('#selected-character-portrait').click();
+ const atk=page.locator('#selected-character-atk');await atk.fill('7');await atk.dispatchEvent('change');
+ const hp=page.locator('#selected-character-current-hp');await hp.fill('5');await hp.dispatchEvent('change');
+ await page.locator('#selected-party-tab').click();
+ const slot=id=>page.locator('.party-member-slot[data-character-id="'+id+'"]');
+ await page.locator('.character-select[data-id="1"]').click();await page.locator('.character-select[data-id="2"]').click();
+ await expect(slot('1').locator('.party-slot-level')).toHaveText('Lv.0');await expect(slot('1').locator('[data-stat="hp"] b')).toHaveText('9/9');
+ await slot('1').locator('.party-slot-level').click();await expect(slot('1').locator('[data-stat="hp"] b')).toHaveText('11/11');
+ await expect(slot('2').locator('.party-slot-level')).toHaveText('Lv.0');
+ for(let i=0;i<4;i++)await slot('1').locator('.party-slot-level').click();await expect(slot('1').locator('.party-slot-level')).toHaveText('Lv.3');await expect(slot('1').locator('[data-stat="atk"] b')).toHaveText('2');
+ for(let i=0;i<4;i++)await slot('1').locator('.party-slot-level').click({button:'right'});await expect(slot('1').locator('.party-slot-level')).toHaveText('Lv.0');
+ await slot('1').locator('.party-slot-portrait').click();await slot('1').locator('.party-slot-portrait').click({button:'right'});await expect(slot('1').locator('.party-slot-level')).toHaveText('Lv.0');
+ await expect(slot('16').locator('.party-slot-level')).toHaveText('Lv.1');await expect(slot('16').locator('[data-stat="atk"] b')).toHaveText('7');await expect(slot('16').locator('[data-stat="hp"] b')).toHaveText('5/11');
+ const round=await page.locator('#current-round').textContent();
+ await slot('16').dragTo(slot('2'));await expect(slot('16')).toHaveAttribute('data-slot','3');await expect(slot('2')).toHaveAttribute('data-slot','1');await expect(slot('16').locator('.party-slot-order')).toHaveText('3rd自分');
+ await slot('16').locator('.party-slot-level').click();await expect(slot('16').locator('.party-slot-level')).toHaveText('Lv.2');await expect(slot('16').locator('[data-stat="atk"] b')).toHaveText('9');
+ await slot('16').click({button:'right'});await expect(slot('16')).toHaveCount(1);
+ await page.locator('#selected-self-tab').click();await expect(page.locator('#selected-character-level')).toHaveText('Lv.2');await expect(atk).toHaveValue('9');await expect(hp).toHaveValue('5');
+ const def=page.locator('#selected-character-def');await def.fill('4');await def.dispatchEvent('change');
+ await page.locator('#selected-party-tab').click();await expect(slot('16').locator('[data-stat="def"] b')).toHaveText('4');
+ await slot('1').dragTo(page.locator('.party-member-slot[data-slot="4"]'));await expect(slot('1')).toHaveAttribute('data-slot','4');await expect(page.locator('.party-member-slot[data-slot="2"]')).toHaveAttribute('data-character-id','');
+ await page.locator('.character-select[data-id="3"]').click();await expect(slot('3')).toHaveAttribute('data-slot','2');
+ await slot('1').click({button:'right'});await expect(slot('1')).toHaveCount(0);await page.locator('.character-select[data-id="1"]').click();await expect(slot('1').locator('.party-slot-level')).toHaveText('Lv.0');
+ await page.locator('.character-select[data-id="16"]').click();await expect(slot('16')).toHaveCount(1);
+ await expect(page.locator('#current-round')).toHaveText(round);
+ await page.locator('#selected-self-tab').click();await page.locator('.character-select[data-id="2"]').click();await expect(slot('2')).toHaveAttribute('data-slot','3');await expect(slot('2').locator('.party-slot-order')).toHaveText('3rd自分');await expect(page.locator('.party-member-slot[data-slot="1"]')).toHaveAttribute('data-character-id','');
+});
+
 test('07 skill: self and 2x2 party preserve the exact outer frame and personal controls',async({page})=>{
  await page.goto('/07_skill/');await selectCharacter(page,'16');
  const frame=page.locator('#selected-character');
