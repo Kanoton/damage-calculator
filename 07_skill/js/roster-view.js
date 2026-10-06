@@ -29,8 +29,8 @@ function createRosterSkillView(enemy,displayName,skill,isOpen,targets,assignImag
 }
 
 function createRosterCharacterStatusControl(enemy,displayName,config){
- const field=document.createElement('span');field.className='roster-character-status roster-status-'+config.key;
- const button=document.createElement('button');button.type='button';button.className='roster-status-button';button.disabled=!!enemy.defeated;
+ const field=document.createElement('span');field.className='roster-mark roster-character-status roster-status-'+config.key;
+ const button=document.createElement('button');button.type='button';button.className='roster-mark-button roster-status-button';button.disabled=!!enemy.defeated;
  const value=config.stack?Math.max(0,Number(enemy[config.key])||0):Boolean(enemy[config.key]);
  button.setAttribute('aria-label',displayName+'の'+config.label+(config.stack?'を増やす':'：'+(value?'オン':'オフ')));
  if(!config.stack)button.setAttribute('aria-pressed',String(value));button.title=config.label+(config.stack?'：左クリックで＋1、右クリックで−1':'：クリックで切り替え');

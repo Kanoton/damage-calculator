@@ -233,3 +233,8 @@ This section supersedes older manual-only CT and placeholder-control notes above
 - Dorothy: True Self toggle, UT_Buff_304.png, gives ATK +1 until turn end. Skill at Warmth 5 snapshots current DEF (including existing modifiers) as additional ATK for the turn; subsequent edits do not alter the snapshot. Warmth is not automatically consumed by this requested workflow.
 - Hanna: Doll Making 0..7, UT_Buff_305_1.png, changes to Doll Complete/UT_Buff_305_Awake.png at 7. Float skill grants MOVE +2 until turn end. Protect Friend toggle, UT_Platform_306.png, adds damage reduction 1 while enabled.
 - Requested character icon mappings are in the canonical status CSV and identical 07 fallback. Weakness, Investigation Target, Erosion, Fan and permanent Fan reduction live on monster instance objects and are included in existing roster undo snapshots.
+
+## Monster status control visibility and layout
+
+- Weakness controls appear only with Moses (24), Investigation Target only with Bonnie (27), Erosion only with Sykes (29), and Fan only with KAngel (101). Switching characters hides the controls without removing their state, effects, or Fan counts; Ame retains shared Fan combat effects without the Fan toggle UI.
+- These controls sit directly after Mark in each monster name, sharing the Mark field/button dimensions (22px button, 20px image, 13px stack count). Status clicks do not register combat targets or trigger the name button. Normal Mark remains available as before.

@@ -220,27 +220,48 @@ test('07 skill: Z3000 kill reduces CT two exactly once and undo restores the kil
  await page.locator('#roster-undo').click();await expect(target(0)).not.toHaveClass(/defeated/);await expect(page.locator('#selected-character-ct')).toHaveText('CT 0 / 4');await expect(page.getByLabel('モンスター撃破数の数')).toHaveValue('0');
 });
 
-test('07 skill: persistent monster statuses survive turn end and weakness zeros opponent dice',async({page})=>{
- const cards=await prepareSherryTargets(page);await selectCharacter(page,'24');const card=cards.first();
+
+test('07 skill: persistent monster statuses show only for their owner and weakness zeros opponent dice',async({page})=>{
+ const cards=await prepareSherryTargets(page);const card=cards.first();await selectCharacter(page,'24');
  await page.getByRole('button',{name:'弱点反撃を発動'}).click();await page.locator('.role-tab[data-role="map"]').click();await card.locator('.roster-select').click();
  await expect(card.locator('.roster-status-weakness button')).toHaveAttribute('aria-pressed','true');
- await card.locator('.roster-status-investigationTarget button').click();await card.locator('.roster-status-erosionStacks button').click();await card.locator('.roster-status-erosionStacks button').click();
- await card.locator('.roster-select').click();await expect(page.locator('#damageAdd1')).toHaveValue('2');
+ await selectCharacter(page,'27');await page.locator('.role-tab[data-role="map"]').click();await card.locator('.roster-status-investigationTarget button').click();
+ await selectCharacter(page,'29');await page.locator('.role-tab[data-role="map"]').click();await card.locator('.roster-status-erosionStacks button').click();await card.locator('.roster-status-erosionStacks button').click();
+ await selectCharacter(page,'24');await page.locator('.role-tab[data-role="map"]').click();await card.locator('.roster-select').click();await expect(page.locator('#damageAdd1')).toHaveValue('2');
  const attack=page.locator('.mode-content[data-role="attack"]'),defense=page.locator('.mode-content[data-role="defense"]');
  await expect(attack.locator('.damage-table thead tr:last-child th')).toHaveText(['0','0','0','0','0','0']);
  const row=await attack.locator('.damage-table tbody tr').first().locator('td').allTextContents();expect(new Set(row).size).toBe(1);
  await page.locator('.role-tab[data-role="defense"]').click();await expect(defense.locator('.defense-choice-die')).toHaveText(['0','0','0','0','0','0']);
  const diceCells=await defense.locator('.damage-table tbody tr').evaluateAll(rows=>rows.map((row,index)=>row.querySelectorAll('th')[index===0?1:0].textContent));expect(diceCells).toEqual(['0','0','0','0','0','0']);
- await page.locator('#turn-end').click();await expect(card.locator('.roster-status-weakness button')).toHaveAttribute('aria-pressed','true');await expect(card.locator('.roster-status-investigationTarget button')).toHaveAttribute('aria-pressed','true');await expect(card.locator('.roster-status-erosionStacks strong')).toHaveText('2');
- await page.locator('.role-tab[data-role="map"]').click();await card.locator('.roster-status-weakness button').click();
- await expect(attack.locator('.damage-table thead tr:last-child th')).toHaveText(['1','2','3','4','5','6']);
- await selectCharacter(page,'27');await page.getByRole('button',{name:'ミッション：インシークレットを発動'}).click();await page.locator('.role-tab[data-role="map"]').click();await card.locator('.roster-select').click();
- await expect(card.locator('.roster-status-investigationTarget button')).toHaveAttribute('aria-pressed','true');
- await selectCharacter(page,'14');await page.getByRole('button',{name:'桜裂空斬を発動'}).click();await page.locator('.role-tab[data-role="map"]').click();await card.locator('.roster-select').click();
- await expect(card.locator('input[aria-label$="の残りHP"]')).toHaveValue('1');
- await page.locator('#roster-undo').click();await expect(card.locator('input[aria-label$="の残りHP"]')).toHaveValue('5');await expect(card.locator('.roster-status-erosionStacks strong')).toHaveText('2');
+ await page.locator('#turn-end').click();await expect(card.locator('.roster-status-weakness button')).toHaveAttribute('aria-pressed','true');
+ await page.locator('.role-tab[data-role="map"]').click();await card.locator('.roster-status-weakness button').click();await expect(attack.locator('.damage-table thead tr:last-child th')).toHaveText(['1','2','3','4','5','6']);
+ await selectCharacter(page,'27');await expect(card.locator('.roster-status-investigationTarget button')).toHaveAttribute('aria-pressed','true');
+ await page.getByRole('button',{name:'ミッション：インシークレットを発動'}).click();await page.locator('.role-tab[data-role="map"]').click();await card.locator('.roster-select').click();
+ await selectCharacter(page,'14');await expect(card.locator('.roster-character-status')).toHaveCount(0);
+ await page.getByRole('button',{name:'桜裂空斬を発動'}).click();await page.locator('.role-tab[data-role="map"]').click();await card.locator('.roster-select').click();await expect(card.locator('input[aria-label$="の残りHP"]')).toHaveValue('1');
+ await page.locator('#roster-undo').click();await expect(card.locator('input[aria-label$="の残りHP"]')).toHaveValue('5');
+ await selectCharacter(page,'29');await expect(card.locator('.roster-status-erosionStacks strong')).toHaveText('2');
 });
 
+test('07 skill: character-only monster controls share Mark placement and size and preserve hidden values',async({page})=>{
+ const cards=await prepareSherryTargets(page),card=cards.first();
+ for(const [id,key] of [['24','weakness'],['27','investigationTarget'],['29','erosionStacks'],['101','fan']]){
+  await selectCharacter(page,id);await page.locator('.role-tab[data-role="map"]').click();
+  await expect(card.locator('.roster-character-status')).toHaveCount(1);
+  const field=card.locator('.roster-status-'+key),button=field.locator('button'),mark=card.locator('.roster-mark:not(.roster-character-status)');
+  await expect(card.locator('.monster-name-text > .roster-status-'+key)).toHaveCount(1);
+  const sizes=await Promise.all([button,mark.locator('button')].map(x=>x.evaluate(el=>({w:el.getBoundingClientRect().width,h:el.getBoundingClientRect().height}))));expect(sizes[0]).toEqual(sizes[1]);
+  const icons=await button.locator('img').count();if(icons)await expect(button.locator('img')).toHaveCSS('width','20px');
+  await button.click();
+  // A status click does not register the monster as a combat target or switch tabs.
+  await expect(page.locator('.mode-content[data-role="map"]')).toBeVisible();
+  await expect(card).not.toHaveClass(/(?:^|\s)selected(?:\s|$)/);
+  await selectCharacter(page,'1');await expect(card.locator('.roster-character-status')).toHaveCount(0);
+  await selectCharacter(page,id);
+  if(key==='erosionStacks')await expect(field.locator('strong')).toHaveText('1');else await expect(button).toHaveAttribute('aria-pressed','true');
+ }
+ await selectCharacter(page,'102');await expect(card.locator('.roster-character-status')).toHaveCount(0);
+});
 test('07 skill: fans include defeated monsters and both attack penalties persist without repeated stacking',async({page})=>{
  const cards=await prepareSherryTargets(page);await selectCharacter(page,'101');
  await page.locator('.role-tab[data-role="map"]').click();
