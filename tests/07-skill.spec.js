@@ -304,9 +304,11 @@ await expect(slots.nth(1)).toHaveAttribute('data-character-id','1');await expect
 
 test('07 skill: self and 2x2 party preserve the exact outer frame and personal controls',async({page})=>{
  await page.goto('/07_skill/');await selectCharacter(page,'16');
- const frame=page.locator('#selected-character'),before=await frame.boundingBox();
+ const frame=page.locator('#selected-character');
+ const frameBounds=()=>frame.evaluate(el=>{const r=el.getBoundingClientRect();return {x:r.x+window.scrollX,y:r.y+window.scrollY,width:r.width,height:r.height};});
+ const before=await frameBounds();
  const atk=page.locator('#selected-character-atk');await atk.fill('7');await atk.dispatchEvent('change');
- await page.locator('#selected-party-tab').click();const partyBounds=await frame.boundingBox();expect(partyBounds).toEqual(before);
+ await page.locator('#selected-party-tab').click();const partyBounds=await frameBounds();expect(partyBounds).toEqual(before);
  const slots=page.locator('#selected-party-grid .party-member-slot'),bounds=await slots.evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {x:r.x,y:r.y,w:r.width,h:r.height};}));
  expect(bounds[0].y).toBe(bounds[1].y);expect(bounds[2].y).toBe(bounds[3].y);expect(bounds[0].x).toBe(bounds[2].x);expect(bounds[1].x).toBe(bounds[3].x);expect(bounds[1].x).toBeGreaterThan(bounds[0].x);expect(bounds[2].y).toBeGreaterThan(bounds[0].y);
  await page.locator('.character-select[data-id="1"]').click();await page.locator('#selected-self-tab').click();await expect(atk).toHaveValue('7');await expect(page.locator('#selected-character-portrait')).toBeVisible();
