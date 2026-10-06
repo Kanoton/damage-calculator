@@ -56,7 +56,7 @@ const CHARACTER_ABILITY_RULES={
   modifiers:[{target:'atk',formula:'per_stack',source:'吸収した影',value:1}]
  },
  '28':{
-  activeSkills:[{key:'active',label:"インターセプトタックル",cooldown:3,target:'monster',effects:[{type:'modify_monster_def',value:-2,durationTurns:2},{type:'modify_stat',target:'self',stat:'atk',value:2,durationTurns:2}]}],
+  activeSkills:[{key:'active',label:"インターセプトタックル",cooldown:3,target:'monster',multipleTargets:true,effects:[{type:'modify_monster_def',value:-2,durationTurns:2},{type:'modify_stat',target:'self',stat:'atk',value:2,durationTurns:2}]}],
   controls:[{key:'エリア拒止通過',type:'toggle'}],
   modifiers:[{target:'atk',formula:'fixed',value:2,when:{key:'エリア拒止通過',equals:1}}]
  },

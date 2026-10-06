@@ -69,7 +69,7 @@ Key behavior:
 - 25 Mamushi: Awakening 0-8. At 8, icon automatically changes to True Dragon and ATK +4 applies automatically. No separate True Dragon toggle. Below 8 reverts both.
 - 26 Sumikage: absorbed Shadow count -> ATK +1 each.
 - 27 Bonnie: the currently selected attack-target monster's Mark stacks are the source of all Mark-based bonuses. Mark >=1 automatically gives ATK +3; while the manual Stealth toggle is active, add that target monster's Mark stack count to ATK. Do not create a Bonnie-side Mark count or a manual 'marked target' toggle. Active Mission: In Secret manually targets a monster and adds Mark +1; Star Coin/card/event rewards are not simulated.
-- 28 Rinrin: Area Denial passage -> ATK +2. Active Intercept Tackle manually targets a monster; the target gets DEF -2 and Rinrin gets ATK +2 for 2 turns. Range/movement legality remains manual.
+- 28 Rinrin: Area Denial passage -> ATK +2. Active Intercept Tackle manually selects multiple monster instances with toggle clicks and OK beside Cancel. Each selected monster gets DEF -2, while Rinrin gets ATK +2 once per confirmation regardless of target count. After one turn-end click both changes remain; after the second they expire, preserving independent manual/passive modifiers. Cancellation changes no stats or CT; a single undo restores the entire batch and CT. Range/movement legality remains manual.
 - 103 Jill: Cocktail attack/defense cards, max 3 each -> corresponding ATK/DEF +1 each.
 - 104 Dorothy: Warmth 0-5 -> DEF +1 each.
 - 106 Tachibana Sherry: Deduction Time 0-4 -> ATK +1 each; turn end -1.
@@ -209,6 +209,6 @@ Use PR history for exact diffs/rationale when touching the same areas.
 
 ## Monster target selection scope review
 
-- Only Sherry currently enables `multipleTargets` in active-skill metadata. Other implemented targeted skills retain immediate single-click confirmation.
-- Rinrin's source description affects all monsters passed during the tackle; her current manual DEF -2 target implementation remains single-target and needs a separate multiple-target update if requested.
+- Sherry and Rinrin enable `multipleTargets` in active-skill metadata. Other implemented targeted skills retain immediate single-click confirmation.
+- Rinrin's source description affects all monsters passed during the tackle; her manual DEF -2 target implementation now supports multiple targets. The self ATK +2 is applied once, and existing two-turn effect timers remove only these skill modifiers after two turn-end clicks.
 - Pandaman's area taunt and Lulu's area movement reduction are not simulated. Luka's passage damage, Megas's random/area damage, Sykes's zone effects, and Bonnie's investigation phases also have multi-monster scope, but those effects are not the existing single-target active-skill selection flow. Do not claim Sherry is the only multi-monster ability in the game.
