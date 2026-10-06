@@ -121,3 +121,12 @@ function createCharacterAbilityChoiceView(key,option,icon,onCycle){
  button.append(icon,document.createTextNode(option.label));button.addEventListener('click',onCycle);
  return button;
 }
+
+function createPartyMemberView(row,index){
+ const slot=document.createElement('button');slot.type='button';slot.className='party-member-slot';slot.dataset.slot=String(index+1);slot.dataset.characterId=row?.id||'';
+ slot.setAttribute('aria-label',(index+1)+'番目'+(index===0?'（自分）':'')+'：'+(row?.name||'未登録')+(index>0&&row?'。右クリックで解除':''));
+ slot.title=index===0?'自分のキャラクター':row?'右クリックでPT登録を解除':'キャラ一覧からクリックで登録';
+ const order=document.createElement('span');order.className='party-slot-order';order.textContent=['1st','2nd','3rd','4th'][index];if(index===0){const self=document.createElement('small');self.textContent='自分';order.append(self);}slot.append(order);
+ if(row){const image=document.createElement('img');image.src='../images/character/'+encodeURIComponent(row.images);image.alt=row.name;slot.append(image);}
+ const name=document.createElement('strong');name.className='party-slot-name';name.textContent=row?.name||'未登録';slot.append(name);return slot;
+}

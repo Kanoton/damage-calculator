@@ -6,6 +6,8 @@
  const conditionsBox=document.getElementById('selected-character-conditions');
  const ownedBox=document.querySelector('.selected-character-chips');
  const hpInput=document.getElementById('selected-character-current-hp');
+ const partyGrid=document.getElementById('selected-party-grid'),selfTab=document.getElementById('selected-self-tab'),partyTab=document.getElementById('selected-party-tab');
+ const partyMembers=[null,null,null];let partyMode=false;
  const STATUS_ICON_SNAPSHOT="group,effect_key,input_kind,icon_file,map_id,atk,def,move,damage_reduce,condition\r\nスタック,コイン,number,UT_Buff/Coin.png\r\nスタック,マーク,number,UT_Buff/UT_Buff_Lock.png\r\nスタック,ヒール,number,UT_Buff/UT_Buff_Heal.png\r\nスタック,チャージ,number,UT_Buff/UT_Buff_Charge.png\r\nスタック,改造,number,UT_Buff/UT_Buff_Gaizao.png\r\nスタック,ジェントル・フレイム,number,UT_Buff/UT_Buff_1049.png\r\nスタック,反撃,number,UT_Buff/UT_Buff_Counter.png\r\nスタック,マインド,number,chip_icon/201_スタンガン.png\r\nスタック,罪証,number,UT_Buff/UT_Buff_Crime.png\r\nスタック,精確無比,number,UT_Buff/UT_Buff_125_Passive.png\r\nスタック,エネルギー保存,number,UT_Buff/UT_Buff_113_Passive.png\r\nスタック,剣気,number,UT_Buff/UT_Buff_115.png\r\nスタック,累計移動ポイント,number,UT_Buff/UT_Buff_117_Passive.png\r\nスタック,スターライト,number,UT_Buff/UT_Buff_StarLight.png\r\nスタック,覚醒,number,UT_Buff/UT_Buff_1026.png\r\n状態,真龍,checkbox,UT_Buff/UT_Buff_1261204.png\r\nスタック,温もり,number,UT_Buff/UT_Buff_304_piano.png\r\n所持数,スターコイン,number,UT_Buff/Coin.png\r\n蓄積ボーナス,優雅の羽ボーナス,number,chip_icon/021_優雅の羽.png\r\n蓄積ボーナス,ギガントアンカーボーナス,number,chip_icon/101_ギガントアンカー.png\r\n蓄積ボーナス,呪いの剣ボーナス,number,chip_icon/111_呪いの剣.png\r\n蓄積ボーナス,反撃による永続ボーナス,number,UT_Buff/UT_Buff_Counter.png\r\n蓄積ボーナス,鴛鴦連理解除ボーナス,number,UT_Buff/UT_Buff_1047.png\r\n蓄積ボーナス,マインド増加ボーナス,number,chip_icon/207_原初の意識.png\r\n蓄積ボーナス,マインド減少ボーナス,number,chip_icon/207_原初の意識.png\r\nマップ固有,真犯人,checkbox,UT_Buff/UT_Buff_1067.png,MAP0104,2,0,2,2,\r\nマップ固有,逆鱗,number,UT_Buff/UT_Buff_1026.png,MAP0005,2,0,0,2,\r\nマップ固有,金鱗,number,UT_Buff/UT_Buff_1027.png,MAP0005,1,1,0,0,\r\nマップ固有,孔雀の羽ばたき,number,UT_Buff/UT_Buff_1046.png,MAP0007,2,2,0,0,excess_over_peacock\r\n追加素材,深層改造,未設定,UT_Buff/UT_Buff_1033.png\r\n追加素材,戦の呪い,未設定,UT_Buff/UT_Buff_1041.png\r\nマップ固有,勇往邁進,number,UT_Buff/UT_Buff_CourageUp.png,MAP0007,2,0,0,2,\r\nキャラクター固有,前ターン被ダメなし,checkbox,UT_Buff/UT_Buff_ConcealedPresence.png\nキャラクター固有,モンスター撃破数,number,UT_Buff/UT_Buff_109_Break.png\nキャラクター固有,ファイアウォール,checkbox,UT_Buff/UT_Buff_120.png\nキャラクター固有,狐光,number,UT_Buff/UT_Buff_124.png\nキャラクター固有,潜伏,checkbox,UT_Buff/UT_Buff_127.png\nキャラクター固有,エリア拒止通過,checkbox,UT_Buff/UT_Buff_128_Skill.png\nキャラクター固有,カクテル攻撃カード,number,UT_Buff/UT_Buff_303_piano.png\nキャラクター固有,カクテル防御カード,number,UT_Buff/UT_Buff_303_piano.png\nキャラクター固有,推理タイム,number,UT_Buff/UT_Buff_306.png\nキャラクター固有,自己主張なし攻撃補正,number,UT_Buff/UT_Buff_105_Break.png\r\nキャラクター固有,自己主張なし防御補正,number,UT_Buff/UT_Buff_105_Break.png\r\nキャラクター固有,自己主張なし移動補正,number,UT_Buff/UT_Buff_105_Break.png\r\nキャラクター固有,ジュジュシールド,checkbox,UT_Buff/UT_Buff_Shield.png\nキャラクター固有,ライフ・ブック,number,UT_Buff/UT_Buff_121_Passive.png\nキャラクター固有,フェーズ・ワン,checkbox,UT_Buff/UT_Event_12702.png\nキャラクター固有,フェーズ・ツー,checkbox,UT_Buff/UT_Event_12703.png\nキャラクター固有,フェーズ・スリー,checkbox,UT_Buff/UT_Event_12704.png\nキャラクター固有,真相解明,checkbox,UT_Buff/UT_Event_12705.png\nキャラクター固有,ファン,number,UT_Buff/UT_Buff_301.png\nキャラクター固有,愛,number,UT_Buff/UT_Buff_302_Passive.png\nキャラクター固有,一生を変えるカクテル,checkbox,UT_Buff/UT_Buff_303.png\nキャラクター固有,本当の私,checkbox,UT_Buff/UT_Buff_304.png\nキャラクター固有,人形制作,number,UT_Buff/UT_Buff_305_1.png\nキャラクター固有,人形完成,checkbox,UT_Buff/UT_Buff_305_Awake.png\nキャラクター固有,親友を守る,checkbox,UT_Buff/UT_Platform_306.png\n";
  let statusIcons=new Map(),mapKeywords=[];
  let currentOpponent=null;
@@ -317,6 +319,46 @@
   if(!suppressChipClick)return;
   event.preventDefault();event.stopImmediatePropagation();suppressChipClick=false;
  },true);
+
+ function renderParty(){
+  partyGrid.replaceChildren();
+  const slots=[selectedCharacter?.id||null,...partyMembers];
+  slots.forEach((id,index)=>{
+   const row=characters.find(item=>String(item.id)===String(id));
+   const slot=createPartyMemberView(row,index);
+   if(index>0)slot.addEventListener('contextmenu',event=>{event.preventDefault();removePartyMember(id);});
+   partyGrid.append(slot);
+  });
+  const registered=new Set(slots.filter(Boolean).map(String));
+  root.querySelectorAll('.character-select').forEach(button=>{
+   const own=String(button.dataset.id)===String(selectedCharacter?.id);
+   button.setAttribute('aria-pressed',String(partyMode?registered.has(String(button.dataset.id)):own));
+   const row=characters.find(item=>String(item.id)===String(button.dataset.id));
+   button.setAttribute('aria-label',(row?.name||'キャラクター')+(partyMode?'をPTに登録':'を選択'));
+  });
+ }
+ function setPartyMode(active){
+  partyMode=Boolean(active&&selectedCharacter);selectedPanel.classList.toggle('is-party-view',partyMode);partyGrid.hidden=!partyMode;
+  selfTab.setAttribute('aria-selected',String(!partyMode));partyTab.setAttribute('aria-selected',String(partyMode));selfTab.tabIndex=partyMode?-1:0;partyTab.tabIndex=partyMode?0:-1;
+  listStatus.textContent=partyMode?'PT登録：キャラをクリックで追加、右クリックで解除（自分を含めて最大4人）':'';
+  renderParty();
+ }
+ function registerPartyMember(row){
+  if(!selectedCharacter)return;
+  const id=String(row.id);
+  if(id===String(selectedCharacter.id)||partyMembers.some(member=>String(member)===id)){listStatus.textContent=row.name+'は登録済みです。';return;}
+  const empty=partyMembers.indexOf(null);
+  if(empty<0){listStatus.textContent='PTは自分を含めて4人までです。右クリックでメンバーを解除できます。';return;}
+  partyMembers[empty]=row.id;renderParty();listStatus.textContent=row.name+'を'+(empty+2)+'番目に登録しました。右クリックで解除できます。';
+ }
+ function removePartyMember(id){
+  if(id===null||id===undefined)return;
+  const index=partyMembers.findIndex(member=>String(member)===String(id));if(index<0)return;
+  const row=characters.find(item=>String(item.id)===String(id));partyMembers[index]=null;renderParty();listStatus.textContent=(row?.name||'メンバー')+'のPT登録を解除しました。';
+ }
+ selfTab.addEventListener('click',()=>setPartyMode(false));partyTab.addEventListener('click',()=>setPartyMode(true));
+ for(const tab of [selfTab,partyTab])tab.addEventListener('keydown',event=>{if(!['ArrowUp','ArrowDown','Home','End'].includes(event.key))return;event.preventDefault();const target=event.key==='Home'?selfTab:event.key==='End'?partyTab:tab===selfTab?partyTab:selfTab;target.click();target.focus();});
+
  function renderSelectedCharacter(){
   if(!selectedCharacter)return;
   selectedPanel.hidden=false;
@@ -326,10 +368,10 @@
   document.getElementById('selected-character-portrait').setAttribute('aria-label',selectedCharacter.name+' Lv.'+state().level+'：クリックでレベルアップ、右クリックでレベルダウン');
   renderOwned();renderConditions();updateStats();
   root.querySelectorAll('.character-select').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.id===selectedCharacter.id)));
-  updateChipListSelection();
+  updateChipListSelection();renderParty();
   window.dispatchEvent(new Event('character-evidence-change'));
  }
- function selectCharacter(row){selectedCharacter=row;renderSelectedCharacter();window.dispatchEvent(new Event('character-selection-change'));}
+ function selectCharacter(row,openParty=false){for(let i=0;i<partyMembers.length;i++)if(String(partyMembers[i])===String(row.id))partyMembers[i]=null;selectedCharacter=row;renderSelectedCharacter();window.dispatchEvent(new Event('character-selection-change'));if(openParty)setPartyMode(true);}
  function changeCharacterLevel(delta){
   if(!selectedCharacter)return;
   const oldLevel=state().level,oldMax=calculate().hp,oldCurrent=state().currentHp;
@@ -400,7 +442,8 @@
    if(folder==='character_list'){
     button.className='character-select';button.setAttribute('aria-label',row.name+'を選択');button.setAttribute('aria-pressed','false');
     if(characterSkills.has(String(row.id))){button.setAttribute('aria-describedby','character-skill-tooltip');button.addEventListener('mouseenter',()=>skillTooltipController.show(button,row));button.addEventListener('mouseleave',skillTooltipController.scheduleHide);button.addEventListener('focus',()=>skillTooltipController.show(button,row));button.addEventListener('blur',skillTooltipController.scheduleHide);button.addEventListener('wheel',event=>{if(skillTooltipController.element.hidden)return;const previous=skillTooltipController.element.scrollTop;skillTooltipController.element.scrollTop+=event.deltaY;if(skillTooltipController.element.scrollTop!==previous)event.preventDefault();},{passive:false});}
-    button.addEventListener('click',()=>selectCharacter(row));
+    button.addEventListener('click',()=>{if(partyMode)registerPartyMember(row);else selectCharacter(row,true);});
+    button.addEventListener('contextmenu',event=>{if(!partyMode)return;event.preventDefault();removePartyMember(row.id);});
    }else{
     button.className='chip-select';button.dataset.name=row.name;button.title=row.name+'\n'+row.effect;button.setAttribute('aria-label',row.name+'：'+row.effect+'。取得する');button.setAttribute('aria-pressed',String(Boolean(selectedCharacter&&state().chips.includes(row.id))));
     button.addEventListener('click',()=>{

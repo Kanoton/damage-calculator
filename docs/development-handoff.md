@@ -1,6 +1,6 @@
 # Development Handoff
 
-Last updated: 2026-10-06
+Last updated: 2026-10-07
 
 This is the durable handoff for continuing development, especially `07_skill`. On a new chat or machine, read this file, current `main`, and recent PRs before changing code.
 
@@ -238,3 +238,11 @@ This section supersedes older manual-only CT and placeholder-control notes above
 
 - Weakness controls appear only with Moses (24), Investigation Target only with Bonnie (27), Erosion only with Sykes (29), and Fan only with KAngel (101). Switching characters hides the controls without removing their state, effects, or Fan counts; Ame retains shared Fan combat effects without the Fan toggle UI.
 - These controls sit directly after Mark in each monster name, sharing the Mark field/button dimensions (22px button, 20px image, 13px stack count). Status clicks do not register combat targets or trigger the name button. Normal Mark remains available as before.
+
+## PT registration (first stage)
+
+- The existing selected-character outer frame retains its exact full width and 118px height. Its rightmost 50px contains vertical Self/PT tabs; existing self controls retain their behavior inside the remaining space.
+- Clicking a character while Self mode is selected sets the player's character through the original selection path and then automatically opens PT mode. Initial default Mimi initialization stays in Self mode. PT mode reuses the same character list for registration and preserves hover abilities and keyboard activation.
+- PT contains a fixed 2x2 grid: 1st is the current self character; 2nd/3rd/4th are up to three optional members. Duplicate IDs (including self) and a fourth additional member are rejected. Registration fills the first empty slot. Right-click either a registered list character or its PT slot to remove it; self cannot be removed as a PT member.
+- PT registration/removal does not select a different self character, alter its level/chips/stats/CT, or fire the map character-selection event. Switching self to an existing PT member removes that member from its previous PT slot and updates 1st while preserving the other members.
+- PT is page-session registration only for now; it does not yet drive ally skill targets, party stats, persistence, or networking.
