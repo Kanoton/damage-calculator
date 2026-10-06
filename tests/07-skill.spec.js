@@ -1,9 +1,72 @@
 const { test, expect } = require('@playwright/test');
 
+async function prepareSherryTargets(page){
+ await page.goto('/07_skill/');await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-tab-monsters').click();
+ const mapSelect=page.locator('#mp-map-select');
+ for(const option of await mapSelect.locator('option').all()){
+  await mapSelect.selectOption(await option.getAttribute('value'));await mapSelect.dispatchEvent('change');
+  if(await page.locator('#mp-monster-list .mp-monster:visible').count())break;
+ }
+ const choices=page.locator('#mp-monster-list .mp-monster:visible');let found=false;
+ for(let i=0;i<await choices.count();i++){
+  await page.locator('#roster-clear').click();await choices.nth(i).click();
+  if(Number(await page.locator('#map-roster-list input[aria-label$="の残りHP"]').first().inputValue())<5)continue;
+  await choices.nth(i).click();await choices.nth(i).click();found=true;break;
+ }
+ expect(found).toBe(true);
+ await selectCharacter(page,'106');
+ const cards=page.locator('#map-roster-list .roster-card');
+ for(let i=0;i<3;i++){const hp=cards.nth(i).locator('input[aria-label$="の残りHP"]');await hp.fill('5');await hp.dispatchEvent('change');}
+ return cards;
+}
+
+test('07 skill: Sherry toggles multiple targets and applies damage once only after OK',async({page})=>{
+ const cards=await prepareSherryTargets(page),skill=page.getByRole('button',{name:'怪力魔法を発動'}),ok=page.locator('#character-skill-target-ok'),ct=page.locator('#selected-character-ct');
+ await skill.click();await expect(ok).toBeVisible();await expect(ok).toBeDisabled();
+ await page.locator('.role-tab[data-role="map"]').click();
+ const target=i=>cards.nth(i).locator('.roster-select'),hp=i=>cards.nth(i).locator('input[aria-label$="の残りHP"]');
+ await target(0).click();await target(1).click();
+ await expect(target(0)).toHaveAttribute('aria-pressed','true');await expect(cards.nth(0)).toHaveClass(/is-skill-target-selected/);
+ await target(0).click();await expect(target(0)).toHaveAttribute('aria-pressed','false');
+ await target(2).focus();await target(2).press('Enter');
+ for(let i=0;i<3;i++)await expect(hp(i)).toHaveValue('5');await expect(ct).toHaveText(/^CT 0 \/ \d+$/);
+ await expect(page.locator('#character-skill-target-message')).toContainText('2体選択中');
+ await ok.click();await expect(page.locator('#character-skill-target-banner')).toBeHidden();
+ await expect(hp(0)).toHaveValue('5');await expect(hp(1)).toHaveValue('3');await expect(hp(2)).toHaveValue('3');
+ await expect(ct).toHaveText(/^CT 2 \/ \d+$/);await expect(page.locator('.is-skill-target-selected')).toHaveCount(0);
+ await ok.evaluate(button=>button.click());await expect(hp(1)).toHaveValue('3');
+ await page.locator('#roster-undo').click();for(let i=0;i<3;i++)await expect(hp(i)).toHaveValue('5');await expect(ct).toHaveText(/^CT 0 \/ \d+$/);
+});
+
+test('07 skill: Sherry cancellation and removed targets consume no HP or CT',async({page})=>{
+ const cards=await prepareSherryTargets(page),skill=page.getByRole('button',{name:'怪力魔法を発動'}),ok=page.locator('#character-skill-target-ok');
+ await skill.click();await page.locator('.role-tab[data-role="map"]').click();await cards.first().locator('.roster-select').click();
+ await page.locator('#character-skill-target-cancel').click();await expect(page.locator('#character-skill-target-banner')).toBeHidden();
+ await expect(cards.first().locator('input[aria-label$="の残りHP"]')).toHaveValue('5');await expect(page.locator('#selected-character-ct')).toHaveText(/^CT 0 \/ \d+$/);
+ await skill.click();await expect(ok).toBeDisabled();await cards.first().locator('.roster-select').click();
+ await cards.first().locator('.roster-delete').click();await expect(ok).toBeDisabled();await expect(page.locator('#character-skill-target-message')).toContainText('0体選択中');
+ await page.locator('#character-skill-target-cancel').click();await skill.click();
+ await cards.first().locator('.roster-select').click();await cards.first().locator('.roster-remove').click();await expect(ok).toBeDisabled();
+ await selectCharacter(page,'9');await expect(page.locator('#character-skill-target-banner')).toBeHidden();
+ await page.getByRole('button',{name:'引き寄せるを発動'}).click();await expect(ok).toBeHidden();
+});
+
 async function selectCharacter(page,id){
  await page.locator('.role-tab.character-tab').click();
  await page.locator(`.character-select[data-id="${id}"]`).click();
 }
+
+test('07 skill: Sherry batch can defeat one target and damage another',async({page})=>{
+ const cards=await prepareSherryTargets(page);
+ const ids=await Promise.all([0,1].map(i=>cards.nth(i).getAttribute('data-instance-id')));
+ const target0=page.locator(`.roster-card[data-instance-id="${ids[0]}"]`),target1=page.locator(`.roster-card[data-instance-id="${ids[1]}"]`);
+ const hp0=target0.locator('input[aria-label$="の残りHP"]'),hp1=target1.locator('input[aria-label$="の残りHP"]');
+ await hp0.fill('1');await hp0.dispatchEvent('change');
+ await page.getByRole('button',{name:'怪力魔法を発動'}).click();await page.locator('.role-tab[data-role="map"]').click();
+ await cards.nth(0).locator('.roster-select').click();await cards.nth(1).locator('.roster-select').click();await page.locator('#character-skill-target-ok').click();
+ await expect(hp0).toHaveValue('0');await expect(target0).toHaveClass(/defeated/);await expect(hp1).toHaveValue('3');
+ await page.locator('#roster-undo').click();await expect(hp0).toHaveValue('1');await expect(hp1).toHaveValue('5');await expect(page.locator('#selected-character-ct')).toHaveText(/^CT 0 \/ \d+$/);
+});
 
 async function selectChipCategory(page,category){
  await page.locator('#character-chip-tab').click();
@@ -546,11 +609,4 @@ test('07 skill: Chouten fan count and Ame love are manually managed and referenc
  await selectCharacter(page,'102');const love=page.getByLabel('愛の数');await expect(love).toHaveValue('2');await love.fill('4');await love.dispatchEvent('change');
  const ameHp=page.locator('#selected-character-current-hp');await ameHp.fill('1');await ameHp.dispatchEvent('change');const baseMove=Number(await page.locator('#selected-character-move').textContent()),baseMaxHp=Number(await page.locator('#selected-character-hp').textContent());
  await page.getByRole('button',{name:'愛情の過剰摂取を発動'}).click();await expect(page.locator('#selected-character-move')).toHaveText(String(baseMove+4));await expect(love).toHaveValue('0');await expect(love).toHaveAttribute('max','5');await expect(page.locator('#selected-character-hp')).toHaveText(String(baseMaxHp+1));
-});
-
-test('07 skill: Sherry Mighty Magic manually targets a monster and deals 2 damage', async ({ page }) => {
- await page.goto('/07_skill/');await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-tab-monsters').click();
- const mapSelect=page.locator('#mp-map-select');for(const option of await mapSelect.locator('option').all()){await mapSelect.selectOption(await option.getAttribute('value'));await mapSelect.dispatchEvent('change');if(await page.locator('#mp-monster-list .mp-monster:visible').count())break;}
- await page.locator('#mp-monster-list .mp-monster:visible').first().click();const hp=page.locator('#map-roster-list input[aria-label$="の残りHP"]').first(),target=page.locator('#map-roster-list .roster-select').first();const before=Number(await hp.inputValue());
- await selectCharacter(page,'106');await page.getByRole('button',{name:'怪力魔法を発動'}).click();await target.click();if(before>2)await expect(hp).toHaveValue(String(before-2));else await expect(page.locator('#map-roster-list .roster-card').first()).toHaveClass(/defeated/);await expect(page.locator('#selected-character-ct')).toHaveText(/^CT 2 \/ \d+$/);
 });

@@ -1583,6 +1583,12 @@ tbody th {
 .character-skill-target-banner strong{font-size:14px}
 #character-skill-target-cancel{flex:none;padding:5px 9px;border:1px solid #89ae98;border-radius:4px;background:#fff;color:#315a40;font:inherit;cursor:pointer}
 #character-skill-target-cancel:hover{background:#f7fbf8}
+.character-skill-target-actions{display:flex;gap:8px;flex:none}
+#character-skill-target-ok{padding:5px 12px;border:1px solid #39875d;border-radius:4px;background:#39875d;color:#fff;font:inherit;cursor:pointer}
+#character-skill-target-ok[hidden]{display:none}
+#character-skill-target-ok:disabled{opacity:.5;cursor:default}
+.map-roster.is-character-skill-targeting .roster-card.is-skill-target-selected:not(.defeated){border-color:#246d42;box-shadow:0 0 0 3px #39875d;background:#d7efdf}
+.map-roster.is-character-skill-targeting .roster-card.is-skill-target-selected .roster-select{background:#c4e6cf}
 .map-roster.is-character-skill-targeting .roster-card:not(.defeated){border-color:#39875d;box-shadow:0 0 0 2px #b9dcc6;background:#f5fbf7}
 .map-roster.is-character-skill-targeting .roster-card:not(.defeated) .roster-select{cursor:crosshair}
 .map-roster.is-character-skill-targeting .roster-card:not(.defeated) .roster-select:hover{background:#e4f4e9}
