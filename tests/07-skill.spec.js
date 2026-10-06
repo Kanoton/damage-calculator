@@ -58,12 +58,13 @@ async function selectCharacter(page,id){
 
 test('07 skill: Sherry batch can defeat one target and damage another',async({page})=>{
  const cards=await prepareSherryTargets(page);
- const labels=await Promise.all([0,1].map(i=>cards.nth(i).locator('input[aria-label$="の残りHP"]').getAttribute('aria-label')));
- const hp0=page.getByLabel(labels[0],{exact:true}),hp1=page.getByLabel(labels[1],{exact:true});
+ const ids=await Promise.all([0,1].map(i=>cards.nth(i).getAttribute('data-instance-id')));
+ const target0=page.locator(`.roster-card[data-instance-id="${ids[0]}"]`),target1=page.locator(`.roster-card[data-instance-id="${ids[1]}"]`);
+ const hp0=target0.locator('input[aria-label$="の残りHP"]'),hp1=target1.locator('input[aria-label$="の残りHP"]');
  await hp0.fill('1');await hp0.dispatchEvent('change');
  await page.getByRole('button',{name:'怪力魔法を発動'}).click();await page.locator('.role-tab[data-role="map"]').click();
  await cards.nth(0).locator('.roster-select').click();await cards.nth(1).locator('.roster-select').click();await page.locator('#character-skill-target-ok').click();
- await expect(hp0).toHaveValue('0');await expect(page.locator('.roster-card').filter({has:hp0})).toHaveClass(/defeated/);await expect(hp1).toHaveValue('3');
+ await expect(hp0).toHaveValue('0');await expect(target0).toHaveClass(/defeated/);await expect(hp1).toHaveValue('3');
  await page.locator('#roster-undo').click();await expect(hp0).toHaveValue('1');await expect(hp1).toHaveValue('5');await expect(page.locator('#selected-character-ct')).toHaveText(/^CT 0 \/ \d+$/);
 });
 
