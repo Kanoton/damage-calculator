@@ -68,6 +68,52 @@ test('07 skill: Sherry batch can defeat one target and damage another',async({pa
  await page.locator('#roster-undo').click();await expect(hp0).toHaveValue('1');await expect(hp1).toHaveValue('5');await expect(page.locator('#selected-character-ct')).toHaveText(/^CT 0 \/ \d+$/);
 });
 
+
+test('07 skill: Rinrin buffs herself once for multiple targets and expires only skill modifiers after two turn ends',async({page})=>{
+ const cards=await prepareSherryTargets(page);await selectCharacter(page,'28');
+ const ids=await Promise.all([0,1,2].map(i=>cards.nth(i).getAttribute('data-instance-id')));
+ const targets=ids.map(id=>page.locator(`.roster-card[data-instance-id="${id}"]`));
+ const defense=i=>targets[i].locator('input[aria-label$="の防御力"]');
+ for(let i=0;i<3;i++){await defense(i).fill(String(5-i));await defense(i).dispatchEvent('change');}
+ const atk=page.locator('#selected-character-atk'),ct=page.locator('#selected-character-ct'),ok=page.locator('#character-skill-target-ok');
+ await page.getByRole('button',{name:'インターセプトタックルを発動'}).click();
+ await expect(ok).toBeDisabled();await page.locator('.role-tab[data-role="map"]').click();
+ for(const target of targets)await target.locator('.roster-select').click();
+ await targets[2].locator('.roster-select').click();
+ await expect(atk).toHaveValue('2');await expect(ct).toHaveText(/^CT 0 \/ \d+$/);
+ for(let i=0;i<3;i++)await expect(defense(i)).toHaveValue(String(5-i));
+ await ok.click();
+ await expect(atk).toHaveValue('4');await expect(ct).toHaveText(/^CT 3 \/ \d+$/);
+ await expect(defense(0)).toHaveValue('3');await expect(defense(1)).toHaveValue('2');await expect(defense(2)).toHaveValue('3');
+ await page.locator('#selected-character-atk-button').click();await expect(atk).toHaveValue('5');
+ await page.locator('#turn-end').click();
+ await expect(atk).toHaveValue('5');await expect(defense(0)).toHaveValue('3');await expect(defense(1)).toHaveValue('2');
+ await page.locator('#turn-end').click();
+ await expect(atk).toHaveValue('3');for(let i=0;i<3;i++)await expect(defense(i)).toHaveValue(String(5-i));
+ await expect(ct).toHaveText(/^CT 3 \/ \d+$/);
+ await page.locator('#roster-undo').click();
+ await expect(atk).toHaveValue('5');await expect(defense(0)).toHaveValue('3');await expect(defense(1)).toHaveValue('2');
+ await page.locator('#turn-end').click();
+ await expect(atk).toHaveValue('3');await expect(defense(0)).toHaveValue('5');await expect(defense(1)).toHaveValue('4');
+});
+
+test('07 skill: Rinrin cancellation and one undo preserve all targets and a single self bonus',async({page})=>{
+ const cards=await prepareSherryTargets(page);await selectCharacter(page,'28');
+ const defense=cards.first().locator('input[aria-label$="の防御力"]');
+ await defense.fill('5');await defense.dispatchEvent('change');
+ const skill=page.getByRole('button',{name:'インターセプトタックルを発動'}),atk=page.locator('#selected-character-atk'),ct=page.locator('#selected-character-ct');
+ await skill.click();await page.locator('.role-tab[data-role="map"]').click();
+ await cards.nth(0).locator('.roster-select').click();await cards.nth(1).locator('.roster-select').click();
+ await page.locator('#character-skill-target-cancel').click();
+ await expect(defense).toHaveValue('5');await expect(atk).toHaveValue('2');await expect(ct).toHaveText(/^CT 0 \/ \d+$/);
+ await skill.click();await expect(page.locator('#character-skill-target-ok')).toBeDisabled();
+ await cards.nth(0).locator('.roster-select').click();await cards.nth(1).locator('.roster-select').click();
+ await page.locator('#character-skill-target-ok').click();await expect(atk).toHaveValue('4');
+ await page.locator('#roster-undo').click();
+ await expect(defense).toHaveValue('5');await expect(atk).toHaveValue('2');await expect(ct).toHaveText(/^CT 0 \/ \d+$/);
+ await page.locator('#turn-end').click();await page.locator('#turn-end').click();await expect(atk).toHaveValue('2');await expect(defense).toHaveValue('5');
+});
+
 async function selectChipCategory(page,category){
  await page.locator('#character-chip-tab').click();
  await page.locator(`.chip-category-tabs [data-category="${category}"]`).click();
@@ -251,6 +297,7 @@ test('07 skill: Kaisei Bonnie and Rinrin apply targeted monster effects', async 
  const before=Number(await defense.inputValue());
  await page.getByRole('button',{name:'インターセプトタックルを発動'}).click();
  await target.click();
+ await page.locator('#character-skill-target-ok').click();
  await expect(defense).toHaveValue(String(Math.max(0,before-2)));
  await expect(page.locator('#selected-character-atk')).toHaveValue('4');
  await page.locator('#turn-end').click();
