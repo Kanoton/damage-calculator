@@ -1,0 +1,16 @@
+.screen-reader{margin:8px auto;padding:8px 10px;max-width:1420px;background:#fff;border:1px solid #b9bdd3;border-radius:8px;color:#25283a;font-size:13px;box-sizing:border-box}
+.reader-toolbar,.reader-settings{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.screen-reader label{display:inline-flex;justify-content:flex-start;gap:4px;margin:0;transform:none}
+.reader-toolbar strong{margin-right:4px}.reader-toolbar small{font-weight:normal;color:#6d587d}
+.screen-reader button,.screen-reader select,.reader-file-button{border:1px solid #bbc0d2;border-radius:5px;background:#f5f6fc;color:#25283a;padding:5px 8px;font:inherit;cursor:pointer}
+.screen-reader button:disabled{opacity:.5;cursor:default}.screen-reader button:hover:enabled,.reader-file-button:hover{background:#e8eaf8}
+.screen-reader input[type=checkbox]{vertical-align:middle;accent-color:#5a57ac}.reader-file-button input{display:none}
+#reader-status{margin:6px 0 0;min-height:1.3em}.screen-reader summary{cursor:pointer;padding:5px 0;color:#4e4794}
+.reader-settings{margin:5px 0}.reader-help,.reader-training p{margin:5px 0;color:#5c6074;line-height:1.5}
+.reader-content{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(320px,1fr);gap:10px;margin:8px 0}
+#reader-preview{width:100%;height:auto;display:block;background:#171a22;touch-action:none;border-radius:5px}
+#reader-preview.is-selecting{cursor:crosshair;outline:2px solid #8272d9}
+.reader-results{min-width:0;overflow:auto}.reader-results p{margin:0 0 7px}.reader-results table{width:100%;border-collapse:collapse;table-layout:auto;border:0;font-size:12px;white-space:nowrap}
+.reader-results th,.reader-results td{text-align:left;padding:5px 4px;height:auto;font:inherit;border:0;border-bottom:1px solid #e2e3eb}.reader-results th{background:#f2f2fa;font-weight:600}
+.reader-training{border-top:1px solid #e2e3eb;padding-top:4px}.reader-training label{display:inline-block;margin:3px 6px 3px 0}
+@media(max-width:800px){.reader-content{grid-template-columns:1fr}.screen-reader{margin:5px}.reader-results table{font-size:11px}}

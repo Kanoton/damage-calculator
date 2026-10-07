@@ -1,0 +1,42 @@
+name: 08 screen reader browser smoke
+
+on:
+  pull_request:
+    paths:
+      - '08_screen_reader/**'
+      - 'csv/**'
+      - 'images/**'
+      - 'tests/08-screen-reader.spec.js'
+      - 'tests/fixtures/screen-reader/**'
+      - 'scripts/check-07-syntax.js'
+      - 'scripts/build-screen-reader-references.py'
+      - 'package.json'
+      - 'playwright.config.js'
+      - '.github/workflows/08-screen-reader-smoke.yml'
+  push:
+    branches: [main]
+    paths:
+      - '08_screen_reader/**'
+      - 'tests/08-screen-reader.spec.js'
+      - 'tests/fixtures/screen-reader/**'
+      - 'package.json'
+      - '.github/workflows/08-screen-reader-smoke.yml'
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npm run check:08
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:08
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 08-screen-reader-test-results
+          path: test-results/
+          retention-days: 7

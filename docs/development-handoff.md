@@ -20,6 +20,20 @@ This is the durable handoff for continuing development, especially `07_skill`. O
 
 ## Current focus
 
+### 08_screen_reader experimental window capture (2026-10-07)
+
+The user requested a separate `08_` folder to try game-screen reading. `08_screen_reader` is a copy of current `07_skill` with capture/recognition controls; 07 runtime files are unchanged. Read `08_screen_reader/README.md`. getDisplayMedia selects a PC game window; snapshots, image uploads/paste and auto mode feed local recognition. Auto samples about every 1.2 seconds with per-field two-consecutive-frame stabilization; jobs do not overlap. Stop/reset invalidates pending frames. New Game pauses auto and resets character/PT state, not map/monsters.
+
+User-confirmed: party numbers are coins; filled stars give Lv0..3. Chips are unique and never lost within a match. Arrows change chip pages. Only visible information updates; chip observations accumulate per owner without deletion. No image leaves the browser; no OCR/vision service is required.
+
+Experimental recognition uses reference HUD coordinates normalized from the supplied 1536x709 screens. Avatar seeds are Hanna105, Kaisei13, AL21, Sumikage26; self portrait seed Hanna105; large-header seeds Hanna/Kaisei. Users can add avatar/self/header/chip-position references, stored with the game crop under an isolated localStorage key and exported/imported as validated JSON. 90 canonical chip descriptors plus ATM30/card26 game examples and numeric shape references are bundled. Ambiguous/unknown matches stay untouched. Large status screens read ATK/DEF/MOVE; small popup uses the highlighted PT tab. PVE6 is not party Lv. Map events, monsters, hand, CT and skill controls are not recognized.
+
+The small chip popup occludes the self portrait: never train/infer self from that region while this popup is open. Retain the previously recognized self or use the explicit self picker. Normal gameplay screen 6234 seeds/validates initial self recognition before per-member chip reads. Popup selected-owner identity is separate from self identity. Fixtures include that normal frame plus the four supplied popup/status frames.
+
+`ScreenReaderCharacterBridge` in 08 character.js updates existing states, keeps self independent from PT editor selection, merges chips before absolute observed stat corrections, uses observed max HP and stores owned coins in a dedicated screenCoin field/result table. It does not infer equivalence with existing Coin/Star Coin stack/quantity controls or overwrite those. Missing fields retain state. Observed max HP remains authoritative until another observation/New Game; manual max-HP-affecting changes may require another screen read. Membership events retain contextual monster controls. No canonical game data is changed.
+
+Use `npm run check:08` / `npm run test:08`; CI is `08 screen reader browser smoke`. Fixtures retain recognition regions only, removing player names/chat/map. Tests cover supplied screens, per-owner accumulation, invisible data retention, reset, stabilization, mocked actual video capture/track stop, denial and local profile persistence. Hosted browser CI is required before merge if workspace Chromium is unavailable. Real game-window capture, minimization/background behavior, other characters and different HUD layouts still require PC testing.
+
 ### Map event video output
 
 `docs/map-event-output/README.md` is the durable instruction for AI-assisted video analysis. `AGENTS.md` routes video-only attachments to it when this repository is the task context. Resolve map/difficulty from filename or folder; ask if either is missing, ambiguous, or inconsistent. Use the central upper progress track and event icon positions, not Round.
