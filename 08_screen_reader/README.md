@@ -34,6 +34,14 @@
 
 ## 構成・検証
 
+### ミニキャラ画像の対応表
+
+正本は `../csv/mini_character_mapping.csv` です。`images/UT_Hero_ProfilePhoto/` の194画像を1ファイル1行で収録し、キャラクター130画像（35人）、モンスター59画像、判別不能5画像に分類しています。モンスターと判別不能は `reader_target=対象外` です。画像番号とキャラIDは一致しないため、`character_id` を使用してください。モンスターの複数候補IDは `|` 区切りで保持します。
+
+「認識用の見本を追加」でキャラを選ぶと、対応表から衣装違いも含む画像を表示します。Web配信時はCSV、`file://`・取得失敗・不正CSV時は同梱対応表を使います。これは見本登録時のキャラ確認用です。プロフィール画像をそのまま認識特徴には追加していません。実ゲームのHUDでは拡大・切り抜き・背景が異なるため、認識用の見本は従来どおり取得画面から登録してください。
+
+CSV修正後は `python3 scripts/build-mini-character-mapping.py` で同梱データを更新し、`python3 scripts/build-mini-character-mapping.py --check` で画像の網羅性、重複、ID・名前、参照画像、同梱データとの一致を確認します。列の意味と未確定項目は `../docs/mini-character-mapping.md` を参照してください。
+
 - `js/screen-reader.js`: 共有／画像入力、監視、安定判定、結果表示、見本管理
 - `js/screen-reader-vision.js`: 画像照合、数字形状照合、☆判定、画面種別・対象判定
 - `js/screen-reader-references.js`: 生成済み特徴（フル画像やプレイヤー名を含まない）

@@ -1,6 +1,6 @@
 # Development Handoff
 
-Last updated: 2026-10-07
+Last updated: 2026-10-08
 
 This is the durable handoff for continuing development, especially `07_skill`. On a new chat or machine, read this file, current `main`, and recent PRs before changing code.
 
@@ -21,6 +21,8 @@ This is the durable handoff for continuing development, especially `07_skill`. O
 ## Current focus
 
 ### 08_screen_reader experimental window capture (2026-10-07)
+
+2026-10-08: `csv/mini_character_mapping.csv` now inventories all 194 profile images: 130 character variants (35 canonical IDs), 59 monster images (10 with multiple candidate IDs), and 5 unresolved images. See `docs/mini-character-mapping.md` for columns and unresolved filenames. All monsters/unknowns are excluded from character recognition. `scripts/build-mini-character-mapping.py --check` validates coverage, names/IDs, reference paths and the generated `mini-character-mapping-data.js` fallback. Run without `--check` after CSV edits. 08 fetches the CSV for training identity previews and falls back for file:// or unavailable/invalid CSV. This does not add uncalibrated profile images to the game-screen matcher or claim recognition coverage for all characters. Existing recognition descriptors and state behavior are unchanged.
 
 The user requested a separate `08_` folder to try game-screen reading. `08_screen_reader` is a copy of current `07_skill` with capture/recognition controls; 07 runtime files are unchanged. Read `08_screen_reader/README.md`. getDisplayMedia selects a PC game window; snapshots, image uploads/paste and auto mode feed local recognition. Auto samples about every 1.2 seconds with per-field two-consecutive-frame stabilization; jobs do not overlap. Stop/reset invalidates pending frames. New Game pauses auto and resets character/PT state, not map/monsters.
 

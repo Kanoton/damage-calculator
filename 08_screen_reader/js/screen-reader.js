@@ -14,12 +14,19 @@
  }
  function save(){try{localStorage.setItem(STORAGE,JSON.stringify({version:1,...custom,area}));}catch{status('見本を保存できませんでした。ブラウザの保存領域を確認してください。');}updateReferenceStatus();}
  function updateReferenceStatus(){$('reference-status').textContent='追加した見本：キャラ '+custom.characters.length+'件／チップ '+custom.chips.length+'件';}
- function updateLearningOptions(){if(!catalog)return;const chips=$('learn-kind').value.startsWith('chip-'),items=chips?catalog.chips:catalog.characters;$('learn-slot-label').hidden=!chips;$('learn-id').replaceChildren(...items.map(row=>Object.assign(document.createElement('option'),{value:row.id,textContent:row.name})));}
+ function updateMappingPreview(){
+  const mapping=window.ScreenReaderMiniCharacterMapping,summary=mapping.summary();
+  $('mapping-status').textContent=summary.source+'：キャラ画像 '+summary.characters+'枚／対象外 '+summary.excluded+'枚';
+  const rows=$('learn-kind').value.startsWith('chip-')?[]:mapping.forCharacter($('learn-id').value);
+  $('mapping-preview').replaceChildren(...rows.map(row=>Object.assign(document.createElement('img'),{src:'../images/UT_Hero_ProfilePhoto/'+row.image_file,alt:row.name+' '+row.image_file,title:row.name+'：'+row.image_file,loading:'lazy'})));
+ }
+ function updateLearningOptions(){if(!catalog)return;const chips=$('learn-kind').value.startsWith('chip-'),items=chips?catalog.chips:catalog.characters;$('learn-slot-label').hidden=!chips;$('learn-id').replaceChildren(...items.map(row=>Object.assign(document.createElement('option'),{value:row.id,textContent:row.name})));updateMappingPreview();}
  function ready(){
   catalog=bridge.catalog();if(!catalog.characters.length){setTimeout(ready,100);return;}
   for(const row of catalog.characters)$('self').append(Object.assign(document.createElement('option'),{value:row.id,textContent:row.name}));
   try{const value=localStorage.getItem(STORAGE);if(value){const p=validateProfile(JSON.parse(value));custom={characters:p.characters,chips:p.chips};area=p.area||null;}}catch{status('保存済みの見本を読み込めませんでした。初期の見本で開始します。');}
   updateLearningOptions();updateReferenceStatus();
+  window.ScreenReaderMiniCharacterMapping.load(catalog.characters).then(updateMappingPreview);
  }
  function showFrame(source){frame=vision.normalize(source,area);ctx.drawImage(frame,0,0);$('area').disabled=false;$('learn').disabled=!catalog;}
  function drawResults(observation){
@@ -88,5 +95,6 @@
  $('export').addEventListener('click',()=>{const url=URL.createObjectURL(new Blob([JSON.stringify({version:1,...custom,area},null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='screen-reader-profile.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
  $('import').addEventListener('change',async()=>{try{const file=$('import').files[0];if(!file)return;if(file.size>1000000)throw Error('ファイルが大きすぎます。');const p=validateProfile(JSON.parse(await file.text()));custom={characters:p.characters,chips:p.chips};area=p.area||null;generation++;stable.clear();sameFrames=0;lastHash=null;save();if(rawSource)read();status('見本を読み込みました。');}catch(error){status(error.message);}finally{$('import').value='';}});
  window.addEventListener('pagehide',stop);
+ $('learn-id').addEventListener('change',updateMappingPreview);
  window.ScreenReaderController={read,stop,stabilize,validateProfile};ready();
 })();

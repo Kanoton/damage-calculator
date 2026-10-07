@@ -11,6 +11,29 @@ async function readFixture(page,n){
 }
 const snapshot=page=>page.evaluate(()=>window.ScreenReaderCharacterBridge.snapshot());
 
+test('08: CSV maps all variants to canonical characters and excludes monsters from training',async({page})=>{
+ await open(page);
+ await expect(page.locator('#reader-mapping-status')).toContainText('CSV対応表');
+ expect(await page.evaluate(()=>ScreenReaderMiniCharacterMapping.summary())).toEqual({source:'CSV対応表',total:194,characters:130,excluded:64});
+ await page.locator('#reader-details').evaluate(el=>el.open=true);
+ await page.locator('.reader-training summary').click();
+ await page.locator('#reader-learn-id').selectOption('2');
+ await expect(page.locator('#reader-mapping-preview img')).toHaveCount(4);
+ await expect(page.locator('#reader-mapping-preview img').first()).toHaveAttribute('alt',/^パルナン /);
+ expect(await page.locator('#reader-mapping-preview img').evaluateAll(imgs=>Promise.all(imgs.map(async im=>{await im.decode();return im.naturalWidth>0;})))).toEqual([true,true,true,true]);
+ expect(await page.locator('#reader-learn-id option').count()).toBe(35);
+ expect(await page.evaluate(()=>ScreenReaderMiniCharacterMapping.forCharacter('M0005'))).toEqual([]);
+ await page.locator('#reader-learn-kind').selectOption('chip-small:0');
+ await expect(page.locator('#reader-mapping-preview img')).toHaveCount(0);
+});
+
+for(const mode of ['unavailable','invalid','incomplete'])test('08: mapping fallback survives '+mode+' CSV',async({page})=>{
+ await page.route('**/csv/mini_character_mapping.csv',route=>mode==='unavailable'?route.abort():route.fulfill({contentType:'text/csv',body:mode==='invalid'?'image_file,entity_type,character_id,name,reader_target,status\n../bad.png,キャラクター,1,ミミ,対象,確認済み':'image_file,entity_type,character_id,monster_ids,name,reader_target,status\nUT_Hero_ProfilePhoto_108.png,キャラクター,1,,ミミ,対象,確認済み'}));
+ await open(page);await expect(page.locator('#reader-mapping-status')).toContainText('CSV取得・検証失敗');
+ expect(await page.evaluate(()=>ScreenReaderMiniCharacterMapping.forCharacter('1').length)).toBe(6);
+ await readFixture(page,'6234');expect((await snapshot(page)).selfId).toBe('105');
+});
+
 test('08: initializes independently without script errors and keeps PT dimensions',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await open(page);
  expect((await snapshot(page)).selfId).toBe('1');await expect(page.locator('#reader-read')).toBeDisabled();

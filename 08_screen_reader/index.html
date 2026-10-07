@@ -47,6 +47,9 @@
    <label id="reader-learn-slot-label" hidden>チップ位置 <select id="reader-learn-slot"><option value="0">上段 左</option><option value="1">上段 中</option><option value="2">上段 右</option><option value="3">中段 左</option><option value="4">中段 左から2つ目</option><option value="5">中段 左から3つ目</option><option value="6">中段 右</option><option value="7">下段 左</option><option value="8">下段 中</option><option value="9">下段 右</option></select></label>
    <button id="reader-learn" type="button" disabled>この画面から見本を追加</button>
    <p id="reader-reference-status"></p>
+   <p id="reader-mapping-status"></p>
+   <div id="reader-mapping-preview" aria-label="選択したキャラクターの対応画像"></div>
+   <p class="reader-help">対応画像はキャラ確認用です。認識用の見本は、取得したゲーム画面から登録してください。</p>
    <button id="reader-export" type="button">見本を書き出す</button>
    <label class="reader-file-button">見本を読み込む<input id="reader-import" type="file" accept="application/json,.json"></label>
   </details>
@@ -550,6 +553,8 @@
 <script src="streamdeck.js"></script>
 <script src="js/screen-reader-references.js"></script>
 <script src="js/screen-reader-vision.js"></script>
+<script src="js/mini-character-mapping-data.js"></script>
+<script src="js/mini-character-mapping.js"></script>
 <script src="js/screen-reader.js"></script>
 <div id="monster-tooltip" role="tooltip" hidden></div>
 </body>

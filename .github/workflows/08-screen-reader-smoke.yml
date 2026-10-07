@@ -10,6 +10,7 @@ on:
       - 'tests/fixtures/screen-reader/**'
       - 'scripts/check-07-syntax.js'
       - 'scripts/build-screen-reader-references.py'
+      - 'scripts/build-mini-character-mapping.py'
       - 'package.json'
       - 'playwright.config.js'
       - '.github/workflows/08-screen-reader-smoke.yml'
@@ -17,6 +18,9 @@ on:
     branches: [main]
     paths:
       - '08_screen_reader/**'
+      - 'csv/mini_character_mapping.csv'
+      - 'images/UT_Hero_ProfilePhoto/**'
+      - 'scripts/build-mini-character-mapping.py'
       - 'tests/08-screen-reader.spec.js'
       - 'tests/fixtures/screen-reader/**'
       - 'package.json'
@@ -32,6 +36,7 @@ jobs:
           node-version: 22
       - run: npm install
       - run: npm run check:08
+      - run: python3 scripts/build-mini-character-mapping.py --check
       - run: npx playwright install --with-deps chromium
       - run: npm run test:08
       - uses: actions/upload-artifact@v4
