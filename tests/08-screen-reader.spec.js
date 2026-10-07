@@ -19,7 +19,7 @@ test('08: initializes independently without script errors and keeps PT dimension
 });
 
 test('08: recognizes sanitized real game frames, adds chips to their owners and updates observed stats',async({page})=>{
- await open(page);await readFixture(page,'6248');let s=await snapshot(page);
+ await open(page);await readFixture(page,'6234');expect((await snapshot(page)).selfId).toBe('105');await readFixture(page,'6248');let s=await snapshot(page);
  expect(s.selfId).toBe('105');expect(s.members.map(m=>m.id)).toEqual(['105','13','21','26']);
  expect(s.members.map(m=>[m.currentHp,m.maxHp])).toEqual([[11,11],[8,10],[7,9],[10,10]]);
  expect(s.members.map(m=>m.coin)).toEqual([17,12,24,9]);expect(s.members[0].level).toBe(1);
@@ -37,8 +37,14 @@ test('08: blank/unknown frames retain previously observed state and never invent
  expect(result.members.every(m=>!m.id)).toBe(true);expect(result.chipIds).toEqual([]);expect(await snapshot(page)).toEqual(before);
 });
 
+test('08: an occluding small chip popup does not decide which party member is self',async({page})=>{
+ await open(page);await readFixture(page,'6250');expect((await snapshot(page)).selfId).toBe('1');
+ await page.locator('#reader-self').selectOption('105');await page.locator('#reader-read').click();await expect.poll(async()=> (await snapshot(page)).selfId).toBe('105');
+ const s=await snapshot(page);expect(s.members[1].chips).toEqual(['26']);expect(s.members[0].chips).toEqual([]);
+});
+
 test('08: partial observations preserve invisible chips, unknown stats and self identity',async({page})=>{
- await open(page);await readFixture(page,'6248');
+ await open(page);await readFixture(page,'6234');await readFixture(page,'6248');
  await page.evaluate(()=>ScreenReaderCharacterBridge.apply({members:[{id:'13',slot:1,coin:19,currentHp:4}],chipOwnerId:'105',chipIds:['30','30','not-a-chip']}));
  let s=await snapshot(page);expect(s.selfId).toBe('105');expect(s.members[0].chips).toEqual(['30']);expect(s.members[1].currentHp).toBe(4);expect(s.members[1].coin).toBe(19);expect(s.members[1].maxHp).toBe(10);
  await page.evaluate(()=>ScreenReaderCharacterBridge.apply({members:[{id:'105',slot:0,maxHp:13,currentHp:12,atk:5,move:6}],chipOwnerId:null,chipIds:[]}));
@@ -53,7 +59,7 @@ test('08: automatic stabilization requires consecutive matching observations for
 });
 
 test('08: window capture reads real video frames, auto updates and stops tracks',async({page})=>{
- await open(page);
+ await open(page);await readFixture(page,'6234');
  await page.evaluate(async image=>{const im=new Image();im.src=image;await im.decode();const c=document.createElement('canvas');c.width=1536;c.height=709;c.getContext('2d').drawImage(im,0,0);window.testCapture=c.captureStream(2);window.testCaptureCanvas=c;navigator.mediaDevices.getDisplayMedia=async()=>window.testCapture;},fixture('6248'));
  await page.locator('#reader-connect').click();await expect(page.locator('#reader-auto')).toBeEnabled();await page.locator('#reader-auto').check();
  await expect.poll(async()=> (await snapshot(page)).members[0].chips,{timeout:10000}).toEqual(['30']);

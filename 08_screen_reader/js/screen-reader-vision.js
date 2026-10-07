@@ -74,10 +74,12 @@
   });
   // Repeated IDs signal a bad match; do not use either conflicting slot.
   for(const m of members)if(m.id&&members.filter(other=>other.id===m.id).length>1){delete m.id;m.unreadable=true;}
-  const own=match(feature(source,regions.self),charRefs.filter(r=>r.kind==='self'));
   const header=match(feature(source,regions.header),charRefs.filter(r=>r.kind==='header'));
-  const observation={members,selfId:own?.id??null,view:'通常画面',chipOwnerId:null,chipIds:[]};
   const tab=activeTab(source);
+  // The small popup covers the self portrait. Never identify self from its
+  // chip contents or selected tab; keep the previous self or explicit choice.
+  const own=header||tab===null?match(feature(source,regions.self),charRefs.filter(r=>r.kind==='self')):null;
+  const observation={members,selfId:own?.id??null,view:'通常画面',chipOwnerId:null,chipIds:[]};
   if(header){
    observation.view='ステータス画面';observation.chipOwnerId=header.id;observation.chipIds=chipMatches(source,largeCenters,chipRefs);
    let target=members.find(m=>m.id===header.id);if(!target){target={id:header.id};members.push(target);}
