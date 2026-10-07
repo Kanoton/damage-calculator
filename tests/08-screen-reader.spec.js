@@ -1,11 +1,11 @@
 const {test,expect}=require('@playwright/test');
-const path=require('path');
 const fixture=n=>require('./fixtures/screen-reader/'+n+'.json').image;
 
 async function open(page){await page.goto('/08_screen_reader/');await page.waitForFunction(()=>window.ScreenReaderCharacterBridge?.catalog().characters.length===35);await expect(page.locator('#reader-self option')).toHaveCount(36);}
 async function readFixture(page,n){
  const image=fixture(n),data=Buffer.from(image.split(',')[1],'base64');
  await page.locator('#reader-file').setInputFiles({name:n+'.png',mimeType:'image/png',buffer:data});
+ await expect(page.locator('#reader-file')).toHaveValue('');
  await expect(page.locator('#reader-status')).toContainText('画面読取：');
  await expect(page.locator('#reader-read')).toBeEnabled();
 }
@@ -28,6 +28,7 @@ test('08: recognizes sanitized real game frames, adds chips to their owners and 
  expect(s.members[1].chips).toEqual(['26']);expect(s.members[0].chips).toEqual(['30']);expect(s.members[1].currentHp).toBe(12);expect(s.members[1].level).toBe(1);
  await readFixture(page,'6251');s=await snapshot(page);expect([s.members[0].atk,s.members[0].def,s.members[0].move]).toEqual([1,2,4]);expect(s.members[2].currentHp).toBe(9);
  await readFixture(page,'6252');s=await snapshot(page);expect([s.members[1].atk,s.members[1].def,s.members[1].move]).toEqual([1,1,5]);expect(s.members[1].chips).toEqual(['26']);expect(s.members[0].chips).toEqual(['30']);
+ await page.screenshot({path:'test-results/08-screen-reader-ui.png',fullPage:true});
 });
 
 test('08: blank/unknown frames retain previously observed state and never invent chips',async({page})=>{
