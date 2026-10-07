@@ -52,6 +52,11 @@ test('08: partial observations preserve invisible chips, unknown stats and self 
  await page.locator('#reader-new-game').click();s=await snapshot(page);expect(s.members[0].level).toBe(0);expect(s.members[0].chips).toEqual([]);expect(s.members.slice(1).every(m=>!m.id)).toBe(true);expect(s.members[0].maxHp).toBe(9);
 });
 
+test('08: owned coin reading preserves separate manually tracked coin controls',async({page})=>{
+ await open(page);await readFixture(page,'6234');await page.evaluate(()=>{const s=captureCharacterAbilityState();s.numbers['スターコイン']=42;s.numbers['コイン']=3;restoreCharacterAbilityState(s);});
+ await readFixture(page,'6248');expect((await snapshot(page)).members[0].coin).toBe(17);const controls=await page.evaluate(()=>captureCharacterAbilityState().numbers);expect(controls['スターコイン']).toBe(42);expect(controls['コイン']).toBe(3);
+});
+
 test('08: automatic stabilization requires consecutive matching observations for each field',async({page})=>{
  await open(page);
  const r=await page.evaluate(()=>{const c=ScreenReaderController,o={members:[{id:'13',slot:1,currentHp:8,maxHp:10,coin:12}],selfId:'105',chipOwnerId:'13',chipIds:['26']};return [c.stabilize(o),c.stabilize(o),c.stabilize({...o,members:[{...o.members[0],currentHp:7}]}),c.stabilize({...o,members:[],chipIds:[]}),c.stabilize(o)];});

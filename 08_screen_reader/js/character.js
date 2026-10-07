@@ -446,7 +446,7 @@
     if(valid(m.level,0,3))s.level=m.level;
     if(valid(m.maxHp,1,999))s.screenMaxHp=m.maxHp;
     if(valid(m.currentHp,0,999))s.currentHp=Math.min(s.screenMaxHp??999,m.currentHp);
-    if(valid(m.coin,0,999)){s.screenCoin=m.coin;if(own)s.numbers['スターコイン']=m.coin;}
+    if(valid(m.coin,0,999))s.screenCoin=m.coin;
     updated++;
    }
    const owner=rowFor(observation.chipOwnerId);
