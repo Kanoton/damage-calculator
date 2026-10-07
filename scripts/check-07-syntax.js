@@ -2,7 +2,9 @@ const fs=require('fs');
 const path=require('path');
 const vm=require('vm');
 
-const root=path.join(__dirname,'..','07_skill');
+const folder=process.argv[2]||'07_skill';
+if(!['07_skill','08_screen_reader'].includes(folder))throw Error('Unknown application folder');
+const root=path.join(__dirname,'..',folder);
 const jsDir=path.join(root,'js');
 const files=fs.readdirSync(jsDir).filter(name=>name.endsWith('.js')).sort().map(name=>path.join(jsDir,name));
 files.push(path.join(root,'streamdeck.js'));
@@ -16,5 +18,5 @@ const ordered=[...html.matchAll(/<script\s+src=["']([^"']+\.js)["'][^>]*><\/scri
  .map(match=>match[1]).filter(src=>!/^https?:/.test(src))
  .map(src=>path.resolve(root,src));
 const combined=ordered.map(file=>fs.readFileSync(file,'utf8')).join('\n;\n');
-new vm.Script(combined,{filename:'07_skill/index-script-order.js'});
+new vm.Script(combined,{filename:folder+'/index-script-order.js'});
 console.log('ok concatenated script order');
