@@ -202,7 +202,7 @@ test('08: reader opens on hover without moving the calculator and supports click
 });
 
 test('08: lower popup uses scaled geometry, selected tab and PT identity without inventing self',async({page})=>{
- await open(page);await page.locator('#reader-self').selectOption('105');
+ await open(page);await readFixture(page,'popup-11');await page.locator('#reader-self').selectOption('105');
  const cases=[['11','105',[]],['36','106',['121']],['41','3',['26','39','36','2']],['43','18',['42','36','24']]];
  for(const [stamp,owner,chips]of cases){
   await readFixture(page,'popup-'+stamp);
