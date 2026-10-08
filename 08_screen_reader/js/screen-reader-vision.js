@@ -19,6 +19,22 @@
   if(!ranks.length||ranks[0][1]>limit||(ranks[1]&&ranks[1][1]-ranks[0][1]<margin))return null;
   return {id:ranks[0][0],confidence:Math.round((1-ranks[0][1])*100)};
  }
+ const profileCache=new WeakMap();
+ function profileMatch(data){
+  const refs=window.ScreenReaderProfileReferences?.characters||[],scores=new Map();
+  for(const ref of refs){
+   let sample=profileCache.get(ref);
+   if(!sample){const mask=decode(ref.mask),positions=[];for(let i=0;i<SIDE*SIDE;i++)if(mask[i>>3]&(1<<(i&7)))positions.push(i*3);sample={data:decode(ref.data),positions};profileCache.set(ref,sample);}
+   const denominator=sample.positions.length*3*255,ceiling=.155*denominator;
+   let total=0;for(const i of sample.positions){total+=Math.abs(data[i]-sample.data[i])+Math.abs(data[i+1]-sample.data[i+1])+Math.abs(data[i+2]-sample.data[i+2]);if(total>ceiling)break;}
+   if(total>ceiling)continue;
+   const score=total/denominator;scores.set(ref.id,Math.min(scores.get(ref.id)??Infinity,score));
+  }
+  const ranks=[...scores].sort((a,b)=>a[1]-b[1]);
+  // Empty identity represents monster art: never return it as a party member.
+  if(!ranks[0]?.[0]||ranks[0][1]>.13||(ranks[1]&&ranks[1][1]-ranks[0][1]<.025))return null;
+  return {id:ranks[0][0],confidence:Math.round((1-ranks[0][1])*100)};
+ }
  function isInk(r,g,b,kind){
   if(kind==='red')return r>165&&r>g*1.45&&r>b*1.35;
   if(kind==='green')return g>170&&g>r*1.3&&g>b*1.25;
@@ -65,7 +81,7 @@
  function analyze(source,custom={characters:[],chips:[]}){
   const refs=window.ScreenReaderReferences,charRefs=[...refs.characters,...(custom.characters||[])],chipRefs=[...refs.chips,...(custom.chips||[])];
   const members=regions.avatar.map((box,index)=>{
-   const found=match(feature(source,box),charRefs.filter(r=>r.kind==='avatar'));if(!found)return {slot:index,unreadable:true};
+   const data=feature(source,box),found=match(data,charRefs.filter(r=>r.kind==='avatar'))||profileMatch(data);if(!found)return {slot:index,unreadable:true};
    const member={slot:index,id:found.id,confidence:found.confidence},kind=['red','green','blue','gold'][index];
    const hp=numberAt(source,[116,103+Y[index],49,42],kind,refs.digits),maxHp=numberAt(source,[173,121+Y[index],27,22],kind,refs.digits),coin=numberAt(source,[235,98+Y[index],27,24],'white',refs.digits),level=levelAt(source,index);
    if(maxHp!==null&&maxHp>=1&&maxHp<=999)member.maxHp=maxHp;
@@ -89,5 +105,5 @@
  }
  function normalize(source,area){const c=document.createElement('canvas');c.width=WIDTH;c.height=HEIGHT;const w=source.videoWidth||source.naturalWidth||source.width,h=source.videoHeight||source.naturalHeight||source.height;const a=area||{x:0,y:0,w:1,h:1};c.getContext('2d').drawImage(source,a.x*w,a.y*h,a.w*w,a.h*h,0,0,WIDTH,HEIGHT);return c;}
  function learn(source,kind,id,index=0){const box=kind==='chip-small'?smallCenters[index]:kind==='chip-large'?largeCenters[index]:kind==='avatar'?regions.avatar[index]:regions[kind];if(!box)throw Error('見本の位置が不正です。');const region=kind.startsWith('chip-')?[box[0]-18,box[1]-18,36,36]:box;return {id:String(id),kind:kind.startsWith('chip-')?'chip':kind,data:encode(feature(source,region))};}
- window.ScreenReaderVision={analyze,normalize,learn,numberAt,feature,regions,WIDTH,HEIGHT};
+ window.ScreenReaderVision={analyze,normalize,learn,numberAt,feature,profileMatch,regions,WIDTH,HEIGHT};
 })();
