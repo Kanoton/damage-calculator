@@ -167,3 +167,15 @@ test('08: learning persists locally and profile validation rejects invalid refer
  await expect(page.locator('#reader-reference-status')).toContainText('キャラ 1件');await page.reload();await expect(page.locator('#reader-reference-status')).toContainText('キャラ 1件');
  const rejected=await page.evaluate(()=>{try{ScreenReaderController.validateProfile({version:1,characters:[{id:'13',kind:'header',data:'bad'}],chips:[],area:null});return false;}catch{return true;}});expect(rejected).toBe(true);
 });
+
+test('08: 16:9 status screenshots identify chip owners and preserve additive ownership',async({page})=>{
+ await open(page);
+ await page.evaluate(()=>ScreenReaderCharacterBridge.apply({members:[{id:'18',slot:1},{id:'3',slot:2},{id:'106',slot:3}]}));
+ for(const [stamp,owner,chip] of [['184601','18','42'],['184606','3','26'],['184610','106','121']]){
+  await readFixture(page,'status-'+stamp);
+  const s=await snapshot(page);expect(s.members.find(m=>m.id===owner).chips).toEqual([chip]);expect(s.selfId).toBe('1');
+  const result=await page.evaluate(async image=>{const im=new Image();im.src=image;await im.decode();const c=ScreenReaderVision.normalize(im),o=ScreenReaderVision.analyze(c);const learned=ScreenReaderVision.learn(c,'chip-large',o.chipIds[0],0);return {o,learned:learned.data,expected:btoa(String.fromCharCode(...ScreenReaderVision.feature(c.statusFrame,[517,334,36,36])))};},fixture('status-'+stamp));
+  expect(result.o.view).toBe('ステータス画面');expect(result.o.chipOwnerId).toBe(owner);expect(result.o.chipIds).toEqual([chip]);expect(result.learned).toBe(result.expected);
+ }
+ const s=await snapshot(page);for(const [owner,chip] of [['18','42'],['3','26'],['106','121']])expect(s.members.find(m=>m.id===owner).chips).toEqual([chip]);
+});

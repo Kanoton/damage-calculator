@@ -128,25 +128,30 @@
   return count(left)>=2&&count(left)>count(original)&&left.members.filter(m=>m.id&&m.coin!==undefined&&m.level!==undefined).length>=2?left:original;
  }
  function analyze(source,custom={characters:[],chips:[]}){
-  const refs=window.ScreenReaderReferences,extra=window.ScreenReaderLayoutReferences||{},charRefs=[...refs.characters,...(extra.characters||[]),...(custom.characters||[])],chipRefs=[...refs.chips,...(custom.chips||[])],digits=[...refs.digits,...(extra.digits||[])];
+  const refs=window.ScreenReaderReferences,extra=window.ScreenReaderLayoutReferences||{},statusRefs=window.ScreenReaderStatusReferences||{},charRefs=[...refs.characters,...(extra.characters||[]),...(statusRefs.characters||[]),...(custom.characters||[])],chipRefs=[...refs.chips,...(statusRefs.chips||[]),...(custom.chips||[])],digits=[...refs.digits,...(extra.digits||[])];
   const {layout,members}=selectLayout(source,charRefs,digits);
   // Repeated IDs signal a bad match; do not use either conflicting slot.
   const repeated=new Set(members.filter(m=>m.id&&members.filter(other=>other.id===m.id).length>1).map(m=>m.id));
   for(const m of members)if(repeated.has(m.id)){delete m.id;m.unreadable=true;}
-  const header=match(feature(source,regions.header),charRefs.filter(r=>r.kind==='header'));
+  const statusSource=source.statusFrame||source;
+  const header=match(feature(statusSource,regions.header),charRefs.filter(r=>r.kind==='header'));
   const tab=activeTab(source);
   // The small popup covers the self portrait. Never identify self from its
   // chip contents or selected tab; keep the previous self or explicit choice.
   const own=header||tab===null?match(feature(source,layout.regions.self),charRefs.filter(r=>r.kind==='self')):null;
   const observation={members,selfId:own?.id??null,view:'通常画面',chipOwnerId:null,chipIds:[]};
   if(header){
-   observation.view='ステータス画面';observation.chipOwnerId=header.id;observation.chipIds=chipMatches(source,largeCenters,chipRefs);
+   observation.view='ステータス画面';observation.chipOwnerId=header.id;observation.chipIds=chipMatches(statusSource,largeCenters,chipRefs);
    let target=members.find(m=>m.id===header.id);if(!target){target={id:header.id};members.push(target);}
-   for(const [stat,box] of [['atk',[542,239,26,37]],['def',[619,239,26,37]],['move',[705,239,27,37]]]){const v=numberAt(source,box,'white',refs.digits);if(v!==null)target[stat]=v;}
+   for(const [stat,box] of [['atk',[542,239,26,37]],['def',[619,239,26,37]],['move',[705,239,27,37]]]){const v=numberAt(statusSource,box,'white',refs.digits);if(v!==null)target[stat]=v;}
   }else if(tab!==null){observation.view='チップ画面';observation.chipOwnerId=members[tab]?.id??null;observation.chipIds=chipMatches(source,smallCenters,chipRefs);}
   return observation;
  }
- function normalize(source,area){const c=document.createElement('canvas');c.width=WIDTH;c.height=HEIGHT;const w=source.videoWidth||source.naturalWidth||source.width,h=source.videoHeight||source.naturalHeight||source.height;const a=area||{x:0,y:0,w:1,h:1};c.getContext('2d').drawImage(source,a.x*w,a.y*h,a.w*w,a.h*h,0,0,WIDTH,HEIGHT);return c;}
- function learn(source,kind,id,index=0){const refs=window.ScreenReaderReferences,extra=window.ScreenReaderLayoutReferences||{},layout=selectLayout(source,[...refs.characters,...(extra.characters||[])],[...refs.digits,...(extra.digits||[])]).layout;const box=kind==='chip-small'?smallCenters[index]:kind==='chip-large'?largeCenters[index]:kind==='avatar'?layout.regions.avatar[index]:layout.regions[kind];if(!box)throw Error('見本の位置が不正です。');const region=kind.startsWith('chip-')?[box[0]-18,box[1]-18,36,36]:box;return {id:String(id),kind:kind.startsWith('chip-')?'chip':kind,data:encode(feature(source,region))};}
+ function normalize(source,area){const c=document.createElement('canvas');c.width=WIDTH;c.height=HEIGHT;const w=source.videoWidth||source.naturalWidth||source.width,h=source.videoHeight||source.naturalHeight||source.height;const a=area||{x:0,y:0,w:1,h:1};c.getContext('2d').drawImage(source,a.x*w,a.y*h,a.w*w,a.h*h,0,0,WIDTH,HEIGHT);
+  // Centered status panels scale with height; party HUD keeps its existing mapping.
+  const statusWidth=a.w*w*HEIGHT/(a.h*h);
+  if(Math.abs(statusWidth-WIDTH)>1){const status=document.createElement('canvas');status.width=WIDTH;status.height=HEIGHT;status.getContext('2d').drawImage(source,a.x*w,a.y*h,a.w*w,a.h*h,(WIDTH-statusWidth)/2,0,statusWidth,HEIGHT);c.statusFrame=status;}
+  return c;}
+ function learn(source,kind,id,index=0){const refs=window.ScreenReaderReferences,extra=window.ScreenReaderLayoutReferences||{},layout=selectLayout(source,[...refs.characters,...(extra.characters||[])],[...refs.digits,...(extra.digits||[])]).layout;const box=kind==='chip-small'?smallCenters[index]:kind==='chip-large'?largeCenters[index]:kind==='avatar'?layout.regions.avatar[index]:layout.regions[kind];if(!box)throw Error('見本の位置が不正です。');const region=kind.startsWith('chip-')?[box[0]-18,box[1]-18,36,36]:box;return {id:String(id),kind:kind.startsWith('chip-')?'chip':kind,data:encode(feature((kind==='header'||kind==='chip-large')?(source.statusFrame||source):source,region))};}
  window.ScreenReaderVision={analyze,normalize,learn,numberAt,feature,profileMatch,regions,WIDTH,HEIGHT};
 })();
