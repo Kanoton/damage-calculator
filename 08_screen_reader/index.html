@@ -33,10 +33,13 @@
   <summary>読取結果・調整</summary>
   <div class="reader-settings">
    <label>自キャラ <select id="reader-self"><option value="">画像から自動判定</option></select></label>
+   <label><input id="reader-world-sync" type="checkbox">選択中のマップへラウンド・進捗・モンスターHPを反映</label>
    <label><input id="reader-apply" type="checkbox" checked>判定できた情報を反映</label>
    <button id="reader-area" type="button" disabled>ゲーム範囲を指定</button>
    <button id="reader-area-reset" type="button">範囲を戻す</button>
   </div>
+  <p class="reader-help">マップ情報で実際のマップ・難易度を選んでから、マップへの反映をONにしてください。読めない項目と画面外のモンスターは保持します。</p>
+  <p id="reader-world-result" role="status"></p>
   <p class="reader-help">チップは見えているページから追加します。未判定の情報は保持します。自動読取は2回続けて一致した情報を反映します。</p>
   <div class="reader-content">
    <canvas id="reader-preview" width="1536" height="709" aria-label="取得したゲーム画面"></canvas>
@@ -560,6 +563,8 @@
 <script src="js/screen-reader-status-references.js"></script>
 <script src="js/screen-reader-popup-references.js"></script>
 <script src="js/screen-reader-vision.js"></script>
+<script src="js/screen-reader-world-references.js"></script>
+<script src="js/screen-reader-world.js"></script>
 <script src="js/mini-character-mapping-data.js"></script>
 <script src="js/mini-character-mapping.js"></script>
 <script src="js/screen-reader.js"></script>

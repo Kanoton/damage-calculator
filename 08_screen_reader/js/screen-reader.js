@@ -7,6 +7,7 @@
  dock.addEventListener('keydown',event=>{if(event.key==='Escape'){setDock(false);toggle.focus();}});
  const STORAGE='astral-08-screen-reader-profile-v1';
  let stream=null,rawSource=null,frame=null,busy=false,timer=null,generation=0,selecting=false,selectionStart=null,area=null,catalog=null,custom={characters:[],chips:[]};
+ let worldContext=null;
  const stable=new Map();let lastHash=null,sameFrames=0,stableTick=0;
  function status(text){$('status').textContent=text;}
  function isArea(a){return a&&['x','y','w','h'].every(k=>Number.isFinite(a[k]))&&a.x>=0&&a.y>=0&&a.w>=.05&&a.h>=.05&&a.x+a.w<=1.00001&&a.y+a.h<=1.00001;}
@@ -35,6 +36,7 @@
  function showFrame(source){frame=vision.normalize(source,area);ctx.drawImage(frame,0,0);$('area').disabled=false;$('learn').disabled=!catalog;}
  function drawResults(observation){
   $('result-body').replaceChildren(...observation.members.filter(m=>Number.isInteger(m.slot)).map(m=>{const tr=document.createElement('tr'),name=catalog.characters.find(c=>c.id===m.id)?.name??'未判定';for(const value of [m.slot+1,name+(m.id===observation.selfId?'（自分）':''),m.level??'—',m.currentHp===undefined&&m.maxHp===undefined?'—':(m.currentHp??'—')+'/'+(m.maxHp??'—'),m.coin??'—',['atk','def'].map(k=>m[k]??'—').join('／')]){const td=document.createElement('td');td.textContent=String(value);tr.append(td);}return tr;}));
+  const world=observation.world,names={M0017:'爆竹ゲロゲロ',M0014:'指揮センター'};if(world)$('world-result').textContent=(world.clock?'ラウンド '+world.clock.round+' ／ 進捗 '+world.clock.progress:'ラウンド・進捗：未判定')+' ／ '+(world.monsters.map(m=>(names[m.monsterId]||m.monsterId)+(m.serial===null?'':' '+m.serial)+' HP '+m.currentHp+'/'+m.maxHp).join('、')||'モンスター：未判定');
   $('view').textContent=observation.view+'：今回読み取れた情報';
   const owner=catalog.characters.find(c=>c.id===observation.chipOwnerId)?.name;
   $('chip-result').textContent=observation.chipOwnerId?(owner+'のチップ：'+(observation.chipIds.map(id=>catalog.chips.find(c=>c.id===id)?.name??id).join('、')||'判定できたチップなし')):'チップの対象キャラは未判定です。';
@@ -45,19 +47,22 @@
   const out={...observation,members:[],selfId:null,chipIds:[]};if(observation.selfId&&accept('self',observation.selfId))out.selfId=observation.selfId;
   for(const m of observation.members){if(!m.id)continue;const identityReady=accept('slot:'+m.slot,m.id),item={id:m.id,slot:m.slot};for(const key of ['level','currentHp','maxHp','coin','atk','def'])if(m[key]!==undefined&&accept(m.id+':'+key,m[key]))item[key]=m[key];if(identityReady)out.members.push(item);}
   const ownerReady=observation.chipOwnerId&&accept('chipOwner',observation.chipOwnerId),chipIds=observation.chipIds.filter(id=>accept(observation.chipOwnerId+':chip:'+id,id));if(ownerReady)out.chipIds=chipIds;else out.chipOwnerId=null;
+  if(observation.world){const w=observation.world;out.world={clock:null,monsters:[]};if(w.clock&&accept('world-clock',JSON.stringify(w.clock)))out.world.clock=w.clock;for(const m of w.monsters||[])if(accept('world-monster:'+m.monsterId+':'+m.serial,JSON.stringify(m)))out.world.monsters.push(m);}
   return out;
  }
- function frameHash(){let hash=0;for(const box of [[0,0,1536,430],[165,498,288,187],[465,324,286,184],[125,430,435,40]])for(const v of vision.feature(frame,box))hash=(hash*31+v)|0;return hash;}
+ function frameHash(){let hash=0;for(const box of [[0,0,1536,709],[0,0,1536,430],[165,498,288,187],[465,324,286,184],[125,430,435,40]])for(const v of vision.feature(frame,box))hash=(hash*31+v)|0;return hash;}
  async function read(automatic=false){
   if(busy||!rawSource||!catalog||selecting)return;busy=true;$('read').disabled=true;const token=generation;
   try{
    if(stream){if(!video.videoWidth)throw Error('共有映像を待っています。');rawSource=video;}
+   const context=window.ScreenReaderMapBridge?.context();if(context!==worldContext){worldContext=context;stable.clear();lastHash=null;sameFrames=0;}
    showFrame(rawSource);const hash=frameHash();sameFrames=hash===lastHash?sameFrames+1:0;lastHash=hash;
    if(automatic&&sameFrames>2)return;
    // Yield to paint without overlapping jobs. Stop/reset invalidates this frame.
    await new Promise(resolve=>requestAnimationFrame(resolve));if(token!==generation)return;
-   const observation=vision.analyze(frame,custom);if($('self').value)observation.selfId=$('self').value;
-   drawResults(observation);const result=$('apply').checked?bridge.apply(automatic?stabilize(observation):observation):{updated:0,added:0};
+   const observation=vision.analyze(frame,custom);if($('world-sync').checked)observation.world=window.ScreenReaderWorldVision.analyze(frame);else $('world-result').textContent='マップ読取はOFFです。マップ・難易度を選び、反映をONにしてください。';if($('self').value)observation.selfId=$('self').value;
+   drawResults(observation);const accepted=automatic?stabilize(observation):observation;const result=$('apply').checked?bridge.apply(accepted):{updated:0,added:0};
+   if($('apply').checked&&$('world-sync').checked){const applied=window.ScreenReaderMapBridge.apply(accepted.world);if(applied.skipped)$('world-result').textContent+=' ／ マップ・難易度・既存個体と一致しない情報 '+applied.skipped+'件は保持';}
    const names=observation.members.filter(m=>m.id).length;
    status((automatic?'自動読取':'画面読取')+'：'+names+'人を判定／チップ '+result.added+'件追加。'+(!observation.selfId?' 自キャラが未判定の場合は「自キャラ」を指定してください。':''));
   }catch(error){status('読み取れませんでした：'+error.message);}finally{busy=false;$('read').disabled=!rawSource;}
@@ -84,8 +89,9 @@
  }
  $('file').addEventListener('change',()=>loadImage($('file').files[0]));
  document.addEventListener('paste',event=>{const file=[...(event.clipboardData?.items||[])].find(i=>i.type.startsWith('image/'))?.getAsFile();if(file){event.preventDefault();loadImage(file);}});
- $('new-game').addEventListener('click',()=>{generation++;clearTimeout(timer);$('auto').checked=false;stable.clear();lastHash=null;sameFrames=0;bridge.reset();$('result-body').replaceChildren();$('chip-result').textContent='';$('view').textContent='新しいゲームの読取を待っています。';status('Lv、HP、補正、取得チップを初期化し、自動読取を停止しました。次のゲームで読取を再開してください。');});
+ $('new-game').addEventListener('click',()=>{generation++;clearTimeout(timer);$('auto').checked=false;stable.clear();lastHash=null;sameFrames=0;bridge.reset();$('world-sync').checked=false;$('world-result').textContent='';$('result-body').replaceChildren();$('chip-result').textContent='';$('view').textContent='新しいゲームの読取を待っています。';status('Lv、HP、補正、取得チップを初期化し、自動読取を停止しました。次のゲームで読取を再開してください。');});
  $('self').addEventListener('change',()=>{generation++;stable.clear();sameFrames=0;lastHash=null;});
+ $('world-sync').addEventListener('change',()=>{stable.clear();sameFrames=0;lastHash=null;});
  $('apply').addEventListener('change',()=>{stable.clear();sameFrames=0;lastHash=null;});
  $('area').addEventListener('click',()=>{selecting=true;preview.classList.add('is-selecting');status('プレビュー上でゲーム画面の範囲をドラッグしてください。');});
  const point=event=>{const b=preview.getBoundingClientRect();return {x:Math.max(0,Math.min(1,(event.clientX-b.left)/b.width)),y:Math.max(0,Math.min(1,(event.clientY-b.top)/b.height))};};

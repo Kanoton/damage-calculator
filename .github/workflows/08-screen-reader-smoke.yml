@@ -7,6 +7,7 @@ on:
       - 'csv/**'
       - 'images/**'
       - 'tests/08-screen-reader.spec.js'
+      - 'tests/08-world-reader.spec.js'
       - 'tests/fixtures/screen-reader/**'
       - 'scripts/check-07-syntax.js'
       - 'scripts/build-screen-reader-references.py'
@@ -15,6 +16,7 @@ on:
       - 'scripts/build-screen-reader-left-hud-fixture.py'
       - 'scripts/build-screen-reader-status-fixtures.py'
       - 'scripts/build-screen-reader-popup-fixtures.py'
+      - 'scripts/build-screen-reader-world-fixtures.py'
       - 'package.json'
       - 'playwright.config.js'
       - '.github/workflows/08-screen-reader-smoke.yml'
@@ -29,7 +31,9 @@ on:
       - 'scripts/build-screen-reader-left-hud-fixture.py'
       - 'scripts/build-screen-reader-status-fixtures.py'
       - 'scripts/build-screen-reader-popup-fixtures.py'
+      - 'scripts/build-screen-reader-world-fixtures.py'
       - 'tests/08-screen-reader.spec.js'
+      - 'tests/08-world-reader.spec.js'
       - 'tests/fixtures/screen-reader/**'
       - 'package.json'
       - '.github/workflows/08-screen-reader-smoke.yml'
@@ -50,6 +54,7 @@ jobs:
       - run: python3 scripts/build-screen-reader-left-hud-fixture.py --check
       - run: python3 scripts/build-screen-reader-status-fixtures.py --check
       - run: python3 scripts/build-screen-reader-popup-fixtures.py --check
+      - run: python3 scripts/build-screen-reader-world-fixtures.py --check
       - run: npx playwright install --with-deps chromium
       - run: npm run test:08
       - uses: actions/upload-artifact@v4
