@@ -109,7 +109,8 @@
    if(coin!==null)member.coin=coin;if(level!==null)member.level=level;return member;
   });
   // Repeated IDs signal a bad match; do not use either conflicting slot.
-  for(const m of members)if(m.id&&members.filter(other=>other.id===m.id).length>1){delete m.id;m.unreadable=true;}
+  const repeated=new Set(members.filter(m=>m.id&&members.filter(other=>other.id===m.id).length>1).map(m=>m.id));
+  for(const m of members)if(repeated.has(m.id)){delete m.id;m.unreadable=true;}
   const header=match(feature(source,regions.header),charRefs.filter(r=>r.kind==='header'));
   const tab=activeTab(source);
   // The small popup covers the self portrait. Never identify self from its
