@@ -11,6 +11,44 @@ async function readFixture(page,n){
 }
 const snapshot=page=>page.evaluate(()=>window.ScreenReaderCharacterBridge.snapshot());
 
+test('08: profile assets expand real normal-screen PT identity without declaring party members self',async({page})=>{
+ await open(page);await readFixture(page,'6234');
+ const s=await snapshot(page);expect(s.selfId).toBe('105');
+ expect(s.members.map(m=>m.id)).toEqual(['105','19','106','27']);
+ // Validate the new matcher independently from the original game-screen seeds.
+ const identities=await page.evaluate(async image=>{const im=new Image();im.src=image;await im.decode();return ScreenReaderVision.regions.avatar.map(box=>ScreenReaderVision.profileMatch(ScreenReaderVision.feature(im,box))?.id??null);},fixture('6234'));
+ expect(identities).toEqual(['105','19','106','27']);
+});
+
+test('08: masked profile matching covers 35 base portraits and rejects all included monster identities',async({page})=>{
+ await open(page);
+ const result=await page.evaluate(()=>{
+  const refs=ScreenReaderProfileReferences.characters,base=new Map(),monsters=new Map();
+  for(const r of refs){if(r.id&&/^UT_Hero_ProfilePhoto_\d+\.png$/.test(r.image))base.set(r.id,base.get(r.id)||r);if(!r.id)monsters.set(r.image,monsters.get(r.image)||r);}
+  const bytes=r=>Uint8Array.from(atob(r.data),c=>c.charCodeAt(0));
+  const wrong=[...base].filter(([id,r])=>ScreenReaderVision.profileMatch(bytes(r))?.id!==id).map(([id])=>id);
+  const falseMonsters=[...monsters].filter(([,r])=>ScreenReaderVision.profileMatch(bytes(r))).map(([file])=>file);
+  const blank=ScreenReaderVision.profileMatch(new Uint8Array(768));
+  return {count:base.size,wrong,monsterCount:monsters.size,falseMonsters,blank};
+ });
+ expect(result).toEqual({count:35,wrong:[],monsterCount:56,falseMonsters:[],blank:null});
+});
+
+test('08: profiles recognize an unseen outfit with transparency and preserve duplicate-slot rejection',async({page})=>{
+ await open(page);
+ const results=await page.evaluate(async()=>{
+  const im=new Image();im.src='../images/UT_Hero_ProfilePhoto/UT_Hero_ProfilePhoto_101_01.png';await im.decode();
+  const c=document.createElement('canvas');c.width=1536;c.height=709;const context=c.getContext('2d');context.fillStyle='#731b34';context.fillRect(0,0,c.width,c.height);
+  for(const box of ScreenReaderVision.regions.avatar.slice(0,2))context.drawImage(im,40,65,115,115*42/73,...box);
+  const masked=ScreenReaderVision.profileMatch(ScreenReaderVision.feature(c,ScreenReaderVision.regions.avatar[0]));
+  return {masked,observation:ScreenReaderVision.analyze(c)};
+ });
+ expect(results.masked?.id).toBe('2');
+ expect(results.observation.members.every(m=>!m.id)).toBe(true);
+ expect(results.observation.selfId).toBeNull();
+ expect(results.observation.chipIds).toEqual([]);
+});
+
 test('08: CSV maps all variants to canonical characters and excludes monsters from training',async({page})=>{
  await open(page);
  await expect(page.locator('#reader-mapping-status')).toContainText('CSV対応表');
