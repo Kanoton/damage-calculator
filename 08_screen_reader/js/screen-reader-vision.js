@@ -137,7 +137,7 @@
   for(const m of members)if(repeated.has(m.id)){delete m.id;m.unreadable=true;}
   const statusSource=source.statusFrame||source;
   const header=match(feature(statusSource,regions.header),charRefs.filter(r=>r.kind==='header'));
-  const lower=source.popupFrame?lowerTab(source.popupFrame):null,tab=lower??activeTab(source);
+  const lower=source.popupFrame&&source.statusFrame?lowerTab(source.popupFrame):null,tab=lower??activeTab(source);
   // The small popup covers the self portrait. Never identify self from its
   // chip contents or selected tab; keep the previous self or explicit choice.
   const own=header||tab===null?match(feature(source,layout.regions.self),charRefs.filter(r=>r.kind==='self')):null;
@@ -155,6 +155,6 @@
   if(Math.abs(statusWidth-WIDTH)>1){const status=document.createElement('canvas');status.width=WIDTH;status.height=HEIGHT;status.getContext('2d').drawImage(source,a.x*w,a.y*h,a.w*w,a.h*h,(WIDTH-statusWidth)/2,0,statusWidth,HEIGHT);c.statusFrame=status;}
   const popup=document.createElement('canvas');popup.width=WIDTH;popup.height=HEIGHT;popup.getContext('2d').drawImage(source,a.x*w,a.y*h,a.w*w,a.h*h,0,0,statusWidth,HEIGHT);c.popupFrame=popup;
   return c;}
- function learn(source,kind,id,index=0){const refs=window.ScreenReaderReferences,extra=window.ScreenReaderLayoutReferences||{},layout=selectLayout(source,[...refs.characters,...(extra.characters||[])],[...refs.digits,...(extra.digits||[])]).layout;const lower=source.popupFrame&&lowerTab(source.popupFrame)!==null;const box=kind==='chip-small'?(lower?lowerCenters:smallCenters)[index]:kind==='chip-large'?largeCenters[index]:kind==='avatar'?layout.regions.avatar[index]:layout.regions[kind];if(!box)throw Error('見本の位置が不正です。');const region=kind.startsWith('chip-')?[box[0]-18,box[1]-18,36,36]:box;return {id:String(id),kind:kind.startsWith('chip-')?'chip':kind,data:encode(feature(kind==='chip-small'&&lower?source.popupFrame:(kind==='header'||kind==='chip-large')?(source.statusFrame||source):source,region))};}
+ function learn(source,kind,id,index=0){const refs=window.ScreenReaderReferences,extra=window.ScreenReaderLayoutReferences||{},layout=selectLayout(source,[...refs.characters,...(extra.characters||[])],[...refs.digits,...(extra.digits||[])]).layout;const lower=source.popupFrame&&source.statusFrame&&lowerTab(source.popupFrame)!==null;const box=kind==='chip-small'?(lower?lowerCenters:smallCenters)[index]:kind==='chip-large'?largeCenters[index]:kind==='avatar'?layout.regions.avatar[index]:layout.regions[kind];if(!box)throw Error('見本の位置が不正です。');const region=kind.startsWith('chip-')?[box[0]-18,box[1]-18,36,36]:box;return {id:String(id),kind:kind.startsWith('chip-')?'chip':kind,data:encode(feature(kind==='chip-small'&&lower?source.popupFrame:(kind==='header'||kind==='chip-large')?(source.statusFrame||source):source,region))};}
  window.ScreenReaderVision={analyze,normalize,learn,numberAt,feature,profileMatch,regions,WIDTH,HEIGHT};
 })();
