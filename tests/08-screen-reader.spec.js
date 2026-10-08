@@ -11,6 +11,31 @@ async function readFixture(page,n){
 }
 const snapshot=page=>page.evaluate(()=>window.ScreenReaderCharacterBridge.snapshot());
 
+test('08: left-aligned HUD reads the reviewed party, all numbers and independent self portrait',async({page})=>{
+ await open(page);await readFixture(page,'left-hud');
+ const s=await snapshot(page);expect(s.selfId).toBe('105');
+ expect(s.members.map(m=>[m.id,m.currentHp,m.maxHp,m.coin,m.level])).toEqual([
+  ['105',9,9,12,0],['106',10,10,12,0],['3',10,10,12,0],['18',9,9,6,0]
+ ]);
+ const learned=await page.evaluate(async image=>{const im=new Image();im.src=image;await im.decode();return {actual:ScreenReaderVision.learn(im,'avatar','106',1).data,expected:btoa(String.fromCharCode(...ScreenReaderVision.feature(im,[55,159,73,42])))};},fixture('left-hud'));
+ expect(learned.actual).toBe(learned.expected);
+ // Switching back must not leave a cached layout or change the old HUD crops.
+ await readFixture(page,'6248');const old=await snapshot(page);
+ expect(old.members.map(m=>m.id)).toEqual(['105','13','21','26']);expect(old.members[0].coin).toBe(17);
+});
+
+test('08: left HUD reads changed coins and retains unreadable fields without inventing a self',async({page})=>{
+ await open(page);await readFixture(page,'left-hud');
+ const o=await page.evaluate(async({left,old})=>{
+  const a=new Image(),b=new Image();a.src=left;b.src=old;await Promise.all([a.decode(),b.decode()]);
+  const c=document.createElement('canvas');c.width=1536;c.height=709;const ctx=c.getContext('2d');ctx.drawImage(a,0,0);
+  ctx.drawImage(b,235,98,27,24,167,98,27,24);ctx.fillStyle='#141414';ctx.fillRect(167,191,27,24);ctx.fillRect(116,445,139,116);
+  const observation=ScreenReaderVision.analyze(c);ScreenReaderCharacterBridge.apply(observation);return observation;
+ },{left:fixture('left-hud'),old:fixture('6248')});
+ expect(o.members[0].coin).toBe(17);expect(o.members[1].coin).toBeUndefined();expect(o.selfId).toBeNull();expect(o.chipIds).toEqual([]);
+ const s=await snapshot(page);expect(s.selfId).toBe('105');expect(s.members[1].coin).toBe(12);expect(s.members[0].coin).toBe(17);
+});
+
 test('08: profile assets expand real normal-screen PT identity without declaring party members self',async({page})=>{
  await open(page);await readFixture(page,'6234');
  const s=await snapshot(page);expect(s.selfId).toBe('105');
