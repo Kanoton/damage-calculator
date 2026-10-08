@@ -20,11 +20,31 @@
   return {id:ranks[0][0],confidence:Math.round((1-ranks[0][1])*100)};
  }
  const profileCache=new WeakMap();
+ function hasFaceTexture(data){
+  const low=[255,255,255],high=[0,0,0];for(let i=0;i<data.length;i++) {const channel=i%3;low[channel]=Math.min(low[channel],data[i]);high[channel]=Math.max(high[channel],data[i]);}
+  return high.reduce((total,value,i)=>total+value-low[i],0)>=75;
+ }
+ function smoothProfile(data){
+  const out=new Uint8Array(data.length);
+  for(let y=0;y<SIDE;y++)for(let x=0;x<SIDE;x++)for(let channel=0;channel<3;channel++){
+   let total=0,count=0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const xx=x+dx,yy=y+dy;if(xx>=0&&xx<SIDE&&yy>=0&&yy<SIDE){total+=data[(yy*SIDE+xx)*3+channel];count++;}}
+   out[(y*SIDE+x)*3+channel]=Math.round(total/count);
+  }
+  return out;
+ }
  function profileMatch(data){
+  if(!hasFaceTexture(data))return null;
+  data=smoothProfile(data);
   const refs=window.ScreenReaderProfileReferences?.characters||[],scores=new Map();
   for(const ref of refs){
    let sample=profileCache.get(ref);
-   if(!sample){const mask=decode(ref.mask),positions=[];for(let i=0;i<SIDE*SIDE;i++)if(mask[i>>3]&(1<<(i&7)))positions.push(i*3);sample={data:decode(ref.data),positions};profileCache.set(ref,sample);}
+   if(!sample){
+    const mask=decode(ref.mask),positions=[],opaque=(x,y)=>x<0||x>=SIDE||y<0||y>=SIDE||Boolean(mask[(y*SIDE+x)>>3]&(1<<((y*SIDE+x)&7)));
+    // Compare only pixels whose smoothing neighbourhood has no transparent edge.
+    for(let y=0;y<SIDE;y++)for(let x=0;x<SIDE;x++){let covered=true;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++)if(!opaque(x+dx,y+dy))covered=false;if(covered)positions.push((y*SIDE+x)*3);}
+    sample={data:smoothProfile(decode(ref.data)),positions};profileCache.set(ref,sample);
+   }
+   if(sample.positions.length<SIDE*SIDE*.35)continue;
    const denominator=sample.positions.length*3*255,ceiling=.155*denominator;
    let total=0;for(const i of sample.positions){total+=Math.abs(data[i]-sample.data[i])+Math.abs(data[i+1]-sample.data[i+1])+Math.abs(data[i+2]-sample.data[i+2]);if(total>ceiling)break;}
    if(total>ceiling)continue;
@@ -81,7 +101,7 @@
  function analyze(source,custom={characters:[],chips:[]}){
   const refs=window.ScreenReaderReferences,charRefs=[...refs.characters,...(custom.characters||[])],chipRefs=[...refs.chips,...(custom.chips||[])];
   const members=regions.avatar.map((box,index)=>{
-   const data=feature(source,box),found=match(data,charRefs.filter(r=>r.kind==='avatar'))||profileMatch(data);if(!found)return {slot:index,unreadable:true};
+   const data=feature(source,box),found=hasFaceTexture(data)?match(data,charRefs.filter(r=>r.kind==='avatar'))||profileMatch(data):null;if(!found)return {slot:index,unreadable:true};
    const member={slot:index,id:found.id,confidence:found.confidence},kind=['red','green','blue','gold'][index];
    const hp=numberAt(source,[116,103+Y[index],49,42],kind,refs.digits),maxHp=numberAt(source,[173,121+Y[index],27,22],kind,refs.digits),coin=numberAt(source,[235,98+Y[index],27,24],'white',refs.digits),level=levelAt(source,index);
    if(maxHp!==null&&maxHp>=1&&maxHp<=999)member.maxHp=maxHp;
