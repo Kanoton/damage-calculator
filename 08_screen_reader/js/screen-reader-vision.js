@@ -100,11 +100,13 @@
  function chipMatches(source,centers,refs){
   const out=[];for(const [x,y] of centers){
    const result=match(feature(source,[x-18,y-18,36,36]),refs,.225,.03);
-   if(result&&!out.includes(result.id))out.push(result.id);
+   if(result?.id&&!out.includes(result.id))out.push(result.id);
   }return out;
  }
  const smallCenters=[[239,527],[312,527],[386,527],[199,591],[273,591],[347,591],[421,591],[239,655],[312,655],[386,655]];
  const largeCenters=[[535,352],[609,352],[682,352],[495,416],[570,416],[644,416],[719,416],[535,481],[609,481],[682,481]];
+ const lowerCenters=[[142,527],[216,527],[289,527],[103,591],[177,591],[251,591],[325,591],[142,655],[216,655],[289,655]];
+ function lowerTab(source){const scores=[64,130,196,264].map(x=>{const p=crop(source,[x-20,434,40,6],40,6).getContext('2d').getImageData(0,0,40,6).data;let n=0;for(let i=0;i<p.length;i+=4)if(p[i]>180&&p[i+1]>105&&p[i+1]<220&&p[i+2]<85)n++;return n;});return scores.filter(n=>n>100).length===1?scores.findIndex(n=>n>100):null;}
  function activeTab(source){
   const scores=[179,285,392,495].map(x=>{const p=crop(source,[x-30,438,60,6],60,6).getContext('2d').getImageData(0,0,60,6).data;let gold=0;for(let i=0;i<p.length;i+=4)if(p[i]>180&&p[i+1]>105&&p[i+1]<220&&p[i+2]<85)gold++;return gold;});const max=Math.max(...scores);return max>180&&scores.filter(v=>v>180).length===1?scores.indexOf(max):null;
  }
@@ -128,14 +130,14 @@
   return count(left)>=2&&count(left)>count(original)&&left.members.filter(m=>m.id&&m.coin!==undefined&&m.level!==undefined).length>=2?left:original;
  }
  function analyze(source,custom={characters:[],chips:[]}){
-  const refs=window.ScreenReaderReferences,extra=window.ScreenReaderLayoutReferences||{},statusRefs=window.ScreenReaderStatusReferences||{},charRefs=[...refs.characters,...(extra.characters||[]),...(statusRefs.characters||[]),...(custom.characters||[])],chipRefs=[...refs.chips,...(statusRefs.chips||[]),...(custom.chips||[])],digits=[...refs.digits,...(extra.digits||[])];
+  const refs=window.ScreenReaderReferences,extra=window.ScreenReaderLayoutReferences||{},statusRefs=window.ScreenReaderStatusReferences||{},charRefs=[...refs.characters,...(extra.characters||[]),...(statusRefs.characters||[]),...(custom.characters||[])],chipRefs=[...refs.chips,...(window.ScreenReaderPopupReferences?.chips||[]),...(statusRefs.chips||[]),...(custom.chips||[])],digits=[...refs.digits,...(extra.digits||[])];
   const {layout,members}=selectLayout(source,charRefs,digits);
   // Repeated IDs signal a bad match; do not use either conflicting slot.
   const repeated=new Set(members.filter(m=>m.id&&members.filter(other=>other.id===m.id).length>1).map(m=>m.id));
   for(const m of members)if(repeated.has(m.id)){delete m.id;m.unreadable=true;}
   const statusSource=source.statusFrame||source;
   const header=match(feature(statusSource,regions.header),charRefs.filter(r=>r.kind==='header'));
-  const tab=activeTab(source);
+  const lower=source.popupFrame?lowerTab(source.popupFrame):null,tab=lower??activeTab(source);
   // The small popup covers the self portrait. Never identify self from its
   // chip contents or selected tab; keep the previous self or explicit choice.
   const own=header||tab===null?match(feature(source,layout.regions.self),charRefs.filter(r=>r.kind==='self')):null;
@@ -143,15 +145,16 @@
   if(header){
    observation.view='ステータス画面';observation.chipOwnerId=header.id;observation.chipIds=chipMatches(statusSource,largeCenters,chipRefs);
    let target=members.find(m=>m.id===header.id);if(!target){target={id:header.id};members.push(target);}
-   for(const [stat,box] of [['atk',[542,239,26,37]],['def',[619,239,26,37]],['move',[705,239,27,37]]]){const v=numberAt(statusSource,box,'white',refs.digits);if(v!==null)target[stat]=v;}
-  }else if(tab!==null){observation.view='チップ画面';observation.chipOwnerId=members[tab]?.id??null;observation.chipIds=chipMatches(source,smallCenters,chipRefs);}
+   for(const [stat,box] of [['atk',[542,239,26,37]],['def',[619,239,26,37]]]){const v=numberAt(statusSource,box,'white',refs.digits);if(v!==null)target[stat]=v;}
+  }else if(tab!==null){observation.view='チップ画面';observation.chipOwnerId=members[tab]?.id??null;observation.chipIds=chipMatches(lower!==null?source.popupFrame:source,lower!==null?lowerCenters:smallCenters,chipRefs);}
   return observation;
  }
  function normalize(source,area){const c=document.createElement('canvas');c.width=WIDTH;c.height=HEIGHT;const w=source.videoWidth||source.naturalWidth||source.width,h=source.videoHeight||source.naturalHeight||source.height;const a=area||{x:0,y:0,w:1,h:1};c.getContext('2d').drawImage(source,a.x*w,a.y*h,a.w*w,a.h*h,0,0,WIDTH,HEIGHT);
   // Centered status panels scale with height; party HUD keeps its existing mapping.
   const statusWidth=a.w*w*HEIGHT/(a.h*h);
   if(Math.abs(statusWidth-WIDTH)>1){const status=document.createElement('canvas');status.width=WIDTH;status.height=HEIGHT;status.getContext('2d').drawImage(source,a.x*w,a.y*h,a.w*w,a.h*h,(WIDTH-statusWidth)/2,0,statusWidth,HEIGHT);c.statusFrame=status;}
+  const popup=document.createElement('canvas');popup.width=WIDTH;popup.height=HEIGHT;popup.getContext('2d').drawImage(source,a.x*w,a.y*h,a.w*w,a.h*h,0,0,statusWidth,HEIGHT);c.popupFrame=popup;
   return c;}
- function learn(source,kind,id,index=0){const refs=window.ScreenReaderReferences,extra=window.ScreenReaderLayoutReferences||{},layout=selectLayout(source,[...refs.characters,...(extra.characters||[])],[...refs.digits,...(extra.digits||[])]).layout;const box=kind==='chip-small'?smallCenters[index]:kind==='chip-large'?largeCenters[index]:kind==='avatar'?layout.regions.avatar[index]:layout.regions[kind];if(!box)throw Error('見本の位置が不正です。');const region=kind.startsWith('chip-')?[box[0]-18,box[1]-18,36,36]:box;return {id:String(id),kind:kind.startsWith('chip-')?'chip':kind,data:encode(feature((kind==='header'||kind==='chip-large')?(source.statusFrame||source):source,region))};}
+ function learn(source,kind,id,index=0){const refs=window.ScreenReaderReferences,extra=window.ScreenReaderLayoutReferences||{},layout=selectLayout(source,[...refs.characters,...(extra.characters||[])],[...refs.digits,...(extra.digits||[])]).layout;const lower=source.popupFrame&&lowerTab(source.popupFrame)!==null;const box=kind==='chip-small'?(lower?lowerCenters:smallCenters)[index]:kind==='chip-large'?largeCenters[index]:kind==='avatar'?layout.regions.avatar[index]:layout.regions[kind];if(!box)throw Error('見本の位置が不正です。');const region=kind.startsWith('chip-')?[box[0]-18,box[1]-18,36,36]:box;return {id:String(id),kind:kind.startsWith('chip-')?'chip':kind,data:encode(feature(kind==='chip-small'&&lower?source.popupFrame:(kind==='header'||kind==='chip-large')?(source.statusFrame||source):source,region))};}
  window.ScreenReaderVision={analyze,normalize,learn,numberAt,feature,profileMatch,regions,WIDTH,HEIGHT};
 })();
