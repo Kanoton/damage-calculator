@@ -260,6 +260,8 @@ This section supersedes older manual-only CT and placeholder-control notes above
 
 ## Monster status control visibility and layout
 
+2026-10-08 (07 and 08): Fate Echo uses the shared 20px icon / numeric stack control without visible label or input. Self Kaisei still applies 2 through skill target selection; positive stacks allow left +1/right -1 and turn-end -1. When Kaisei is a PT member (not self), the control remains visible at zero/off; activating from zero sets 2, active clicks increment by 1 and right clicks decrement. Countdown to zero switches aria-pressed off. Active marks remain editable even if Kaisei leaves the party; zero controls disappear when no PT Kaisei remains. Existing undo, defeated disabling and opponent refresh are preserved. Weakness uses UT_Buff_125_Skill.png in both versions.
+
 - Weakness controls appear when Moses (24) is self or registered in PT, Investigation Target when Bonnie (27) participates, Erosion when Sykes (29) participates, and Fan when KAngel (101) participates. Controls for all participating IDs appear together after Mark, regardless of the current PT chip-edit target. Registration/removal refreshes controls through `party-members-change` without resetting map progress. Hiding a control does not remove its stored state/effects/Fan count. Existing combat effects still use the actual self character; PT editor selection does not switch the calculator's character. Ame retains shared Fan combat effects without the Fan toggle UI.
 - These controls sit directly after Mark in each monster name, sharing the Mark field/button dimensions (22px button, 20px image, 13px stack count). Status clicks do not register combat targets or trigger the name button. Normal Mark remains available as before.
 

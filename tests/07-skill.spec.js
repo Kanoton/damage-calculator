@@ -581,12 +581,12 @@ test('07 skill: Kaisei Bonnie and Rinrin apply targeted monster effects', async 
  await selectCharacter(page,'13');
  await page.getByRole('button',{name:'フェイト・エコーを発動'}).click();
  await target.click();
- await expect(page.locator('.roster-fate-echo').first()).toContainText('フェイト・エコー2');
+ await expect(page.locator('.roster-fate-echo').first()).toHaveText('2');
  await expect(page.locator('#selected-character-ct')).toHaveText(/^CT 3 \/ \d+$/);
  await target.click();
  await expect(page.locator('#damageAdd1')).toHaveValue('1');
  await page.locator('#turn-end').click();
- await expect(page.locator('.roster-fate-echo').first()).toContainText('フェイト・エコー1');
+ await expect(page.locator('.roster-fate-echo').first()).toHaveText('1');
  await page.locator('#turn-end').click();
  await expect(page.locator('.roster-fate-echo')).toHaveCount(0);
  await expect(page.locator('#damageAdd1')).toHaveValue('0');
@@ -948,4 +948,25 @@ test('07 skill: Chouten fan count and Ame love are manually managed and referenc
  await selectCharacter(page,'102');const love=page.getByLabel('愛の数');await expect(love).toHaveValue('2');await love.fill('4');await love.dispatchEvent('change');
  const ameHp=page.locator('#selected-character-current-hp');await ameHp.fill('1');await ameHp.dispatchEvent('change');const baseMove=Number(await page.locator('#selected-character-move').textContent()),baseMaxHp=Number(await page.locator('#selected-character-hp').textContent());
  await page.getByRole('button',{name:'愛情の過剰摂取を発動'}).click();await expect(page.locator('#selected-character-move')).toHaveText(String(baseMove+4));await expect(love).toHaveValue('0');await expect(love).toHaveAttribute('max','5');await expect(page.locator('#selected-character-hp')).toHaveText(String(baseMaxHp+1));
+});
+
+for(const folder of ['07_skill','08_screen_reader'])test(folder+': Fate Echo icon controls support self and PT countdown; weakness uses its skill icon',async({page})=>{
+ await page.goto('/'+folder+'/');await selectCharacter(page,'13');
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-tab-monsters').click();
+ const maps=page.locator('#mp-map-select');for(const option of await maps.locator('option').all()){await maps.selectOption(await option.getAttribute('value'));await maps.dispatchEvent('change');if(await page.locator('#mp-monster-list .mp-monster:visible').count())break;}
+ await page.locator('#mp-monster-list .mp-monster:visible').first().click();
+ const card=page.locator('#map-roster-list .roster-card').first(),field=card.locator('.roster-fate-echo'),button=field.locator('button');
+ await page.getByRole('button',{name:'フェイト・エコーを発動'}).click();await card.locator('.roster-select').click();
+ await expect(field).toHaveText('2');await expect(field.locator('input')).toHaveCount(0);await expect(button.locator('img')).toHaveAttribute('src',/UT_Buff_114_Max\.png$/);await expect(button.locator('img')).toHaveCSS('width','20px');
+ await button.click();await expect(field).toHaveText('3');await button.click({button:'right'});await expect(field).toHaveText('2');
+ await page.locator('#turn-end').click();await expect(field).toHaveText('1');await page.locator('#turn-end').click();await expect(field).toHaveCount(0);
+ await selectCharacter(page,'24');await page.locator('#selected-party-tab').click();await page.locator('.character-select[data-id="13"]').click();
+ await page.locator('.role-tab[data-role="map"]').click();await expect(card.locator('.roster-status-weakness img')).toHaveAttribute('src',/UT_Buff_125_Skill\.png$/);
+ await expect(field).toHaveText('0');await expect(button).toHaveAttribute('aria-pressed','false');
+ const ct=await page.locator('#selected-character-ct').textContent();await button.click();await expect(field).toHaveText('2');await expect(button).toHaveAttribute('aria-pressed','true');await expect(page.locator('#selected-character-ct')).toHaveText(ct);await expect(page.locator('#selected-character-name')).toHaveText('モーゼス');
+ await expect(page.locator('.mode-content[data-role="map"]')).toBeVisible();
+ await button.click({button:'right'});await expect(field).toHaveText('1');await button.click();await expect(field).toHaveText('2');
+ await page.locator('#turn-end').click();await expect(field).toHaveText('1');await page.locator('#turn-end').click();await expect(field).toHaveText('0');await expect(button).toHaveAttribute('aria-pressed','false');
+ await page.locator('#roster-undo').click();await expect(field).toHaveText('1');await expect(button).toHaveAttribute('aria-pressed','true');
+ await button.click({button:'right'});await button.click({button:'right'});await expect(field).toHaveText('0');await button.click();await expect(field).toHaveText('2');
 });

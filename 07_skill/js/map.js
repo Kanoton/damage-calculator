@@ -249,14 +249,21 @@ function renderRoster(){
   const deleteButton=createRosterActionButton('roster-delete','削除',displayName+'を削除');deleteButton.addEventListener('click',()=>{rememberRoster();const i=rosterState.monsters.indexOf(enemy);if(i>=0)rosterState.monsters.splice(i,1);if(rosterState.selectedId===enemy.instanceId){rosterState.selectedId=null;window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:null}));}renderRoster();});
    actions.append(remove,deleteButton);
   const statusControls=[],statusCharacterIds=new Set(window.getPartyCharacterIds?.()||[String(window.captureCharacterAbilityState?.()?.id||'')]);
-  for(const config of [{characterId:'24',key:'weakness',label:'弱点'},{characterId:'27',key:'investigationTarget',label:'調査対象',icon:'UT_Buff_127_Skill.png'},{characterId:'29',key:'erosionStacks',label:'エロ',icon:'UT_Buff_129_Skill.png',stack:true},{characterId:'101',key:'fan',label:'ファン',icon:'UT_Buff_301.png'}].filter(config=>statusCharacterIds.has(config.characterId))){
+  for(const config of [{characterId:'24',key:'weakness',label:'弱点',icon:'UT_Buff_125_Skill.png'},{characterId:'27',key:'investigationTarget',label:'調査対象',icon:'UT_Buff_127_Skill.png'},{characterId:'29',key:'erosionStacks',label:'エロ',icon:'UT_Buff_129_Skill.png',stack:true},{characterId:'101',key:'fan',label:'ファン',icon:'UT_Buff_301.png'}].filter(config=>statusCharacterIds.has(config.characterId))){
    const view=createRosterCharacterStatusControl(enemy,displayName,config);
    const change=delta=>{if(enemy.defeated)return;const current=config.stack?(Number(enemy[config.key])||0):!!enemy[config.key],next=config.stack?Math.max(0,current+delta):!current;if(current===next)return;rememberRoster();enemy[config.key]=next;renderRoster();};
    view.button.addEventListener('click',event=>{event.stopPropagation();change(1);});if(config.stack)view.button.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();change(-1);});
    statusControls.push(view.field);
   }
    const {field:markField,button:markButton}=createRosterMarkControl(enemy,displayName);const changeMark=delta=>{if(enemy.defeated)return;const next=Math.max(0,(enemy.markStacks||0)+delta);if(next===(enemy.markStacks||0))return;rememberRoster();enemy.markStacks=next;if(rosterState.selectedId===enemy.instanceId)registerEnemy(enemy,false);renderRoster();};markButton.addEventListener('click',event=>{event.stopPropagation();changeMark(1);});markButton.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();changeMark(-1);});nameText.append(markField,...statusControls);
-  if((enemy.fateEchoStacks||0)>0){const fate=document.createElement('span');fate.className='roster-fate-echo';fate.title='フェイト・エコー：受けるダメージ+1、ターン終了時に1減少';const icon=document.createElement('img');icon.src='../images/UT_Buff/UT_Buff_114_Max.png';icon.alt='';const label=document.createElement('span');label.textContent='フェイト・エコー';const value=document.createElement('strong');value.textContent=String(enemy.fateEchoStacks);fate.append(icon,label,value);nameText.append(fate);}
+  const partyKaisei=statusCharacterIds.has('13')&&String(window.captureCharacterAbilityState?.()?.id)!=='13';
+  if((enemy.fateEchoStacks||0)>0||partyKaisei){
+   const {field,button}=createRosterCharacterStatusControl(enemy,displayName,{key:'fateEchoStacks',label:'フェイト・エコー',icon:'UT_Buff_114_Max.png',stack:true});
+   field.classList.add('roster-fate-echo');button.setAttribute('aria-pressed',String((enemy.fateEchoStacks||0)>0));
+   button.title='フェイト・エコー：受けるダメージ+1、ターン終了時に1減少。'+(partyKaisei?'オフからクリックで2、':'')+'左クリックで＋1、右クリックで−1';
+   const change=delta=>{if(enemy.defeated)return;const current=enemy.fateEchoStacks||0,next=partyKaisei&&delta>0&&current===0?2:Math.max(0,current+delta);if(next===current)return;rememberRoster();enemy.fateEchoStacks=next;renderRoster();};
+   button.addEventListener('click',event=>{event.stopPropagation();change(1);});button.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();change(-1);});nameText.append(field);
+  }
   const skill=summonSkills[enemy.monsterId],skillOpen=skillChoiceId===enemy.instanceId;
   const skillTargets=skill?.targets.map(id=>{const target=data.stats.find(row=>row.monster_id===id&&row['難易度']===difficulty.value);return target?{id,name:target['モンスター名'],image:data.images[target.image]}:null;})||[];
   const skillView=createRosterSkillView(enemy,displayName,skill,skillOpen,skillTargets,assignMapImage,()=>{skillChoiceId=skillOpen?null:enemy.instanceId;renderRoster();},id=>summonFromSkill(enemy,id));
