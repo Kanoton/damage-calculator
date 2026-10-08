@@ -1,6 +1,10 @@
 (()=>{
  'use strict';
  const $=id=>document.getElementById('reader-'+id),video=$('video'),preview=$('preview'),ctx=preview.getContext('2d'),vision=window.ScreenReaderVision,bridge=window.ScreenReaderCharacterBridge;
+ const dock=document.getElementById('reader-dock'),toggle=$('toggle');
+ const setDock=open=>{dock.classList.toggle('is-open',open);toggle.setAttribute('aria-expanded',String(open));};
+ toggle.addEventListener('click',()=>setDock(!dock.classList.contains('is-open')));
+ dock.addEventListener('keydown',event=>{if(event.key==='Escape'){setDock(false);toggle.focus();}});
  const STORAGE='astral-08-screen-reader-profile-v1';
  let stream=null,rawSource=null,frame=null,busy=false,timer=null,generation=0,selecting=false,selectionStart=null,area=null,catalog=null,custom={characters:[],chips:[]};
  const stable=new Map();let lastHash=null,sameFrames=0,stableTick=0;
@@ -30,7 +34,7 @@
  }
  function showFrame(source){frame=vision.normalize(source,area);ctx.drawImage(frame,0,0);$('area').disabled=false;$('learn').disabled=!catalog;}
  function drawResults(observation){
-  $('result-body').replaceChildren(...observation.members.filter(m=>Number.isInteger(m.slot)).map(m=>{const tr=document.createElement('tr'),name=catalog.characters.find(c=>c.id===m.id)?.name??'未判定';for(const value of [m.slot+1,name+(m.id===observation.selfId?'（自分）':''),m.level??'—',m.currentHp===undefined&&m.maxHp===undefined?'—':(m.currentHp??'—')+'/'+(m.maxHp??'—'),m.coin??'—',['atk','def','move'].map(k=>m[k]??'—').join('／')]){const td=document.createElement('td');td.textContent=String(value);tr.append(td);}return tr;}));
+  $('result-body').replaceChildren(...observation.members.filter(m=>Number.isInteger(m.slot)).map(m=>{const tr=document.createElement('tr'),name=catalog.characters.find(c=>c.id===m.id)?.name??'未判定';for(const value of [m.slot+1,name+(m.id===observation.selfId?'（自分）':''),m.level??'—',m.currentHp===undefined&&m.maxHp===undefined?'—':(m.currentHp??'—')+'/'+(m.maxHp??'—'),m.coin??'—',['atk','def'].map(k=>m[k]??'—').join('／')]){const td=document.createElement('td');td.textContent=String(value);tr.append(td);}return tr;}));
   $('view').textContent=observation.view+'：今回読み取れた情報';
   const owner=catalog.characters.find(c=>c.id===observation.chipOwnerId)?.name;
   $('chip-result').textContent=observation.chipOwnerId?(owner+'のチップ：'+(observation.chipIds.map(id=>catalog.chips.find(c=>c.id===id)?.name??id).join('、')||'判定できたチップなし')):'チップの対象キャラは未判定です。';
@@ -39,7 +43,7 @@
  function stabilize(observation){
   stableTick++;
   const out={...observation,members:[],selfId:null,chipIds:[]};if(observation.selfId&&accept('self',observation.selfId))out.selfId=observation.selfId;
-  for(const m of observation.members){if(!m.id)continue;const identityReady=accept('slot:'+m.slot,m.id),item={id:m.id,slot:m.slot};for(const key of ['level','currentHp','maxHp','coin','atk','def','move'])if(m[key]!==undefined&&accept(m.id+':'+key,m[key]))item[key]=m[key];if(identityReady)out.members.push(item);}
+  for(const m of observation.members){if(!m.id)continue;const identityReady=accept('slot:'+m.slot,m.id),item={id:m.id,slot:m.slot};for(const key of ['level','currentHp','maxHp','coin','atk','def'])if(m[key]!==undefined&&accept(m.id+':'+key,m[key]))item[key]=m[key];if(identityReady)out.members.push(item);}
   const ownerReady=observation.chipOwnerId&&accept('chipOwner',observation.chipOwnerId),chipIds=observation.chipIds.filter(id=>accept(observation.chipOwnerId+':chip:'+id,id));if(ownerReady)out.chipIds=chipIds;else out.chipOwnerId=null;
   return out;
  }

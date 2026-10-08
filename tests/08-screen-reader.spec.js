@@ -1,7 +1,7 @@
 const {test,expect}=require('@playwright/test');
 const fixture=n=>require('./fixtures/screen-reader/'+n+'.json').image;
 
-async function open(page){await page.goto('/08_screen_reader/');await page.waitForFunction(()=>window.ScreenReaderCharacterBridge?.catalog().characters.length===35);await expect(page.locator('#reader-self option')).toHaveCount(36);}
+async function open(page){await page.goto('/08_screen_reader/');await page.locator('#reader-toggle').click();await page.waitForFunction(()=>window.ScreenReaderCharacterBridge?.catalog().characters.length===35);await expect(page.locator('#reader-self option')).toHaveCount(36);}
 async function readFixture(page,n){
  const image=fixture(n),data=Buffer.from(image.split(',')[1],'base64');
  await page.locator('#reader-file').setInputFiles({name:n+'.png',mimeType:'image/png',buffer:data});
@@ -112,8 +112,8 @@ test('08: recognizes sanitized real game frames, adds chips to their owners and 
  expect(s.members[0].chips).toEqual(['30']);expect(s.members[1].chips).toEqual([]);
  await readFixture(page,'6250');s=await snapshot(page);
  expect(s.members[1].chips).toEqual(['26']);expect(s.members[0].chips).toEqual(['30']);expect(s.members[1].currentHp).toBe(12);expect(s.members[1].level).toBe(1);
- await readFixture(page,'6251');s=await snapshot(page);expect([s.members[0].atk,s.members[0].def,s.members[0].move]).toEqual([1,2,4]);expect(s.members[2].currentHp).toBe(9);
- await readFixture(page,'6252');s=await snapshot(page);expect([s.members[1].atk,s.members[1].def,s.members[1].move]).toEqual([1,1,5]);expect(s.members[1].chips).toEqual(['26']);expect(s.members[0].chips).toEqual(['30']);
+ await readFixture(page,'6251');s=await snapshot(page);expect([s.members[0].atk,s.members[0].def]).toEqual([1,2]);expect(s.members[2].currentHp).toBe(9);
+ await readFixture(page,'6252');s=await snapshot(page);expect([s.members[1].atk,s.members[1].def]).toEqual([1,1]);expect(s.members[1].chips).toEqual(['26']);expect(s.members[0].chips).toEqual(['30']);
  await page.screenshot({path:'test-results/08-screen-reader-ui.png',fullPage:true});
 });
 
@@ -178,4 +178,37 @@ test('08: 16:9 status screenshots identify chip owners and preserve additive own
   expect(result.o.view).toBe('ステータス画面');expect(result.o.chipOwnerId).toBe(owner);expect(result.o.chipIds).toEqual([chip]);expect(result.learned).toBe(result.expected);
  }
  const s=await snapshot(page);for(const [owner,chip] of [['18','42'],['3','26'],['106','121']])expect(s.members.find(m=>m.id===owner).chips).toEqual([chip]);
+});
+
+
+test('08: status reading never emits movement from hand-size digits',async({page})=>{
+ await open(page);
+ for(const n of ['6251','6252','status-184601','status-184606','status-184610']){
+  const result=await page.evaluate(async image=>{const im=new Image();im.src=image;await im.decode();return ScreenReaderVision.analyze(ScreenReaderVision.normalize(im));},fixture(n));
+  expect(result.members.every(m=>!Object.hasOwn(m,'move'))).toBe(true);
+ }
+ const stable=await page.evaluate(()=>{const o={members:[{id:'13',slot:1,move:99}],selfId:null,chipOwnerId:null,chipIds:[]};ScreenReaderController.stabilize(o);return ScreenReaderController.stabilize(o);});
+ expect(stable.members[0].move).toBeUndefined();
+});
+
+test('08: reader opens on hover without moving the calculator and supports click and Escape',async({page})=>{
+ await page.goto('/08_screen_reader/');await page.mouse.move(0,500);
+ const panel=page.locator('#reader-panel'),toggle=page.locator('#reader-toggle'),body=page.locator('.tool-wrapper');
+ await expect(panel).toBeHidden();const before=await body.boundingBox();
+ await toggle.hover();await expect(panel).toBeVisible();expect(await body.boundingBox()).toEqual(before);
+ await page.mouse.move(0,500);await expect(panel).toBeHidden();
+ await toggle.click();await page.mouse.move(0,500);await expect(panel).toBeVisible();await expect(toggle).toHaveAttribute('aria-expanded','true');
+ await toggle.press('Escape');await expect(panel).toBeHidden();expect(await body.boundingBox()).toEqual(before);
+});
+
+test('08: lower popup uses scaled geometry, selected tab and PT identity without inventing self',async({page})=>{
+ await open(page);await readFixture(page,'popup-11');await page.locator('#reader-self').selectOption('105');
+ const cases=[['11','105',[]],['36','106',['121']],['41','3',['26','39','36','2']],['43','18',['42','36','24']]];
+ for(const [stamp,owner,chips]of cases){
+  await readFixture(page,'popup-'+stamp);
+  const s=await snapshot(page);expect(s.selfId).toBe('105');expect(s.members.find(m=>m.id===owner).chips).toEqual(chips);
+  const observations=await page.evaluate(async image=>{const im=new Image();im.src=image;await im.decode();return [1,.75].map(scale=>{const c=document.createElement('canvas');c.width=im.width*scale;c.height=im.height*scale;c.getContext('2d').drawImage(im,0,0,c.width,c.height);return ScreenReaderVision.analyze(ScreenReaderVision.normalize(c));});},fixture('popup-'+stamp));
+  for(const o of observations){expect(o.chipOwnerId).toBe(owner);expect(o.chipIds).toEqual(chips);expect(o.selfId).toBeNull();}
+ }
+ await readFixture(page,'popup-11');const s=await snapshot(page);expect(s.members.find(m=>m.id==='18').chips).toEqual(['42','36','24']);
 });
