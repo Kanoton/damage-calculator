@@ -86,6 +86,39 @@ const roundDisplay=document.getElementById('current-round'),progressDisplay=docu
 function roundProgressReady(){return Boolean(data.maps[pick.value]&&hasSelectedCharacter());}
 function renderRoundProgress(){roundDisplay.textContent=rosterState.round;progressDisplay.textContent=rosterState.progress;document.getElementById('round-progress-controls').hidden=!roundProgressReady();}
 function executeProgressEvents(){if(!roundProgressReady())return;groupMapEvents(routeRows(data.events)).filter(group=>Number(group['進捗'])===rosterState.progress).forEach(group=>executeEvent(group,{remember:false,render:false}));updateEventRows();renderRoster();}
+// Screen observations synchronize absolute values, never synthesize turn-end clicks.
+window.ScreenReaderMapBridge={
+ context:()=>JSON.stringify([pick.value,difficulty.value,routeState.route]),
+ snapshot:()=>({map:pick.value,difficulty:difficulty.value,round:rosterState.round,progress:rosterState.progress,events:[...executedEvents],monsters:rosterState.monsters.map(e=>({monsterId:e.monsterId,serial:e.boss?null:e.serial,hp:e.hp,defeated:!!e.defeated,attack:e.attack,defense:e.defense,instanceId:e.instanceId}))}),
+ apply:observation=>{
+  const result={updated:0,added:0,events:0,skipped:0};if(!roundProgressReady()||!observation)return result;
+  const valid=(n,min,max)=>Number.isSafeInteger(n)&&n>=min&&n<=max,clock=observation.clock;
+  if(clock&&(!valid(clock.round,1,99)||!valid(clock.progress,1,99)||clock.round<rosterState.round)){result.skipped++;return result;}
+  let saved=false;const save=()=>{if(!saved){rememberRoster();saved=true;}};
+  if(clock){
+   if(clock.round!==rosterState.round||clock.progress!==rosterState.progress){save();rosterState.round=clock.round;rosterState.progress=clock.progress;result.updated++;}
+   // Catch up missing progress events in order, with the existing once-only keys.
+   const groups=groupMapEvents(routeRows(data.events)).filter(g=>/^\d+$/.test(String(g['進捗']))&&Number(g['進捗'])<=clock.progress).sort((a,b)=>Number(a['進捗'])-Number(b['進捗']));
+   for(const group of groups)if(!executedEvents.has(eventKey(group))){save();executeEvent(group,{remember:false,render:false});if(executedEvents.has(eventKey(group)))result.events++;}
+  }
+  const observations=Array.isArray(observation.monsters)?observation.monsters:[],seen=new Set();
+  for(const o of observations){
+   const key=o.monsterId+':'+o.serial;if(seen.has(key)){result.skipped++;continue;}seen.add(key);
+   if(observations.filter(p=>p.monsterId===o.monsterId&&p.serial===o.serial).length!==1||!valid(o.currentHp,0,999)||!valid(o.maxHp,1,999)||o.currentHp>o.maxHp){result.skipped++;continue;}
+   const stats=data.stats.find(r=>r.monster_id===o.monsterId&&r['難易度']===difficulty.value);if(!stats){result.skipped++;continue;}
+   const boss=String(stats['ボス']).trim()==='1';if(boss?o.serial!==null:!valid(o.serial,1,999)){result.skipped++;continue;}
+   const matches=rosterState.monsters.filter(e=>e.monsterId===o.monsterId&&e.mapId===pick.value&&(boss||e.serial===o.serial));
+   if(matches.length>1||matches[0]?.defeated||Number(rosterStat(stats,'HP'))!==o.maxHp||(!matches.length&&data.nativeMapByMonster[o.monsterId]!==pick.value)){result.skipped++;continue;}
+   let enemy=matches[0];if(!enemy){
+    save();enemy=addPlacedMonster({instanceId:rosterState.nextId++,monsterId:o.monsterId,name:stats['モンスター名'],mapName:data.maps[pick.value].name,mapId:pick.value,difficulty:difficulty.value,image:data.images[stats.image],base:{...stats},damageTaken:0,attack:rosterStat(stats,'攻撃'),defense:rosterStat(stats,'防御'),hp:o.maxHp,coin:stats['コイン']===''?null:Number(stats['コイン']),boss,reflect:String(stats['反撃']).trim()==='1'});
+    if(!boss){enemy.serial=o.serial;rosterState.serials.set(o.monsterId,Math.max(rosterState.serials.get(o.monsterId)||0,o.serial));}result.added++;
+   }
+   if(enemy.hp!==o.currentHp){save();enemy.manualHp=o.currentHp;enemy.hp=o.currentHp;enemy.damageTaken=o.maxHp-o.currentHp;if(o.currentHp===0)removeEnemy(enemy);result.updated++;}
+  }
+  if(saved){renderRoundProgress();updateEventRows();renderRoster();}return result;
+ }
+};
+
 function changeProgress(delta){const next=Math.max(0,rosterState.progress+delta);if(next===rosterState.progress)return;rememberRoster();rosterState.progress=next;renderRoundProgress();executeProgressEvents();}
 document.getElementById('progress-minus').addEventListener('click',()=>changeProgress(-1));
 document.getElementById('progress-plus').addEventListener('click',()=>changeProgress(1));
