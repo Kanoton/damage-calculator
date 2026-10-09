@@ -18,6 +18,8 @@ body.mobile-ui{margin:0 auto;padding:8px 8px calc(12px + env(safe-area-inset-bot
 .mobile-ui #character-panel{height:auto;min-height:0;padding:8px}
 .mobile-ui .character-view,.mobile-ui .character-image-grid,.mobile-ui .chip-category-view{overflow:visible;max-height:none}
 .mobile-ui .character-image-grid{grid-template-columns:minmax(0,1fr);gap:8px}
+.mobile-ui #character-image-list{max-height:min(60dvh,560px);overflow-y:auto;overscroll-behavior:contain}
+.mobile-ui .selected-character{scroll-margin-top:60px;margin-bottom:12px}
 .mobile-ui .mobile-character-detail{margin-top:-6px;margin-bottom:10px}
 .mobile-ui .selected-character{height:auto;min-height:0;margin-top:14px;padding:10px;grid-template-columns:48px minmax(0,1fr);grid-template-rows:auto auto auto auto;gap:12px;overflow:visible}
 .mobile-ui .selected-character-member-tabs{grid-column:1/-1;grid-row:1;flex-direction:row;border:0;padding:0;height:auto}

@@ -31,6 +31,7 @@
  const chips=document.querySelector('.selected-character-chips'),details=document.createElement('details');details.className='mobile-chip-details';const summary=document.createElement('summary');summary.textContent='取得チップ';chips.before(details);details.append(summary,chips);
  for(const table of document.querySelectorAll('.damage-table')){const toggle=button('出目の表を表示',()=>{const expanded=table.classList.toggle('mobile-expanded');toggle.textContent=expanded?'出目の表を閉じる':'出目の表を表示';toggle.setAttribute('aria-expanded',String(expanded));});toggle.className='mobile-only mobile-table-toggle';toggle.setAttribute('aria-expanded','false');table.before(toggle);}
  const tabs=document.querySelector('.role-tabs'),tabAnchor=document.createComment('desktop role tabs');tabs.before(tabAnchor);
- function update(){close();document.body.classList.toggle('mobile-ui',media.matches);window.dispatchEvent(new Event('mobile-ui-change'));if(!media.matches){details.open=true;tabAnchor.after(tabs);}else{details.open=false;document.querySelector('.main-container').before(tabs);}}
+ const panel=document.getElementById('selected-character'),round=document.getElementById('round-progress-controls'),panelAnchor=document.createComment('desktop character'),roundAnchor=document.createComment('desktop round');panel.before(panelAnchor);round.before(roundAnchor);
+ function update(){close();document.body.classList.toggle('mobile-ui',media.matches);window.dispatchEvent(new Event('mobile-ui-change'));if(!media.matches){details.open=true;tabAnchor.after(tabs);roundAnchor.after(round);panelAnchor.after(panel);}else{details.open=false;const main=document.querySelector('.main-container');main.before(tabs,round,panel);}}
  media.addEventListener('change',update);update();
 })();

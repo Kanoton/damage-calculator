@@ -27,7 +27,15 @@ test('phone: ability details, chip foldout and table foldout are explicit and ac
 });
 test('phone: narrow and landscape layouts do not overflow and desktop resize restores layout',async({page},info)=>{
  await page.setViewportSize({width:360,height:780});await start(page);for(const id of ['103','104','8'])await add(page,id);await noOverflow(page);
+ expect(await page.evaluate(()=>document.getElementById('selected-character').getBoundingClientRect().top<document.querySelector('.main-container').getBoundingClientRect().top)).toBe(true);
  await info.attach('phone-party',{body:await page.screenshot({fullPage:true}),contentType:'image/png'});
  await page.setViewportSize({width:844,height:390});await noOverflow(page);await page.locator('#selected-self-tab').tap();await noOverflow(page);
  await page.setViewportSize({width:1100,height:800});await expect(page.locator('body')).not.toHaveClass(/mobile-ui/);await expect(page.locator('.mobile-party-actions').first()).toBeHidden();
+});
+
+test('phone: monster HP changes once, modal cancellation is harmless and Undo restores HP',async({page})=>{
+ await start(page);await page.locator('.role-tab[data-role="map"]').tap();await page.locator('#mp-tab-monsters').tap();await page.locator('#mp-map-select').selectOption('MAP0104');await page.locator('#roster-clear').tap();await page.locator('#mp-monster-list .mp-monster:visible').first().tap();
+ const card=page.locator('#map-roster-list .roster-card').first(),hp=card.getByRole('spinbutton',{name:/残りHP$/}),before=Number(await hp.inputValue());
+ const icon=card.getByRole('button',{name:/残りHPを増やす$/});await icon.tap();await page.getByRole('button',{name:'閉じる',exact:true}).tap();await expect(hp).toHaveValue(String(before));
+ await icon.tap();await page.getByRole('button',{name:'− 減らす',exact:true}).tap();await expect(hp).toHaveValue(String(before-1));await page.locator('#roster-undo').tap();await expect(hp).toHaveValue(String(before));await noOverflow(page);
 });

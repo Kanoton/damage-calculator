@@ -448,7 +448,7 @@
  function setPartyMode(active){
   partyMode=Boolean(active&&selectedCharacter);if(!partyMode){partyEditId=null;chipStatus.textContent='';}selectedPanel.classList.toggle('is-party-view',partyMode);partyGrid.hidden=!partyMode;
   selfTab.setAttribute('aria-selected',String(!partyMode));partyTab.setAttribute('aria-selected',String(partyMode));selfTab.tabIndex=partyMode?-1:0;partyTab.tabIndex=partyMode?0:-1;
-  listStatus.textContent=partyMode?'PT登録：キャラをクリックで追加、右クリックで解除（自分を含めて最大4人）':'';
+  listStatus.textContent=partyMode?(document.body.classList.contains('mobile-ui')?'PT登録：一覧をタップで追加、PTの操作ボタンから解除（自分を含めて最大4人）':'PT登録：キャラをクリックで追加、右クリックで解除（自分を含めて最大4人）'):'';
   renderParty();
  }
  function registerPartyMember(row){
@@ -456,7 +456,7 @@
   const id=String(row.id);
   if(partySlots.some(member=>String(member)===id)){listStatus.textContent=row.name+'は登録済みです。';return;}
   const empty=partySlots.indexOf(null);
-  if(empty<0){listStatus.textContent='PTは自分を含めて4人までです。右クリックでメンバーを解除できます。';return;}
+  if(empty<0){listStatus.textContent=document.body.classList.contains('mobile-ui')?'PTは自分を含めて4人までです。PTの操作ボタンからメンバーを解除できます。':'PTは自分を含めて4人までです。右クリックでメンバーを解除できます。';return;}
   partySlots[empty]=row.id;partyStates.set(id,{level:0,currentHp:null,chips:[],manual:{atk:0,def:0,move:0}});renderParty();window.dispatchEvent(new Event('party-members-change'));listStatus.textContent=row.name+'を'+(empty+1)+'番目に登録しました。右クリックで解除できます。';
  }
  function removePartyMember(id){
