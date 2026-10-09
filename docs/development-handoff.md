@@ -391,3 +391,9 @@ This section supersedes older manual-only CT and placeholder-control notes above
 - CSS Grid places main tabs/views on left; round/progress, unchanged118px self/PT frame and monster roster on right. Main content and roster list scroll independently within the viewport; narrow/tall windows keep vertical layout. No state or DOM ownership changes. Mobile retains its existing priority. 08 is unchanged.
 - `npm run test:07:wide` / `playwright.wide.config.js` / `07-wide.yml` verify all4 modes at FHD, portrait/narrow/ratio gating, state retention, roster scrolling and HP Undo in Chromium and WebKit. Tests45sec, suite5min, failures3, CI15min; screenshots/reports retained14days. Existing desktop, mobile and pair regressions also required.
 - Checkpoint before wide UI:2582a1336d7dec9f07351c25338c9741da0c7785 (mobile approved by user); branch codex/07-wide-layout.
+
+## 07 wide layout refinement (2026-10-09)
+
+- Supersedes initial wide arrangement: right rail35% (minimum580px), round/progress top left, standalone main tabs to its right; main below. Monster roster top right in2 columns, self/PT118px frame bottom right. Only roster list scrolls within right rail.
+- Wide map toolbar combines subtabs on left with map/difficulty on right; wrapper is display:contents outside wide mode. Roster help text is hidden only in wide mode, card statistics use2x2 compact rows. Vertical/mobile layout and calculation/state processing remain shared.
+- Checkpoint before refinement:3b409c6a8e760a4e813a4f3f24121d60e553cbe6; branch codex/07-wide-refine. Existing bounded wide/mobile/desktop/pair CI remain required.

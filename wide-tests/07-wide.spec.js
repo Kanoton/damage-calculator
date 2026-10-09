@@ -1,11 +1,11 @@
 const {test,expect}=require('@playwright/test');
 async function select(page,id){await page.locator('.role-tab.character-tab').click();await page.locator('#selected-self-tab').click();await page.locator('#character-list-tab').click();await page.locator(`.character-select[data-id="${id}"]`).click();await page.locator('#selected-self-tab').click();}
-async function bounds(page){return page.evaluate(()=>{const rect=s=>{const b=document.querySelector(s).getBoundingClientRect();return {x:b.x,y:b.y,right:b.right,bottom:b.bottom,width:b.width,height:b.height};};return {main:rect('.tool-wrapper'),round:rect('#round-progress-controls'),self:rect('#selected-character'),roster:rect('.map-roster'),overflowX:document.documentElement.scrollWidth>innerWidth+1,overflowY:document.documentElement.scrollHeight>innerHeight+1};});}
+async function bounds(page){return page.evaluate(()=>{const rect=s=>{const b=document.querySelector(s).getBoundingClientRect();return {x:b.x,y:b.y,right:b.right,bottom:b.bottom,width:b.width,height:b.height};};return {main:rect('.main-container'),round:rect('#round-progress-controls'),self:rect('#selected-character'),roster:rect('.map-roster'),overflowX:document.documentElement.scrollWidth>innerWidth+1,overflowY:document.documentElement.scrollHeight>innerHeight+1};});}
 test('FHD: left main and right controls fit the viewport in all four modes',async({page},info)=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/07_skill/');await select(page,'1');
  for(const role of ['map','character','attack','defense']){
-  await page.locator(`.role-tab[data-role="${role}"]`).click();const b=await bounds(page);expect(b.overflowX).toBe(false);expect(b.overflowY).toBe(false);expect(b.round.x).toBeGreaterThan(b.main.right);expect(b.self.width).toBe(520);expect(b.roster.bottom).toBeLessThanOrEqual(1080);expect(b.self.height).toBe(118);
-  await info.attach('fhd-'+role,{body:await page.screenshot(),contentType:'image/png'});
+  await page.locator(`.role-tab[data-role="${role}"]`).click();const b=await bounds(page);expect(b.overflowX).toBe(false);expect(b.overflowY).toBe(false);expect(b.round.x).toBe(b.main.x);expect(b.round.bottom).toBeLessThanOrEqual(b.main.y);expect(b.self.width).toBeGreaterThan(650);expect(b.self.y).toBeGreaterThanOrEqual(b.roster.bottom);expect(b.roster.bottom).toBeLessThanOrEqual(1080);expect(b.self.height).toBe(118);
+  await page.mouse.move(0,0);await info.attach('fhd-'+role,{body:await page.screenshot(),contentType:'image/png'});
  }
  expect(errors).toEqual([]);
 });
