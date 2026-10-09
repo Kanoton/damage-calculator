@@ -987,3 +987,11 @@ test('07 PT support: cocktail and Dorothy bonuses expire on turn end; capped hea
  const before=await page.evaluate(()=>captureCharacterAbilityState().currentHp);await page.locator('#selected-character-hp-fill').click({button:'right'});await page.getByRole('button',{name:'PTパンダマン回復＋2'}).click();expect(await page.evaluate(()=>captureCharacterAbilityState().currentHp)).toBe(before);
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();expect(await page.evaluate(()=>captureCharacterAbilityState().currentHp)).toBe(before-1);
 });
+
+test('07 PT support: explicit Yume bonus and Bonnie stealth use received amounts without card tracking',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'1');await registerSupport(page,'20');await registerSupport(page,'27');await registerSupport(page,'103');const base=Number(await page.locator('#attackPower1').inputValue());
+ const bonus=page.getByRole('spinbutton',{name:'PTユメ攻撃補正の数'});await bonus.fill('4');await bonus.dispatchEvent('change');expect(Number(await page.locator('#attackPower1').inputValue())).toBe(base+4);
+ await page.evaluate(()=>window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:{name:'test monster',markStacks:2}})));await page.getByRole('button',{name:/^PT潜伏：/}).click();expect(Number(await page.locator('#attackPower1').inputValue())).toBe(base+6);
+ await page.getByRole('button',{name:/^PT潜伏：/}).click();expect(Number(await page.locator('#attackPower1').inputValue())).toBe(base+4);
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#turn-end').click();expect(Number(await page.locator('#attackPower1').inputValue())).toBe(base);
+});
