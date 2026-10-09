@@ -16,7 +16,7 @@
   if(target.classList.contains('roster-status-button')&&target.getAttribute('aria-pressed')!==null)return;
   event.preventDefault();event.stopImmediatePropagation();opener=target;
   const title=target.id==='selected-character-portrait'?'レベル':target.id==='selected-character-ct'?'CT':(target.getAttribute('aria-label')||target.title||'数値の変更').split(/[:：\n]/)[0].replace(/を(?:1)?(?:増やす|減らす)$/,'');open(title);
-  const ct=target.id==='selected-character-ct';dialog.append(button('＋ 増やす',()=>dispatchOriginal(target,ct)),button('− 減らす',()=>dispatchOriginal(target,!ct)));
+  const reverse=target.id==='selected-character-ct'||target.id==='selected-character-hp-fill'||target.closest('[data-stat="hp"]')!==null||target.getAttribute('aria-label')?.endsWith('残りHPを減らす');dialog.append(button('＋ 増やす',()=>dispatchOriginal(target,reverse)),button('− 減らす',()=>dispatchOriginal(target,!reverse)));
  },true);
  document.addEventListener('click',event=>{
   if(!media.matches)return;const target=event.target.closest('.mobile-party-actions');if(!target)return;
