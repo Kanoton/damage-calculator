@@ -114,7 +114,6 @@
    if(['atk','def','move','damageReduce'].includes(rule.target))result[rule.target]+=abilityModifierValue(rule);
   }
   for(const stat of ['atk','def','move'])result[stat]+=activeSkillStatBonus(stat);
-  const light=Math.floor(abilityControlValue('PTスターライト')/6);result.atk+=light;result.def+=light;
   for(const c of partySupportControls)if(c.stat){const amount=c.number?abilityControlValue(c.key):(abilityControlValue(c.key)?(c.marked?(Number(currentOpponent?.markStacks)||0):c.value):0);result[c.stat]+=amount;}
   for(const rule of mapKeywords.filter(row=>row.map_id===mapPicker.value)){
    let stacks=rule.input_kind==='checkbox'?(state().modes[rule.effect_key]?1:0):number(state(),rule.effect_key);
@@ -151,7 +150,6 @@
  // Received PT effects are stored with self ability state, including roster Undo.
  const partySupportControls=[
   {donor:'8',key:'PTジュジュシールド',icon:'ジュジュシールド',stat:'damageReduce',value:99},
-  {donor:'21',key:'PTスターライト',icon:'スターライト',number:true},
   {donor:'103',key:'PTカクテル攻撃',icon:'カクテル攻撃カード',number:true,max:3,stat:'atk'},
   {donor:'103',key:'PTカクテル防御',icon:'カクテル防御カード',number:true,max:3,stat:'def'},
   {donor:'104',key:'PTドロシー攻撃',icon:'本当の私',stat:'atk',value:1},

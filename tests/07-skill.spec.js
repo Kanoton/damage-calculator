@@ -972,11 +972,11 @@ for(const folder of ['07_skill','08_screen_reader'])test(folder+': Fate Echo ico
 });
 
 async function registerSupport(page,id){await page.locator('#selected-party-tab').click();await page.locator('#character-list-tab').click();await page.locator('.character-select[data-id="'+id+'"]').click();await page.locator('#selected-self-tab').click();}
-test('07 PT support: shield and starlight affect self, persist after donor removal, and Undo restores',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'1');await registerSupport(page,'8');await registerSupport(page,'21');
+test('07 PT support: shield and confirmed Yume bonus affect self, persist after donor removal, and Undo restores',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'1');await registerSupport(page,'8');await registerSupport(page,'20');
  const atk=Number(await page.locator('#attackPower1').inputValue()),def=Number(await page.locator('#defensePower2').inputValue());
  await page.getByRole('button',{name:/^PTジュジュシールド：/}).click();expect(Number(await page.locator('#damageReduce2').inputValue())).toBe(99);
- const light=page.getByRole('spinbutton',{name:'PTスターライトの数'});await light.fill('12');await light.dispatchEvent('change');expect(Number(await page.locator('#attackPower1').inputValue())).toBe(atk+2);expect(Number(await page.locator('#defensePower2').inputValue())).toBe(def+2);
+ const light=page.getByRole('spinbutton',{name:'PTユメ攻撃補正の数'});await light.fill('4');await light.dispatchEvent('change');expect(Number(await page.locator('#attackPower1').inputValue())).toBe(atk+4);expect(Number(await page.locator('#defensePower2').inputValue())).toBe(def);
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();await page.locator('.role-tab.character-tab').click();await expect(light).toHaveValue('0');
  await page.locator('#selected-party-tab').click();await page.locator('.character-select[data-id="8"]').click({button:'right'});await page.locator('#selected-self-tab').click();await expect(page.getByRole('button',{name:/^PTジュジュシールド：/})).toHaveAttribute('aria-pressed','true');
 });
