@@ -24,10 +24,14 @@ for(const actor of characters.filter(c=>!selected.length||selected.includes(c.id
   test.setTimeout(45000);page.setDefaultTimeout(4000);
   const errors=[];page.on('pageerror',error=>errors.push(error.message));
   const completed=[],failed=[];const targets=characters.filter(c=>c.id!==actor.id);
-  const checkpoint=info.outputPath('pairs.jsonl');fs.mkdirSync(path.dirname(checkpoint),{recursive:true});
+  const checkpoint=info.outputPath('pairs.jsonl'),coveragePath=info.outputPath('coverage.json');fs.mkdirSync(path.dirname(checkpoint),{recursive:true});
+  let current=null;
+  const coverage=()=>({self:actor.id,name:actor.name,expected:targets.length,passed:completed,failed,current,remaining:targets.filter(c=>!completed.includes(c.id)&&!failed.some(f=>f.id===c.id)).map(c=>c.id)});
+  const saveCoverage=()=>fs.writeFileSync(coveragePath,JSON.stringify(coverage(),null,2));saveCoverage();
   try{
    await prepare(page,actor.id);
    for(const donor of targets){
+    current=donor.id;saveCoverage();
     try{
      await test.step(`${actor.name} × ${donor.name} (${actor.id}/${donor.id})`,async()=>{
       const result=await page.evaluate(({actor,donor,allSupport})=>{
@@ -63,11 +67,12 @@ for(const actor of characters.filter(c=>!selected.length||selected.includes(c.id
       expect(result.statuses).toEqual(expectedStatuses.sort());
       expect(result.level).toBe('Lv.1');expect(Number(result.donorAtk)).toBe(Number(donor.fields[11])+1);expect(result.donorChips).toBe(1);expect(result.resetLevel).toBe('Lv.0');expect(result.resetChips).toBe(0);expect(errors).toEqual([]);
      });
-     completed.push(donor.id);fs.appendFileSync(checkpoint,JSON.stringify({self:actor.id,pt:donor.id,status:'passed'})+'\n');
-    }catch(error){failed.push({id:donor.id,message:error.message});fs.appendFileSync(checkpoint,JSON.stringify({self:actor.id,pt:donor.id,status:'failed',message:error.message})+'\n');throw error;}
+     completed.push(donor.id);current=null;saveCoverage();fs.appendFileSync(checkpoint,JSON.stringify({self:actor.id,pt:donor.id,status:'passed'})+'\n');
+    }catch(error){failed.push({id:donor.id,message:error.message});current=null;saveCoverage();fs.appendFileSync(checkpoint,JSON.stringify({self:actor.id,pt:donor.id,status:'failed',message:error.message})+'\n');throw error;}
    }
   }finally{
-   await info.attach('pair-coverage',{body:JSON.stringify({self:actor.id,name:actor.name,expected:targets.length,passed:completed,failed,remaining:targets.filter(c=>!completed.includes(c.id)&&!failed.some(f=>f.id===c.id)).map(c=>c.id)},null,2),contentType:'application/json'});
+   saveCoverage();console.log('PAIR_COVERAGE '+JSON.stringify({self:actor.id,passed:completed.length,failed:failed.length,remaining:coverage().remaining.length}));
+   await info.attach('pair-coverage',{body:JSON.stringify(coverage(),null,2),contentType:'application/json'});
   }
  });
 }
