@@ -970,3 +970,20 @@ for(const folder of ['07_skill','08_screen_reader'])test(folder+': Fate Echo ico
  await page.locator('#roster-undo').click();await expect(field).toHaveText('1');await expect(button).toHaveAttribute('aria-pressed','true');
  await button.click({button:'right'});await button.click({button:'right'});await expect(field).toHaveText('0');await button.click();await expect(field).toHaveText('2');
 });
+
+async function registerSupport(page,id){await page.locator('#selected-party-tab').click();await page.locator('#character-list-tab').click();await page.locator('.character-select[data-id="'+id+'"]').click();await page.locator('#selected-self-tab').click();}
+test('07 PT support: shield and starlight affect self, persist after donor removal, and Undo restores',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'1');await registerSupport(page,'8');await registerSupport(page,'21');
+ const atk=Number(await page.locator('#attackPower1').inputValue()),def=Number(await page.locator('#defensePower2').inputValue());
+ await page.getByRole('button',{name:/^PTジュジュシールド：/}).click();expect(Number(await page.locator('#damageReduce2').inputValue())).toBe(99);
+ const light=page.getByRole('spinbutton',{name:'PTスターライトの数'});await light.fill('12');await light.dispatchEvent('change');expect(Number(await page.locator('#attackPower1').inputValue())).toBe(atk+2);expect(Number(await page.locator('#defensePower2').inputValue())).toBe(def+2);
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();await page.locator('.role-tab.character-tab').click();await expect(light).toHaveValue('0');
+ await page.locator('#selected-party-tab').click();await page.locator('.character-select[data-id="8"]').click({button:'right'});await page.locator('#selected-self-tab').click();await expect(page.getByRole('button',{name:/^PTジュジュシールド：/})).toHaveAttribute('aria-pressed','true');
+});
+test('07 PT support: cocktail and Dorothy bonuses expire on turn end; capped healing and Undo',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'1');await registerSupport(page,'103');await registerSupport(page,'104');await registerSupport(page,'10');
+ const atk=Number(await page.locator('#attackPower1').inputValue());const attack=page.getByRole('spinbutton',{name:'PTカクテル攻撃の数'});await attack.fill('2');await attack.dispatchEvent('change');await page.getByRole('button',{name:/^PTドロシー攻撃：/}).click();expect(Number(await page.locator('#attackPower1').inputValue())).toBe(atk+3);
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#turn-end').click();await page.locator('.role-tab.character-tab').click();expect(Number(await page.locator('#attackPower1').inputValue())).toBe(atk);await expect(attack).toHaveValue('0');
+ const before=await page.evaluate(()=>captureCharacterAbilityState().currentHp);await page.locator('#selected-character-hp-fill').click({button:'right'});await page.getByRole('button',{name:'PTパンダマン回復＋2'}).click();expect(await page.evaluate(()=>captureCharacterAbilityState().currentHp)).toBe(before);
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();expect(await page.evaluate(()=>captureCharacterAbilityState().currentHp)).toBe(before-1);
+});
