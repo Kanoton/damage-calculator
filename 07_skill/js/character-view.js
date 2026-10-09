@@ -2,6 +2,7 @@
 function createOwnedChipView(chip,chargeDelta,onCharge){
  const item=document.createElement('span');item.className='selected-chip';item.title=chip.name+'\n'+chip.effect;
  const img=document.createElement('img');img.alt=chip.name;img.src='../images/chip_icon/'+encodeURIComponent(chip.images);item.append(img);
+ const name=document.createElement("span");name.className="owned-chip-name";name.textContent=chip.name;item.append(name);
  if(chargeDelta!==null){
   item.classList.add('is-actionable');item.setAttribute('role','button');item.tabIndex=0;
   if(chargeDelta)item.title+='\nクリック：チャージ'+(chargeDelta>0?'+':'')+chargeDelta;

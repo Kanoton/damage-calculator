@@ -1,5 +1,7 @@
 /* The toolbar wrapper keeps the existing vertical layout outside wide mode. */
-.mp-toolbar{display:contents}
+.mp-toolbar,.roster-summary{display:contents}
+#wide-chip-open,.owned-chip-name{display:none}
+.roster-summary>.roster-history-controls{justify-content:flex-end}
 @media (min-width:1600px) and (min-aspect-ratio:3/2){
  body:not(.mobile-ui){max-width:none;width:calc(100% - 24px);height:calc(100dvh - 24px);margin:12px;padding:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(580px,35%);grid-template-rows:50px minmax(0,1fr) 118px;gap:12px 16px;overflow:hidden}
  body:not(.mobile-ui)>.tool-wrapper{display:contents}
@@ -19,7 +21,7 @@
  body:not(.mobile-ui) .map-roster .roster-card{min-width:0}
  body:not(.mobile-ui) .map-roster .roster-name{font-size:15px;grid-template-columns:34px minmax(0,1fr);gap:5px}
  body:not(.mobile-ui) .map-roster .roster-portrait{width:34px;height:34px}
- body:not(.mobile-ui) .map-roster .roster-card>.roster-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:3px 8px;padding:0 8px 8px}
+ body:not(.mobile-ui) .map-roster .roster-card>.roster-stats{grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;padding:0 8px 8px}
  body:not(.mobile-ui) .map-roster .roster-card-top{padding:25px 8px 5px}
  body:not(.mobile-ui) #map-draft .mp-toolbar{display:flex;align-items:center;gap:10px;flex:none;border-bottom:2px solid var(--mp-accent)}
  body:not(.mobile-ui) #map-draft .mp-subtabs{order:0;border-bottom:0;gap:4px}
@@ -28,4 +30,25 @@
  body:not(.mobile-ui) #map-draft .mp-filters label{font-size:12px;gap:5px}
  body:not(.mobile-ui) #map-draft .mp-filters label:last-child{flex:0 0 135px}
  body:not(.mobile-ui) #map-draft select{font-size:13px;padding:6px 22px 6px 6px}
+ body:not(.mobile-ui) .roster-summary{display:flex;align-items:center;gap:8px;margin:8px 0;flex:none}
+ body:not(.mobile-ui) .roster-summary .map-roster-status{order:-1;margin:0;font-size:12px}
+ body:not(.mobile-ui) .roster-summary .roster-history-controls{margin-left:auto;flex:none}
+ body:not(.mobile-ui) .roster-summary .map-roster-empty:empty,body:not(.mobile-ui) .roster-summary #roster-error:empty{display:none}
+ body:not(.mobile-ui) .map-roster .roster-stat{gap:2px;font-size:13px;min-width:0}
+ body:not(.mobile-ui) .map-roster .roster-stat img{width:18px;height:18px}
+ body:not(.mobile-ui) .map-roster .roster-stat-icon{width:18px;height:18px;flex:0 0 18px}
+ body:not(.mobile-ui) .map-roster .roster-hp{max-width:36px;width:36px}
+ body:not(.mobile-ui)>#selected-character .selected-character-main{grid-column:2/4}
+ body:not(.mobile-ui)>#selected-character .selected-character-chips{display:none}
+ body:not(.mobile-ui)>#selected-character .selected-character-skill-controls{right:70px}
+ body:not(.mobile-ui)>#selected-character .selected-character-identity{padding-right:145px}
+ body:not(.mobile-ui) #wide-chip-open{display:block;position:absolute;right:0;top:0;padding:3px 8px;border:1px solid #d4ac37;border-radius:4px;background:#fff8df;color:#493e22;font:inherit;font-weight:700;cursor:pointer}
 }
+.wide-chip-dialog{width:min(760px,90vw);max-height:80dvh;border:2px solid #d4ac37;border-radius:8px;padding:18px;color:#493e22;background:#fff}
+.wide-chip-dialog::backdrop{background:#0006}
+.wide-chip-dialog header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.wide-chip-dialog h2{margin:0;font-size:20px}
+.wide-chip-dialog .selected-character-chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));grid-template-rows:none;grid-auto-flow:row;grid-auto-columns:auto;width:100%;height:auto;max-height:60dvh;overflow:auto;border:0;padding:0;gap:10px}
+.wide-chip-dialog .selected-chip{display:flex;flex-direction:column;align-items:center;width:auto;height:auto;padding:8px;gap:6px;border:1px solid #e5d69f;border-radius:5px;font-size:13px}
+.wide-chip-dialog .selected-chip img{width:56px;height:56px;object-fit:contain}
+.wide-chip-dialog .owned-chip-name{display:block}
