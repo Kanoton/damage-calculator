@@ -1,3 +1,19 @@
+// Teru is a separate, dice-free hit; only a surviving opponent is followed up.
+function getTeruCombinedDamage(mainDamage,defensePower,hp,followUp){
+ if(!followUp?.enabled||followUp.stacks<1||mainDamage>=hp)return mainDamage;
+ return mainDamage+Math.max(1,followUp.attack+followUp.stacks-defensePower)+(followUp.damageAdd||0);
+}
+function renderTeruFollowUp(calculator,defensePower){
+ if(calculator.dataset.role!=='attack')return;
+ let panel=calculator.querySelector('.teru-follow-up');
+ if(!panel){panel=document.createElement('div');panel.className='teru-follow-up';const label=document.createElement('span');label.className='teru-follow-up-summary';const button=document.createElement('button');button.type='button';button.textContent='追撃後の戦闘終了（狐光−1）';button.title='実際に追撃した戦闘の終了時に1回押す。元の攻撃だけで倒した場合は押さない';button.addEventListener('click',()=>window.consumeTeruFollowUp?.());panel.append(label,button);calculator.querySelector('.damage-table').before(panel);}
+ const effect=window.getTeruFollowUp?.();panel.hidden=!effect;
+ if(!effect)return;
+ const damage=Math.max(1,effect.attack+effect.stacks-defensePower)+(effect.damageAdd||0);
+ panel.querySelector('span').textContent=effect.enabled&&effect.stacks>0?`テル追撃：${damage}ダメージ（敵が生存した場合のみ加算） `:'テル追撃：オフ／狐光なし ';
+ panel.querySelector('button').disabled=!effect.enabled||effect.stacks<1;
+}
+
 // 通常の「防御」を選択した場合の最終ダメージ
 function getDefenseDamage(
     attackPower,
@@ -439,6 +455,7 @@ function calculateCardAwareDamage(
         ? getDefensePowerDistribution(calculator, defensePower)
         : new Map([[defensePower, 1]]);
 
+    const followUp = !isSurvival && calculator.dataset.role === 'attack' ? window.getTeruFollowUp?.() : null;
     const damageCounts = new Map();
 
     let expectedDamage = 0;
@@ -461,7 +478,7 @@ function calculateCardAwareDamage(
 
             for (let attackDice = 1; attackDice <= 6; attackDice++) {
                 for (let defenseDice = 1; defenseDice <= 6; defenseDice++) {
-                    const finalDamage = getDefenseDamage(
+                    const mainDamage = getDefenseDamage(
                         cardAttackPower,
                         cardDefensePower,
                         damageAdd,
@@ -471,6 +488,7 @@ function calculateCardAwareDamage(
                         !isSurvival && calculator.dataset.role === 'attack' && calculator.dataset.ignoreDefenseOnAttackSix === 'true'
                     );
 
+                    const finalDamage = getTeruCombinedDamage(mainDamage, cardDefensePower, hp, followUp);
                     const probability =
                         cardProbability / 36;
 
@@ -581,9 +599,9 @@ function renderDamageProbabilityGraph(
 
 
 
-function calculateDefenseDamageGrid(attackPower,defensePower,damageAdd,damageReduce,hp,ignoreDefenseOnAttackSix=false,zeroAttackDice=false,zeroDefenseDice=false){
+function calculateDefenseDamageGrid(attackPower,defensePower,damageAdd,damageReduce,hp,ignoreDefenseOnAttackSix=false,zeroAttackDice=false,zeroDefenseDice=false,followUp=null){
  const rows=[],damageCounts=new Map();let totalDamage=0,defeatCount=0,survivalCount=0,maxDamage=0;
- for(let attackDice=1;attackDice<=6;attackDice++){const damages=[];for(let defenseDice=1;defenseDice<=6;defenseDice++){const damage=getDefenseDamage(attackPower,defensePower,damageAdd,damageReduce,zeroAttackDice?0:attackDice,zeroDefenseDice?0:defenseDice,ignoreDefenseOnAttackSix);damages.push(damage);totalDamage+=damage;damageCounts.set(damage,(damageCounts.get(damage)||0)+1);maxDamage=Math.max(maxDamage,damage);if(damage>=hp)defeatCount++;else survivalCount++;}rows.push({attackDice:zeroAttackDice?0:attackDice,damages});}
+ for(let attackDice=1;attackDice<=6;attackDice++){const damages=[];for(let defenseDice=1;defenseDice<=6;defenseDice++){const mainDamage=getDefenseDamage(attackPower,defensePower,damageAdd,damageReduce,zeroAttackDice?0:attackDice,zeroDefenseDice?0:defenseDice,ignoreDefenseOnAttackSix),damage=getTeruCombinedDamage(mainDamage,defensePower,hp,followUp);damages.push(damage);totalDamage+=damage;damageCounts.set(damage,(damageCounts.get(damage)||0)+1);maxDamage=Math.max(maxDamage,damage);if(damage>=hp)defeatCount++;else survivalCount++;}rows.push({attackDice:zeroAttackDice?0:attackDice,damages});}
  return {rows,damageCounts,totalDamage,defeatCount,survivalCount,maxDamage,totalCombinations:36};
 }
 function renderDefenseDamageGrid(tableBody,grid,hp){
@@ -605,7 +623,8 @@ function renderDefenseModeGuidance(calculator,{attackPower,defensePower,damageAd
 function calculateDamage(calculator, isSurvival = false) {
     const inputs=getCalculatorDamageInputs(calculator);
     const {attackPower,defensePower,damageAdd,damageReduce,hp}=inputs;
-    const grid=calculateDefenseDamageGrid(attackPower,defensePower,damageAdd,damageReduce,hp,!isSurvival&&calculator.dataset.role==='attack'&&calculator.dataset.ignoreDefenseOnAttackSix==='true',calculator.dataset.zeroAttackDice==='true',calculator.dataset.zeroDefenseDice==='true');
+    const grid=calculateDefenseDamageGrid(attackPower,defensePower,damageAdd,damageReduce,hp,!isSurvival&&calculator.dataset.role==='attack'&&calculator.dataset.ignoreDefenseOnAttackSix==='true',calculator.dataset.zeroAttackDice==='true',calculator.dataset.zeroDefenseDice==='true',!isSurvival&&calculator.dataset.role==='attack'?window.getTeruFollowUp?.():null);
+    renderTeruFollowUp(calculator,defensePower);
     calculator.querySelectorAll('.damage-table thead tr:last-child th').forEach((cell,index)=>cell.textContent=calculator.dataset.zeroDefenseDice==='true'?'0':String(index+1));
     renderDefenseDamageGrid(calculator.querySelector('.damage-table tbody'),grid,hp);
 
