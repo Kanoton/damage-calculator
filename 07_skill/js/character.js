@@ -30,7 +30,7 @@
  window.setCharacterEvidenceStack=value=>{if(!selectedCharacter)return;state().numbers['罪証']=Math.max(0,Math.floor(Number(value)||0));renderConditions();updateStats();window.dispatchEvent(new Event('character-evidence-change'));};
  const number=(s,key)=>Math.min(key==='チャージ'?10:Infinity,Math.max(0,Number(s.numbers[key])||0));
  const abilityRules=()=>CHARACTER_ABILITY_RULES[String(selectedCharacter?.id)]||null;
- const abilityControlValue=key=>{if(key==='ファン')return Math.max(0,Number(state().numbers[key])||0)+(window.getRosterFanCount?.()||0);const stored=state().numbers[key];if(stored!==undefined)return Number(stored)||0;const control=abilityRules()?.controls?.find(item=>item.key===key);return Number(control?.default)||0;};
+ const abilityControlValue=key=>{if(String(selectedCharacter?.id)==='6'&&key.startsWith('自己主張なし')&&state().numbers['マジで怒ったぞ'])return 2;if(key==='ファン')return Math.max(0,Number(state().numbers[key])||0)+(window.getRosterFanCount?.()||0);const stored=state().numbers[key];if(stored!==undefined)return Number(stored)||0;const control=abilityRules()?.controls?.find(item=>item.key===key);return Number(control?.default)||0;};
  const activeSkill=()=>abilityRules()?.activeSkills?.[0]||null;
  const activeSkillMaxCooldown=skill=>Math.max(0,(Number(skill?.cooldown)||0)-(state().chips.includes('15')?1:0));
  const activeSkillCooldown=skill=>Math.min(activeSkillMaxCooldown(skill),Math.max(0,Number(state().skillCooldowns?.[skill?.key])||0));
@@ -127,7 +127,7 @@
   return result;
  }
  function makeIcon(key){
-  const file=statusIcons.get(key)||statusIcons.get(key==='憑依先の戦闘ATK'?'狐光':specialIcons[key]);
+  const file=statusIcons.get(key)||(['マジで怒ったぞ','次の攻撃ダイス6'].includes(key)?statusIcons.get('自己主張なし攻撃補正'):null)||statusIcons.get(key==='憑依先の戦闘ATK'?'狐光':specialIcons[key]);
   if(!file)return Object.assign(document.createElement('span'),{className:'condition-fallback',textContent:key});
   const icon=document.createElement('img');icon.alt='';
   const path=file.startsWith('chip_icon/')||file.startsWith('UT_Buff/')?file:'icon/'+file;
@@ -178,7 +178,7 @@
   const available=self||partySlots.some(id=>String(id)==='23')||abilityControlValue('PTテル憑依');
   if(!available)return null;
   return {enabled:!!abilityControlValue(self?'狐光追加攻撃':'PTテル憑依'),stacks:abilityControlValue(key),attack:self?calculate(true).atk:abilityControlValue('PTテル攻撃力'),
-   damageAdd:(currentOpponent?.markStacks>0?1:0)+(Number(currentOpponent?.erosionStacks)||0)+(String(selectedCharacter.id)==='29'?2:0)};
+   damageAdd:(currentOpponent?.markStacks>0?1:0)+(currentOpponent?.fateEchoStacks>0?1:0)+(Number(currentOpponent?.erosionStacks)||0)+(String(selectedCharacter.id)==='29'?2:0)};
  };
  window.consumeTeruFollowUp=()=>{
   const effect=window.getTeruFollowUp();if(!effect?.enabled||effect.stacks<1)return;
@@ -230,7 +230,7 @@
   for(const control of abilityRules()?.controls||[]){
    if(control.type==='toggle'){
     const active=Boolean(abilityControlValue(control.key));
-    conditionsBox.append(createCharacterAbilityToggleView(control.key,active,makeIcon(control.key),()=>{state().numbers[control.key]=active?0:1;renderConditions();updateStats();}));
+    conditionsBox.append(createCharacterAbilityToggleView(control.key,active,makeIcon(control.key),()=>{if(String(selectedCharacter.id)==='6')window.rememberCharacterSkillActivation?.();state().numbers[control.key]=active?0:1;renderConditions();updateStats();}));
    }else if(control.type==='choice'){
     const options=control.options||[],current=abilityControlValue(control.key),option=options.find(item=>Number(item.value)===current)||options[0];
     const change=delta=>{const index=Math.max(0,options.indexOf(option)),next=control.cycle===false?Math.max(0,Math.min(options.length-1,index+delta)):(index+delta+options.length)%options.length;state().numbers[control.key]=Number(options[next]?.value)||0;renderConditions();updateStats();};
@@ -241,9 +241,11 @@
     const iconKey=control.iconAtMax&&effectiveMax!==undefined&&current>=effectiveMax?control.iconAtMax:control.key;
     const view=createConditionNumberView(control.key,current,makeIcon(iconKey));
     if(control.iconAtMax&&iconKey!==control.key)view.item.title=iconKey+'：左クリックで＋1、右クリックで−1';
+    const forced=String(selectedCharacter.id)==='6'&&control.key.startsWith('自己主張なし')&&!!abilityControlValue('マジで怒ったぞ');
+    view.input.disabled=forced;view.button.disabled=forced;
     view.input.min=String(Number(control.min)||0);
     if(effectiveMax!==undefined)view.input.max=String(effectiveMax);
-    const setValue=value=>{const min=Number(control.min)||0,max=effectiveMax===undefined?Infinity:effectiveMax;const next=Math.max(min,Math.min(max,Math.floor(Number(value)||0)));state().numbers[control.key]=control.key==='ファン'?Math.max(0,next-(window.getRosterFanCount?.()||0)):next;view.input.value=abilityControlValue(control.key);if(control.iconAtMax){const nextKey=state().numbers[control.key]>=max?control.iconAtMax:control.key;view.button.replaceChildren(makeIcon(nextKey));view.item.title=nextKey+'：左クリックで＋1、右クリックで−1';}updateStats();};
+    const setValue=value=>{if(forced)return;const min=Number(control.min)||0,max=effectiveMax===undefined?Infinity:effectiveMax;const next=Math.max(min,Math.min(max,Math.floor(Number(value)||0)));state().numbers[control.key]=control.key==='ファン'?Math.max(0,next-(window.getRosterFanCount?.()||0)):next;view.input.value=abilityControlValue(control.key);if(control.iconAtMax){const nextKey=state().numbers[control.key]>=max?control.iconAtMax:control.key;view.button.replaceChildren(makeIcon(nextKey));view.item.title=nextKey+'：左クリックで＋1、右クリックで−1';}updateStats();};
     view.button.addEventListener('click',()=>setValue(abilityControlValue(control.key)+1));
     view.button.addEventListener('contextmenu',event=>{event.preventDefault();setValue(abilityControlValue(control.key)-1);});
     view.input.addEventListener('change',()=>setValue(view.input.value));conditionsBox.append(view.item);
@@ -289,6 +291,11 @@
  applyCharacterToCalculator=(totals=selectedCharacter&&calculate())=>{
   if(!totals)return;
   document.querySelector('[data-role="attack"].mode-content').dataset.ignoreDefenseOnAttackSix=String(Boolean(abilityRules()?.ignoreDefenseOnAttackSix));
+  const attackMode=document.querySelector('[data-role="attack"].mode-content'),defenseMode=document.querySelector('[data-role="defense"].mode-content');
+  attackMode.dataset.fixedAttackDice=String(String(selectedCharacter.id)==='6'&&abilityControlValue('次の攻撃ダイス6')?6:0);
+  defenseMode.dataset.moses=String(String(selectedCharacter.id)==='24');
+  defenseMode.dataset.evadeMinimum=String(String(selectedCharacter.id)==='24'?1+abilityControlValue('精確無比'):1);
+  if(String(selectedCharacter.id)!=='24')defenseMode.dataset.evadeTable='false';
   const weak=String(selectedCharacter?.id)==='24'&&Boolean(currentOpponent?.weakness);
   document.querySelector('[data-role="attack"].mode-content').dataset.zeroDefenseDice=String(weak);
   document.querySelector('[data-role="defense"].mode-content').dataset.zeroAttackDice=String(weak);

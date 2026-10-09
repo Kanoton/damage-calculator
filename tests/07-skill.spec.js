@@ -1029,3 +1029,33 @@ test('07 Teru: separate follow-up uses pre-consumption stacks, minimum one, no d
  await selectCharacter(page,'23');const fox=page.getByLabel('狐光の数',{exact:true});await fox.fill('3');await fox.dispatchEvent('change');await page.getByLabel('憑依先の戦闘ATKの数').fill('10');await page.getByLabel('憑依先の戦闘ATKの数').dispatchEvent('change');await page.getByRole('button',{name:/^狐光追加攻撃：/}).click();
  await expect(page.locator('#selected-character-atk')).toHaveValue('2');await expect(page.locator('#attackPower1')).toHaveValue('10');expect((await page.evaluate(()=>getTeruFollowUp())).attack).toBe(2);
 });
+
+
+test('07 Padman: skill enables maximum toggle, preserves manual values, fixed-six die excludes other rows',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'6');
+ const atk=page.getByLabel('自己主張なし攻撃補正の数');await atk.fill('-1');await atk.dispatchEvent('change');
+ await page.getByRole('button',{name:'マジで怒ったぞを発動'}).click();await expect(atk).toHaveValue('2');await expect(atk).toBeDisabled();await expect(page.locator('#selected-character-atk')).toHaveValue('4');
+ await page.getByRole('button',{name:/^マジで怒ったぞ：/}).click();await expect(atk).toHaveValue('-1');await expect(atk).toBeEnabled();
+ await page.getByRole('button',{name:/^マジで怒ったぞ：/}).click();await page.locator('#turn-end').click();await expect(atk).toHaveValue('-1');
+ await page.getByRole('button',{name:/^次の攻撃ダイス6：/}).click();await page.locator('.role-tab[data-role="attack"]').click();
+ await expect(page.locator('.mode-content[data-role="attack"] .damage-table tbody tr').first().locator('td')).toHaveText(['－','－','－','－','－','－']);
+ expect(await page.evaluate(()=>calculateDefenseDamageGrid(3,2,0,0,10,false,false,false,null,{fixedAttack:6}).totalCombinations)).toBe(6);
+});
+
+test('07 Moses: evade minimum excludes faces from table and probability but not ordinary defense',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'24');const stacks=page.getByLabel('精確無比の数');await stacks.fill('1');await stacks.dispatchEvent('change');await page.locator('.role-tab[data-role="defense"]').click();
+ await page.getByRole('button',{name:'回避の表',exact:true}).click();
+ const mode=page.locator('.mode-content[data-role="defense"]');for(const [id,value] of [['attackPower2',10],['hp2',1],['damageAdd2',0],['damageReduce2',0]]){await page.locator('#'+id).fill(String(value));await page.locator('#'+id).dispatchEvent('input');}
+ await expect(mode.locator('.damage-table tbody tr td:first-of-type')).toHaveText(['－','－','－','－','－','－']);await expect(mode.locator('.result-rate')).toHaveText('53.33%');await expect(mode.locator('.future-result-rate')).toHaveText('53.33%');
+ const choices=await page.evaluate(()=>getCardAwareDefenseChoices(document.querySelector('.mode-content[data-role="defense"]'),10,2,0,0,1));expect(choices[0].evadeSurvivalProbability).toBeCloseTo(1);expect(choices[5].evadeSurvivalProbability).toBeCloseTo(0.2);
+ await page.getByRole('button',{name:'防御の表',exact:true}).click();expect(await mode.locator('.damage-table tbody tr td:first-of-type').first().textContent()).not.toBe('－');
+ await selectCharacter(page,'1');expect(await page.locator('.mode-content[data-role="defense"]').getAttribute('data-evade-minimum')).toBe('1');
+});
+
+test('07 Teru: target Mark and Fate Echo plus reduction apply separately to main and follow-up',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'1');await registerSupport(page,'23');
+ for(const [label,value] of [['PTテル攻撃力の数',8],['PTテル狐光の数',3]]){const field=page.getByLabel(label,{exact:true});await field.fill(String(value));await field.dispatchEvent('change');}await page.getByRole('button',{name:/^PTテル憑依：/}).click();
+ await page.evaluate(()=>window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:{markStacks:1,fateEchoStacks:2,erosionStacks:0}})));
+ const effect=await page.evaluate(()=>getTeruFollowUp());expect(effect.damageAdd).toBe(2);
+ const values=await page.evaluate(()=>{const f=getTeruFollowUp(),main=getDefenseDamage(2,4,2,1,1,1);return [main,getTeruCombinedDamage(main,4,99,f,1),getTeruCombinedDamage(main,4,99,f,99)];});expect(values).toEqual([2,10,2]);
+});
