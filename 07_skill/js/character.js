@@ -165,7 +165,7 @@
    else {const button=createCharacterAbilityToggleView(c.key,!!current,makeIcon(c.icon),()=>change(current?0:1));if(c.marked)button.title+='。戦闘終了後は手動でオフ（ターン終了でも解除）';conditionsBox.append(button);}
   }
   for(const c of [{donor:'103',label:'PTカクテル回復＋1',amount:1},{donor:'10',label:'PTパンダマン回復＋2',amount:2},{donor:'104',label:'PTドロシー通過回復＋1',amount:1}])if(donors.has(c.donor)){
-   const button=document.createElement('button');button.type='button';button.className='condition-toggle';button.textContent=c.label;button.title='ゲームで発生した回復を自キャラへ反映（最大HPまで）。範囲・通過は手動確認';button.addEventListener('click',()=>{const max=calculate().hp,next=Math.min(max,state().currentHp+c.amount);if(next===state().currentHp)return;window.rememberCharacterSkillActivation?.();state().currentHp=next;renderConditions();updateStats();});conditionsBox.append(button);
+   const button=document.createElement('button');button.type='button';button.className='selected-chip condition-toggle';button.setAttribute('aria-label',c.label);button.append(makeIcon('ヒール'));button.title=c.label+'：ゲームで発生した回復を自キャラへ反映（最大HPまで）。範囲・通過は手動確認';button.addEventListener('click',()=>{const max=calculate().hp,next=Math.min(max,state().currentHp+c.amount);if(next===state().currentHp)return;window.rememberCharacterSkillActivation?.();state().currentHp=next;renderConditions();updateStats();});conditionsBox.append(button);
   }
  }
  function renderConditions(){

@@ -93,7 +93,7 @@ document.getElementById('turn-end').addEventListener('click',()=>{rememberRoster
 renderRoundProgress();
 window.addEventListener('character-selection-change',()=>{if(!roundProgressReady()){renderRoundProgress();return;}rosterState.round=1;rosterState.progress=1;renderRoundProgress();executeProgressEvents();});
 
-window.rememberCharacterSkillActivation=()=>rememberRoster();
+window.rememberCharacterSkillActivation=()=>{rememberRoster();rosterUndo.disabled=false;};
 window.getRosterFanCount=()=>rosterState.monsters.filter(enemy=>enemy.fan).length;
 window.reduceRosterFanAttack=()=>{for(const enemy of rosterState.monsters)if(enemy.fan&&!enemy.defeated)enemy.fanSkillAttackReduction=true;renderRoster();};
 function opponentDetails(enemy){return enemy?{name:enemy.name,mapId:enemy.mapId,markStacks:enemy.markStacks||0,fateEchoStacks:enemy.fateEchoStacks||0,erosionStacks:enemy.erosionStacks||0,weakness:!!enemy.weakness,fan:!!enemy.fan}:null;}
