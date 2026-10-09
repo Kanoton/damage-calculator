@@ -422,3 +422,9 @@ This section supersedes older manual-only CT and placeholder-control notes above
 - Character header now holds list/chip tabs, PT/list status and a default-off checkbox for ability hover. Tooltip show (including keyboard focus) requires the checkbox; disabling hides it immediately. Mobile explicit ability details remain available.
 - PT chip count is anchored farther down/right beneath its button. Existing owned counts and popup handlers remain shared.
 - Checkpoint:7e895f953981894182e3cf23200c6863b06a43c5; branch codex/07-hover-toolbar.
+
+## 07 tab attachment correction (2026-10-09)
+
+- Supersedes overlapping tab edge: tab bottom meets panel top without overlap; tab bottom border is zero so the intact panel top supplies the single shared line. All tabs paint to their rounded border box, including inactive tabs. No gap between tabs.
+- Character hover checkbox uses compact label スキルを表示 and auto left margin to stay at the header right edge even when status is empty. Default-off behavior remains.
+- Checkpoint:7d14dfc78ebe7766d64e9311e0f698489e7a6f57; branch codex/07-tab-corners. 08 unchanged.
