@@ -358,3 +358,12 @@ This section supersedes older manual-only CT and placeholder-control notes above
 - Teru: user confirmed Mark, Fate Echo and damage reduction apply independently to both main hit and pursuit. Pursuit base remains minimum 1 before increases/reduction; final reduction allows zero, following existing combat conventions. Enemy survival after actual reduced main hit controls follow-up. Foxfire still consumed only via explicit battle-end button.
 - Position, hand and random target/damage tracking are out of current scope; results entered directly. Nancy distance/retaliation handling is excluded. Al's stat conversion is self-only; PT Al stats remain deferred. Lulu's stack-loss extra effects are excluded and do not require a new healing formula.
 - 08 remains unchanged; port these calculator/character/rules/tests changes later.
+
+
+## 07 bounded PT pair regression (2026-10-09)
+
+- `pair-tests/07-party-pairs.spec.js` derives the 35 self × 34 non-self donor matrix from canonical character stats. Each self uses an independent fresh page and records individual pair checkpoints; no test hooks are added to app code. Registration and removal use DOM events in the browser for bounded cost; focused interactions use normal Playwright clicks.
+- Common checks: duplicate registration rejection, self identity/ability snapshot/HP/ATK/DEF/MOVE/CT/calculator/chip/clock isolation; donor level/manual ATK/HP/chip editing; support visibility; monster Weakness/Investigation/Erosion/Fan/Fate Echo availability; donor removal cleanup and fresh re-registration. No skill is assumed implemented merely because CT exists.
+- Focused coverage: Teru/Sykes Erosion prediction, Hanna/Sherry different expiry, three received buffs composing without sharing timers, Dorothy manual Warmth plus capped party heal; existing 07 tests cover Undo, skill targets, stacks, die probabilities and ordinary pointer input. Dorothy healing-trigger Warmth acquisition is not inferred here: automatic event linking remains separate from its manual stack control.
+- Dedicated command/config/workflow: test:07:pairs / playwright.pairs.config.js / 07-party-pairs.yml. Per-self timeout45s, suite12min, failures3, workers2, retries0, CI job15min. JSON reports, per-pair JSONL, coverage attachments, failure traces upload even on failure/cancellation. PAIR_SELF_IDS allows selected self groups to rerun.
+- Scope: 07 only. 08 merging and deferred ability additions are not part of the matrix test work.
