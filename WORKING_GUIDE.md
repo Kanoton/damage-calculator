@@ -141,3 +141,8 @@ CI定義は `.github/workflows/06b-smoke.yml`、テスト本体は `tests/06b-sm
 ## 11. 07スマホ対応
 
 `07_skill/mobile.css` と `js/mobile.js` が幅900px以下・coarse pointerの操作を担当します。PCと計算・状態処理を共用し、別世代フォルダには分けません。`npm run test:07:mobile` でChromium/AndroidとWebKit/iPhoneのエミュレーションを検証します。CIは `.github/workflows/07-mobile.yml`、上限15分、スクリーンショット・結果は14日保存します。既存PCテストとPT組み合わせ検証も維持してください。同期機能は対象外で、将来追加する場合もスマホ操作モードでは表示・動作を無効にします。
+
+
+## 12. 07横長表示
+
+`wide.css` が幅1600px以上・縦横比3:2以上・スマホモード以外で左右配置を有効にします。FHDの右側管理領域は520px、左側は残り幅です。メイン内部の構成・計算処理は共用します。`npm run test:07:wide` と `.github/workflows/07-wide.yml` でChromium/WebKitのFHD・サイズ切替・状態保持・独立スクロールを検証します。スマホ／PC／組み合わせテストも維持してください。
