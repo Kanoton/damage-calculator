@@ -1,22 +1,31 @@
 /* The toolbar wrapper keeps the existing vertical layout outside wide mode. */
 .mp-toolbar,.roster-summary{display:contents}
-#wide-chip-open,.owned-chip-name{display:none}
+#wide-chip-open,.party-chip-open,.owned-chip-name{display:none}
 .roster-summary>.roster-history-controls{justify-content:flex-end}
 @media (min-width:1600px) and (min-aspect-ratio:3/2){
  body:not(.mobile-ui){max-width:none;width:calc(100% - 24px);height:calc(100dvh - 24px);margin:12px;padding:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(580px,35%);grid-template-rows:50px minmax(0,1fr) 118px;gap:12px 16px;overflow:hidden}
  body:not(.mobile-ui)>.tool-wrapper{display:contents}
- body:not(.mobile-ui) .tool-wrapper>.role-tabs{grid-column:1;grid-row:1;justify-self:end;align-self:center;margin:0;width:max-content;gap:6px;flex-wrap:nowrap}
- body:not(.mobile-ui) .role-tabs .role-tab{border:2px solid transparent;border-radius:5px;height:38px}
- body:not(.mobile-ui) .role-tabs .role-tab.active{border-color:currentColor}
+ body:not(.mobile-ui) .tool-wrapper>.role-tabs{grid-column:1;grid-row:1;justify-self:end;align-self:end;transform:translateY(15px);margin:0 3px 0 0;width:max-content;gap:4px;flex-wrap:nowrap}
+ body:not(.mobile-ui) .role-tabs .role-tab{border:3px solid transparent;border-radius:5px 5px 0 0;height:38px}
+ body:not(.mobile-ui) .role-tabs .map-tab{--tab-border:#39875d}
+ body:not(.mobile-ui) .role-tabs .character-tab{--tab-border:#d4ac37}
+ body:not(.mobile-ui) .role-tabs .attack-tab{--tab-border:#ef6b6b}
+ body:not(.mobile-ui) .role-tabs .defense-tab{--tab-border:#5f9bd3}
+ body:not(.mobile-ui) .role-tabs .role-tab.active{border:3px solid var(--tab-border);border-bottom-color:#fff;background:#fff}
  body:not(.mobile-ui) .tool-wrapper>.main-container{grid-column:1;grid-row:2/-1;min-width:0;min-height:0;height:100%;overflow:auto}
  body:not(.mobile-ui) .tool-wrapper>.main-container.map-mode,body:not(.mobile-ui) .tool-wrapper>.main-container.character-mode{overflow:hidden}
  body:not(.mobile-ui)>#round-progress-controls{grid-column:1;grid-row:1;justify-self:start;align-self:center;margin:0;width:max-content;min-width:0;gap:8px;z-index:3;padding:6px 8px}
  body:not(.mobile-ui)>#round-progress-controls #turn-end{margin-left:0}
  body:not(.mobile-ui)>#selected-character{grid-column:2;grid-row:3;margin:0;width:100%;height:118px;column-gap:8px;grid-template-columns:48px minmax(0,1fr) minmax(100px,25%) 50px}
  body:not(.mobile-ui)>#selected-character .selected-character-stats{padding-right:0}
- body:not(.mobile-ui)>.map-roster{grid-column:2;grid-row:1/3;min-width:0;min-height:0;margin:0;display:flex;flex-direction:column;overflow:hidden;padding:12px}
+ body:not(.mobile-ui)>.map-roster{grid-column:2;grid-row:1/3;min-width:0;min-height:0;margin:0;display:flex;flex-direction:column;overflow:hidden;padding:12px 0}
  body:not(.mobile-ui) .map-roster-description{display:none}
- body:not(.mobile-ui) .map-roster-list{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:max-content;gap:8px;flex:1;min-height:0;overflow:auto;align-content:start;overscroll-behavior:contain;padding-right:4px;scrollbar-gutter:stable}
+ body:not(.mobile-ui) .map-roster-list{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:max-content;gap:12px;flex:1;min-height:0;overflow:auto;align-content:start;overscroll-behavior:contain;padding:0 12px;scrollbar-gutter:auto;scrollbar-width:none}
+ body:not(.mobile-ui) .map-roster-list::-webkit-scrollbar{width:0}
+ body:not(.mobile-ui) .map-roster>.roster-heading,body:not(.mobile-ui) .map-roster>.roster-actionbar,body:not(.mobile-ui) .map-roster>.roster-summary,body:not(.mobile-ui) .map-roster>.character-skill-target-banner{margin-left:12px;margin-right:12px}
+ body:not(.mobile-ui) .party-chip-open{display:inline-block;padding:1px 5px;border:1px solid #d4ac37;border-radius:4px;background:#fff8df;color:#493e22;font-size:11px;cursor:pointer;margin-left:auto}
+ body:not(.mobile-ui) .party-slot-chips{display:none}
+ body:not(.mobile-ui) .party-slot-body{display:block;width:100%}
  body:not(.mobile-ui) .map-roster .roster-actionbar{flex:none;gap:6px}
  body:not(.mobile-ui) .map-roster .roster-card{min-width:0}
  body:not(.mobile-ui) .map-roster .roster-name{font-size:15px;grid-template-columns:34px minmax(0,1fr);gap:5px}
@@ -44,8 +53,8 @@
  body:not(.mobile-ui)>#selected-character .selected-character-identity{padding-right:145px}
  body:not(.mobile-ui) #wide-chip-open{display:block;position:absolute;right:0;top:0;padding:3px 8px;border:1px solid #d4ac37;border-radius:4px;background:#fff8df;color:#493e22;font:inherit;font-weight:700;cursor:pointer}
 }
-.wide-chip-dialog{width:min(760px,90vw);max-height:80dvh;border:2px solid #d4ac37;border-radius:8px;padding:18px;color:#493e22;background:#fff}
-.wide-chip-dialog::backdrop{background:#0006}
+.wide-chip-dialog{position:fixed;inset:auto 18px 28px auto;margin:0;width:min(660px,90vw);max-height:70dvh;border:2px solid #d4ac37;border-radius:8px;padding:18px;color:#493e22;background:#fff}
+.wide-chip-dialog::backdrop{background:#0002}
 .wide-chip-dialog header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .wide-chip-dialog h2{margin:0;font-size:20px}
 .wide-chip-dialog .selected-character-chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));grid-template-rows:none;grid-auto-flow:row;grid-auto-columns:auto;width:100%;height:auto;max-height:60dvh;overflow:auto;border:0;padding:0;gap:10px}

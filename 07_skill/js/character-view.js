@@ -158,6 +158,9 @@ function createPartyMemberView(row,index,parameters,isSelf,onLevelChange,ownedCh
    const image=document.createElement('img');image.src='../images/UT_Buff/'+icon;image.alt=label;image.draggable=false;button.append(image);button.addEventListener('click',event=>{event.stopPropagation();onStatChange?.(key,1);});button.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();onStatChange?.(key,-1);});
    const value=document.createElement('b');value.textContent=key==='hp'?parameters.currentHp+'/'+parameters.hp:parameters[key];stat.append(button,value);stats.append(stat);
   }
+  const chipButton=document.createElement('button');chipButton.type='button';chipButton.className='party-chip-open';chipButton.textContent='チップ';chipButton.setAttribute('aria-label',row.name+'の取得チップを表示');chipButton.setAttribute('aria-haspopup','dialog');
+  chipButton.addEventListener('click',event=>{event.stopPropagation();document.dispatchEvent(new CustomEvent('wide-party-chips',{detail:{name:row.name,id:String(row.id),isSelf,chips:ownedChips,opener:chipButton}}));});
+  chipButton.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();});identity.append(chipButton);
   details.append(stats);
   if(ownedChips.length){
    const list=document.createElement('div');list.className='party-slot-chips';list.setAttribute('role','list');list.setAttribute('aria-label',row.name+'の取得済みチップ');list.style.setProperty('--party-chip-count',String(ownedChips.length));
