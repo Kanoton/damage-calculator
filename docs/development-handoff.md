@@ -374,3 +374,12 @@ This section supersedes older manual-only CT and placeholder-control notes above
 - `pair-tests/07-party-focus.spec.js` supplements the one-donor matrix with three donors: Padman/Jill/Dorothy/Ren skill and support composition, turn-end Undo, donor removal and re-registration; Sherry/Teru/Hanna/Ren independent persistent effects and pursuit consumption Undo.
 - Browser image audit decodes all canonical status, chip, Hero Card2, monster and monster-info assets. A separate rendered audit visits every self character and the implemented received-support groups. Only four explicitly unassigned controls may use text substitutes: Pandaman counter attack/damage received, Nardis excess hand amount, Teru pursuit toggle. User will supply their icons separately. No image mapping is guessed here.
 - Runs in existing bounded pair config/workflow (45 seconds per test, 12 minutes suite, 15 minutes CI, stop after three failures). Images audit JSON and failure traces are retained with pair results. 08 stays unchanged.
+
+
+## 07 mobile touch UI (2026-10-09)
+
+- Checkpoint: `checkpoint/07-before-mobile-20261009` at `1ed9fb62cd7675a1b649a986bb561b63492d1ae4` (local tag `checkpoint-07-before-mobile-20261009`). Work is isolated on `codex/07-mobile-ui`; 08 and calculator rules are unchanged.
+- `mobile.css` and `js/mobile.js` activate only for coarse pointers at widths up to 900px. Desktop keeps its layout and pointer semantics. Mobile navigation and self/PT controls move above the main panel, with the character list in a bounded scrolling area; self/PT use flexible height and a vertical roster; assigned chips and dice tables can be expanded.
+- Tap numeric icons to choose +/−; CT preserves reversed left/right semantics. Existing event handlers apply the edits. PT operation buttons expose chip editing, swap (including empty slots) and removal; self removal is not offered. Character abilities use an explicit detail dialog. Mobile uses native numeric keyboard, suppressing the custom number pad.
+- No cross-device synchronization. Future sync must be hidden and inactive in touch mobile mode, not merely hidden visually. No browser-name-only detection. Real-device keyboard/safe-area/long-press behavior still needs manual verification.
+- `npm run test:07:mobile` runs Chromium Pixel 5 and WebKit iPhone 13 emulation, plus 360px portrait/844px landscape and desktop restoration. Suite max5min, test30sec, failures3, CI15min. Screenshots and failure traces retained14days. Existing desktop/06b and bounded1190-pair CI remain required.

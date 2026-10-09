@@ -437,10 +437,18 @@
   });
   if(selectedCharacter)updateChipListSelection();
  }
+ document.addEventListener('mobile-party-swap',event=>{
+  const {from,to}=event.detail||{};if(!Number.isInteger(from)||!Number.isInteger(to)||from<0||to<0||from>=4||to>=4||!partySlots[from])return;
+  [partySlots[from],partySlots[to]]=[partySlots[to],partySlots[from]];renderParty();listStatus.textContent='PTの順番を変更しました。';
+ });
+ document.addEventListener('mobile-character-detail',event=>{
+  const row=characters.find(item=>String(item.id)===String(event.detail?.id));const ability=row&&characterSkills.get(String(row.id));
+  if(row&&ability){const view=createCharacterSkillTooltipView(row,ability);window.showMobileInformation?.(row.name,[view.stats,view.description]);}
+ });
  function setPartyMode(active){
   partyMode=Boolean(active&&selectedCharacter);if(!partyMode){partyEditId=null;chipStatus.textContent='';}selectedPanel.classList.toggle('is-party-view',partyMode);partyGrid.hidden=!partyMode;
   selfTab.setAttribute('aria-selected',String(!partyMode));partyTab.setAttribute('aria-selected',String(partyMode));selfTab.tabIndex=partyMode?-1:0;partyTab.tabIndex=partyMode?0:-1;
-  listStatus.textContent=partyMode?'PT登録：キャラをクリックで追加、右クリックで解除（自分を含めて最大4人）':'';
+  listStatus.textContent=partyMode?(document.body.classList.contains('mobile-ui')?'PT登録：一覧をタップで追加、PTの操作ボタンから解除（自分を含めて最大4人）':'PT登録：キャラをクリックで追加、右クリックで解除（自分を含めて最大4人）'):'';
   renderParty();
  }
  function registerPartyMember(row){
@@ -448,8 +456,8 @@
   const id=String(row.id);
   if(partySlots.some(member=>String(member)===id)){listStatus.textContent=row.name+'は登録済みです。';return;}
   const empty=partySlots.indexOf(null);
-  if(empty<0){listStatus.textContent='PTは自分を含めて4人までです。右クリックでメンバーを解除できます。';return;}
-  partySlots[empty]=row.id;partyStates.set(id,{level:0,currentHp:null,chips:[],manual:{atk:0,def:0,move:0}});renderParty();window.dispatchEvent(new Event('party-members-change'));listStatus.textContent=row.name+'を'+(empty+1)+'番目に登録しました。右クリックで解除できます。';
+  if(empty<0){listStatus.textContent=document.body.classList.contains('mobile-ui')?'PTは自分を含めて4人までです。PTの操作ボタンからメンバーを解除できます。':'PTは自分を含めて4人までです。右クリックでメンバーを解除できます。';return;}
+  partySlots[empty]=row.id;partyStates.set(id,{level:0,currentHp:null,chips:[],manual:{atk:0,def:0,move:0}});renderParty();window.dispatchEvent(new Event('party-members-change'));listStatus.textContent=row.name+'を'+(empty+1)+'番目に登録しました。'+(document.body.classList.contains('mobile-ui')?'PTの操作ボタンから解除できます。':'右クリックで解除できます。');
  }
  function removePartyMember(id){
   if(id===null||id===undefined||String(id)===String(selectedCharacter?.id))return;
@@ -569,6 +577,7 @@
     });
    }
    button.append(item);target.append(button);
+   if(folder==='character_list'){const detail=document.createElement('button');detail.type='button';detail.className='mobile-only mobile-character-detail';detail.textContent='能力の詳細';detail.setAttribute('aria-label',row.name+'の能力の詳細');detail.addEventListener('click',()=>document.dispatchEvent(new CustomEvent('mobile-character-detail',{detail:{id:String(row.id)}})));target.append(detail);}
   }
  }
  const mapPicker=document.getElementById('mp-map-select');
