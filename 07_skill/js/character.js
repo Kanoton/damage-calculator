@@ -457,7 +457,7 @@
   if(partySlots.some(member=>String(member)===id)){listStatus.textContent=row.name+'は登録済みです。';return;}
   const empty=partySlots.indexOf(null);
   if(empty<0){listStatus.textContent=document.body.classList.contains('mobile-ui')?'PTは自分を含めて4人までです。PTの操作ボタンからメンバーを解除できます。':'PTは自分を含めて4人までです。右クリックでメンバーを解除できます。';return;}
-  partySlots[empty]=row.id;partyStates.set(id,{level:0,currentHp:null,chips:[],manual:{atk:0,def:0,move:0}});renderParty();window.dispatchEvent(new Event('party-members-change'));listStatus.textContent=row.name+'を'+(empty+1)+'番目に登録しました。右クリックで解除できます。';
+  partySlots[empty]=row.id;partyStates.set(id,{level:0,currentHp:null,chips:[],manual:{atk:0,def:0,move:0}});renderParty();window.dispatchEvent(new Event('party-members-change'));listStatus.textContent=row.name+'を'+(empty+1)+'番目に登録しました。'+(document.body.classList.contains('mobile-ui')?'PTの操作ボタンから解除できます。':'右クリックで解除できます。');
  }
  function removePartyMember(id){
   if(id===null||id===undefined||String(id)===String(selectedCharacter?.id))return;

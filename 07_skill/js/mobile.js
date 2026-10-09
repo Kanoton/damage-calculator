@@ -7,7 +7,7 @@
  dialog.addEventListener('cancel',()=>{if(opener?.isConnected)opener.focus({preventScroll:true});});
  function button(label,action){const b=document.createElement('button');b.type='button';b.textContent=label;b.addEventListener('click',action);return b;}
  function open(title){close();dialog.replaceChildren();const heading=document.createElement('h2');heading.id='mobile-action-title';heading.textContent=title;dialog.append(heading,button('閉じる',close));dialog.showModal();}
- window.showMobileInformation=(title,nodes)=>{open(title);const content=document.createElement('div');content.className='mobile-information';content.append(...nodes);dialog.append(content);};
+ window.showMobileInformation=(title,nodes)=>{opener=document.activeElement;open(title);const content=document.createElement('div');content.className='mobile-information';content.append(...nodes);dialog.append(content);};
  function dispatchOriginal(target,right=false){close();bypass=true;try{if(target.isConnected){if(right)target.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true}));else target.click();}}finally{bypass=false;}}
  const numericSelector=['#selected-character-portrait','#selected-character-hp-fill','#selected-character-atk-button','#selected-character-def-button','#selected-character-ct','.condition-icon','.party-slot-level','.party-slot-portrait','.party-slot-stat-icon','.roster-stat-icon','.roster-mark-button'].join(',');
  document.addEventListener('click',event=>{

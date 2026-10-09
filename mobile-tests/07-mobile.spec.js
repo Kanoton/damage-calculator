@@ -23,11 +23,13 @@ test('phone: ability details, chip foldout and table foldout are explicit and ac
  await start(page);await page.getByRole('button',{name:'ミミの能力の詳細',exact:true}).tap();await expect(page.getByRole('dialog')).toContainText('パッシブ');await page.getByRole('button',{name:'閉じる',exact:true}).tap();
  await expect(page.locator('.mobile-chip-details')).not.toHaveAttribute('open','');await page.locator('.mobile-chip-details summary').tap();await expect(page.locator('.mobile-chip-details')).toHaveAttribute('open','');
  await page.locator('.role-tab[data-role="attack"]').tap();await expect(page.locator('.mode-content.active .damage-table')).toBeHidden();await page.locator('.mode-content.active .mobile-table-toggle').tap();await expect(page.locator('.mode-content.active .damage-table')).toBeVisible();await noOverflow(page);
+ await page.evaluate(()=>scrollTo(0,0));
  await info.attach('phone-calculator',{body:await page.screenshot({fullPage:true}),contentType:'image/png'});
 });
 test('phone: narrow and landscape layouts do not overflow and desktop resize restores layout',async({page},info)=>{
  await page.setViewportSize({width:360,height:780});await start(page);for(const id of ['103','104','8'])await add(page,id);await noOverflow(page);
  expect(await page.evaluate(()=>document.getElementById('selected-character').getBoundingClientRect().top<document.querySelector('.main-container').getBoundingClientRect().top)).toBe(true);
+ await page.evaluate(()=>scrollTo(0,0));
  await info.attach('phone-party',{body:await page.screenshot({fullPage:true}),contentType:'image/png'});
  await page.setViewportSize({width:844,height:390});await noOverflow(page);await page.locator('#selected-self-tab').tap();await noOverflow(page);
  await page.setViewportSize({width:1100,height:800});await expect(page.locator('body')).not.toHaveClass(/mobile-ui/);await expect(page.locator('.mobile-party-actions').first()).toBeHidden();
