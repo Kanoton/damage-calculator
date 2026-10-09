@@ -367,3 +367,10 @@ This section supersedes older manual-only CT and placeholder-control notes above
 - Focused coverage: Teru/Sykes Erosion prediction, Hanna/Sherry different expiry, three received buffs composing without sharing timers, Dorothy manual Warmth plus capped party heal; existing 07 tests cover Undo, skill targets, stacks, die probabilities and ordinary pointer input. Dorothy healing-trigger Warmth acquisition is not inferred here: automatic event linking remains separate from its manual stack control.
 - Dedicated command/config/workflow: test:07:pairs / playwright.pairs.config.js / 07-party-pairs.yml. Per-self timeout45s, suite12min, failures3, workers2, retries0, CI job15min. JSON reports, per-pair JSONL, coverage attachments, failure traces upload even on failure/cancellation. PAIR_SELF_IDS allows selected self groups to rerun.
 - Scope: 07 only. 08 merging and deferred ability additions are not part of the matrix test work.
+
+
+## 07 full-party lifecycle and image audit (2026-10-09)
+
+- `pair-tests/07-party-focus.spec.js` supplements the one-donor matrix with three donors: Padman/Jill/Dorothy/Ren skill and support composition, turn-end Undo, donor removal and re-registration; Sherry/Teru/Hanna/Ren independent persistent effects and pursuit consumption Undo.
+- Browser image audit decodes all canonical status, chip, Hero Card2, monster and monster-info assets. A separate rendered audit visits every self character and the implemented received-support groups. Only four explicitly unassigned controls may use text substitutes: Pandaman counter attack/damage received, Nardis excess hand amount, Teru pursuit toggle. User will supply their icons separately. No image mapping is guessed here.
+- Runs in existing bounded pair config/workflow (45 seconds per test, 12 minutes suite, 15 minutes CI, stop after three failures). Images audit JSON and failure traces are retained with pair results. 08 stays unchanged.
