@@ -377,11 +377,11 @@ test('07 skill: PT editing isolates chips, modifiers and icon HP from self and o
  for(const id of ['1','4','7','10','9','13'])await page.locator('.chip-select[data-id="'+id+'"]').click();
  await expect(stat('1','atk')).toHaveText('4');await expect(stat('1','def')).toHaveText('2');await expect(stat('1','move')).toHaveText('1');await expect(stat('1','hp')).toHaveText('9/14');await expect(slot('1').locator('.party-slot-chip')).toHaveCount(6);
  await expect(slot('2').locator('.party-slot-chip')).toHaveCount(0);await expect(slot('27').locator('.party-slot-chip')).toHaveCount(0);await expect(page.locator('#selected-character-atk')).toHaveValue(ownAtk);await expect(slot('1').locator('input')).toHaveCount(0);
- for(let i=0;i<3;i++)await icon('1','hp').click({button:'right'});await expect(stat('1','hp')).toHaveText('6/14');await expect(stat('1','atk')).toHaveText('8');await icon('1','hp').click();await expect(stat('1','atk')).toHaveText('4');
+ for(let i=0;i<3;i++)await icon('1','hp').click();await expect(stat('1','hp')).toHaveText('6/14');await expect(stat('1','atk')).toHaveText('8');await icon('1','hp').click({button:'right'});await expect(stat('1','atk')).toHaveText('4');
  await icon('1','atk').click();await icon('1','def').click();await icon('1','move').click();await expect(stat('1','atk')).toHaveText('5');await expect(stat('1','def')).toHaveText('3');await expect(stat('1','move')).toHaveText('2');
  await slot('1').dragTo(page.locator('.party-member-slot[data-slot="4"]'));await expect(slot('1')).toHaveAttribute('aria-current','true');await expect(page.locator('.chip-select[data-id="1"]')).toHaveAttribute('aria-pressed','true');
  await page.locator('.chip-select[data-id="1"]').click();await expect(stat('1','atk')).toHaveText('4');await expect(slot('1').locator('.party-slot-chip')).toHaveCount(5);
- for(let i=0;i<20;i++)await icon('1','hp').click();await expect(stat('1','hp')).toHaveText('14/14');await page.locator('.chip-select[data-id="7"]').click();await expect(stat('1','hp')).toHaveText('12/12');
+ for(let i=0;i<20;i++)await icon('1','hp').click({button:'right'});await expect(stat('1','hp')).toHaveText('14/14');await page.locator('.chip-select[data-id="7"]').click();await expect(stat('1','hp')).toHaveText('12/12');
  await slot('2').locator('.party-slot-name').click();await expect(page.locator('.chip-select[data-id="4"]')).toHaveAttribute('aria-pressed','false');await page.locator('.chip-select[data-id="4"]').click();await expect(stat('2','move')).toHaveText('1');await expect(stat('1','move')).toHaveText('2');
  await slot('27').locator('.party-slot-name').click();await page.locator('.chip-select[data-id="1"]').click();await expect(page.locator('#selected-character-atk')).toHaveValue(String(Number(ownAtk)+1));await expect(stat('1','atk')).toHaveText('3');
  await slot('1').locator('.party-slot-name').click();await slot('1').locator('.party-slot-name').click({button:'right'});await expect(slot('1')).toHaveCount(0);await expect(slot('27')).toHaveAttribute('aria-current','true');await expect(page.locator('.chip-select[data-id="1"]')).toHaveAttribute('aria-pressed','true');
@@ -836,8 +836,9 @@ test('07 skill: contextual character attacks only apply when enabled', async ({ 
  const damage=page.getByLabel('このターンに受けたダメージの数');
  await damage.fill('4');await damage.dispatchEvent('change');
  await expect(page.locator('#selected-character-atk')).toHaveValue('1');
- await page.getByRole('button',{name:/カウンター攻撃：オフ/}).click();
+ await page.getByRole('button',{name:'カウンター攻撃を増やす',exact:true}).click();
  await expect(page.locator('#selected-character-atk')).toHaveValue('5');
+ const counter=page.getByLabel('カウンター攻撃の数');await expect(counter).toHaveValue('1');await page.getByRole('button',{name:'カウンター攻撃を増やす',exact:true}).click();await expect(counter).toHaveValue('2');await expect(page.locator('#selected-character-atk')).toHaveValue('5');await expect(page.getByRole('button',{name:'カウンター攻撃を増やす',exact:true}).locator('img')).toHaveAttribute('src','../images/UT_Buff/UT_Buff_Counter.png');await expect(page.getByRole('button',{name:'このターンに受けたダメージを増やす',exact:true}).locator('img')).toHaveAttribute('src','../images/UT_Buff/UT_Buff_SangXinBingKuang.png');await counter.fill('0');await counter.dispatchEvent('change');await expect(page.locator('#selected-character-atk')).toHaveValue('1');
 
  await selectCharacter(page,'17');
  await expect(page.getByRole('button',{name:/真夜の一閃：オフ/})).toHaveCount(0);
@@ -986,7 +987,7 @@ test('07 PT support: cocktail and Dorothy bonuses expire on turn end; capped hea
  await page.goto('/07_skill/');await selectCharacter(page,'1');await registerSupport(page,'103');await registerSupport(page,'104');await registerSupport(page,'10');
  const atk=Number(await page.locator('#attackPower1').inputValue());const attack=page.getByRole('spinbutton',{name:'PTカクテル攻撃の数'});await attack.fill('2');await attack.dispatchEvent('change');await page.getByRole('button',{name:/^PTドロシー攻撃：/}).click();expect(Number(await page.locator('#attackPower1').inputValue())).toBe(atk+3);
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#turn-end').click();await page.locator('.role-tab.character-tab').click();expect(Number(await page.locator('#attackPower1').inputValue())).toBe(atk);await expect(attack).toHaveValue('0');
- const before=await page.evaluate(()=>captureCharacterAbilityState().currentHp);await page.locator('#selected-character-hp-fill').click({button:'right'});await page.getByRole('button',{name:'PTパンダマン回復＋2'}).click();expect(await page.evaluate(()=>captureCharacterAbilityState().currentHp)).toBe(before);
+ const before=await page.evaluate(()=>captureCharacterAbilityState().currentHp);await page.locator('#selected-character-hp-fill').click();await page.getByRole('button',{name:'PTパンダマン回復＋2'}).click();expect(await page.evaluate(()=>captureCharacterAbilityState().currentHp)).toBe(before);
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();expect(await page.evaluate(()=>captureCharacterAbilityState().currentHp)).toBe(before-1);
 });
 
@@ -1058,4 +1059,13 @@ test('07 Teru: target Mark and Fate Echo plus reduction apply separately to main
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:{markStacks:1,fateEchoStacks:2,erosionStacks:0}})));
  const effect=await page.evaluate(()=>getTeruFollowUp());expect(effect.damageAdd).toBe(2);
  const values=await page.evaluate(()=>{const f=getTeruFollowUp(),main=getDefenseDamage(2,4,2,1,1,1);return [main,getTeruCombinedDamage(main,4,99,f,1),getTeruCombinedDamage(main,4,99,f,99)];});expect(values).toEqual([2,10,2]);
+});
+
+
+test('07 skill: HP icons decrement on click and increment on right click for self and monsters',async({page})=>{
+ await prepareSherryTargets(page);
+ const hp=page.locator('#selected-character-current-hp'),icon=page.locator('#selected-character-hp-fill'),initial=Number(await hp.inputValue());
+ await icon.click();await expect(hp).toHaveValue(String(initial-1));await icon.click({button:'right'});await expect(hp).toHaveValue(String(initial));await icon.click({button:'right'});await expect(hp).toHaveValue(String(initial));
+ const instanceId=await page.locator('#map-roster-list .roster-card').first().getAttribute('data-instance-id');const card=page.locator('#map-roster-list .roster-card[data-instance-id="'+instanceId+'"]'),enemyHp=card.locator('input[aria-label$="の残りHP"]'),enemyIcon=card.getByRole('button',{name:/残りHPを減らす$/}),before=Number(await enemyHp.inputValue());
+ await enemyIcon.click();await expect(enemyHp).toHaveValue(String(before-1));await page.locator('#roster-undo').click();await expect(enemyHp).toHaveValue(String(before));await enemyIcon.click({button:'right'});await expect(enemyHp).toHaveValue(String(before+1));await enemyHp.fill('1');await enemyHp.dispatchEvent('change');await enemyIcon.click();await expect(enemyHp).toHaveValue('0');await expect(card).toHaveClass(/defeated/);await page.locator('#roster-undo').click();await expect(enemyHp).toHaveValue('1');await expect(card).not.toHaveClass(/defeated/);
 });

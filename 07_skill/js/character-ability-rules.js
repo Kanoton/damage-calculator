@@ -2,8 +2,8 @@
 const CHARACTER_ABILITY_RULES={
  '10':{
   activeSkills:[{key:'active',label:"食べ放題",cooldown:3,effects:[]}],
-  controls:[{key:'カウンター攻撃',type:'toggle'},{key:'このターンに受けたダメージ',type:'number',min:0}],
-  modifiers:[{target:'atk',formula:'per_stack',source:'このターンに受けたダメージ',value:1,when:{key:'カウンター攻撃',equals:1}}]
+  controls:[{key:'カウンター攻撃',type:'number',min:0},{key:'このターンに受けたダメージ',type:'number',min:0}],
+  modifiers:[{target:'atk',formula:'per_stack',source:'このターンに受けたダメージ',value:1,when:{key:'カウンター攻撃',min:1}}]
  },
  '17':{
   activeSkills:[{key:'active',label:"真夜の一閃",cooldown:3,target:'monster',multipleTargets:true,effects:[{type:'damage_monster',sourceStat:'atk',offset:2}]}]

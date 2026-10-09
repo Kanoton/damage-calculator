@@ -13,7 +13,7 @@ async function self(page,id){
 async function prepare(page,id){
  await page.goto('/07_skill/');await self(page,id);
  await page.locator('#selected-character-ct').click({button:'right'});
- await page.locator('#selected-character-atk-button').click();await page.locator('#selected-character-hp-fill').click({button:'right'});
+ await page.locator('#selected-character-atk-button').click();await page.locator('#selected-character-hp-fill').click();
  const counter=page.locator('#selected-character-conditions input.condition-number:enabled').first();if(await counter.count()){await counter.fill('1');await counter.dispatchEvent('change');}
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-tab-monsters').click();await page.locator('#mp-map-select').selectOption('MAP0104');
  await page.locator('#roster-clear').click();await page.locator('#mp-monster-list .mp-monster:visible').first().click();
@@ -46,7 +46,7 @@ for(const actor of characters.filter(c=>!selected.length||selected.includes(c.id
        click(`.character-select[data-id="${donor.id}"]`);const duplicateIds=window.getPartyCharacterIds();
        click(`.party-member-slot[data-character-id="${donor.id}"] .party-slot-level`);
        click(`.party-member-slot[data-character-id="${donor.id}"] [data-stat="atk"] button`);
-       slot().querySelector('[data-stat="hp"] button').dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true}));
+       click(`.party-member-slot[data-character-id="${donor.id}"] [data-stat="hp"] button`);
        const level=slot().querySelector('.party-slot-level').textContent,donorAtk=slot().querySelector('[data-stat="atk"] b').textContent;
        slot().click();click('#character-chip-tab');
        const chip=$('#chip-image-list .chip-select');if(!chip)throw new Error('No chip to check ownership');chip.click();

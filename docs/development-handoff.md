@@ -428,3 +428,9 @@ This section supersedes older manual-only CT and placeholder-control notes above
 - Supersedes overlapping tab edge: tab bottom meets panel top without overlap; tab bottom border is zero so the intact panel top supplies the single shared line. All tabs paint to their rounded border box, including inactive tabs. No gap between tabs.
 - Character hover checkbox uses compact label スキルを表示 and auto left margin to stay at the header right edge even when status is empty. Default-off behavior remains.
 - Checkpoint:7d14dfc78ebe7766d64e9311e0f698489e7a6f57; branch codex/07-tab-corners. 08 unchanged.
+
+## 07 HP click direction / Pandaman stack icons (2026-10-09)
+
+- HP icons now decrement on primary click and increment on contextmenu for self, all PT slots, and monster roster. Other statistics retain their directions. Mobile plus/minus routes HP events in the reversed direction, preserving the explicit meaning of its buttons. Direct numeric entry and HP clamping/defeat/Undo remain shared.
+- Pandaman カウンター攻撃 is a nonnegative stack counter using UT_Buff_Counter.png; このターンに受けたダメージ uses UT_Buff_SangXinBingKuang.png. Counter >0 keeps the existing received-damage ATK bonus once, without multiplying by stacks. Acquisition, consumption and damage entry remain manual; no new lifecycle inference.
+- Checkpoint:a6c296f68e7a216d0e1f865978d6c19d59a2eacb; branch codex/07-hp-counter. 08 unchanged.

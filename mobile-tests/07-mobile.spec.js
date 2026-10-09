@@ -39,6 +39,6 @@ test('phone: narrow and landscape layouts do not overflow and desktop resize res
 test('phone: monster HP changes once, modal cancellation is harmless and Undo restores HP',async({page})=>{
  await start(page);await page.locator('.role-tab[data-role="map"]').tap();await page.locator('#mp-tab-monsters').tap();await page.locator('#mp-map-select').selectOption('MAP0104');await page.locator('#roster-clear').tap();await page.locator('#mp-monster-list .mp-monster:visible').first().tap();
  const card=page.locator('#map-roster-list .roster-card').first(),hp=card.getByRole('spinbutton',{name:/残りHP$/}),before=Number(await hp.inputValue());
- const icon=card.getByRole('button',{name:/残りHPを増やす$/});await icon.tap();await page.getByRole('button',{name:'閉じる',exact:true}).tap();await expect(hp).toHaveValue(String(before));
+ const icon=card.getByRole('button',{name:/残りHPを減らす$/});await icon.tap();await page.getByRole('button',{name:'閉じる',exact:true}).tap();await expect(hp).toHaveValue(String(before));
  await icon.tap();await page.getByRole('button',{name:'− 減らす',exact:true}).tap();await expect(hp).toHaveValue(String(before-1));await page.locator('#roster-undo').tap();await expect(hp).toHaveValue(String(before));await noOverflow(page);
 });

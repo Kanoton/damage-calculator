@@ -42,7 +42,7 @@
   if(!condition)return true;
   if(condition.key==='current_hp_ratio<=')return activeConditionForced('current_hp_ratio<=')||(state().currentHp!==null&&state().currentHp<=base('hp')*Number(condition.value));
   if(condition.key==='target_mark')return (Number(currentOpponent?.markStacks)||0)>=(Number(condition.min)||0);
-  return abilityControlValue(condition.key)===Number(condition.equals);
+  return condition.min!==undefined?abilityControlValue(condition.key)>=Number(condition.min):abilityControlValue(condition.key)===Number(condition.equals);
  };
  const abilityModifierValue=rule=>{
   if(!abilityConditionMatches(rule.when))return 0;
@@ -127,7 +127,7 @@
   return result;
  }
  function makeIcon(key){
-  const file=statusIcons.get(key)||(['マジで怒ったぞ','次の攻撃ダイス6'].includes(key)?statusIcons.get('自己主張なし攻撃補正'):null)||statusIcons.get(key==='憑依先の戦闘ATK'?'狐光':specialIcons[key]);
+  const file=({'カウンター攻撃':'UT_Buff/UT_Buff_Counter.png','このターンに受けたダメージ':'UT_Buff/UT_Buff_SangXinBingKuang.png'})[key]||statusIcons.get(key)||(['マジで怒ったぞ','次の攻撃ダイス6'].includes(key)?statusIcons.get('自己主張なし攻撃補正'):null)||statusIcons.get(key==='憑依先の戦闘ATK'?'狐光':specialIcons[key]);
   if(!file)return Object.assign(document.createElement('span'),{className:'condition-fallback',textContent:key});
   const icon=document.createElement('img');icon.alt='';
   const path=file.startsWith('chip_icon/')||file.startsWith('UT_Buff/')?file:'icon/'+file;
@@ -539,8 +539,8 @@
  hpInput.addEventListener('change',()=>{state().currentHp=Math.max(0,Number(hpInput.value)||0);updateStats();});
  const hpButton=document.getElementById('selected-character-hp-fill');
  const changeHp=delta=>{if(!selectedCharacter)return;state().currentHp=Math.max(0,Math.min(calculate().hp,state().currentHp+delta));updateStats();};
- hpButton.addEventListener('click',()=>changeHp(1));
- hpButton.addEventListener('contextmenu',event=>{event.preventDefault();changeHp(-1);});
+ hpButton.addEventListener('click',()=>changeHp(-1));
+ hpButton.addEventListener('contextmenu',event=>{event.preventDefault();changeHp(1);});
  for(const stat of ['atk','def']){
   const button=document.getElementById('selected-character-'+stat+'-button');
   const change=delta=>{if(!selectedCharacter)return;const current=calculate()[stat],next=Math.max(0,current+delta);state().manual[stat]+=next-current;updateStats();};
