@@ -402,3 +402,10 @@ This section supersedes older manual-only CT and placeholder-control notes above
 
 - Wide-mode roster count and Undo/Clear share one row; four statistics fit one compact row (18px icons/13px text, HP three digits).
 - Wide-mode Chip button beside Skill opens a native dialog with names and56px owned-chip icons. It moves the original controls, preserving charge/CT activation handlers; closing or leaving wide mode restores their home. Condition toggles remain in the lower status bar. Vertical/mobile keep their chip presentation. New script js/wide-chips.js loads after mobile.js.
+
+## 07 attached tabs / anchored chip popup (2026-10-09)
+
+- Wide main tabs attach to the panel top edge. Explicit per-role border colors match all4 panels; selected bottom border bridges with white.
+- Wide roster uses equal12px column/outer spacing; scrollbar is hidden to avoid asymmetric gutter, while wheel/touch/keyboard scrolling remain (list is focusable). Cards use the recovered width.
+- Chip dialog sits at bottom right near the opener. Close button, Escape and outside click dismiss it; original self-chip handlers and restoration remain. Each occupied PT slot has a wide-only Chip button with a named read-only ownership list; self slot reuses self actions. Empty ownership has a message. PT chip editing stays on existing character/chip tabs.
+- Checkpoint before change:b98ffbc817c5067d510edb4348c74968977c13d1; branch codex/07-wide-details.
