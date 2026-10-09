@@ -52,6 +52,7 @@ test('PT chip buttons show each member ownership without changing self chips',as
  await expect(page.locator('.party-member-slot[data-character-id="8"] .party-chip-count')).toHaveText('×0');
  await page.locator('.party-member-slot[data-character-id="8"]').click();await page.locator('#character-chip-tab').click();await page.locator('#chip-category-3').click();await page.locator('.chip-select[data-name="エネルギー回収"]').click();
  await expect(page.locator('.party-member-slot[data-character-id="8"] .party-chip-count')).toHaveText('×1');
+ await page.locator('.chip-select[data-name="エナジーソード"]').click();await expect(page.locator('.party-member-slot[data-character-id="8"] .party-chip-count')).toHaveText('×2');
  const before=await page.evaluate(()=>captureCharacterAbilityState());
  await page.getByRole('button',{name:'レンの取得チップを表示',exact:true}).click();const dialog=page.locator('.wide-chip-dialog');await expect(dialog).toBeVisible();await expect(dialog.getByRole('heading')).toHaveText('レンの取得チップ');await expect(dialog.getByAltText('エネルギー回収',{exact:true})).toBeVisible();await expect(dialog.locator('.is-actionable')).toHaveCount(0);
  const b=await dialog.boundingBox();expect(b.x+b.width).toBeGreaterThan(1850);expect(b.y+b.height).toBeGreaterThan(1000);await info.attach('pt-chip-popup',{body:await page.screenshot(),contentType:'image/png'});
