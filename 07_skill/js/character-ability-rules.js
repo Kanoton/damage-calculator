@@ -27,8 +27,10 @@ const CHARACTER_ABILITY_RULES={
  },
  '6':{
   ignoreDefenseOnAttackSix:true,
-  activeSkills:[{key:'active',label:"マジで怒ったぞ",cooldown:3,effects:[]}],
+  activeSkills:[{key:'active',label:"マジで怒ったぞ",cooldown:3,effects:[{type:'modify_control',key:'マジで怒ったぞ',delta:1,max:1}]}],
   controls:[
+   {key:'マジで怒ったぞ',type:'toggle',duration:'turn'},
+   {key:'次の攻撃ダイス6',type:'toggle'},
    {key:'自己主張なし攻撃補正',type:'number',min:-2,max:2},
    {key:'自己主張なし防御補正',type:'number',min:-2,max:2},
    {key:'自己主張なし移動補正',type:'number',min:-2,max:2}
