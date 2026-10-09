@@ -737,7 +737,7 @@ test('07 skill: character list hover shows ability tooltip', async ({ page }) =>
  await page.goto('/07_skill/');
  await page.locator('.role-tab.character-tab').click();
  const mimi=page.locator('.character-select[data-id="1"]');
- await mimi.hover();
+ await page.locator('#character-hover-skills').check();await mimi.hover();
  const tooltip=page.locator('#character-skill-tooltip');
  await expect(tooltip).toBeVisible();
  await expect(tooltip).toContainText('商品補充');
@@ -757,7 +757,7 @@ test('07 skill: character cards use Hero Card2 artwork and live stats while pres
  await expect(mimi.locator('.character-list-name')).toHaveText('ミミ');
  for(const [key,value] of [['lv0_atk','7'],['lv0_def','6'],['lv0_hp','19']])await expect(mimi.locator(`[data-stat="${key}"]`)).toHaveText(value);
  await expect(mimi.locator('[data-stat="initial_coin"]')).toHaveText('12+10');
- await mimi.hover();await expect(page.locator('#character-skill-tooltip')).toContainText('商品補充');
+ await page.locator('#character-hover-skills').check();await mimi.hover();await expect(page.locator('#character-skill-tooltip')).toContainText('商品補充');
  const parunan=page.locator('.character-select[data-id="2"]');await parunan.click();
  await expect(page.locator('#selected-character-name')).toHaveText('パルナン');
  await expect(parunan).toHaveAttribute('aria-pressed','true');
@@ -782,7 +782,7 @@ test('07 skill: file protocol keeps character cards, tooltip and selection', asy
  const mimi=page.locator('.character-select[data-id="1"]');
  await expect(mimi.locator('.character-list-image')).toHaveAttribute('src','../images/UT_Hero_Card2/UT_Hero_Card2_108.png');
  await expect(mimi.locator('[data-stat="lv0_hp"]')).toHaveText('9');
- await mimi.hover();await expect(page.locator('#character-skill-tooltip')).toContainText('商品補充');
+ await page.locator('#character-hover-skills').check();await mimi.hover();await expect(page.locator('#character-skill-tooltip')).toContainText('商品補充');
  await page.locator('.character-select[data-id="2"]').click();
  await expect(page.locator('#selected-character-name')).toHaveText('パルナン');
 });

@@ -415,3 +415,10 @@ This section supersedes older manual-only CT and placeholder-control notes above
 - Supersedes white tab bridge: wide tabs meet the panel top without covering its border. Selected tab has all4 colored edges; panel outline stays intact and role background colors remain.
 - Occupied PT slots show owned-chip count (×0, ×1, ...) directly below Chip button, refreshed by existing renderParty ownership updates. Wide-only control reserves room beside name/statistics; mobile/vertical presentation is preserved.
 - Checkpoint:b97c314e1ed75c97bb3931abf1d7e62bc4c2082a; branch codex/07-tab-outline-counts.
+
+## 07 single shared tab edge / opt-in ability hover (2026-10-09)
+
+- Wide tabs share the exact3px top edge with the panel, keeping active bottom color while avoiding stacked6px line. Inactive background clips to padding box so panel outline is not covered. Wide main/map/character subtab gaps are0.
+- Character header now holds list/chip tabs, PT/list status and a default-off checkbox for ability hover. Tooltip show (including keyboard focus) requires the checkbox; disabling hides it immediately. Mobile explicit ability details remain available.
+- PT chip count is anchored farther down/right beneath its button. Existing owned counts and popup handlers remain shared.
+- Checkpoint:7e895f953981894182e3cf23200c6863b06a43c5; branch codex/07-hover-toolbar.
