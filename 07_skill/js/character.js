@@ -154,7 +154,8 @@
   {donor:'103',key:'PTカクテル防御',icon:'カクテル防御カード',number:true,max:3,stat:'def'},
   {donor:'104',key:'PTドロシー攻撃',icon:'本当の私',stat:'atk',value:1},
   {donor:'20',key:'PTユメ攻撃補正',icon:'ヒール',number:true,stat:'atk'},
-  {donor:'27',key:'PT潜伏',icon:'潜伏',stat:'atk',marked:true}
+  {donor:'27',key:'PT潜伏',icon:'潜伏',stat:'atk',marked:true},
+  {donor:'105',key:'PTハンナ次の移動',icon:'人形完成',stat:'move',value:2}
  ];
  function renderPartySupport(){
   const donors=new Set(partySlots.filter(id=>String(id)!==String(selectedCharacter?.id)).map(String));
@@ -162,8 +163,9 @@
    const current=abilityControlValue(c.key);if(!donors.has(c.donor)&&!current)continue;
    const change=value=>{const next=Math.max(0,Math.min(c.max??999,Math.floor(Number(value)||0)));if(next===abilityControlValue(c.key))return;window.rememberCharacterSkillActivation?.();state().numbers[c.key]=next;renderConditions();updateStats();};
    if(c.number){const view=createConditionNumberView(c.key,current,makeIcon(c.icon));view.input.max=String(c.max??999);if(c.key==='PTユメ攻撃補正')view.item.title='ゲームで確定した余剰回復によるATK増加量を指定。回復量から自動換算しません。ターン終了で解除';view.button.addEventListener('click',()=>change(current+1));view.button.addEventListener('contextmenu',e=>{e.preventDefault();change(current-1);});view.input.addEventListener('change',()=>change(view.input.value));conditionsBox.append(view.item);}
-   else {const button=createCharacterAbilityToggleView(c.key,!!current,makeIcon(c.icon),()=>change(current?0:1));if(c.marked)button.title+='。戦闘終了後は手動でオフ（ターン終了でも解除）';conditionsBox.append(button);}
+   else {const button=createCharacterAbilityToggleView(c.key,!!current,makeIcon(c.icon),()=>change(current?0:1));if(c.marked)button.title+='。戦闘終了後は手動でオフ（ターン終了でも解除）';if(c.donor==='105')button.title+='。ゲームで次の移動力＋2を受けた時にオン。移動後は手動でオフ';conditionsBox.append(button);}
   }
+  if(String(selectedCharacter?.id)==='106'&&donors.has('105')){const button=document.createElement('button');button.type='button';button.className='selected-chip condition-toggle';button.setAttribute('aria-label','PTハンナ推理タイム＋1');button.title='ハンナの通過で受けた推理タイム＋1（最大4、ターン終了で−1）';button.append(makeIcon('推理タイム'));button.addEventListener('click',()=>{const current=abilityControlValue('推理タイム');if(current>=4)return;window.rememberCharacterSkillActivation?.();state().numbers['推理タイム']=current+1;renderConditions();updateStats();});conditionsBox.append(button);}
   for(const c of [{donor:'103',label:'PTカクテル回復＋1',amount:1},{donor:'10',label:'PTパンダマン回復＋2',amount:2},{donor:'104',label:'PTドロシー通過回復＋1',amount:1}])if(donors.has(c.donor)){
    const button=document.createElement('button');button.type='button';button.className='selected-chip condition-toggle';button.setAttribute('aria-label',c.label);button.append(makeIcon('ヒール'));button.title=c.label+'：ゲームで発生した回復を自キャラへ反映（最大HPまで）。範囲・通過は手動確認';button.addEventListener('click',()=>{const max=calculate().hp,next=Math.min(max,state().currentHp+c.amount);if(next===state().currentHp)return;window.rememberCharacterSkillActivation?.();state().currentHp=next;renderConditions();updateStats();});conditionsBox.append(button);
   }
