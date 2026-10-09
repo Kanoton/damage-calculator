@@ -397,3 +397,8 @@ This section supersedes older manual-only CT and placeholder-control notes above
 - Supersedes initial wide arrangement: right rail35% (minimum580px), round/progress top left, standalone main tabs to its right; main below. Monster roster top right in2 columns, self/PT118px frame bottom right. Only roster list scrolls within right rail.
 - Wide map toolbar combines subtabs on left with map/difficulty on right; wrapper is display:contents outside wide mode. Roster help text is hidden only in wide mode, card statistics use2x2 compact rows. Vertical/mobile layout and calculation/state processing remain shared.
 - Checkpoint before refinement:3b409c6a8e760a4e813a4f3f24121d60e553cbe6; branch codex/07-wide-refine. Existing bounded wide/mobile/desktop/pair CI remain required.
+
+## 07 compact roster and owned-chip dialog (2026-10-09)
+
+- Wide-mode roster count and Undo/Clear share one row; four statistics fit one compact row (18px icons/13px text, HP three digits).
+- Wide-mode Chip button beside Skill opens a native dialog with names and56px owned-chip icons. It moves the original controls, preserving charge/CT activation handlers; closing or leaving wide mode restores their home. Condition toggles remain in the lower status bar. Vertical/mobile keep their chip presentation. New script js/wide-chips.js loads after mobile.js.

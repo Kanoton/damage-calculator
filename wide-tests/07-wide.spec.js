@@ -27,3 +27,16 @@ test('FHD: monster scrolling and numeric edits/Undo remain independent from left
  const list=page.locator('#map-roster-list');expect(await list.evaluate(e=>e.scrollHeight>e.clientHeight)).toBe(true);await list.evaluate(e=>e.scrollTop=e.scrollHeight);expect(await list.evaluate(e=>e.scrollTop)).toBeGreaterThan(0);expect((await bounds(page)).overflowY).toBe(false);
  const hp=page.locator('.roster-card').first().getByRole('spinbutton',{name:/残りHP$/}),before=await hp.inputValue();await hp.fill(String(Number(before)-1));await hp.dispatchEvent('change');await page.locator('#roster-undo').click();await expect(hp).toHaveValue(before);
 });
+
+test('wide chips: original charge action works in dialog and survives close/resize',async({page})=>{
+ await page.goto('/07_skill/');await select(page,'6');
+ await page.locator('#character-chip-tab').click();
+ const chip=page.locator('.chip-select[data-name="エネルギー回収"]');await chip.click();
+ await page.locator('#wide-chip-open').click();
+ const dialog=page.locator('.wide-chip-dialog');await expect(dialog).toBeVisible();
+ await dialog.locator('.selected-chip.is-actionable').first().click();
+ await expect(page.getByLabel('チャージの数',{exact:true})).toHaveValue('2');
+ await dialog.getByRole('button',{name:'閉じる',exact:true}).click();await expect(dialog).not.toBeVisible();
+ await page.locator('#wide-chip-open').click();await page.setViewportSize({width:1080,height:1920});await expect(dialog).not.toBeVisible();
+ await expect(page.locator('#selected-character-chips .selected-chip')).toBeVisible();
+});
