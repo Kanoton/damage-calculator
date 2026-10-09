@@ -94,6 +94,8 @@ renderRoundProgress();
 window.addEventListener('character-selection-change',()=>{if(!roundProgressReady()){renderRoundProgress();return;}rosterState.round=1;rosterState.progress=1;renderRoundProgress();executeProgressEvents();});
 
 window.rememberCharacterSkillActivation=()=>{rememberRoster();rosterUndo.disabled=false;};
+const partyFanReduce=document.createElement('button');partyFanReduce.type='button';partyFanReduce.id='roster-pt-fan-reduce';partyFanReduce.textContent='PTファン ATK−1';partyFanReduce.title='超てんちゃんのスキルでファン9体以上の効果が発動した時に使用。生存中のファンのATKを永続−1（重複不可）。9体の条件はゲームで確認してください';partyFanReduce.hidden=true;rosterUndo.parentElement.prepend(partyFanReduce);
+partyFanReduce.addEventListener('click',()=>{if(partyFanReduce.hidden||partyFanReduce.disabled)return;rememberRoster();window.reduceRosterFanAttack();if(rosterState.selectedId){const enemy=rosterState.monsters.find(e=>e.instanceId===rosterState.selectedId&&!e.defeated);if(enemy)registerEnemy(enemy,false);}});
 window.getRosterFanCount=()=>rosterState.monsters.filter(enemy=>enemy.fan).length;
 window.reduceRosterFanAttack=()=>{for(const enemy of rosterState.monsters)if(enemy.fan&&!enemy.defeated)enemy.fanSkillAttackReduction=true;renderRoster();};
 function opponentDetails(enemy){return enemy?{name:enemy.name,mapId:enemy.mapId,markStacks:enemy.markStacks||0,fateEchoStacks:enemy.fateEchoStacks||0,erosionStacks:enemy.erosionStacks||0,weakness:!!enemy.weakness,fan:!!enemy.fan}:null;}
@@ -216,6 +218,8 @@ function resolveCharacterSkillTarget(enemy){
  renderCharacterSkillTargetUi();renderRoster();roster.querySelector('[data-skill-target-id="'+enemy.instanceId+'"]')?.focus();return true;
 }
 function renderRoster(){
+ const ptFan=(window.getPartyCharacterIds?.()||[]).map(String).includes('101')&&String(window.captureCharacterAbilityState?.()?.id)!=='101';partyFanReduce.hidden=!ptFan;partyFanReduce.disabled=!rosterState.monsters.some(e=>e.fan&&!e.defeated&&!e.fanSkillAttackReduction);
+
  let newlyDefeated;do{newlyDefeated=false;for(const enemy of rosterState.monsters){if(enemy.defeated)continue;updateEnemy(enemy);if(enemy.hp<=0){removeEnemy(enemy);newlyDefeated=true;}}}while(newlyDefeated);
  renderCharacterSkillTargetUi();
  window.dispatchEvent(new Event('roster-status-change'));

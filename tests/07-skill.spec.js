@@ -995,3 +995,8 @@ test('07 PT support: explicit Yume bonus and Bonnie stealth use received amounts
  await page.getByRole('button',{name:/^PT潜伏：/}).click();expect(Number(await page.locator('#attackPower1').inputValue())).toBe(base+4);
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#turn-end').click();expect(Number(await page.locator('#attackPower1').inputValue())).toBe(base);
 });
+
+test('07 PT support: confirmed KAngel fan debuff is permanent once-only and undoable',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'1');await registerSupport(page,'101');await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-tab-monsters').click();const maps=page.locator('#mp-map-select');for(const option of await maps.locator('option').all()){await maps.selectOption(await option.getAttribute('value'));if(await page.locator('#mp-monster-list .mp-monster:visible').count())break;}
+ await page.locator('#mp-monster-list .mp-monster:visible').first().click();const card=page.locator('#map-roster-list .roster-card').first(),attack=card.locator('input[aria-label$="の攻撃力"]');await attack.fill('5');await attack.dispatchEvent('change');await card.locator('.roster-status-fan button').click();await page.locator('#roster-pt-fan-reduce').click();await expect(attack).toHaveValue('4');await expect(page.locator('#roster-pt-fan-reduce')).toBeDisabled();await page.locator('#turn-end').click();await expect(attack).toHaveValue('4');await page.locator('#roster-undo').click();await page.locator('#roster-undo').click();await expect(attack).toHaveValue('5');await expect(page.locator('#roster-pt-fan-reduce')).toBeEnabled();
+});
