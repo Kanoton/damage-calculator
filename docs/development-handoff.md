@@ -383,3 +383,11 @@ This section supersedes older manual-only CT and placeholder-control notes above
 - Tap numeric icons to choose +/−; CT preserves reversed left/right semantics. Existing event handlers apply the edits. PT operation buttons expose chip editing, swap (including empty slots) and removal; self removal is not offered. Character abilities use an explicit detail dialog. Mobile uses native numeric keyboard, suppressing the custom number pad.
 - No cross-device synchronization. Future sync must be hidden and inactive in touch mobile mode, not merely hidden visually. No browser-name-only detection. Real-device keyboard/safe-area/long-press behavior still needs manual verification.
 - `npm run test:07:mobile` runs Chromium Pixel 5 and WebKit iPhone 13 emulation, plus 360px portrait/844px landscape and desktop restoration. Suite max5min, test30sec, failures3, CI15min. Screenshots and failure traces retained14days. Existing desktop/06b and bounded1190-pair CI remain required.
+
+
+## 07 wide desktop / FHD layout (2026-10-09)
+
+- `wide.css` changes only the outer arrangement when viewport width >=1600px and aspect ratio >=3/2, excluding mobile touch mode. At1920x1080, right management rail is520px, gap16px; left uses remaining width. Threshold is deliberately larger than initial1280 proposal to preserve main-view space.
+- CSS Grid places main tabs/views on left; round/progress, unchanged118px self/PT frame and monster roster on right. Main content and roster list scroll independently within the viewport; narrow/tall windows keep vertical layout. No state or DOM ownership changes. Mobile retains its existing priority. 08 is unchanged.
+- `npm run test:07:wide` / `playwright.wide.config.js` / `07-wide.yml` verify all4 modes at FHD, portrait/narrow/ratio gating, state retention, roster scrolling and HP Undo in Chromium and WebKit. Tests45sec, suite5min, failures3, CI15min; screenshots/reports retained14days. Existing desktop, mobile and pair regressions also required.
+- Checkpoint before wide UI:2582a1336d7dec9f07351c25338c9741da0c7785 (mobile approved by user); branch codex/07-wide-layout.

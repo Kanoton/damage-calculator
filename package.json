@@ -6,6 +6,7 @@
     "check:07": "node scripts/check-07-syntax.js",
     "check:08": "node scripts/check-07-syntax.js 08_screen_reader",
     "test:08": "playwright test tests/08-screen-reader.spec.js tests/08-world-reader.spec.js",
+    "test:07:wide": "playwright test --config=playwright.wide.config.js",
     "test:07:mobile": "playwright test --config=playwright.mobile.config.js",
     "test:07:pairs": "playwright test --config=playwright.pairs.config.js"
   },
