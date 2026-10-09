@@ -1,0 +1,33 @@
+const {test,expect}=require('@playwright/test');
+async function start(page,id='1'){
+ await page.goto('/07_skill/');await expect(page.locator('body')).toHaveClass(/mobile-ui/);await page.locator('.role-tab.character-tab').click();await page.locator('#selected-self-tab').click();await page.locator('#character-list-tab').click();await page.locator(`.character-select[data-id="${id}"]`).click();await page.locator('#selected-self-tab').click();
+}
+async function change(page,selector,plus){await page.locator(selector).tap();await expect(page.getByRole('dialog')).toBeVisible();await page.getByRole('button',{name:plus?'＋ 増やす':'− 減らす',exact:true}).tap();}
+async function add(page,id){await page.locator('#selected-party-tab').tap();await page.locator('#character-list-tab').tap();await page.locator(`.character-select[data-id="${id}"]`).tap();}
+async function noOverflow(page){expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);}
+test('phone: HP, level, CT and stacks can increase and decrease without right click',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await start(page,'106');
+ const hp=Number(await page.locator('#selected-character-current-hp').inputValue());await change(page,'#selected-character-hp-fill',false);await expect(page.locator('#selected-character-current-hp')).toHaveValue(String(hp-1));await change(page,'#selected-character-hp-fill',true);await expect(page.locator('#selected-character-current-hp')).toHaveValue(String(hp));
+ await change(page,'#selected-character-portrait',true);await expect(page.locator('#selected-character-level')).toHaveText('Lv.1');await change(page,'#selected-character-portrait',false);await expect(page.locator('#selected-character-level')).toHaveText('Lv.0');
+ await change(page,'#selected-character-ct',true);await expect(page.locator('#selected-character-ct')).toHaveText(/^CT 1/);await change(page,'#selected-character-ct',false);await expect(page.locator('#selected-character-ct')).toHaveText(/^CT 0/);
+ await change(page,'[aria-label="推理タイムを増やす"]',true);await expect(page.getByLabel('推理タイムの数')).toHaveValue('1');await change(page,'[aria-label="推理タイムを増やす"]',false);await expect(page.getByLabel('推理タイムの数')).toHaveValue('0');
+ await page.getByLabel('推理タイムの数').tap();await expect(page.locator('#character-number-pad')).toBeHidden();await noOverflow(page);expect(errors).toEqual([]);
+});
+test('phone: PT edits, swaps with empty slot, removes and preserves self identity',async({page})=>{
+ await start(page);await add(page,'8');const slot='.party-member-slot[data-character-id="8"]';await change(page,slot+' .party-slot-level',true);await expect(page.locator(slot+' .party-slot-level')).toHaveText('Lv.1');await change(page,slot+' .party-slot-level',false);await expect(page.locator(slot+' .party-slot-level')).toHaveText('Lv.0');
+ await page.getByRole('button',{name:'レンの操作',exact:true}).tap();await page.getByRole('button',{name:'4番目と入れ替え',exact:true}).tap();await expect(page.locator(slot)).toHaveAttribute('data-slot','4');
+ await page.getByRole('button',{name:'レンの操作',exact:true}).tap();await page.getByRole('button',{name:'PT登録を解除',exact:true}).tap();await expect(page.locator(slot)).toHaveCount(0);expect(await page.evaluate(()=>captureCharacterAbilityState().id)).toBe('1');
+ await noOverflow(page);
+});
+test('phone: ability details, chip foldout and table foldout are explicit and accessible',async({page},info)=>{
+ await start(page);await page.getByRole('button',{name:'ミミの能力の詳細',exact:true}).tap();await expect(page.getByRole('dialog')).toContainText('パッシブ');await page.getByRole('button',{name:'閉じる',exact:true}).tap();
+ await expect(page.locator('.mobile-chip-details')).not.toHaveAttribute('open','');await page.locator('.mobile-chip-details summary').tap();await expect(page.locator('.mobile-chip-details')).toHaveAttribute('open','');
+ await page.locator('.role-tab[data-role="attack"]').tap();await expect(page.locator('.mode-content.active .damage-table')).toBeHidden();await page.locator('.mode-content.active .mobile-table-toggle').tap();await expect(page.locator('.mode-content.active .damage-table')).toBeVisible();await noOverflow(page);
+ await info.attach('phone-calculator',{body:await page.screenshot({fullPage:true}),contentType:'image/png'});
+});
+test('phone: narrow and landscape layouts do not overflow and desktop resize restores layout',async({page},info)=>{
+ await page.setViewportSize({width:360,height:780});await start(page);for(const id of ['103','104','8'])await add(page,id);await noOverflow(page);
+ await info.attach('phone-party',{body:await page.screenshot({fullPage:true}),contentType:'image/png'});
+ await page.setViewportSize({width:844,height:390});await noOverflow(page);await page.locator('#selected-self-tab').tap();await noOverflow(page);
+ await page.setViewportSize({width:1100,height:800});await expect(page.locator('body')).not.toHaveClass(/mobile-ui/);await expect(page.locator('.mobile-party-actions').first()).toBeHidden();
+});

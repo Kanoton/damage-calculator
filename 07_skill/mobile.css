@@ -1,0 +1,68 @@
+/* Desktop dimensions and interactions stay in style.css. */
+.mobile-only{display:none}
+.mobile-chip-details{display:contents}
+.mobile-chip-details>summary{display:none}
+.selected-character.is-party-view>.mobile-chip-details{display:none}
+.mobile-action-dialog{width:min(420px,calc(100% - 24px));max-height:80dvh;overflow:auto;border:2px solid #b89224;border-radius:12px;padding:16px;color:#493e22;background:#fffdf6}
+.mobile-action-dialog::backdrop{background:#0007}
+.mobile-action-dialog h2{font-size:18px;margin:0 0 12px;overflow-wrap:anywhere}
+.mobile-action-dialog button{min-height:44px;padding:10px 14px;margin:4px;border:1px solid #b89224;border-radius:6px;background:#fff8df;font:inherit;color:inherit}
+.mobile-information{white-space:pre-wrap;line-height:1.6}
+body.mobile-ui{margin:0 auto;padding:8px 8px calc(12px + env(safe-area-inset-bottom));font-size:16px}
+.mobile-ui .mobile-only{display:block}
+.mobile-ui .role-tabs{position:sticky;top:0;z-index:30;width:100%;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:0;background:#fff;padding-top:env(safe-area-inset-top)}
+.mobile-ui .role-tab{min-width:0;width:auto;min-height:48px;height:auto;padding:8px 2px;font-size:14px}
+.mobile-ui .main-container{height:auto!important;min-height:0!important;padding:12px 8px;grid-template-columns:minmax(0,1fr);gap:16px;overflow:visible!important}
+.mobile-ui .main-container.map-mode{padding:0}
+.mobile-ui #map-draft{height:auto;min-height:0}
+.mobile-ui #character-panel{height:auto;min-height:0;padding:8px}
+.mobile-ui .character-view,.mobile-ui .character-image-grid,.mobile-ui .chip-category-view{overflow:visible;max-height:none}
+.mobile-ui .character-image-grid{grid-template-columns:minmax(0,1fr);gap:8px}
+.mobile-ui .mobile-character-detail{margin-top:-6px;margin-bottom:10px}
+.mobile-ui .selected-character{height:auto;min-height:0;margin-top:14px;padding:10px;grid-template-columns:48px minmax(0,1fr);grid-template-rows:auto auto auto auto;gap:12px;overflow:visible}
+.mobile-ui .selected-character-member-tabs{grid-column:1/-1;grid-row:1;flex-direction:row;border:0;padding:0;height:auto}
+.mobile-ui .selected-character-member-tabs button{min-height:44px;font-size:16px}
+.mobile-ui #selected-character-portrait{grid-column:1;grid-row:2;min-height:64px}
+.mobile-ui .selected-character-main{grid-column:2;grid-row:2;gap:8px}
+.mobile-ui .selected-character-identity{flex-wrap:wrap;white-space:normal;overflow:visible;padding:0;font-size:16px}
+.mobile-ui #selected-character-name{max-width:none}
+.mobile-ui .selected-character-skill-controls{position:static;flex-direction:row;flex-wrap:wrap}
+.mobile-ui #selected-character-skill,.mobile-ui #selected-character-ct{min-height:44px;padding:8px;font-size:16px}
+.mobile-ui .selected-character-stats{padding:0;flex-wrap:wrap;white-space:normal;overflow:visible;gap:6px}
+.mobile-ui .selected-character-conditions{grid-column:1/-1;grid-row:3;height:auto;min-height:0;flex-wrap:wrap;overflow:visible;padding-top:8px}
+.mobile-ui .condition-item{max-width:100%;gap:4px}
+.mobile-ui .condition-icon,.mobile-ui .selected-character-stat-icon,.mobile-ui .selected-character-hp button{width:44px;height:44px;min-width:44px}
+.mobile-ui .condition-icon img,.mobile-ui .selected-character-stat-icon img,.mobile-ui .selected-character-hp img{width:26px;height:26px;object-fit:contain;margin:auto}
+.mobile-ui .selected-chip{min-width:44px;min-height:44px}
+.mobile-ui input,.mobile-ui select,.mobile-ui textarea{font-size:16px!important}
+.mobile-ui input[type=number]{min-height:44px}
+.mobile-ui .mobile-chip-details{display:block;grid-column:1/-1;grid-row:4;min-width:0}
+.mobile-ui .mobile-chip-details>summary{display:list-item;min-height:44px;padding:10px;cursor:pointer}
+.mobile-ui .selected-character-chips{height:auto;min-height:48px;padding:8px 0;border-left:0;--chip-size:44px}
+.mobile-ui .selected-party-grid{grid-column:1/-1;grid-row:2/-1;grid-template-columns:minmax(0,1fr);grid-template-rows:none;grid-auto-rows:auto;height:auto;gap:8px}
+.mobile-ui .party-member-slot{padding:8px;flex-wrap:wrap;gap:8px;overflow:visible;min-height:76px}
+.mobile-ui .party-slot-order{font-size:14px;width:36px}
+.mobile-ui .party-slot-name{font-size:16px;line-height:1.4;white-space:normal}
+.mobile-ui .party-slot-identity{gap:8px;line-height:1.4;flex-wrap:wrap}
+.mobile-ui .party-slot-level{font-size:16px;min-height:44px;padding:6px}
+.mobile-ui .party-slot-body{height:auto;flex-basis:100%;flex-wrap:wrap}
+.mobile-ui .party-slot-details,.mobile-ui .party-member-slot.has-self-chips .party-slot-details{flex:1 1 100%;min-width:0}
+.mobile-ui .party-slot-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;font-size:16px;line-height:1.4}
+.mobile-ui .party-slot-stat-icon{width:44px;height:44px}
+.mobile-ui .party-slot-stat img{width:24px;height:24px}
+.mobile-ui .party-slot-chips{flex:1 1 100%;height:44px;--party-chip-size:20px;padding:0;border-left:0}
+.mobile-ui .mobile-party-actions{margin-left:auto;min-height:44px;padding:8px 16px}
+.mobile-ui .character-skill-tooltip{display:none!important}
+.mobile-ui button{touch-action:manipulation}
+.mobile-ui .mobile-table-toggle{min-height:44px;width:100%;margin:8px 0;padding:10px}
+.mobile-ui .damage-table:not(.mobile-expanded){display:none}
+.mobile-ui .damage-area{min-width:0;overflow-x:auto;display:flex;flex-direction:column}
+.mobile-ui .damage-area .analysis-values{order:-1}
+.mobile-ui .battle-card-counter button,.mobile-ui .number-control button,.mobile-ui .roster-stat-icon,.mobile-ui .roster-mark-button,.mobile-ui .roster-status-button{min-width:44px;min-height:44px}
+.mobile-ui .roster-actionbar button,.mobile-ui .round-progress-controls button,.mobile-ui .character-subtabs button,.mobile-ui .teru-follow-up button{min-height:44px}
+.mobile-ui .round-progress-controls{flex-wrap:wrap;height:auto}
+.mobile-ui .map-roster-list{grid-template-columns:minmax(0,1fr)}
+.mobile-ui .roster-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.mobile-ui .roster-stat{min-width:0;font-size:16px}
+.mobile-ui .roster-hp{min-width:0;max-width:64px}
+.mobile-ui #character-list-status{font-size:14px;line-height:1.5}

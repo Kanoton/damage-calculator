@@ -437,6 +437,14 @@
   });
   if(selectedCharacter)updateChipListSelection();
  }
+ document.addEventListener('mobile-party-swap',event=>{
+  const {from,to}=event.detail||{};if(!Number.isInteger(from)||!Number.isInteger(to)||from<0||to<0||from>=4||to>=4||!partySlots[from])return;
+  [partySlots[from],partySlots[to]]=[partySlots[to],partySlots[from]];renderParty();listStatus.textContent='PTの順番を変更しました。';
+ });
+ document.addEventListener('mobile-character-detail',event=>{
+  const row=characters.find(item=>String(item.id)===String(event.detail?.id));const ability=row&&characterSkills.get(String(row.id));
+  if(row&&ability){const view=createCharacterSkillTooltipView(row,ability);window.showMobileInformation?.(row.name,[view.stats,view.description]);}
+ });
  function setPartyMode(active){
   partyMode=Boolean(active&&selectedCharacter);if(!partyMode){partyEditId=null;chipStatus.textContent='';}selectedPanel.classList.toggle('is-party-view',partyMode);partyGrid.hidden=!partyMode;
   selfTab.setAttribute('aria-selected',String(!partyMode));partyTab.setAttribute('aria-selected',String(partyMode));selfTab.tabIndex=partyMode?-1:0;partyTab.tabIndex=partyMode?0:-1;
@@ -569,6 +577,7 @@
     });
    }
    button.append(item);target.append(button);
+   if(folder==='character_list'){const detail=document.createElement('button');detail.type='button';detail.className='mobile-only mobile-character-detail';detail.textContent='能力の詳細';detail.setAttribute('aria-label',row.name+'の能力の詳細');detail.addEventListener('click',()=>document.dispatchEvent(new CustomEvent('mobile-character-detail',{detail:{id:String(row.id)}})));target.append(detail);}
   }
  }
  const mapPicker=document.getElementById('mp-map-select');
