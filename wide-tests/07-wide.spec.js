@@ -25,6 +25,8 @@ test('FHD: monster scrolling and numeric edits/Undo remain independent from left
  for(let i=0;i<15;i++)await page.locator('#mp-monster-list .mp-monster:visible').first().click();
  const cards=page.locator('.roster-card');const first=await cards.nth(0).boundingBox(),second=await cards.nth(1).boundingBox();expect(second.x).toBeGreaterThan(first.x);expect(second.y).toBe(first.y);
  const list=page.locator('#map-roster-list');expect(await list.evaluate(e=>e.scrollHeight>e.clientHeight)).toBe(true);await list.evaluate(e=>e.scrollTop=e.scrollHeight);expect(await list.evaluate(e=>e.scrollTop)).toBeGreaterThan(0);expect((await bounds(page)).overflowY).toBe(false);
+ const firstCard=page.locator('.roster-card').first();for(const [label,value] of [['攻撃力','99'],['防御力','99'],['残りHP','999']]){const input=firstCard.getByRole('spinbutton',{name:new RegExp(label+'$')});await input.fill(value);await input.dispatchEvent('change');}
+ const row=await firstCard.locator('.roster-stats').evaluate(e=>({ys:[...e.children].map(c=>c.getBoundingClientRect().y),fits:[...e.children].every(c=>c.scrollWidth<=c.clientWidth+1)}));expect(new Set(row.ys).size).toBe(1);expect(row.fits).toBe(true);
  const hp=page.locator('.roster-card').first().getByRole('spinbutton',{name:/残りHP$/}),before=await hp.inputValue();await hp.fill(String(Number(before)-1));await hp.dispatchEvent('change');await page.locator('#roster-undo').click();await expect(hp).toHaveValue(before);
 });
 

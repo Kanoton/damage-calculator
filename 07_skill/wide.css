@@ -1,6 +1,7 @@
 /* The toolbar wrapper keeps the existing vertical layout outside wide mode. */
 .mp-toolbar,.roster-summary{display:contents}
 #wide-chip-open,.owned-chip-name{display:none}
+.roster-summary>.roster-history-controls{justify-content:flex-end}
 @media (min-width:1600px) and (min-aspect-ratio:3/2){
  body:not(.mobile-ui){max-width:none;width:calc(100% - 24px);height:calc(100dvh - 24px);margin:12px;padding:0;display:grid;grid-template-columns:minmax(0,1fr) minmax(580px,35%);grid-template-rows:50px minmax(0,1fr) 118px;gap:12px 16px;overflow:hidden}
  body:not(.mobile-ui)>.tool-wrapper{display:contents}
