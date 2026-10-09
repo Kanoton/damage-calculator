@@ -194,7 +194,7 @@
    for(const key of ['PTテル攻撃力','PTテル狐光']){
     const view=createConditionNumberView(key,abilityControlValue(key),makeIcon('狐光'));
     view.item.title=key==='PTテル攻撃力'?'憑依による上昇を含むテルの表示ATK。追撃時限定の狐光は含めない':'ゲームで確認した狐光。カードの所持・使用は管理しません';
-    const change=value=>{window.rememberCharacterSkillActivation?.();state().numbers[key]=Math.max(0,Math.floor(Number(value)||0));renderConditions();updateStats();};
+    const change=value=>{const next=Math.max(0,Math.floor(Number(value)||0));if(next===abilityControlValue(key))return;window.rememberCharacterSkillActivation?.();state().numbers[key]=next;view.input.value=next;updateStats();};
     view.button.addEventListener('click',()=>change(abilityControlValue(key)+1));view.button.addEventListener('contextmenu',e=>{e.preventDefault();change(abilityControlValue(key)-1);});view.input.addEventListener('change',()=>change(view.input.value));conditionsBox.append(view.item);
    }
   }
