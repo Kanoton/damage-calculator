@@ -970,3 +970,38 @@ for(const folder of ['07_skill','08_screen_reader'])test(folder+': Fate Echo ico
  await page.locator('#roster-undo').click();await expect(field).toHaveText('1');await expect(button).toHaveAttribute('aria-pressed','true');
  await button.click({button:'right'});await button.click({button:'right'});await expect(field).toHaveText('0');await button.click();await expect(field).toHaveText('2');
 });
+
+async function registerSupport(page,id){await page.locator('#selected-party-tab').click();await page.locator('#character-list-tab').click();await page.locator('.character-select[data-id="'+id+'"]').click();await page.locator('#selected-self-tab').click();}
+test('07 PT support: shield and confirmed Yume bonus affect self, persist after donor removal, and Undo restores',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'1');await registerSupport(page,'8');await registerSupport(page,'20');
+ const atk=Number(await page.locator('#attackPower1').inputValue()),def=Number(await page.locator('#defensePower2').inputValue());
+ await page.getByRole('button',{name:/^PTジュジュシールド：/}).click();expect(Number(await page.locator('#damageReduce2').inputValue())).toBe(99);
+ const light=page.getByRole('spinbutton',{name:'PTユメ攻撃補正の数'});await light.fill('4');await light.dispatchEvent('change');expect(Number(await page.locator('#attackPower1').inputValue())).toBe(atk+4);expect(Number(await page.locator('#defensePower2').inputValue())).toBe(def);
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();await page.locator('.role-tab.character-tab').click();await expect(light).toHaveValue('0');
+ await page.locator('#selected-party-tab').click();await page.locator('.character-select[data-id="8"]').click({button:'right'});await page.locator('#selected-self-tab').click();await expect(page.getByRole('button',{name:/^PTジュジュシールド：/})).toHaveAttribute('aria-pressed','true');
+});
+test('07 PT support: cocktail and Dorothy bonuses expire on turn end; capped healing and Undo',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'1');await registerSupport(page,'103');await registerSupport(page,'104');await registerSupport(page,'10');
+ const atk=Number(await page.locator('#attackPower1').inputValue());const attack=page.getByRole('spinbutton',{name:'PTカクテル攻撃の数'});await attack.fill('2');await attack.dispatchEvent('change');await page.getByRole('button',{name:/^PTドロシー攻撃：/}).click();expect(Number(await page.locator('#attackPower1').inputValue())).toBe(atk+3);
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#turn-end').click();await page.locator('.role-tab.character-tab').click();expect(Number(await page.locator('#attackPower1').inputValue())).toBe(atk);await expect(attack).toHaveValue('0');
+ const before=await page.evaluate(()=>captureCharacterAbilityState().currentHp);await page.locator('#selected-character-hp-fill').click({button:'right'});await page.getByRole('button',{name:'PTパンダマン回復＋2'}).click();expect(await page.evaluate(()=>captureCharacterAbilityState().currentHp)).toBe(before);
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();expect(await page.evaluate(()=>captureCharacterAbilityState().currentHp)).toBe(before-1);
+});
+
+test('07 PT support: explicit Yume bonus and Bonnie stealth use received amounts without card tracking',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'1');await registerSupport(page,'20');await registerSupport(page,'27');await registerSupport(page,'103');const base=Number(await page.locator('#attackPower1').inputValue());
+ const bonus=page.getByRole('spinbutton',{name:'PTユメ攻撃補正の数'});await bonus.fill('4');await bonus.dispatchEvent('change');expect(Number(await page.locator('#attackPower1').inputValue())).toBe(base+4);
+ await page.evaluate(()=>window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:{name:'test monster',markStacks:2}})));await page.getByRole('button',{name:/^PT潜伏：/}).click();expect(Number(await page.locator('#attackPower1').inputValue())).toBe(base+6);
+ await page.getByRole('button',{name:/^PT潜伏：/}).click();expect(Number(await page.locator('#attackPower1').inputValue())).toBe(base+4);
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#turn-end').click();expect(Number(await page.locator('#attackPower1').inputValue())).toBe(base);
+});
+
+test('07 PT support: confirmed KAngel fan debuff is permanent once-only and undoable',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'1');await registerSupport(page,'101');await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-tab-monsters').click();const maps=page.locator('#mp-map-select');for(const option of await maps.locator('option').all()){await maps.selectOption(await option.getAttribute('value'));if(await page.locator('#mp-monster-list .mp-monster:visible').count())break;}
+ await page.locator('#mp-monster-list .mp-monster:visible').first().click();const card=page.locator('#map-roster-list .roster-card').first(),attack=card.locator('input[aria-label$="の攻撃力"]');await attack.fill('5');await attack.dispatchEvent('change');await card.locator('.roster-status-fan button').click();await page.locator('#roster-pt-fan-reduce').click();await expect(attack).toHaveValue('4');await expect(page.locator('#roster-pt-fan-reduce')).toBeDisabled();await page.locator('#turn-end').click();await expect(attack).toHaveValue('4');await page.locator('#roster-undo').click();await page.locator('#roster-undo').click();await expect(attack).toHaveValue('5');await expect(page.locator('#roster-pt-fan-reduce')).toBeEnabled();
+});
+
+test('07 PT support: Hanna next movement is manually consumed; Sherry reasoning stacks and expires',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'106');await registerSupport(page,'105');const atk=Number(await page.locator('#attackPower1').inputValue());await page.getByRole('button',{name:'PTハンナ推理タイム＋1'}).click();expect(Number(await page.locator('#attackPower1').inputValue())).toBe(atk+1);
+ const move=page.getByRole('button',{name:/^PTハンナ次の移動：/});await move.click();expect((await page.evaluate(()=>captureCharacterAbilityState())).numbers['PTハンナ次の移動']).toBe(1);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#turn-end').click();expect(Number(await page.locator('#attackPower1').inputValue())).toBe(atk);await page.locator('.role-tab.character-tab').click();await expect(move).toHaveAttribute('aria-pressed','true');await move.click();await expect(move).toHaveAttribute('aria-pressed','false');
+});

@@ -114,6 +114,7 @@
    if(['atk','def','move','damageReduce'].includes(rule.target))result[rule.target]+=abilityModifierValue(rule);
   }
   for(const stat of ['atk','def','move'])result[stat]+=activeSkillStatBonus(stat);
+  for(const c of partySupportControls)if(c.stat){const amount=c.number?abilityControlValue(c.key):(abilityControlValue(c.key)?(c.marked?(Number(currentOpponent?.markStacks)||0):c.value):0);result[c.stat]+=amount;}
   for(const rule of mapKeywords.filter(row=>row.map_id===mapPicker.value)){
    let stacks=rule.input_kind==='checkbox'?(state().modes[rule.effect_key]?1:0):number(state(),rule.effect_key);
    if(rule.condition==='excess_over_peacock')stacks=currentOpponent?.name==='クジャク係'&&currentOpponent.mapId===mapPicker.value?Math.max(0,stacks-number(state(),'クジャク係の羽ばたき')):0;
@@ -146,8 +147,32 @@
   }
   return numeric;
  }
+ // Received PT effects are stored with self ability state, including roster Undo.
+ const partySupportControls=[
+  {donor:'8',key:'PTジュジュシールド',icon:'ジュジュシールド',stat:'damageReduce',value:99},
+  {donor:'103',key:'PTカクテル攻撃',icon:'カクテル攻撃カード',number:true,max:3,stat:'atk'},
+  {donor:'103',key:'PTカクテル防御',icon:'カクテル防御カード',number:true,max:3,stat:'def'},
+  {donor:'104',key:'PTドロシー攻撃',icon:'本当の私',stat:'atk',value:1},
+  {donor:'20',key:'PTユメ攻撃補正',icon:'ヒール',number:true,stat:'atk'},
+  {donor:'27',key:'PT潜伏',icon:'潜伏',stat:'atk',marked:true},
+  {donor:'105',key:'PTハンナ次の移動',icon:'人形完成',stat:'move',value:2}
+ ];
+ function renderPartySupport(){
+  const donors=new Set(partySlots.filter(id=>String(id)!==String(selectedCharacter?.id)).map(String));
+  for(const c of partySupportControls){
+   const current=abilityControlValue(c.key);if(!donors.has(c.donor)&&!current)continue;
+   const change=value=>{const next=Math.max(0,Math.min(c.max??999,Math.floor(Number(value)||0)));if(next===abilityControlValue(c.key))return;window.rememberCharacterSkillActivation?.();state().numbers[c.key]=next;renderConditions();updateStats();};
+   if(c.number){const view=createConditionNumberView(c.key,current,makeIcon(c.icon));view.input.max=String(c.max??999);if(c.key==='PTユメ攻撃補正')view.item.title='ゲームで確定した余剰回復によるATK増加量を指定。回復量から自動換算しません。ターン終了で解除';view.button.addEventListener('click',()=>change(current+1));view.button.addEventListener('contextmenu',e=>{e.preventDefault();change(current-1);});view.input.addEventListener('change',()=>change(view.input.value));conditionsBox.append(view.item);}
+   else {const button=createCharacterAbilityToggleView(c.key,!!current,makeIcon(c.icon),()=>change(current?0:1));if(c.marked)button.title+='。戦闘終了後は手動でオフ（ターン終了でも解除）';if(c.donor==='105')button.title+='。ゲームで次の移動力＋2を受けた時にオン。移動後は手動でオフ';conditionsBox.append(button);}
+  }
+  if(String(selectedCharacter?.id)==='106'&&donors.has('105')){const button=document.createElement('button');button.type='button';button.className='selected-chip condition-toggle';button.setAttribute('aria-label','PTハンナ推理タイム＋1');button.title='ハンナの通過で受けた推理タイム＋1（最大4、ターン終了で−1）';button.append(makeIcon('推理タイム'));button.addEventListener('click',()=>{const current=abilityControlValue('推理タイム');if(current>=4)return;window.rememberCharacterSkillActivation?.();state().numbers['推理タイム']=current+1;renderConditions();updateStats();});conditionsBox.append(button);}
+  for(const c of [{donor:'103',label:'PTカクテル回復＋1',amount:1},{donor:'10',label:'PTパンダマン回復＋2',amount:2},{donor:'104',label:'PTドロシー通過回復＋1',amount:1}])if(donors.has(c.donor)){
+   const button=document.createElement('button');button.type='button';button.className='selected-chip condition-toggle';button.setAttribute('aria-label',c.label);button.append(makeIcon('ヒール'));button.title=c.label+'：ゲームで発生した回復を自キャラへ反映（最大HPまで）。範囲・通過は手動確認';button.addEventListener('click',()=>{const max=calculate().hp,next=Math.min(max,state().currentHp+c.amount);if(next===state().currentHp)return;window.rememberCharacterSkillActivation?.();state().currentHp=next;renderConditions();updateStats();});conditionsBox.append(button);
+  }
+ }
  function renderConditions(){
   conditionsBox.replaceChildren();
+  renderPartySupport();
   const ownedRules=activeRules();
   for(const [key,label,triggers] of [['attack','攻撃時',['on_attack','on_attack_after_mark']],['move','移動時',['on_next_move']]]){
    if(!ownedRules.some(rule=>triggers.includes(rule.trigger)))continue;
@@ -521,6 +546,7 @@
   if(!selectedCharacter)return;
   let changed=false;
   for(const key of Object.keys(state().skillCooldowns)){const current=Number(state().skillCooldowns[key])||0;if(current>0){state().skillCooldowns[key]=current-1;changed=true;}}
+  for(const key of ['PTカクテル攻撃','PTカクテル防御','PTドロシー攻撃','PTユメ攻撃補正','PT潜伏'])if(state().numbers[key]){state().numbers[key]=0;changed=true;}
   for(const control of abilityRules()?.controls||[])if(control.duration==='turn'&&state().numbers[control.key]){state().numbers[control.key]=0;changed=true;}
   const beforeEffects=state().activeEffects.length;
   state().activeEffects=state().activeEffects.filter(effect=>effect.duration!=='turn').map(effect=>effect.durationTurns?{...effect,durationTurns:effect.durationTurns-1}:effect).filter(effect=>effect.durationTurns===undefined||effect.durationTurns>0);
@@ -530,6 +556,7 @@
   if(changed){renderConditions();updateStats();}
  };
  document.querySelectorAll('.role-tab').forEach(tab=>tab.addEventListener('click',()=>{if(tab.dataset.role==='map'||tab.dataset.role==='character')clearCharacterAttackPhase();}));
+ window.addEventListener('party-members-change',()=>{if(selectedCharacter){renderConditions();updateStats();}});
  window.addEventListener('roster-status-change',()=>{if(selectedCharacter){renderConditions();updateStats();}});
  window.addEventListener('character-monster-defeated',()=>{if(String(selectedCharacter?.id)!=='9')return;state().numbers['モンスター撃破数']=abilityControlValue('モンスター撃破数')+1;const skill=activeSkill();state().skillCooldowns[skill.key]=Math.max(0,activeSkillCooldown(skill)-2);renderConditions();updateStats();});
  window.addEventListener('character-opponent-change',event=>{currentOpponent=event.detail;if(selectedCharacter){renderConditions();updateStats();}});
