@@ -23,6 +23,7 @@ test('phone: ability details, chip foldout and table foldout are explicit and ac
  await start(page);await page.getByRole('button',{name:'ミミの能力の詳細',exact:true}).tap();await expect(page.getByRole('dialog')).toContainText('パッシブ');await page.getByRole('button',{name:'閉じる',exact:true}).tap();
  await expect(page.locator('.mobile-chip-details')).not.toHaveAttribute('open','');await page.locator('.mobile-chip-details summary').tap();await expect(page.locator('.mobile-chip-details')).toHaveAttribute('open','');
  await page.locator('.role-tab[data-role="attack"]').tap();await expect(page.locator('.mode-content.active .damage-table')).toBeHidden();await page.locator('.mode-content.active .mobile-table-toggle').tap();await expect(page.locator('.mode-content.active .damage-table')).toBeVisible();await noOverflow(page);
+ expect((await page.locator('#Atk1').boundingBox()).width).toBeGreaterThanOrEqual(32);await page.locator('.plus-button[data-target="Atk1"]').tap();await expect(page.locator('#Atk1')).toHaveValue('1');
  await page.evaluate(()=>scrollTo(0,0));
  await info.attach('phone-calculator',{body:await page.screenshot({fullPage:true}),contentType:'image/png'});
 });

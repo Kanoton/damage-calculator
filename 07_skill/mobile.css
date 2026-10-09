@@ -61,6 +61,10 @@ body.mobile-ui{margin:0 auto;padding:8px 8px calc(12px + env(safe-area-inset-bot
 .mobile-ui .damage-area{min-width:0;overflow-x:auto;display:flex;flex-direction:column}
 .mobile-ui .damage-area .analysis-values{order:-1}
 .mobile-ui .battle-card-counter button,.mobile-ui .number-control button,.mobile-ui .roster-stat-icon,.mobile-ui .roster-mark-button,.mobile-ui .roster-status-button{min-width:44px;min-height:44px}
+.mobile-ui .battle-card-area{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.mobile-ui .battle-card{max-width:110px}
+.mobile-ui .battle-card-counter{width:100%;max-width:150px}
+.mobile-ui .battle-card-counter input{min-width:32px;min-height:44px}
 .mobile-ui .roster-actionbar button,.mobile-ui .round-progress-controls button,.mobile-ui .character-subtabs button,.mobile-ui .teru-follow-up button{min-height:44px}
 .mobile-ui .round-progress-controls{flex-wrap:wrap;height:auto}
 .mobile-ui .map-roster-list{grid-template-columns:minmax(0,1fr)}
