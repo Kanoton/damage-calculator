@@ -848,7 +848,7 @@ test('07 skill: contextual character attacks only apply when enabled', async ({ 
  await foxfire.fill('3');await foxfire.dispatchEvent('change');
  await expect(page.locator('#selected-character-atk')).toHaveValue('2');
  await page.getByRole('button',{name:/狐光追加攻撃：オフ/}).click();
- await expect(page.locator('#selected-character-atk')).toHaveValue('5');
+ await expect(page.locator('#selected-character-atk')).toHaveValue('2');
 
  await selectCharacter(page,'27');
  await expect(page.getByLabel('対象のマークの数')).toHaveCount(0);
@@ -932,13 +932,15 @@ test('07 skill: Papara active skill forces half-HP attack bonus until turn end',
  await page.locator('#turn-end').click();await expect(page.locator('#selected-character-atk')).toHaveValue('2');
 });
 
-test('07 skill: Teru possession accepts ally stats and adds half for the turn', async ({ page }) => {
+test('07 skill: Teru possession rounds up, survives turn end and expires at explicit next turn start', async ({ page }) => {
  await page.goto('/07_skill/');await selectCharacter(page,'23');
  const atk=page.locator('#selected-character-atk'),def=page.locator('#selected-character-def');const beforeAtk=Number(await atk.inputValue()),beforeDef=Number(await def.inputValue());
  let dialogIndex=0;page.on('dialog',async dialog=>{await dialog.accept(dialogIndex++===0?'5':'3');});
  await page.getByRole('button',{name:'三神憑依を発動'}).click();
- await expect(atk).toHaveValue(String(beforeAtk+2.5));await expect(def).toHaveValue(String(beforeDef+1.5));
- await page.locator('#turn-end').click();await expect(atk).toHaveValue(String(beforeAtk));await expect(def).toHaveValue(String(beforeDef));
+ await expect(atk).toHaveValue(String(beforeAtk+3));await expect(def).toHaveValue(String(beforeDef+2));
+ await page.locator('#turn-end').click();await expect(atk).toHaveValue(String(beforeAtk+3));await expect(def).toHaveValue(String(beforeDef+2));
+ await page.getByRole('button',{name:'テルのターン開始',exact:true}).click();await expect(atk).toHaveValue(String(beforeAtk));await expect(def).toHaveValue(String(beforeDef));
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();await expect(atk).toHaveValue(String(beforeAtk+3));
 });
 
 test('07 skill: Chouten fan count and Ame love are manually managed and referenced', async ({ page }) => {
@@ -1004,4 +1006,26 @@ test('07 PT support: confirmed KAngel fan debuff is permanent once-only and undo
 test('07 PT support: Hanna next movement is manually consumed; Sherry reasoning stacks and expires',async({page})=>{
  await page.goto('/07_skill/');await selectCharacter(page,'106');await registerSupport(page,'105');const atk=Number(await page.locator('#attackPower1').inputValue());await page.getByRole('button',{name:'PTハンナ推理タイム＋1'}).click();expect(Number(await page.locator('#attackPower1').inputValue())).toBe(atk+1);
  const move=page.getByRole('button',{name:/^PTハンナ次の移動：/});await move.click();expect((await page.evaluate(()=>captureCharacterAbilityState())).numbers['PTハンナ次の移動']).toBe(1);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#turn-end').click();expect(Number(await page.locator('#attackPower1').inputValue())).toBe(atk);await page.locator('.role-tab.character-tab').click();await expect(move).toHaveAttribute('aria-pressed','true');await move.click();await expect(move).toHaveAttribute('aria-pressed','false');
+});
+
+
+test('07 Teru: separate follow-up uses pre-consumption stacks, minimum one, no dice and only survivors',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'1');await registerSupport(page,'23');
+ const set=async(label,value)=>{const input=page.getByLabel(label,{exact:true});await input.fill(String(value));await input.dispatchEvent('change');};
+ await set('PTテル攻撃力の数',8);await set('PTテル狐光の数',3);await page.getByRole('button',{name:/^PTテル憑依：/}).click();
+ await page.locator('.role-tab[data-role="attack"]').click();
+ for(const [id,value] of [['attackPower1',2],['defensePower1',4],['hp1',8],['damageAdd1',0],['damageReduce1',0]]){await page.locator('#'+id).fill(String(value));await page.locator('#'+id).dispatchEvent('input');}
+ const result=await page.evaluate(()=>{const mode=document.querySelector('.mode-content[data-role="attack"]');return {base:calculateDefenseDamageGrid(2,4,0,0,8,false,false,false,getTeruFollowUp()),card:calculateCardAwareDamage(mode,2,4,0,0,8,false)};});
+ expect(result.base.rows[0].damages).toEqual([8,8,8,8,8,8]);expect(result.base.defeatCount).toBe(36);expect(result.card.defeatProbability).toBeCloseTo(1);
+ expect(await page.evaluate(()=>getTeruCombinedDamage(8,4,8,getTeruFollowUp()))).toBe(8);
+ expect(await page.evaluate(()=>getTeruCombinedDamage(1,100,8,getTeruFollowUp()))).toBe(2);
+ await expect(page.locator('.teru-follow-up-summary')).toContainText('7ダメージ');
+ await page.locator('#Atk5').fill('1');await page.locator('#Atk5').dispatchEvent('input');
+ await expect(page.locator('.teru-follow-up-summary')).toContainText('7ダメージ');
+ expect((await page.evaluate(()=>captureCharacterAbilityState())).numbers['PTテル狐光']).toBe(3);
+ await page.getByRole('button',{name:'追撃後の戦闘終了（狐光−1）'}).click();expect((await page.evaluate(()=>captureCharacterAbilityState())).numbers['PTテル狐光']).toBe(2);
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();expect((await page.evaluate(()=>captureCharacterAbilityState())).numbers['PTテル狐光']).toBe(3);
+ await page.locator('#turn-end').click();expect((await page.evaluate(()=>getTeruFollowUp())).enabled).toBe(true);
+ await selectCharacter(page,'23');const fox=page.getByLabel('狐光の数',{exact:true});await fox.fill('3');await fox.dispatchEvent('change');await page.getByLabel('憑依先の戦闘ATKの数').fill('10');await page.getByLabel('憑依先の戦闘ATKの数').dispatchEvent('change');await page.getByRole('button',{name:/^狐光追加攻撃：/}).click();
+ await expect(page.locator('#selected-character-atk')).toHaveValue('2');await expect(page.locator('#attackPower1')).toHaveValue('10');expect((await page.evaluate(()=>getTeruFollowUp())).attack).toBe(2);
 });

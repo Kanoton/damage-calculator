@@ -1637,3 +1637,6 @@ tbody th {
 @media(max-width:700px){.party-slot-stats{grid-template-columns:repeat(2,max-content);gap:0 5px;font-size:10px;line-height:10px}.party-slot-stat img{width:10px;height:10px}.party-slot-name{line-height:12px}.party-slot-identity{line-height:12px;gap:3px}.party-slot-level{font-size:10px}.party-slot-body{height:36px}.party-slot-chips{--party-chip-size:17px}}
 @media(max-width:500px){.party-slot-portrait{display:none}.selected-party-grid{column-gap:3px}.party-slot-order{width:21px}}
 @media(max-width:700px){.party-slot-stat-icon{width:10px;height:10px}}
+
+.teru-follow-up:not([hidden]){display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-bottom:8px;font-size:12px}
+.teru-follow-up button{padding:4px 8px;font-size:12px}
