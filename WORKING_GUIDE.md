@@ -127,3 +127,12 @@ CI定義は `.github/workflows/06b-smoke.yml`、テスト本体は `tests/06b-sm
 正本は従来どおり `csv/`、`images/` です。緑枠／ランダム表示素材は `images/MapEvent/assets/`、承認済み観測JSONと図のサンプルは `docs/map-event-output/samples/` にあります。`scripts/map_event_output.py` は観測JSONから候補CSV・モンスターなしのPNG・ZIPを生成し、正本のCSVとアプリ実装は変更しません。Python依存は `scripts/requirements-map-event.txt` です。
 
 検証は `python3 -m unittest discover -s tests/map_event_output -v` を使用します。CSVやアプリへ結果を反映する依頼の場合は、本ガイドの通常のフォールバック・画像参照・ブラウザ検証も実施します。
+
+
+## 10. 07 PT組み合わせの全数検証
+
+通常のsmokeとは別に `npm run test:07:pairs` を実行します。正本キャラCSVから異なる自キャラ×PT1人を生成します（現在35×34＝1,190通り）。自キャラごとの45秒上限、全体12分上限、失敗3グループ、2ブラウザworker、再試行なし。CIジョブ自体にも15分上限を設けています。
+
+`pair-test-report.json` と `pair-test-results/` にステップ結果・1組ずつのJSONL・各自キャラの完了/失敗/未実行リスト・失敗traceを保存します。CIは失敗/中断時にも成果物をアップロードします。再実行は例として `PAIR_SELF_IDS=23,29 npm run test:07:pairs` で自キャラを限定でき、個別対象は `-- --grep 'self=23 '` でも指定できます。各グループは新規ページから始まり、アプリ本体の状態を変更するためのテスト用APIは追加しません。
+
+全数検証は登録/重複拒否/解除/再登録、PT側のLv・HP・ATK・チップ編集、自キャラの能力・CT・計算値・チップ所有・マップ時計の不変性、受ける支援とモンスター状態操作の表示を対象にします。共通部分はブラウザ内DOMイベントで効率化し、重点ケースと既存smokeはPlaywrightの実際のクリック/入力を使用します。全数検証の成功は、未実装スキルや位置・手札・ランダム処理の網羅を意味しません。
