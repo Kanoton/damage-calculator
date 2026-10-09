@@ -5,6 +5,7 @@ test('FHD: left main and right controls fit the viewport in all four modes',asyn
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/07_skill/');await select(page,'1');
  for(const role of ['map','character','attack','defense']){
   await page.locator(`.role-tab[data-role="${role}"]`).click();const b=await bounds(page);expect(b.overflowX).toBe(false);expect(b.overflowY).toBe(false);expect(b.round.x).toBe(b.main.x);expect(b.round.bottom).toBeLessThanOrEqual(b.main.y);expect(b.self.width).toBeGreaterThan(650);expect(b.self.y).toBeGreaterThanOrEqual(b.roster.bottom);expect(b.roster.bottom).toBeLessThanOrEqual(1080);expect(b.self.height).toBe(118);
+  if(role==='map'){const header=await page.evaluate(()=>{const a=document.querySelector('.mp-filters').getBoundingClientRect(),b=document.querySelector('.mp-subtabs').getBoundingClientRect();return {overlap:a.x<b.right,aligned:Math.abs(a.y-b.y)<10};});expect(header.overlap).toBe(false);expect(header.aligned).toBe(true);}
   await page.mouse.move(0,0);await info.attach('fhd-'+role,{body:await page.screenshot(),contentType:'image/png'});
  }
  expect(errors).toEqual([]);
@@ -22,6 +23,7 @@ test('wide resize: state survives switching to portrait, narrow desktop and back
 test('FHD: monster scrolling and numeric edits/Undo remain independent from left panel',async({page})=>{
  await page.goto('/07_skill/');await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-tab-monsters').click();await page.locator('#mp-map-select').selectOption('MAP0104');await page.locator('#roster-clear').click();
  for(let i=0;i<15;i++)await page.locator('#mp-monster-list .mp-monster:visible').first().click();
+ const cards=page.locator('.roster-card');const first=await cards.nth(0).boundingBox(),second=await cards.nth(1).boundingBox();expect(second.x).toBeGreaterThan(first.x);expect(second.y).toBe(first.y);
  const list=page.locator('#map-roster-list');expect(await list.evaluate(e=>e.scrollHeight>e.clientHeight)).toBe(true);await list.evaluate(e=>e.scrollTop=e.scrollHeight);expect(await list.evaluate(e=>e.scrollTop)).toBeGreaterThan(0);expect((await bounds(page)).overflowY).toBe(false);
  const hp=page.locator('.roster-card').first().getByRole('spinbutton',{name:/残りHP$/}),before=await hp.inputValue();await hp.fill(String(Number(before)-1));await hp.dispatchEvent('change');await page.locator('#roster-undo').click();await expect(hp).toHaveValue(before);
 });
