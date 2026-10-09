@@ -160,7 +160,7 @@ function createPartyMemberView(row,index,parameters,isSelf,onLevelChange,ownedCh
   }
   const chipButton=document.createElement('button');chipButton.type='button';chipButton.className='party-chip-open';chipButton.textContent='チップ';chipButton.setAttribute('aria-label',row.name+'の取得チップを表示');chipButton.setAttribute('aria-haspopup','dialog');
   chipButton.addEventListener('click',event=>{event.stopPropagation();document.dispatchEvent(new CustomEvent('wide-party-chips',{detail:{name:row.name,id:String(row.id),isSelf,chips:ownedChips,opener:chipButton}}));});
-  chipButton.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();});identity.append(chipButton);
+  chipButton.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();});const chipControl=document.createElement('div');chipControl.className='party-chip-control';const chipCount=document.createElement('span');chipCount.className='party-chip-count';chipCount.textContent='×'+ownedChips.length;chipCount.setAttribute('aria-label','取得チップ '+ownedChips.length+'個');chipControl.append(chipButton,chipCount);identity.append(chipControl);
   details.append(stats);
   if(ownedChips.length){
    const list=document.createElement('div');list.className='party-slot-chips';list.setAttribute('role','list');list.setAttribute('aria-label',row.name+'の取得済みチップ');list.style.setProperty('--party-chip-count',String(ownedChips.length));

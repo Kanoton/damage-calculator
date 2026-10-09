@@ -409,3 +409,9 @@ This section supersedes older manual-only CT and placeholder-control notes above
 - Wide roster uses equal12px column/outer spacing; scrollbar is hidden to avoid asymmetric gutter, while wheel/touch/keyboard scrolling remain (list is focusable). Cards use the recovered width.
 - Chip dialog sits at bottom right near the opener. Close button, Escape and outside click dismiss it; original self-chip handlers and restoration remain. Each occupied PT slot has a wide-only Chip button with a named read-only ownership list; self slot reuses self actions. Empty ownership has a message. PT chip editing stays on existing character/chip tabs.
 - Checkpoint before change:b98ffbc817c5067d510edb4348c74968977c13d1; branch codex/07-wide-details.
+
+## 07 intact panel outline / PT chip counts (2026-10-09)
+
+- Supersedes white tab bridge: wide tabs meet the panel top without covering its border. Selected tab has all4 colored edges; panel outline stays intact and role background colors remain.
+- Occupied PT slots show owned-chip count (×0, ×1, ...) directly below Chip button, refreshed by existing renderParty ownership updates. Wide-only control reserves room beside name/statistics; mobile/vertical presentation is preserved.
+- Checkpoint:b97c314e1ed75c97bb3931abf1d7e62bc4c2082a; branch codex/07-tab-outline-counts.
