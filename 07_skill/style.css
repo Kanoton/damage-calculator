@@ -1645,5 +1645,5 @@ tbody th {
 .character-toolbar{display:flex;align-items:center;flex-wrap:wrap;gap:8px;flex:none;border-bottom:2px solid #d4ac37}
 .character-toolbar>.character-subtabs{border-bottom:0}
 .character-toolbar>.character-status{flex:1;min-width:180px;font-size:12px;margin:0;padding:4px 0}
-.character-hover-toggle{display:flex;align-items:center;gap:5px;flex:none;margin:0;padding:4px 0;font-size:12px;transform:none;cursor:pointer}
+.character-hover-toggle{display:flex;align-items:center;gap:5px;flex:none;margin:0 0 0 auto;padding:4px 0;font-size:12px;transform:none;cursor:pointer}
 .character-hover-toggle input{margin:0;cursor:pointer}
