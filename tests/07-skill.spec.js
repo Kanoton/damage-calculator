@@ -218,10 +218,10 @@ test('07 skill: new character controls use confirmed icons and turn lifetimes',a
  await selectCharacter(page,'104');const warm=page.getByLabel('温もりの数');await warm.fill('5');await warm.dispatchEvent('change');
  const atk=page.locator('#selected-character-atk'),def=page.locator('#selected-character-def'),before=Number(await atk.inputValue()),snapshotDef=Number(await def.inputValue());
  await page.getByRole('button',{name:/本当の私：オフ/}).click();await expect(atk).toHaveValue(String(before+1));
- await page.getByRole('button',{name:'本当の私を発動'}).click();await expect(atk).toHaveValue(String(before+1+snapshotDef));
+ await page.getByRole('button',{name:'本当の私を発動'}).click();await expect(warm).toHaveValue('0');await expect(atk).toHaveValue(String(before+1+snapshotDef));
  await warm.fill('0');await warm.dispatchEvent('change');await expect(atk).toHaveValue(String(before+1+snapshotDef));
  await page.locator('#turn-end').click();await expect(atk).toHaveValue(String(before));await expect(page.getByRole('button',{name:/本当の私：オフ/})).toBeVisible();
- await selectCharacter(page,'105');const doll=page.getByLabel('人形制作の数');await doll.fill('7');await doll.dispatchEvent('change');
+ await selectCharacter(page,'105');await registerSupport(page,'106');const doll=page.getByLabel('人形制作の数');await doll.fill('7');await doll.dispatchEvent('change');
  await expect(page.getByRole('button',{name:'人形制作を増やす'}).locator('img')).toHaveAttribute('src',/UT_Buff_305_Awake\.png$/);
  await page.getByRole('button',{name:/親友を守る：オフ/}).click();await expect(page.locator('#damageReduce2')).toHaveValue('1');
  await page.getByRole('button',{name:'浮遊魔法を発動'}).click();await expect(page.locator('#selected-character-move')).toHaveText('2');
@@ -852,8 +852,8 @@ test('07 skill: additional character stat skills modify parameters', async ({ pa
  await selectCharacter(page,'103');
  await expect(page.getByLabel('カクテル攻撃カードの数')).toHaveCount(0);
  await expect(page.getByLabel('カクテル防御カードの数')).toHaveCount(0);
- await page.getByRole('button',{name:/一生を変えるカクテル：オフ/}).click();
- await expect(page.locator('#selected-character-move')).toHaveText('3');
+ await expect(page.getByRole('button',{name:/一生を変えるカクテル：/})).toHaveCount(0);
+ await expect(page.locator('#selected-character-move')).toHaveText('0');
  await page.locator('#turn-end').click();await expect(page.locator('#selected-character-move')).toHaveText('0');
 });
 
@@ -1264,4 +1264,42 @@ test('07 skill: Rinrin passage confirmation works from file fallback',async({pag
  const path=require('path'),{pathToFileURL}=require('url');await page.goto(pathToFileURL(path.resolve(__dirname,'../07_skill/index.html')).href);await selectCharacter(page,'28');
  await page.locator('#selected-character-skill').click();await page.locator('#rinrin-area-dialog').getByRole('button',{name:'No',exact:true}).click();await expect(page.locator('#selected-character-ct')).toHaveText('CT 3 / 3');
  await page.locator('#roster-undo').click();await expect(page.locator('#selected-character-ct')).toHaveText('CT 0 / 3');
+});
+
+for(const protocol of ['http','file'])test('07 descriptions: Ren shield and Hanna Float sections have requested order '+protocol,async({page})=>{
+ if(protocol==='file'){const {pathToFileURL}=require('url'),path=require('path');await page.goto(pathToFileURL(path.resolve(__dirname,'../07_skill/index.html')).href);}else await page.goto('/07_skill/');
+ await page.locator('.role-tab.character-tab').click();await page.locator('#character-hover-skills').check();
+ const tooltip=page.locator('#character-skill-tooltip');await page.locator('.character-select[data-id="8"]').hover();await expect(tooltip).toBeVisible();
+ const ren=await tooltip.locator('.character-skill-text').textContent();expect(ren).not.toContain('※ジュジュシールド効果：');expect(ren).toContain('\nジュジュシールド\n次に受けるダメージ-99');expect(ren.indexOf('\nジュジュシールド\n')).toBeGreaterThan(ren.indexOf('パッシブスキル'));
+ await expect(tooltip.locator('strong').filter({hasText:/^ジュジュシールド$/})).toHaveCount(1);
+ await page.locator('.character-select[data-id="105"]').hover();
+ const hanna=await tooltip.locator('.character-skill-text').textContent();expect(hanna).toContain('浮遊\n移動力+2、罠・ロードブロックを無効化。他のユニットに通過される際、戦闘が発生しない。');expect(hanna.indexOf('\n浮遊\n')).toBeGreaterThan(hanna.lastIndexOf('パッシブスキル'));expect(hanna.indexOf('\n浮遊\n')).toBeLessThan(hanna.indexOf('\n人形完成\n'));
+});
+
+test('07 Dorothy: Warmth five snapshots full DEF before consuming; four stays and Undo restores',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'104');const warm=page.getByLabel('温もりの数'),atk=page.locator('#selected-character-atk'),def=page.locator('#selected-character-def'),ct=page.locator('#selected-character-ct');
+ await warm.fill('5');await warm.dispatchEvent('change');await page.locator('#selected-character-def-button').click();
+ const oldAtk=Number(await atk.inputValue()),oldDef=Number(await def.inputValue());await page.locator('#selected-character-skill').click();
+ await expect(warm).toHaveValue('0');await expect(atk).toHaveValue(String(oldAtk+oldDef));await expect(def).toHaveValue(String(oldDef-5));await expect(ct).toHaveText('CT 2 / 2');
+ await page.locator('#roster-undo').click();await expect(warm).toHaveValue('5');await expect(atk).toHaveValue(String(oldAtk));await expect(def).toHaveValue(String(oldDef));await expect(ct).toHaveText('CT 0 / 2');
+ await warm.fill('4');await warm.dispatchEvent('change');await page.locator('#selected-character-skill').click();await expect(warm).toHaveValue('4');await expect(atk).toHaveValue(String(oldAtk));
+ await page.locator('#roster-undo').click();await warm.fill('5');await warm.dispatchEvent('change');await page.locator('#selected-character-skill').click();await page.locator('#turn-end').click();await expect(warm).toHaveValue('0');await expect(atk).toHaveValue(String(oldAtk));
+});
+
+test('07 Jill and Dorothy: no received healing controls; cocktail colors and independent stat Undo',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'103');await expect(page.getByRole('button',{name:/一生を変えるカクテル：/})).toHaveCount(0);await page.locator('#selected-character-skill').click();await expect(page.locator('#selected-character-move')).toHaveText('0');
+ await selectCharacter(page,'1');await registerSupport(page,'103');await registerSupport(page,'104');await expect(page.getByRole('button',{name:'PTカクテル回復＋1',exact:true})).toHaveCount(0);await expect(page.getByRole('button',{name:'PTドロシー通過回復＋1',exact:true})).toHaveCount(0);
+ const atk=page.locator('#selected-character-atk'),def=page.locator('#selected-character-def'),baseAtk=Number(await atk.inputValue()),baseDef=Number(await def.inputValue());
+ for(const [key,color] of [['PTカクテル攻撃','rgb(204, 51, 51)'],['PTカクテル防御','rgb(38, 115, 201)']])await expect(page.getByRole('button',{name:key+'を増やす'})).toHaveCSS('border-top-color',color);
+ await page.getByLabel('PTカクテル攻撃の数').fill('2');await page.getByLabel('PTカクテル攻撃の数').dispatchEvent('change');await page.getByLabel('PTカクテル防御の数').fill('3');await page.getByLabel('PTカクテル防御の数').dispatchEvent('change');await expect(atk).toHaveValue(String(baseAtk+2));await expect(def).toHaveValue(String(baseDef+3));
+ await page.locator('#roster-undo').click();await expect(def).toHaveValue(String(baseDef));await expect(atk).toHaveValue(String(baseAtk+2));await page.locator('#turn-end').click();await expect(atk).toHaveValue(String(baseAtk));
+});
+
+test('07 Hanna: protection requires PT Sherry; blessing icons are explicit and loaded',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'105');const protect=page.getByRole('button',{name:/^親友を守る：/});await expect(protect).toHaveCount(0);
+ await registerSupport(page,'106');await protect.click();await expect(page.locator('#damageReduce2')).toHaveValue('1');
+ await page.locator('#selected-party-tab').click();await page.locator('.party-member-slot[data-character-id="106"] .party-slot-name').click({button:'right'});await expect(protect).toHaveCount(0);await expect(page.locator('#damageReduce2')).toHaveValue('0');
+ await page.locator('.character-select[data-id="106"]').click();await page.locator('#selected-self-tab').click();await expect(protect).toBeVisible();await expect(page.locator('#damageReduce2')).toHaveValue('1');
+ await selectCharacter(page,'106');await registerSupport(page,'105');
+ for(const button of [page.getByRole('button',{name:/^PTハンナ次の移動：/}),page.getByRole('button',{name:'PTハンナ推理タイム＋1',exact:true})]){await expect(button.locator('img')).toHaveAttribute('src','../images/UT_Buff/UT_Platform_305.png');await expect.poll(()=>button.locator('img').evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);}
 });

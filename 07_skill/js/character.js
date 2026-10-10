@@ -40,6 +40,7 @@
  const activeConditionForced=key=>(state().activeEffects||[]).some(effect=>effect.type==='force_condition'&&effect.key===key);
  const abilityConditionMatches=condition=>{
   if(!condition)return true;
+  if(condition.partyCharacterId&&!partySlots.some(id=>String(id)===condition.partyCharacterId))return false;
   if(condition.key==='current_hp_ratio<=')return activeConditionForced('current_hp_ratio<=')||(state().currentHp!==null&&state().currentHp<=base('hp')*Number(condition.value));
   if(condition.key==='target_mark')return (Number(currentOpponent?.markStacks)||0)>=(Number(condition.min)||0);
   return condition.min!==undefined?abilityControlValue(condition.key)>=Number(condition.min):abilityControlValue(condition.key)===Number(condition.equals);
@@ -128,7 +129,7 @@
   return result;
  }
  function makeIcon(key){
-  const file=({'手札枚数':'UT_Buff/UT_Buff_Hand.png','自己主張なし攻撃補正':'UT_Buff/Attack.png','自己主張なし防御補正':'UT_Buff/Defense.png','自己主張なし移動補正':'UT_Buff/run.png','このターンに受けたダメージ':'UT_Buff/UT_Buff_SangXinBingKuang.png'})[key]||statusIcons.get(key)||(['マジで怒ったぞ','次の攻撃ダイス6'].includes(key)?statusIcons.get('自己主張なし攻撃補正'):null)||statusIcons.get(specialIcons[key]);
+  const file=({'親友の祝福':'UT_Buff/UT_Platform_305.png','手札枚数':'UT_Buff/UT_Buff_Hand.png','自己主張なし攻撃補正':'UT_Buff/Attack.png','自己主張なし防御補正':'UT_Buff/Defense.png','自己主張なし移動補正':'UT_Buff/run.png','このターンに受けたダメージ':'UT_Buff/UT_Buff_SangXinBingKuang.png'})[key]||statusIcons.get(key)||(['マジで怒ったぞ','次の攻撃ダイス6'].includes(key)?statusIcons.get('自己主張なし攻撃補正'):null)||statusIcons.get(specialIcons[key]);
   if(!file)return Object.assign(document.createElement('span'),{className:'condition-fallback',textContent:key});
   const icon=document.createElement('img');icon.alt='';
   const path=file.startsWith('chip_icon/')||file.startsWith('UT_Buff/')?file:'icon/'+file;
@@ -167,11 +168,11 @@
    if(abilityRules()?.controls?.some(control=>control.key===c.key))continue;
    const current=abilityControlValue(c.key);if(!donors.has(c.donor)&&!current)continue;
    const change=value=>{const next=Math.max(0,Math.min(c.max??999,Math.floor(Number(value)||0)));if(next===abilityControlValue(c.key))return;window.rememberCharacterSkillActivation?.();state().numbers[c.key]=next;if(c.key==='PTジュジュシールド'&&next)state().numbers['反撃']=1;renderConditions();updateStats();};
-   if(c.number){const view=createConditionNumberView(c.key,current,makeIcon(c.icon));view.input.max=String(c.max??999);if(c.key==='PTユメ攻撃補正')view.item.title='ゲームで確定した余剰回復によるATK増加量を指定。回復量から自動換算しません。ターン終了で解除';view.button.addEventListener('click',()=>change(current+1));view.button.addEventListener('contextmenu',e=>{e.preventDefault();change(current-1);});view.input.addEventListener('change',()=>change(view.input.value));conditionsBox.append(view.item);}
-   else {const button=createCharacterAbilityToggleView(c.key,!!current,makeIcon(c.icon),()=>change(current?0:1));if(c.marked)button.title+='。戦闘終了後は手動でオフ（ターン終了でも解除）';if(c.donor==='105')button.title+='。ゲームで次の移動力＋2を受けた時にオン。移動後は手動でオフ';conditionsBox.append(button);}
+   if(c.number){const view=createConditionNumberView(c.key,current,makeIcon(c.icon));if(c.donor==='103')view.button.classList.add(c.stat==='atk'?'support-atk':'support-def');view.input.max=String(c.max??999);if(c.key==='PTユメ攻撃補正')view.item.title='ゲームで確定した余剰回復によるATK増加量を指定。回復量から自動換算しません。ターン終了で解除';view.button.addEventListener('click',()=>change(current+1));view.button.addEventListener('contextmenu',e=>{e.preventDefault();change(current-1);});view.input.addEventListener('change',()=>change(view.input.value));conditionsBox.append(view.item);}
+   else {const button=createCharacterAbilityToggleView(c.key,!!current,makeIcon(c.donor==='105'&&String(selectedCharacter.id)==='106'?'親友の祝福':c.icon),()=>change(current?0:1));if(c.marked)button.title+='。戦闘終了後は手動でオフ（ターン終了でも解除）';if(c.donor==='105')button.title+='。ゲームで次の移動力＋2を受けた時にオン。移動後は手動でオフ';conditionsBox.append(button);}
   }
-  if(String(selectedCharacter?.id)==='106'&&donors.has('105')){const button=document.createElement('button');button.type='button';button.className='selected-chip condition-toggle';button.setAttribute('aria-label','PTハンナ推理タイム＋1');button.title='ハンナの通過で受けた推理タイム＋1（最大4、ターン終了で−1）';button.append(makeIcon('推理タイム'));button.addEventListener('click',()=>{const current=abilityControlValue('推理タイム');if(current>=4)return;window.rememberCharacterSkillActivation?.();state().numbers['推理タイム']=current+1;renderConditions();updateStats();});conditionsBox.append(button);}
-  for(const c of [{donor:'103',label:'PTカクテル回復＋1',amount:1},{donor:'10',label:'PTパンダマン回復＋2',amount:2},{donor:'104',label:'PTドロシー通過回復＋1',amount:1}])if(donors.has(c.donor)){
+  if(String(selectedCharacter?.id)==='106'&&donors.has('105')){const button=document.createElement('button');button.type='button';button.className='selected-chip condition-toggle';button.setAttribute('aria-label','PTハンナ推理タイム＋1');button.title='ハンナの通過で受けた推理タイム＋1（最大4、ターン終了で−1）';button.append(makeIcon('親友の祝福'));button.addEventListener('click',()=>{const current=abilityControlValue('推理タイム');if(current>=4)return;window.rememberCharacterSkillActivation?.();state().numbers['推理タイム']=current+1;renderConditions();updateStats();});conditionsBox.append(button);}
+  for(const c of [{donor:'10',label:'PTパンダマン回復＋2',amount:2}])if(donors.has(c.donor)){
    const button=document.createElement('button');button.type='button';button.className='selected-chip condition-toggle';button.setAttribute('aria-label',c.label);button.append(makeIcon('ヒール'));button.title=c.label+'：ゲームで発生した回復を自キャラへ反映（最大HPまで）。範囲・通過は手動確認';button.addEventListener('click',()=>{const max=calculate().hp,next=Math.min(max,state().currentHp+c.amount);if(next===state().currentHp)return;window.rememberCharacterSkillActivation?.();state().currentHp=next;renderConditions();updateStats();});conditionsBox.append(button);
   }
  }
@@ -266,7 +267,7 @@
   const controls=[...(abilityRules()?.controls||[])];
   if(String(selectedCharacter.id)!=='27'&&(partySlots.some(id=>String(id)==='27')||abilityControlValue('潜入調査')))controls.push(CHARACTER_ABILITY_RULES['27'].controls.find(control=>control.key==='潜入調査'));
   for(const control of controls){
-   if(control.placement)continue;
+   if(control.placement||control.requiresParty&&!partySlots.some(id=>String(id)===control.requiresParty))continue;
    if(control.type==='toggle'){
     const active=Boolean(abilityControlValue(control.key));
     const toggle=createCharacterAbilityToggleView(control.key,active,makeIcon(control.key),()=>{window.rememberCharacterSkillActivation?.();state().numbers[control.key]=active?0:1;if(control.key==='ジュジュシールド'&&!active)state().numbers['反撃']=1;renderConditions();updateStats();});
