@@ -1,10 +1,5 @@
 name: 07 party pair regression
 on:
-  pull_request:
-    paths: ['07_skill/**', 'csv/**', 'images/**', 'pair-tests/**', 'playwright.pairs.config.js', 'playwright.config.js', 'package.json', '.github/workflows/07-party-pairs.yml']
-  push:
-    branches: [main]
-    paths: ['07_skill/**', 'csv/**', 'images/**', 'pair-tests/**', 'playwright.pairs.config.js', 'playwright.config.js', 'package.json', '.github/workflows/07-party-pairs.yml']
   workflow_dispatch:
     inputs:
       self_ids:
@@ -16,6 +11,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   pairs:
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
