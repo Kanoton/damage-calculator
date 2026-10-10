@@ -1086,7 +1086,7 @@ test('07 Teru: direct inputs replace increases without double addition and prese
  await source.fill('9');await page.getByRole('button',{name:'三神憑依を発動'}).click();await expect(page.locator('#selected-character-ct')).toContainText('CT 3');await expect(page.locator('#selected-character-atk')).toHaveValue('12');
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();await expect(source).toHaveValue('9');await page.locator('#roster-undo').click();await expect(source).toHaveValue('5');await expect(page.locator('#selected-character-atk')).toHaveValue('8');
  await selectCharacter(page,'1');await expect(source).toBeHidden();await selectCharacter(page,'23');await expect(source).toHaveValue('5');
- await expect(page.locator('#selected-character-conditions .condition-number')).toHaveCount(1);await expect(page.getByLabel('狐光の数',{exact:true})).toBeVisible();
+ await expect(page.getByLabel('狐光の数',{exact:true})).toHaveCount(1);await expect(page.getByLabel('三神憑依攻撃補正の数',{exact:true})).toHaveCount(0);await expect(page.getByLabel('三神憑依防御補正の数',{exact:true})).toHaveCount(0);await expect(page.getByLabel('憑依先の戦闘ATKの数',{exact:true})).toHaveCount(0);
  await page.locator('#turn-end').click();await expect(page.locator('#selected-character-atk')).toHaveValue('3');await expect(page.locator('#selected-character-def')).toHaveValue('1');
 });
 
@@ -1100,7 +1100,7 @@ test('07 Teru: pursuit directly follows PT ATK and stops when the donor is remov
  await setTeruPartyAttack(page,10);expect((await page.evaluate(()=>getTeruFollowUp())).attack).toBe(10);await expect(page.locator('.teru-follow-up-summary')).toContainText('9ダメージ');
  await page.locator('.role-tab[data-role="attack"]').click();await page.getByRole('button',{name:'追撃後の戦闘終了（狐光−1）'}).click();await expect(fox).toHaveValue('2');
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();await expect(fox).toHaveValue('3');
- await page.locator('#selected-party-tab').click();await page.locator('.character-select[data-id="23"]').click({button:'right'});await page.locator('#selected-self-tab').click();expect(await page.evaluate(()=>getTeruFollowUp())).toBeNull();await page.evaluate(()=>consumeTeruFollowUp());await expect(fox).toHaveValue('3');
+ await page.locator('.role-tab[data-role="character"]').click();await page.locator('#selected-party-tab').click();await page.locator('.character-select[data-id="23"]').click({button:'right'});await page.locator('#selected-self-tab').click();expect(await page.evaluate(()=>getTeruFollowUp())).toBeNull();await page.evaluate(()=>consumeTeruFollowUp());await expect(fox).toHaveValue('3');
  await registerSupport(page,'23');expect((await page.evaluate(()=>getTeruFollowUp())).attack).toBe(2);
  await selectCharacter(page,'2');await expect(fox).toHaveValue('0');expect((await page.evaluate(()=>getTeruFollowUp())).enabled).toBe(false);await selectCharacter(page,'1');await expect(fox).toHaveValue('3');expect((await page.evaluate(()=>getTeruFollowUp())).attack).toBe(2);
  await selectCharacter(page,'23');expect(await page.evaluate(()=>getTeruFollowUp())).toBeNull();await selectCharacter(page,'1');await expect(fox).toHaveValue('3');expect(await page.evaluate(()=>getTeruFollowUp())).toBeNull();
