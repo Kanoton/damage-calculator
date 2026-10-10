@@ -191,6 +191,17 @@
  const teruDialog=document.createElement('dialog');teruDialog.id='teru-stat-dialog';teruDialog.setAttribute('aria-label','憑依先のステータス入力');
  teruDialog.innerHTML='<form><h3>憑依先のステータス</h3><div id="teru-skill-inputs"></div><div class="skill-dialog-actions"><button type="button" data-cancel>キャンセル</button><button type="submit">憑依を確定</button></div></form>';
  document.body.append(teruDialog);
+ const rinrinDialog=document.createElement('dialog');rinrinDialog.id='rinrin-area-dialog';rinrinDialog.setAttribute('aria-label','エリア拒止の通過確認');
+ rinrinDialog.innerHTML='<h3>エリア拒止を通過しますか？</h3><p>Yes：対象を選択して防御力−2、自身の攻撃力＋2（２ターン）。No：補正なしでスキルを使用。</p><div class="skill-dialog-actions"><button type="button" data-cancel>キャンセル</button><button type="button" data-no>No</button><button type="button" data-yes>Yes</button></div>';
+ document.body.append(rinrinDialog);
+ rinrinDialog.querySelector('[data-cancel]').addEventListener('click',()=>rinrinDialog.close());
+ window.addEventListener('character-selection-change',()=>{if(rinrinDialog.open)rinrinDialog.close();});
+ for(const passes of [false,true])rinrinDialog.querySelector(passes?'[data-yes]':'[data-no]').addEventListener('click',()=>{
+  const skill=activeSkill();rinrinDialog.close();if(String(selectedCharacter?.id)!=='28'||!skill||activeSkillCooldown(skill)>0)return;
+  if(passes){requestSkillTargets(skill);return;}
+  window.rememberCharacterSkillActivation?.();state().skillCooldowns[skill.key]=activeSkillMaxCooldown(skill);renderConditions();updateStats();
+ });
+
  function sourceInput(spec,commit){
   const item=document.createElement('label');item.className='skill-source-input';item.title=spec.label;
   if(spec.stat){const icon=document.createElement('img');icon.src='../images/UT_Buff/'+(spec.stat==='atk'?'Attack.png':'Defense.png');icon.alt='';item.append(icon);}
@@ -538,6 +549,7 @@
  ctButton.addEventListener('contextmenu',event=>{event.preventDefault();changeActiveSkillCooldown(1);});
  skillButton.addEventListener('click',()=>{
   const skill=activeSkill();if(!skill||activeSkillCooldown(skill)>0)return;
+  if(String(selectedCharacter.id)==='28'){rinrinDialog.showModal();return;}
   if(String(selectedCharacter.id)==='23'){
    const container=teruDialog.querySelector('#teru-skill-inputs');container.replaceChildren();
    container.append(sourceInput({key:'三神憑依攻撃補正',label:'憑依する味方の攻撃力',stat:'atk'},false),sourceInput({key:'三神憑依防御補正',label:'憑依する味方の防御力',stat:'def'},false));
@@ -546,12 +558,15 @@
   if(skill.inputStats){
    const fields=[...document.querySelectorAll('#skill-source-inputs input')];if(fields.some(input=>!input.reportValidity()))return;
   }
-  if(skill.target){window.dispatchEvent(new CustomEvent('character-skill-target-request',{detail:{target:skill.target,skillKey:skill.key,label:skill.label,characterId:selectedCharacter.id,multipleTargets:!!skill.multipleTargets,attackAfterSkill:String(selectedCharacter.id)==='9'&&calculate().atk>=7}}));return;}
+  if(skill.target){requestSkillTargets(skill);return;}
   window.rememberCharacterSkillActivation?.();
   applyActiveSkillEffects(skill);
   state().skillCooldowns[skill.key]=activeSkillMaxCooldown(skill);
   renderConditions();updateStats();
  });
+ function requestSkillTargets(skill){
+  window.dispatchEvent(new CustomEvent('character-skill-target-request',{detail:{target:skill.target,skillKey:skill.key,label:skill.label,characterId:selectedCharacter.id,multipleTargets:!!skill.multipleTargets,attackAfterSkill:String(selectedCharacter.id)==='9'&&calculate().atk>=7}}));
+ }
  function applyActiveSkillEffects(skill){
   state().activeEffects=(state().activeEffects||[]).filter(effect=>effect.source!==skill.key);
   // Decide conditional branches before any effect changes its source control.
