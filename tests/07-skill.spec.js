@@ -124,7 +124,7 @@ test('07 skill: Padman signed adjustments clamp independently and use the confir
  for(const [name,stat] of configs){
   const key='自己主張なし'+name+'補正',input=page.getByLabel(key+'の数'),button=page.getByRole('button',{name:key+'を増やす',exact:true});
   await expect(input).toHaveValue('0');await expect(input).toHaveAttribute('min','-2');await expect(input).toHaveAttribute('max','2');
-  const icon=button.locator('img');await expect(icon).toHaveAttribute('src','../images/UT_Buff/UT_Buff_105_Break.png');
+  const icon=button.locator('img');await expect(icon).toHaveAttribute('src','../images/UT_Buff/'+({atk:'Attack.png',def:'Defense.png',move:'run.png'})[stat]);
   await expect.poll(()=>icon.evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);
   const value=page.locator('#selected-character-'+stat),base=Number(stat==='move'?await value.textContent():await value.inputValue());
   const expectValue=expected=>stat==='move'?expect(value).toHaveText(String(expected)):expect(value).toHaveValue(String(expected));
@@ -146,7 +146,7 @@ test('07 skill: Padman icon fallback works when the status CSV cannot be fetched
  await page.route('**/csv/status_icon_map_all.csv',route=>route.abort());
  await page.goto('/07_skill/');await selectCharacter(page,'6');
  for(const stat of ['攻撃','防御','移動']){
-  await expect(page.getByRole('button',{name:'自己主張なし'+stat+'補正を増やす',exact:true}).locator('img')).toHaveAttribute('src','../images/UT_Buff/UT_Buff_105_Break.png');
+  await expect(page.getByRole('button',{name:'自己主張なし'+stat+'補正を増やす',exact:true}).locator('img')).toHaveAttribute('src','../images/UT_Buff/'+({'攻撃':'Attack.png','防御':'Defense.png','移動':'run.png'})[stat]);
  }
 });
 
@@ -1180,7 +1180,7 @@ test('07 Z3000: ATK seven opens attack for the surviving skill target and Undo r
 });
 
 test('07 Z3000: a kill raising ATK from six to seven does not retroactively open attack',async({page})=>{
- const {target,hp}=await prepareZ3000Survivor(page);await hp.fill('4');await hp.dispatchEvent('change');
+ const {target,hp}=await prepareZ3000Survivor(page);const instanceId=await target.evaluate(button=>button.closest('.roster-card').dataset.instanceId);await hp.fill('4');await hp.dispatchEvent('change');
  const kills=page.getByLabel('モンスター撃破数の数');await kills.fill('1');await kills.dispatchEvent('change');const atk=page.locator('#selected-character-atk');await atk.fill('6');await atk.dispatchEvent('change');
- await page.getByRole('button',{name:'引き寄せるを発動'}).click();await page.locator('.role-tab[data-role="map"]').click();await target.click();await expect(atk).toHaveValue('7');await expect(page.locator('.role-tab[data-role="map"]')).toHaveClass(/active/);await expect(page.locator('#map-roster-list .roster-card').first()).toHaveClass(/defeated/);
+ await page.getByRole('button',{name:'引き寄せるを発動'}).click();await page.locator('.role-tab[data-role="map"]').click();await target.click();await expect(atk).toHaveValue('7');await expect(page.locator('.role-tab[data-role="map"]')).toHaveClass(/active/);await expect(page.locator('#map-roster-list .roster-card[data-instance-id="'+instanceId+'"]')).toHaveClass(/defeated/);
 });

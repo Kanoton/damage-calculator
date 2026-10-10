@@ -283,7 +283,7 @@
    const item=document.createElement('label');item.className='condition-item';item.title=key+'：アイコンを左クリックで+1、右クリックで-1';
    const button=document.createElement('button');button.type='button';button.className='condition-icon';button.setAttribute('aria-label',key+'を増やす');button.append(makeIcon(key));
    const input=document.createElement('input');input.type='number';input.min='0';if(key==='チャージ')input.max='10';input.inputMode='numeric';input.className='condition-number';input.setAttribute('aria-label',key+'の数');input.value=number(state(),key);
-   const setValue=value=>{if(key==='ヒール')window.rememberCharacterSkillActivation?.();state().numbers[key]=Math.min(key==='チャージ'?10:Infinity,Math.max(0,Number(value)||0));input.value=state().numbers[key];updateStats();if(key==='罪証')window.dispatchEvent(new Event('character-evidence-change'));};
+   const setValue=value=>{const next=Math.min(key==='チャージ'?10:Infinity,Math.max(0,key==='ヒール'?Math.floor(Number(value)||0):Number(value)||0));if(key==='ヒール'){if(next===number(state(),key)){input.value=next;return;}window.rememberCharacterSkillActivation?.();}state().numbers[key]=next;input.value=next;updateStats();if(key==='罪証')window.dispatchEvent(new Event('character-evidence-change'));};
    button.addEventListener('click',()=>setValue(number(state(),key)+1));
    button.addEventListener('contextmenu',e=>{e.preventDefault();setValue(number(state(),key)-1);});
    input.addEventListener('change',()=>setValue(input.value));item.append(button,input);conditionsBox.append(item);
