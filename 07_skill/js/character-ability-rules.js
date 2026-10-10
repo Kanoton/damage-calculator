@@ -135,7 +135,7 @@ const CHARACTER_ABILITY_RULES={
  },
  '8':{
   activeSkills:[{key:'active',label:"子供の特権",cooldown:3,effects:[]}],
-  controls:[{key:'ジュジュシールド',type:'toggle'},{key:'反撃',type:'toggle'}],
+  controls:[{key:'ジュジュシールド',type:'toggle'}],
   modifiers:[{target:'damageReduce',formula:'fixed',value:99,when:{key:'ジュジュシールド',equals:1}}]
  },
  '11':{
