@@ -198,7 +198,7 @@
   item.append(icon,input);return item;
  }
  function renderTeruSkillInputs(){
-  const container=document.getElementById('teru-skill-inputs');container.replaceChildren();container.hidden=String(selectedCharacter.id)!=='23';
+  const container=document.getElementById('teru-skill-inputs');container.replaceChildren();container.hidden=String(selectedCharacter.id)!=='23';document.getElementById('selected-character-skill-controls').classList.toggle('has-teru-inputs',!container.hidden);
   if(container.hidden)return;
   container.append(createTeruStatInput('三神憑依対象攻撃力','憑依する味方の攻撃力','atk'),createTeruStatInput('三神憑依対象防御力','憑依する味方の防御力','def'));
  }

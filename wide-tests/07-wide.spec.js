@@ -73,8 +73,9 @@ test('Teru: persistent possession inputs fit and keep a separate snapshot',async
  const source=page.getByLabel('憑依する味方の攻撃力',{exact:true}),def=page.getByLabel('憑依する味方の防御力',{exact:true});
  await expect(source).toBeVisible();await expect(def).toBeVisible();await source.fill('5');await source.dispatchEvent('change');await def.fill('3');await def.dispatchEvent('change');await page.getByRole('button',{name:'三神憑依を発動'}).click();await expect(page.locator('#selected-character-atk')).toHaveValue('5');
  await source.fill('9');await source.dispatchEvent('change');await expect(page.locator('#selected-character-atk')).toHaveValue('5');
- const boxes=await page.evaluate(()=>{const rect=s=>{const r=document.querySelector(s).getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom};};return {inputs:rect('#teru-skill-inputs'),skill:rect('#selected-character-skill'),ct:rect('#selected-character-ct'),frame:rect('#selected-character'),overflow:document.documentElement.scrollWidth>innerWidth+1};});
+ const boxes=await page.evaluate(()=>{const rect=s=>{const r=document.querySelector(s).getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom};};return {inputs:rect('#teru-skill-inputs'),skill:rect('#selected-character-skill'),ct:rect('#selected-character-ct'),stats:rect('.selected-character-stats'),frame:rect('#selected-character'),overflow:document.documentElement.scrollWidth>innerWidth+1};});
  expect(boxes.overflow).toBe(false);expect(boxes.inputs.right).toBeLessThanOrEqual(boxes.frame.right);expect(boxes.inputs.bottom).toBeLessThanOrEqual(boxes.frame.bottom);
- for(const key of ['skill','ct'])expect(boxes.inputs.bottom<=boxes[key].y||boxes.inputs.y>=boxes[key].bottom||boxes.inputs.right<=boxes[key].x||boxes.inputs.x>=boxes[key].right).toBe(true);
+ for(const key of ['skill','ct']){expect(boxes[key].right).toBeLessThanOrEqual(boxes.frame.right);expect(boxes[key].bottom).toBeLessThanOrEqual(boxes.frame.bottom);expect(boxes.inputs.bottom<=boxes[key].y||boxes.inputs.y>=boxes[key].bottom||boxes.inputs.right<=boxes[key].x||boxes.inputs.x>=boxes[key].right).toBe(true);}
+ expect(boxes.inputs.bottom).toBeLessThanOrEqual(boxes.stats.y);
  await info.attach('teru-source-inputs',{body:await page.screenshot(),contentType:'image/png'});
 });
