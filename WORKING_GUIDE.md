@@ -131,7 +131,7 @@ CI定義は `.github/workflows/06b-smoke.yml`、テスト本体は `tests/06b-sm
 
 ## 10. 07 PT組み合わせの全数検証
 
-通常のsmokeとは別に `npm run test:07:pairs` を実行します。正本キャラCSVから異なる自キャラ×PT1人を生成します（現在35×34＝1,190通り）。自キャラごとの45秒上限、全体12分上限、失敗3グループ、2ブラウザworker、再試行なし。CIジョブ自体にも15分上限を設けています。
+総当たり検証はユーザーが明示的に指定した時だけ実行します。通常の修正では実行しません。全キャラのCT巡回も `FULL_CHARACTER_CHECK=1` 指定時だけにし、通常の07 smokeでは今回の8キャラを対象とします。対象コマンドは `npm run test:07:pairs`、CIは手動 `workflow_dispatch` のみ（PR/pushでは起動しない）です。正本キャラCSVから異なる自キャラ×PT1人を生成します（現在35×34＝1,190通り）。自キャラごとの45秒上限、全体12分上限、失敗3グループ、2ブラウザworker、再試行なし。CIジョブ自体にも15分上限を設けています。
 
 `pair-test-report.json` と `pair-test-results/` にステップ結果・1組ずつのJSONL・各自キャラの完了/失敗/未実行リスト・失敗traceを保存します。CIは失敗/中断時にも成果物をアップロードします。再実行は例として `PAIR_SELF_IDS=23,29 npm run test:07:pairs` で自キャラを限定でき、個別対象は `-- --grep 'self=23 '` でも指定できます。各グループは新規ページから始まり、アプリ本体の状態を変更するためのテスト用APIは追加しません。
 
@@ -140,9 +140,9 @@ CI定義は `.github/workflows/06b-smoke.yml`、テスト本体は `tests/06b-sm
 
 ## 11. 07スマホ対応
 
-`07_skill/mobile.css` と `js/mobile.js` が幅900px以下・coarse pointerの操作を担当します。PCと計算・状態処理を共用し、別世代フォルダには分けません。`npm run test:07:mobile` でChromium/AndroidとWebKit/iPhoneのエミュレーションを検証します。CIは `.github/workflows/07-mobile.yml`、上限15分、スクリーンショット・結果は14日保存します。既存PCテストとPT組み合わせ検証も維持してください。同期機能は対象外で、将来追加する場合もスマホ操作モードでは表示・動作を無効にします。
+`07_skill/mobile.css` と `js/mobile.js` が幅900px以下・coarse pointerの操作を担当します。PCと計算・状態処理を共用し、別世代フォルダには分けません。`npm run test:07:mobile` でChromium/AndroidとWebKit/iPhoneのエミュレーションを検証します。CIは `.github/workflows/07-mobile.yml`、上限15分、スクリーンショット・結果は14日保存します。既存PCテストを維持してください。PT総当たり検証は明示指定時のみです。同期機能は対象外で、将来追加する場合もスマホ操作モードでは表示・動作を無効にします。
 
 
 ## 12. 07横長表示
 
-`wide.css` が幅1600px以上・縦横比3:2以上・スマホモード以外で左右配置を有効にします。FHDの右側管理領域は35%（最小580px）、左側は残り幅です。ラウンドは左上、メインタブは左領域の右寄り、モンスター2列一覧は右上、自キャラ/PTは右下です。メイン内部の構成・計算処理は共用します。`npm run test:07:wide` と `.github/workflows/07-wide.yml` でChromium/WebKitのFHD・サイズ切替・状態保持・独立スクロールを検証します。スマホ／PC／組み合わせテストも維持してください。
+`wide.css` が幅1600px以上・縦横比3:2以上・スマホモード以外で左右配置を有効にします。FHDの右側管理領域は35%（最小580px）、左側は残り幅です。ラウンドは左上、メインタブは左領域の右寄り、モンスター2列一覧は右上、自キャラ/PTは右下です。メイン内部の構成・計算処理は共用します。`npm run test:07:wide` と `.github/workflows/07-wide.yml` でChromium/WebKitのFHD・サイズ切替・状態保持・独立スクロールを検証します。スマホ／PCテストも維持してください。組み合わせの総当たりは明示指定時のみです。

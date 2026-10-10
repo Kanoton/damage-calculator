@@ -47,7 +47,9 @@
  const abilityModifierValue=rule=>{
   if(!abilityConditionMatches(rule.when))return 0;
   if(rule.formula==='fixed')return Number(rule.value)||0;
-  const source=rule.source==='target_mark'?(Number(currentOpponent?.markStacks)||0):abilityControlValue(rule.source);
+  let source=rule.source==='target_mark'?(Number(currentOpponent?.markStacks)||0):abilityControlValue(rule.source);
+  if(rule.sourceCap!==undefined)source=Math.min(source,Number(rule.sourceCap));
+  if(rule.formula==='percent_of_ceil')return Math.ceil(source*(Number(rule.value)||0));
   if(rule.formula==='per_stack')return source*(Number(rule.value)||0);
   if(rule.formula==='floor_per_unit')return Math.floor(source/(Number(rule.unit)||1))*(Number(rule.value)||0);
   if(rule.formula==='alternating_steps'){
@@ -126,7 +128,7 @@
   return result;
  }
  function makeIcon(key){
-  const file=({'カウンター攻撃':'UT_Buff/UT_Buff_Counter.png','このターンに受けたダメージ':'UT_Buff/UT_Buff_SangXinBingKuang.png'})[key]||statusIcons.get(key)||(['マジで怒ったぞ','次の攻撃ダイス6'].includes(key)?statusIcons.get('自己主張なし攻撃補正'):null)||statusIcons.get(specialIcons[key]);
+  const file=({'手札枚数':'UT_Buff/UT_Buff_Hand.png','自己主張なし攻撃補正':'UT_Buff/Attack.png','自己主張なし防御補正':'UT_Buff/Defense.png','自己主張なし移動補正':'UT_Buff/run.png','このターンに受けたダメージ':'UT_Buff/UT_Buff_SangXinBingKuang.png'})[key]||statusIcons.get(key)||(['マジで怒ったぞ','次の攻撃ダイス6'].includes(key)?statusIcons.get('自己主張なし攻撃補正'):null)||statusIcons.get(specialIcons[key]);
   if(!file)return Object.assign(document.createElement('span'),{className:'condition-fallback',textContent:key});
   const icon=document.createElement('img');icon.alt='';
   const path=file.startsWith('chip_icon/')||file.startsWith('UT_Buff/')?file:'icon/'+file;
@@ -137,6 +139,7 @@
  function neededInputs(){
   const numeric=new Set();
   if(state().chips.some(id=>chips.find(chip=>chip.id===id)?.category==='チャージ'))numeric.add('チャージ');
+  if(String(selectedCharacter.id)==='11'||partySlots.some(id=>String(id)==='11')||number(state(),'ヒール')>0)numeric.add('ヒール');
   for(const rule of activeRules()){
    if(rule.kind==='counter_delta')numeric.add(rule.target);
    if(rule.source_key&&rule.source_key!=='追加最大HP'&&rule.source_key!=='対象のマーク')numeric.add(rule.source_key);
@@ -150,6 +153,7 @@
  // Received PT effects are stored with self ability state, including roster Undo.
  const partySupportControls=[
   {donor:'8',key:'PTジュジュシールド',icon:'ジュジュシールド',stat:'damageReduce',value:99},
+  {donor:'8',key:'反撃',icon:'反撃'},
   {donor:'103',key:'PTカクテル攻撃',icon:'カクテル攻撃カード',number:true,max:3,stat:'atk'},
   {donor:'103',key:'PTカクテル防御',icon:'カクテル防御カード',number:true,max:3,stat:'def'},
   {donor:'104',key:'PTドロシー攻撃',icon:'本当の私',stat:'atk',value:1},
@@ -160,6 +164,7 @@
  function renderPartySupport(){
   const donors=new Set(partySlots.filter(id=>String(id)!==String(selectedCharacter?.id)).map(String));
   for(const c of partySupportControls){
+   if(abilityRules()?.controls?.some(control=>control.key===c.key))continue;
    const current=abilityControlValue(c.key);if(!donors.has(c.donor)&&!current)continue;
    const change=value=>{const next=Math.max(0,Math.min(c.max??999,Math.floor(Number(value)||0)));if(next===abilityControlValue(c.key))return;window.rememberCharacterSkillActivation?.();state().numbers[c.key]=next;renderConditions();updateStats();};
    if(c.number){const view=createConditionNumberView(c.key,current,makeIcon(c.icon));view.input.max=String(c.max??999);if(c.key==='PTユメ攻撃補正')view.item.title='ゲームで確定した余剰回復によるATK増加量を指定。回復量から自動換算しません。ターン終了で解除';view.button.addEventListener('click',()=>change(current+1));view.button.addEventListener('contextmenu',e=>{e.preventDefault();change(current-1);});view.input.addEventListener('change',()=>change(view.input.value));conditionsBox.append(view.item);}
@@ -195,7 +200,7 @@
  function renderTeruSkillInputs(){
   const container=document.getElementById('teru-skill-inputs');container.replaceChildren();container.hidden=String(selectedCharacter.id)!=='23';document.getElementById('selected-character-skill-controls').classList.toggle('has-teru-inputs',!container.hidden);
   if(container.hidden)return;
-  container.append(createTeruStatInput('三神憑依攻撃補正','憑依による攻撃力上昇','atk'),createTeruStatInput('三神憑依防御補正','憑依による防御力上昇','def'));
+  container.append(createTeruStatInput('三神憑依攻撃補正','憑依する味方の攻撃力','atk'),createTeruStatInput('三神憑依防御補正','憑依する味方の防御力','def'));
  }
  function renderTeruSupport(){
   const self=String(selectedCharacter.id)==='23';
@@ -238,10 +243,10 @@
    conditionsBox.append(button);
   }
   for(const control of abilityRules()?.controls||[]){
-   if(control.placement==='skill')continue;
+   if(control.placement)continue;
    if(control.type==='toggle'){
     const active=Boolean(abilityControlValue(control.key));
-    const toggle=createCharacterAbilityToggleView(control.key,active,makeIcon(control.key),()=>{if(['6','23'].includes(String(selectedCharacter.id)))window.rememberCharacterSkillActivation?.();state().numbers[control.key]=active?0:1;renderConditions();updateStats();});
+    const toggle=createCharacterAbilityToggleView(control.key,active,makeIcon(control.key),()=>{if(['6','10','23'].includes(String(selectedCharacter.id)))window.rememberCharacterSkillActivation?.();state().numbers[control.key]=active?0:1;renderConditions();updateStats();});
     conditionsBox.append(toggle);
    }else if(control.type==='choice'){
     const options=control.options||[],current=abilityControlValue(control.key),option=options.find(item=>Number(item.value)===current)||options[0];
@@ -252,6 +257,7 @@
     const effectiveMax=control.max===undefined?undefined:Number(control.max)+(Number(state().controlMaxBonuses?.[control.key])||0);
     const iconKey=control.iconAtMax&&effectiveMax!==undefined&&current>=effectiveMax?control.iconAtMax:control.key;
     const view=createConditionNumberView(control.key,current,makeIcon(iconKey));
+    if(control.key==='手札枚数')view.item.title='モンスターの手札は0枚：自分の手札枚数を入力。攻撃力への加算は最大3';
     if(control.iconAtMax&&iconKey!==control.key)view.item.title=iconKey+'：左クリックで＋1、右クリックで−1';
     const forced=String(selectedCharacter.id)==='6'&&control.key.startsWith('自己主張なし')&&!!abilityControlValue('マジで怒ったぞ');
     view.input.disabled=forced;view.button.disabled=forced;
@@ -277,7 +283,7 @@
    const item=document.createElement('label');item.className='condition-item';item.title=key+'：アイコンを左クリックで+1、右クリックで-1';
    const button=document.createElement('button');button.type='button';button.className='condition-icon';button.setAttribute('aria-label',key+'を増やす');button.append(makeIcon(key));
    const input=document.createElement('input');input.type='number';input.min='0';if(key==='チャージ')input.max='10';input.inputMode='numeric';input.className='condition-number';input.setAttribute('aria-label',key+'の数');input.value=number(state(),key);
-   const setValue=value=>{state().numbers[key]=Math.min(key==='チャージ'?10:Infinity,Math.max(0,Number(value)||0));input.value=state().numbers[key];updateStats();if(key==='罪証')window.dispatchEvent(new Event('character-evidence-change'));};
+   const setValue=value=>{if(key==='ヒール')window.rememberCharacterSkillActivation?.();state().numbers[key]=Math.min(key==='チャージ'?10:Infinity,Math.max(0,Number(value)||0));input.value=state().numbers[key];updateStats();if(key==='罪証')window.dispatchEvent(new Event('character-evidence-change'));};
    button.addEventListener('click',()=>setValue(number(state(),key)+1));
    button.addEventListener('contextmenu',e=>{e.preventDefault();setValue(number(state(),key)-1);});
    input.addEventListener('change',()=>setValue(input.value));item.append(button,input);conditionsBox.append(item);
@@ -525,7 +531,7 @@
    for(const input of skill.inputStats){const raw=window.prompt(input.label,String(abilityControlValue(input.key)));if(raw===null)return;const value=Number(raw);if(!raw.trim()||!Number.isFinite(value)||value<(input.min??0)||(input.max!==undefined&&value>input.max)||(input.integer&&!Number.isSafeInteger(value)))return;values[input.key]=value;}
    Object.assign(state().numbers,values);
   }
-  if(skill.target){window.dispatchEvent(new CustomEvent('character-skill-target-request',{detail:{target:skill.target,skillKey:skill.key,label:skill.label,characterId:selectedCharacter.id,multipleTargets:!!skill.multipleTargets}}));return;}
+  if(skill.target){window.dispatchEvent(new CustomEvent('character-skill-target-request',{detail:{target:skill.target,skillKey:skill.key,label:skill.label,characterId:selectedCharacter.id,multipleTargets:!!skill.multipleTargets,attackAfterSkill:String(selectedCharacter.id)==='9'&&calculate().atk>=7}}));return;}
   window.rememberCharacterSkillActivation?.();
   applyActiveSkillEffects(skill);
   state().skillCooldowns[skill.key]=activeSkillMaxCooldown(skill);

@@ -5,7 +5,7 @@ const rows=fs.readFileSync(path.join(__dirname,'../csv/character_stats.csv'),'ut
 const characters=rows.slice(1).map(line=>{const fields=line.split(',');return {id:fields[0],name:fields[1],fields};});
 const selected=(process.env.PAIR_SELF_IDS||'').split(',').filter(Boolean);
 if(selected.some(id=>!characters.some(c=>c.id===id)))throw new Error('PAIR_SELF_IDS contains unknown character IDs');
-const donors={8:['PTジュジュシールド'],10:['PTパンダマン回復＋2'],20:['PTユメ攻撃補正'],23:['PTテル憑依','PTテル狐光'],27:['PT潜伏'],103:['PTカクテル攻撃','PTカクテル防御','PTカクテル回復＋1'],104:['PTドロシー攻撃','PTドロシー通過回復＋1'],105:['PTハンナ次の移動']};
+const donors={8:['PTジュジュシールド','反撃'],10:['PTパンダマン回復＋2'],11:['ヒール'],20:['PTユメ攻撃補正'],23:['PTテル憑依','PTテル狐光'],27:['PT潜伏'],103:['PTカクテル攻撃','PTカクテル防御','PTカクテル回復＋1'],104:['PTドロシー攻撃','PTドロシー通過回復＋1'],105:['PTハンナ次の移動']};
 const allSupport=Object.values(donors).flat().concat('PTハンナ推理タイム＋1');
 async function self(page,id){
  await page.locator('.role-tab.character-tab').click();await page.locator('#selected-self-tab').click();await page.locator('#character-list-tab').click();await page.locator(`.character-select[data-id="${id}"]`).click();await page.locator('#selected-self-tab').click();

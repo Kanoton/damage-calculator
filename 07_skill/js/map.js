@@ -208,6 +208,8 @@ function commitCharacterSkillTargets(enemies){
  window.dispatchEvent(new CustomEvent('character-skill-target-resolved',{detail:{characterId:request.characterId,skillKey:request.skillKey,success:true,targetId:targets[0].instanceId,targetIds:targets.map(enemy=>enemy.instanceId)}}));
  renderRoster();
  rosterNotice.textContent=request.label+'を'+names.join('・')+'に使用しました。';
+ // Z3000's threshold is captured before damage/kill bonuses at skill use.
+ if(request.attackAfterSkill&&!targets[0].defeated){rosterState.selectedId=targets[0].instanceId;registerEnemy(targets[0]);}
  return true;
 }
 targetOk.addEventListener('click',()=>{const request=characterSkillTargetRequest;if(!request?.multipleTargets)return;commitCharacterSkillTargets(rosterState.monsters.filter(enemy=>request.selectedIds.has(enemy.instanceId)&&!enemy.defeated));});

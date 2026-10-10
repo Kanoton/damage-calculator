@@ -2,8 +2,8 @@
 const CHARACTER_ABILITY_RULES={
  '10':{
   activeSkills:[{key:'active',label:"食べ放題",cooldown:3,effects:[]}],
-  controls:[{key:'カウンター攻撃',type:'number',min:0},{key:'このターンに受けたダメージ',type:'number',min:0}],
-  modifiers:[{target:'atk',formula:'per_stack',source:'このターンに受けたダメージ',value:1,when:{key:'カウンター攻撃',min:1}}]
+  controls:[{key:'反撃',type:'toggle'},{key:'このターンに受けたダメージ',type:'number',min:0}],
+  modifiers:[{target:'atk',formula:'per_stack',source:'このターンに受けたダメージ',value:1,when:{key:'反撃',equals:1}}]
  },
  '17':{
   activeSkills:[{key:'active',label:"真夜の一閃",cooldown:3,target:'monster',multipleTargets:true,effects:[{type:'damage_monster',sourceStat:'atk',offset:2}]}]
@@ -11,7 +11,7 @@ const CHARACTER_ABILITY_RULES={
  '23':{
   activeSkills:[{key:'active',label:"三神憑依",cooldown:3,effects:[]}],
   controls:[{key:'狐光',type:'number',min:0},{key:'三神憑依攻撃補正',type:'number',min:0,duration:'turn',placement:'skill'},{key:'三神憑依防御補正',type:'number',min:0,duration:'turn',placement:'skill'}],
-  modifiers:[{target:'atk',formula:'per_stack',source:'三神憑依攻撃補正',value:1},{target:'def',formula:'per_stack',source:'三神憑依防御補正',value:1}]
+  modifiers:[{target:'atk',formula:'percent_of_ceil',source:'三神憑依攻撃補正',value:0.5},{target:'def',formula:'percent_of_ceil',source:'三神憑依防御補正',value:0.5}]
  },
  '27':{
   activeSkills:[{key:'active',label:"ミッション：インシークレット",cooldown:3,target:'monster',effects:[{type:'modify_monster_mark',delta:1},{type:'set_monster_status',key:'investigationTarget',value:true}]}],
@@ -30,7 +30,7 @@ const CHARACTER_ABILITY_RULES={
   ignoreDefenseOnAttackSix:true,
   activeSkills:[{key:'active',label:"マジで怒ったぞ",cooldown:3,effects:[{type:'modify_control',key:'マジで怒ったぞ',delta:1,max:1}]}],
   controls:[
-   {key:'マジで怒ったぞ',type:'toggle',duration:'turn'},
+   {key:'マジで怒ったぞ',type:'toggle',duration:'turn',placement:'internal'},
    {key:'次の攻撃ダイス6',type:'toggle'},
    {key:'自己主張なし攻撃補正',type:'number',min:-2,max:2},
    {key:'自己主張なし防御補正',type:'number',min:-2,max:2},
@@ -44,8 +44,8 @@ const CHARACTER_ABILITY_RULES={
  },
  '15':{
   activeSkills:[{key:'active',label:"クィーン プリビレッジ",cooldown:3,effects:[]}],
-  controls:[{key:'相手より多い手札',type:'number',min:0,max:3}],
-  modifiers:[{target:'atk',formula:'per_stack',source:'相手より多い手札',value:1}]
+  controls:[{key:'手札枚数',type:'number',min:0}],
+  modifiers:[{target:'atk',formula:'per_stack',source:'手札枚数',sourceCap:3,value:1}]
  },
  '26':{
   activeSkills:[{key:'active',label:"暗影融合",cooldown:3,inputStats:[{key:'吸収した影',label:'吸収した影の数',integer:true}],effects:[{type:'modify_stat',target:'self',stat:'atk',sourceKey:'吸収した影',duration:'turn'}]}]
@@ -81,8 +81,8 @@ const CHARACTER_ABILITY_RULES={
   activeSkills:[{key:'active',label:"気功修練",cooldown:3,effects:[{type:'heal',target:'self',value:2},{type:'modify_stat',target:'self',stat:'atk',value:4,duration:'turn',when:{key:'エネルギー保存',min:1}}]}],
   controls:[{key:'エネルギー保存',type:'number',min:0,max:5}],
   modifiers:[
-   {target:'atk',formula:'per_stack',source:'エネルギー保存',value:2},
-   {target:'def',formula:'per_stack',source:'エネルギー保存',value:2}
+   {target:'atk',formula:'fixed',value:2,when:{key:'エネルギー保存',min:1}},
+   {target:'def',formula:'fixed',value:2,when:{key:'エネルギー保存',min:1}}
   ]
  },
  '14':{
