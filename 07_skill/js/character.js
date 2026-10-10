@@ -190,7 +190,11 @@
   const item=document.createElement('label');item.className='teru-stat-input';item.title=label;
   const icon=document.createElement('img');icon.src='../images/UT_Buff/'+(stat==='atk'?'Attack.png':'Defense.png');icon.alt='';
   const input=document.createElement('input');input.type='number';input.min='0';input.step='1';input.inputMode='numeric';input.setAttribute('aria-label',label);input.dataset.teruKey=key;input.value=abilityControlValue(key);
-  input.addEventListener('change',()=>{const value=Number(input.value);const next=Number.isFinite(value)?Math.max(0,Math.floor(value)):0;if(next!==abilityControlValue(key)){window.rememberCharacterSkillActivation?.();state().numbers[key]=next;}input.value=next;updateStats();});
+  input.addEventListener('change',()=>{const value=Number(input.value);const next=Number.isFinite(value)?Math.max(0,Math.floor(value)):0;input.value=next;if(next===abilityControlValue(key))return;window.rememberCharacterSkillActivation?.();state().numbers[key]=next;
+   // Source inputs only affect the next cast. Avoid rewriting Skill on blur:
+   // WebKit can cancel its pending click when that button's text is replaced.
+   if(key==='PTテル攻撃力')updateStats();
+  });
   item.append(icon,input);return item;
  }
  function renderTeruSkillInputs(){
