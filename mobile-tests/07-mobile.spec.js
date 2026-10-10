@@ -52,3 +52,10 @@ test('Teru: bounded stat dialog applies rounded halves and leaves the header cle
  await info.attach('teru-stat-dialog',{body:await page.screenshot(),contentType:'image/png'});await page.getByRole('button',{name:'憑依を確定'}).click();await expect(page.locator('#selected-character-atk')).toHaveValue('5');await expect(page.locator('#teru-stat-dialog')).not.toBeVisible();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
 });
+
+for(const [id,label,skill,value] of [['16','オーバードライブのダイスの出目','オーバードライブ',10],['26','吸収した影の数','暗影融合',4]])test('Skill source fits beside button: '+id,async({page},info)=>{
+ await start(page,id);
+ const field=page.getByLabel(label,{exact:true});await expect(field).toBeVisible();await field.fill(String(value));await page.getByRole('button',{name:skill+'を発動'}).click();await expect(page.locator('#selected-character-ct')).toContainText(id==='16'?'CT 4':'CT 3');
+ const boxes=await page.evaluate(()=>{const rect=s=>{const r=document.querySelector(s).getBoundingClientRect();return{x:r.x,y:r.y,right:r.right,bottom:r.bottom};};return{field:rect('#skill-source-inputs'),skill:rect('#selected-character-skill'),stats:rect('.selected-character-stats'),frame:rect('#selected-character'),overflow:document.documentElement.scrollWidth>innerWidth+1};});expect(boxes.overflow).toBe(false);expect(boxes.field.right).toBeLessThanOrEqual(boxes.frame.right);expect(boxes.field.bottom).toBeLessThanOrEqual(boxes.frame.bottom);expect(boxes.field.right<=boxes.skill.x||boxes.field.x>=boxes.skill.right||boxes.field.bottom<=boxes.skill.y||boxes.field.y>=boxes.skill.bottom).toBe(true);expect(boxes.field.bottom<=boxes.stats.y||boxes.field.x>=boxes.stats.right||boxes.field.right<=boxes.stats.x).toBe(true);
+ await info.attach('skill-source-'+id,{body:await page.screenshot(),contentType:'image/png'});
+});
