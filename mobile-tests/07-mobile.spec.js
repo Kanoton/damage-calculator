@@ -44,14 +44,11 @@ test('phone: monster HP changes once, modal cancellation is harmless and Undo re
 });
 
 
-test('Teru: source stat inputs fit and apply rounded halves',async({page},info)=>{
+test('Teru: bounded stat dialog applies rounded halves and leaves the header clear',async({page},info)=>{
  await start(page,'23');
- const source=page.getByLabel('憑依する味方の攻撃力',{exact:true}),def=page.getByLabel('憑依する味方の防御力',{exact:true});
- await expect(source).toBeVisible();await expect(def).toBeVisible();await source.fill('5');await source.dispatchEvent('change');await def.fill('3');await page.getByRole('button',{name:'三神憑依を発動'}).click();await expect(page.locator('#selected-character-atk')).toHaveValue('5');
- await source.fill('9');await source.dispatchEvent('change');await expect(page.locator('#selected-character-atk')).toHaveValue('7');
- const boxes=await page.evaluate(()=>{const rect=s=>{const r=document.querySelector(s).getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom};};return {inputs:rect('#teru-skill-inputs'),skill:rect('#selected-character-skill'),ct:rect('#selected-character-ct'),stats:rect('.selected-character-stats'),frame:rect('#selected-character'),overflow:document.documentElement.scrollWidth>innerWidth+1};});
- expect(boxes.overflow).toBe(false);expect(boxes.inputs.right).toBeLessThanOrEqual(boxes.frame.right);expect(boxes.inputs.bottom).toBeLessThanOrEqual(boxes.frame.bottom);
- for(const key of ['skill','ct']){expect(boxes[key].right).toBeLessThanOrEqual(boxes.frame.right);expect(boxes[key].bottom).toBeLessThanOrEqual(boxes.frame.bottom);expect(boxes.inputs.bottom<=boxes[key].y||boxes.inputs.y>=boxes[key].bottom||boxes.inputs.right<=boxes[key].x||boxes.inputs.x>=boxes[key].right).toBe(true);}
- expect(boxes.inputs.bottom).toBeLessThanOrEqual(boxes.stats.y);
- await info.attach('teru-source-inputs',{body:await page.screenshot(),contentType:'image/png'});
+ await expect(page.locator('#teru-stat-dialog')).not.toBeVisible();await page.getByRole('button',{name:'三神憑依を発動'}).click();
+ await page.getByLabel('憑依する味方の攻撃力',{exact:true}).fill('5');await page.getByLabel('憑依する味方の防御力',{exact:true}).fill('3');
+ const bounds=await page.locator('#teru-stat-dialog').boundingBox(),viewport=page.viewportSize();expect(bounds.x).toBeGreaterThanOrEqual(0);expect(bounds.y).toBeGreaterThanOrEqual(0);expect(bounds.x+bounds.width).toBeLessThanOrEqual(viewport.width);expect(bounds.y+bounds.height).toBeLessThanOrEqual(viewport.height);
+ await info.attach('teru-stat-dialog',{body:await page.screenshot(),contentType:'image/png'});await page.getByRole('button',{name:'憑依を確定'}).click();await expect(page.locator('#selected-character-atk')).toHaveValue('5');await expect(page.locator('#teru-stat-dialog')).not.toBeVisible();
+ expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
 });

@@ -213,6 +213,8 @@ function commitCharacterSkillTargets(enemies){
  return true;
 }
 targetOk.addEventListener('click',()=>{const request=characterSkillTargetRequest;if(!request?.multipleTargets)return;commitCharacterSkillTargets(rosterState.monsters.filter(enemy=>request.selectedIds.has(enemy.instanceId)&&!enemy.defeated));});
+// Capture before the focused monster button's native Enter click can toggle selection.
+document.addEventListener('keydown',event=>{if(event.key!=='Enter'||!characterSkillTargetRequest?.multipleTargets||event.target.closest('input,textarea,select')||event.isComposing)return;event.preventDefault();event.stopImmediatePropagation();if(!targetOk.disabled)targetOk.click();},true);
 function resolveCharacterSkillTarget(enemy){
  const request=characterSkillTargetRequest;if(!request||enemy.defeated)return false;
  if(!request.multipleTargets)return commitCharacterSkillTargets([enemy]);

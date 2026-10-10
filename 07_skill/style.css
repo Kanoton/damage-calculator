@@ -1648,19 +1648,23 @@ tbody th {
 .character-hover-toggle{display:flex;align-items:center;gap:5px;flex:none;margin:0 0 0 auto;padding:4px 0;font-size:12px;transform:none;cursor:pointer}
 .character-hover-toggle input{margin:0;cursor:pointer}
 
-/* Teru: persistent source stats beside Skill, independent of Foxfire stacks. */
-#teru-skill-inputs{display:flex;gap:4px}
-#teru-skill-inputs[hidden]{display:none}
-.teru-stat-input{display:inline-flex;align-items:center;justify-content:flex-start;gap:3px;margin:0}
-.teru-stat-input img{width:18px;height:18px;object-fit:contain}
-.teru-stat-input input{box-sizing:border-box;width:42px;min-width:0;padding:2px;font:inherit;font-size:12px}
-.mobile-ui .teru-stat-input input{width:54px;min-height:44px;font-size:16px}
-.mobile-ui .selected-character-skill-controls.has-teru-inputs{width:100%;max-width:100%}
-body:not(.mobile-ui) .selected-character-skill-controls.has-teru-inputs{display:grid;grid-template-columns:max-content max-content;gap:2px}
-body:not(.mobile-ui) .has-teru-inputs #selected-character-skill{grid-column:1;grid-row:1}
-body:not(.mobile-ui) .has-teru-inputs #selected-character-ct{grid-column:2;grid-row:1}
-body:not(.mobile-ui) .has-teru-inputs #teru-skill-inputs{grid-column:1/-1;grid-row:2}
-body:not(.mobile-ui) .has-teru-inputs .teru-stat-input input{width:38px;height:20px;appearance:textfield}
-body:not(.mobile-ui) .has-teru-inputs .teru-stat-input input::-webkit-inner-spin-button{appearance:none}
-body:not(.mobile-ui) .selected-character-main:has(.has-teru-inputs) .selected-character-stats{margin-top:14px}
-body:not(.mobile-ui) .has-teru-inputs #selected-character-skill,body:not(.mobile-ui) .has-teru-inputs #selected-character-ct{height:18px;padding:0 6px;font-size:12px;line-height:16px}
+/* Skill sources share the top button row; Teru sources live in a bounded dialog. */
+#skill-source-inputs{display:flex;gap:4px}
+#skill-source-inputs[hidden]{display:none}
+.skill-source-input{display:inline-flex;align-items:center;gap:4px;margin:0;font-size:12px}
+.skill-source-input img{width:18px;height:18px;object-fit:contain}
+.skill-source-input input{box-sizing:border-box;width:46px;min-width:0;padding:2px;font:inherit}
+.selected-character-skill-controls.has-source-inputs{display:grid;grid-template-columns:max-content max-content;gap:3px}
+.has-source-inputs #selected-character-skill{grid-column:1;grid-row:1}
+.has-source-inputs #skill-source-inputs{grid-column:2;grid-row:1}
+.has-source-inputs #selected-character-ct{grid-column:1/-1;grid-row:2;justify-self:end}
+.selected-character-main:has(.has-source-inputs) .selected-character-identity{padding-right:130px}
+#teru-stat-dialog{box-sizing:border-box;width:min(360px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:visible;padding:20px;border:2px solid #d4ac37;border-radius:8px;background:#fffdf4;color:#493e22}
+#teru-stat-dialog::backdrop{background:#0005}
+#teru-stat-dialog h3{margin:0 0 14px;font-size:16px}
+#teru-skill-inputs{display:flex;gap:20px;flex-wrap:wrap}
+#teru-stat-dialog .skill-source-input input{width:70px;font-size:18px}
+.skill-dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+.skill-dialog-actions button{padding:8px 12px}
+.mobile-ui .skill-source-input input{min-height:44px;font-size:16px}
+.mobile-ui .selected-character-main:has(.has-source-inputs) .selected-character-identity{padding-right:0}

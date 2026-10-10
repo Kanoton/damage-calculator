@@ -166,7 +166,7 @@
   for(const c of partySupportControls){
    if(abilityRules()?.controls?.some(control=>control.key===c.key))continue;
    const current=abilityControlValue(c.key);if(!donors.has(c.donor)&&!current)continue;
-   const change=value=>{const next=Math.max(0,Math.min(c.max??999,Math.floor(Number(value)||0)));if(next===abilityControlValue(c.key))return;window.rememberCharacterSkillActivation?.();state().numbers[c.key]=next;renderConditions();updateStats();};
+   const change=value=>{const next=Math.max(0,Math.min(c.max??999,Math.floor(Number(value)||0)));if(next===abilityControlValue(c.key))return;window.rememberCharacterSkillActivation?.();state().numbers[c.key]=next;if(c.key==='PTジュジュシールド'&&next)state().numbers['反撃']=1;renderConditions();updateStats();};
    if(c.number){const view=createConditionNumberView(c.key,current,makeIcon(c.icon));view.input.max=String(c.max??999);if(c.key==='PTユメ攻撃補正')view.item.title='ゲームで確定した余剰回復によるATK増加量を指定。回復量から自動換算しません。ターン終了で解除';view.button.addEventListener('click',()=>change(current+1));view.button.addEventListener('contextmenu',e=>{e.preventDefault();change(current-1);});view.input.addEventListener('change',()=>change(view.input.value));conditionsBox.append(view.item);}
    else {const button=createCharacterAbilityToggleView(c.key,!!current,makeIcon(c.icon),()=>change(current?0:1));if(c.marked)button.title+='。戦闘終了後は手動でオフ（ターン終了でも解除）';if(c.donor==='105')button.title+='。ゲームで次の移動力＋2を受けた時にオン。移動後は手動でオフ';conditionsBox.append(button);}
   }
@@ -187,21 +187,31 @@
   window.rememberCharacterSkillActivation?.();const key='PTテル狐光';
   state().numbers[key]=effect.stacks-1;renderConditions();updateStats();
  };
- // Stat inputs are deliberately separate from clickable stack icons.
- function createTeruStatInput(key,label,stat){
-  const item=document.createElement('label');item.className='teru-stat-input';item.title=label;
-  const icon=document.createElement('img');icon.src='../images/UT_Buff/'+(stat==='atk'?'Attack.png':'Defense.png');icon.alt='';
-  const input=document.createElement('input');input.type='number';input.min='0';input.step='1';input.inputMode='numeric';input.setAttribute('aria-label',label);input.dataset.teruKey=key;input.value=abilityControlValue(key);
-  input.addEventListener('change',()=>{const value=Number(input.value);const next=Number.isFinite(value)?Math.max(0,Math.floor(value)):0;input.value=next;if(next===abilityControlValue(key))return;window.rememberCharacterSkillActivation?.();state().numbers[key]=next;
-   updateStats();
-  });
-  item.append(icon,input);return item;
+ // Editable skill sources are separate from applied bonuses; Teru commits both atomically.
+ const teruDialog=document.createElement('dialog');teruDialog.id='teru-stat-dialog';teruDialog.setAttribute('aria-label','憑依先のステータス入力');
+ teruDialog.innerHTML='<form><h3>憑依先のステータス</h3><div id="teru-skill-inputs"></div><div class="skill-dialog-actions"><button type="button" data-cancel>キャンセル</button><button type="submit">憑依を確定</button></div></form>';
+ document.body.append(teruDialog);
+ function sourceInput(spec,commit){
+  const item=document.createElement('label');item.className='skill-source-input';item.title=spec.label;
+  if(spec.stat){const icon=document.createElement('img');icon.src='../images/UT_Buff/'+(spec.stat==='atk'?'Attack.png':'Defense.png');icon.alt='';item.append(icon);}
+  else {const label=document.createElement('span');label.textContent=String(selectedCharacter.id)==='16'?'出目':'影';item.append(label);}
+  const input=document.createElement('input');input.type='number';input.min=String(spec.min??0);input.step='1';input.inputMode='numeric';input.required=true;input.setAttribute('aria-label',spec.label);input.dataset.sourceKey=spec.key;input.value=abilityControlValue(spec.key);
+  if(commit)input.addEventListener('change',()=>{if(!input.checkValidity())return;const next=Number(input.value);if(next===abilityControlValue(spec.key))return;window.rememberCharacterSkillActivation?.();state().numbers[spec.key]=next;});
+  item.append(input);return item;
  }
- function renderTeruSkillInputs(){
-  const container=document.getElementById('teru-skill-inputs');container.replaceChildren();container.hidden=String(selectedCharacter.id)!=='23';document.getElementById('selected-character-skill-controls').classList.toggle('has-teru-inputs',!container.hidden);
-  if(container.hidden)return;
-  container.append(createTeruStatInput('三神憑依攻撃補正','憑依する味方の攻撃力','atk'),createTeruStatInput('三神憑依防御補正','憑依する味方の防御力','def'));
+ function renderSkillInputs(){
+  const container=document.getElementById('skill-source-inputs');container.replaceChildren();const specs=activeSkill()?.inputStats||[];container.hidden=!specs.length;
+  document.getElementById('selected-character-skill-controls').classList.toggle('has-source-inputs',!!specs.length);
+  for(const spec of specs)container.append(sourceInput(spec,true));
  }
+ teruDialog.querySelector('[data-cancel]').addEventListener('click',()=>teruDialog.close());
+ window.addEventListener('character-selection-change',()=>{if(teruDialog.open)teruDialog.close();});
+ teruDialog.querySelector('form').addEventListener('submit',event=>{
+  event.preventDefault();const skill=activeSkill();if(String(selectedCharacter?.id)!=='23'||!skill||activeSkillCooldown(skill)>0){teruDialog.close();return;}
+  const fields=[...teruDialog.querySelectorAll('input')];if(fields.some(input=>!input.checkValidity()))return;
+  window.rememberCharacterSkillActivation?.();for(const input of fields)state().numbers[input.dataset.sourceKey]=Number(input.value);
+  applyActiveSkillEffects(skill);state().skillCooldowns[skill.key]=activeSkillMaxCooldown(skill);teruDialog.close();renderConditions();updateStats();
+ });
  function renderTeruSupport(){
   const self=String(selectedCharacter.id)==='23';
   if(!self&&(partySlots.some(id=>String(id)==='23')||abilityControlValue('PTテル憑依')||abilityControlValue('PTテル狐光'))){
@@ -219,7 +229,7 @@
  }
  function renderConditions(){
   conditionsBox.replaceChildren();
-  renderTeruSkillInputs();
+  renderSkillInputs();
   renderPartySupport();
   renderTeruSupport();
   const ownedRules=activeRules();
@@ -242,15 +252,17 @@
    });
    conditionsBox.append(button);
   }
-  for(const control of abilityRules()?.controls||[]){
+  const controls=[...(abilityRules()?.controls||[])];
+  if(String(selectedCharacter.id)!=='27'&&(partySlots.some(id=>String(id)==='27')||abilityControlValue('潜入調査')))controls.push(CHARACTER_ABILITY_RULES['27'].controls.find(control=>control.key==='潜入調査'));
+  for(const control of controls){
    if(control.placement)continue;
    if(control.type==='toggle'){
     const active=Boolean(abilityControlValue(control.key));
-    const toggle=createCharacterAbilityToggleView(control.key,active,makeIcon(control.key),()=>{if(['6','10','23'].includes(String(selectedCharacter.id)))window.rememberCharacterSkillActivation?.();state().numbers[control.key]=active?0:1;renderConditions();updateStats();});
+    const toggle=createCharacterAbilityToggleView(control.key,active,makeIcon(control.key),()=>{window.rememberCharacterSkillActivation?.();state().numbers[control.key]=active?0:1;if(control.key==='ジュジュシールド'&&!active)state().numbers['反撃']=1;renderConditions();updateStats();});
     conditionsBox.append(toggle);
    }else if(control.type==='choice'){
     const options=control.options||[],current=abilityControlValue(control.key),option=options.find(item=>Number(item.value)===current)||options[0];
-    const change=delta=>{const index=Math.max(0,options.indexOf(option)),next=control.cycle===false?Math.max(0,Math.min(options.length-1,index+delta)):(index+delta+options.length)%options.length;state().numbers[control.key]=Number(options[next]?.value)||0;renderConditions();updateStats();};
+    const change=delta=>{const index=Math.max(0,options.indexOf(option)),next=control.cycle===false?Math.max(0,Math.min(options.length-1,index+delta)):(index+delta+options.length)%options.length;const value=Number(options[next]?.value)||0;if(value===current)return;window.rememberCharacterSkillActivation?.();state().numbers[control.key]=value;renderConditions();updateStats();};
     const button=createCharacterAbilityChoiceView(control.key,option,makeIcon(option?.iconKey||control.key),()=>change(1));button.addEventListener('contextmenu',event=>{event.preventDefault();change(-1);});conditionsBox.append(button);
    }else if(control.type==='number'){
     const current=abilityControlValue(control.key);
@@ -526,10 +538,13 @@
  ctButton.addEventListener('contextmenu',event=>{event.preventDefault();changeActiveSkillCooldown(1);});
  skillButton.addEventListener('click',()=>{
   const skill=activeSkill();if(!skill||activeSkillCooldown(skill)>0)return;
+  if(String(selectedCharacter.id)==='23'){
+   const container=teruDialog.querySelector('#teru-skill-inputs');container.replaceChildren();
+   container.append(sourceInput({key:'三神憑依攻撃補正',label:'憑依する味方の攻撃力',stat:'atk'},false),sourceInput({key:'三神憑依防御補正',label:'憑依する味方の防御力',stat:'def'},false));
+   teruDialog.showModal();return;
+  }
   if(skill.inputStats){
-   const values={};
-   for(const input of skill.inputStats){const raw=window.prompt(input.label,String(abilityControlValue(input.key)));if(raw===null)return;const value=Number(raw);if(!raw.trim()||!Number.isFinite(value)||value<(input.min??0)||(input.max!==undefined&&value>input.max)||(input.integer&&!Number.isSafeInteger(value)))return;values[input.key]=value;}
-   Object.assign(state().numbers,values);
+   const fields=[...document.querySelectorAll('#skill-source-inputs input')];if(fields.some(input=>!input.reportValidity()))return;
   }
   if(skill.target){window.dispatchEvent(new CustomEvent('character-skill-target-request',{detail:{target:skill.target,skillKey:skill.key,label:skill.label,characterId:selectedCharacter.id,multipleTargets:!!skill.multipleTargets,attackAfterSkill:String(selectedCharacter.id)==='9'&&calculate().atk>=7}}));return;}
   window.rememberCharacterSkillActivation?.();
@@ -539,8 +554,9 @@
  });
  function applyActiveSkillEffects(skill){
   state().activeEffects=(state().activeEffects||[]).filter(effect=>effect.source!==skill.key);
-  for(const effect of skill.effects||[]){
-   if(!activeEffectAllowed(effect))continue;
+  // Decide conditional branches before any effect changes its source control.
+  const effects=(skill.effects||[]).filter(activeEffectAllowed);
+  for(const effect of effects){
    if(effect.type==='heal'&&effect.target==='self'){const maxHp=calculate().hp;state().currentHp=Math.min(maxHp,(Number(state().currentHp)||0)+(Number(effect.value)||0));continue;}
    if(effect.type==='heal_from_control'&&effect.target==='self'){const maxHp=calculate().hp;state().currentHp=Math.min(maxHp,(Number(state().currentHp)||0)+abilityControlValue(effect.sourceKey));continue;}
    if(effect.type==='increase_max_hp'){state().maxHpBonus=(Number(state().maxHpBonus)||0)+(Number(effect.value)||0);continue;}
