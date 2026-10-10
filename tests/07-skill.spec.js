@@ -628,7 +628,7 @@ test('07 skill: Kaisei Bonnie and Rinrin apply targeted monster effects', async 
  await selectCharacter(page,'28');
  const defense=page.locator('#map-roster-list input[aria-label$="の防御力"]').first();
  const before=Number(await defense.inputValue());
- await page.getByRole('button',{name:'インターセプトタックルを発動'}).click();
+ await page.getByRole('button',{name:'インターセプトタックルを発動'}).click();await page.locator('#rinrin-area-dialog').getByRole('button',{name:'Yes',exact:true}).click();
  await target.click();
  await page.locator('#character-skill-target-ok').click();
  await expect(defense).toHaveValue(String(Math.max(0,before-2)));
