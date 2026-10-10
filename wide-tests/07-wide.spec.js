@@ -103,7 +103,7 @@ test('Rinrin: bounded passage dialog supports No, Undo and Yes target selection'
 test('Jill support: attack and defense have colored borders without healing buttons',async({page},info)=>{
  await page.goto('/07_skill/');await select(page,'1');
  await page.locator('#selected-party-tab').click();await page.locator('.character-select[data-id="103"]').click();await page.locator('.character-select[data-id="104"]').click();await page.locator('#selected-self-tab').click();
- for(const [key,color] of [['PTカクテル攻撃','rgb(204, 51, 51)'],['PTカクテル防御','rgb(38, 115, 201)']]){const button=page.getByRole('button',{name:key+'を増やす'});await expect(button).toHaveCSS('border-top-color',color);await expect(button).toHaveCSS('border-top-width','2px');}
+ for(const [key,color] of [['PTカクテル攻撃','rgb(204, 51, 51)'],['PTカクテル防御','rgb(38, 115, 201)']]){const button=page.getByRole('button',{name:key+'を増やす'});await expect(button).toHaveCSS('border-top-color',color);await expect(button).toHaveCSS('border-top-width','2px');await expect(button).toHaveCSS('background-color',color);}
  await expect(page.getByRole('button',{name:'PTカクテル回復＋1',exact:true})).toHaveCount(0);await expect(page.getByRole('button',{name:'PTドロシー通過回復＋1',exact:true})).toHaveCount(0);
  await info.attach('cocktail-border',{body:await page.screenshot(),contentType:'image/png'});
 });

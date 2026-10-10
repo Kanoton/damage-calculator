@@ -1213,7 +1213,7 @@ test('07 Z3000: a kill raising ATK from six to seven does not retroactively open
 });
 
 
-test('07 Ren: shield grants counter automatically but each off switch remains independent for self and PT',async({page})=>{
+test('07 Ren: self has no counter; PT shield grants counter with independent off switches',async({page})=>{
  await page.goto('/07_skill/');await selectCharacter(page,'8');
  for(const party of [false,true]){
   if(party){await selectCharacter(page,'1');await registerSupport(page,'8');}
