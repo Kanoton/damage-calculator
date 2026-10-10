@@ -91,7 +91,13 @@ function createCharacterSkillTooltipView(row,ability){
   entry.setAttribute('aria-label',label+' Lv0からLv3 '+values);entry.append(icon,text);stats.append(entry);
  }
  const description=document.createElement('div');description.className='character-skill-text';
- const lines=ability.split(/\r?\n/);
+ let displayAbility=ability.replace(/\r\n/g,'\n');
+ if(String(row.id)==='8'){
+  const shield=displayAbility.match(/^※ジュジュシールド効果：[ \t]*(.+)$/m);
+  if(shield)displayAbility=displayAbility.replace(shield[0]+'\n','').trimEnd()+'\n\nジュジュシールド\n'+shield[1];
+ }
+ if(String(row.id)==='105')displayAbility=displayAbility.replace(/(^人形完成$)/m,'浮遊\n移動力+2、罠・ロードブロックを無効化。他のユニットに通過される際、戦闘が発生しない。\n\n$1');
+ const lines=displayAbility.split(/\r?\n/);
  lines.forEach((line,index)=>{
   const heading=/^(?:スキル|パッシブスキル)\s*[-－]\s*.+$/.test(line.trim())||/^[^\s。、！？：:（）()\[\]［］]{1,24}$/.test(line.trim());
   if(heading){const strong=document.createElement('strong');strong.textContent=line;description.append(strong);}

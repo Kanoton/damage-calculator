@@ -54,9 +54,7 @@ const CHARACTER_ABILITY_RULES={
   activeSkills:[{key:'active',label:"インターセプトタックル",cooldown:3,target:'monster',multipleTargets:true,effects:[{type:'modify_monster_def',value:-2,durationTurns:2},{type:'modify_stat',target:'self',stat:'atk',value:2,durationTurns:2}]}]
  },
  '103':{
-  activeSkills:[{key:'active',label:"カクテルを作る",cooldown:3,effects:[]}],
-  controls:[{key:'一生を変えるカクテル',type:'toggle',duration:'turn'}],
-  modifiers:[{target:'move',formula:'fixed',value:3,when:{key:'一生を変えるカクテル',equals:1}}]
+  activeSkills:[{key:'active',label:"カクテルを作る",cooldown:3,effects:[]}]
  },
  '7':{
   activeSkills:[{key:'active',label:"ひとくちだけ",cooldown:3,effects:[{type:'force_condition',key:'current_hp_ratio<=',duration:'turn'}]}],
@@ -100,7 +98,7 @@ const CHARACTER_ABILITY_RULES={
   modifiers:[{target:'atk',formula:'fixed',value:4,when:{key:'覚醒',equals:8}}]
  },
  '104':{
-  activeSkills:[{key:'active',label:"本当の私",cooldown:2,effects:[{type:'modify_stat',target:'self',stat:'atk',sourceStat:'def',duration:'turn',when:{key:'温もり',equals:5}}]}],
+  activeSkills:[{key:'active',label:"本当の私",cooldown:2,effects:[{type:'modify_stat',target:'self',stat:'atk',sourceStat:'def',duration:'turn',when:{key:'温もり',equals:5}},{type:'modify_control',key:'温もり',delta:-5,min:0,when:{key:'温もり',equals:5}}]}],
   controls:[{key:'温もり',type:'number',min:0,max:5},{key:'本当の私',type:'toggle',duration:'turn'}],
   modifiers:[{target:'def',formula:'per_stack',source:'温もり',value:1},{target:'atk',formula:'fixed',value:1,when:{key:'本当の私',equals:1}}]
  },
@@ -169,7 +167,7 @@ const CHARACTER_ABILITY_RULES={
  },
  '105':{
   activeSkills:[{key:'active',label:"浮遊魔法",cooldown:3,effects:[{type:'modify_stat',target:'self',stat:'move',value:2,duration:'turn'}]}],
-  controls:[{key:'人形制作',type:'number',min:0,max:7,iconAtMax:'人形完成'},{key:'親友を守る',type:'toggle'}],
-  modifiers:[{target:'damageReduce',formula:'fixed',value:1,when:{key:'親友を守る',equals:1}}]
+  controls:[{key:'人形制作',type:'number',min:0,max:7,iconAtMax:'人形完成'},{key:'親友を守る',type:'toggle',requiresParty:'106'}],
+  modifiers:[{target:'damageReduce',formula:'fixed',value:1,when:{key:'親友を守る',equals:1,partyCharacterId:'106'}}]
  },
 };

@@ -1672,3 +1672,6 @@ tbody th {
 body:not(.mobile-ui) .has-source-inputs #selected-character-skill{height:24px;padding:1px 6px;font-size:12px}
 body:not(.mobile-ui) .has-source-inputs #skill-source-inputs{height:24px;align-items:center}
 body:not(.mobile-ui) .has-source-inputs .skill-source-input input{height:24px}
+
+.condition-icon.support-atk{border:2px solid #c33}
+.condition-icon.support-def{border:2px solid #2673c9}
