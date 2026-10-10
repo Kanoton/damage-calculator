@@ -1,6 +1,6 @@
 # Development Handoff
 
-Last updated: 2026-10-09
+Last updated: 2026-10-10
 
 This is the durable handoff for continuing development, especially `07_skill`. On a new chat or machine, read this file, current `main`, and recent PRs before changing code.
 
@@ -434,3 +434,15 @@ This section supersedes older manual-only CT and placeholder-control notes above
 - HP icons now decrement on primary click and increment on contextmenu for self, all PT slots, and monster roster. Other statistics retain their directions. Mobile plus/minus routes HP events in the reversed direction, preserving the explicit meaning of its buttons. Direct numeric entry and HP clamping/defeat/Undo remain shared.
 - Pandaman カウンター攻撃 is a nonnegative stack counter using UT_Buff_Counter.png; このターンに受けたダメージ uses UT_Buff_SangXinBingKuang.png. Counter >0 keeps the existing received-damage ATK bonus once, without multiplying by stacks. Acquisition, consumption and damage entry remain manual; no new lifecycle inference.
 - Checkpoint:a6c296f68e7a216d0e1f865978d6c19d59a2eacb; branch codex/07-hp-counter. 08 unchanged.
+
+
+## 07 Teru persistent inputs / pursuit controls (2026-10-10)
+
+- Base: latest main `e5a99980137844f90a0b9c3be01ff08786a75c7d` (PR #186). New branch `codex/07-teru-controls-20261010`; old `codex/07-teru-follow-up` was inspected only as reference, not merged. 08 is untouched.
+- Current main already had no 攻守増加ストック control. Possession instead prompted for ally ATK/DEF and resolved ceil(source/2) into activeEffects. Those prompts are now persistent Attack/Defense icon inputs beside Skill, stored in self numbers under the same 三神憑依対象攻撃力/防御力 keys. Edits do not mutate the active snapshot; casting replaces it and next Teru turn clears it. Editing inputs and self pursuit mode/stack values now records Undo.
+- Self 狐光追加攻撃 remains necessary: it switches main calculation to 憑依先の戦闘ATK while Teru's own ATK supplies the independent pursuit. Visible label is 憑依先の戦闘＋狐光追撃 with instructions; keep off for Teru's own ordinary battle. No automatic damage, Foxfire grant/consumption or hand tracking added. Existing explicit pursuit battle-end consumption remains.
+- PT controls are received-effect inputs on the selected self, NOT the PT roster member's ATK/HP state. PTテル憑依 enables pursuit; PTテル攻撃力 supplies pursuit ATK only and is now a standalone Attack icon numeric input; PTテル狐光 is the sole numeric stack control. Removing the donor preserves received values/controls; changing self preserves each character's independent self numbers. Re-registering the PT donor does not infer or overwrite these numbers.
+- Pursuit calculation is unchanged: pre-consumption Foxfire, main-hit survival gate, dice-free follow-up, minimum base one with independent target modifiers/reduction, explicit Foxfire -1 and Undo.
+- Changed: 07 index.html, js/character.js, style.css; tests/07-skill.spec.js, wide-tests/07-wide.spec.js, mobile-tests/07-mobile.spec.js and this handoff. Later port only these Teru changes to 08 while preserving reader bridges.
+- Local syntax: all 20 scripts individually and concatenated order passed; git diff --check passed. Local Playwright execution attempted for Teru and 06b/07, blocked at browser launch (no browser executable). Browser download failed with empty/invalid ZIP in this environment; npm ci also cannot be used because this repository has no lockfile. Existing hosted workflows use npm install. Browser assertions, screenshots, file:// and real touch behavior are pending hosted CI/manual verification at this checkpoint; do not claim local browser success.
+- Added focused regressions for persistent source values, snapshot replacement, source/mode Undo, independent PT attack input, donor removal, self switching, file://, wide/mobile input bounds and screenshots. Existing HP direction, Pandaman, tabs and pursuit tests retained.

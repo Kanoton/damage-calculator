@@ -936,7 +936,8 @@ test('07 skill: Papara active skill forces half-HP attack bonus until turn end',
 test('07 skill: Teru possession rounds up, survives turn end and expires at explicit next turn start', async ({ page }) => {
  await page.goto('/07_skill/');await selectCharacter(page,'23');
  const atk=page.locator('#selected-character-atk'),def=page.locator('#selected-character-def');const beforeAtk=Number(await atk.inputValue()),beforeDef=Number(await def.inputValue());
- let dialogIndex=0;page.on('dialog',async dialog=>{await dialog.accept(dialogIndex++===0?'5':'3');});
+ page.on('dialog',()=>{throw new Error('Teru must not open a stat prompt');});
+ for(const [label,value] of [['憑依する味方の攻撃力','5'],['憑依する味方の防御力','3']]){await page.getByLabel(label,{exact:true}).fill(value);await page.getByLabel(label,{exact:true}).dispatchEvent('change');}
  await page.getByRole('button',{name:'三神憑依を発動'}).click();
  await expect(atk).toHaveValue(String(beforeAtk+3));await expect(def).toHaveValue(String(beforeDef+2));
  await page.locator('#turn-end').click();await expect(atk).toHaveValue(String(beforeAtk+3));await expect(def).toHaveValue(String(beforeDef+2));
@@ -1068,4 +1069,39 @@ test('07 skill: HP icons decrement on click and increment on right click for sel
  await icon.click();await expect(hp).toHaveValue(String(initial-1));await icon.click({button:'right'});await expect(hp).toHaveValue(String(initial));await icon.click({button:'right'});await expect(hp).toHaveValue(String(initial));
  const instanceId=await page.locator('#map-roster-list .roster-card').first().getAttribute('data-instance-id');const card=page.locator('#map-roster-list .roster-card[data-instance-id="'+instanceId+'"]'),enemyHp=card.locator('input[aria-label$="の残りHP"]'),enemyIcon=card.getByRole('button',{name:/残りHPを減らす$/}),before=Number(await enemyHp.inputValue());
  await enemyIcon.click();await expect(enemyHp).toHaveValue(String(before-1));await page.locator('#roster-undo').click();await expect(enemyHp).toHaveValue(String(before));await enemyIcon.click({button:'right'});await expect(enemyHp).toHaveValue(String(before+1));await enemyHp.fill('1');await enemyHp.dispatchEvent('change');await enemyIcon.click();await expect(enemyHp).toHaveValue('0');await expect(card).toHaveClass(/defeated/);await page.locator('#roster-undo').click();await expect(enemyHp).toHaveValue('1');await expect(card).not.toHaveClass(/defeated/);
+});
+
+
+test('07 Teru: persistent source stats replace snapshots, retain inputs and undo edits',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'23');
+ const source=page.getByLabel('憑依する味方の攻撃力',{exact:true}),def=page.getByLabel('憑依する味方の防御力',{exact:true});
+ await expect(source).toBeVisible();await expect(source.locator('..').locator('img')).toHaveAttribute('src','../images/UT_Buff/Attack.png');
+ const set=async(field,value)=>{await field.fill(value);await field.dispatchEvent('change');};
+ await set(source,'5');await set(def,'3');await page.getByRole('button',{name:'三神憑依を発動'}).click();
+ await expect(page.locator('#selected-character-atk')).toHaveValue('5');await expect(page.locator('#selected-character-def')).toHaveValue('3');
+ await set(source,'9');await expect(page.locator('#selected-character-atk')).toHaveValue('5');
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();await expect(source).toHaveValue('5');
+ await set(source,'7');for(let i=0;i<3;i++)await page.locator('#selected-character-ct').click();await page.getByRole('button',{name:'三神憑依を発動'}).click();
+ await expect(page.locator('#selected-character-atk')).toHaveValue('6');await expect(page.locator('#selected-character-def')).toHaveValue('3');
+ await page.locator('#roster-undo').click();await expect(page.locator('#selected-character-atk')).toHaveValue('5');await expect(source).toHaveValue('7');
+ await selectCharacter(page,'1');await expect(source).toBeHidden();await selectCharacter(page,'23');await expect(source).toHaveValue('7');
+ await page.getByRole('button',{name:/^狐光追加攻撃：/}).click();await expect(page.locator('#attackPower1')).toHaveValue('0');await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();await expect(page.locator('#attackPower1')).toHaveValue('5');
+});
+
+test('07 Teru: PT attack is independent of Foxfire, donor removal and self changes retain received state',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'1');await registerSupport(page,'23');
+ const attack=page.getByLabel('PTテル攻撃力の数',{exact:true}),fox=page.getByLabel('PTテル狐光の数',{exact:true});
+ await expect(page.getByRole('button',{name:'PTテル攻撃力を増やす',exact:true})).toHaveCount(0);
+ await expect(attack.locator('..').locator('img')).toHaveAttribute('src','../images/UT_Buff/Attack.png');
+ const base=await page.locator('#selected-character-atk').inputValue();await attack.fill('8');await attack.dispatchEvent('change');await fox.fill('3');await fox.dispatchEvent('change');await page.getByRole('button',{name:/^PTテル憑依：/}).click();
+ await expect(page.locator('#selected-character-atk')).toHaveValue(base);expect((await page.evaluate(()=>getTeruFollowUp())).attack).toBe(8);
+ await page.locator('#selected-party-tab').click();await page.locator('.character-select[data-id="23"]').click({button:'right'});await page.locator('#selected-self-tab').click();expect(await page.evaluate(()=>getPartyCharacterIds())).not.toContain('23');await expect(attack).toHaveValue('8');await expect(fox).toHaveValue('3');
+ await page.locator('.role-tab[data-role="attack"]').click();await page.getByRole('button',{name:'追撃後の戦闘終了（狐光−1）'}).click();await expect(fox).toHaveValue('2');
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();await expect(fox).toHaveValue('3');
+ await selectCharacter(page,'2');await expect(attack).toHaveCount(0);await selectCharacter(page,'1');await expect(attack).toHaveValue('8');await expect(fox).toHaveValue('3');
+});
+
+test('07 Teru: file protocol source inputs activate without a popup',async({page})=>{
+ const path=require('path'),{pathToFileURL}=require('url');await page.goto(pathToFileURL(path.resolve(__dirname,'../07_skill/index.html')).href);await selectCharacter(page,'23');
+ const input=page.getByLabel('憑依する味方の攻撃力',{exact:true});await input.fill('5');await input.dispatchEvent('change');await page.getByRole('button',{name:'三神憑依を発動'}).click();await expect(page.locator('#selected-character-atk')).toHaveValue('5');
 });

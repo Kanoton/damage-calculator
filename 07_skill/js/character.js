@@ -185,6 +185,19 @@
   window.rememberCharacterSkillActivation?.();const key=String(selectedCharacter.id)==='23'?'狐光':'PTテル狐光';
   state().numbers[key]=effect.stacks-1;renderConditions();updateStats();
  };
+ // Stat inputs are deliberately separate from clickable stack icons.
+ function createTeruStatInput(key,label,stat){
+  const item=document.createElement('label');item.className='teru-stat-input';item.title=label;
+  const icon=document.createElement('img');icon.src='../images/UT_Buff/'+(stat==='atk'?'Attack.png':'Defense.png');icon.alt='';
+  const input=document.createElement('input');input.type='number';input.min='0';input.step='1';input.inputMode='numeric';input.setAttribute('aria-label',label);input.dataset.teruKey=key;input.value=abilityControlValue(key);
+  input.addEventListener('change',()=>{const value=Number(input.value);const next=Number.isFinite(value)?Math.max(0,Math.floor(value)):0;if(next!==abilityControlValue(key)){window.rememberCharacterSkillActivation?.();state().numbers[key]=next;}input.value=next;updateStats();});
+  item.append(icon,input);return item;
+ }
+ function renderTeruSkillInputs(){
+  const container=document.getElementById('teru-skill-inputs');container.replaceChildren();container.hidden=String(selectedCharacter.id)!=='23';
+  if(container.hidden)return;
+  container.append(createTeruStatInput('三神憑依対象攻撃力','憑依する味方の攻撃力','atk'),createTeruStatInput('三神憑依対象防御力','憑依する味方の防御力','def'));
+ }
  function renderTeruSupport(){
   const self=String(selectedCharacter.id)==='23';
   if(!self&&(partySlots.some(id=>String(id)==='23')||abilityControlValue('PTテル憑依')||abilityControlValue('PTテル狐光')||abilityControlValue('PTテル攻撃力'))){
@@ -192,8 +205,9 @@
    const toggle=createCharacterAbilityToggleView(key,active,makeIcon('狐光'),()=>{window.rememberCharacterSkillActivation?.();state().numbers[key]=active?0:1;renderConditions();updateStats();});
    toggle.title='自身がテルの憑依を受けた時にオン。自身の次のターン終了時に手動でオフ（敵ターンの反撃まで保持）';conditionsBox.append(toggle);
    for(const key of ['PTテル攻撃力','PTテル狐光']){
+    if(key==='PTテル攻撃力'){const input=createTeruStatInput(key,'PTテル攻撃力の数','atk');input.title='憑依による上昇を含むテルの表示ATK。狐光は含めない。自キャラのATKには加算しません';conditionsBox.append(input);continue;}
     const view=createConditionNumberView(key,abilityControlValue(key),makeIcon('狐光'));
-    view.item.title=key==='PTテル攻撃力'?'憑依による上昇を含むテルの表示ATK。追撃時限定の狐光は含めない':'ゲームで確認した狐光。カードの所持・使用は管理しません';
+    view.item.title='ゲームで確認した狐光。カードの所持・使用は管理しません';
     const change=value=>{const next=Math.max(0,Math.floor(Number(value)||0));if(next===abilityControlValue(key))return;window.rememberCharacterSkillActivation?.();state().numbers[key]=next;view.input.value=next;updateStats();};
     view.button.addEventListener('click',()=>change(abilityControlValue(key)+1));view.button.addEventListener('contextmenu',e=>{e.preventDefault();change(abilityControlValue(key)-1);});view.input.addEventListener('change',()=>change(view.input.value));conditionsBox.append(view.item);
    }
@@ -205,6 +219,7 @@
  }
  function renderConditions(){
   conditionsBox.replaceChildren();
+  renderTeruSkillInputs();
   renderPartySupport();
   renderTeruSupport();
   const ownedRules=activeRules();
@@ -230,7 +245,9 @@
   for(const control of abilityRules()?.controls||[]){
    if(control.type==='toggle'){
     const active=Boolean(abilityControlValue(control.key));
-    conditionsBox.append(createCharacterAbilityToggleView(control.key,active,makeIcon(control.key),()=>{if(String(selectedCharacter.id)==='6')window.rememberCharacterSkillActivation?.();state().numbers[control.key]=active?0:1;renderConditions();updateStats();}));
+    const toggle=createCharacterAbilityToggleView(control.key,active,makeIcon(control.key),()=>{if(['6','23'].includes(String(selectedCharacter.id)))window.rememberCharacterSkillActivation?.();state().numbers[control.key]=active?0:1;renderConditions();updateStats();});
+    if(control.key==='狐光追加攻撃'){toggle.classList.add('teru-battle-toggle');toggle.textContent='憑依先の戦闘＋狐光追撃：'+(active?'オン':'オフ');toggle.setAttribute('aria-label','狐光追加攻撃：'+(active?'オン':'オフ')+'（憑依先の戦闘を計算）');toggle.title='オン：主攻撃に憑依先の戦闘ATK、追撃にテル自身のATKを使用。テル自身の通常攻撃はオフ。計算だけでは狐光を消費せず、実際に追撃した後に戦闘終了ボタンを押してください';}
+    conditionsBox.append(toggle);
    }else if(control.type==='choice'){
     const options=control.options||[],current=abilityControlValue(control.key),option=options.find(item=>Number(item.value)===current)||options[0];
     const change=delta=>{const index=Math.max(0,options.indexOf(option)),next=control.cycle===false?Math.max(0,Math.min(options.length-1,index+delta)):(index+delta+options.length)%options.length;state().numbers[control.key]=Number(options[next]?.value)||0;renderConditions();updateStats();};
@@ -245,7 +262,7 @@
     view.input.disabled=forced;view.button.disabled=forced;
     view.input.min=String(Number(control.min)||0);
     if(effectiveMax!==undefined)view.input.max=String(effectiveMax);
-    const setValue=value=>{if(forced)return;const min=Number(control.min)||0,max=effectiveMax===undefined?Infinity:effectiveMax;const next=Math.max(min,Math.min(max,Math.floor(Number(value)||0)));state().numbers[control.key]=control.key==='ファン'?Math.max(0,next-(window.getRosterFanCount?.()||0)):next;view.input.value=abilityControlValue(control.key);if(control.iconAtMax){const nextKey=state().numbers[control.key]>=max?control.iconAtMax:control.key;view.button.replaceChildren(makeIcon(nextKey));view.item.title=nextKey+'：左クリックで＋1、右クリックで−1';}updateStats();};
+    const setValue=value=>{if(forced)return;const min=Number(control.min)||0,max=effectiveMax===undefined?Infinity:effectiveMax;const next=Math.max(min,Math.min(max,Math.floor(Number(value)||0)));if(String(selectedCharacter.id)==='23'&&next!==abilityControlValue(control.key))window.rememberCharacterSkillActivation?.();state().numbers[control.key]=control.key==='ファン'?Math.max(0,next-(window.getRosterFanCount?.()||0)):next;view.input.value=abilityControlValue(control.key);if(control.iconAtMax){const nextKey=state().numbers[control.key]>=max?control.iconAtMax:control.key;view.button.replaceChildren(makeIcon(nextKey));view.item.title=nextKey+'：左クリックで＋1、右クリックで−1';}updateStats();};
     view.button.addEventListener('click',()=>setValue(abilityControlValue(control.key)+1));
     view.button.addEventListener('contextmenu',event=>{event.preventDefault();setValue(abilityControlValue(control.key)-1);});
     view.input.addEventListener('change',()=>setValue(view.input.value));conditionsBox.append(view.item);
@@ -505,7 +522,7 @@
  ctButton.addEventListener('contextmenu',event=>{event.preventDefault();changeActiveSkillCooldown(1);});
  skillButton.addEventListener('click',()=>{
   const skill=activeSkill();if(!skill||activeSkillCooldown(skill)>0)return;
-  if(skill.inputStats){
+  if(skill.inputStats&&String(selectedCharacter.id)!=='23'){
    const values={};
    for(const input of skill.inputStats){const raw=window.prompt(input.label,String(abilityControlValue(input.key)));if(raw===null)return;const value=Number(raw);if(!raw.trim()||!Number.isFinite(value)||value<(input.min??0)||(input.max!==undefined&&value>input.max)||(input.integer&&!Number.isSafeInteger(value)))return;values[input.key]=value;}
    Object.assign(state().numbers,values);

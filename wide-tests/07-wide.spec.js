@@ -66,3 +66,15 @@ test('character toolbar: hover is opt-in and PT guidance shares tab row',async({
  await page.locator('#selected-party-tab').click();await expect(page.locator('#character-list-status')).toContainText('PT登録');const status=await page.locator('#character-list-status').boundingBox(),tab=await page.locator('#character-chip-tab').boundingBox();expect(status.x).toBeGreaterThan(tab.x+tab.width);expect(status.y).toBeLessThan(tab.y+tab.height);
  const gaps=await page.locator('.role-tabs').evaluate(e=>[...e.children].slice(1).map((c,i)=>c.getBoundingClientRect().left-e.children[i].getBoundingClientRect().right));expect(gaps.every(g=>Math.abs(g)<1)).toBe(true);await info.attach('character-toolbar-pt',{body:await page.screenshot(),contentType:'image/png'});
 });
+
+
+test('Teru: persistent possession inputs fit and keep a separate snapshot',async({page},info)=>{
+ await page.goto('/07_skill/');await select(page,'23');
+ const source=page.getByLabel('憑依する味方の攻撃力',{exact:true}),def=page.getByLabel('憑依する味方の防御力',{exact:true});
+ await expect(source).toBeVisible();await expect(def).toBeVisible();await source.fill('5');await source.dispatchEvent('change');await def.fill('3');await def.dispatchEvent('change');await page.getByRole('button',{name:'三神憑依を発動'}).click();await expect(page.locator('#selected-character-atk')).toHaveValue('5');
+ await source.fill('9');await source.dispatchEvent('change');await expect(page.locator('#selected-character-atk')).toHaveValue('5');
+ const boxes=await page.evaluate(()=>{const rect=s=>{const r=document.querySelector(s).getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom};};return {inputs:rect('#teru-skill-inputs'),skill:rect('#selected-character-skill'),ct:rect('#selected-character-ct'),frame:rect('#selected-character'),overflow:document.documentElement.scrollWidth>innerWidth+1};});
+ expect(boxes.overflow).toBe(false);expect(boxes.inputs.right).toBeLessThanOrEqual(boxes.frame.right);expect(boxes.inputs.bottom).toBeLessThanOrEqual(boxes.frame.bottom);
+ for(const key of ['skill','ct'])expect(boxes.inputs.bottom<=boxes[key].y||boxes.inputs.y>=boxes[key].bottom||boxes.inputs.right<=boxes[key].x||boxes.inputs.x>=boxes[key].right).toBe(true);
+ await info.attach('teru-source-inputs',{body:await page.screenshot(),contentType:'image/png'});
+});
