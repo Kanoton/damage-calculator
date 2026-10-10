@@ -57,7 +57,7 @@ test('07 assets: canonical icons, chips, hero cards and monster artwork decode i
 test('07 rendered icons: all characters and registered supports load their assigned images',async({page})=>{
  await start(page);const ids=readRows('csv/character_stats.csv').map(r=>r.id);
  // Two controls intentionally have text substitutes until the user supplies their icons.
- const allowed=new Set(['相手より多い手札','狐光追加攻撃']);
+ const allowed=new Set(['相手より多い手札']);
  for(const id of ids){
   await page.locator('#selected-party-tab').click();await page.locator('#character-list-tab').click();await page.locator('#selected-self-tab').click();await page.locator(`.character-select[data-id="${id}"]`).click();await page.locator('#selected-self-tab').click();
   const bad=await page.locator('#selected-character-conditions').evaluate(async root=>{

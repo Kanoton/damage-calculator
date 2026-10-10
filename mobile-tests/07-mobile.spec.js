@@ -47,7 +47,7 @@ test('phone: monster HP changes once, modal cancellation is harmless and Undo re
 test('Teru: direct stat increase inputs fit and update immediately',async({page},info)=>{
  await start(page,'23');
  const source=page.getByLabel('憑依による攻撃力上昇',{exact:true}),def=page.getByLabel('憑依による防御力上昇',{exact:true});
- await expect(source).toBeVisible();await expect(def).toBeVisible();await source.fill('5');await source.dispatchEvent('change');await def.fill('3');await def.dispatchEvent('change');await page.getByRole('button',{name:'三神憑依を発動'}).click();await expect(page.locator('#selected-character-atk')).toHaveValue('7');
+ await expect(source).toBeVisible();await expect(def).toBeVisible();await source.fill('5');await source.dispatchEvent('change');await def.fill('3');await page.getByRole('button',{name:'三神憑依を発動'}).click();await expect(page.locator('#selected-character-atk')).toHaveValue('7');
  await source.fill('9');await source.dispatchEvent('change');await expect(page.locator('#selected-character-atk')).toHaveValue('11');
  const boxes=await page.evaluate(()=>{const rect=s=>{const r=document.querySelector(s).getBoundingClientRect();return {x:r.x,y:r.y,right:r.right,bottom:r.bottom};};return {inputs:rect('#teru-skill-inputs'),skill:rect('#selected-character-skill'),ct:rect('#selected-character-ct'),stats:rect('.selected-character-stats'),frame:rect('#selected-character'),overflow:document.documentElement.scrollWidth>innerWidth+1};});
  expect(boxes.overflow).toBe(false);expect(boxes.inputs.right).toBeLessThanOrEqual(boxes.frame.right);expect(boxes.inputs.bottom).toBeLessThanOrEqual(boxes.frame.bottom);

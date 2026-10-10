@@ -1096,12 +1096,14 @@ test('07 Teru: pursuit directly follows PT ATK and stops when the donor is remov
  const fox=page.getByLabel('PTテル狐光の数',{exact:true}),base=await page.locator('#selected-character-atk').inputValue();
  await setTeruPartyAttack(page,8);await fox.fill('3');await fox.dispatchEvent('change');await page.getByRole('button',{name:/^PTテル憑依：/}).click();
  await expect(page.locator('#selected-character-atk')).toHaveValue(base);expect((await page.evaluate(()=>getTeruFollowUp())).attack).toBe(8);
- await setTeruPartyAttack(page,10);expect((await page.evaluate(()=>getTeruFollowUp())).attack).toBe(10);
+ await page.locator('.role-tab[data-role="attack"]').click();await page.locator('#defensePower1').fill('4');await page.locator('#defensePower1').dispatchEvent('input');await expect(page.locator('.teru-follow-up-summary')).toContainText('7ダメージ');
+ await setTeruPartyAttack(page,10);expect((await page.evaluate(()=>getTeruFollowUp())).attack).toBe(10);await expect(page.locator('.teru-follow-up-summary')).toContainText('9ダメージ');
  await page.locator('.role-tab[data-role="attack"]').click();await page.getByRole('button',{name:'追撃後の戦闘終了（狐光−1）'}).click();await expect(fox).toHaveValue('2');
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();await expect(fox).toHaveValue('3');
  await page.locator('#selected-party-tab').click();await page.locator('.character-select[data-id="23"]').click({button:'right'});await page.locator('#selected-self-tab').click();expect(await page.evaluate(()=>getTeruFollowUp())).toBeNull();await page.evaluate(()=>consumeTeruFollowUp());await expect(fox).toHaveValue('3');
  await registerSupport(page,'23');expect((await page.evaluate(()=>getTeruFollowUp())).attack).toBe(2);
- await selectCharacter(page,'2');await expect(fox).toHaveCount(0);await selectCharacter(page,'1');await expect(fox).toHaveValue('3');expect(await page.evaluate(()=>getTeruFollowUp())).toBeNull();
+ await selectCharacter(page,'2');await expect(fox).toHaveValue('0');expect((await page.evaluate(()=>getTeruFollowUp())).enabled).toBe(false);await selectCharacter(page,'1');await expect(fox).toHaveValue('3');expect((await page.evaluate(()=>getTeruFollowUp())).attack).toBe(2);
+ await selectCharacter(page,'23');expect(await page.evaluate(()=>getTeruFollowUp())).toBeNull();await selectCharacter(page,'1');await expect(fox).toHaveValue('3');expect(await page.evaluate(()=>getTeruFollowUp())).toBeNull();
 });
 
 test('07 Teru: file protocol source inputs activate without a popup',async({page})=>{
