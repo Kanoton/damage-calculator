@@ -28,10 +28,10 @@ test('07 skill: Sherry toggles multiple targets and applies damage once only aft
  await target(0).click();await target(1).click();
  await expect(target(0)).toHaveAttribute('aria-pressed','true');await expect(cards.nth(0)).toHaveClass(/is-skill-target-selected/);
  await target(0).click();await expect(target(0)).toHaveAttribute('aria-pressed','false');
- await target(2).focus();await target(2).press('Enter');
+ await target(2).click();
  for(let i=0;i<3;i++)await expect(hp(i)).toHaveValue('5');await expect(ct).toHaveText(/^CT 0 \/ \d+$/);
  await expect(page.locator('#character-skill-target-message')).toContainText('2体選択中');
- await ok.click();await expect(page.locator('#character-skill-target-banner')).toBeHidden();
+ await target(2).press('Enter');await expect(page.locator('#character-skill-target-banner')).toBeHidden();
  await expect(hp(0)).toHaveValue('5');await expect(hp(1)).toHaveValue('3');await expect(hp(2)).toHaveValue('3');
  await expect(ct).toHaveText(/^CT 2 \/ \d+$/);await expect(page.locator('.is-skill-target-selected')).toHaveCount(0);
  await ok.evaluate(button=>button.click());await expect(hp(1)).toHaveValue('3');
@@ -622,7 +622,8 @@ test('07 skill: affected characters expose active skill CT management; full scan
   await expect(skill).toBeVisible();
   await expect(ct).toHaveText('CT 0 / '+cooldown);
   await skill.click();
-  if(['9','13','14','16','17','24','26','27','28','106'].includes(id)){
+  if(id==='23')await page.getByRole('button',{name:'憑依を確定'}).click();
+  if(['9','13','14','17','24','27','28','106'].includes(id)){
    await expect(ct).toHaveText('CT 0 / '+cooldown);
    continue;
   }
@@ -635,16 +636,16 @@ test('07 skill: affected characters expose active skill CT management; full scan
 });
 
 
-test('07 skill: Jasmine prompts for dice and clears effects while CT counts down',async({page})=>{
+test('07 skill: Jasmine uses adjacent dice input and clears effects while CT counts down',async({page})=>{
  await page.goto('/07_skill/');await selectCharacter(page,'16');
  const skill=page.getByRole('button',{name:'オーバードライブを発動'}),ct=page.locator('#selected-character-ct');
  await page.locator('#selected-character-def').fill('5');await page.locator('#selected-character-def').dispatchEvent('change');
- page.once('dialog',dialog=>dialog.accept('9'));await skill.click();
+ await page.getByLabel('オーバードライブのダイスの出目',{exact:true}).fill('9');await skill.click();
  await expect(page.locator('#selected-character-move')).toHaveText('3');await expect(page.locator('#selected-character-def')).toHaveValue('4');await expect(ct).toHaveText('CT 4 / 4');
  await page.locator('#turn-end').click();await expect(page.locator('#selected-character-move')).toHaveText('0');await expect(page.locator('#selected-character-def')).toHaveValue('5');await expect(ct).toHaveText('CT 3 / 4');
  await page.locator('#roster-undo').click();await expect(ct).toHaveText('CT 4 / 4');await expect(page.locator('#selected-character-def')).toHaveValue('4');
  for(let i=0;i<4;i++)await page.locator('#turn-end').click();await expect(ct).toHaveText('CT 0 / 4');await expect(skill).toBeEnabled();
- page.once('dialog',dialog=>dialog.accept('10'));await skill.click();await expect(page.locator('#selected-character-atk')).toHaveValue('3');await expect(page.locator('#selected-character-def')).toHaveValue('2');
+ await page.getByLabel('オーバードライブのダイスの出目',{exact:true}).fill('10');await skill.click();await expect(page.locator('#selected-character-atk')).toHaveValue('3');await expect(page.locator('#selected-character-def')).toHaveValue('2');
  await page.locator('#turn-end').click();await expect(page.locator('#selected-character-atk')).toHaveValue('1');await expect(page.locator('#selected-character-def')).toHaveValue('5');
 });
 
@@ -653,8 +654,8 @@ test('07 skill: Jasmine canceled and invalid dice consume no CT and cumulative m
  const movement=page.getByLabel('累計移動ポイントの数');await movement.fill('26');await movement.dispatchEvent('change');
  await expect(page.locator('#selected-character-atk')).toHaveValue('2');await expect(page.locator('#selected-character-def')).toHaveValue('1');
  const skill=page.getByRole('button',{name:'オーバードライブを発動'});
- for(const value of [null,'','-1','1.5']){
-  page.once('dialog',dialog=>value===null?dialog.dismiss():dialog.accept(value));await skill.click();
+ for(const value of ['','-1','1.5']){
+  await page.getByLabel('オーバードライブのダイスの出目',{exact:true}).fill(value);await skill.click();
   await expect(page.locator('#selected-character-ct')).toHaveText('CT 0 / 4');await expect(page.locator('#selected-character-move')).toHaveText('0');
  }
  await expect(page.getByRole('button',{name:/オーバードライブ結果/})).toHaveCount(0);
@@ -811,8 +812,7 @@ test('07 skill: additional character stat skills modify parameters', async ({ pa
  await expect(page.locator('#selected-character-atk')).toHaveValue('4');
 
  await selectCharacter(page,'26');
- await expect(page.getByLabel('吸収した影の数')).toHaveCount(0);
- page.once('dialog',dialog=>dialog.accept('4'));
+ await page.getByLabel('吸収した影の数',{exact:true}).fill('4');
  await page.getByRole('button',{name:'暗影融合を発動'}).click();
  await expect(page.locator('#selected-character-atk')).toHaveValue('6');
  await page.locator('#turn-end').click();await expect(page.locator('#selected-character-atk')).toHaveValue('2');
@@ -937,16 +937,16 @@ test('07 skill: Papara active skill forces half-HP attack bonus until turn end',
  await page.locator('#turn-end').click();await expect(page.locator('#selected-character-atk')).toHaveValue('2');
 });
 
-test('07 skill: Teru rounded half stats reset at turn end and Undo restores them',async({page})=>{
+test('07 skill: Teru dialog commits rounded halves atomically, resets at turn end and Undo restores',async({page})=>{
  await page.goto('/07_skill/');await selectCharacter(page,'23');
  const atk=page.locator('#selected-character-atk'),def=page.locator('#selected-character-def');
  const beforeAtk=Number(await atk.inputValue()),beforeDef=Number(await def.inputValue());
- page.on('dialog',()=>{throw new Error('Teru must not open a stat prompt');});
- for(const [label,value] of [['憑依する味方の攻撃力','5'],['憑依する味方の防御力','3']]){await page.getByLabel(label,{exact:true}).fill(value);await page.getByLabel(label,{exact:true}).dispatchEvent('change');}
- await expect(atk).toHaveValue(String(beforeAtk+3));await expect(def).toHaveValue(String(beforeDef+2));
- await page.getByRole('button',{name:'三神憑依を発動'}).click();await expect(atk).toHaveValue(String(beforeAtk+3));
+ await page.getByRole('button',{name:'三神憑依を発動'}).click();
+ for(const [label,value] of [['憑依する味方の攻撃力','5'],['憑依する味方の防御力','3']])await page.getByLabel(label,{exact:true}).fill(value);
+ await expect(atk).toHaveValue(String(beforeAtk));await page.getByRole('button',{name:'憑依を確定'}).click();
+ await expect(atk).toHaveValue(String(beforeAtk+3));await expect(def).toHaveValue(String(beforeDef+2));await expect(page.locator('#teru-stat-dialog')).not.toBeVisible();
  await page.locator('#turn-end').click();await expect(atk).toHaveValue(String(beforeAtk));await expect(def).toHaveValue(String(beforeDef));
- await expect(page.getByLabel('憑依する味方の攻撃力',{exact:true})).toHaveValue('0');await expect(page.getByLabel('憑依する味方の防御力',{exact:true})).toHaveValue('0');
+ const values=await page.evaluate(()=>captureCharacterAbilityState().numbers);expect(values['三神憑依攻撃補正']).toBe(0);expect(values['三神憑依防御補正']).toBe(0);
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();await expect(atk).toHaveValue(String(beforeAtk+3));await expect(def).toHaveValue(String(beforeDef+2));
 });
 
@@ -1082,18 +1082,16 @@ test('07 skill: HP icons decrement on click and increment on right click for sel
 });
 
 
-test('07 Teru: source inputs replace rounded half increases without double addition and preserve ordinary manual stats',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'23');
- const source=page.getByLabel('憑依する味方の攻撃力',{exact:true}),def=page.getByLabel('憑依する味方の防御力',{exact:true});
- await expect(source.locator('..').locator('img')).toHaveAttribute('src','../images/UT_Buff/Attack.png');
- await page.locator('#selected-character-atk-button').click();
- await source.fill('5');await source.dispatchEvent('change');await def.fill('3');await def.dispatchEvent('change');
+test('07 Teru: dialog cancel preserves stats, recast replaces halves and Undo restores one cast',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'23');await page.locator('#selected-character-atk-button').click();
+ const skill=page.getByRole('button',{name:'三神憑依を発動'}),source=page.getByLabel('憑依する味方の攻撃力',{exact:true});
+ await skill.click();await source.fill('5');await page.getByLabel('憑依する味方の防御力',{exact:true}).fill('3');await page.getByRole('button',{name:'憑依を確定'}).click();
  await expect(page.locator('#selected-character-atk')).toHaveValue('6');await expect(page.locator('#selected-character-def')).toHaveValue('3');
- // A real blur followed by Skill must not cancel the WebKit click.
- await source.fill('9');await page.getByRole('button',{name:'三神憑依を発動'}).click();await expect(page.locator('#selected-character-ct')).toContainText('CT 3');await expect(page.locator('#selected-character-atk')).toHaveValue('8');
- await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();await expect(source).toHaveValue('9');await page.locator('#roster-undo').click();await expect(source).toHaveValue('5');await expect(page.locator('#selected-character-atk')).toHaveValue('6');
- await selectCharacter(page,'1');await expect(source).toBeHidden();await selectCharacter(page,'23');await expect(source).toHaveValue('5');
- await expect(page.getByLabel('狐光の数',{exact:true})).toHaveCount(1);await expect(page.getByLabel('三神憑依攻撃補正の数',{exact:true})).toHaveCount(0);await expect(page.getByLabel('三神憑依防御補正の数',{exact:true})).toHaveCount(0);await expect(page.getByLabel('憑依先の戦闘ATKの数',{exact:true})).toHaveCount(0);
+ for(let i=0;i<3;i++)await page.locator('#selected-character-ct').click();await skill.click();await source.fill('9');await page.getByRole('button',{name:'キャンセル',exact:true}).click();
+ await expect(page.locator('#selected-character-atk')).toHaveValue('6');await expect(page.locator('#selected-character-ct')).toContainText('CT 0');
+ await skill.click();await expect(source).toHaveValue('5');await source.fill('9');await page.getByRole('button',{name:'憑依を確定'}).click();await expect(page.locator('#selected-character-atk')).toHaveValue('8');
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();await expect(page.locator('#selected-character-atk')).toHaveValue('6');
+ await selectCharacter(page,'1');await selectCharacter(page,'23');await expect(page.getByLabel('狐光の数',{exact:true})).toHaveCount(1);expect(await page.evaluate(()=>getTeruFollowUp())).toBeNull();
  await page.locator('#turn-end').click();await expect(page.locator('#selected-character-atk')).toHaveValue('3');await expect(page.locator('#selected-character-def')).toHaveValue('1');
 });
 
@@ -1113,9 +1111,9 @@ test('07 Teru: pursuit directly follows PT ATK and stops when the donor is remov
  await selectCharacter(page,'23');expect(await page.evaluate(()=>getTeruFollowUp())).toBeNull();await selectCharacter(page,'1');await expect(fox).toHaveValue('3');expect(await page.evaluate(()=>getTeruFollowUp())).toBeNull();
 });
 
-test('07 Teru: file protocol source inputs activate without a popup',async({page})=>{
+test('07 Teru: file protocol stat dialog supports number pad',async({page})=>{
  const path=require('path'),{pathToFileURL}=require('url');await page.goto(pathToFileURL(path.resolve(__dirname,'../07_skill/index.html')).href);await selectCharacter(page,'23');
- const input=page.getByLabel('憑依する味方の攻撃力',{exact:true});await input.fill('5');await input.dispatchEvent('change');await page.getByRole('button',{name:'三神憑依を発動'}).click();await expect(page.locator('#selected-character-atk')).toHaveValue('5');
+ await page.getByRole('button',{name:'三神憑依を発動'}).click();const input=page.getByLabel('憑依する味方の攻撃力',{exact:true});await input.focus();await page.locator('#character-number-pad button[data-key="5"]').click();await page.locator('#character-number-pad button[data-key="確定"]').click();await page.getByRole('button',{name:'憑依を確定'}).click();await expect(page.locator('#selected-character-atk')).toHaveValue('5');
 });
 
 async function setTeruPartyAttack(page,value){
@@ -1183,4 +1181,52 @@ test('07 Z3000: a kill raising ATK from six to seven does not retroactively open
  const {target,hp}=await prepareZ3000Survivor(page);const instanceId=await target.evaluate(button=>button.closest('.roster-card').dataset.instanceId);await hp.fill('4');await hp.dispatchEvent('change');
  const kills=page.getByLabel('モンスター撃破数の数');await kills.fill('1');await kills.dispatchEvent('change');const atk=page.locator('#selected-character-atk');await atk.fill('6');await atk.dispatchEvent('change');
  await page.getByRole('button',{name:'引き寄せるを発動'}).click();await page.locator('.role-tab[data-role="map"]').click();await target.click();await expect(atk).toHaveValue('7');await expect(page.locator('.role-tab[data-role="map"]')).toHaveClass(/active/);await expect(page.locator('#map-roster-list .roster-card[data-instance-id="'+instanceId+'"]')).toHaveClass(/defeated/);
+});
+
+
+test('07 Ren: shield grants counter automatically but each off switch remains independent for self and PT',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'8');
+ for(const party of [false,true]){
+  if(party){await selectCharacter(page,'1');await registerSupport(page,'8');}
+  const shield=page.getByRole('button',{name:party?/^PTジュジュシールド：/:/^ジュジュシールド：/}),counter=page.getByRole('button',{name:/^反撃：/});
+  await shield.click();await expect(counter).toHaveAttribute('aria-pressed','true');await shield.click();await expect(counter).toHaveAttribute('aria-pressed','true');await counter.click();await expect(shield).toHaveAttribute('aria-pressed','false');
+  await shield.click();await counter.click();await expect(counter).toHaveAttribute('aria-pressed','false');await expect(shield).toHaveAttribute('aria-pressed','true');
+  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();await expect(counter).toHaveAttribute('aria-pressed','true');await page.locator('.role-tab.character-tab').click();
+ }
+});
+
+test('07 Misaki: skill branches on initial Sword Aura 2 versus 3 and Undo restores',async({page})=>{
+ const cards=await prepareSherryTargets(page);await selectCharacter(page,'14');const stacks=page.getByLabel('剣気の数');
+ for(const [before,after] of [[2,3],[3,1]]){
+  await stacks.fill(String(before));await stacks.dispatchEvent('change');await page.getByRole('button',{name:'桜裂空斬を発動'}).click();await page.locator('.role-tab[data-role="map"]').click();await cards.first().locator('.roster-select').click();await expect(stacks).toHaveValue(String(after));await page.locator('#roster-undo').click();await expect(stacks).toHaveValue(String(before));await page.locator('.role-tab.character-tab').click();
+ }
+});
+
+test('07 Nardis: skill adds three actual cards without automatic turn-end removal and Undo restores',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'15');const hand=page.getByLabel('手札枚数の数');await hand.fill('2');await hand.dispatchEvent('change');
+ await page.getByRole('button',{name:'クィーン プリビレッジを発動'}).click();await expect(hand).toHaveValue('5');await expect(page.locator('#selected-character-atk')).toHaveValue('4');await page.locator('#turn-end').click();await expect(hand).toHaveValue('5');
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();await page.locator('#roster-undo').click();await expect(hand).toHaveValue('2');
+});
+
+for(const [id,label,key,value] of [['16','オーバードライブのダイスの出目','オーバードライブ',10],['26','吸収した影の数','暗影融合',4]])test('07 skill adjacent number pad: '+id,async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,id);const input=page.getByLabel(label,{exact:true});await input.focus();for(const digit of String(value))await page.locator('#character-number-pad button[data-key="'+digit+'"]').click();await page.locator('#character-number-pad button[data-key="確定"]').click();await expect(input).toHaveValue(String(value));
+ const base=Number(await page.locator('#selected-character-atk').inputValue());await page.getByRole('button',{name:key+'を発動'}).click();await expect(page.locator('#selected-character-atk')).toHaveValue(String(base+(id==='16'?2:4)));await page.locator('#turn-end').click();await expect(page.locator('#selected-character-atk')).toHaveValue(String(base));
+});
+
+test('07 Luka: Enter confirms selected targets without toggling the focused monster',async({page})=>{
+ const cards=await prepareSherryTargets(page);await selectCharacter(page,'17');await page.getByRole('button',{name:'真夜の一閃を発動'}).click();await page.locator('.role-tab[data-role="map"]').click();const targets=cards.locator('.roster-select');await targets.nth(0).click();await targets.nth(1).click();await targets.nth(1).press('Enter');await expect(page.locator('#character-skill-target-banner')).toBeHidden();await expect(page.locator('#selected-character-ct')).toContainText('CT 3');await expect(cards.nth(2).locator('input[aria-label$="の残りHP"]')).toHaveValue('5');
+ await page.locator('#roster-undo').click();for(let i=0;i<3;i++)await expect(cards.nth(i).locator('input[aria-label$="の残りHP"]')).toHaveValue('5');
+});
+
+test('07 Bonnie: PT phase editor matches self controls and preserves received state and Undo',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'1');await registerSupport(page,'27');const phase=page.getByRole('button',{name:/^潜入調査：/});await expect(phase).toHaveAttribute('title',/フェーズ・ワン/);
+ for(let i=0;i<3;i++)await phase.click();await expect(phase).toHaveAttribute('title',/真相解明/);await phase.click();await expect(phase).toHaveAttribute('title',/真相解明/);await phase.click({button:'right'});await expect(phase).toHaveAttribute('title',/フェーズ・スリー/);
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();await expect(phase).toHaveAttribute('title',/真相解明/);await page.locator('.role-tab.character-tab').click();await page.locator('#selected-party-tab').click();await page.locator('.character-select[data-id="27"]').click({button:'right'});await page.locator('#selected-self-tab').click();await expect(phase).toHaveAttribute('title',/真相解明/);
+});
+
+test('07 Moses: two stacks make evade faces 3..6 equally likely in base and card-aware results',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'24');await page.getByLabel('精確無比の数').fill('2');await page.getByLabel('精確無比の数').dispatchEvent('change');await page.locator('.role-tab[data-role="defense"]').click();await page.getByRole('button',{name:'回避の表',exact:true}).click();
+ const mode=page.locator('.mode-content[data-role="defense"]');await expect(mode).toHaveAttribute('data-evade-minimum','3');for(const [id,value] of [['attackPower2',10],['hp2',1],['damageAdd2',0],['damageReduce2',0]]){await page.locator('#'+id).fill(String(value));await page.locator('#'+id).dispatchEvent('input');}
+ await expect(mode.locator('.result-rate')).toHaveText('62.50%');await expect(mode.locator('.future-result-rate')).toHaveText('62.50%');
+ const grid=await page.evaluate(()=>calculateDefenseDamageGrid(10,2,0,0,1,false,false,false,null,{evade:true,minimum:3}));expect(grid.totalCombinations).toBe(24);expect(grid.rows.every(row=>row.damages[0]===null&&row.damages[1]===null)).toBe(true);
 });

@@ -43,7 +43,7 @@ const CHARACTER_ABILITY_RULES={
   ]
  },
  '15':{
-  activeSkills:[{key:'active',label:"クィーン プリビレッジ",cooldown:3,effects:[]}],
+  activeSkills:[{key:'active',label:"クィーン プリビレッジ",cooldown:3,effects:[{type:'modify_control',key:'手札枚数',delta:3}]}],
   controls:[{key:'手札枚数',type:'number',min:0}],
   modifiers:[{target:'atk',formula:'per_stack',source:'手札枚数',sourceCap:3,value:1}]
  },
@@ -139,7 +139,7 @@ const CHARACTER_ABILITY_RULES={
  },
  '8':{
   activeSkills:[{key:'active',label:"子供の特権",cooldown:3,effects:[]}],
-  controls:[{key:'ジュジュシールド',type:'toggle'}],
+  controls:[{key:'ジュジュシールド',type:'toggle'},{key:'反撃',type:'toggle'}],
   modifiers:[{target:'damageReduce',formula:'fixed',value:99,when:{key:'ジュジュシールド',equals:1}}]
  },
  '11':{
