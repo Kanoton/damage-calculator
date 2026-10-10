@@ -83,3 +83,16 @@ for(const [id,label,skill,value] of [['16','オーバードライブのダイス
  const boxes=await page.evaluate(()=>{const rect=s=>{const r=document.querySelector(s).getBoundingClientRect();return{x:r.x,y:r.y,right:r.right,bottom:r.bottom};};return{field:rect('#skill-source-inputs'),skill:rect('#selected-character-skill'),stats:rect('.selected-character-stats'),frame:rect('#selected-character'),overflow:document.documentElement.scrollWidth>innerWidth+1};});expect(boxes.overflow).toBe(false);expect(boxes.field.right).toBeLessThanOrEqual(boxes.frame.right);expect(boxes.field.bottom).toBeLessThanOrEqual(boxes.frame.bottom);expect(boxes.field.right<=boxes.skill.x||boxes.field.x>=boxes.skill.right||boxes.field.bottom<=boxes.skill.y||boxes.field.y>=boxes.skill.bottom).toBe(true);expect(boxes.field.bottom<=boxes.stats.y||boxes.field.x>=boxes.stats.right||boxes.field.right<=boxes.stats.x).toBe(true);
  await info.attach('skill-source-'+id,{body:await page.screenshot(),contentType:'image/png'});
 });
+
+
+test('Rinrin: bounded passage dialog supports No, Undo and Yes target selection',async({page},info)=>{
+ await page.goto('/07_skill/');await select(page,'28');
+ const dialog=page.locator('#rinrin-area-dialog'),skill=page.locator('#selected-character-skill'),ct=page.locator('#selected-character-ct');
+ await skill.click();await expect(dialog).toBeVisible();
+ const box=await dialog.boundingBox(),viewport=page.viewportSize();expect(box.x).toBeGreaterThanOrEqual(0);expect(box.y).toBeGreaterThanOrEqual(0);expect(box.x+box.width).toBeLessThanOrEqual(viewport.width);expect(box.y+box.height).toBeLessThanOrEqual(viewport.height);
+ await info.attach('rinrin-passage',{body:await page.screenshot(),contentType:'image/png'});
+ await dialog.getByRole('button',{name:'No',exact:true}).click();await expect(ct).toHaveText('CT 3 / 3');await expect(page.locator('#selected-character-atk')).toHaveValue('2');
+ await page.locator('#roster-undo').click();await expect(ct).toHaveText('CT 0 / 3');
+ await skill.click();await dialog.getByRole('button',{name:'Yes',exact:true}).click();await expect(page.locator('#character-skill-target-banner')).toBeVisible();
+ await page.locator('#character-skill-target-cancel').click();await expect(ct).toHaveText('CT 0 / 3');
+});

@@ -79,7 +79,7 @@ test('07 skill: Rinrin buffs herself once for multiple targets and expires only 
  const defense=i=>targets[i].locator('input[aria-label$="の防御力"]');
  for(let i=0;i<3;i++){await defense(i).fill(String(5-i));await defense(i).dispatchEvent('change');}
  const atk=page.locator('#selected-character-atk'),ct=page.locator('#selected-character-ct'),ok=page.locator('#character-skill-target-ok');
- await page.getByRole('button',{name:'インターセプトタックルを発動'}).click();
+ await page.getByRole('button',{name:'インターセプトタックルを発動'}).click();await page.locator('#rinrin-area-dialog').getByRole('button',{name:'Yes',exact:true}).click();
  await expect(ok).toBeDisabled();await page.locator('.role-tab[data-role="map"]').click();
  for(const target of targets)await target.locator('.roster-select').click();
  await targets[2].locator('.roster-select').click();
@@ -105,11 +105,11 @@ test('07 skill: Rinrin cancellation and one undo preserve all targets and a sing
  const defense=cards.first().locator('input[aria-label$="の防御力"]');
  await defense.fill('5');await defense.dispatchEvent('change');
  const skill=page.getByRole('button',{name:'インターセプトタックルを発動'}),atk=page.locator('#selected-character-atk'),ct=page.locator('#selected-character-ct');
- await skill.click();await page.locator('.role-tab[data-role="map"]').click();
+ await skill.click();await page.locator('#rinrin-area-dialog').getByRole('button',{name:'Yes',exact:true}).click();await page.locator('.role-tab[data-role="map"]').click();
  await cards.nth(0).locator('.roster-select').click();await cards.nth(1).locator('.roster-select').click();
  await page.locator('#character-skill-target-cancel').click();
  await expect(defense).toHaveValue('5');await expect(atk).toHaveValue('2');await expect(ct).toHaveText(/^CT 0 \/ \d+$/);
- await skill.click();await expect(page.locator('#character-skill-target-ok')).toBeDisabled();
+ await skill.click();await page.locator('#rinrin-area-dialog').getByRole('button',{name:'Yes',exact:true}).click();await expect(page.locator('#character-skill-target-ok')).toBeDisabled();
  await cards.nth(0).locator('.roster-select').click();await cards.nth(1).locator('.roster-select').click();
  await page.locator('#character-skill-target-ok').click();await expect(atk).toHaveValue('4');
  await page.locator('#roster-undo').click();
@@ -117,6 +117,34 @@ test('07 skill: Rinrin cancellation and one undo preserve all targets and a sing
  await page.locator('#turn-end').click();await page.locator('#turn-end').click();await expect(atk).toHaveValue('2');await expect(defense).toHaveValue('5');
 });
 
+
+test('07 skill: Rinrin asks first, No consumes only CT and cancel or switching never casts',async({page})=>{
+ const cards=await prepareSherryTargets(page);await selectCharacter(page,'28');
+ const dialog=page.locator('#rinrin-area-dialog'),skill=page.locator('#selected-character-skill'),ct=page.locator('#selected-character-ct'),atk=page.locator('#selected-character-atk');
+ const before=await cards.first().locator('input[aria-label$="の防御力"]').inputValue();
+ await expect(page.getByRole('button',{name:/エリア拒止通過/})).toHaveCount(0);
+ await skill.click();await expect(dialog).toBeVisible();await expect(page.locator('#character-skill-target-banner')).toBeHidden();
+ await dialog.getByRole('button',{name:'キャンセル',exact:true}).click();await expect(ct).toHaveText('CT 0 / 3');
+ await skill.click();await page.keyboard.press('Escape');await expect(dialog).toBeHidden();await expect(ct).toHaveText('CT 0 / 3');
+ await skill.click();await dialog.getByRole('button',{name:'No',exact:true}).click();
+ await expect(ct).toHaveText('CT 3 / 3');await expect(atk).toHaveValue('2');await expect(cards.first().locator('input[aria-label$="の防御力"]')).toHaveValue(before);
+ await page.locator('#roster-undo').click();await expect(ct).toHaveText('CT 0 / 3');
+ await skill.click();await page.evaluate(()=>document.querySelector('.character-select[data-id="1"]').click());await expect(dialog).toBeHidden();
+ await selectCharacter(page,'28');await expect(ct).toHaveText('CT 0 / 3');
+});
+
+test('07 skill: Sykes clears all erosion at turn end even when hidden, including defeated monsters, with Undo',async({page})=>{
+ const cards=await prepareSherryTargets(page);await selectCharacter(page,'29');await page.locator('.role-tab[data-role="map"]').click();
+ const ids=await Promise.all([0,1,2].map(i=>cards.nth(i).getAttribute('data-instance-id'))),targets=ids.map(id=>page.locator(`.roster-card[data-instance-id="${id}"]`));
+ for(const target of targets){await target.locator('.roster-status-erosionStacks button').click();await target.locator('.roster-status-erosionStacks button').click();}
+ await targets[2].locator('.roster-remove').click();await targets[0].locator('.roster-select').click();await expect(page.locator('#damageAdd1')).toHaveValue('2');
+ await selectCharacter(page,'1');await page.locator('#selected-party-tab').click();await page.locator('.character-select[data-id="29"]').click();
+ await expect(page.locator('.roster-status-erosionStacks')).toHaveCount(0);
+ await page.locator('#turn-end').click();await expect(page.locator('#damageAdd1')).toHaveValue('0');
+ await page.locator('#roster-undo').click();await expect(page.locator('#damageAdd1')).toHaveValue('2');
+ await selectCharacter(page,'29');for(const target of targets)await expect(target.locator('.roster-status-erosionStacks strong')).toHaveText('2');
+ await page.locator('#turn-end').click();for(const target of targets)await expect(target.locator('.roster-status-erosionStacks strong')).toHaveText('0');
+});
 
 test('07 skill: Padman signed adjustments clamp independently and use the confirmed icon',async({page})=>{
  await page.goto('/07_skill/');await selectCharacter(page,'6');
@@ -241,9 +269,9 @@ test('07 skill: persistent monster statuses show only for their owner and weakne
  await selectCharacter(page,'27');await expect(card.locator('.roster-status-investigationTarget button')).toHaveAttribute('aria-pressed','true');
  await page.getByRole('button',{name:'ミッション：インシークレットを発動'}).click();await page.locator('.role-tab[data-role="map"]').click();await card.locator('.roster-select').click();
  await selectCharacter(page,'14');await expect(card.locator('.roster-character-status')).toHaveCount(0);
- await page.getByRole('button',{name:'桜裂空斬を発動'}).click();await page.locator('.role-tab[data-role="map"]').click();await card.locator('.roster-select').click();await expect(card.locator('input[aria-label$="の残りHP"]')).toHaveValue('1');
+ await page.getByRole('button',{name:'桜裂空斬を発動'}).click();await page.locator('.role-tab[data-role="map"]').click();await card.locator('.roster-select').click();await expect(card.locator('input[aria-label$="の残りHP"]')).toHaveValue('3');
  await page.locator('#roster-undo').click();await expect(card.locator('input[aria-label$="の残りHP"]')).toHaveValue('5');
- await selectCharacter(page,'29');await expect(card.locator('.roster-status-erosionStacks strong')).toHaveText('2');
+ await selectCharacter(page,'29');await expect(card.locator('.roster-status-erosionStacks strong')).toHaveText('0');
 });
 
 test('07 skill: character-only monster controls share Mark placement and size and preserve hidden values',async({page})=>{
@@ -394,13 +422,13 @@ test('07 skill: monster status buttons combine self and PT membership and preser
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-tab-monsters').click();
  const maps=page.locator('#mp-map-select');for(const option of await maps.locator('option').all()){await maps.selectOption(await option.getAttribute('value'));await maps.dispatchEvent('change');if(await page.locator('#mp-monster-list .mp-monster:visible').count())break;}
  await page.locator('#mp-monster-list .mp-monster:visible').first().click();
- const card=page.locator('#map-roster-list .roster-card').first();await expect(card.locator('.roster-mark')).toHaveCount(5);
- expect(await card.locator('.roster-character-status').evaluateAll(nodes=>nodes.map(n=>[...n.classList].find(c=>c.startsWith('roster-status-'))))).toEqual(['roster-status-weakness','roster-status-investigationTarget','roster-status-erosionStacks','roster-status-fan']);
- await card.locator('.roster-status-investigationTarget button').click();await card.locator('.roster-status-erosionStacks button').click();await expect(card.locator('.roster-status-erosionStacks strong')).toHaveText('1');
+ const card=page.locator('#map-roster-list .roster-card').first();await expect(card.locator('.roster-mark')).toHaveCount(4);
+ expect(await card.locator('.roster-character-status').evaluateAll(nodes=>nodes.map(n=>[...n.classList].find(c=>c.startsWith('roster-status-'))))).toEqual(['roster-status-weakness','roster-status-investigationTarget','roster-status-fan']);
+ await card.locator('.roster-status-investigationTarget button').click();await expect(card.locator('.roster-status-erosionStacks')).toHaveCount(0);
  const round=await page.locator('#current-round').textContent(),count=await page.locator('#roster-counts').textContent();
  await page.locator('.role-tab[data-role="character"]').click();await page.locator('.party-member-slot[data-character-id="29"] .party-slot-name').click();await expect(page.locator('#selected-character-name')).toHaveText('ボニー');
  await page.locator('.party-member-slot[data-character-id="29"] .party-slot-name').click({button:'right'});await expect(card.locator('.roster-status-erosionStacks')).toHaveCount(0);await expect(card.locator('.roster-status-investigationTarget button')).toHaveAttribute('aria-pressed','true');
- await page.locator('.character-select[data-id="29"]').click();await expect(card.locator('.roster-status-erosionStacks strong')).toHaveText('1');await expect(page.locator('#roster-counts')).toHaveText(count);await expect(page.locator('#current-round')).toHaveText(round);
+ await page.locator('.character-select[data-id="29"]').click();await expect(card.locator('.roster-status-erosionStacks')).toHaveCount(0);await expect(page.locator('#roster-counts')).toHaveText(count);await expect(page.locator('#current-round')).toHaveText(round);
 });
 
 test('07 skill: self and 2x2 party preserve the exact outer frame and personal controls',async({page})=>{
@@ -600,7 +628,7 @@ test('07 skill: Kaisei Bonnie and Rinrin apply targeted monster effects', async 
  await selectCharacter(page,'28');
  const defense=page.locator('#map-roster-list input[aria-label$="の防御力"]').first();
  const before=Number(await defense.inputValue());
- await page.getByRole('button',{name:'インターセプトタックルを発動'}).click();
+ await page.getByRole('button',{name:'インターセプトタックルを発動'}).click();await page.locator('#rinrin-area-dialog').getByRole('button',{name:'Yes',exact:true}).click();
  await target.click();
  await page.locator('#character-skill-target-ok').click();
  await expect(defense).toHaveValue(String(Math.max(0,before-2)));
@@ -818,8 +846,8 @@ test('07 skill: additional character stat skills modify parameters', async ({ pa
  await page.locator('#turn-end').click();await expect(page.locator('#selected-character-atk')).toHaveValue('2');
 
  await selectCharacter(page,'28');
- await page.getByRole('button',{name:/エリア拒止通過：オフ/}).click();
- await expect(page.locator('#selected-character-atk')).toHaveValue('4');
+ await expect(page.getByRole('button',{name:/エリア拒止通過/})).toHaveCount(0);
+ await expect(page.locator('#selected-character-atk')).toHaveValue('2');
 
  await selectCharacter(page,'103');
  await expect(page.getByLabel('カクテル攻撃カードの数')).toHaveCount(0);
@@ -1229,4 +1257,11 @@ test('07 Moses: two stacks make evade faces 3..6 equally likely in base and card
  const mode=page.locator('.mode-content[data-role="defense"]');await expect(mode).toHaveAttribute('data-evade-minimum','3');for(const [id,value] of [['attackPower2',10],['hp2',1],['damageAdd2',0],['damageReduce2',0]]){await page.locator('#'+id).fill(String(value));await page.locator('#'+id).dispatchEvent('input');}
  await expect(mode.locator('.result-rate')).toHaveText('62.50%');await expect(mode.locator('.future-result-rate')).toHaveText('62.50%');
  const grid=await page.evaluate(()=>calculateDefenseDamageGrid(10,2,0,0,1,false,false,false,null,{evade:true,minimum:3}));expect(grid.totalCombinations).toBe(24);expect(grid.rows.every(row=>row.damages[0]===null&&row.damages[1]===null)).toBe(true);
+});
+
+
+test('07 skill: Rinrin passage confirmation works from file fallback',async({page})=>{
+ const path=require('path'),{pathToFileURL}=require('url');await page.goto(pathToFileURL(path.resolve(__dirname,'../07_skill/index.html')).href);await selectCharacter(page,'28');
+ await page.locator('#selected-character-skill').click();await page.locator('#rinrin-area-dialog').getByRole('button',{name:'No',exact:true}).click();await expect(page.locator('#selected-character-ct')).toHaveText('CT 3 / 3');
+ await page.locator('#roster-undo').click();await expect(page.locator('#selected-character-ct')).toHaveText('CT 0 / 3');
 });

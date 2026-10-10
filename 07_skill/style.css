@@ -1659,9 +1659,9 @@ tbody th {
 .has-source-inputs #skill-source-inputs{grid-column:2;grid-row:1}
 .has-source-inputs #selected-character-ct{grid-column:1/-1;grid-row:2;justify-self:end}
 .selected-character-main:has(.has-source-inputs) .selected-character-identity{padding-right:130px}
-#teru-stat-dialog{box-sizing:border-box;width:min(360px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:visible;padding:20px;border:2px solid #d4ac37;border-radius:8px;background:#fffdf4;color:#493e22}
-#teru-stat-dialog::backdrop{background:#0005}
-#teru-stat-dialog h3{margin:0 0 14px;font-size:16px}
+#teru-stat-dialog,#rinrin-area-dialog{box-sizing:border-box;width:min(360px,calc(100vw - 24px));max-height:calc(100vh - 24px);overflow:visible;padding:20px;border:2px solid #d4ac37;border-radius:8px;background:#fffdf4;color:#493e22}
+#teru-stat-dialog::backdrop,#rinrin-area-dialog::backdrop{background:#0005}
+#teru-stat-dialog h3,#rinrin-area-dialog h3{margin:0 0 14px;font-size:16px}
 #teru-skill-inputs{display:flex;gap:20px;flex-wrap:wrap}
 #teru-stat-dialog .skill-source-input input{width:70px;font-size:18px}
 .skill-dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
