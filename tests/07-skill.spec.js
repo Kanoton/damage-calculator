@@ -1175,8 +1175,8 @@ async function prepareZ3000Survivor(page){
 test('07 Z3000: ATK seven opens attack for the surviving skill target and Undo restores skill damage',async({page})=>{
  const {target,hp}=await prepareZ3000Survivor(page),before=Number(await hp.inputValue());
  const atk=page.locator('#selected-character-atk');await atk.fill('7');await atk.dispatchEvent('change');await page.getByRole('button',{name:'引き寄せるを発動'}).click();await page.locator('.role-tab[data-role="map"]').click();await target.click();
- await expect(page.locator('.role-tab[data-role="attack"]')).toHaveClass(/active/);await expect(page.locator('#hp1')).toHaveValue(String(before-5));await expect(page.locator('#attackPower1')).toHaveValue('7');
- await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();await expect(hp).toHaveValue(String(before));await expect(page.locator('#selected-character-ct')).toHaveText('CT 0 / 4');
+ await expect(page.locator('.role-tab[data-role="attack"]')).toHaveClass(/active/);await expect(page.locator('#hp1')).toHaveValue(String(before-5));await expect(page.locator('#attackPower1')).toHaveValue('7');await expect(target).toHaveAttribute('aria-pressed','true');
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();await expect(target).toHaveAttribute('aria-pressed','false');await expect(hp).toHaveValue(String(before));await expect(page.locator('#selected-character-ct')).toHaveText('CT 0 / 4');
 });
 
 test('07 Z3000: a kill raising ATK from six to seven does not retroactively open attack',async({page})=>{
