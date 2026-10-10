@@ -1673,5 +1673,15 @@ body:not(.mobile-ui) .has-source-inputs #selected-character-skill{height:24px;pa
 body:not(.mobile-ui) .has-source-inputs #skill-source-inputs{height:24px;align-items:center}
 body:not(.mobile-ui) .has-source-inputs .skill-source-input input{height:24px}
 
-.condition-icon.support-atk{border:2px solid #c33}
-.condition-icon.support-def{border:2px solid #2673c9}
+.condition-icon.support-atk{border:2px solid #c33;background:#c33}
+.condition-icon.support-def{border:2px solid #2673c9;background:#2673c9}
+
+#skill-source-dialog{box-sizing:border-box;width:min(360px,calc(100vw - 24px));padding:20px;border:2px solid #d4ac37;border-radius:8px;background:#fffdf4;color:#493e22}
+#skill-source-dialog::backdrop{background:#0005}
+#skill-source-dialog h3{margin:0 0 14px;font-size:16px}
+#skill-source-dialog-inputs{display:flex;gap:20px}
+#skill-source-dialog input{width:70px;font-size:18px}
+dialog.anchored-skill-dialog{position:fixed;margin:0;max-height:calc(100vh - 16px)}
+#rinrin-area-dialog{width:min(640px,calc(100vw - 16px));padding:12px}
+.rinrin-yes{white-space:nowrap;font-size:14px}
+@media(max-width:640px){.rinrin-yes{font-size:11px}}

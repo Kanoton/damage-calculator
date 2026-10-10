@@ -165,11 +165,12 @@
  function renderPartySupport(){
   const donors=new Set(partySlots.filter(id=>String(id)!==String(selectedCharacter?.id)).map(String));
   for(const c of partySupportControls){
+   if(c.key==='反撃'&&String(selectedCharacter?.id)==='8')continue;
    if(abilityRules()?.controls?.some(control=>control.key===c.key))continue;
    const current=abilityControlValue(c.key);if(!donors.has(c.donor)&&!current)continue;
    const change=value=>{const next=Math.max(0,Math.min(c.max??999,Math.floor(Number(value)||0)));if(next===abilityControlValue(c.key))return;window.rememberCharacterSkillActivation?.();state().numbers[c.key]=next;if(c.key==='PTジュジュシールド'&&next)state().numbers['反撃']=1;renderConditions();updateStats();};
    if(c.number){const view=createConditionNumberView(c.key,current,makeIcon(c.icon));if(c.donor==='103')view.button.classList.add(c.stat==='atk'?'support-atk':'support-def');view.input.max=String(c.max??999);if(c.key==='PTユメ攻撃補正')view.item.title='ゲームで確定した余剰回復によるATK増加量を指定。回復量から自動換算しません。ターン終了で解除';view.button.addEventListener('click',()=>change(current+1));view.button.addEventListener('contextmenu',e=>{e.preventDefault();change(current-1);});view.input.addEventListener('change',()=>change(view.input.value));conditionsBox.append(view.item);}
-   else {const button=createCharacterAbilityToggleView(c.key,!!current,makeIcon(c.donor==='105'&&String(selectedCharacter.id)==='106'?'親友の祝福':c.icon),()=>change(current?0:1));if(c.marked)button.title+='。戦闘終了後は手動でオフ（ターン終了でも解除）';if(c.donor==='105')button.title+='。ゲームで次の移動力＋2を受けた時にオン。移動後は手動でオフ';conditionsBox.append(button);}
+   else {const button=createCharacterAbilityToggleView(c.key,!!current,makeIcon(c.icon),()=>change(current?0:1));if(c.marked)button.title+='。戦闘終了後は手動でオフ（ターン終了でも解除）';if(c.donor==='105')button.title+='。ゲームで次の移動力＋2を受けた時にオン。移動後は手動でオフ';conditionsBox.append(button);}
   }
   if(String(selectedCharacter?.id)==='106'&&donors.has('105')){const button=document.createElement('button');button.type='button';button.className='selected-chip condition-toggle';button.setAttribute('aria-label','PTハンナ推理タイム＋1');button.title='ハンナの通過で受けた推理タイム＋1（最大4、ターン終了で−1）';button.append(makeIcon('親友の祝福'));button.addEventListener('click',()=>{const current=abilityControlValue('推理タイム');if(current>=4)return;window.rememberCharacterSkillActivation?.();state().numbers['推理タイム']=current+1;renderConditions();updateStats();});conditionsBox.append(button);}
   for(const c of [{donor:'10',label:'PTパンダマン回復＋2',amount:2}])if(donors.has(c.donor)){
@@ -193,8 +194,30 @@
  teruDialog.innerHTML='<form><h3>憑依先のステータス</h3><div id="teru-skill-inputs"></div><div class="skill-dialog-actions"><button type="button" data-cancel>キャンセル</button><button type="submit">憑依を確定</button></div></form>';
  document.body.append(teruDialog);
  const rinrinDialog=document.createElement('dialog');rinrinDialog.id='rinrin-area-dialog';rinrinDialog.setAttribute('aria-label','エリア拒止の通過確認');
- rinrinDialog.innerHTML='<h3>エリア拒止を通過しますか？</h3><p>Yes：対象を選択して防御力−2、自身の攻撃力＋2（２ターン）。No：補正なしでスキルを使用。</p><div class="skill-dialog-actions"><button type="button" data-cancel>キャンセル</button><button type="button" data-no>No</button><button type="button" data-yes>Yes</button></div>';
+ rinrinDialog.innerHTML='<h3>エリア拒止を通過しますか？</h3><p class="rinrin-yes">Yes：対象の防御力−2／自身の攻撃力＋2（２ターン）</p><p>No：補正なしでスキルを使用。</p><div class="skill-dialog-actions"><button type="button" data-cancel>キャンセル</button><button type="button" data-no>No</button><button type="button" data-yes>Yes</button></div>';
  document.body.append(rinrinDialog);
+ const sourceDialog=document.createElement('dialog');sourceDialog.id='skill-source-dialog';sourceDialog.setAttribute('aria-label','スキルの数値入力');
+ sourceDialog.innerHTML='<form><h3></h3><div id="skill-source-dialog-inputs"></div><div class="skill-dialog-actions"><button type="button" data-cancel>キャンセル</button><button type="submit">スキルを確定</button></div></form>';
+ document.body.append(sourceDialog);
+ const skillDialogs=[teruDialog,sourceDialog,rinrinDialog];
+ function positionSkillDialog(dialog){
+  if(!dialog.open)return;const anchor=document.getElementById('selected-character-skill').getBoundingClientRect(),width=dialog.offsetWidth,height=dialog.offsetHeight;
+  dialog.style.left=Math.max(8,Math.min(anchor.right-width,innerWidth-width-8))+'px';
+  dialog.style.top=Math.max(8,Math.min(anchor.top-height-8,innerHeight-height-8))+'px';
+ }
+ function openSkillDialog(dialog){dialog.showModal();positionSkillDialog(dialog);}
+ function closeSkillDialogs(){for(const dialog of skillDialogs)if(dialog.open)dialog.close();}
+ for(const dialog of skillDialogs){dialog.classList.add('anchored-skill-dialog');dialog.addEventListener('click',event=>{if(event.target!==dialog)return;const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();});}
+ document.addEventListener('keydown',event=>{if(event.key==='Escape'&&skillDialogs.some(dialog=>dialog.open)){event.preventDefault();event.stopImmediatePropagation();closeSkillDialogs();}},true);
+ window.addEventListener('resize',()=>skillDialogs.forEach(positionSkillDialog));window.addEventListener('scroll',()=>skillDialogs.forEach(positionSkillDialog),true);
+ window.addEventListener('character-selection-change',closeSkillDialogs);
+ sourceDialog.querySelector('[data-cancel]').addEventListener('click',()=>sourceDialog.close());
+ sourceDialog.querySelector('form').addEventListener('submit',event=>{
+  event.preventDefault();const skill=activeSkill();if(!skill?.inputStats||activeSkillCooldown(skill)>0){sourceDialog.close();return;}
+  const fields=[...sourceDialog.querySelectorAll('input')];if(fields.some(input=>!input.checkValidity()))return;
+  window.rememberCharacterSkillActivation?.();for(const input of fields)state().numbers[input.dataset.sourceKey]=Number(input.value);
+  applyActiveSkillEffects(skill);state().skillCooldowns[skill.key]=activeSkillMaxCooldown(skill);sourceDialog.close();renderConditions();updateStats();
+ });
  rinrinDialog.querySelector('[data-cancel]').addEventListener('click',()=>rinrinDialog.close());
  window.addEventListener('character-selection-change',()=>{if(rinrinDialog.open)rinrinDialog.close();});
  for(const passes of [false,true])rinrinDialog.querySelector(passes?'[data-yes]':'[data-no]').addEventListener('click',()=>{
@@ -212,9 +235,8 @@
   item.append(input);return item;
  }
  function renderSkillInputs(){
-  const container=document.getElementById('skill-source-inputs');container.replaceChildren();const specs=activeSkill()?.inputStats||[];container.hidden=!specs.length;
-  document.getElementById('selected-character-skill-controls').classList.toggle('has-source-inputs',!!specs.length);
-  for(const spec of specs)container.append(sourceInput(spec,true));
+  const container=document.getElementById('skill-source-inputs');container.replaceChildren();container.hidden=true;
+  document.getElementById('selected-character-skill-controls').classList.remove('has-source-inputs');
  }
  teruDialog.querySelector('[data-cancel]').addEventListener('click',()=>teruDialog.close());
  window.addEventListener('character-selection-change',()=>{if(teruDialog.open)teruDialog.close();});
@@ -270,7 +292,7 @@
    if(control.placement||control.requiresParty&&!partySlots.some(id=>String(id)===control.requiresParty))continue;
    if(control.type==='toggle'){
     const active=Boolean(abilityControlValue(control.key));
-    const toggle=createCharacterAbilityToggleView(control.key,active,makeIcon(control.key),()=>{window.rememberCharacterSkillActivation?.();state().numbers[control.key]=active?0:1;if(control.key==='ジュジュシールド'&&!active)state().numbers['反撃']=1;renderConditions();updateStats();});
+    const toggle=createCharacterAbilityToggleView(control.key,active,makeIcon(control.key),()=>{window.rememberCharacterSkillActivation?.();state().numbers[control.key]=active?0:1;renderConditions();updateStats();});
     conditionsBox.append(toggle);
    }else if(control.type==='choice'){
     const options=control.options||[],current=abilityControlValue(control.key),option=options.find(item=>Number(item.value)===current)||options[0];
@@ -550,14 +572,15 @@
  ctButton.addEventListener('contextmenu',event=>{event.preventDefault();changeActiveSkillCooldown(1);});
  skillButton.addEventListener('click',()=>{
   const skill=activeSkill();if(!skill||activeSkillCooldown(skill)>0)return;
-  if(String(selectedCharacter.id)==='28'){rinrinDialog.showModal();return;}
+  if(String(selectedCharacter.id)==='28'){openSkillDialog(rinrinDialog);return;}
   if(String(selectedCharacter.id)==='23'){
    const container=teruDialog.querySelector('#teru-skill-inputs');container.replaceChildren();
    container.append(sourceInput({key:'三神憑依攻撃補正',label:'憑依する味方の攻撃力',stat:'atk'},false),sourceInput({key:'三神憑依防御補正',label:'憑依する味方の防御力',stat:'def'},false));
-   teruDialog.showModal();return;
+   openSkillDialog(teruDialog);return;
   }
   if(skill.inputStats){
-   const fields=[...document.querySelectorAll('#skill-source-inputs input')];if(fields.some(input=>!input.reportValidity()))return;
+   const container=sourceDialog.querySelector('#skill-source-dialog-inputs');container.replaceChildren();sourceDialog.querySelector('h3').textContent=skill.label;
+   for(const spec of skill.inputStats)container.append(sourceInput(spec,false));openSkillDialog(sourceDialog);return;
   }
   if(skill.target){requestSkillTargets(skill);return;}
   window.rememberCharacterSkillActivation?.();
