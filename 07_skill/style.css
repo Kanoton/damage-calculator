@@ -1668,3 +1668,7 @@ tbody th {
 .skill-dialog-actions button{padding:8px 12px}
 .mobile-ui .skill-source-input input{min-height:44px;font-size:16px}
 .mobile-ui .selected-character-main:has(.has-source-inputs) .selected-character-identity{padding-right:0}
+
+body:not(.mobile-ui) .has-source-inputs #selected-character-skill{height:24px;padding:1px 6px;font-size:12px}
+body:not(.mobile-ui) .has-source-inputs #skill-source-inputs{height:24px;align-items:center}
+body:not(.mobile-ui) .has-source-inputs .skill-source-input input{height:24px}
