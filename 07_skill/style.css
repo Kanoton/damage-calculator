@@ -1663,4 +1663,5 @@ body:not(.mobile-ui) .has-teru-inputs #selected-character-ct{grid-column:2;grid-
 body:not(.mobile-ui) .has-teru-inputs #teru-skill-inputs{grid-column:1/-1;grid-row:2}
 body:not(.mobile-ui) .has-teru-inputs .teru-stat-input input{width:38px;height:20px;appearance:textfield}
 body:not(.mobile-ui) .has-teru-inputs .teru-stat-input input::-webkit-inner-spin-button{appearance:none}
-body:not(.mobile-ui) .selected-character-main:has(.has-teru-inputs) .selected-character-stats{padding-top:10px}
+body:not(.mobile-ui) .selected-character-main:has(.has-teru-inputs) .selected-character-stats{margin-top:10px}
+body:not(.mobile-ui) .has-teru-inputs #selected-character-skill,body:not(.mobile-ui) .has-teru-inputs #selected-character-ct{height:18px;padding:0 6px;font-size:12px;line-height:16px}
