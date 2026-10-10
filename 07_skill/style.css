@@ -1655,7 +1655,6 @@ tbody th {
 .teru-stat-input img{width:18px;height:18px;object-fit:contain}
 .teru-stat-input input{box-sizing:border-box;width:42px;min-width:0;padding:2px;font:inherit;font-size:12px}
 .mobile-ui .teru-stat-input input{width:54px;min-height:44px;font-size:16px}
-.selected-character-conditions .teru-battle-toggle{width:auto;max-width:180px;height:auto;min-height:27px;font-size:11px;white-space:normal}
 .mobile-ui .selected-character-skill-controls.has-teru-inputs{width:100%;max-width:100%}
 body:not(.mobile-ui) .selected-character-skill-controls.has-teru-inputs{display:grid;grid-template-columns:max-content max-content;gap:2px}
 body:not(.mobile-ui) .has-teru-inputs #selected-character-skill{grid-column:1;grid-row:1}

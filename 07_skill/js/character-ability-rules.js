@@ -9,8 +9,9 @@ const CHARACTER_ABILITY_RULES={
   activeSkills:[{key:'active',label:"真夜の一閃",cooldown:3,target:'monster',multipleTargets:true,effects:[{type:'damage_monster',sourceStat:'atk',offset:2}]}]
  },
  '23':{
-  activeSkills:[{key:'active',label:"三神憑依",cooldown:3,inputStats:[{key:'三神憑依対象攻撃力',label:'憑依する味方の攻撃力'},{key:'三神憑依対象防御力',label:'憑依する味方の防御力'}],effects:[{type:'modify_stat',target:'self',stat:'atk',sourceKey:'三神憑依対象攻撃力',multiplier:0.5,rounding:'ceil',duration:'teru_next_turn'},{type:'modify_stat',target:'self',stat:'def',sourceKey:'三神憑依対象防御力',multiplier:0.5,rounding:'ceil',duration:'teru_next_turn'}]}],
-  controls:[{key:'狐光追加攻撃',type:'toggle'},{key:'狐光',type:'number',min:0},{key:'憑依先の戦闘ATK',type:'number',min:0}]
+  activeSkills:[{key:'active',label:"三神憑依",cooldown:3,effects:[]}],
+  controls:[{key:'狐光',type:'number',min:0},{key:'三神憑依攻撃補正',type:'number',min:0,duration:'turn',placement:'skill'},{key:'三神憑依防御補正',type:'number',min:0,duration:'turn',placement:'skill'}],
+  modifiers:[{target:'atk',formula:'per_stack',source:'三神憑依攻撃補正',value:1},{target:'def',formula:'per_stack',source:'三神憑依防御補正',value:1}]
  },
  '27':{
   activeSkills:[{key:'active',label:"ミッション：インシークレット",cooldown:3,target:'monster',effects:[{type:'modify_monster_mark',delta:1},{type:'set_monster_status',key:'investigationTarget',value:true}]}],

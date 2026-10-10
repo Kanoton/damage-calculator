@@ -97,7 +97,7 @@
   if(rule.formula==='percent_of_ceil')return Math.ceil(source*amount);
   return 0;
  }
- function calculate(forTeruPursuit=false){
+ function calculate(){
   const active=activeRules().filter(r=>r.kind==='modifier'||r.kind==='event_modifier');
   const startingHp=base('hp')+(Number(state().maxHpBonus)||0);
   const maxBonus=active.filter(r=>r.target==='max_hp'&&triggerMatches(r)&&conditionMatches(r,startingHp)).reduce((sum,r)=>sum+valueOf(r,0),0);
@@ -107,7 +107,6 @@
   const result={atk:base('atk'),def:base('def'),move:base('move'),hp:maxHp,damageReduce:0,damageAdd:(currentOpponent?.markStacks>0?1:0)+(currentOpponent?.fateEchoStacks>0?1:0)+(Number(currentOpponent?.erosionStacks)||0)};
   for(const rule of active){
    if(!['atk','def','move'].includes(rule.target))continue;
-   if(forTeruPursuit&&['on_attack','on_attack_after_mark'].includes(rule.trigger))continue;
    if(!triggerMatches(rule)||!conditionMatches(rule,maxHp))continue;
    result[rule.target]+=valueOf(rule,maxBonus);
   }
@@ -127,7 +126,7 @@
   return result;
  }
  function makeIcon(key){
-  const file=({'カウンター攻撃':'UT_Buff/UT_Buff_Counter.png','このターンに受けたダメージ':'UT_Buff/UT_Buff_SangXinBingKuang.png'})[key]||statusIcons.get(key)||(['マジで怒ったぞ','次の攻撃ダイス6'].includes(key)?statusIcons.get('自己主張なし攻撃補正'):null)||statusIcons.get(key==='憑依先の戦闘ATK'?'狐光':specialIcons[key]);
+  const file=({'カウンター攻撃':'UT_Buff/UT_Buff_Counter.png','このターンに受けたダメージ':'UT_Buff/UT_Buff_SangXinBingKuang.png'})[key]||statusIcons.get(key)||(['マジで怒ったぞ','次の攻撃ダイス6'].includes(key)?statusIcons.get('自己主張なし攻撃補正'):null)||statusIcons.get(specialIcons[key]);
   if(!file)return Object.assign(document.createElement('span'),{className:'condition-fallback',textContent:key});
   const icon=document.createElement('img');icon.alt='';
   const path=file.startsWith('chip_icon/')||file.startsWith('UT_Buff/')?file:'icon/'+file;
@@ -173,16 +172,14 @@
  }
  // Follow-up preview never consumes stacks or runs ordinary attack chip triggers.
  window.getTeruFollowUp=()=>{
-  if(!selectedCharacter)return null;
-  const self=String(selectedCharacter.id)==='23',key=self?'狐光':'PTテル狐光';
-  const available=self||partySlots.some(id=>String(id)==='23')||abilityControlValue('PTテル憑依');
-  if(!available)return null;
-  return {enabled:!!abilityControlValue(self?'狐光追加攻撃':'PTテル憑依'),stacks:abilityControlValue(key),attack:self?calculate(true).atk:abilityControlValue('PTテル攻撃力'),
+  if(!selectedCharacter||String(selectedCharacter.id)==='23'||!partySlots.some(id=>String(id)==='23'))return null;
+  const teru=characters.find(row=>String(row.id)==='23');if(!teru)return null;
+  return {enabled:!!abilityControlValue('PTテル憑依'),stacks:abilityControlValue('PTテル狐光'),attack:calculatePartyMember(teru).atk,
    damageAdd:(currentOpponent?.markStacks>0?1:0)+(currentOpponent?.fateEchoStacks>0?1:0)+(Number(currentOpponent?.erosionStacks)||0)+(String(selectedCharacter.id)==='29'?2:0)};
  };
  window.consumeTeruFollowUp=()=>{
   const effect=window.getTeruFollowUp();if(!effect?.enabled||effect.stacks<1)return;
-  window.rememberCharacterSkillActivation?.();const key=String(selectedCharacter.id)==='23'?'狐光':'PTテル狐光';
+  window.rememberCharacterSkillActivation?.();const key='PTテル狐光';
   state().numbers[key]=effect.stacks-1;renderConditions();updateStats();
  };
  // Stat inputs are deliberately separate from clickable stack icons.
@@ -191,35 +188,29 @@
   const icon=document.createElement('img');icon.src='../images/UT_Buff/'+(stat==='atk'?'Attack.png':'Defense.png');icon.alt='';
   const input=document.createElement('input');input.type='number';input.min='0';input.step='1';input.inputMode='numeric';input.setAttribute('aria-label',label);input.dataset.teruKey=key;input.value=abilityControlValue(key);
   input.addEventListener('change',()=>{const value=Number(input.value);const next=Number.isFinite(value)?Math.max(0,Math.floor(value)):0;input.value=next;if(next===abilityControlValue(key))return;window.rememberCharacterSkillActivation?.();state().numbers[key]=next;
-   // Source inputs only affect the next cast. Avoid rewriting Skill on blur:
-   // WebKit can cancel its pending click when that button's text is replaced.
-   if(key==='PTテル攻撃力')updateStats();
+   updateStats();
   });
   item.append(icon,input);return item;
  }
  function renderTeruSkillInputs(){
   const container=document.getElementById('teru-skill-inputs');container.replaceChildren();container.hidden=String(selectedCharacter.id)!=='23';document.getElementById('selected-character-skill-controls').classList.toggle('has-teru-inputs',!container.hidden);
   if(container.hidden)return;
-  container.append(createTeruStatInput('三神憑依対象攻撃力','憑依する味方の攻撃力','atk'),createTeruStatInput('三神憑依対象防御力','憑依する味方の防御力','def'));
+  container.append(createTeruStatInput('三神憑依攻撃補正','憑依による攻撃力上昇','atk'),createTeruStatInput('三神憑依防御補正','憑依による防御力上昇','def'));
  }
  function renderTeruSupport(){
   const self=String(selectedCharacter.id)==='23';
-  if(!self&&(partySlots.some(id=>String(id)==='23')||abilityControlValue('PTテル憑依')||abilityControlValue('PTテル狐光')||abilityControlValue('PTテル攻撃力'))){
+  if(!self&&(partySlots.some(id=>String(id)==='23')||abilityControlValue('PTテル憑依')||abilityControlValue('PTテル狐光'))){
    const key='PTテル憑依',active=!!abilityControlValue(key);
    const toggle=createCharacterAbilityToggleView(key,active,makeIcon('狐光'),()=>{window.rememberCharacterSkillActivation?.();state().numbers[key]=active?0:1;renderConditions();updateStats();});
    toggle.title='自身がテルの憑依を受けた時にオン。自身の次のターン終了時に手動でオフ（敵ターンの反撃まで保持）';conditionsBox.append(toggle);
-   for(const key of ['PTテル攻撃力','PTテル狐光']){
-    if(key==='PTテル攻撃力'){const input=createTeruStatInput(key,'PTテル攻撃力の数','atk');input.title='憑依による上昇を含むテルの表示ATK。狐光は含めない。自キャラのATKには加算しません';conditionsBox.append(input);continue;}
+   for(const key of ['PTテル狐光']){
     const view=createConditionNumberView(key,abilityControlValue(key),makeIcon('狐光'));
     view.item.title='ゲームで確認した狐光。カードの所持・使用は管理しません';
     const change=value=>{const next=Math.max(0,Math.floor(Number(value)||0));if(next===abilityControlValue(key))return;window.rememberCharacterSkillActivation?.();state().numbers[key]=next;view.input.value=next;updateStats();};
     view.button.addEventListener('click',()=>change(abilityControlValue(key)+1));view.button.addEventListener('contextmenu',e=>{e.preventDefault();change(abilityControlValue(key)-1);});view.input.addEventListener('change',()=>change(view.input.value));conditionsBox.append(view.item);
    }
   }
-  if(self&&(state().activeEffects||[]).some(effect=>effect.duration==='teru_next_turn')){
-   const button=document.createElement('button');button.type='button';button.textContent='テルのターン開始';button.title='次のテルのターン開始時に押し、憑依で得たATK・DEFを解除';
-   button.addEventListener('click',()=>{window.rememberCharacterSkillActivation?.();state().activeEffects=state().activeEffects.filter(effect=>effect.duration!=='teru_next_turn');renderConditions();updateStats();});conditionsBox.append(button);
-  }
+
  }
  function renderConditions(){
   conditionsBox.replaceChildren();
@@ -247,10 +238,10 @@
    conditionsBox.append(button);
   }
   for(const control of abilityRules()?.controls||[]){
+   if(control.placement==='skill')continue;
    if(control.type==='toggle'){
     const active=Boolean(abilityControlValue(control.key));
     const toggle=createCharacterAbilityToggleView(control.key,active,makeIcon(control.key),()=>{if(['6','23'].includes(String(selectedCharacter.id)))window.rememberCharacterSkillActivation?.();state().numbers[control.key]=active?0:1;renderConditions();updateStats();});
-    if(control.key==='狐光追加攻撃'){toggle.classList.add('teru-battle-toggle');toggle.textContent='憑依先の戦闘＋狐光追撃：'+(active?'オン':'オフ');toggle.setAttribute('aria-label','狐光追加攻撃：'+(active?'オン':'オフ')+'（憑依先の戦闘を計算）');toggle.title='オン：主攻撃に憑依先の戦闘ATK、追撃にテル自身のATKを使用。テル自身の通常攻撃はオフ。計算だけでは狐光を消費せず、実際に追撃した後に戦闘終了ボタンを押してください';}
     conditionsBox.append(toggle);
    }else if(control.type==='choice'){
     const options=control.options||[],current=abilityControlValue(control.key),option=options.find(item=>Number(item.value)===current)||options[0];
@@ -295,7 +286,7 @@
  function updateActiveSkillUi(){
   const skill=activeSkill(),controls=document.getElementById('selected-character-skill-controls'),button=document.getElementById('selected-character-skill'),ct=document.getElementById('selected-character-ct');
   controls.hidden=!skill;if(!skill)return;
-  const cooldown=activeSkillCooldown(skill);state().skillCooldowns[skill.key]=cooldown;ct.textContent='CT '+cooldown+' / '+activeSkillMaxCooldown(skill);ct.title='CT上限 '+activeSkillMaxCooldown(skill)+'：左クリックで1減らす／右クリックで1増やす';ct.setAttribute('aria-label','CT '+cooldown+'、上限 '+activeSkillMaxCooldown(skill)+'：左クリックで1減らす、右クリックで1増やす');button.textContent='スキル';button.title=skill.label+'を発動';button.setAttribute('aria-label',skill.label+'を発動');button.disabled=cooldown>0;
+  const cooldown=activeSkillCooldown(skill);state().skillCooldowns[skill.key]=cooldown;ct.textContent='CT '+cooldown+' / '+activeSkillMaxCooldown(skill);ct.title='CT上限 '+activeSkillMaxCooldown(skill)+'：左クリックで1減らす／右クリックで1増やす';ct.setAttribute('aria-label','CT '+cooldown+'、上限 '+activeSkillMaxCooldown(skill)+'：左クリックで1減らす、右クリックで1増やす');if(button.textContent!=='スキル')button.textContent='スキル';button.title=skill.label+'を発動';button.setAttribute('aria-label',skill.label+'を発動');button.disabled=cooldown>0;
  }
  function updateStats(){
   if(!selectedCharacter)return;
@@ -323,7 +314,7 @@
   const enemyAttack=document.getElementById('attackPower2'),previousFan=Number(enemyAttack.dataset.fanReduction)||0;
   const fanReduction=['101','102'].includes(String(selectedCharacter?.id))&&currentOpponent?.fan?1:0;
   const baseEnemyAttack=Math.max(0,Number(enemyAttack.value)+previousFan),appliedFanReduction=Math.min(baseEnemyAttack,fanReduction);enemyAttack.value=baseEnemyAttack-appliedFanReduction;enemyAttack.dataset.fanReduction=String(appliedFanReduction);
-  document.getElementById('attackPower1').value=String(selectedCharacter.id)==='23'&&abilityControlValue('狐光追加攻撃')?abilityControlValue('憑依先の戦闘ATK'):totals.atk;
+  document.getElementById('attackPower1').value=totals.atk;
   document.getElementById('defensePower2').value=totals.def;
   document.getElementById('hp2').value=state().currentHp;
   const reduction=document.getElementById('damageReduce2');
@@ -456,7 +447,10 @@
    const row=characters.find(item=>String(item.id)===String(button.dataset.id));
    button.setAttribute('aria-label',(row?.name||'キャラクター')+(partyMode?'をPTに登録':'を選択'));
   });
-  if(selectedCharacter)updateChipListSelection();
+  if(selectedCharacter){updateChipListSelection();
+   // PT ATK/level/chip edits must refresh the directly referenced pursuit.
+   calculateDamage(document.querySelector('[data-role="attack"].mode-content'),false);
+  }
  }
  document.addEventListener('mobile-party-swap',event=>{
   const {from,to}=event.detail||{};if(!Number.isInteger(from)||!Number.isInteger(to)||from<0||to<0||from>=4||to>=4||!partySlots[from])return;
@@ -526,7 +520,7 @@
  ctButton.addEventListener('contextmenu',event=>{event.preventDefault();changeActiveSkillCooldown(1);});
  skillButton.addEventListener('click',()=>{
   const skill=activeSkill();if(!skill||activeSkillCooldown(skill)>0)return;
-  if(skill.inputStats&&String(selectedCharacter.id)!=='23'){
+  if(skill.inputStats){
    const values={};
    for(const input of skill.inputStats){const raw=window.prompt(input.label,String(abilityControlValue(input.key)));if(raw===null)return;const value=Number(raw);if(!raw.trim()||!Number.isFinite(value)||value<(input.min??0)||(input.max!==undefined&&value>input.max)||(input.integer&&!Number.isSafeInteger(value)))return;values[input.key]=value;}
    Object.assign(state().numbers,values);
@@ -539,7 +533,6 @@
  });
  function applyActiveSkillEffects(skill){
   state().activeEffects=(state().activeEffects||[]).filter(effect=>effect.source!==skill.key);
-  if(String(selectedCharacter.id)==='23')state().activeEffects=state().activeEffects.filter(effect=>effect.duration!=='teru_next_turn');
   for(const effect of skill.effects||[]){
    if(!activeEffectAllowed(effect))continue;
    if(effect.type==='heal'&&effect.target==='self'){const maxHp=calculate().hp;state().currentHp=Math.min(maxHp,(Number(state().currentHp)||0)+(Number(effect.value)||0));continue;}

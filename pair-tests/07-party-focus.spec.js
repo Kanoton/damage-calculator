@@ -31,7 +31,7 @@ test('07 full party: skill, stacked supports, turn end and Undo retain independe
 
 test('07 full party: Teru, Hanna and shield survive turn end and consume independently with Undo',async({page})=>{
  await start(page,'106');for(const id of ['23','105','8'])await add(page,id);
- await number(page,'PTテル攻撃力',8);await number(page,'PTテル狐光',3);
+ await setTeruPartyAttack(page,8);await number(page,'PTテル狐光',3);
  await page.getByRole('button',{name:/^PTテル憑依：/}).click();await page.getByRole('button',{name:/^PTハンナ次の移動：/}).click();await page.getByRole('button',{name:/^PTジュジュシールド：/}).click();await page.getByRole('button',{name:'PTハンナ推理タイム＋1',exact:true}).click();
  await page.locator('#turn-end').click();
  let s=await page.evaluate(()=>captureCharacterAbilityState());expect(s.numbers['推理タイム']).toBe(0);for(const k of ['PTテル憑依','PTハンナ次の移動','PTジュジュシールド'])expect(s.numbers[k]).toBe(1);expect(s.numbers['PTテル狐光']).toBe(3);
@@ -72,3 +72,11 @@ test('07 rendered icons: all characters and registered supports load their assig
   for(const id of group)await remove(page,id);
  }
 });
+
+async function setTeruPartyAttack(page,value){
+ await page.locator('#selected-party-tab').click();
+ const stat=page.locator('.party-member-slot[data-character-id="23"] [data-stat="atk"]');
+ let current=Number(await stat.locator('b').textContent());
+ while(current!==value){await stat.locator('button').click({button:current<value?'left':'right'});current+=current<value?1:-1;}
+ await page.locator('#selected-self-tab').click();
+}

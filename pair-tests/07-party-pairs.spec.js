@@ -5,7 +5,7 @@ const rows=fs.readFileSync(path.join(__dirname,'../csv/character_stats.csv'),'ut
 const characters=rows.slice(1).map(line=>{const fields=line.split(',');return {id:fields[0],name:fields[1],fields};});
 const selected=(process.env.PAIR_SELF_IDS||'').split(',').filter(Boolean);
 if(selected.some(id=>!characters.some(c=>c.id===id)))throw new Error('PAIR_SELF_IDS contains unknown character IDs');
-const donors={8:['PTジュジュシールド'],10:['PTパンダマン回復＋2'],20:['PTユメ攻撃補正'],23:['PTテル憑依','PTテル攻撃力','PTテル狐光'],27:['PT潜伏'],103:['PTカクテル攻撃','PTカクテル防御','PTカクテル回復＋1'],104:['PTドロシー攻撃','PTドロシー通過回復＋1'],105:['PTハンナ次の移動']};
+const donors={8:['PTジュジュシールド'],10:['PTパンダマン回復＋2'],20:['PTユメ攻撃補正'],23:['PTテル憑依','PTテル狐光'],27:['PT潜伏'],103:['PTカクテル攻撃','PTカクテル防御','PTカクテル回復＋1'],104:['PTドロシー攻撃','PTドロシー通過回復＋1'],105:['PTハンナ次の移動']};
 const allSupport=Object.values(donors).flat().concat('PTハンナ推理タイム＋1');
 async function self(page,id){
  await page.locator('.role-tab.character-tab').click();await page.locator('#selected-self-tab').click();await page.locator('#character-list-tab').click();await page.locator(`.character-select[data-id="${id}"]`).click();await page.locator('#selected-self-tab').click();
@@ -81,7 +81,7 @@ test('07 interactions: Teru with Sykes, Hanna with Sherry, and combined PT buffs
  await page.goto('/07_skill/');await self(page,'29');
  async function add(id){await page.locator('#selected-party-tab').click();await page.locator('#character-list-tab').click();await page.locator(`.character-select[data-id="${id}"]`).click();await page.locator('#selected-self-tab').click();}
  async function number(key,value){const field=page.getByLabel(key+'の数',{exact:true});await field.fill(String(value));await field.dispatchEvent('change');}
- await add('23');await number('PTテル攻撃力',8);await number('PTテル狐光',3);await page.getByRole('button',{name:/^PTテル憑依：/}).click();
+ await add('23');await setTeruPartyAttack(page,8);await number('PTテル狐光',3);await page.getByRole('button',{name:/^PTテル憑依：/}).click();
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:{erosionStacks:4,markStacks:0,fateEchoStacks:0}})));
  const f=await page.evaluate(()=>getTeruFollowUp());expect(f.damageAdd).toBe(6);expect(await page.evaluate(()=>getTeruCombinedDamage(1,4,99,getTeruFollowUp()))).toBe(14);
  await self(page,'106');await add('105');await page.getByRole('button',{name:'PTハンナ推理タイム＋1'}).click();await page.getByRole('button',{name:/^PTハンナ次の移動：/}).click();await page.locator('#turn-end').click();const state=await page.evaluate(()=>captureCharacterAbilityState());expect(state.numbers['推理タイム']).toBe(0);expect(state.numbers['PTハンナ次の移動']).toBe(1);
@@ -96,3 +96,11 @@ test('07 interactions: Dorothy manual Warmth and party healing retain stat corre
  const hp=page.locator('#selected-character-current-hp'),max=Number(await page.locator('#selected-character-hp').textContent());await hp.fill(String(max-1));await hp.dispatchEvent('change');
  await page.getByRole('button',{name:'PTカクテル回復＋1',exact:true}).click();await expect(hp).toHaveValue(String(max));await page.getByRole('button',{name:'PTカクテル回復＋1',exact:true}).click();await expect(hp).toHaveValue(String(max));await expect(page.locator('#selected-character-def')).toHaveValue(defense);
 });
+
+async function setTeruPartyAttack(page,value){
+ await page.locator('#selected-party-tab').click();
+ const stat=page.locator('.party-member-slot[data-character-id="23"] [data-stat="atk"]');
+ let current=Number(await stat.locator('b').textContent());
+ while(current!==value){await stat.locator('button').click({button:current<value?'left':'right'});current+=current<value?1:-1;}
+ await page.locator('#selected-self-tab').click();
+}
