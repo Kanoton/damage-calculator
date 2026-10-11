@@ -1711,3 +1711,5 @@ dialog[data-inline-pad] .character-number-pad{grid-template-columns:repeat(3,min
 /* Cancel shares the keypad row and aligns with its lower edge. */
 dialog[data-inline-pad] .skill-entry-fields{display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;gap:12px}
 dialog[data-inline-pad] .skill-entry-fields [data-cancel]{min-width:72px;align-self:flex-end}
+dialog[data-inline-pad] .skill-keypad-slot{display:flex;align-items:flex-end}
+dialog[data-inline-pad] .skill-entry-fields [data-cancel]{padding:8px 12px}
