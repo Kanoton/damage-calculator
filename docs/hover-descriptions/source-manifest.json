@@ -1,0 +1,30 @@
+{
+  "rows": 418,
+  "categories": {
+    "スキル": 70,
+    "能力全文": 35,
+    "自キャラ": 44,
+    "PT受領": 24,
+    "スキル入力": 4,
+    "モンスター状態": 7,
+    "共通・マップ": 8,
+    "チップ": 200,
+    "共通・チップ": 16,
+    "共通パラメータ": 10
+  },
+  "characters": 35,
+  "sourceHashes": {
+    "07_skill/js/character.js": "3d6f5cc94758941567273a3fe880336c449de35ee493a84d28a17d93be8ccb69",
+    "07_skill/js/character-view.js": "022a240e56afcaac91abadfdecea9011b172c8759527c1f8cbfdd778795e88d0",
+    "07_skill/js/character-ability-rules.js": "c47d73091a1d2ba60cad03bc9236eb1d989bcee7b389005052545f35fdf3fab7",
+    "07_skill/js/roster-view.js": "ed3a648e8b763b34312bfe0a9242a9d3d1df813ddabe0930b34591cb70f8cca4",
+    "07_skill/js/map.js": "5db5fda0b9b478f37ed589a3ab3949734a69f82c32ae14e95754643333e097cc",
+    "07_skill/js/map-utils.js": "c751b7c4d0d6024454acad8817b44694eaf32208c4fbf556b0f100e851d16125",
+    "07_skill/index.html": "ee930735d3c8753943c13fcd6a225d5432aa5bf157cad449dde00d8de9cadb59",
+    "csv/character_stats.csv": "b3f8d1a60d5163adcf57302e5de86976721492362bcf1247233e57d750193f3d",
+    "csv/character_skills.csv": "37c2a448e2fe7eecd8b7a38a800804aeabe4ed6c02954fe83f811a81ecf07497",
+    "csv/status_icon_map_all.csv": "504724e74276441ad6f0694912efa37a8ad3bf3d9be636272cf00183c9c08383",
+    "csv/chip_list.csv": "f1e5f069edd694866bba8814402ed871dead69857885e2eeab271d9c77edc929",
+    "csv/chip_stat_rules.csv": "b1ee084e7cecbeab3037da62fdac7c4319543023e4cd7d763440a41d4574d6ef"
+  }
+}
