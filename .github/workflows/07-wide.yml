@@ -1,10 +1,10 @@
 name: 07 wide browser regression
 on:
   pull_request:
-    paths: ['07_skill/**', 'wide-tests/**', 'playwright.wide.config.js', 'playwright.config.js', 'package.json', '.github/workflows/07-wide.yml']
+    paths: ['07_skill/**', 'wide-tests/**', 'test-helpers/**', 'playwright.wide.config.js', 'playwright.config.js', 'package.json', '.github/workflows/07-wide.yml']
   push:
     branches: [main]
-    paths: ['07_skill/**', 'wide-tests/**', 'playwright.wide.config.js', 'playwright.config.js', 'package.json', '.github/workflows/07-wide.yml']
+    paths: ['07_skill/**', 'wide-tests/**', 'test-helpers/**', 'playwright.wide.config.js', 'playwright.config.js', 'package.json', '.github/workflows/07-wide.yml']
   workflow_dispatch:
 concurrency:
   group: 07-wide-${{ github.event.pull_request.number || github.ref }}

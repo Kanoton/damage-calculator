@@ -1,10 +1,10 @@
 name: 07 mobile browser regression
 on:
   pull_request:
-    paths: ['07_skill/**', 'mobile-tests/**', 'playwright.mobile.config.js', 'playwright.config.js', 'package.json', '.github/workflows/07-mobile.yml']
+    paths: ['07_skill/**', 'mobile-tests/**', 'test-helpers/**', 'playwright.mobile.config.js', 'playwright.config.js', 'package.json', '.github/workflows/07-mobile.yml']
   push:
     branches: [main]
-    paths: ['07_skill/**', 'mobile-tests/**', 'playwright.mobile.config.js', 'playwright.config.js', 'package.json', '.github/workflows/07-mobile.yml']
+    paths: ['07_skill/**', 'mobile-tests/**', 'test-helpers/**', 'playwright.mobile.config.js', 'playwright.config.js', 'package.json', '.github/workflows/07-mobile.yml']
   workflow_dispatch:
 concurrency:
   group: 07-mobile-${{ github.event.pull_request.number || github.ref }}
