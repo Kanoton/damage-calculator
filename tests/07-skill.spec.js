@@ -1337,6 +1337,7 @@ test('07 Sherry: blessing movement and Doll Complete overlap at plus two and Und
  const blessing=page.getByRole('button',{name:'PTハンナ推理タイム＋1',exact:true}),doll=page.getByRole('button',{name:/^PTハンナ次の移動：/}),move=page.locator('#selected-character-move');
  await blessing.click();await expect(blessing).toHaveAttribute('aria-pressed','true');await expect(move).toHaveText('2');await doll.click();await expect(move).toHaveText('2');await blessing.click({button:'right'});await expect(blessing).toHaveAttribute('aria-pressed','false');await expect(move).toHaveText('2');await doll.click();await expect(move).toHaveText('0');
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();await expect(move).toHaveText('2');
+ await page.locator('.role-tab.character-tab').click();await doll.click();await blessing.click();await page.locator('#selected-party-tab').click();await page.locator('.party-member-slot[data-character-id="105"] .party-slot-name').click({button:'right'});await page.locator('#selected-self-tab').click();await expect(move).toHaveText('2');await expect(blessing).toHaveAttribute('aria-pressed','true');await blessing.click({button:'right'});await expect(move).toHaveText('0');await expect(blessing).toHaveCount(0);
 });
 
 for(const protocol of ['http','file'])test('07 Padman: passive description omits movement '+protocol,async({page})=>{

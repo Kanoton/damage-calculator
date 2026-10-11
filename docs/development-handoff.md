@@ -569,3 +569,5 @@ This section supersedes older manual-only CT and placeholder-control notes above
 
 
 - Screenshot refinement: mobile Rinrin's original long sentence stranded the final syllable on a second line at14px. Shortened the same ATK/DEF explanation without changing effects and added a one-line text-range assertion on desktop/mobile. Blessing operation now exposes its received movement state through aria-pressed; right-click clearance remains independent of Reasoning. Local focused launch was attempted and blocked by missing Chromium headless-shell1234; all browser results come from hosted CI.
+
+- Received Blessing movement remains clearable after Hanna removal: retain its action while the received flag is active, then hide it after manual clearance without donor. Added donor-removal/clear-state regression; per-self storage remains independent.
