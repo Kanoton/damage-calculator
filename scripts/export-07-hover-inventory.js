@@ -32,7 +32,7 @@ exec(section(character,'function neededInputs(','\n // Received PT effects'));
 exec(section(character,'function renderPartySupport(','\n // Follow-up preview'));
 exec(section(character,'function renderTeruSupport(','\n function renderConditions'));
 exec(section(character,'function renderConditions(','\n function updateActiveSkillUi'));
-exec(section(character,'function sourceInput(',"\n teruDialog.querySelector('[data-cancel]')"));
+exec(section(character,'function sourceInput(','\n function renderTeruSupport'));
 exec(section(character,'function updateActiveSkillUi(','\n function updateStats'));
 exec(section(character,'const activeSkillMaxCooldown=','\n const activeEffectConditionMatches'));
 exec(section(character,'function toggleable(','\n function updateChipListSelection'));

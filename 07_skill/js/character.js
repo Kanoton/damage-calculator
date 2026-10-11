@@ -190,14 +190,12 @@
   state().numbers[key]=effect.stacks-1;renderConditions();updateStats();
  };
  // Editable skill sources are separate from applied bonuses; Teru commits both atomically.
- const teruDialog=document.createElement('dialog');teruDialog.id='teru-stat-dialog';teruDialog.setAttribute('aria-label','憑依先のステータス入力');
- teruDialog.innerHTML='<form><h3>憑依先のステータス</h3><div class="skill-entry-row"><div class="skill-entry-fields"><div id="teru-skill-inputs"></div></div><div class="skill-keypad-slot"></div><button type="button" data-cancel>キャンセル</button></div></form>';
+ const teruDialog=createCharacterSkillInputDialogView('teru-stat-dialog','憑依先のステータス入力','憑依先のステータス','teru-skill-inputs');
  document.body.append(teruDialog);
  const rinrinDialog=document.createElement('dialog');rinrinDialog.id='rinrin-area-dialog';rinrinDialog.setAttribute('aria-label','エリア拒止の通過確認');
  rinrinDialog.innerHTML='<h3>エリア拒止を通過しますか？</h3><p class="rinrin-yes">Yes：対象DEF−2／自身ATK＋2（2ターン）</p><p>No：補正なしでスキルを使用。</p><div class="skill-dialog-actions"><button type="button" data-yes>Yes</button><button type="button" data-no>No</button><button type="button" data-cancel>キャンセル</button></div>';
  document.body.append(rinrinDialog);
- const sourceDialog=document.createElement('dialog');sourceDialog.id='skill-source-dialog';sourceDialog.setAttribute('aria-label','スキルの数値入力');
- sourceDialog.innerHTML='<form><h3></h3><div class="skill-entry-row"><div class="skill-entry-fields"><div id="skill-source-dialog-inputs"></div></div><div class="skill-keypad-slot"></div><button type="button" data-cancel>キャンセル</button></div></form>';
+ const sourceDialog=createCharacterSkillInputDialogView('skill-source-dialog','スキルの数値入力','','skill-source-dialog-inputs');
  document.body.append(sourceDialog);
  const skillDialogs=[teruDialog,sourceDialog,rinrinDialog];
  for(const dialog of [teruDialog,sourceDialog]){
@@ -208,6 +206,14 @@
    if(dialog===teruDialog&&index===0){fields[1].focus();return;}
    dialog.querySelector('form').requestSubmit();
   });
+  dialog.querySelector('form').addEventListener('submit',event=>{
+   event.preventDefault();const skill=activeSkill();
+   const matches=dialog===teruDialog?String(selectedCharacter?.id)==='23'&&!!skill:!!skill?.inputStats;
+   if(!matches||activeSkillCooldown(skill)>0){dialog.close();return;}
+   const fields=[...dialog.querySelectorAll('input')];if(fields.some(input=>!input.checkValidity()))return;
+   window.rememberCharacterSkillActivation?.();for(const input of fields)state().numbers[input.dataset.sourceKey]=Number(input.value);
+   applyActiveSkillEffects(skill);state().skillCooldowns[skill.key]=activeSkillMaxCooldown(skill);dialog.close();renderConditions();updateStats();
+  });
  }
 
  function positionSkillDialog(dialog){
@@ -217,19 +223,10 @@
  }
  function openSkillDialog(dialog){dialog.showModal();positionSkillDialog(dialog);}
  function closeSkillDialogs(){for(const dialog of skillDialogs)if(dialog.open)dialog.close();}
- for(const dialog of skillDialogs){dialog.classList.add('anchored-skill-dialog');dialog.addEventListener('click',event=>{if(event.target!==dialog)return;const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();});}
+ for(const dialog of skillDialogs){dialog.querySelector('[data-cancel]').addEventListener('click',()=>dialog.close());dialog.classList.add('anchored-skill-dialog');dialog.addEventListener('click',event=>{if(event.target!==dialog)return;const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();});}
  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&skillDialogs.some(dialog=>dialog.open)){event.preventDefault();event.stopImmediatePropagation();closeSkillDialogs();}},true);
  window.addEventListener('resize',()=>skillDialogs.forEach(positionSkillDialog));window.addEventListener('scroll',()=>skillDialogs.forEach(positionSkillDialog),true);
  window.addEventListener('character-selection-change',closeSkillDialogs);
- sourceDialog.querySelector('[data-cancel]').addEventListener('click',()=>sourceDialog.close());
- sourceDialog.querySelector('form').addEventListener('submit',event=>{
-  event.preventDefault();const skill=activeSkill();if(!skill?.inputStats||activeSkillCooldown(skill)>0){sourceDialog.close();return;}
-  const fields=[...sourceDialog.querySelectorAll('input')];if(fields.some(input=>!input.checkValidity()))return;
-  window.rememberCharacterSkillActivation?.();for(const input of fields)state().numbers[input.dataset.sourceKey]=Number(input.value);
-  applyActiveSkillEffects(skill);state().skillCooldowns[skill.key]=activeSkillMaxCooldown(skill);sourceDialog.close();renderConditions();updateStats();
- });
- rinrinDialog.querySelector('[data-cancel]').addEventListener('click',()=>rinrinDialog.close());
- window.addEventListener('character-selection-change',()=>{if(rinrinDialog.open)rinrinDialog.close();});
  for(const passes of [false,true])rinrinDialog.querySelector(passes?'[data-yes]':'[data-no]').addEventListener('click',()=>{
   const skill=activeSkill();rinrinDialog.close();if(String(selectedCharacter?.id)!=='28'||!skill||activeSkillCooldown(skill)>0)return;
   if(passes){requestSkillTargets(skill);return;}
@@ -243,14 +240,6 @@
   const input=document.createElement('input');input.type='number';input.min=String(spec.min??0);input.step='1';input.inputMode='numeric';input.required=true;input.setAttribute('aria-label',spec.label);input.dataset.sourceKey=spec.key;input.value=abilityControlValue(spec.key);
   item.append(input);return item;
  }
- teruDialog.querySelector('[data-cancel]').addEventListener('click',()=>teruDialog.close());
- window.addEventListener('character-selection-change',()=>{if(teruDialog.open)teruDialog.close();});
- teruDialog.querySelector('form').addEventListener('submit',event=>{
-  event.preventDefault();const skill=activeSkill();if(String(selectedCharacter?.id)!=='23'||!skill||activeSkillCooldown(skill)>0){teruDialog.close();return;}
-  const fields=[...teruDialog.querySelectorAll('input')];if(fields.some(input=>!input.checkValidity()))return;
-  window.rememberCharacterSkillActivation?.();for(const input of fields)state().numbers[input.dataset.sourceKey]=Number(input.value);
-  applyActiveSkillEffects(skill);state().skillCooldowns[skill.key]=activeSkillMaxCooldown(skill);teruDialog.close();renderConditions();updateStats();
- });
  function renderTeruSupport(){
   const self=String(selectedCharacter.id)==='23';
   if(!self&&(partySlots.some(id=>String(id)==='23')||abilityControlValue('PTテル憑依')||abilityControlValue('PTテル狐光'))){

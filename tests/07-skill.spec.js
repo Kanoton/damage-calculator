@@ -1315,9 +1315,9 @@ for(const [id,label] of [['16','オーバードライブのダイスの出目'],
  await page.goto('/07_skill/');await selectCharacter(page,id);
  const dialog=page.locator(id==='23'?'#teru-stat-dialog':'#skill-source-dialog'),skill=page.locator('#selected-character-skill'),ct=page.locator('#selected-character-ct'),atk=page.locator('#selected-character-atk');
  const initialCT=await ct.textContent(),initialATK=await atk.inputValue();
- for(const cancel of ['outside','escape']){
+ for(const cancel of ['outside','escape','button']){
   await skill.click();await expect(dialog).toBeVisible();const field=page.getByLabel(label,{exact:true});await field.fill('12');await field.focus();
-  if(cancel==='escape')await page.keyboard.press('Escape');else await page.mouse.click(1,1);
+  if(cancel==='escape')await page.keyboard.press('Escape');else if(cancel==='button')await dialog.getByRole('button',{name:'キャンセル',exact:true}).click();else await page.mouse.click(1,1);
   await expect(dialog).toBeHidden();await expect(page.locator('#character-number-pad')).toBeHidden();await expect(ct).toHaveText(initialCT);await expect(atk).toHaveValue(initialATK);
  }
  await skill.click();await expect(page.getByLabel(label,{exact:true})).toHaveValue('0');await page.keyboard.press('Escape');
