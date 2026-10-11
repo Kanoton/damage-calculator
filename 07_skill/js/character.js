@@ -236,17 +236,12 @@
   window.rememberCharacterSkillActivation?.();state().skillCooldowns[skill.key]=activeSkillMaxCooldown(skill);renderConditions();updateStats();
  });
 
- function sourceInput(spec,commit){
+ function sourceInput(spec){
   const item=document.createElement('label');item.className='skill-source-input';item.title=getSkillHoverText('skill.input',{name:spec.label});
   if(spec.stat){const icon=document.createElement('img');icon.src='../images/UT_Buff/'+(spec.stat==='atk'?'Attack.png':'Defense.png');icon.alt='';item.append(icon);}
   else {const label=document.createElement('span');label.textContent=String(selectedCharacter.id)==='16'?'出目':'影';item.append(label);}
   const input=document.createElement('input');input.type='number';input.min=String(spec.min??0);input.step='1';input.inputMode='numeric';input.required=true;input.setAttribute('aria-label',spec.label);input.dataset.sourceKey=spec.key;input.value=abilityControlValue(spec.key);
-  if(commit)input.addEventListener('change',()=>{if(!input.checkValidity())return;const next=Number(input.value);if(next===abilityControlValue(spec.key))return;window.rememberCharacterSkillActivation?.();state().numbers[spec.key]=next;});
   item.append(input);return item;
- }
- function renderSkillInputs(){
-  const container=document.getElementById('skill-source-inputs');container.replaceChildren();container.hidden=true;
-  document.getElementById('selected-character-skill-controls').classList.remove('has-source-inputs');
  }
  teruDialog.querySelector('[data-cancel]').addEventListener('click',()=>teruDialog.close());
  window.addEventListener('character-selection-change',()=>{if(teruDialog.open)teruDialog.close();});
@@ -273,7 +268,6 @@
  }
  function renderConditions(){
   conditionsBox.replaceChildren();
-  renderSkillInputs();
   renderPartySupport();
   renderTeruSupport();
   const ownedRules=activeRules();
@@ -597,12 +591,12 @@
   if(String(selectedCharacter.id)==='28'){openSkillDialog(rinrinDialog);return;}
   if(String(selectedCharacter.id)==='23'){
    const container=teruDialog.querySelector('#teru-skill-inputs');container.replaceChildren();
-   container.append(sourceInput({key:'三神憑依攻撃補正',label:'憑依する味方の攻撃力',stat:'atk'},false),sourceInput({key:'三神憑依防御補正',label:'憑依する味方の防御力',stat:'def'},false));
+   container.append(sourceInput({key:'三神憑依攻撃補正',label:'憑依する味方の攻撃力',stat:'atk'}),sourceInput({key:'三神憑依防御補正',label:'憑依する味方の防御力',stat:'def'}));
    openSkillDialog(teruDialog);return;
   }
   if(skill.inputStats){
    const container=sourceDialog.querySelector('#skill-source-dialog-inputs');container.replaceChildren();sourceDialog.querySelector('h3').textContent=skill.label;
-   for(const spec of skill.inputStats)container.append(sourceInput(spec,false));openSkillDialog(sourceDialog);return;
+   for(const spec of skill.inputStats)container.append(sourceInput(spec));openSkillDialog(sourceDialog);return;
   }
   if(skill.target){requestSkillTargets(skill);return;}
   window.rememberCharacterSkillActivation?.();

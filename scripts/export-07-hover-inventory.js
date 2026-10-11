@@ -32,11 +32,11 @@ exec(section(character,'function neededInputs(','\n // Received PT effects'));
 exec(section(character,'function renderPartySupport(','\n // Follow-up preview'));
 exec(section(character,'function renderTeruSupport(','\n function renderConditions'));
 exec(section(character,'function renderConditions(','\n function updateActiveSkillUi'));
-exec(section(character,'function sourceInput(','\n function renderSkillInputs'));
+exec(section(character,'function sourceInput(',"\n teruDialog.querySelector('[data-cancel]')"));
 exec(section(character,'function updateActiveSkillUi(','\n function updateStats'));
 exec(section(character,'const activeSkillMaxCooldown=','\n const activeEffectConditionMatches'));
 exec(section(character,'function toggleable(','\n function updateChipListSelection'));
-context.renderSkillInputs=()=>{};context.updateStats=()=>{};
+context.updateStats=()=>{};
 context.byChip=new Map(chips.map(c=>[c.id,chipRules.filter(r=>r.chip_id===c.id)]));
 context.abilityRules=()=>rules[String(context.selectedCharacter.id)];
 context.state=()=>context.currentState;
@@ -83,7 +83,7 @@ for(const donor of ['8','103','104','20','27','105','23','10','11']){
 }
 const blessing=render('106',{},['105']).find(e=>describe(e).key==='PTハンナ推理タイム＋1');capture('pt:105:blessing:106','PT受領','105','橘シェリーの状態欄','自キャラが橘シェリー、PTに遠野ハンナ／受領移動状態が残る間',blessing,'通常','aria-labelはPTハンナ推理タイム＋1。人形完成と祝福は別操作');
 for(const id of ['16','26','23']){
- const specs=id==='23'?exec(character.match(/container\.append\(sourceInput\((\{key:'三神憑依攻撃補正'.*?\}),false\),sourceInput\((\{key:'三神憑依防御補正'.*?\}),false\)\)/).slice(1).join(',').replace(/^/,'[').replace(/$/,']')):rules[id].activeSkills[0].inputStats;
+ const specs=id==='23'?exec(character.match(/container\.append\(sourceInput\((\{key:'三神憑依攻撃補正'.*?\})\),sourceInput\((\{key:'三神憑依防御補正'.*?\})\)\)/).slice(1).join(',').replace(/^/,'[').replace(/$/,']')):rules[id].activeSkills[0].inputStats;
  render(id);for(const spec of specs){context.spec=spec;const e=exec('sourceInput(spec,false)');add(`input:${id}:${spec.key}`,'スキル入力',id,'スキル入力枠','自キャラが'+names.get(id)+'、スキルボタン押下後',spec.label,'数値入力','通常',describe(e).icon,e.title,'07_skill/js/character.js:sourceInput','現在のtitleは入力対象名のみ');}
 }
 const fanTitle=map.match(/partyFanReduce\.title=([^;\n]+);/)[1];add('monster:pt-fan-reduce','PT受領','101','モンスター一覧上部','超てんちゃんがPT','PTファン ATK−1','ボタン','通常','',exec(fanTitle),'07_skill/js/map.js:partyFanReduce');
