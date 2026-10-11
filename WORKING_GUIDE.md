@@ -131,7 +131,7 @@ CI定義は `.github/workflows/06b-smoke.yml`、テスト本体は `tests/06b-sm
 
 ## 10. 07 PT組み合わせの全数検証
 
-総当たり検証はユーザーが明示的に指定した時だけ実行します。通常の修正では実行しません。全キャラのCT巡回も `FULL_CHARACTER_CHECK=1` 指定時だけにし、通常の07 smokeでは今回の8キャラを対象とします。対象コマンドは `npm run test:07:pairs`、CIは手動 `workflow_dispatch` のみ（PR/pushでは起動しない）です。正本キャラCSVから異なる自キャラ×PT1人を生成します（現在35×34＝1,190通り）。自キャラごとの45秒上限、全体12分上限、失敗3グループ、2ブラウザworker、再試行なし。CIジョブ自体にも15分上限を設けています。
+総当たり検証はユーザーが明示的に指定した時だけ実行します。通常の修正では実行しません。全キャラのCT巡回も `FULL_CHARACTER_CHECK=1` 指定時だけにし、通常の07 smokeでは今回の8キャラを対象とします。対象コマンドは `npm run test:07:pairs`、既存pair CIは手動 `workflow_dispatch` のみです。加えて `.github/workflows/07-requested-fullcheck.yml` は、ユーザーの明示依頼後にPRへ `user-requested-full-check` ラベルを付けた場合だけ全35キャラCT・全PT組合せを実行します。通常のラベルなしPR/pushでは全数検証を実行しません。正本キャラCSVから異なる自キャラ×PT1人を生成します（現在35×34＝1,190通り）。自キャラごとの45秒上限、全体12分上限、失敗3グループ、2ブラウザworker、再試行なし。CIジョブ自体にも15分上限を設けています。
 
 `pair-test-report.json` と `pair-test-results/` にステップ結果・1組ずつのJSONL・各自キャラの完了/失敗/未実行リスト・失敗traceを保存します。CIは失敗/中断時にも成果物をアップロードします。再実行は例として `PAIR_SELF_IDS=23,29 npm run test:07:pairs` で自キャラを限定でき、個別対象は `-- --grep 'self=23 '` でも指定できます。各グループは新規ページから始まり、アプリ本体の状態を変更するためのテスト用APIは追加しません。
 

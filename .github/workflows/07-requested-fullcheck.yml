@@ -1,0 +1,37 @@
+name: 07 explicitly requested full check
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+concurrency:
+  group: 07-requested-fullcheck-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  full:
+    # Apply this label only after an explicit user request for exhaustive checks.
+    if: contains(github.event.pull_request.labels.*.name, 'user-requested-full-check')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npm run check:07
+      - run: npx playwright install --with-deps chromium
+      - name: All 35 character CT lifecycles
+        run: npm run test:07 -- --grep 'affected characters expose active skill CT'
+        env:
+          FULL_CHARACTER_CHECK: '1'
+      - name: All self and party combinations
+        run: npm run test:07:pairs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 07-requested-fullcheck-results
+          path: |
+            pair-test-report.json
+            pair-test-results/
+            test-results/
+          if-no-files-found: warn
+          retention-days: 14

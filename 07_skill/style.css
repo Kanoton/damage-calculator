@@ -1685,3 +1685,25 @@ dialog.anchored-skill-dialog{position:fixed;margin:0;max-height:calc(100vh - 16p
 #rinrin-area-dialog{width:min(640px,calc(100vw - 16px));padding:12px}
 .rinrin-yes{white-space:nowrap;font-size:14px}
 @media(max-width:640px){.rinrin-yes{font-size:11px}}
+
+/* Skill entry fits the inputs and in-frame keypad; actions sit below that row. */
+#teru-stat-dialog,#skill-source-dialog{width:min(360px,calc(100vw - 16px));padding:12px}
+.skill-entry-row{display:grid;grid-template-columns:minmax(90px,1fr) 184px;gap:12px;align-items:start}
+#teru-skill-inputs,#skill-source-dialog-inputs{display:flex;flex-direction:column;gap:14px;padding-top:8px}
+dialog[data-inline-pad] .character-number-pad{position:static;box-sizing:border-box;width:184px;box-shadow:none}
+dialog[data-inline-pad] .skill-dialog-actions{justify-content:flex-start;margin-top:12px;margin-left:auto;width:max-content}
+dialog[data-inline-pad] .skill-dialog-actions button{min-width:72px}
+#rinrin-area-dialog{width:max-content;max-width:calc(100vw - 16px);font-size:14px}
+#rinrin-area-dialog p{font-size:14px;line-height:1.5;margin:8px 0;white-space:normal}
+#rinrin-area-dialog .skill-dialog-actions{justify-content:flex-start;margin-top:12px}
+@media(max-width:380px){.skill-entry-row{grid-template-columns:minmax(80px,1fr) 166px;gap:8px}dialog[data-inline-pad] .character-number-pad{width:166px;grid-template-columns:repeat(3,minmax(0,1fr));padding:6px}}
+
+.skill-keypad-slot{min-height:187px}
+dialog[data-inline-pad] .character-number-pad{grid-template-columns:repeat(3,minmax(0,1fr))}
+.mobile-ui dialog[data-inline-pad] .skill-keypad-slot{min-height:211px}
+
+/* Size from the field + keypad row, never from right-aligned action buttons. */
+#teru-stat-dialog,#skill-source-dialog{width:max-content;max-width:calc(100vw - 16px)}
+.skill-entry-row{grid-template-columns:max-content 184px}
+.mobile-ui dialog[data-inline-pad] .character-number-pad button{height:44px}
+@media(max-width:380px){.skill-entry-row{grid-template-columns:max-content 166px}}
