@@ -1,4 +1,4 @@
-name: 06b browser smoke
+name: browser smoke regression
 
 on:
   pull_request:
@@ -10,6 +10,7 @@ on:
       - 'playwright.config.js'
       - 'package.json'
       - 'package-lock.json'
+      - '.github/workflows/06b-smoke.yml'
   push:
     branches: [main]
     paths:
@@ -20,6 +21,7 @@ on:
       - 'playwright.config.js'
       - 'package.json'
       - 'package-lock.json'
+      - '.github/workflows/06b-smoke.yml'
 
 jobs:
   smoke:
@@ -31,4 +33,4 @@ jobs:
           node-version: 22
       - run: npm install
       - run: npx playwright install --with-deps chromium
-      - run: npm run test:06b
+      - run: npm run test:smoke
