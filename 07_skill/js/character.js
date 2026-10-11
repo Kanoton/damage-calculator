@@ -192,13 +192,13 @@
  };
  // Editable skill sources are separate from applied bonuses; Teru commits both atomically.
  const teruDialog=document.createElement('dialog');teruDialog.id='teru-stat-dialog';teruDialog.setAttribute('aria-label','憑依先のステータス入力');
- teruDialog.innerHTML='<form><h3>憑依先のステータス</h3><div class="skill-entry-row"><div id="teru-skill-inputs"></div><div class="skill-keypad-slot"></div></div><div class="skill-dialog-actions"><button type="button" data-cancel>キャンセル</button><button type="submit">確定</button></div></form>';
+ teruDialog.innerHTML='<form><h3>憑依先のステータス</h3><div class="skill-entry-row"><div class="skill-entry-fields"><div id="teru-skill-inputs"></div><button type="button" data-cancel>キャンセル</button></div><div class="skill-keypad-slot"></div></div></form>';
  document.body.append(teruDialog);
  const rinrinDialog=document.createElement('dialog');rinrinDialog.id='rinrin-area-dialog';rinrinDialog.setAttribute('aria-label','エリア拒止の通過確認');
  rinrinDialog.innerHTML='<h3>エリア拒止を通過しますか？</h3><p class="rinrin-yes">Yes：対象DEF−2／自身ATK＋2（2ターン）</p><p>No：補正なしでスキルを使用。</p><div class="skill-dialog-actions"><button type="button" data-cancel>キャンセル</button><button type="button" data-no>No</button><button type="button" data-yes>Yes</button></div>';
  document.body.append(rinrinDialog);
  const sourceDialog=document.createElement('dialog');sourceDialog.id='skill-source-dialog';sourceDialog.setAttribute('aria-label','スキルの数値入力');
- sourceDialog.innerHTML='<form><h3></h3><div class="skill-entry-row"><div id="skill-source-dialog-inputs"></div><div class="skill-keypad-slot"></div></div><div class="skill-dialog-actions"><button type="button" data-cancel>キャンセル</button><button type="submit">確定</button></div></form>';
+ sourceDialog.innerHTML='<form><h3></h3><div class="skill-entry-row"><div class="skill-entry-fields"><div id="skill-source-dialog-inputs"></div><button type="button" data-cancel>キャンセル</button></div><div class="skill-keypad-slot"></div></div></form>';
  document.body.append(sourceDialog);
  const skillDialogs=[teruDialog,sourceDialog,rinrinDialog];
  for(const dialog of [teruDialog,sourceDialog]){
