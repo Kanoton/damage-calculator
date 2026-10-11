@@ -61,11 +61,12 @@ CIに合わせて Node.js 22、npm、Python 3 を用意します。
 npm install
 npx playwright install --with-deps chromium
 npm run check:07
+npm run test:smoke
 npm run test:06b
 npm run test:07
 ```
 
-現在の `test:06b` は Playwright の全テストを実行します。`test:07` は固有能力テストのみを実行します。`check:07` は個別JSとHTMLの読み込み順で連結したJSを構文チェックします。
+`test:smoke` は `tests/` の通常回帰テスト（06b・07・08）を実行し、全キャラCT巡回・PT総当たりは含みません。`test:06b` は06bのsmokeだけを実行します。`test:07` は固有能力テストのみを実行します。`check:07` は個別JSとHTMLの読み込み順で連結したJSを構文チェックします。
 
 ## プロジェクトの進め方
 

@@ -85,7 +85,7 @@ npx playwright install --with-deps chromium
 npm run test:06b
 ```
 
-CI定義は `.github/workflows/06b-smoke.yml`、テスト本体は `tests/06b-smoke.spec.js` です。
+06b専用のテスト本体は `tests/06b-smoke.spec.js` です。通常回帰CI `.github/workflows/06b-smoke.yml` は `npm run test:smoke` で `tests/` 全体（06b・07・08）を従来どおり実行します。全キャラCT巡回・PT総当たりは含みません。
 
 `07_skill` の固有能力テストは `tests/07-skill.spec.js`、CIは `.github/workflows/07-skill-smoke.yml`、実行コマンドは `npm run test:07` です。
 
