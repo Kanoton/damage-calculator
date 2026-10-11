@@ -4,6 +4,14 @@ Last updated: 2026-10-11
 
 This is the durable handoff for continuing development, especially `07_skill`. On a new chat or machine, read this file, current `main`, and recent PRs before changing code.
 
+## 2026-10-11：NewGame・ゲーム開始タイミング（作業中）
+
+- ユーザーは今回の変更後にフルチェックを明示指定。基準main `4f523b0`（PR #196反映済み）、ブランチ `codex/07-new-game-20261011`。開始11:49 UTC、30分区切り12:19 UTC。
+- 07のみ：撃破ボタンは撃破処理後にマップタブへ移動。NewGameをラウンド・進捗枠に追加し、確認の「はい」またはEnterで実行。「いいえ」／Escapeはキャンセル。ラウンド1・進捗1、先頭マップ（夢想号）・普通へ戻し、自キャラ未選択・PT/全キャラ状態/チップ/モンスター/バフ/ルート/ミッション/イベント実行済み/Undo履歴/計算機入力をリセットする。
+- ミミの既存の自動初期表示は維持するが初期表示専用通知では進捗イベントを実行しない。一覧で自キャラを選択した時に進捗1イベントを実行する。NewGame後はキャラ未選択のためイベントなし、再選択で発生。先頭マップの選択はHTTP/file://共通。
+- 関連：index、style、map、character、07テスト、WORKING_GUIDE、説明文一覧manifestを更新。08・共有CSV・画像は変更しない。HTTP/file://でアクセス直後0体→キャラ選択後4体、NewGame取消/クリック確定/Enter確定、PT/レベル/狐光/手動ATK/マップ/難易度/履歴のクリア、再選択、撃破→マップ→Undoの回帰テストを追加。
+- 構文（21script個別＋連結）、説明文生成一致・formatterは成功。ブラウザはGitHub通常CIで確認する。PRに `user-requested-full-check` を付与し全35キャラCT＋1,190PT組合せを実行する。PR作成・通常CI・フルチェック・最終差分・マージが残る。
+
 ## 2026-10-11：07説明文の参照元統一
 
 - 依頼：418行の文面編集に先立ち説明文の参照元を統一。基準main `48e86b3`（PR #195）。ブランチ `codex/07-hover-source-20261011`。

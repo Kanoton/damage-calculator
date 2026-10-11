@@ -1357,3 +1357,34 @@ for(const protocol of ['http','file'])test(`07 skill: canonical hover text is sh
  await expect(page.locator('#character-skill-tooltip')).toContainText('ジュジュシールド');
  expect(errors).toEqual([]);
 });
+
+for(const protocol of ['http','file'])test(`07 game lifecycle: initial event waits for selection and NewGame clears all on ${protocol}`,async({page})=>{
+ const errors=[];page.on('pageerror',error=>errors.push(error.message));
+ if(protocol==='file')await page.goto(require('node:url').pathToFileURL(require('node:path').resolve('07_skill/index.html')).href);else await page.goto('/07_skill/');
+ await expect(page.locator('#selected-character-name')).toHaveText('ミミ');
+ await expect(page.locator('#mp-map-select')).toHaveValue('MAP0001');await expect(page.locator('#map-roster-list .roster-card')).toHaveCount(0);
+ await selectCharacter(page,'23');await expect(page.locator('#map-roster-list .roster-card')).toHaveCount(4);
+ await page.locator('.character-select[data-id="8"]').click();
+ await page.locator('#selected-self-tab').click();await page.locator('#selected-character-atk-button').click();await page.locator('#selected-character-portrait').click();
+ await page.getByLabel('狐光の数').fill('4');await page.getByLabel('狐光の数').dispatchEvent('change');
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0002');await page.locator('#mp-difficulty').selectOption('悪夢');
+ await page.locator('#turn-end').click();await expect(page.locator('#current-round')).toHaveText('2');
+ await page.locator('#new-game').click();await page.locator('#new-game-cancel').click();
+ await expect(page.locator('#current-round')).toHaveText('2');await expect(page.locator('#selected-character-name')).toHaveText('テル');
+ await page.locator('#new-game').click();if(protocol==='http')await page.locator('#new-game-confirm').click();else await page.locator('#new-game-dialog').press('Enter');
+ await expect(page.locator('.role-tab[data-role="map"]')).toHaveClass(/active/);
+ await expect(page.locator('#selected-character')).toBeHidden();await expect(page.locator('#mp-map-select')).toHaveValue('MAP0001');
+ await expect(page.locator('#map-roster-list .roster-card')).toHaveCount(0);await expect(page.locator('#roster-undo')).toBeDisabled();
+ expect(await page.evaluate(()=>getPartyCharacterIds())).toEqual([]);
+ await expect(page.locator('#current-round')).toHaveText('1');await expect(page.locator('#current-progress')).toHaveText('1');
+ await selectCharacter(page,'23');await expect(page.locator('#map-roster-list .roster-card')).toHaveCount(4);
+ await expect(page.locator('#selected-character-atk')).toHaveValue('2');await expect(page.locator('#selected-character-level')).toHaveText('Lv.0');await expect(page.getByLabel('狐光の数')).toHaveValue('0');await expect(page.locator('#mp-difficulty')).toHaveValue('普通');await expect(page.locator('#selected-character-ct')).toHaveText('CT 0 / 3');
+ expect(errors).toEqual([]);
+});
+
+test('07 game lifecycle: defeat button returns to map and Undo restores the monster',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'1');const card=page.locator('#map-roster-list .roster-card').first();
+ await card.locator('.roster-select').click();await expect(page.locator('.role-tab[data-role="attack"]')).toHaveClass(/active/);
+ await card.locator('.roster-remove').click();await expect(page.locator('.role-tab[data-role="map"]')).toHaveClass(/active/);
+ await expect(page.locator('#roster-counts')).toContainText('撃破 1');await page.locator('#roster-undo').click();await expect(page.locator('#roster-counts')).toContainText('撃破 0');
+});

@@ -13,7 +13,7 @@
  let statusIcons=new Map(),mapKeywords=[];
  let currentOpponent=null;
  let characterSkills=new Map();
- let characters=[],chips=[],rules=[],category='マーク',selectedCharacter=null;
+ let characters=[],chips=[],rules=[],category='マーク',selectedCharacter=null;let gameResetRequested=false;
  const states=new Map();
  const byChip=new Map();
  const specialIcons={'対象のマーク':'マーク','攻撃対象はモンスター':'モンスター','クジャク係の羽ばたき':'孔雀の羽ばたき'};
@@ -556,12 +556,24 @@
   updateChipListSelection();renderParty();
   window.dispatchEvent(new Event('character-evidence-change'));
  }
- function selectCharacter(row,openParty=false){
+ function selectCharacter(row,openParty=false,notify=true){
   const ownIndex=partySlots.findIndex(id=>String(id)===String(selectedCharacter?.id));
   for(let i=0;i<partySlots.length;i++)if(String(partySlots[i])===String(row.id))partySlots[i]=null;
   partyStates.delete(String(row.id));partyEditId=null;partySlots[ownIndex<0?0:ownIndex]=row.id;
-  selectedCharacter=row;renderSelectedCharacter();window.dispatchEvent(new Event('character-selection-change'));if(openParty)setPartyMode(true);
+  selectedCharacter=row;renderSelectedCharacter();window.dispatchEvent(new Event(notify?'character-selection-change':'character-initialized'));if(openParty)setPartyMode(true);
  }
+ window.addEventListener('new-game-reset',()=>{
+  gameResetRequested=true;closeSkillDialogs();if(skillTooltipController)skillTooltipController.element.hidden=true;
+  selectedCharacter=null;currentOpponent=null;states.clear();partyStates.clear();partySlots.fill(null);partyEditId=null;draggedPartyIndex=null;
+  conditionsBox.replaceChildren();ownedBox.replaceChildren();selectedPanel.hidden=true;
+  document.getElementById('selected-character-name').textContent='';
+  for(const id of ['selected-character-current-hp','selected-character-atk','selected-character-def'])document.getElementById(id).value='';
+  document.getElementById('selected-character-skill-controls').hidden=true;
+  setPartyMode(false);listStatus.textContent='';chipStatus.textContent='';
+  document.getElementById('selected-self-tab').click();document.getElementById('character-list-tab').click();
+  root.querySelector('.chip-category-tabs button[data-category="マーク"]')?.click();renderChips();
+  window.dispatchEvent(new Event('character-selection-change'));window.dispatchEvent(new Event('party-members-change'));
+ });
  function changeCharacterLevel(delta){
   if(!selectedCharacter)return;
   const oldLevel=state().level,oldMax=calculate().hp,oldCurrent=state().currentHp;
@@ -704,6 +716,6 @@
   skillTooltipController=setupCharacterSkillTooltip({characterSkills});
   for(const rule of rules){if(!byChip.has(rule.chip_id))byChip.set(rule.chip_id,[]);byChip.get(rule.chip_id).push(rule);}
   renderImages(document.getElementById('character-image-list'),characters,'character_list','list_img');renderChips();
-  const defaultCharacter=characters.find(row=>row.name==='ミミ');if(defaultCharacter)selectCharacter(defaultCharacter);
+  const defaultCharacter=characters.find(row=>row.name==='ミミ');if(defaultCharacter&&!gameResetRequested)selectCharacter(defaultCharacter,false,false);
  });
 })();
