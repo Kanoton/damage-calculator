@@ -24,6 +24,7 @@
 
 `index.html` の実際の読み込み順は依存関係でもあります。順序を変更するときは慎重に扱ってください。
 
+0. `js/hover-text.js` — 07専用の説明文CSVから生成。HTTP／file://共通の文面
 1. `js/calculator.js` — ダメージ計算、カード確率、攻撃/防御UI、確率グラフ
 2. `js/map-utils.js` — CSV解析、画像パス、ギミック計算などの共通処理
 3. `js/map-data.js` — マップ系フォールバックデータ・固定設定
@@ -150,4 +151,6 @@ CI定義は `.github/workflows/06b-smoke.yml`、テスト本体は `tests/06b-sm
 
 ## 13. 07のマウスオーバー文面一覧
 
-第一段階の編集用資料は `docs/hover-descriptions/inventory.csv`、説明は同フォルダの `README.md` です。`node scripts/export-07-hover-inventory.js` で実装の表示関数・正本CSVから再生成し、`--check` で一致を確認できます。ID単位で修正後の説明文・編集メモを保持します。これは現在の表示文面を整理する資料で、アプリはまだ読み込みません。文面調整→承認した文面の参照元統一の順で進めます。一覧化だけでゲームルールや08を変更しません。生成スクリプトは表示テキストを抽出するオフライン処理で、全キャラCT巡回・PT総当たり検証ではありません。
+07の説明文の正本は `07_skill/data/hover-descriptions.csv`（167行）です。説明文の列だけを編集し、`node scripts/build-07-hover-text.js` で同期script `js/hover-text.js` を生成します。生成JSは手編集せず、CSVと同時にコミットしてください。HTTP／file://はこの同じデータを読み、旧能力全文snapshotや共有CSVの文章にはフォールバックしません。キャラ・チップの数値、アイコン、ゲームルール等の既存フォールバックは保持します。共有 `csv/` と08の説明表示は従来どおりです。
+
+`npm run check:07` は生成一致・差し込み処理・script構文を確認します。対応確認用の418行は `docs/hover-descriptions/inventory.csv`、編集方法は同フォルダの `README.md`。`node scripts/export-07-hover-inventory.js` で再生成し、`--check` で一致を確認します。旧一覧のID単位の修正文・メモを保持しますが、今後の編集元は167行の正本です。抽出はオフライン表示処理で、全キャラCT巡回・PT総当たり検証ではありません。

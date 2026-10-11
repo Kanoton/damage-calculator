@@ -1,20 +1,20 @@
 // ===== キャラクター表示ヘルパー =====
 function createOwnedChipView(chip,chargeDelta,onCharge){
- const item=document.createElement('span');item.className='selected-chip';item.title=chip.name+'\n'+chip.effect;
+ const item=document.createElement('span');item.className='selected-chip';item.title=getSkillHoverText('chip.'+chip.id);
  const img=document.createElement('img');img.alt=chip.name;img.src='../images/chip_icon/'+encodeURIComponent(chip.images);item.append(img);
  const name=document.createElement("span");name.className="owned-chip-name";name.textContent=chip.name;item.append(name);
  if(chargeDelta!==null){
   item.classList.add('is-actionable');item.setAttribute('role','button');item.tabIndex=0;
-  if(chargeDelta)item.title+='\nクリック：チャージ'+(chargeDelta>0?'+':'')+chargeDelta;
-  if(chargeDelta<0)item.title+='（'+(-chargeDelta)+'以上必要）';
-  if(chip.id==='56')item.title+='、CT-1';
+  if(chargeDelta)item.title+=getSkillHoverText('chip.charge',{delta:(chargeDelta>0?'+':'')+chargeDelta});
+  if(chargeDelta<0)item.title+=getSkillHoverText('chip.charge.required',{amount:-chargeDelta});
+  if(chip.id==='56')item.title+=getSkillHoverText('chip.charge.ct');
   item.addEventListener('click',onCharge);item.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();onCharge();}});
  }
  return item;
 }
 
 function createConditionPhaseView(label,checked,onChange){
- const field=document.createElement('label');field.className='condition-phase';
+ const field=document.createElement('label');field.className='condition-phase';field.title=getSkillHoverText(label==='攻撃時'?'phase.attack':'phase.move');
  const checkbox=document.createElement('input');checkbox.type='checkbox';checkbox.checked=checked;checkbox.setAttribute('aria-label',label+'の効果を有効にする');
  checkbox.addEventListener('change',()=>onChange(checkbox.checked));field.append(checkbox,document.createTextNode(label));
  return field;
@@ -25,7 +25,7 @@ function createChipConditionToggleView(chip,id,mode,onToggle){
  button.className='selected-chip condition-toggle'+(mode?' is-active':'')+(id==='112'&&mode===1?' is-red':'')+(id==='112'&&mode===2?' is-blue':'')+(id==='112'&&mode===3?' is-both':'');
  button.dataset.chipId=id;button.setAttribute('aria-pressed',String(mode>0));
  const status=id==='112'?(mode===1?'赤き呪い':mode===2?'青き呪い':mode===3?'赤き呪いと青き呪い':'オフ'):(mode?'オン':'オフ');
- button.setAttribute('aria-label',chip.name+'：'+status+'。クリックで切り替え');button.title=chip.name+'：'+status+'\nクリックで条件を切り替え';
+ button.setAttribute('aria-label',chip.name+'：'+status+'。クリックで切り替え');button.title=getSkillHoverText('operation.condition',{name:chip.name,state:status});
  const img=document.createElement('img');img.alt='';img.src='../images/chip_icon/'+encodeURIComponent(chip.images);button.append(img);button.addEventListener('click',onToggle);
  return button;
 }
@@ -33,12 +33,12 @@ function createChipConditionToggleView(chip,id,mode,onToggle){
 function createMapConditionToggleView(key,active,icon,onToggle){
  const button=document.createElement('button');button.type='button';button.className='selected-chip condition-toggle'+(active?' is-active':'');
  button.setAttribute('aria-pressed',String(active));button.setAttribute('aria-label',key+'：'+(active?'オン':'オフ')+'。クリックで切り替え');
- button.title=key+'：'+(active?'オン':'オフ')+'\nクリックで条件を切り替え';button.append(icon);button.addEventListener('click',onToggle);
+ button.title=getSkillHoverText('operation.condition',{name:key,state:active?'オン':'オフ'});button.append(icon);button.addEventListener('click',onToggle);
  return button;
 }
 
 function createConditionNumberView(key,value,icon){
- const item=document.createElement('label');item.className='condition-item';item.title=key+'：アイコンを左クリックで+1、右クリックで-1';
+ const item=document.createElement('label');item.className='condition-item';item.title=getSkillHoverText('operation.number',{name:key});
  const button=document.createElement('button');button.type='button';button.className='condition-icon';button.setAttribute('aria-label',key+'を増やす');button.append(icon);
  const input=document.createElement('input');input.type='number';input.min='0';if(key==='チャージ')input.max='10';input.inputMode='numeric';input.className='condition-number';input.setAttribute('aria-label',key+'の数');input.value=value;
  item.append(button,input);return {item,button,input};
@@ -69,7 +69,7 @@ function createCharacterListCardView(row){
  for(const [key,label,icon] of [['lv0_atk','攻撃力','Attack.png'],['lv0_def','防御力','Defense.png'],['lv0_hp','HP','Hp.png'],['initial_coin','初期コイン','Coin.png']]){
   const entry=document.createElement('span');entry.className='character-list-stat';entry.dataset.stat=key;
   const value=String(row[key]??'—');const bonus=key==='initial_coin'?Number(row.lv1_coin_bonus||0):0;
-  entry.title=label+(bonus?'（Lv1コイン加算 +'+bonus+'）':'');entry.setAttribute('aria-label',label+' '+value+(bonus?'、Lv1コイン加算 '+bonus:''));
+  entry.title=getSkillHoverText(bonus?'parameter.coin_bonus':'parameter.label',{name:label,bonus});entry.setAttribute('aria-label',label+' '+value+(bonus?'、Lv1コイン加算 '+bonus:''));
   const image=document.createElement('img');image.className='character-list-stat-icon';image.src='../images/UT_Buff/'+icon;image.alt='';
   const text=document.createElement('span');text.textContent=value;entry.append(image,text);
   if(bonus){const extra=document.createElement('small');extra.className='character-list-coin-bonus';extra.textContent='+'+bonus;entry.append(extra);}
@@ -83,7 +83,7 @@ function createCharacterListCardView(row){
 function createCharacterSkillTooltipView(row,ability){
  const stats=document.createElement('div');stats.className='character-skill-stats';
  for(const [key,label,file] of [['atk','攻撃力','Attack.png'],['def','防御力','Defense.png'],['hp','HP','Hp.png'],['move','移動力',null]]){
-  const entry=document.createElement('span');entry.className='character-skill-stat';entry.title=label;
+  const entry=document.createElement('span');entry.className='character-skill-stat';entry.title=getSkillHoverText('parameter.label',{name:label});
   const icon=file?document.createElement('img'):document.createElement('span');
   if(file){icon.src='../images/UT_Buff/'+file;icon.alt='';}else{icon.className='character-skill-move-icon';icon.textContent='👟';icon.setAttribute('aria-hidden','true');}
   const values=[0,1,2,3].map(level=>row['lv'+level+'_'+key]??'—').join(' / ');
@@ -92,12 +92,6 @@ function createCharacterSkillTooltipView(row,ability){
  }
  const description=document.createElement('div');description.className='character-skill-text';
  let displayAbility=ability.replace(/\r\n/g,'\n');
- if(String(row.id)==='8'){
-  const shield=displayAbility.match(/^※ジュジュシールド効果：[ \t]*(.+)$/m);
-  if(shield)displayAbility=displayAbility.replace(shield[0]+'\n','').trimEnd()+'\n\nジュジュシールド\n'+shield[1];
- }
- if(String(row.id)==='105')displayAbility=displayAbility.replace(/(^人形完成$)/m,'浮遊\n移動力+2、罠・ロードブロックを無効化。他のユニットに通過される際、戦闘が発生しない。\n\n$1');
- if(String(row.id)==='6')displayAbility=displayAbility.replace('、移動ダイス-2～2','');
  const lines=displayAbility.split(/\r?\n/);
  lines.forEach((line,index)=>{
   const heading=!(String(row.id)==='8'&&lines[index-1]==='ジュジュシールド')&&(/^(?:スキル|パッシブスキル)\s*[-－]\s*.+$/.test(line.trim())||/^[^\s。、！？：:（）()\[\]［］]{1,24}$/.test(line.trim()));
@@ -119,13 +113,13 @@ function createCharacterNumberPadView(){
 function createCharacterAbilityToggleView(key,active,icon,onToggle){
  const button=document.createElement('button');button.type='button';button.className='selected-chip condition-toggle'+(active?' is-active':'');
  button.setAttribute('aria-pressed',String(active));button.setAttribute('aria-label',key+'：'+(active?'オン':'オフ')+'。クリックで切り替え');
- button.title=key+'：'+(active?'オン':'オフ')+'\nクリックで切り替え';button.append(icon);button.addEventListener('click',onToggle);
+ button.title=getSkillHoverText('operation.toggle',{name:key,state:active?'オン':'オフ'});button.append(icon);button.addEventListener('click',onToggle);
  return button;
 }
 
 function createCharacterAbilityChoiceView(key,option,icon,onCycle){
  const button=document.createElement('button');button.type='button';button.className='selected-chip condition-toggle'+(Number(option.value)?' is-active':'');
- button.setAttribute('aria-label',key+'：'+option.label+'。クリックで切り替え');button.title=key+'：'+option.label+'\nクリックで切り替え';
+ button.setAttribute('aria-label',key+'：'+option.label+'。クリックで切り替え');button.title=getSkillHoverText('operation.toggle',{name:key,state:option.label});
  button.append(icon,document.createTextNode(option.label));button.addEventListener('click',onCycle);
  return button;
 }
@@ -146,22 +140,22 @@ const partyChipGridResizeObserver=new ResizeObserver(entries=>{
 function createPartyMemberView(row,index,parameters,isSelf,onLevelChange,ownedChips=[],onStatChange){
  const slot=document.createElement('div');slot.className='party-member-slot';slot.dataset.slot=String(index+1);slot.dataset.characterId=row?.id||'';slot.tabIndex=0;slot.draggable=Boolean(row);slot.setAttribute('role','group');
  slot.setAttribute('aria-label',(index+1)+'番目'+(isSelf?'（自分）':'')+'：'+(row?.name||'未登録'));
- slot.title=row?'名前・枠をクリックでチップ編集対象を選択／ドラッグで順番変更'+(isSelf?'':'／枠を右クリックでPT登録解除'):'キャラ一覧からクリックで登録';
+ slot.title=row?getSkillHoverText('party.slot',{extra:isSelf?'':getSkillHoverText('party.slot.remove')}):getSkillHoverText('party.slot.empty');
  const order=document.createElement('span');order.className='party-slot-order';order.textContent=['1st','2nd','3rd','4th'][index];if(isSelf){const self=document.createElement('small');self.textContent='自分';order.append(self);}slot.append(order);
  const details=document.createElement('div');details.className='party-slot-details';
  let chipList=null;
  const identity=document.createElement('div');identity.className='party-slot-identity';
  const name=document.createElement('strong');name.className='party-slot-name';name.textContent=row?.name||'未登録';identity.append(name);details.append(identity);
  if(row){
-  const levelTitle='左クリックでレベルアップ／右クリックでレベルダウン（Lv0～3）';
+  const levelTitle=getSkillHoverText('party.level');
   const wireLevel=button=>{button.title=levelTitle;button.addEventListener('click',event=>{event.stopPropagation();onLevelChange(1);});button.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();onLevelChange(-1);});button.addEventListener('keydown',event=>{if(event.key==='ArrowDown'){event.preventDefault();event.stopPropagation();onLevelChange(-1);}});};
   const portrait=document.createElement('button');portrait.type='button';portrait.className='party-slot-portrait';portrait.setAttribute('aria-label',row.name+'のレベル変更');
   const image=document.createElement('img');image.src='../images/character/'+encodeURIComponent(row.images);image.alt=row.name;image.draggable=false;portrait.append(image);wireLevel(portrait);slot.append(portrait);
   const stats=document.createElement('div');stats.className='party-slot-stats';
   const level=document.createElement('button');level.type='button';level.className='party-slot-level';level.textContent='Lv.'+parameters.level;level.setAttribute('aria-label',row.name+' Lv.'+parameters.level+'：'+levelTitle);wireLevel(level);identity.append(level);
   for(const [key,label,icon] of [['hp','HP','Hp.png'],['atk','攻撃力','Attack.png'],['def','防御力','Defense.png'],['move','移動力','run.png']]){
-   const stat=document.createElement('span');stat.className='party-slot-stat';stat.dataset.stat=key;stat.title=label;stat.setAttribute('aria-label',label+' '+(key==='hp'?parameters.currentHp+' / '+parameters.hp:parameters[key]));
-   const button=document.createElement('button');button.type='button';button.className='party-slot-stat-icon';button.setAttribute('aria-label',row.name+'の'+(key==='hp'?'現在HPを減らす':label+'を増やす'));button.title=label+(key==='hp'?'：左クリックで−1／右クリックで＋1':'：左クリックで＋1／右クリックで−1');
+   const stat=document.createElement('span');stat.className='party-slot-stat';stat.dataset.stat=key;stat.title=getSkillHoverText('parameter.label',{name:label});stat.setAttribute('aria-label',label+' '+(key==='hp'?parameters.currentHp+' / '+parameters.hp:parameters[key]));
+   const button=document.createElement('button');button.type='button';button.className='party-slot-stat-icon';button.setAttribute('aria-label',row.name+'の'+(key==='hp'?'現在HPを減らす':label+'を増やす'));button.title=getSkillHoverText(key==='hp'?'parameter.hp':'parameter.increase',{name:label});
    const image=document.createElement('img');image.src='../images/UT_Buff/'+icon;image.alt=label;image.draggable=false;button.append(image);button.addEventListener('click',event=>{event.stopPropagation();onStatChange?.(key,key==='hp'?-1:1);});button.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();onStatChange?.(key,key==='hp'?1:-1);});
    const value=document.createElement('b');value.textContent=key==='hp'?parameters.currentHp+'/'+parameters.hp:parameters[key];stat.append(button,value);stats.append(stat);
   }
@@ -172,7 +166,7 @@ function createPartyMemberView(row,index,parameters,isSelf,onLevelChange,ownedCh
   if(ownedChips.length){
    const list=document.createElement('div');list.className='party-slot-chips';list.setAttribute('role','list');list.setAttribute('aria-label',row.name+'の取得済みチップ');list.style.setProperty('--party-chip-count',String(ownedChips.length));
    for(const chip of ownedChips){
-    const item=document.createElement('span');item.className='party-slot-chip';item.dataset.chipId=chip.id;item.setAttribute('role','listitem');item.title=chip.name+'\n'+chip.effect;
+    const item=document.createElement('span');item.className='party-slot-chip';item.dataset.chipId=chip.id;item.setAttribute('role','listitem');item.title=getSkillHoverText('chip.'+chip.id);
     const image=document.createElement('img');image.src='../images/chip_icon/'+encodeURIComponent(chip.images);image.alt=chip.name;image.draggable=false;item.append(image);list.append(item);
    }
    chipList=list;

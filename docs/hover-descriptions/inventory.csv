@@ -6,7 +6,7 @@
 
 パッシブスキル - リサイクル
 1枚のバトルカードを捨てるごとに、1コインを獲得する。
-累計で手札を25枚獲得するたびにチップを1つ得る。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+累計で手札を25枚獲得するたびにチップを1つ得る。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "skill:2","スキル","2","パルナン","スキル使用ボタン","自キャラがパルナン","ネットショッピング","ボタン","通常／CT中（無効）","","ネットショッピングを発動","","CT中はボタン無効。効果全文とは別","07_skill/js/character.js:updateActiveSkillUi",""
 "ct:2","スキル","2","パルナン","CTボタン","自キャラがパルナン","CT","ボタン","通常上限 2","","CT上限 2：左クリックで1減らす／右クリックで1増やす","","CT短縮チップ15所持時は上限・説明の数字が1少なくなる","07_skill/js/character.js:updateActiveSkillUi",""
 "ability:2","能力全文","2","パルナン","キャラクター一覧／詳細","スキルを表示がオンの時に一覧でホバー／詳細表示","パルナンの能力","能力説明","07の表示文面","","スキル - ネットショッピング［CT 2］
@@ -15,14 +15,14 @@
 パッシブスキル - 伝説商人
 ショップで購入できるバトルカード数+1、ショップに入るたびスターコイン+1。
 ショップに並ぶカードの枚数も+1され、全てのカードが10%の確率で値段1コインに変更される。
-パルナンが「振り込み」を行った後は、ショップのカード1枚の値段が1コインに変更される。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+パルナンが「振り込み」を行った後は、ショップのカード1枚の値段が1コインに変更される。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "skill:3","スキル","3","ファニィ","スキル使用ボタン","自キャラがファニィ","トラブル・メーカー","ボタン","通常／CT中（無効）","","トラブル・メーカーを発動","","CT中はボタン無効。効果全文とは別","07_skill/js/character.js:updateActiveSkillUi",""
 "ct:3","スキル","3","ファニィ","CTボタン","自キャラがファニィ","CT","ボタン","通常上限 3","","CT上限 3：左クリックで1減らす／右クリックで1増やす","","CT短縮チップ15所持時は上限・説明の数字が1少なくなる","07_skill/js/character.js:updateActiveSkillUi",""
 "ability:3","能力全文","3","ファニィ","キャラクター一覧／詳細","スキルを表示がオンの時に一覧でホバー／詳細表示","ファニィの能力","能力説明","07の表示文面","","スキル - トラブル・メーカー［CT 3］
 2つのマップイベントから1つを選んで発動する。
 
 パッシブスキル - 盲点発現！
-ファニイがイベントを発生させるたびに、スターコインを3獲得する。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+ファニイがイベントを発生させるたびに、スターコインを3獲得する。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "self:4:前ターン被ダメなし:base","自キャラ","4","アランナ","自キャラ状態欄","自キャラがアランナ","前ターン被ダメなし","ボタン","初期表示","UT_Buff/UT_Buff_ConcealedPresence.png","前ターン被ダメなし：オフ
 クリックで切り替え","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "self:4:前ターン被ダメなし:1","自キャラ","4","アランナ","自キャラ状態欄","自キャラがアランナ","前ターン被ダメなし","ボタン","オン","UT_Buff/UT_Buff_ConcealedPresence.png","前ターン被ダメなし：オン
@@ -35,7 +35,7 @@
 
 パッシブスキル - 勇気を出す！
 前回のターンでダメージを受けていない場合、攻撃力+3。
-スタック不可、ダメージを受けるとクリア。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+スタック不可、ダメージを受けるとクリア。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "skill:5","スキル","5","コマチ","スキル使用ボタン","自キャラがコマチ","忍術連撃","ボタン","通常／CT中（無効）","","忍術連撃を発動","","CT中はボタン無効。効果全文とは別","07_skill/js/character.js:updateActiveSkillUi",""
 "ct:5","スキル","5","コマチ","CTボタン","自キャラがコマチ","CT","ボタン","通常上限 3","","CT上限 3：左クリックで1減らす／右クリックで1増やす","","CT短縮チップ15所持時は上限・説明の数字が1少なくなる","07_skill/js/character.js:updateActiveSkillUi",""
 "ability:5","能力全文","5","コマチ","キャラクター一覧／詳細","スキルを表示がオンの時に一覧でホバー／詳細表示","コマチの能力","能力説明","07の表示文面","","スキル - 忍術連撃［CT 3］
@@ -43,7 +43,7 @@
 
 パッシブスキル - コピーニンジャ
 効果カードを3枚使用するごとに、最後に使用した効果カードを手札にコピーする。
-同時にCT-1、効果カードのダメージ+1。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+同時にCT-1、効果カードのダメージ+1。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "self:6:次の攻撃ダイス6:base","自キャラ","6","パッドマン","自キャラ状態欄","自キャラがパッドマン","次の攻撃ダイス6","ボタン","初期表示","UT_Buff/UT_Buff_105_Break.png","次の攻撃ダイス6：オフ
 クリックで切り替え","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "self:6:自己主張なし攻撃補正:base","自キャラ","6","パッドマン","自キャラ状態欄","自キャラがパッドマン","自己主張なし攻撃補正","数値入力","初期表示","UT_Buff/Attack.png","自己主張なし攻撃補正：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
@@ -59,7 +59,7 @@
 パッシブスキル - 自己主張なし
 各ターンごとに、既存の基準値以上で属性が増減する：攻撃力-2～2、防御力-2～2。
 攻撃時のダイスの出目が6の場合、相手の防御力を無視する。
-出目が2未満の場合は、次の攻撃時のダイスの出目を6にする。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+出目が2未満の場合は、次の攻撃時のダイスの出目を6にする。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "skill:7","スキル","7","パパラ","スキル使用ボタン","自キャラがパパラ","ひとくちだけ","ボタン","通常／CT中（無効）","","ひとくちだけを発動","","CT中はボタン無効。効果全文とは別","07_skill/js/character.js:updateActiveSkillUi",""
 "ct:7","スキル","7","パパラ","CTボタン","自キャラがパパラ","CT","ボタン","通常上限 3","","CT上限 3：左クリックで1減らす／右クリックで1増やす","","CT短縮チップ15所持時は上限・説明の数字が1少なくなる","07_skill/js/character.js:updateActiveSkillUi",""
 "ability:7","能力全文","7","パパラ","キャラクター一覧／詳細","スキルを表示がオンの時に一覧でホバー／詳細表示","パパラの能力","能力説明","07の表示文面","","スキル - ひとくちだけ［CT 3］
@@ -67,7 +67,7 @@
 スキルの持続時間中はHPが半分未満であると見なす。
 
 パッシブスキル - 可愛さは正義
-現在のHPが最大HPの半分以下の場合、攻撃力+3。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+現在のHPが最大HPの半分以下の場合、攻撃力+3。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "self:8:ジュジュシールド:base","自キャラ","8","レン","自キャラ状態欄","自キャラがレン","ジュジュシールド","ボタン","初期表示","UT_Buff/UT_Buff_Shield.png","ジュジュシールド：オフ
 クリックで切り替え","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "self:8:ジュジュシールド:1","自キャラ","8","レン","自キャラ状態欄","自キャラがレン","ジュジュシールド","ボタン","オン","UT_Buff/UT_Buff_Shield.png","ジュジュシールド：オン
@@ -82,7 +82,7 @@
 ジュジュシールドをキャラクターに与えたとき、反撃効果（1回）も与える。
 
 ジュジュシールド
-次に受けるダメージ-99","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+次に受けるダメージ-99","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "self:9:モンスター撃破数:base","自キャラ","9","Z3000","自キャラ状態欄","自キャラがZ3000","モンスター撃破数","数値入力","初期表示","UT_Buff/UT_Buff_109_Break.png","モンスター撃破数：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "skill:9","スキル","9","Z3000","スキル使用ボタン","自キャラがZ3000","引き寄せる","ボタン","通常／CT中（無効）","","引き寄せるを発動","","CT中はボタン無効。効果全文とは別","07_skill/js/character.js:updateActiveSkillUi",""
 "ct:9","スキル","9","Z3000","CTボタン","自キャラがZ3000","CT","ボタン","通常上限 4","","CT上限 4：左クリックで1減らす／右クリックで1増やす","","CT短縮チップ15所持時は上限・説明の数字が1少なくなる","07_skill/js/character.js:updateActiveSkillUi",""
@@ -92,7 +92,7 @@
 
 パッシブスキル - 回収利用
 モンスター撃破時にCT-2。
-モンスターを2体撃破するたびに攻撃力+1。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+モンスターを2体撃破するたびに攻撃力+1。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "self:10:反撃:base","自キャラ","10","パンダマン","自キャラ状態欄","自キャラがパンダマン","反撃","ボタン","初期表示","UT_Buff/UT_Buff_Counter.png","反撃：オフ
 クリックで切り替え","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "self:10:このターンに受けたダメージ:base","自キャラ","10","パンダマン","自キャラ状態欄","自キャラがパンダマン","このターンに受けたダメージ","数値入力","初期表示","UT_Buff/UT_Buff_SangXinBingKuang.png","このターンに受けたダメージ：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
@@ -107,7 +107,7 @@
 パッシブスキル - 善きも悪しきもある
 ハンバーガーまたはチョコレートケーキ使用後、周囲5マス以内の他キャラクターのHP+2。
 「食べ物」を消費する時にカウンターを1スタック獲得し、消費したものがハンバーガーなら最大HP+2も得る。
-カウンター攻撃時は、このターンに受けたダメージ分だけ攻撃力が上昇する。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+カウンター攻撃時は、このターンに受けたダメージ分だけ攻撃力が上昇する。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "self:11:ヒール:base","自キャラ","11","ルル","自キャラ状態欄","自キャラがルル","ヒール","数値入力","初期表示","UT_Buff/UT_Buff_Heal.png","ヒール：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "skill:11","スキル","11","ルル","スキル使用ボタン","自キャラがルル","癒しの粘液","ボタン","通常／CT中（無効）","","癒しの粘液を発動","","CT中はボタン無効。効果全文とは別","07_skill/js/character.js:updateActiveSkillUi",""
 "ct:11","スキル","11","ルル","CTボタン","自キャラがルル","CT","ボタン","通常上限 3","","CT上限 3：左クリックで1減らす／右クリックで1増やす","","CT短縮チップ15所持時は上限・説明の数字が1少なくなる","07_skill/js/character.js:updateActiveSkillUi",""
@@ -118,7 +118,7 @@
 パッシブスキル - 細胞分裂
 ダメージを受けた後、【ヒール】+1スタック、CT-1。
 ターン終了時に【ヒール】を2スタック失うごとに3マス以内のランダムな位置へ【ミニスライム】を1個生成する。最大2個。
-キャラクターが【ミニスライム】を通過するとそれを消費し、HP+1と【ヒール】+1スタックを得る。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+キャラクターが【ミニスライム】を通過するとそれを消費し、HP+1と【ヒール】+1スタックを得る。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "self:12:エネルギー保存:base","自キャラ","12","ヒメ","自キャラ状態欄","自キャラがヒメ","エネルギー保存","数値入力","初期表示","UT_Buff/UT_Buff_113_Passive.png","エネルギー保存：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "skill:12","スキル","12","ヒメ","スキル使用ボタン","自キャラがヒメ","気功修練","ボタン","通常／CT中（無効）","","気功修練を発動","","CT中はボタン無効。効果全文とは別","07_skill/js/character.js:updateActiveSkillUi",""
 "ct:12","スキル","12","ヒメ","CTボタン","自キャラがヒメ","CT","ボタン","通常上限 3","","CT上限 3：左クリックで1減らす／右クリックで1増やす","","CT短縮チップ15所持時は上限・説明の数字が1少なくなる","07_skill/js/character.js:updateActiveSkillUi",""
@@ -132,7 +132,7 @@ HP+2、エネルギー保存が発動中の場合、このターンの間攻撃�
 攻撃時に5スタックある場合、追加で2スタックを消費し、その攻撃で与えたダメージの88%を追加で2マス以内の敵に与える。
 
 パッシブスキル - 以心伝心
-スキル使用時、ユメが符カード-福1枚手札に加える。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+スキル使用時、ユメが符カード-福1枚手札に加える。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "skill:13","スキル","13","カイセイ","スキル使用ボタン","自キャラがカイセイ","フェイト・エコー","ボタン","通常／CT中（無効）","","フェイト・エコーを発動","","CT中はボタン無効。効果全文とは別","07_skill/js/character.js:updateActiveSkillUi",""
 "ct:13","スキル","13","カイセイ","CTボタン","自キャラがカイセイ","CT","ボタン","通常上限 3","","CT上限 3：左クリックで1減らす／右クリックで1増やす","","CT短縮チップ15所持時は上限・説明の数字が1少なくなる","07_skill/js/character.js:updateActiveSkillUi",""
 "ability:13","能力全文","13","カイセイ","キャラクター一覧／詳細","スキルを表示がオンの時に一覧でホバー／詳細表示","カイセイの能力","能力説明","07の表示文面","","スキル - フェイト・エコー［CT 3］
@@ -142,7 +142,7 @@ HP+2、エネルギー保存が発動中の場合、このターンの間攻撃�
 マークされたモンスターを撃破したキャラクターは運命の導きを得る。
 
 パッシブスキル - 幸運な番号
-移動ポイントが6なら、6枚のコインを得る。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+移動ポイントが6なら、6枚のコインを得る。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "self:14:剣気:base","自キャラ","14","ミサキ","自キャラ状態欄","自キャラがミサキ","剣気","数値入力","初期表示","UT_Buff/UT_Buff_115.png","剣気：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "skill:14","スキル","14","ミサキ","スキル使用ボタン","自キャラがミサキ","桜裂空斬","ボタン","通常／CT中（無効）","","桜裂空斬を発動","","CT中はボタン無効。効果全文とは別","07_skill/js/character.js:updateActiveSkillUi",""
 "ct:14","スキル","14","ミサキ","CTボタン","自キャラがミサキ","CT","ボタン","通常上限 3","","CT上限 3：左クリックで1減らす／右クリックで1増やす","","CT短縮チップ15所持時は上限・説明の数字が1少なくなる","07_skill/js/character.js:updateActiveSkillUi",""
@@ -152,7 +152,7 @@ HP+2、エネルギー保存が発動中の場合、このターンの間攻撃�
 
 パッシブスキル - 剣気
 戦闘中、自身の攻撃命中や回避成功すると剣気1つを得る。最大3スタック
-自身がスタン時に全ての剣気スタックを失う。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+自身がスタン時に全ての剣気スタックを失う。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "self:15:手札枚数:base","自キャラ","15","ナーディス","自キャラ状態欄","自キャラがナーディス","手札枚数","数値入力","初期表示","UT_Buff/UT_Buff_Hand.png","モンスターの手札は0枚：自分の手札枚数を入力。攻撃力への加算は最大3","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "skill:15","スキル","15","ナーディス","スキル使用ボタン","自キャラがナーディス","クィーン プリビレッジ","ボタン","通常／CT中（無効）","","クィーン プリビレッジを発動","","CT中はボタン無効。効果全文とは別","07_skill/js/character.js:updateActiveSkillUi",""
 "ct:15","スキル","15","ナーディス","CTボタン","自キャラがナーディス","CT","ボタン","通常上限 3","","CT上限 3：左クリックで1減らす／右クリックで1増やす","","CT短縮チップ15所持時は上限・説明の数字が1少なくなる","07_skill/js/character.js:updateActiveSkillUi",""
@@ -161,7 +161,7 @@ HP+2、エネルギー保存が発動中の場合、このターンの間攻撃�
 
 パッシブスキル - プレッシャー
 戦闘時自分の手札は相手より多い場合、多い手札の1枚につき自分の攻撃力+1。
-最大攻撃力+3。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+最大攻撃力+3。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "self:16:累計移動ポイント:base","自キャラ","16","ジャスミン","自キャラ状態欄","自キャラがジャスミン","累計移動ポイント","数値入力","初期表示","UT_Buff/UT_Buff_117_Passive.png","累計移動ポイント：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "skill:16","スキル","16","ジャスミン","スキル使用ボタン","自キャラがジャスミン","オーバードライブ","ボタン","通常／CT中（無効）","","オーバードライブを発動","","CT中はボタン無効。効果全文とは別","07_skill/js/character.js:updateActiveSkillUi",""
 "ct:16","スキル","16","ジャスミン","CTボタン","自キャラがジャスミン","CT","ボタン","通常上限 4","","CT上限 4：左クリックで1減らす／右クリックで1増やす","","CT短縮チップ15所持時は上限・説明の数字が1少なくなる","07_skill/js/character.js:updateActiveSkillUi",""
@@ -171,7 +171,7 @@ HP+2、エネルギー保存が発動中の場合、このターンの間攻撃�
 
 パッシブスキル - チャージステップ
 累計移動ステップ数が13スタック増加するごとに、攻撃力と防御力が交互に1ずつ増加する。
-疾走マスを踏んだ時、CT-2。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+疾走マスを踏んだ時、CT-2。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "skill:17","スキル","17","ルカ","スキル使用ボタン","自キャラがルカ","真夜の一閃","ボタン","通常／CT中（無効）","","真夜の一閃を発動","","CT中はボタン無効。効果全文とは別","07_skill/js/character.js:updateActiveSkillUi",""
 "ct:17","スキル","17","ルカ","CTボタン","自キャラがルカ","CT","ボタン","通常上限 3","","CT上限 3：左クリックで1減らす／右クリックで1増やす","","CT短縮チップ15所持時は上限・説明の数字が1少なくなる","07_skill/js/character.js:updateActiveSkillUi",""
 "ability:17","能力全文","17","ルカ","キャラクター一覧／詳細","スキルを表示がオンの時に一覧でホバー／詳細表示","ルカの能力","能力説明","07の表示文面","","スキル - 真夜の一閃［CT 3］
@@ -179,7 +179,7 @@ HP+2、エネルギー保存が発動中の場合、このターンの間攻撃�
 （スキル使用時に戦闘不可）
 
 パッシブスキル - 攻めの姿勢
-1ターンに1回、セーフティポイントを経過または滞在時にCT-2。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+1ターンに1回、セーフティポイントを経過または滞在時にCT-2。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "self:18:ファイアウォール:base","自キャラ","18","ナンシーロー","自キャラ状態欄","自キャラがナンシーロー","ファイアウォール","ボタン","初期表示","UT_Buff/UT_Buff_120.png","ファイアウォール：オフ
 クリックで切り替え","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "self:18:ファイアウォール:1","自キャラ","18","ナンシーロー","自キャラ状態欄","自キャラがナンシーロー","ファイアウォール","ボタン","オン","UT_Buff/UT_Buff_120.png","ファイアウォール：オン
@@ -198,7 +198,7 @@ HP+2、エネルギー保存が発動中の場合、このターンの間攻撃�
 
 ファイアウォール
 攻撃力+2、防御力+2。
-2マスより遠いモンスターから受けるダメージ-1。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+2マスより遠いモンスターから受けるダメージ-1。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "skill:19","スキル","19","メガス","スキル使用ボタン","自キャラがメガス","軌道エアバースト","ボタン","通常／CT中（無効）","","軌道エアバーストを発動","","CT中はボタン無効。効果全文とは別","07_skill/js/character.js:updateActiveSkillUi",""
 "ct:19","スキル","19","メガス","CTボタン","自キャラがメガス","CT","ボタン","通常上限 3","","CT上限 3：左クリックで1減らす／右クリックで1増やす","","CT短縮チップ15所持時は上限・説明の数字が1少なくなる","07_skill/js/character.js:updateActiveSkillUi",""
 "ability:19","能力全文","19","メガス","キャラクター一覧／詳細","スキルを表示がオンの時に一覧でホバー／詳細表示","メガスの能力","能力説明","07の表示文面","","スキル - 軌道エアバースト［CT 3］
@@ -214,7 +214,7 @@ HP+2、エネルギー保存が発動中の場合、このターンの間攻撃�
 ターン終了時、手札数が6より少ない場合、カード1枚を得る。
 
 精確照準
-【軌道エアバースト】で与えるダメージ+1。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+【軌道エアバースト】で与えるダメージ+1。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "skill:20","スキル","20","ユメ","スキル使用ボタン","自キャラがユメ","白沢よ、福を与えよ","ボタン","通常／CT中（無効）","","白沢よ、福を与えよを発動","","CT中はボタン無効。効果全文とは別","07_skill/js/character.js:updateActiveSkillUi",""
 "ct:20","スキル","20","ユメ","CTボタン","自キャラがユメ","CT","ボタン","通常上限 3","","CT上限 3：左クリックで1減らす／右クリックで1増やす","","CT短縮チップ15所持時は上限・説明の数字が1少なくなる","07_skill/js/character.js:updateActiveSkillUi",""
 "ability:20","能力全文","20","ユメ","キャラクター一覧／詳細","スキルを表示がオンの時に一覧でホバー／詳細表示","ユメの能力","能力説明","07の表示文面","","スキル - 白沢よ、福を与えよ［CT 3］
@@ -224,7 +224,7 @@ HP+2、エネルギー保存が発動中の場合、このターンの間攻撃�
 ダイスの出目が1の場合、符カード-禍1枚手に入る、ダイスの出目が6の場合、符カード-福1枚手に入る。
 
 パッシブスキル - お手伝い完璧
-ヒメに符カード-福を使った時、ヒメのエネルギー保存が発動。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+ヒメに符カード-福を使った時、ヒメのエネルギー保存が発動。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "self:21:スターライト:base","自キャラ","21","アル","自キャラ状態欄","自キャラがアル","スターライト","数値入力","初期表示","UT_Buff/UT_Buff_StarLight.png","スターライト：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "skill:21","スキル","21","アル","スキル使用ボタン","自キャラがアル","強者の機欄","ボタン","通常／CT中（無効）","","強者の機欄を発動","","CT中はボタン無効。効果全文とは別","07_skill/js/character.js:updateActiveSkillUi",""
 "ct:21","スキル","21","アル","CTボタン","自キャラがアル","CT","ボタン","通常上限 3","","CT上限 3：左クリックで1減らす／右クリックで1増やす","","CT短縮チップ15所持時は上限・説明の数字が1少なくなる","07_skill/js/character.js:updateActiveSkillUi",""
@@ -233,7 +233,7 @@ HP+2、エネルギー保存が発動中の場合、このターンの間攻撃�
 
 パッシブスキル - ウィンウィン
 他キャラクターにカードを与える時、双方にスターライト+1。
-自身のスターライトが6スタック毎に攻撃力+1、防御力+1。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+自身のスターライトが6スタック毎に攻撃力+1、防御力+1。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "self:22:ライフ・ブック:base","自キャラ","22","リン","自キャラ状態欄","自キャラがリン","ライフ・ブック","数値入力","初期表示","UT_Buff/UT_Buff_121_Passive.png","ライフ・ブック：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "skill:22","スキル","22","リン","スキル使用ボタン","自キャラがリン","ライフ・ブック","ボタン","通常／CT中（無効）","","ライフ・ブックを発動","","CT中はボタン無効。効果全文とは別","07_skill/js/character.js:updateActiveSkillUi",""
 "ct:22","スキル","22","リン","CTボタン","自キャラがリン","CT","ボタン","通常上限 3","","CT上限 3：左クリックで1減らす／右クリックで1増やす","","CT短縮チップ15所持時は上限・説明の数字が1少なくなる","07_skill/js/character.js:updateActiveSkillUi",""
@@ -242,7 +242,7 @@ HP+2、エネルギー保存が発動中の場合、このターンの間攻撃�
 
 パッシブスキル - 調査結果
 イベント発生時、ライフ・ブック1枚得る。
-ライフ・ブックを使用するたびに、ライフ・ブックのダメージが1上昇する。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+ライフ・ブックを使用するたびに、ライフ・ブックのダメージが1上昇する。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "self:23:狐光:base","自キャラ","23","テル","自キャラ状態欄","自キャラがテル","狐光","数値入力","初期表示","UT_Buff/UT_Buff_124.png","狐光：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "skill:23","スキル","23","テル","スキル使用ボタン","自キャラがテル","三神憑依","ボタン","通常／CT中（無効）","","三神憑依を発動","","CT中はボタン無効。効果全文とは別","07_skill/js/character.js:updateActiveSkillUi",""
 "ct:23","スキル","23","テル","CTボタン","自キャラがテル","CT","ボタン","通常上限 3","","CT上限 3：左クリックで1減らす／右クリックで1増やす","","CT短縮チップ15所持時は上限・説明の数字が1少なくなる","07_skill/js/character.js:updateActiveSkillUi",""
@@ -255,7 +255,7 @@ HP+2、エネルギー保存が発動中の場合、このターンの間攻撃�
 テルまたは三神憑依状態のキャラクターがコスト2以上の攻撃カードを使用すると、テルは狐光を1スタック獲得する。
 
 狐光
-1スタックにつき、追加攻撃の攻撃力+1。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+1スタックにつき、追加攻撃の攻撃力+1。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "self:24:精確無比:base","自キャラ","24","モーゼス","自キャラ状態欄","自キャラがモーゼス","精確無比","数値入力","初期表示","UT_Buff/UT_Buff_125_Passive.png","精確無比：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "skill:24","スキル","24","モーゼス","スキル使用ボタン","自キャラがモーゼス","弱点反撃","ボタン","通常／CT中（無効）","","弱点反撃を発動","","CT中はボタン無効。効果全文とは別","07_skill/js/character.js:updateActiveSkillUi",""
 "ct:24","スキル","24","モーゼス","CTボタン","自キャラがモーゼス","CT","ボタン","通常上限 2","","CT上限 2：左クリックで1減らす／右クリックで1増やす","","CT短縮チップ15所持時は上限・説明の数字が1少なくなる","07_skill/js/character.js:updateActiveSkillUi",""
@@ -271,7 +271,7 @@ HP+2、エネルギー保存が発動中の場合、このターンの間攻撃�
 
 精確無比
 1スタックごとに攻撃力+2、回避ダイスの最小出目+1。
-ターン終了時に1スタック減少。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+ターン終了時に1スタック減少。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "self:25:覚醒:base","自キャラ","25","真夢梓","自キャラ状態欄","自キャラが真夢梓","覚醒","数値入力","初期表示","UT_Buff/UT_Buff_1026.png","覚醒：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "self:25:覚醒:8","自キャラ","25","真夢梓","自キャラ状態欄","自キャラが真夢梓","覚醒","数値入力","最大値","UT_Buff/UT_Buff_1261204.png","真龍：左クリックで＋1、右クリックで−1","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "self:25:覚醒:edited","自キャラ","25","真夢梓","自キャラ状態欄","自キャラが真夢梓","覚醒","数値入力","値編集後・最大未満","UT_Buff/UT_Buff_1026.png","覚醒：左クリックで＋1、右クリックで−1","","初期表示と記号・操作文が異なる。最大到達時は最大値行を参照","07_skill/js/character.js:renderConditions:setValue",""
@@ -287,7 +287,7 @@ HP+2、エネルギー保存が発動中の場合、このターンの間攻撃�
 真龍の時、手札にある噛みつくとスキルで獲得する噛みつくが龍の咆哮に変化する。
 
 真龍
-攻撃力+4。スキルの範囲を無制限にする。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+攻撃力+4。スキルの範囲を無制限にする。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "skill:26","スキル","26","スミカゲ","スキル使用ボタン","自キャラがスミカゲ","暗影融合","ボタン","通常／CT中（無効）","","暗影融合を発動","","CT中はボタン無効。効果全文とは別","07_skill/js/character.js:updateActiveSkillUi",""
 "ct:26","スキル","26","スミカゲ","CTボタン","自キャラがスミカゲ","CT","ボタン","通常上限 3","","CT上限 3：左クリックで1減らす／右クリックで1増やす","","CT短縮チップ15所持時は上限・説明の数字が1少なくなる","07_skill/js/character.js:updateActiveSkillUi",""
 "ability:26","能力全文","26","スミカゲ","キャラクター一覧／詳細","スキルを表示がオンの時に一覧でホバー／詳細表示","スミカゲの能力","能力説明","07の表示文面","","スキル - 暗影融合［CT 3］
@@ -296,7 +296,7 @@ HP+2、エネルギー保存が発動中の場合、このターンの間攻撃�
 
 パッシブスキル - シャドウツイン
 ターン開始時と攻撃命中時、スミカゲがいるマスに【影】を配置する、2ターン継続。
-敵キャラクターまたはモンスターが【影】の上に滞在すると、1ダメージを受ける。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+敵キャラクターまたはモンスターが【影】の上に滞在すると、1ダメージを受ける。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "self:27:潜伏:base","自キャラ","27","ボニー","自キャラ状態欄","自キャラがボニー","潜伏","ボタン","初期表示","UT_Buff/UT_Buff_127.png","潜伏：オフ
 クリックで切り替え","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "self:27:潜入調査:base","自キャラ","27","ボニー","自キャラ状態欄","自キャラがボニー","潜入調査","ボタン","初期表示","UT_Buff/UT_Event_12702.png","潜入調査：フェーズ・ワン
@@ -339,7 +339,7 @@ HP+2、エネルギー保存が発動中の場合、このターンの間攻撃�
 
 潜伏
 モンスターへ攻撃するとき、【マーク】スタック分攻撃力を増加。
-戦闘終了後、この効果を解除する。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+戦闘終了後、この効果を解除する。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "skill:28","スキル","28","リンリン","スキル使用ボタン","自キャラがリンリン","インターセプトタックル","ボタン","通常／CT中（無効）","","インターセプトタックルを発動","","CT中はボタン無効。効果全文とは別","07_skill/js/character.js:updateActiveSkillUi",""
 "ct:28","スキル","28","リンリン","CTボタン","自キャラがリンリン","CT","ボタン","通常上限 3","","CT上限 3：左クリックで1減らす／右クリックで1増やす","","CT短縮チップ15所持時は上限・説明の数字が1少なくなる","07_skill/js/character.js:updateActiveSkillUi",""
 "ability:28","能力全文","28","リンリン","キャラクター一覧／詳細","スキルを表示がオンの時に一覧でホバー／詳細表示","リンリンの能力","能力説明","07の表示文面","","スキル - インターセプトタックル［CT 3］
@@ -352,7 +352,7 @@ HP+2、エネルギー保存が発動中の場合、このターンの間攻撃�
 パッシブスキル - インターセプター
 自身のロードブロックがエリア拒止に変化。
 ゲーム開始時、エリア拒止を2枚追加獲得。
-ロードブロック通過後、エリア拒止を1枚獲得する。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+ロードブロック通過後、エリア拒止を1枚獲得する。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "skill:29","スキル","29","サイクス","スキル使用ボタン","自キャラがサイクス","アビサルゾーン","ボタン","通常／CT中（無効）","","アビサルゾーンを発動","","CT中はボタン無効。効果全文とは別","07_skill/js/character.js:updateActiveSkillUi",""
 "ct:29","スキル","29","サイクス","CTボタン","自キャラがサイクス","CT","ボタン","通常上限 3","","CT上限 3：左クリックで1減らす／右クリックで1増やす","","CT短縮チップ15所持時は上限・説明の数字が1少なくなる","07_skill/js/character.js:updateActiveSkillUi",""
 "ability:29","能力全文","29","サイクス","キャラクター一覧／詳細","スキルを表示がオンの時に一覧でホバー／詳細表示","サイクスの能力","能力説明","07の表示文面","","スキル - アビサルゾーン［CT 3］
@@ -369,7 +369,7 @@ HP+2、エネルギー保存が発動中の場合、このターンの間攻撃�
 
 テンタクルアビサル
 周囲2マス以内の全てのモンスターに1ダメージを与え、その後、移動力減少効果を受けているモンスターに1ターンの間、アビスエロージョンマークを1スタック付与する。
-永続的に存在し、1つのマスに最大1体まで存在する。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+永続的に存在し、1つのマスに最大1体まで存在する。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "self:101:ファン:base","自キャラ","101","超てんちゃん","自キャラ状態欄","自キャラが超てんちゃん","ファン","数値入力","初期表示","UT_Buff/UT_Buff_301.png","ファン：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "skill:101","スキル","101","超てんちゃん","スキル使用ボタン","自キャラが超てんちゃん","インターネットエンジェル","ボタン","通常／CT中（無効）","","インターネットエンジェルを発動","","CT中はボタン無効。効果全文とは別","07_skill/js/character.js:updateActiveSkillUi",""
 "ct:101","スキル","101","超てんちゃん","CTボタン","自キャラが超てんちゃん","CT","ボタン","通常上限 3","","CT上限 3：左クリックで1減らす／右クリックで1増やす","","CT短縮チップ15所持時は上限・説明の数字が1少なくなる","07_skill/js/character.js:updateActiveSkillUi",""
@@ -384,7 +384,7 @@ HP+2、エネルギー保存が発動中の場合、このターンの間攻撃�
 「ファン」状態の敵が超てんちゃんを攻撃する際、攻撃力-1。
 
 パッシブスキル - 一心同体
-超てんちゃんとあめちゃんのパッシブスキルは共有される。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+超てんちゃんとあめちゃんのパッシブスキルは共有される。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "self:102:愛:base","自キャラ","102","あめちゃん","自キャラ状態欄","自キャラがあめちゃん","愛","数値入力","初期表示","UT_Buff/UT_Buff_302_Passive.png","愛：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "skill:102","スキル","102","あめちゃん","スキル使用ボタン","自キャラがあめちゃん","愛情の過剰摂取","ボタン","通常／CT中（無効）","","愛情の過剰摂取を発動","","CT中はボタン無効。効果全文とは別","07_skill/js/character.js:updateActiveSkillUi",""
 "ct:102","スキル","102","あめちゃん","CTボタン","自キャラがあめちゃん","CT","ボタン","通常上限 3","","CT上限 3：左クリックで1減らす／右クリックで1増やす","","CT短縮チップ15所持時は上限・説明の数字が1少なくなる","07_skill/js/character.js:updateActiveSkillUi",""
@@ -397,7 +397,7 @@ HP+2、エネルギー保存が発動中の場合、このターンの間攻撃�
 愛の初期値は2スタック。
 
 パッシブスキル - Two hearts beat as one
-超てんちゃんとあめちゃんのパッシブスキルは共有される。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+超てんちゃんとあめちゃんのパッシブスキルは共有される。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "skill:103","スキル","103","ジル","スキル使用ボタン","自キャラがジル","カクテルを作る","ボタン","通常／CT中（無効）","","カクテルを作るを発動","","CT中はボタン無効。効果全文とは別","07_skill/js/character.js:updateActiveSkillUi",""
 "ct:103","スキル","103","ジル","CTボタン","自キャラがジル","CT","ボタン","通常上限 3","","CT上限 3：左クリックで1減らす／右クリックで1増やす","","CT短縮チップ15所持時は上限・説明の数字が1少なくなる","07_skill/js/character.js:updateActiveSkillUi",""
 "ability:103","能力全文","103","ジル","キャラクター一覧／詳細","スキルを表示がオンの時に一覧でホバー／詳細表示","ジルの能力","能力説明","07の表示文面","","スキル - カクテルを作る［CT 3］
@@ -410,7 +410,7 @@ HP+2、エネルギー保存が発動中の場合、このターンの間攻撃�
 
 パッシブスキル - 一生を変えるカクテル
 カクテルを作る時、種類が違うカードを3つ使う場合、ジルがスターコイン+3。
-同じ種類のカードを3つ使う場合、このターン目標の移動ダイスの出目+3。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+同じ種類のカードを3つ使う場合、このターン目標の移動ダイスの出目+3。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "self:104:温もり:base","自キャラ","104","ドロシー","自キャラ状態欄","自キャラがドロシー","温もり","数値入力","初期表示","UT_Buff/UT_Buff_304_piano.png","温もり：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "self:104:本当の私:base","自キャラ","104","ドロシー","自キャラ状態欄","自キャラがドロシー","本当の私","ボタン","初期表示","UT_Buff/UT_Buff_304.png","本当の私：オフ
 クリックで切り替え","","","07_skill/js/character.js:renderConditions / character-view.js",""
@@ -425,7 +425,7 @@ HP+2、エネルギー保存が発動中の場合、このターンの間攻撃�
 パッシブスキル - 社交界の蝶
 HPを回復する時、「温もり」を+1。
 「温もり」1つにつき、防御力が1上昇する（最大5スタック）。
-ドロシーが他のキャラクターを通り過ぎる時、自身とそのキャラクターのHPを1ずつ回復する。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+ドロシーが他のキャラクターを通り過ぎる時、自身とそのキャラクターのHPを1ずつ回復する。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "self:105:人形制作:base","自キャラ","105","遠野ハンナ","自キャラ状態欄","自キャラが遠野ハンナ","人形制作","数値入力","初期表示","UT_Buff/UT_Buff_305_1.png","人形制作：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "self:105:人形制作:7","自キャラ","105","遠野ハンナ","自キャラ状態欄","自キャラが遠野ハンナ","人形制作","数値入力","最大値","UT_Buff/UT_Buff_305_Awake.png","人形完成：左クリックで＋1、右クリックで−1","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "self:105:人形制作:edited","自キャラ","105","遠野ハンナ","自キャラ状態欄","自キャラが遠野ハンナ","人形制作","数値入力","値編集後・最大未満","UT_Buff/UT_Buff_305_1.png","人形制作：左クリックで＋1、右クリックで−1","","初期表示と記号・操作文が異なる。最大到達時は最大値行を参照","07_skill/js/character.js:renderConditions:setValue",""
@@ -451,7 +451,7 @@ HPを回復する時、「温もり」を+1。
 移動力+2、罠・ロードブロックを無効化。他のユニットに通過される際、戦闘が発生しない。
 
 人形完成
-味方キャラクターを通過すると、その味方キャラクターに次の移動力+2を付与する。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+味方キャラクターを通過すると、その味方キャラクターに次の移動力+2を付与する。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "self:106:推理タイム:base","自キャラ","106","橘シェリー","自キャラ状態欄","自キャラが橘シェリー","推理タイム","数値入力","初期表示","UT_Buff/UT_Buff_306.png","推理タイム：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "skill:106","スキル","106","橘シェリー","スキル使用ボタン","自キャラが橘シェリー","怪力魔法","ボタン","通常／CT中（無効）","","怪力魔法を発動","","CT中はボタン無効。効果全文とは別","07_skill/js/character.js:updateActiveSkillUi",""
 "ct:106","スキル","106","橘シェリー","CTボタン","自キャラが橘シェリー","CT","ボタン","通常上限 2","","CT上限 2：左クリックで1減らす／右クリックで1増やす","","CT短縮チップ15所持時は上限・説明の数字が1少なくなる","07_skill/js/character.js:updateActiveSkillUi",""
@@ -466,7 +466,7 @@ HPを回復する時、「温もり」を+1。
 遠野ハンナが橘シェリーの4マス以内にいる場合、遠野ハンナの受けるダメージ-1。
 
 推理タイム
-1スタックごとに攻撃力+1。ターン終了時に-1。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","csv/character_skills.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+1スタックごとに攻撃力+1。ターン終了時に-1。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "pt:8:PTジュジュシールド:base","PT受領","8","レン","自キャラ状態欄","自キャラは受領側（抽出例ミミ）、PTにレン。受領状態が残ればPT解除後も表示される場合あり","PTジュジュシールド","ボタン","初期表示","UT_Buff/UT_Buff_Shield.png","PTジュジュシールド：オフ
 クリックで切り替え","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "pt:8:PTジュジュシールド:1","PT受領","8","レン","自キャラ状態欄","自キャラは受領側（抽出例ミミ）、PTにレン。受領状態が残ればPT解除後も表示される場合あり","PTジュジュシールド","ボタン","オン","UT_Buff/UT_Buff_Shield.png","PTジュジュシールド：オン
@@ -527,272 +527,272 @@ HPを回復する時、「温もり」を+1。
 "map:MAP0007:勇往邁進","共通・マップ","","共通","自キャラ状態欄","マップ MAP0007","勇往邁進","数値入力","初期表示","UT_Buff/UT_Buff_CourageUp.png","勇往邁進：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "map:MAP0007:クジャク係の羽ばたき","共通・マップ","","共通","自キャラ状態欄","マップ MAP0007、攻撃対象がクジャク係","クジャク係の羽ばたき","数値入力","初期表示","UT_Buff/UT_Buff_1046.png","クジャク係の羽ばたき：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "chip:1:owned","チップ","","ボクシンググローブ-初級","自キャラ所持チップ","該当チップ所持","ボクシンググローブ-初級","所持表示","通常","chip_icon/001_ボクシンググローブ-初級.png","ボクシンググローブ-初級
-攻撃力+1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+攻撃力+1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:1:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","ボクシンググローブ-初級","チップ表示","通常","chip_icon/001_ボクシンググローブ-初級.png","ボクシンググローブ-初級
-攻撃力+1。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+攻撃力+1。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:2:owned","チップ","","ボクシンググローブ-中級","自キャラ所持チップ","該当チップ所持","ボクシンググローブ-中級","所持表示","通常","chip_icon/002_ボクシンググローブ-中級.png","ボクシンググローブ-中級
-攻撃力+2。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+攻撃力+2。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:2:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","ボクシンググローブ-中級","チップ表示","通常","chip_icon/002_ボクシンググローブ-中級.png","ボクシンググローブ-中級
-攻撃力+2。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+攻撃力+2。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:3:owned","チップ","","ボクシンググローブ-上級","自キャラ所持チップ","該当チップ所持","ボクシンググローブ-上級","所持表示","通常","chip_icon/003_ボクシンググローブ-上級.png","ボクシンググローブ-上級
-攻撃力+5。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+攻撃力+5。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:3:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","ボクシンググローブ-上級","チップ表示","通常","chip_icon/003_ボクシンググローブ-上級.png","ボクシンググローブ-上級
-攻撃力+5。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+攻撃力+5。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:4:owned","チップ","","スピードローラースケート-初級","自キャラ所持チップ","該当チップ所持","スピードローラースケート-初級","所持表示","通常","chip_icon/004_スピードローラースケート-初級.png","スピードローラースケート-初級
-移動力+1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+移動力+1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:4:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","スピードローラースケート-初級","チップ表示","通常","chip_icon/004_スピードローラースケート-初級.png","スピードローラースケート-初級
-移動力+1。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+移動力+1。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:5:owned","チップ","","スピードローラースケート-中級","自キャラ所持チップ","該当チップ所持","スピードローラースケート-中級","所持表示","通常","chip_icon/005_スピードローラースケート-中級.png","スピードローラースケート-中級
-移動力+2。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+移動力+2。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:5:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","スピードローラースケート-中級","チップ表示","通常","chip_icon/005_スピードローラースケート-中級.png","スピードローラースケート-中級
-移動力+2。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+移動力+2。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:6:owned","チップ","","スピードローラースケート-上級","自キャラ所持チップ","該当チップ所持","スピードローラースケート-上級","所持表示","通常","chip_icon/006_スピードローラースケート-上級.png","スピードローラースケート-上級
-移動力+4。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+移動力+4。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:6:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","スピードローラースケート-上級","チップ表示","通常","chip_icon/006_スピードローラースケート-上級.png","スピードローラースケート-上級
-移動力+4。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+移動力+4。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:7:owned","チップ","","サンドクッキー-普通","自キャラ所持チップ","該当チップ所持","サンドクッキー-普通","所持表示","通常","chip_icon/007_サンドクッキー-普通.png","サンドクッキー-普通
-HP上限+2。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+HP上限+2。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:7:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","サンドクッキー-普通","チップ表示","通常","chip_icon/007_サンドクッキー-普通.png","サンドクッキー-普通
-HP上限+2。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+HP上限+2。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:8:owned","チップ","","サンドクッキー-なかなか","自キャラ所持チップ","該当チップ所持","サンドクッキー-なかなか","所持表示","通常","chip_icon/008_サンドクッキー-なかなか.png","サンドクッキー-なかなか
-HP上限+3。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+HP上限+3。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:8:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","サンドクッキー-なかなか","チップ表示","通常","chip_icon/008_サンドクッキー-なかなか.png","サンドクッキー-なかなか
-HP上限+3。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+HP上限+3。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:9:owned","チップ","","サンドクッキー-ウマすぎ","自キャラ所持チップ","該当チップ所持","サンドクッキー-ウマすぎ","所持表示","通常","chip_icon/009_サンドクッキー-ウマすぎ.png","サンドクッキー-ウマすぎ
-最大HP+3。追加の最大HP2につき、攻撃力+1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+最大HP+3。追加の最大HP2につき、攻撃力+1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:9:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","サンドクッキー-ウマすぎ","チップ表示","通常","chip_icon/009_サンドクッキー-ウマすぎ.png","サンドクッキー-ウマすぎ
-最大HP+3。追加の最大HP2につき、攻撃力+1。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+最大HP+3。追加の最大HP2につき、攻撃力+1。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:10:owned","チップ","","ヘルメット-一般","自キャラ所持チップ","該当チップ所持","ヘルメット-一般","所持表示","通常","chip_icon/010_ヘルメット-一般.png","ヘルメット-一般
-防御力+1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+防御力+1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:10:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","ヘルメット-一般","チップ表示","通常","chip_icon/010_ヘルメット-一般.png","ヘルメット-一般
-防御力+1。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+防御力+1。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:11:owned","チップ","","ヘルメット-普通","自キャラ所持チップ","該当チップ所持","ヘルメット-普通","所持表示","通常","chip_icon/011_ヘルメット-普通.png","ヘルメット-普通
-防御力+2。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+防御力+2。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:11:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","ヘルメット-普通","チップ表示","通常","chip_icon/011_ヘルメット-普通.png","ヘルメット-普通
-防御力+2。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+防御力+2。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:12:owned","チップ","","ヘルメット-高級","自キャラ所持チップ","該当チップ所持","ヘルメット-高級","所持表示","通常","chip_icon/012_ヘルメット-高級.png","ヘルメット-高級
-防御力+3。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+防御力+3。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:12:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","ヘルメット-高級","チップ表示","通常","chip_icon/012_ヘルメット-高級.png","ヘルメット-高級
-防御力+3。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+防御力+3。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:13:owned","チップ","","砥石","自キャラ所持チップ","該当チップ所持","砥石","所持表示","通常","chip_icon/013_砥石.png","砥石
-HPが50%未満の時、攻撃力+4、受けるダメージ-1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+HPが50%未満の時、攻撃力+4、受けるダメージ-1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:13:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","砥石","チップ表示","通常","chip_icon/013_砥石.png","砥石
-HPが50%未満の時、攻撃力+4、受けるダメージ-1。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+HPが50%未満の時、攻撃力+4、受けるダメージ-1。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:14:owned","チップ","","アドレナリン注射液-高効率","自キャラ所持チップ","該当チップ所持","アドレナリン注射液-高効率","所持表示","通常","chip_icon/014_アドレナリン注射液-高効率.png","アドレナリン注射液-高効率
-HPが半分以下時、攻撃力+8、反撃無効を得る。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+HPが半分以下時、攻撃力+8、反撃無効を得る。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:14:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","アドレナリン注射液-高効率","チップ表示","通常","chip_icon/014_アドレナリン注射液-高効率.png","アドレナリン注射液-高効率
-HPが半分以下時、攻撃力+8、反撃無効を得る。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+HPが半分以下時、攻撃力+8、反撃無効を得る。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:15:owned","チップ","","エクストラ-バッテリー","自キャラ所持チップ","該当チップ所持","エクストラ-バッテリー","所持表示","通常","chip_icon/015_エクストラ-バッテリー.png","エクストラ-バッテリー
-CT-1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+CT-1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:15:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","エクストラ-バッテリー","チップ表示","通常","chip_icon/015_エクストラ-バッテリー.png","エクストラ-バッテリー
-CT-1。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+CT-1。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:16:owned","チップ","","会員推薦状","自キャラ所持チップ","該当チップ所持","会員推薦状","所持表示","通常","chip_icon/016_会員推薦状.png","会員推薦状
-ラウンドボーナスカード+1、ショップのカード価格-1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+ラウンドボーナスカード+1、ショップのカード価格-1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:16:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","会員推薦状","チップ表示","通常","chip_icon/016_会員推薦状.png","会員推薦状
-ラウンドボーナスカード+1、ショップのカード価格-1。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+ラウンドボーナスカード+1、ショップのカード価格-1。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:17:owned","チップ","","ビッグバッグ","自キャラ所持チップ","該当チップ所持","ビッグバッグ","所持表示","通常","chip_icon/017_ビッグバッグ.png","ビッグバッグ
-カード使用数+1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+カード使用数+1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:17:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","ビッグバッグ","チップ表示","通常","chip_icon/017_ビッグバッグ.png","ビッグバッグ
-カード使用数+1。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+カード使用数+1。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:18:owned","チップ","","マジックトーム","自キャラ所持チップ","該当チップ所持","マジックトーム","所持表示","通常","chip_icon/018_マジックトーム.png","マジックトーム
-カード3枚使うごとに、その3枚目に使ったカードを手札に加える。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+カード3枚使うごとに、その3枚目に使ったカードを手札に加える。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:18:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","マジックトーム","チップ表示","通常","chip_icon/018_マジックトーム.png","マジックトーム
-カード3枚使うごとに、その3枚目に使ったカードを手札に加える。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+カード3枚使うごとに、その3枚目に使ったカードを手札に加える。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:19:owned","チップ","","スマートウォッチ","自キャラ所持チップ","該当チップ所持","スマートウォッチ","所持表示","通常","chip_icon/019_スマートウォッチ.png","スマートウォッチ
-ターン終了時、手札数が5より少ない場合、カード1枚を得る。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+ターン終了時、手札数が5より少ない場合、カード1枚を得る。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:19:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","スマートウォッチ","チップ表示","通常","chip_icon/019_スマートウォッチ.png","スマートウォッチ
-ターン終了時、手札数が5より少ない場合、カード1枚を得る。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+ターン終了時、手札数が5より少ない場合、カード1枚を得る。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:20:owned","チップ","","豚の貯金箱","自キャラ所持チップ","該当チップ所持","豚の貯金箱","所持表示","通常","chip_icon/020_豚の貯金箱.png","豚の貯金箱
-効果カードを2枚使うごとに、コイン+3。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+効果カードを2枚使うごとに、コイン+3。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:20:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","豚の貯金箱","チップ表示","通常","chip_icon/020_豚の貯金箱.png","豚の貯金箱
-効果カードを2枚使うごとに、コイン+3。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+効果カードを2枚使うごとに、コイン+3。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:21:owned","チップ","","優雅の羽","自キャラ所持チップ","該当チップ所持","優雅の羽","所持表示","通常","chip_icon/021_優雅の羽.png","優雅の羽
-回避成功時、攻撃力+1（最大4スタック）。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+回避成功時、攻撃力+1（最大4スタック）。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:21:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","優雅の羽","チップ表示","通常","chip_icon/021_優雅の羽.png","優雅の羽
-回避成功時、攻撃力+1（最大4スタック）。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+回避成功時、攻撃力+1（最大4スタック）。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:22:owned","チップ","","探天衛星","自キャラ所持チップ","該当チップ所持","探天衛星","所持表示","通常","chip_icon/022_探天衛星.png","探天衛星
-全ての効果カードの効果距離+3。ターン終了時、手札が6より少ない場合、軌道レールキャノンを1枚得る。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+全ての効果カードの効果距離+3。ターン終了時、手札が6より少ない場合、軌道レールキャノンを1枚得る。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:22:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","探天衛星","チップ表示","通常","chip_icon/022_探天衛星.png","探天衛星
-全ての効果カードの効果距離+3。ターン終了時、手札が6より少ない場合、軌道レールキャノンを1枚得る。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+全ての効果カードの効果距離+3。ターン終了時、手札が6より少ない場合、軌道レールキャノンを1枚得る。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:23:owned","チップ","","しおり","自キャラ所持チップ","該当チップ所持","しおり","所持表示","通常","chip_icon/023_しおり.png","しおり
-効果カードダメージ+1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+効果カードダメージ+1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:23:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","しおり","チップ表示","通常","chip_icon/023_しおり.png","しおり
-効果カードダメージ+1。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+効果カードダメージ+1。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:24:owned","チップ","","循環往来","自キャラ所持チップ","該当チップ所持","循環往来","所持表示","通常","chip_icon/024_循環往来.png","循環往来
-強化チップの再抽選回数を3回獲得する。3ターン後、強化チップを選択し、1個獲得する。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+強化チップの再抽選回数を3回獲得する。3ターン後、強化チップを選択し、1個獲得する。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:24:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","循環往来","チップ表示","通常","chip_icon/024_循環往来.png","循環往来
-強化チップの再抽選回数を3回獲得する。3ターン後、強化チップを選択し、1個獲得する。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+強化チップの再抽選回数を3回獲得する。3ターン後、強化チップを選択し、1個獲得する。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:25:owned","チップ","","懐中電灯-強光","自キャラ所持チップ","該当チップ所持","懐中電灯-強光","所持表示","通常","chip_icon/025_懐中電灯-強光.png","懐中電灯-強光
-モンスターへの攻撃時、【コイン】が4スタックにつき、自身の攻撃力+1。モンスターにヒット後、【コイン】を1スタック獲得する。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+モンスターへの攻撃時、【コイン】が4スタックにつき、自身の攻撃力+1。モンスターにヒット後、【コイン】を1スタック獲得する。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:25:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","懐中電灯-強光","チップ表示","通常","chip_icon/025_懐中電灯-強光.png","懐中電灯-強光
-モンスターへの攻撃時、【コイン】が4スタックにつき、自身の攻撃力+1。モンスターにヒット後、【コイン】を1スタック獲得する。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+モンスターへの攻撃時、【コイン】が4スタックにつき、自身の攻撃力+1。モンスターにヒット後、【コイン】を1スタック獲得する。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:25:toggle:0","チップ","","共通","自キャラ状態欄","該当チップ所持、条件切替対象","懐中電灯-強光","ボタン","モード 0","chip_icon/025_懐中電灯-強光.png","懐中電灯-強光：オフ
 クリックで条件を切り替え","","","07_skill/js/character-view.js:createChipConditionToggleView",""
 "chip:25:toggle:1","チップ","","共通","自キャラ状態欄","該当チップ所持、条件切替対象","懐中電灯-強光","ボタン","モード 1","chip_icon/025_懐中電灯-強光.png","懐中電灯-強光：オン
 クリックで条件を切り替え","","","07_skill/js/character-view.js:createChipConditionToggleView",""
 "chip:26:owned","チップ","","キャッシュカード-残高少ない","自キャラ所持チップ","該当チップ所持","キャッシュカード-残高少ない","所持表示","通常","chip_icon/026_キャッシュカード-残高少ない.png","キャッシュカード-残高少ない
-【コイン】スタック+4。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+【コイン】スタック+4。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:26:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","キャッシュカード-残高少ない","チップ表示","通常","chip_icon/026_キャッシュカード-残高少ない.png","キャッシュカード-残高少ない
-【コイン】スタック+4。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+【コイン】スタック+4。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:27:owned","チップ","","キャッシュカード-残高多い","自キャラ所持チップ","該当チップ所持","キャッシュカード-残高多い","所持表示","通常","chip_icon/027_キャッシュカード-残高多い.png","キャッシュカード-残高多い
-【コイン】スタック+7。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+【コイン】スタック+7。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:27:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","キャッシュカード-残高多い","チップ表示","通常","chip_icon/027_キャッシュカード-残高多い.png","キャッシュカード-残高多い
-【コイン】スタック+7。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+【コイン】スタック+7。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:28:owned","チップ","","キャッシュカード-アンリミテッド","自キャラ所持チップ","該当チップ所持","キャッシュカード-アンリミテッド","所持表示","通常","chip_icon/028_キャッシュカード-アンリミテッド.png","キャッシュカード-アンリミテッド
-【コイン】スタック+3、全キャラクターのラウンドボーナス+3。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+【コイン】スタック+3、全キャラクターのラウンドボーナス+3。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:28:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","キャッシュカード-アンリミテッド","チップ表示","通常","chip_icon/028_キャッシュカード-アンリミテッド.png","キャッシュカード-アンリミテッド
-【コイン】スタック+3、全キャラクターのラウンドボーナス+3。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+【コイン】スタック+3、全キャラクターのラウンドボーナス+3。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:29:owned","チップ","","8面ダイス","自キャラ所持チップ","該当チップ所持","8面ダイス","所持表示","通常","chip_icon/029_8面ダイス.png","8面ダイス
-ダイスの出目が8の場合、スターコイン+8。ダイスの累計出目が8につき、【コイン】スタック+1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+ダイスの出目が8の場合、スターコイン+8。ダイスの累計出目が8につき、【コイン】スタック+1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:29:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","8面ダイス","チップ表示","通常","chip_icon/029_8面ダイス.png","8面ダイス
-ダイスの出目が8の場合、スターコイン+8。ダイスの累計出目が8につき、【コイン】スタック+1。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+ダイスの出目が8の場合、スターコイン+8。ダイスの累計出目が8につき、【コイン】スタック+1。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:30:owned","チップ","","ATM","自キャラ所持チップ","該当チップ所持","ATM","所持表示","通常","chip_icon/030_ATM.png","ATM
-振り込み時、自身と対象は同時に1【コイン】とスターコイン1枚を獲得する。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+振り込み時、自身と対象は同時に1【コイン】とスターコイン1枚を獲得する。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:30:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","ATM","チップ表示","通常","chip_icon/030_ATM.png","ATM
-振り込み時、自身と対象は同時に1【コイン】とスターコイン1枚を獲得する。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+振り込み時、自身と対象は同時に1【コイン】とスターコイン1枚を獲得する。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:31:owned","チップ","","スターコインハンマー","自キャラ所持チップ","該当チップ所持","スターコインハンマー","所持表示","通常","chip_icon/031_スターコインハンマー.png","スターコインハンマー
-5【コイン】を獲得する。攻撃時、現在の所持スターコインが20より多い場合、現在所持しているスターコインの30%分の攻撃力を追加で獲得し、その後6スターコインを消費する。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+5【コイン】を獲得する。攻撃時、現在の所持スターコインが20より多い場合、現在所持しているスターコインの30%分の攻撃力を追加で獲得し、その後6スターコインを消費する。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:31:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","スターコインハンマー","チップ表示","通常","chip_icon/031_スターコインハンマー.png","スターコインハンマー
-5【コイン】を獲得する。攻撃時、現在の所持スターコインが20より多い場合、現在所持しているスターコインの30%分の攻撃力を追加で獲得し、その後6スターコインを消費する。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+5【コイン】を獲得する。攻撃時、現在の所持スターコインが20より多い場合、現在所持しているスターコインの30%分の攻撃力を追加で獲得し、その後6スターコインを消費する。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:32:owned","チップ","","紫色の飛星","自キャラ所持チップ","該当チップ所持","紫色の飛星","所持表示","通常","chip_icon/032_紫色の飛星.png","紫色の飛星
-モンスターを見逃した時、そのモンスターに1ダメージを与え、【コイン】を1スタック獲得する。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+モンスターを見逃した時、そのモンスターに1ダメージを与え、【コイン】を1スタック獲得する。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:32:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","紫色の飛星","チップ表示","通常","chip_icon/032_紫色の飛星.png","紫色の飛星
-モンスターを見逃した時、そのモンスターに1ダメージを与え、【コイン】を1スタック獲得する。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+モンスターを見逃した時、そのモンスターに1ダメージを与え、【コイン】を1スタック獲得する。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:33:owned","チップ","","金色の飛星","自キャラ所持チップ","該当チップ所持","金色の飛星","所持表示","通常","chip_icon/033_金色の飛星.png","金色の飛星
-モンスターを見逃した時、そのモンスターに2ダメージを与え、【コイン】を1スタック獲得する。対象がボスの場合、【コイン】のスタック数分の追加ダメージを与える。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+モンスターを見逃した時、そのモンスターに2ダメージを与え、【コイン】を1スタック獲得する。対象がボスの場合、【コイン】のスタック数分の追加ダメージを与える。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:33:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","金色の飛星","チップ表示","通常","chip_icon/033_金色の飛星.png","金色の飛星
-モンスターを見逃した時、そのモンスターに2ダメージを与え、【コイン】を1スタック獲得する。対象がボスの場合、【コイン】のスタック数分の追加ダメージを与える。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+モンスターを見逃した時、そのモンスターに2ダメージを与え、【コイン】を1スタック獲得する。対象がボスの場合、【コイン】のスタック数分の追加ダメージを与える。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:34:owned","チップ","","手持ち扇風機-小","自キャラ所持チップ","該当チップ所持","手持ち扇風機-小","所持表示","通常","chip_icon/034_手持ち扇風機-小.png","手持ち扇風機-小
-スキル使用後、6マス以内のモンスターに【マーク】1つ付与。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+スキル使用後、6マス以内のモンスターに【マーク】1つ付与。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:34:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","手持ち扇風機-小","チップ表示","通常","chip_icon/034_手持ち扇風機-小.png","手持ち扇風機-小
-スキル使用後、6マス以内のモンスターに【マーク】1つ付与。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+スキル使用後、6マス以内のモンスターに【マーク】1つ付与。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:35:owned","チップ","","スプレー缶","自キャラ所持チップ","該当チップ所持","スプレー缶","所持表示","通常","chip_icon/035_スプレー缶.png","スプレー缶
-効果カードでモンスターにダメージを与えた後、目標モンスターに【マーク】を1つ付与。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+効果カードでモンスターにダメージを与えた後、目標モンスターに【マーク】を1つ付与。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:35:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","スプレー缶","チップ表示","通常","chip_icon/035_スプレー缶.png","スプレー缶
-効果カードでモンスターにダメージを与えた後、目標モンスターに【マーク】を1つ付与。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+効果カードでモンスターにダメージを与えた後、目標モンスターに【マーク】を1つ付与。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:36:owned","チップ","","スタンダードサイト","自キャラ所持チップ","該当チップ所持","スタンダードサイト","所持表示","通常","chip_icon/036_スタンダードサイト.png","スタンダードサイト
-攻撃力+2。攻撃時、目標に【マーク】を一つ付与。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+攻撃力+2。攻撃時、目標に【マーク】を一つ付与。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:36:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","スタンダードサイト","チップ表示","通常","chip_icon/036_スタンダードサイト.png","スタンダードサイト
-攻撃力+2。攻撃時、目標に【マーク】を一つ付与。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+攻撃力+2。攻撃時、目標に【マーク】を一つ付与。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:37:owned","チップ","","イーグルアイ","自キャラ所持チップ","該当チップ所持","イーグルアイ","所持表示","通常","chip_icon/037_イーグルアイ.png","イーグルアイ
-攻撃時、目標に【マーク】を1つ付与し、攻撃目標の【マーク】スタック数の二倍の攻撃力上昇。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+攻撃時、目標に【マーク】を1つ付与し、攻撃目標の【マーク】スタック数の二倍の攻撃力上昇。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:37:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","イーグルアイ","チップ表示","通常","chip_icon/037_イーグルアイ.png","イーグルアイ
-攻撃時、目標に【マーク】を1つ付与し、攻撃目標の【マーク】スタック数の二倍の攻撃力上昇。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+攻撃時、目標に【マーク】を1つ付与し、攻撃目標の【マーク】スタック数の二倍の攻撃力上昇。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:38:owned","チップ","","忍術手裏剣","自キャラ所持チップ","該当チップ所持","忍術手裏剣","所持表示","通常","chip_icon/038_忍術手裏剣.png","忍術手裏剣
-カード使用数+1、ダメージ系効果カードを使用した場合、目標モンスターに【マーク】スタック数と同じ数のダメージを与える。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+カード使用数+1、ダメージ系効果カードを使用した場合、目標モンスターに【マーク】スタック数と同じ数のダメージを与える。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:38:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","忍術手裏剣","チップ表示","通常","chip_icon/038_忍術手裏剣.png","忍術手裏剣
-カード使用数+1、ダメージ系効果カードを使用した場合、目標モンスターに【マーク】スタック数と同じ数のダメージを与える。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+カード使用数+1、ダメージ系効果カードを使用した場合、目標モンスターに【マーク】スタック数と同じ数のダメージを与える。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:39:owned","チップ","","標的","自キャラ所持チップ","該当チップ所持","標的","所持表示","通常","chip_icon/039_標的.png","標的
-攻撃力+1。ターン開始時、4マス以内で最も近いモンスターに【マーク】スタックを1付与する。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+攻撃力+1。ターン開始時、4マス以内で最も近いモンスターに【マーク】スタックを1付与する。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:39:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","標的","チップ表示","通常","chip_icon/039_標的.png","標的
-攻撃力+1。ターン開始時、4マス以内で最も近いモンスターに【マーク】スタックを1付与する。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+攻撃力+1。ターン開始時、4マス以内で最も近いモンスターに【マーク】スタックを1付与する。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:40:owned","チップ","","魔法の矢袋","自キャラ所持チップ","該当チップ所持","魔法の矢袋","所持表示","通常","chip_icon/040_魔法の矢袋.png","魔法の矢袋
-【マーク】されたモンスターに対してカードを使用した場合、使用したカードを手札に戻し、目標のモンスターに【マーク】を1つ付与（1ターンに1度）。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+【マーク】されたモンスターに対してカードを使用した場合、使用したカードを手札に戻し、目標のモンスターに【マーク】を1つ付与（1ターンに1度）。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:40:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","魔法の矢袋","チップ表示","通常","chip_icon/040_魔法の矢袋.png","魔法の矢袋
-【マーク】されたモンスターに対してカードを使用した場合、使用したカードを手札に戻し、目標のモンスターに【マーク】を1つ付与（1ターンに1度）。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+【マーク】されたモンスターに対してカードを使用した場合、使用したカードを手札に戻し、目標のモンスターに【マーク】を1つ付与（1ターンに1度）。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:41:owned","チップ","","手持ち扇風機-大","自キャラ所持チップ","該当チップ所持","手持ち扇風機-大","所持表示","通常","chip_icon/041_手持ち扇風機-大.png","手持ち扇風機-大
-スキル使用後、カードを1枚獲得、6マス以内のモンスターに【マーク】1つ付与。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+スキル使用後、カードを1枚獲得、6マス以内のモンスターに【マーク】1つ付与。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:41:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","手持ち扇風機-大","チップ表示","通常","chip_icon/041_手持ち扇風機-大.png","手持ち扇風機-大
-スキル使用後、カードを1枚獲得、6マス以内のモンスターに【マーク】1つ付与。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+スキル使用後、カードを1枚獲得、6マス以内のモンスターに【マーク】1つ付与。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:42:owned","チップ","","カッターナイフ-ベーシック","自キャラ所持チップ","該当チップ所持","カッターナイフ-ベーシック","所持表示","通常","chip_icon/042_カッターナイフ-ベーシック.png","カッターナイフ-ベーシック
-HPが満タン時、攻撃力+2、それに加えて攻撃時に【ヒール】スタック数と同じ数の攻撃力が上昇。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+HPが満タン時、攻撃力+2、それに加えて攻撃時に【ヒール】スタック数と同じ数の攻撃力が上昇。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:42:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","カッターナイフ-ベーシック","チップ表示","通常","chip_icon/042_カッターナイフ-ベーシック.png","カッターナイフ-ベーシック
-HPが満タン時、攻撃力+2、それに加えて攻撃時に【ヒール】スタック数と同じ数の攻撃力が上昇。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+HPが満タン時、攻撃力+2、それに加えて攻撃時に【ヒール】スタック数と同じ数の攻撃力が上昇。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:43:owned","チップ","","カッターナイフ-シャープ","自キャラ所持チップ","該当チップ所持","カッターナイフ-シャープ","所持表示","通常","chip_icon/043_カッターナイフ-シャープ.png","カッターナイフ-シャープ
-HPが満タン時、攻撃力+4、それに加えて攻撃時に【ヒール】スタック数と同じ数の攻撃力が上昇。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+HPが満タン時、攻撃力+4、それに加えて攻撃時に【ヒール】スタック数と同じ数の攻撃力が上昇。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:43:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","カッターナイフ-シャープ","チップ表示","通常","chip_icon/043_カッターナイフ-シャープ.png","カッターナイフ-シャープ
-HPが満タン時、攻撃力+4、それに加えて攻撃時に【ヒール】スタック数と同じ数の攻撃力が上昇。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+HPが満タン時、攻撃力+4、それに加えて攻撃時に【ヒール】スタック数と同じ数の攻撃力が上昇。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:44:owned","チップ","","救急箱-緊急治療","自キャラ所持チップ","該当チップ所持","救急箱-緊急治療","所持表示","通常","chip_icon/044_救急箱-緊急治療.png","救急箱-緊急治療
-ターン開始時、【ヒール】スタック+1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+ターン開始時、【ヒール】スタック+1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:44:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","救急箱-緊急治療","チップ表示","通常","chip_icon/044_救急箱-緊急治療.png","救急箱-緊急治療
-ターン開始時、【ヒール】スタック+1。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+ターン開始時、【ヒール】スタック+1。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:45:owned","チップ","","救急箱-完備治療","自キャラ所持チップ","該当チップ所持","救急箱-完備治療","所持表示","通常","chip_icon/045_救急箱-完備治療.png","救急箱-完備治療
-ターン開始時、【ヒール】スタック+3。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+ターン開始時、【ヒール】スタック+3。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:45:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","救急箱-完備治療","チップ表示","通常","chip_icon/045_救急箱-完備治療.png","救急箱-完備治療
-ターン開始時、【ヒール】スタック+3。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+ターン開始時、【ヒール】スタック+3。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:46:owned","チップ","","ビタミン剤","自キャラ所持チップ","該当チップ所持","ビタミン剤","所持表示","通常","chip_icon/046_ビタミン剤.png","ビタミン剤
-カードを獲得するたび、【ヒール】スタック+1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+カードを獲得するたび、【ヒール】スタック+1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:46:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","ビタミン剤","チップ表示","通常","chip_icon/046_ビタミン剤.png","ビタミン剤
-カードを獲得するたび、【ヒール】スタック+1。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+カードを獲得するたび、【ヒール】スタック+1。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:47:owned","チップ","","おいしいキャンディー","自キャラ所持チップ","該当チップ所持","おいしいキャンディー","所持表示","通常","chip_icon/047_おいしいキャンディー.png","おいしいキャンディー
-カードを使用した後、【ヒール】を1スタック獲得する。カードを使用した後、HPが満タンの場合、このターンのカード使用数+1（毎ターン最大1回発動）","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+カードを使用した後、【ヒール】を1スタック獲得する。カードを使用した後、HPが満タンの場合、このターンのカード使用数+1（毎ターン最大1回発動）","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:47:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","おいしいキャンディー","チップ表示","通常","chip_icon/047_おいしいキャンディー.png","おいしいキャンディー
-カードを使用した後、【ヒール】を1スタック獲得する。カードを使用した後、HPが満タンの場合、このターンのカード使用数+1（毎ターン最大1回発動）","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+カードを使用した後、【ヒール】を1スタック獲得する。カードを使用した後、HPが満タンの場合、このターンのカード使用数+1（毎ターン最大1回発動）","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:48:owned","チップ","","トンポーロウ","自キャラ所持チップ","該当チップ所持","トンポーロウ","所持表示","通常","chip_icon/048_トンポーロウ.png","トンポーロウ
-ターン開始時、周囲5マス以内の全員の【ヒール】スタック+1、HP+1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+ターン開始時、周囲5マス以内の全員の【ヒール】スタック+1、HP+1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:48:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","トンポーロウ","チップ表示","通常","chip_icon/048_トンポーロウ.png","トンポーロウ
-ターン開始時、周囲5マス以内の全員の【ヒール】スタック+1、HP+1。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+ターン開始時、周囲5マス以内の全員の【ヒール】スタック+1、HP+1。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:49:owned","チップ","","バッファーシールド","自キャラ所持チップ","該当チップ所持","バッファーシールド","所持表示","通常","chip_icon/049_バッファーシールド.png","バッファーシールド
-攻撃を受けるたび、【ヒール】スタック+2、スターコイン+3。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+攻撃を受けるたび、【ヒール】スタック+2、スターコイン+3。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:49:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","バッファーシールド","チップ表示","通常","chip_icon/049_バッファーシールド.png","バッファーシールド
-攻撃を受けるたび、【ヒール】スタック+2、スターコイン+3。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+攻撃を受けるたび、【ヒール】スタック+2、スターコイン+3。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:50:owned","チップ","","友情バッジ","自キャラ所持チップ","該当チップ所持","友情バッジ","所持表示","通常","chip_icon/050_友情バッジ.png","友情バッジ
-味方に治療や振り込みを行った際に、味方と同時に【ヒール】スタック+2。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+味方に治療や振り込みを行った際に、味方と同時に【ヒール】スタック+2。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:50:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","友情バッジ","チップ表示","通常","chip_icon/050_友情バッジ.png","友情バッジ
-味方に治療や振り込みを行った際に、味方と同時に【ヒール】スタック+2。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+味方に治療や振り込みを行った際に、味方と同時に【ヒール】スタック+2。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:51:owned","チップ","","エネルギー回収","自キャラ所持チップ","該当チップ所持","エネルギー回収","操作ボタン","通常","chip_icon/051_エネルギー回収.png","エネルギー回収
 ダイスの出目が5貯まるごとに、【チャージ】を2獲得する。【チャージ】が5より大きい時、移動力+1。
-クリック：チャージ+2","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+クリック：チャージ+2","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:51:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","エネルギー回収","チップ表示","通常","chip_icon/051_エネルギー回収.png","エネルギー回収
-ダイスの出目が5貯まるごとに、【チャージ】を2獲得する。【チャージ】が5より大きい時、移動力+1。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+ダイスの出目が5貯まるごとに、【チャージ】を2獲得する。【チャージ】が5より大きい時、移動力+1。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:52:owned","チップ","","エナジーソード","自キャラ所持チップ","該当チップ所持","エナジーソード","操作ボタン","通常","chip_icon/052_エナジーソード.png","エナジーソード
 攻撃命中ごとに【チャージ】を2獲得する。【チャージ】が7より大きい時、攻撃力+2。
-クリック：チャージ+2","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+クリック：チャージ+2","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:52:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","エナジーソード","チップ表示","通常","chip_icon/052_エナジーソード.png","エナジーソード
-攻撃命中ごとに【チャージ】を2獲得する。【チャージ】が7より大きい時、攻撃力+2。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+攻撃命中ごとに【チャージ】を2獲得する。【チャージ】が7より大きい時、攻撃力+2。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:53:owned","チップ","","ワープエンジン","自キャラ所持チップ","該当チップ所持","ワープエンジン","操作ボタン","通常","chip_icon/053_ワープエンジン.png","ワープエンジン
 突撃ゲートまたは疾走マスに止まった時、【チャージ】を2獲得し、次の移動時に移動力+2。
-クリック：チャージ+2","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+クリック：チャージ+2","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:53:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","ワープエンジン","チップ表示","通常","chip_icon/053_ワープエンジン.png","ワープエンジン
-突撃ゲートまたは疾走マスに止まった時、【チャージ】を2獲得し、次の移動時に移動力+2。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+突撃ゲートまたは疾走マスに止まった時、【チャージ】を2獲得し、次の移動時に移動力+2。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:54:owned","チップ","","電撃グローブ","自キャラ所持チップ","該当チップ所持","電撃グローブ","操作ボタン","通常","chip_icon/054_電撃グローブ.png","電撃グローブ
 効果カードを使用した時、【チャージ】を2スタック獲得する。ターン終了時、チャージを4消費して、自身から2マス以内の全モンスターに2ダメージを与える。
-クリック：チャージ+2","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+クリック：チャージ+2","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:54:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","電撃グローブ","チップ表示","通常","chip_icon/054_電撃グローブ.png","電撃グローブ
-効果カードを使用した時、【チャージ】を2スタック獲得する。ターン終了時、チャージを4消費して、自身から2マス以内の全モンスターに2ダメージを与える。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+効果カードを使用した時、【チャージ】を2スタック獲得する。ターン終了時、チャージを4消費して、自身から2マス以内の全モンスターに2ダメージを与える。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:55:owned","チップ","","エアバッグ","自キャラ所持チップ","該当チップ所持","エアバッグ","操作ボタン","通常","chip_icon/055_エアバッグ.png","エアバッグ
 現在HPを超えるダメージを受ける場合、【チャージ】を6消費してそのダメージを0にする。ダメージを受けた後、【チャージ】を1獲得する。
-クリック：チャージ-6（6以上必要）","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+クリック：チャージ-6（6以上必要）","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:55:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","エアバッグ","チップ表示","通常","chip_icon/055_エアバッグ.png","エアバッグ
-現在HPを超えるダメージを受ける場合、【チャージ】を6消費してそのダメージを0にする。ダメージを受けた後、【チャージ】を1獲得する。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+現在HPを超えるダメージを受ける場合、【チャージ】を6消費してそのダメージを0にする。ダメージを受けた後、【チャージ】を1獲得する。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:56:owned","チップ","","ライトニングコア","自キャラ所持チップ","該当チップ所持","ライトニングコア","操作ボタン","通常","chip_icon/056_ライトニングコア.png","ライトニングコア
 スキル使用後、このターンのカード使用数+1、【チャージ】を5消費し、スキルのCT-1。
-クリック：チャージ-5（5以上必要）、CT-1","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+クリック：チャージ-5（5以上必要）、CT-1","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:56:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","ライトニングコア","チップ表示","通常","chip_icon/056_ライトニングコア.png","ライトニングコア
-スキル使用後、このターンのカード使用数+1、【チャージ】を5消費し、スキルのCT-1。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+スキル使用後、このターンのカード使用数+1、【チャージ】を5消費し、スキルのCT-1。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:57:owned","チップ","","永久機関","自キャラ所持チップ","該当チップ所持","永久機関","所持表示","通常","chip_icon/057_永久機関.png","永久機関
-移動力+2。ターン開始時、自身の【チャージ】が6未満の場合、【チャージ】を6にする。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+移動力+2。ターン開始時、自身の【チャージ】が6未満の場合、【チャージ】を6にする。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:57:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","永久機関","チップ表示","通常","chip_icon/057_永久機関.png","永久機関
-移動力+2。ターン開始時、自身の【チャージ】が6未満の場合、【チャージ】を6にする。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+移動力+2。ターン開始時、自身の【チャージ】が6未満の場合、【チャージ】を6にする。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:58:owned","チップ","","レールガン","自キャラ所持チップ","該当チップ所持","レールガン","操作ボタン","通常","chip_icon/058_レールガン.png","レールガン
 攻撃力+2。モンスターに挑戦した後、【チャージ】を4消費して、対象がいるマスの全モンスターに現在の攻撃力の50%分のダメージを与える。
-クリック：チャージ-4（4以上必要）","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+クリック：チャージ-4（4以上必要）","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:58:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","レールガン","チップ表示","通常","chip_icon/058_レールガン.png","レールガン
-攻撃力+2。モンスターに挑戦した後、【チャージ】を4消費して、対象がいるマスの全モンスターに現在の攻撃力の50%分のダメージを与える。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+攻撃力+2。モンスターに挑戦した後、【チャージ】を4消費して、対象がいるマスの全モンスターに現在の攻撃力の50%分のダメージを与える。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:101:owned","チップ","","ギガントアンカー","自キャラ所持チップ","該当チップ所持","ギガントアンカー","所持表示","通常","chip_icon/101_ギガントアンカー.png","ギガントアンカー
-ダメージを受けるたびに、攻撃力+1。ターン開始時、このチップによる攻撃力ボーナス-1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+ダメージを受けるたびに、攻撃力+1。ターン開始時、このチップによる攻撃力ボーナス-1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:101:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","ギガントアンカー","チップ表示","通常","chip_icon/101_ギガントアンカー.png","ギガントアンカー
-ダメージを受けるたびに、攻撃力+1。ターン開始時、このチップによる攻撃力ボーナス-1。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+ダメージを受けるたびに、攻撃力+1。ターン開始時、このチップによる攻撃力ボーナス-1。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:102:owned","チップ","","トライデント","自キャラ所持チップ","該当チップ所持","トライデント","所持表示","通常","chip_icon/102_トライデント.png","トライデント
-スキル使用時、味方キャラ1名に攻撃力+1、防御力+1。（この効果は単体対象に重複発動しない）","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+スキル使用時、味方キャラ1名に攻撃力+1、防御力+1。（この効果は単体対象に重複発動しない）","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:102:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","トライデント","チップ表示","通常","chip_icon/102_トライデント.png","トライデント
-スキル使用時、味方キャラ1名に攻撃力+1、防御力+1。（この効果は単体対象に重複発動しない）","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+スキル使用時、味方キャラ1名に攻撃力+1、防御力+1。（この効果は単体対象に重複発動しない）","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:102:toggle:0","チップ","","共通","自キャラ状態欄","該当チップ所持、条件切替対象","トライデント","ボタン","モード 0","chip_icon/102_トライデント.png","トライデント：オフ
 クリックで条件を切り替え","","","07_skill/js/character-view.js:createChipConditionToggleView",""
 "chip:102:toggle:1","チップ","","共通","自キャラ状態欄","該当チップ所持、条件切替対象","トライデント","ボタン","モード 1","chip_icon/102_トライデント.png","トライデント：オン
 クリックで条件を切り替え","","","07_skill/js/character-view.js:createChipConditionToggleView",""
 "chip:103:owned","チップ","","夢想号プラモデル","自キャラ所持チップ","該当チップ所持","夢想号プラモデル","所持表示","通常","chip_icon/103_夢想号プラモデル.png","夢想号プラモデル
-移動力+2。ダイスの出目累計15ごとに、スキルCT-1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+移動力+2。ダイスの出目累計15ごとに、スキルCT-1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:103:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","夢想号プラモデル","チップ表示","通常","chip_icon/103_夢想号プラモデル.png","夢想号プラモデル
-移動力+2。ダイスの出目累計15ごとに、スキルCT-1。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+移動力+2。ダイスの出目累計15ごとに、スキルCT-1。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:111:owned","チップ","","呪いの剣","自キャラ所持チップ","該当チップ所持","呪いの剣","所持表示","通常","chip_icon/111_呪いの剣.png","呪いの剣
-呪い：モンスターを撃破するたびに、攻撃力+1を得る。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+呪い：モンスターを撃破するたびに、攻撃力+1を得る。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:111:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","呪いの剣","チップ表示","通常","chip_icon/111_呪いの剣.png","呪いの剣
-呪い：モンスターを撃破するたびに、攻撃力+1を得る。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+呪い：モンスターを撃破するたびに、攻撃力+1を得る。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:112:owned","チップ","","復讐の戟","自キャラ所持チップ","該当チップ所持","復讐の戟","所持表示","通常","chip_icon/112_復讐の戟.png","復讐の戟
-【青き呪い】状態になった間：攻撃力+5、【赤き呪い】状態になった間：防御力+5。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+【青き呪い】状態になった間：攻撃力+5、【赤き呪い】状態になった間：防御力+5。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:112:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","復讐の戟","チップ表示","通常","chip_icon/112_復讐の戟.png","復讐の戟
-【青き呪い】状態になった間：攻撃力+5、【赤き呪い】状態になった間：防御力+5。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+【青き呪い】状態になった間：攻撃力+5、【赤き呪い】状態になった間：防御力+5。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:112:toggle:0","チップ","","共通","自キャラ状態欄","該当チップ所持、条件切替対象","復讐の戟","ボタン","モード 0","chip_icon/112_復讐の戟.png","復讐の戟：オフ
 クリックで条件を切り替え","","","07_skill/js/character-view.js:createChipConditionToggleView",""
 "chip:112:toggle:1","チップ","","共通","自キャラ状態欄","該当チップ所持、条件切替対象","復讐の戟","ボタン","モード 1","chip_icon/112_復讐の戟.png","復讐の戟：赤き呪い
@@ -802,137 +802,137 @@ HPが満タン時、攻撃力+4、それに加えて攻撃時に【ヒール】�
 "chip:112:toggle:3","チップ","","共通","自キャラ状態欄","該当チップ所持、条件切替対象","復讐の戟","ボタン","モード 3","chip_icon/112_復讐の戟.png","復讐の戟：赤き呪いと青き呪い
 クリックで条件を切り替え","","","07_skill/js/character-view.js:createChipConditionToggleView",""
 "chip:113:owned","チップ","","貫通の銃","自キャラ所持チップ","該当チップ所持","貫通の銃","所持表示","通常","chip_icon/113_貫通の銃.png","貫通の銃
-効果カードが目標モンスターの防御力と同じの数のダメージを追加で出る。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+効果カードが目標モンスターの防御力と同じの数のダメージを追加で出る。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:113:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","貫通の銃","チップ表示","通常","chip_icon/113_貫通の銃.png","貫通の銃
-効果カードが目標モンスターの防御力と同じの数のダメージを追加で出る。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+効果カードが目標モンスターの防御力と同じの数のダメージを追加で出る。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:121:owned","チップ","","大鉦","自キャラ所持チップ","該当チップ所持","大鉦","所持表示","通常","chip_icon/121_大鉦.png","大鉦
-スキル使用後、4マス以内の全キャラクターの攻撃力+1、受けるダメージ-1、1ターン継続。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+スキル使用後、4マス以内の全キャラクターの攻撃力+1、受けるダメージ-1、1ターン継続。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:121:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","大鉦","チップ表示","通常","chip_icon/121_大鉦.png","大鉦
-スキル使用後、4マス以内の全キャラクターの攻撃力+1、受けるダメージ-1、1ターン継続。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+スキル使用後、4マス以内の全キャラクターの攻撃力+1、受けるダメージ-1、1ターン継続。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:121:toggle:0","チップ","","共通","自キャラ状態欄","該当チップ所持、条件切替対象","大鉦","ボタン","モード 0","chip_icon/121_大鉦.png","大鉦：オフ
 クリックで条件を切り替え","","","07_skill/js/character-view.js:createChipConditionToggleView",""
 "chip:121:toggle:1","チップ","","共通","自キャラ状態欄","該当チップ所持、条件切替対象","大鉦","ボタン","モード 1","chip_icon/121_大鉦.png","大鉦：オン
 クリックで条件を切り替え","","","07_skill/js/character-view.js:createChipConditionToggleView",""
 "chip:122:owned","チップ","","お年玉","自キャラ所持チップ","該当チップ所持","お年玉","所持表示","通常","chip_icon/122_お年玉.png","お年玉
-爆竹使用後、カード使用数+1。振り込み後、爆竹を1枚獲得。爆竹3枚使用するごとに、全キャラクターにランダムで最大3種類の新春祝福を獲得。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+爆竹使用後、カード使用数+1。振り込み後、爆竹を1枚獲得。爆竹3枚使用するごとに、全キャラクターにランダムで最大3種類の新春祝福を獲得。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:122:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","お年玉","チップ表示","通常","chip_icon/122_お年玉.png","お年玉
-爆竹使用後、カード使用数+1。振り込み後、爆竹を1枚獲得。爆竹3枚使用するごとに、全キャラクターにランダムで最大3種類の新春祝福を獲得。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+爆竹使用後、カード使用数+1。振り込み後、爆竹を1枚獲得。爆竹3枚使用するごとに、全キャラクターにランダムで最大3種類の新春祝福を獲得。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:131:owned","チップ","","紅茶にケーキ","自キャラ所持チップ","該当チップ所持","紅茶にケーキ","所持表示","通常","chip_icon/131_紅茶にケーキ.png","紅茶にケーキ
-攻撃力+1。ティーポットを攻撃する時に、攻撃力+1、防御力+1（1ターン継続）。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+攻撃力+1。ティーポットを攻撃する時に、攻撃力+1、防御力+1（1ターン継続）。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:131:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","紅茶にケーキ","チップ表示","通常","chip_icon/131_紅茶にケーキ.png","紅茶にケーキ
-攻撃力+1。ティーポットを攻撃する時に、攻撃力+1、防御力+1（1ターン継続）。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+攻撃力+1。ティーポットを攻撃する時に、攻撃力+1、防御力+1（1ターン継続）。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:131:toggle:0","チップ","","共通","自キャラ状態欄","該当チップ所持、条件切替対象","紅茶にケーキ","ボタン","モード 0","chip_icon/131_紅茶にケーキ.png","紅茶にケーキ：オフ
 クリックで条件を切り替え","","","07_skill/js/character-view.js:createChipConditionToggleView",""
 "chip:131:toggle:1","チップ","","共通","自キャラ状態欄","該当チップ所持、条件切替対象","紅茶にケーキ","ボタン","モード 1","chip_icon/131_紅茶にケーキ.png","紅茶にケーキ：オン
 クリックで条件を切り替え","","","07_skill/js/character-view.js:createChipConditionToggleView",""
 "chip:132:owned","チップ","","古の魔法杖","自キャラ所持チップ","該当チップ所持","古の魔法杖","所持表示","通常","chip_icon/132_古の魔法杖.png","古の魔法杖
-全ての効果カードの効果距離+3、カード使用数+1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+全ての効果カードの効果距離+3、カード使用数+1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:132:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","古の魔法杖","チップ表示","通常","chip_icon/132_古の魔法杖.png","古の魔法杖
-全ての効果カードの効果距離+3、カード使用数+1。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+全ての効果カードの効果距離+3、カード使用数+1。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:133:owned","チップ","","精良な装備セット","自キャラ所持チップ","該当チップ所持","精良な装備セット","所持表示","通常","chip_icon/133_精良な装備セット.png","精良な装備セット
-攻撃力+4、【問題生徒】になった時、防御力+4。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+攻撃力+4、【問題生徒】になった時、防御力+4。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:133:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","精良な装備セット","チップ表示","通常","chip_icon/133_精良な装備セット.png","精良な装備セット
-攻撃力+4、【問題生徒】になった時、防御力+4。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+攻撃力+4、【問題生徒】になった時、防御力+4。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:133:toggle:0","チップ","","共通","自キャラ状態欄","該当チップ所持、条件切替対象","精良な装備セット","ボタン","モード 0","chip_icon/133_精良な装備セット.png","精良な装備セット：オフ
 クリックで条件を切り替え","","","07_skill/js/character-view.js:createChipConditionToggleView",""
 "chip:133:toggle:1","チップ","","共通","自キャラ状態欄","該当チップ所持、条件切替対象","精良な装備セット","ボタン","モード 1","chip_icon/133_精良な装備セット.png","精良な装備セット：オン
 クリックで条件を切り替え","","","07_skill/js/character-view.js:createChipConditionToggleView",""
 "chip:141:owned","チップ","","荒波の御守り","自キャラ所持チップ","該当チップ所持","荒波の御守り","所持表示","通常","chip_icon/141_荒波の御守り.png","荒波の御守り
-効果カード使用時、1ダメージを受ける。カードを獲得時、HP1回復する。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+効果カード使用時、1ダメージを受ける。カードを獲得時、HP1回復する。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:141:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","荒波の御守り","チップ表示","通常","chip_icon/141_荒波の御守り.png","荒波の御守り
-効果カード使用時、1ダメージを受ける。カードを獲得時、HP1回復する。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+効果カード使用時、1ダメージを受ける。カードを獲得時、HP1回復する。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:142:owned","チップ","","幻のシーフードスープ","自キャラ所持チップ","該当チップ所持","幻のシーフードスープ","所持表示","通常","chip_icon/142_幻のシーフードスープ.png","幻のシーフードスープ
-戦闘中のダイスの出目は1か6になる。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+戦闘中のダイスの出目は1か6になる。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:142:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","幻のシーフードスープ","チップ表示","通常","chip_icon/142_幻のシーフードスープ.png","幻のシーフードスープ
-戦闘中のダイスの出目は1か6になる。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+戦闘中のダイスの出目は1か6になる。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:143:owned","チップ","","無限の蛇","自キャラ所持チップ","該当チップ所持","無限の蛇","所持表示","通常","chip_icon/143_無限の蛇.png","無限の蛇
-ターン開始時、手札を8までドローする、カード使用数+1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+ターン開始時、手札を8までドローする、カード使用数+1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:143:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","無限の蛇","チップ表示","通常","chip_icon/143_無限の蛇.png","無限の蛇
-ターン開始時、手札を8までドローする、カード使用数+1。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+ターン開始時、手札を8までドローする、カード使用数+1。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:144:owned","チップ","","陰陽鯉","自キャラ所持チップ","該当チップ所持","陰陽鯉","所持表示","通常","chip_icon/144_陰陽鯉.png","陰陽鯉
-反撃無効を得る、攻撃時、ダイスの出目を6に固定する。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+反撃無効を得る、攻撃時、ダイスの出目を6に固定する。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:144:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","陰陽鯉","チップ表示","通常","chip_icon/144_陰陽鯉.png","陰陽鯉
-反撃無効を得る、攻撃時、ダイスの出目を6に固定する。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+反撃無効を得る、攻撃時、ダイスの出目を6に固定する。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:145:owned","チップ","","蛇のぬいぐるみ","自キャラ所持チップ","該当チップ所持","蛇のぬいぐるみ","所持表示","通常","chip_icon/145_蛇のぬいぐるみ.png","蛇のぬいぐるみ
-ダメージを受ける後、このターンで受けるダメージ-2、攻撃力+2。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+ダメージを受ける後、このターンで受けるダメージ-2、攻撃力+2。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:145:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","蛇のぬいぐるみ","チップ表示","通常","chip_icon/145_蛇のぬいぐるみ.png","蛇のぬいぐるみ
-ダメージを受ける後、このターンで受けるダメージ-2、攻撃力+2。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+ダメージを受ける後、このターンで受けるダメージ-2、攻撃力+2。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:145:toggle:0","チップ","","共通","自キャラ状態欄","該当チップ所持、条件切替対象","蛇のぬいぐるみ","ボタン","モード 0","chip_icon/145_蛇のぬいぐるみ.png","蛇のぬいぐるみ：オフ
 クリックで条件を切り替え","","","07_skill/js/character-view.js:createChipConditionToggleView",""
 "chip:145:toggle:1","チップ","","共通","自キャラ状態欄","該当チップ所持、条件切替対象","蛇のぬいぐるみ","ボタン","モード 1","chip_icon/145_蛇のぬいぐるみ.png","蛇のぬいぐるみ：オン
 クリックで条件を切り替え","","","07_skill/js/character-view.js:createChipConditionToggleView",""
 "chip:146:owned","チップ","","鯉のぬいぐるみ","自キャラ所持チップ","該当チップ所持","鯉のぬいぐるみ","所持表示","通常","chip_icon/146_鯉のぬいぐるみ.png","鯉のぬいぐるみ
-スキル使用後、反撃1回得る、反撃時、攻撃力+1永続、防御力+1永続を得る。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+スキル使用後、反撃1回得る、反撃時、攻撃力+1永続、防御力+1永続を得る。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:146:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","鯉のぬいぐるみ","チップ表示","通常","chip_icon/146_鯉のぬいぐるみ.png","鯉のぬいぐるみ
-スキル使用後、反撃1回得る、反撃時、攻撃力+1永続、防御力+1永続を得る。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+スキル使用後、反撃1回得る、反撃時、攻撃力+1永続、防御力+1永続を得る。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:151:owned","チップ","","タイマー","自キャラ所持チップ","該当チップ所持","タイマー","所持表示","通常","chip_icon/151_タイマー.png","タイマー
-改造を得る時、追加で1スタック獲得する。改造スタック2つにつき、攻撃力+1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+改造を得る時、追加で1スタック獲得する。改造スタック2つにつき、攻撃力+1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:151:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","タイマー","チップ表示","通常","chip_icon/151_タイマー.png","タイマー
-改造を得る時、追加で1スタック獲得する。改造スタック2つにつき、攻撃力+1。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+改造を得る時、追加で1スタック獲得する。改造スタック2つにつき、攻撃力+1。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:152:owned","チップ","","復活人形","自キャラ所持チップ","該当チップ所持","復活人形","所持表示","通常","chip_icon/152_復活人形.png","復活人形
-撃破された後、進捗バーへの影響を無くす。攻撃力、防御力、最大HP上限+1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+撃破された後、進捗バーへの影響を無くす。攻撃力、防御力、最大HP上限+1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:152:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","復活人形","チップ表示","通常","chip_icon/152_復活人形.png","復活人形
-撃破された後、進捗バーへの影響を無くす。攻撃力、防御力、最大HP上限+1。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+撃破された後、進捗バーへの影響を無くす。攻撃力、防御力、最大HP上限+1。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:153:owned","チップ","","キャンディー会員証","自キャラ所持チップ","該当チップ所持","キャンディー会員証","所持表示","通常","chip_icon/153_キャンディー会員証.png","キャンディー会員証
-怪奇飴カードの値段を3コインにする。怪奇飴カードを使用時、CT-1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+怪奇飴カードの値段を3コインにする。怪奇飴カードを使用時、CT-1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:153:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","キャンディー会員証","チップ表示","通常","chip_icon/153_キャンディー会員証.png","キャンディー会員証
-怪奇飴カードの値段を3コインにする。怪奇飴カードを使用時、CT-1。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+怪奇飴カードの値段を3コインにする。怪奇飴カードを使用時、CT-1。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:161:owned","チップ","","彩り羽のブレスレット","自キャラ所持チップ","該当チップ所持","彩り羽のブレスレット","所持表示","通常","chip_icon/161_彩り羽のブレスレット.png","彩り羽のブレスレット
-スキル使用後、彩りの羽を1枚獲得する。彩りの羽を3枚使った後、強化チップを1個獲得する。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+スキル使用後、彩りの羽を1枚獲得する。彩りの羽を3枚使った後、強化チップを1個獲得する。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:161:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","彩り羽のブレスレット","チップ表示","通常","chip_icon/161_彩り羽のブレスレット.png","彩り羽のブレスレット
-スキル使用後、彩りの羽を1枚獲得する。彩りの羽を3枚使った後、強化チップを1個獲得する。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+スキル使用後、彩りの羽を1枚獲得する。彩りの羽を3枚使った後、強化チップを1個獲得する。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:162:owned","チップ","","オシドリペンダント","自キャラ所持チップ","該当チップ所持","オシドリペンダント","所持表示","通常","chip_icon/162_オシドリペンダント.png","オシドリペンダント
-【鴛鴦連理】を持つ時、移動力+2。【鴛鴦連理】解除時、攻撃力、防御力+1。（永続）","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+【鴛鴦連理】を持つ時、移動力+2。【鴛鴦連理】解除時、攻撃力、防御力+1。（永続）","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:162:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","オシドリペンダント","チップ表示","通常","chip_icon/162_オシドリペンダント.png","オシドリペンダント
-【鴛鴦連理】を持つ時、移動力+2。【鴛鴦連理】解除時、攻撃力、防御力+1。（永続）","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+【鴛鴦連理】を持つ時、移動力+2。【鴛鴦連理】解除時、攻撃力、防御力+1。（永続）","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:162:toggle:0","チップ","","共通","自キャラ状態欄","該当チップ所持、条件切替対象","オシドリペンダント","ボタン","モード 0","chip_icon/162_オシドリペンダント.png","オシドリペンダント：オフ
 クリックで条件を切り替え","","","07_skill/js/character-view.js:createChipConditionToggleView",""
 "chip:162:toggle:1","チップ","","共通","自キャラ状態欄","該当チップ所持、条件切替対象","オシドリペンダント","ボタン","モード 1","chip_icon/162_オシドリペンダント.png","オシドリペンダント：オン
 クリックで条件を切り替え","","","07_skill/js/character-view.js:createChipConditionToggleView",""
 "chip:163:owned","チップ","","孔雀の扇子","自キャラ所持チップ","該当チップ所持","孔雀の扇子","所持表示","通常","chip_icon/163_孔雀の扇子.png","孔雀の扇子
-攻撃命中後、自身が【ジェントル・フレイム】2スタック獲得する。戦闘に挑まれた時、【ジェントル・フレイム】3スタック消耗し、反撃1スタック獲得、さらにHP3回復する。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+攻撃命中後、自身が【ジェントル・フレイム】2スタック獲得する。戦闘に挑まれた時、【ジェントル・フレイム】3スタック消耗し、反撃1スタック獲得、さらにHP3回復する。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:163:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","孔雀の扇子","チップ表示","通常","chip_icon/163_孔雀の扇子.png","孔雀の扇子
-攻撃命中後、自身が【ジェントル・フレイム】2スタック獲得する。戦闘に挑まれた時、【ジェントル・フレイム】3スタック消耗し、反撃1スタック獲得、さらにHP3回復する。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+攻撃命中後、自身が【ジェントル・フレイム】2スタック獲得する。戦闘に挑まれた時、【ジェントル・フレイム】3スタック消耗し、反撃1スタック獲得、さらにHP3回復する。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:201:owned","チップ","","スタンガン","自キャラ所持チップ","該当チップ所持","スタンガン","所持表示","通常","chip_icon/201_スタンガン.png","スタンガン
-エリートユニットを撃破した後、【マインド】を1スタック獲得する。【マインド】のスタック数が3以上の場合、攻撃力+2、防御力+2。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+エリートユニットを撃破した後、【マインド】を1スタック獲得する。【マインド】のスタック数が3以上の場合、攻撃力+2、防御力+2。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:201:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","スタンガン","チップ表示","通常","chip_icon/201_スタンガン.png","スタンガン
-エリートユニットを撃破した後、【マインド】を1スタック獲得する。【マインド】のスタック数が3以上の場合、攻撃力+2、防御力+2。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+エリートユニットを撃破した後、【マインド】を1スタック獲得する。【マインド】のスタック数が3以上の場合、攻撃力+2、防御力+2。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:202:owned","チップ","","スポーツリストバンド","自キャラ所持チップ","該当チップ所持","スポーツリストバンド","所持表示","通常","chip_icon/202_スポーツリストバンド.png","スポーツリストバンド
-攻撃力+1。攻撃時、防御側の移動力が変化している場合、追加で攻撃力+4。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+攻撃力+1。攻撃時、防御側の移動力が変化している場合、追加で攻撃力+4。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:202:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","スポーツリストバンド","チップ表示","通常","chip_icon/202_スポーツリストバンド.png","スポーツリストバンド
-攻撃力+1。攻撃時、防御側の移動力が変化している場合、追加で攻撃力+4。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+攻撃力+1。攻撃時、防御側の移動力が変化している場合、追加で攻撃力+4。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:202:toggle:0","チップ","","共通","自キャラ状態欄","該当チップ所持、条件切替対象","スポーツリストバンド","ボタン","モード 0","chip_icon/202_スポーツリストバンド.png","スポーツリストバンド：オフ
 クリックで条件を切り替え","","","07_skill/js/character-view.js:createChipConditionToggleView",""
 "chip:202:toggle:1","チップ","","共通","自キャラ状態欄","該当チップ所持、条件切替対象","スポーツリストバンド","ボタン","モード 1","chip_icon/202_スポーツリストバンド.png","スポーツリストバンド：オン
 クリックで条件を切り替え","","","07_skill/js/character-view.js:createChipConditionToggleView",""
 "chip:203:owned","チップ","","懐中時計","自キャラ所持チップ","該当チップ所持","懐中時計","所持表示","通常","chip_icon/203_懐中時計.png","懐中時計
-スタンされた後の次のラウンド開始時、即座に復活する。そのラウンドのモンスター行動時、全てのモンスターが時間停止状態になる。その後、懐中時計は「懐中時計（破損）」に変化する。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+スタンされた後の次のラウンド開始時、即座に復活する。そのラウンドのモンスター行動時、全てのモンスターが時間停止状態になる。その後、懐中時計は「懐中時計（破損）」に変化する。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:203:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","懐中時計","チップ表示","通常","chip_icon/203_懐中時計.png","懐中時計
-スタンされた後の次のラウンド開始時、即座に復活する。そのラウンドのモンスター行動時、全てのモンスターが時間停止状態になる。その後、懐中時計は「懐中時計（破損）」に変化する。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+スタンされた後の次のラウンド開始時、即座に復活する。そのラウンドのモンスター行動時、全てのモンスターが時間停止状態になる。その後、懐中時計は「懐中時計（破損）」に変化する。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:204:owned","チップ","","懐中時計（破損）","自キャラ所持チップ","該当チップ所持","懐中時計（破損）","所持表示","通常","chip_icon/204_懐中時計（破損）.png","懐中時計（破損）
-元の機能を失ってしまったようで、修復は不可能に見える。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+元の機能を失ってしまったようで、修復は不可能に見える。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:204:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","懐中時計（破損）","チップ表示","通常","chip_icon/204_懐中時計（破損）.png","懐中時計（破損）
-元の機能を失ってしまったようで、修復は不可能に見える。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+元の機能を失ってしまったようで、修復は不可能に見える。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:205:owned","チップ","","アダプティブコア","自キャラ所持チップ","該当チップ所持","アダプティブコア","所持表示","通常","chip_icon/205_アダプティブコア.png","アダプティブコア
-マインドが3スタック以下の時、受けるダメージ-1。マインドが3スタック以上の時、攻撃力+2。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+マインドが3スタック以下の時、受けるダメージ-1。マインドが3スタック以上の時、攻撃力+2。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:205:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","アダプティブコア","チップ表示","通常","chip_icon/205_アダプティブコア.png","アダプティブコア
-マインドが3スタック以下の時、受けるダメージ-1。マインドが3スタック以上の時、攻撃力+2。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+マインドが3スタック以下の時、受けるダメージ-1。マインドが3スタック以上の時、攻撃力+2。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:206:owned","チップ","","エンタメターミナル","自キャラ所持チップ","該当チップ所持","エンタメターミナル","所持表示","通常","chip_icon/206_エンタメターミナル.png","エンタメターミナル
-攻撃力+4、防御力+4。ターン終了時、マインドスタック-1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+攻撃力+4、防御力+4。ターン終了時、マインドスタック-1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:206:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","エンタメターミナル","チップ表示","通常","chip_icon/206_エンタメターミナル.png","エンタメターミナル
-攻撃力+4、防御力+4。ターン終了時、マインドスタック-1。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+攻撃力+4、防御力+4。ターン終了時、マインドスタック-1。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:207:owned","チップ","","原初の意識","自キャラ所持チップ","該当チップ所持","原初の意識","所持表示","通常","chip_icon/207_原初の意識.png","原初の意識
-マインド増加時、最大HP+1（永続）。マインド減少時、攻撃力+1（永続）。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+マインド増加時、最大HP+1（永続）。マインド減少時、攻撃力+1（永続）。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:207:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","原初の意識","チップ表示","通常","chip_icon/207_原初の意識.png","原初の意識
-マインド増加時、最大HP+1（永続）。マインド減少時、攻撃力+1（永続）。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+マインド増加時、最大HP+1（永続）。マインド減少時、攻撃力+1（永続）。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:211:owned","チップ","","虫眼鏡","自キャラ所持チップ","該当チップ所持","虫眼鏡","所持表示","通常","chip_icon/211_虫眼鏡.png","虫眼鏡
-【罪証】を1スタック保有するごとに、攻撃力+1、防御力+1（最大4スタック）。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+【罪証】を1スタック保有するごとに、攻撃力+1、防御力+1（最大4スタック）。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:211:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","虫眼鏡","チップ表示","通常","chip_icon/211_虫眼鏡.png","虫眼鏡
-【罪証】を1スタック保有するごとに、攻撃力+1、防御力+1（最大4スタック）。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+【罪証】を1スタック保有するごとに、攻撃力+1、防御力+1（最大4スタック）。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:212:owned","チップ","","ハンナの人形","自キャラ所持チップ","該当チップ所持","ハンナの人形","所持表示","通常","chip_icon/212_ハンナの人形.png","ハンナの人形
-振り込み後、【罪証】を1スタック獲得する。ターン終了時、自身の【罪証】スタック数×2のスターコインを獲得する。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","csv/chip_list.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+振り込み後、【罪証】を1スタック獲得する。ターン終了時、自身の【罪証】スタック数×2のスターコインを獲得する。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:212:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","ハンナの人形","チップ表示","通常","chip_icon/212_ハンナの人形.png","ハンナの人形
-振り込み後、【罪証】を1スタック獲得する。ターン終了時、自身の【罪証】スタック数×2のスターコインを獲得する。","","チャージ操作の追記なし","csv/chip_list.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+振り込み後、【罪証】を1スタック獲得する。ターン終了時、自身の【罪証】スタック数×2のスターコインを獲得する。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "shared:優雅の羽ボーナス","共通・チップ","","共通","自キャラ状態欄","入力を参照するチップを所持：ID 21","優雅の羽ボーナス","数値入力","初期表示","chip_icon/021_優雅の羽.png","優雅の羽ボーナス：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "shared:コイン","共通・チップ","","共通","自キャラ状態欄","入力を参照するチップを所持：ID 25","コイン","数値入力","初期表示","UT_Buff/Coin.png","コイン：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "shared:スターコイン","共通・チップ","","共通","自キャラ状態欄","入力を参照するチップを所持：ID 31","スターコイン","数値入力","初期表示","UT_Buff/Coin.png","スターコイン：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""

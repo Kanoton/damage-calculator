@@ -1,4 +1,4 @@
-async function loadCharacterData({listStatus,chipStatus,statusIconSnapshot,characterSkillsSnapshot}){
+async function loadCharacterData({listStatus,chipStatus,statusIconSnapshot}){
  async function load(kind,file,status){
   if(location.protocol==='file:')return parseMapCSV(CHARACTER_CSV_SNAPSHOT[kind]);
   try{const response=await fetch('../csv/'+file,{cache:'no-cache'});if(!response.ok)throw Error(file);const rows=parseMapCSV(await response.text());if(rows.length&&!Object.hasOwn(rows[0],'id'))throw Error('Missing id');return rows;}
@@ -23,13 +23,8 @@ async function loadCharacterData({listStatus,chipStatus,statusIconSnapshot,chara
   const rows=parseMapCSV(csv);
   return {mapKeywords:rows.filter(row=>row.group==='マップ固有'&&row.map_id&&['number','checkbox'].includes(row.input_kind)),statusIcons:new Map(rows.filter(row=>['number','checkbox'].includes(row.input_kind)&&/^(?:(?:chip_icon|UT_Buff)\/)?[^/\\]+\.png$/i.test(row.icon_file)).map(row=>[row.effect_key,row.icon_file]))};
  }
- async function loadCharacterSkills(){
-  let csv=characterSkillsSnapshot;
-  if(location.protocol!=='file:'){
-   try{const response=await fetch('../csv/character_skills.csv',{cache:'no-cache'});if(!response.ok)throw Error('character_skills.csv');csv=await response.text();}
-   catch(error){console.warn('キャラクター能力CSVを取得できないため、同梱データを使用します。',error);}
-  }
-  return new Map(parseMapCSV(csv).filter(row=>row.id&&row.ability).map(row=>[row.id,row.ability]));
+ function loadCharacterSkills(){
+  return new Map(Object.keys(SKILL_HOVER_TEXT).filter(key=>key.startsWith('ability.')).map(key=>[key.slice(8),getSkillHoverText(key)]));
  }
  async function loadCharacterCardImages(){
   let csv=CHARACTER_HERO_CARD_CSV_SNAPSHOT;
