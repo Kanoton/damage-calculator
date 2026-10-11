@@ -177,3 +177,11 @@ function createPartyMemberView(row,index,parameters,isSelf,onLevelChange,ownedCh
  }else slot.append(details);
  return slot;
 }
+
+// Numeric skill dialogs share markup; activation stays in the character controller.
+function createCharacterSkillInputDialogView(id,label,title,inputId){
+ const dialog=document.createElement('dialog');dialog.id=id;dialog.setAttribute('aria-label',label);
+ dialog.innerHTML='<form><h3></h3><div class="skill-entry-row"><div class="skill-entry-fields"><div></div></div><div class="skill-keypad-slot"></div><button type="button" data-cancel>キャンセル</button></div></form>';
+ dialog.querySelector('h3').textContent=title;dialog.querySelector('.skill-entry-fields>div').id=inputId;
+ return dialog;
+}
