@@ -1701,3 +1701,9 @@ dialog[data-inline-pad] .skill-dialog-actions button{min-width:72px}
 .skill-keypad-slot{min-height:187px}
 dialog[data-inline-pad] .character-number-pad{grid-template-columns:repeat(3,minmax(0,1fr))}
 .mobile-ui dialog[data-inline-pad] .skill-keypad-slot{min-height:211px}
+
+/* Size from the field + keypad row, never from right-aligned action buttons. */
+#teru-stat-dialog,#skill-source-dialog{width:max-content;max-width:calc(100vw - 16px)}
+.skill-entry-row{grid-template-columns:max-content 184px}
+.mobile-ui dialog[data-inline-pad] .character-number-pad button{height:44px}
+@media(max-width:380px){.skill-entry-row{grid-template-columns:max-content 166px}}
