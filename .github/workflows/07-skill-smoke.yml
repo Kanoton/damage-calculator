@@ -10,6 +10,7 @@ on:
       - 'playwright.config.js'
       - 'package.json'
       - 'package-lock.json'
+      - '.github/workflows/07-skill-smoke.yml'
   push:
     branches: [main]
     paths:
@@ -20,6 +21,7 @@ on:
       - 'playwright.config.js'
       - 'package.json'
       - 'package-lock.json'
+      - '.github/workflows/07-skill-smoke.yml'
 
 jobs:
   smoke:
