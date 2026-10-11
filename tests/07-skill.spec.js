@@ -1335,7 +1335,7 @@ test('07 Teru: keypad and Enter advance ATK to DEF then confirm one cast',async(
 test('07 Sherry: blessing movement and Doll Complete overlap at plus two and Undo restores',async({page})=>{
  await page.goto('/07_skill/');await selectCharacter(page,'106');await registerSupport(page,'105');
  const blessing=page.getByRole('button',{name:'PTハンナ推理タイム＋1',exact:true}),doll=page.getByRole('button',{name:/^PTハンナ次の移動：/}),move=page.locator('#selected-character-move');
- await blessing.click();await expect(move).toHaveText('2');await doll.click();await expect(move).toHaveText('2');await blessing.click({button:'right'});await expect(move).toHaveText('2');await doll.click();await expect(move).toHaveText('0');
+ await blessing.click();await expect(blessing).toHaveAttribute('aria-pressed','true');await expect(move).toHaveText('2');await doll.click();await expect(move).toHaveText('2');await blessing.click({button:'right'});await expect(blessing).toHaveAttribute('aria-pressed','false');await expect(move).toHaveText('2');await doll.click();await expect(move).toHaveText('0');
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();await expect(move).toHaveText('2');
 });
 

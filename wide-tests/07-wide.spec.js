@@ -93,7 +93,7 @@ test('Rinrin: bounded passage dialog supports No, Undo and Yes target selection'
  const dialog=page.locator('#rinrin-area-dialog'),skill=page.locator('#selected-character-skill'),ct=page.locator('#selected-character-ct');
  await skill.click();await expect(dialog).toBeVisible();
  const box=await dialog.boundingBox(),viewport=page.viewportSize();expect(box.x).toBeGreaterThanOrEqual(0);expect(box.y).toBeGreaterThanOrEqual(0);expect(box.x+box.width).toBeLessThanOrEqual(viewport.width);expect(box.y+box.height).toBeLessThanOrEqual(viewport.height);
- await expect(dialog.locator('.rinrin-yes')).toHaveCSS('font-size','14px');expect(await dialog.locator('.rinrin-yes').evaluate(p=>p.scrollWidth<=p.clientWidth)).toBe(true);
+ await expect(dialog.locator('.rinrin-yes')).toHaveCSS('font-size','14px');expect(await dialog.locator('.rinrin-yes').evaluate(p=>{const r=document.createRange();r.selectNodeContents(p);return r.getClientRects().length===1&&p.scrollWidth<=p.clientWidth;})).toBe(true);
  await info.attach('rinrin-passage',{body:await page.screenshot(),contentType:'image/png'});
  await dialog.getByRole('button',{name:'No',exact:true}).click();await expect(ct).toHaveText('CT 3 / 3');await expect(page.locator('#selected-character-atk')).toHaveValue('2');
  await page.locator('#roster-undo').click();await expect(ct).toHaveText('CT 0 / 3');
