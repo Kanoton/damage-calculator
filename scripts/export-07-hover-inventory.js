@@ -3,7 +3,7 @@ const fs=require('fs'),path=require('path'),vm=require('vm'),crypto=require('cry
 const root=path.resolve(__dirname,'..'),out=path.join(root,'docs/hover-descriptions');
 const read=file=>fs.readFileSync(path.join(root,file),'utf8');
 const character=read('07_skill/js/character.js'),map=read('07_skill/js/map.js');
-const files=['07_skill/data/hover-descriptions.csv','07_skill/js/hover-text.js','07_skill/js/character.js','07_skill/js/character-view.js','07_skill/js/character-ability-rules.js','07_skill/js/roster-view.js','07_skill/js/map.js','07_skill/js/map-utils.js','07_skill/index.html','csv/character_stats.csv','csv/character_skills.csv','csv/status_icon_map_all.csv','csv/chip_list.csv','csv/chip_stat_rules.csv'];
+const files=['07_skill/data/hover-descriptions.csv','07_skill/js/hover-text.js','07_skill/js/character.js','07_skill/js/character-view.js','07_skill/js/character-ability-rules.js','07_skill/js/roster-view.js','07_skill/js/map.js','07_skill/js/map-utils.js','07_skill/index.html','csv/character_stats.csv','csv/status_icon_map_all.csv','csv/chip_list.csv','csv/chip_stat_rules.csv'];
 // Minimal text DOM for calling the existing display builders, without running the app.
 class TextNode{constructor(text){this.textContent=String(text);}}
 class Element{
@@ -103,7 +103,7 @@ for(const chip of chips){
  if(exec('toggleable(chip.id)'))for(const mode of chip.id==='112'?[0,1,2,3]:[0,1]){context.mode=mode;const element=exec('createChipConditionToggleView(chip,chip.id,mode,()=>{})');add(`chip:${chip.id}:toggle:${mode}`,'チップ','','自キャラ状態欄','該当チップ所持、条件切替対象',chip.name,'ボタン','モード '+mode,describe(element).icon,element.title,'07_skill/js/character-view.js:createChipConditionToggleView');}
 }
 for(const [key,value] of shared)capture('shared:'+key,'共通・チップ','','自キャラ状態欄','入力を参照するチップを所持：ID '+[...new Set(value.ids)].join(' / ')+(key==='ヒール'?'。自キャラ／PTルルまたは保持数>0でも表示':''),value.element);
-for(const phase of ['攻撃時','移動時'])add('phase:'+phase,'共通・チップ','','自キャラ状態欄','対応する攻撃時／次の移動時チップ効果を所持',phase,'チェック','通常','','','07_skill/js/character-view.js:createConditionPhaseView','title未設定（表示ラベル・aria-labelのみ）');
+for(const phase of ['攻撃時','移動時'])add('phase:'+phase,'共通・チップ','','自キャラ状態欄','対応する攻撃時／次の移動時チップ効果を所持',phase,'チェック','通常','',exec("getSkillHoverText('"+(phase==='攻撃時'?'phase.attack':'phase.move')+"')"),'07_skill/js/character-view.js:createConditionPhaseView','title未設定（表示ラベル・aria-labelのみ）');
 // Static self stat buttons: take the literal title and artwork from index.html.
 const html=read('07_skill/index.html');
 for(const id of ['selected-character-portrait','selected-character-hp-fill','selected-character-atk-button','selected-character-def-button']){
