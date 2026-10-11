@@ -53,7 +53,7 @@ test('07 skill: Sherry cancellation and removed targets consume no HP or CT',asy
 
 async function selectCharacter(page,id){
  await page.locator('.role-tab.character-tab').click();
- await page.locator('#selected-self-tab').click();
+ if(await page.locator('#selected-self-tab').isVisible())await page.locator('#selected-self-tab').click();
  await page.locator('#character-list-tab').click();
  await page.locator(`.character-select[data-id="${id}"]`).click();
  await page.locator('#selected-self-tab').click();
