@@ -580,3 +580,12 @@ This section supersedes older manual-only CT and placeholder-control notes above
 
 
 - Final current-source verification (supersedes earlier1a7d094 snapshot):0988006bd67d43b64069e0a5930808b8d21c9820.07 89 passed (38098093879), default119 passed (38098093891), wide22 passed (38098093890), mobile20 passed (38098093875), full workflow38098093888 succeeded:35 CTs,41 pair/focus tests. Downloaded latest artifact reconfirms35×34=1,190 passed,0 failed,0 remaining;295 images decoded with0 failures. Width is intrinsic to field/keypad row; mobile keys44px, empty keypad input keeps editor usable without casting. Viewed latest iPhone intrinsic-width dialog screenshot and existing Chromium/WebKit wide views. Full-request label removed after this success; following commit changes this results record only. Ordinary final CI/merge/Pages confirmation remain. Physical device/game input still unverified; local launch blocked by absent Chromium.
+
+
+## 07 keypad cancel alignment (2026-10-11, Japan)
+
+- Base latest main3825fd0 (#193 merged); isolated branch codex/07-keypad-cancel-20261011. Original unrelated image edit preserved;08 untouched.
+- Jasmine/Sumikage/Teru: removed separate form submit buttons; Cancel is in the field column left of keypad, aligned to its lower edge. Existing keypad/Enter confirmation, Teru ATK→DEF→cast, validation/cancel/Undo semantics retained. Forms still submit programmatically via requestSubmit.
+- Updated tests to use public Enter confirmation and assert Cancel left/bottom alignment and no extra submit button in Chromium/WebKit desktop/mobile. No full CT/pair run requested or enabled.
+- No complete hover-description inventory exists; docs/hover-description-guide.md maps current CSV and implementation sources, distinguishing ability text from actual button/stack titles. Attachment screenshot unavailable at supplied scratch path; text placement instruction is sufficient.
+- All20 individual JS and actual-order concatenation syntax passed; hosted standard07/default/wide/mobile verification pending. Physical-device/game validation unverified.
