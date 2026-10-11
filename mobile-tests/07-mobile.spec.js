@@ -1,6 +1,7 @@
 const {test,expect}=require('@playwright/test');
+const {selectCharacter,expectSkillKeypadLayout,expectSkillDialogNearButton,expectDialogInViewport}=require('../test-helpers/07-ui');
 async function start(page,id='1'){
- await page.goto('/07_skill/');await expect(page.locator('body')).toHaveClass(/mobile-ui/);await page.locator('.role-tab.character-tab').click();await page.locator('#selected-self-tab').click();await page.locator('#character-list-tab').click();await page.locator(`.character-select[data-id="${id}"]`).click();await page.locator('#selected-self-tab').click();
+ await page.goto('/07_skill/');await expect(page.locator('body')).toHaveClass(/mobile-ui/);await selectCharacter(page,id);
 }
 async function change(page,selector,plus){await page.locator(selector).tap();await expect(page.getByRole('dialog')).toBeVisible();await page.getByRole('button',{name:plus?'＋ 増やす':'− 減らす',exact:true}).tap();}
 async function add(page,id){await page.locator('#selected-party-tab').tap();await page.locator('#character-list-tab').tap();await page.locator(`.character-select[data-id="${id}"]`).tap();}
@@ -48,8 +49,8 @@ test('Teru: bounded stat dialog applies rounded halves and leaves the header cle
  await start(page,'23');
  await expect(page.locator('#teru-stat-dialog')).not.toBeVisible();await page.getByRole('button',{name:'三神憑依を発動'}).click();
  await page.getByLabel('憑依する味方の攻撃力',{exact:true}).fill('5');await page.getByLabel('憑依する味方の防御力',{exact:true}).fill('3');
- const layout=await page.locator('#character-number-pad').evaluate(p=>{const r=p.getBoundingClientRect(),d=p.closest('dialog').getBoundingClientRect(),i=p.closest('dialog').querySelector('input').getBoundingClientRect();return{inside:r.left>=d.left&&r.right<=d.right&&r.bottom<=d.bottom,right:r.left>=i.right||r.top>=i.bottom};});expect(layout).toEqual({inside:true,right:true});const actions=await page.locator('#character-number-pad').evaluate(p=>{const r=p.getBoundingClientRect(),d=p.closest('dialog'),c=d.querySelector('[data-cancel]').getBoundingClientRect();return{right:c.left>=r.right,bottom:Math.abs(c.bottom-r.bottom),extraSubmit:d.querySelectorAll('button[type="submit"]').length};});expect(actions.right).toBe(true);expect(actions.bottom).toBeLessThanOrEqual(1);expect(actions.extraSubmit).toBe(0);
- const bounds=await page.locator('#teru-stat-dialog').boundingBox(),viewport=page.viewportSize();expect(bounds.x).toBeGreaterThanOrEqual(0);expect(bounds.y).toBeGreaterThanOrEqual(0);expect(bounds.x+bounds.width).toBeLessThanOrEqual(viewport.width);expect(bounds.y+bounds.height).toBeLessThanOrEqual(viewport.height);
+ await expectSkillKeypadLayout(page);
+ await expectDialogInViewport(page,page.locator('#teru-stat-dialog'));
  await info.attach('teru-stat-dialog',{body:await page.screenshot(),contentType:'image/png'});await page.locator('#teru-stat-dialog input').last().press('Enter');await expect(page.locator('#selected-character-atk')).toHaveValue('5');await expect(page.locator('#teru-stat-dialog')).not.toBeVisible();
  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1)).toBe(true);
 });
@@ -57,8 +58,8 @@ test('Teru: bounded stat dialog applies rounded halves and leaves the header cle
 for(const [id,label,skill,value] of [['16','オーバードライブのダイスの出目','オーバードライブ',10],['26','吸収した影の数','暗影融合',4]])test('Skill source fits beside button: '+id,async({page},info)=>{
  await start(page,id);
  const field=page.getByLabel(label,{exact:true});await expect(field).toHaveCount(0);await page.getByRole('button',{name:skill+'を発動'}).click();await expect(field).toBeVisible();await field.fill(String(value));
- const boxes=await page.evaluate(()=>{const r=document.querySelector('#skill-source-dialog').getBoundingClientRect(),a=document.querySelector('#selected-character-skill').getBoundingClientRect();return{x:r.x,y:r.y,right:r.right,bottom:r.bottom,gap:a.top-r.bottom,width:innerWidth,height:innerHeight,overflow:document.documentElement.scrollWidth>innerWidth+1};});expect(boxes.overflow).toBe(false);expect(boxes.x).toBeGreaterThanOrEqual(0);expect(boxes.y).toBeGreaterThanOrEqual(0);expect(boxes.right).toBeLessThanOrEqual(boxes.width);expect(boxes.bottom).toBeLessThanOrEqual(boxes.height);expect(boxes.gap).toBeLessThanOrEqual(10);
- const layout=await page.locator('#character-number-pad').evaluate(p=>{const r=p.getBoundingClientRect(),d=p.closest('dialog').getBoundingClientRect(),i=p.closest('dialog').querySelector('input').getBoundingClientRect();return{inside:r.left>=d.left&&r.right<=d.right&&r.bottom<=d.bottom,right:r.left>=i.right||r.top>=i.bottom};});expect(layout).toEqual({inside:true,right:true});const actions=await page.locator('#character-number-pad').evaluate(p=>{const r=p.getBoundingClientRect(),d=p.closest('dialog'),c=d.querySelector('[data-cancel]').getBoundingClientRect();return{right:c.left>=r.right,bottom:Math.abs(c.bottom-r.bottom),extraSubmit:d.querySelectorAll('button[type="submit"]').length};});expect(actions.right).toBe(true);expect(actions.bottom).toBeLessThanOrEqual(1);expect(actions.extraSubmit).toBe(0);
+ await expectSkillDialogNearButton(page);
+ await expectSkillKeypadLayout(page);
  await info.attach('skill-source-'+id,{body:await page.screenshot(),contentType:'image/png'});
  await page.locator('#skill-source-dialog input').last().press('Enter');await expect(page.locator('#selected-character-ct')).toContainText(id==='16'?'CT 4':'CT 3');
 });
@@ -68,7 +69,7 @@ test('Rinrin: bounded passage dialog supports No, Undo and Yes target selection'
  await start(page,'28');
  const dialog=page.locator('#rinrin-area-dialog'),skill=page.locator('#selected-character-skill'),ct=page.locator('#selected-character-ct');
  await skill.tap();await expect(dialog).toBeVisible();
- const box=await dialog.boundingBox(),viewport=page.viewportSize();expect(box.x).toBeGreaterThanOrEqual(0);expect(box.y).toBeGreaterThanOrEqual(0);expect(box.x+box.width).toBeLessThanOrEqual(viewport.width);expect(box.y+box.height).toBeLessThanOrEqual(viewport.height);
+ await expectDialogInViewport(page,dialog);
  await expect(dialog.locator('.rinrin-yes')).toHaveCSS('font-size','14px');expect(await dialog.locator('.rinrin-yes').evaluate(p=>{const r=document.createRange();r.selectNodeContents(p);return r.getClientRects().length===1&&p.scrollWidth<=p.clientWidth;})).toBe(true);
  await info.attach('rinrin-passage',{body:await page.screenshot(),contentType:'image/png'});
  await dialog.getByRole('button',{name:'No',exact:true}).tap();await expect(ct).toHaveText('CT 3 / 3');await expect(page.locator('#selected-character-atk')).toHaveValue('2');
