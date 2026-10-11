@@ -1384,7 +1384,7 @@ for(const protocol of ['http','file'])test(`07 game lifecycle: initial event wai
 
 test('07 game lifecycle: defeat button returns to map and Undo restores the monster',async({page})=>{
  await page.goto('/07_skill/');await selectCharacter(page,'1');const card=page.locator('#map-roster-list .roster-card').first();
- await card.locator('.roster-select').click();await expect(page.locator('.role-tab[data-role="attack"]')).toHaveClass(/active/);
+ await card.locator('.roster-portrait').click();await expect(page.locator('.role-tab[data-role="attack"]')).toHaveClass(/active/);
  await card.locator('.roster-remove').click();await expect(page.locator('.role-tab[data-role="map"]')).toHaveClass(/active/);
  await expect(page.locator('#roster-counts')).toContainText('撃破 1');await page.locator('#roster-undo').click();await expect(page.locator('#roster-counts')).toContainText('撃破 0');
 });
