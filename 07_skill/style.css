@@ -1713,3 +1713,10 @@ dialog[data-inline-pad] .skill-entry-fields{align-self:stretch;display:flex;flex
 dialog[data-inline-pad] .skill-entry-fields [data-cancel]{min-width:72px;align-self:flex-end}
 dialog[data-inline-pad] .skill-keypad-slot{display:flex;align-items:flex-end}
 dialog[data-inline-pad] .skill-entry-fields [data-cancel]{padding:8px 12px}
+
+#new-game{padding:5px 10px;border:1px solid #cdbb82;border-radius:4px;background:#fff;cursor:pointer;font:inherit;white-space:nowrap}
+#new-game-dialog{max-width:calc(100vw - 32px);padding:20px;border:1px solid #cdbb82;border-radius:8px;font:inherit}
+#new-game-dialog::backdrop{background:rgba(0,0,0,.3)}
+#new-game-dialog p{margin:0 0 16px;font:inherit}
+#new-game-dialog>div{display:flex;justify-content:flex-end;gap:12px}
+#new-game-dialog button{padding:8px 20px;font:inherit;min-height:44px}

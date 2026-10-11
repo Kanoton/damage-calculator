@@ -4,6 +4,17 @@ Last updated: 2026-10-11
 
 This is the durable handoff for continuing development, especially `07_skill`. On a new chat or machine, read this file, current `main`, and recent PRs before changing code.
 
+## 2026-10-11：NewGame・ゲーム開始タイミング
+
+- ユーザーは今回の変更後にフルチェックを明示指定。基準main `4f523b0`（PR #196反映済み）、ブランチ `codex/07-new-game-20261011`。開始11:49 UTC、30分区切り12:19 UTC。
+- 07のみ：撃破ボタンは撃破処理後にマップタブへ移動。NewGameをラウンド・進捗枠に追加し、確認の「はい」またはEnterで実行。「いいえ」／Escapeはキャンセル。ラウンド1・進捗1、先頭マップ（夢想号）・普通へ戻し、自キャラ未選択・PT/全キャラ状態/チップ/モンスター/バフ/ルート/ミッション/イベント実行済み/Undo履歴/計算機入力をリセットする。
+- ミミの既存の自動初期表示は維持するが初期表示専用通知では進捗イベントを実行しない。一覧で自キャラを選択した時に進捗1イベントを実行する。NewGame後はキャラ未選択のためイベントなし、再選択で発生。先頭マップの選択はHTTP/file://共通。
+- 関連：index、style、map、character、07テスト、WORKING_GUIDE、説明文一覧manifestを更新。08・共有CSV・画像は変更しない。HTTP/file://でアクセス直後0体→キャラ選択後4体、NewGame取消/クリック確定/Enter確定、PT/レベル/狐光/手動ATK/マップ/難易度/履歴のクリア、再選択、撃破→マップ→Undoの回帰テストを追加。
+- PR #197： https://github.com/Kanoton/damage-calculator/pull/197 。構文21script（個別＋連結）、説明文生成一致・formatter・inventory一致は成功。実装と回帰テストの最終headで通常CI成功：07 94件（HTTP/file://・NewGame・撃破→マップ→Undo含む）、06bセット124件、横長22件、モバイル20件。
+- 明示指定のフルチェック成功：https://github.com/Kanoton/damage-calculator/actions/runs/38137856086 。全35キャラCT、PT全35グループ×34人＝1,190組、失敗0・未実行0。組合せ＋焦点テストは41件成功（2.2分）。coverage.json / pairs.jsonl / trace等は同run成果物。
+- 途中の通常CIで、追加撃破テストの攻撃タブ確認が1件失敗（他93/123件成功）。選択ボタン内のマーク操作と区別してモンスター画像をクリックする手順に修正し、上記の最終再確認で成功。NewGame追加2件は初回から成功。ローカルChromiumが取得できない既知の実行環境のためブラウザ確認はGitHub CIを使用。
+- 12:07 UTCに結果記録。最後の変更はこの引き継ぎのみで実装・テストは同一。フルチェックのラベルは成功後に外して、文書更新だけで全数検証を繰り返さない。最終差分・通常CI確認後にマージする。08移植時はgame初期通知と明示選択通知の区別、NewGameイベントによる全状態クリア、確認ダイアログ・Enter操作・先頭マップ・撃破後のタブ移動を含める。
+
 ## 2026-10-11：07説明文の参照元統一
 
 - 依頼：418行の文面編集に先立ち説明文の参照元を統一。基準main `48e86b3`（PR #195）。ブランチ `codex/07-hover-source-20261011`。
