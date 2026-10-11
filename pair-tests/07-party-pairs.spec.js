@@ -60,7 +60,8 @@ for(const actor of characters.filter(c=>!selected.length||selected.includes(c.id
       },{actor,donor,allSupport});
       expect(result.added).toEqual(result.initial);expect(result.edited).toEqual(result.initial);expect(result.removed).toEqual(result.initial);
       expect(result.ids).toEqual([actor.id,donor.id]);expect(result.duplicateIds).toEqual(result.ids);expect(result.removedIds).toEqual([actor.id]);
-      const expectedSupport=[...(donors[donor.id]||[]),...(actor.id==='106'&&donor.id==='105'?['PTハンナ推理タイム＋1']:[])].sort();
+      // The collector includes self Heal/Counter too; registration must retain that baseline and deduplicate received controls.
+      const expectedSupport=[...new Set([...result.baselineSupport,...(donors[donor.id]||[]),...(actor.id==='106'&&donor.id==='105'?['PTハンナ推理タイム＋1']:[])])].sort();
       expect(result.addedSupport.sort()).toEqual(expectedSupport);expect(result.removedSupport).toEqual(result.baselineSupport);
       const statusIds={24:'weakness',27:'investigationTarget',29:'erosionStacks',101:'fan'};
       const expectedStatuses=Object.entries(statusIds).filter(([id])=>id===actor.id||(id!=='29'&&id===donor.id)).map(([,key])=>key);if(donor.id==='13')expectedStatuses.push('fateEchoStacks');
