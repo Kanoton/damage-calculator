@@ -1364,7 +1364,7 @@ for(const protocol of ['http','file'])test(`07 game lifecycle: initial event wai
  await expect(page.locator('#selected-character-name')).toHaveText('ミミ');
  await expect(page.locator('#mp-map-select')).toHaveValue('MAP0001');await expect(page.locator('#map-roster-list .roster-card')).toHaveCount(0);
  await selectCharacter(page,'23');await expect(page.locator('#map-roster-list .roster-card')).toHaveCount(4);
- await page.locator('.character-select[data-id="8"]').click();
+ await page.locator('#selected-party-tab').click();await page.locator('.character-select[data-id="8"]').click();
  await page.locator('#selected-self-tab').click();await page.locator('#selected-character-atk-button').click();await page.locator('#selected-character-portrait').click();
  await page.getByLabel('狐光の数').fill('4');await page.getByLabel('狐光の数').dispatchEvent('change');
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0002');await page.locator('#mp-difficulty').selectOption('悪夢');
