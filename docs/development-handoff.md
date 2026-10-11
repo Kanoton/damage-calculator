@@ -1,8 +1,19 @@
 # Development Handoff
 
-Last updated: 2026-10-10
+Last updated: 2026-10-11
 
 This is the durable handoff for continuing development, especially `07_skill`. On a new chat or machine, read this file, current `main`, and recent PRs before changing code.
+
+## 2026-10-11：07説明文の参照元統一
+
+- 依頼：418行の文面編集に先立ち説明文の参照元を統一。基準main `48e86b3`（PR #195）。ブランチ `codex/07-hover-source-20261011`。
+- 正本：`07_skill/data/hover-descriptions.csv`、167行（能力35、チップ90、共通・個別42）。共通操作は名前・状態・数値を差し込む。`scripts/build-07-hover-text.js` で `07_skill/js/hover-text.js` を生成しindexで最初に読み込む。HTTP／file://で同じ文面、生成JSは手編集しない。
+- character/view/loader、roster-view、mapの対象titleとHTMLパラメータtitleを共通参照へ移行。07の旧能力全文snapshotとRen/Hanna/Padmanの本文後加工は、現在の表示文を正本に取り込んで置換。共有CSV・画像・08・ゲーム計算・操作・Undoは変更なし。08移植時は説明文の正本とscript先頭読み込みを含める。
+- 元の418行と移行後の説明文をオフライン抽出で比較し全件一致。inventoryは対応確認資料として維持。編集方法は `docs/hover-descriptions/README.md`、WORKING_GUIDE13節。
+- ローカル：生成一致、formatter（HTMLを解釈しない／不足変数・不明キー）、21scriptの個別＋連結構文、inventory一致は成功。HTTP／file://の焦点テストを追加。ブラウザ・06b・横長・モバイルの通常CIはPRで確認する。全キャラCT巡回・PT全数検証は依頼されておらず実行しない。
+- PR #196： https://github.com/Kanoton/damage-calculator/pull/196 。実装head `5fc6066` の通常CI成功：07 91件（追加HTTP／file://含む）、06b回帰セット121件、横長22件（Chromium/WebKit）、モバイル20件（Chromium/WebKit）。自動起動した08既存CIも成功、08の変更はなし。全数チェックはskipped。
+- ローカルのブラウザ2件はChromium未導入で起動失敗。ブラウザ取得もZIP不正で失敗したため、上記GitHub CIで確認した。
+- 作業開始11:28 UTC、11:43 UTCに結果記録。最終コミットは案内（AGENTS/ガイド）と抽出元の正確化・引き継ぎのみ。最終headのCIと差分を確認してマージする。今後は167行のCSVの説明文列を編集・受領→生成→必要範囲の表示確認→PR反映。ゲーム内実機照合は今回の対象外。
 
 ## 現在の作業方針：07を先行し、08へ後日統合（2026-10-09）
 

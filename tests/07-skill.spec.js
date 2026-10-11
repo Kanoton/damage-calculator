@@ -1344,3 +1344,16 @@ for(const protocol of ['http','file'])test('07 Padman: passive description omits
  if(protocol==='file')await page.goto(require('node:url').pathToFileURL(require('node:path').resolve('07_skill/index.html')).href);else await page.goto('/07_skill/');
  await page.locator('.role-tab.character-tab').click();await page.locator('#character-hover-skills').check();await page.locator('.character-select[data-id="6"]').hover();const text=await page.locator('#character-skill-tooltip .character-skill-text').textContent();expect(text.split('パッシブスキル')[1]).not.toMatch(/移動/);expect(text).toContain('攻撃力-2～2、防御力-2～2');
 });
+
+for(const protocol of ['http','file'])test(`07 skill: canonical hover text is shared on ${protocol}`,async({page})=>{
+ const errors=[];page.on('pageerror',error=>errors.push(error.message));
+ if(protocol==='file')await page.goto(require('node:url').pathToFileURL(require('node:path').resolve('07_skill/index.html')).href);else await page.goto('/07_skill/');
+ await selectCharacter(page,'8');
+ const expected=await page.evaluate(()=>({atk:getSkillHoverText('parameter.increase',{name:'攻撃力'}),skill:getSkillHoverText('skill.cast',{name:CHARACTER_ABILITY_RULES['8'].activeSkills[0].label})}));
+ await expect(page.locator('#selected-character-atk-button')).toHaveAttribute('title',expected.atk);
+ await expect(page.locator('#selected-character-skill')).toHaveAttribute('title',expected.skill);
+ await page.locator('#character-list-tab').click();
+ await page.locator('#character-hover-skills').check();const tooltip=page.locator('.character-select[data-id="8"]');await tooltip.hover();
+ await expect(page.locator('#character-skill-tooltip')).toContainText('ジュジュシールド');
+ expect(errors).toEqual([]);
+});

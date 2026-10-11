@@ -94,7 +94,7 @@ renderRoundProgress();
 window.addEventListener('character-selection-change',()=>{if(!roundProgressReady()){renderRoundProgress();return;}rosterState.round=1;rosterState.progress=1;renderRoundProgress();executeProgressEvents();});
 
 window.rememberCharacterSkillActivation=()=>{rememberRoster();rosterUndo.disabled=false;};
-const partyFanReduce=document.createElement('button');partyFanReduce.type='button';partyFanReduce.id='roster-pt-fan-reduce';partyFanReduce.textContent='PTファン ATK−1';partyFanReduce.title='超てんちゃんのスキルでファン9体以上の効果が発動した時に使用。生存中のファンのATKを永続−1（重複不可）。9体の条件はゲームで確認してください';partyFanReduce.hidden=true;rosterUndo.parentElement.prepend(partyFanReduce);
+const partyFanReduce=document.createElement('button');partyFanReduce.type='button';partyFanReduce.id='roster-pt-fan-reduce';partyFanReduce.textContent='PTファン ATK−1';partyFanReduce.title=getSkillHoverText('party.fan');partyFanReduce.hidden=true;rosterUndo.parentElement.prepend(partyFanReduce);
 partyFanReduce.addEventListener('click',()=>{if(partyFanReduce.hidden||partyFanReduce.disabled)return;rememberRoster();window.reduceRosterFanAttack();if(rosterState.selectedId){const enemy=rosterState.monsters.find(e=>e.instanceId===rosterState.selectedId&&!e.defeated);if(enemy)registerEnemy(enemy,false);}});
 window.getRosterFanCount=()=>rosterState.monsters.filter(enemy=>enemy.fan).length;
 window.reduceRosterFanAttack=()=>{for(const enemy of rosterState.monsters)if(enemy.fan&&!enemy.defeated)enemy.fanSkillAttackReduction=true;renderRoster();};
@@ -268,7 +268,7 @@ function renderRoster(){
   if((enemy.fateEchoStacks||0)>0||partyKaisei){
    const {field,button}=createRosterCharacterStatusControl(enemy,displayName,{key:'fateEchoStacks',label:'フェイト・エコー',icon:'UT_Buff_114_Max.png',stack:true});
    field.classList.add('roster-fate-echo');button.setAttribute('aria-pressed',String((enemy.fateEchoStacks||0)>0));
-   button.title='フェイト・エコー：受けるダメージ+1、ターン終了時に1減少。'+(partyKaisei?'オフからクリックで2、':'')+'左クリックで＋1、右クリックで−1';
+   button.title=getSkillHoverText('monster.fate',{extra:partyKaisei?getSkillHoverText('monster.fate.party'):''});
    const change=delta=>{if(enemy.defeated)return;const current=enemy.fateEchoStacks||0,next=partyKaisei&&delta>0&&current===0?2:Math.max(0,current+delta);if(next===current)return;rememberRoster();enemy.fateEchoStacks=next;renderRoster();};
    button.addEventListener('click',event=>{event.stopPropagation();change(1);});button.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();change(-1);});nameText.append(field);
   }
