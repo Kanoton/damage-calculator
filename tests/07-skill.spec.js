@@ -40,7 +40,7 @@ test('07 skill: Sherry toggles multiple targets and applies damage once only aft
 
 test('07 skill: Sherry cancellation and removed targets consume no HP or CT',async({page})=>{
  const cards=await prepareSherryTargets(page),skill=page.getByRole('button',{name:'怪力魔法を発動'}),ok=page.locator('#character-skill-target-ok');
- await skill.click();await page.locator('.role-tab[data-role="map"]').click();await cards.first().locator('.roster-select').click();
+ await skill.click();expect(await page.locator('.character-skill-target-actions button').allTextContents()).toEqual(['OK','キャンセル']);await page.locator('.role-tab[data-role="map"]').click();await cards.first().locator('.roster-select').click();
  await page.locator('#character-skill-target-cancel').click();await expect(page.locator('#character-skill-target-banner')).toBeHidden();
  await expect(cards.first().locator('input[aria-label$="の残りHP"]')).toHaveValue('5');await expect(page.locator('#selected-character-ct')).toHaveText(/^CT 0 \/ \d+$/);
  await skill.click();await expect(ok).toBeDisabled();await cards.first().locator('.roster-select').click();
@@ -120,6 +120,7 @@ test('07 skill: Rinrin cancellation and one undo preserve all targets and a sing
 
 test('07 skill: Rinrin asks first, No consumes only CT and cancel or switching never casts',async({page})=>{
  const cards=await prepareSherryTargets(page);await selectCharacter(page,'28');
+ expect(await page.locator('#rinrin-area-dialog .skill-dialog-actions button').allTextContents()).toEqual(['Yes','No','キャンセル']);
  const dialog=page.locator('#rinrin-area-dialog'),skill=page.locator('#selected-character-skill'),ct=page.locator('#selected-character-ct'),atk=page.locator('#selected-character-atk');
  const before=await cards.first().locator('input[aria-label$="の防御力"]').inputValue();
  await expect(page.getByRole('button',{name:/エリア拒止通過/})).toHaveCount(0);
@@ -1369,7 +1370,9 @@ for(const protocol of ['http','file'])test(`07 game lifecycle: initial event wai
  await page.getByLabel('狐光の数').fill('4');await page.getByLabel('狐光の数').dispatchEvent('change');
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0002');await page.locator('#mp-difficulty').selectOption('悪夢');
  await page.locator('#turn-end').click();await expect(page.locator('#current-round')).toHaveText('2');
- await page.locator('#new-game').click();await page.locator('#new-game-cancel').click();
+ await expect(page.locator('#new-game')).toHaveText('リセット');await page.locator('#new-game').click();
+ expect(await page.locator('#new-game-dialog button').allTextContents()).toEqual(['はい','いいえ']);
+ await page.locator('#new-game-cancel').click();
  await expect(page.locator('#current-round')).toHaveText('2');await expect(page.locator('#selected-character-name')).toHaveText('テル');
  await page.locator('#new-game').click();if(protocol==='http')await page.locator('#new-game-confirm').click();else await page.locator('#new-game-dialog').press('Enter');
  await expect(page.locator('.role-tab[data-role="map"]')).toHaveClass(/active/);

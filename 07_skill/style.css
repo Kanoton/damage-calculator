@@ -1708,11 +1708,16 @@ dialog[data-inline-pad] .character-number-pad{grid-template-columns:repeat(3,min
 .mobile-ui dialog[data-inline-pad] .character-number-pad button{height:44px}
 @media(max-width:380px){.skill-entry-row{grid-template-columns:max-content 166px}}
 
-/* Cancel shares the keypad row and aligns with its lower edge. */
-dialog[data-inline-pad] .skill-entry-fields{align-self:stretch;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;gap:12px}
-dialog[data-inline-pad] .skill-entry-fields [data-cancel]{min-width:72px;align-self:flex-end}
+/* Affirmative keypad action precedes Cancel, with aligned lower edges. */
+.skill-entry-row{grid-template-columns:max-content 184px max-content}
+dialog[data-inline-pad] .skill-entry-fields{align-self:start}
 dialog[data-inline-pad] .skill-keypad-slot{display:flex;align-items:flex-end}
-dialog[data-inline-pad] .skill-entry-fields [data-cancel]{padding:8px 12px}
+dialog[data-inline-pad] .skill-entry-row>[data-cancel]{min-width:72px;align-self:end;padding:8px 12px}
+@media(max-width:480px){
+ .skill-entry-row{grid-template-columns:184px max-content}
+ dialog[data-inline-pad] .skill-entry-fields{grid-column:1 / -1}
+}
+@media(max-width:380px){.skill-entry-row{grid-template-columns:166px max-content;gap:8px}}
 
 #new-game{padding:5px 10px;border:1px solid #cdbb82;border-radius:4px;background:#fff;cursor:pointer;font:inherit;white-space:nowrap}
 #new-game-dialog{max-width:calc(100vw - 32px);padding:20px;border:1px solid #cdbb82;border-radius:8px;font:inherit}

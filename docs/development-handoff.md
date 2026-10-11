@@ -625,3 +625,11 @@ This section supersedes older manual-only CT and placeholder-control notes above
 - Guide/README/WORKING_GUIDE explain filtering, source/label/title distinctions and scope; this supersedes the earlier note that no inventory exists. Current app source remains runtime authority; new docs CSV is not loaded by07.
 - Validation:418 unique IDs,35 complete ability rows, CSV newline/quote round-trip, current renderer-specific Padman/Ren text, distinct Hanna/Sherry icons/PT Teru text, deterministic --check, editor-text/note retention and edited-ID orphan protection passed. Export-script syntax,20 individual07JS plus actual-order concatenation syntax, whitespace checks passed. No browser tests or full CT/PT matrix run: app, sharedCSV/images,07/06b/08 implementations unchanged. Physical/game UI not newly verified.
 - PR https://github.com/Kanoton/damage-calculator/pull/195 contains only7 documentation/export files; published content matched the local files. Existing browser workflows are not triggered by these paths; opt-in full workflow is skipped. Local extraction/syntax/inventory checks above supply validation for this documentation-only change. Final record commit and authorized merge follow. Next step is user review/edit of proposed wording; do not apply arbitrary effects as explanatory text.
+
+
+## 07 affirmative-first dialogs (2026-10-11, Japan)
+
+- Base latest main089c347 (#197); isolated branch codex/07-confirm-order-20261011. Existing worktrees preserved;08/sharedCSV/images untouched.
+- NewGame display renamed リセット; reset confirmation/gameplay remains unchanged. NewGame buttons now はい→いいえ; Rinrin Yes→No→キャンセル; shared multi-target banner OK→キャンセル.
+- Jasmine/Sumikage/Teru retain the in-keypad confirmation only; Cancel moved to its right and aligned to the keypad lower edge. On narrow screens fields move above keypad/Cancel to fit viewport. Enter progression, outside/Escape cancellation and casting semantics unchanged.
+- Updated desktop/WebKit/mobile layout expectations and HTTP/file reset label/order checks. No full CT/PT traversal requested or enabled. Syntax, ordinary browser CI and final diff verification pending; physical devices unverified.
