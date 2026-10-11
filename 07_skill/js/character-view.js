@@ -97,6 +97,7 @@ function createCharacterSkillTooltipView(row,ability){
   if(shield)displayAbility=displayAbility.replace(shield[0]+'\n','').trimEnd()+'\n\nジュジュシールド\n'+shield[1];
  }
  if(String(row.id)==='105')displayAbility=displayAbility.replace(/(^人形完成$)/m,'浮遊\n移動力+2、罠・ロードブロックを無効化。他のユニットに通過される際、戦闘が発生しない。\n\n$1');
+ if(String(row.id)==='6')displayAbility=displayAbility.replace('、移動ダイス-2～2','');
  const lines=displayAbility.split(/\r?\n/);
  lines.forEach((line,index)=>{
   const heading=!(String(row.id)==='8'&&lines[index-1]==='ジュジュシールド')&&(/^(?:スキル|パッシブスキル)\s*[-－]\s*.+$/.test(line.trim())||/^[^\s。、！？：:（）()\[\]［］]{1,24}$/.test(line.trim()));
