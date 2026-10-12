@@ -1420,7 +1420,7 @@ test('07 party chip HP gains affect only the chip owner',async({page})=>{
 });
 
 async function acquireEffectChip(page,id,map){
- if(map){await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption(map);await page.locator('.role-tab[data-role="character"]').click();await selectChipCategory(page,'マップ固有');}
+ if(map){await page.locator('.role-tab[data-role="map"]').click();if(map==='MAP0101')await page.locator('#mp-map-select').evaluate(select=>{if(![...select.options].some(option=>option.value==='MAP0101'))select.add(new Option('予選運動場（非表示マップのテスト）','MAP0101'));});await page.locator('#mp-map-select').selectOption(map);await page.locator('.role-tab[data-role="character"]').click();await selectChipCategory(page,'マップ固有');}
  else await selectChipCategory(page,'共通');
  await page.locator('.chip-select[data-id="'+id+'"]').click();
 }
