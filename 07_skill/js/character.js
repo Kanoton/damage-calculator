@@ -37,15 +37,15 @@
  const activeEffectAllowed=effect=>activeEffectConditionMatches(effect.when)&&(!effect.unless||!activeEffectConditionMatches(effect.unless));
  const activeSkillStatBonus=stat=>(state().activeEffects||[]).filter(effect=>effect.type==='modify_stat'&&effect.target==='self'&&effect.stat===stat&&activeEffectConditionMatches(effect.when)).reduce((sum,effect)=>sum+(effect.resolvedValue!==undefined?Number(effect.resolvedValue):(effect.sourceKey?abilityControlValue(effect.sourceKey)*(effect.multiplier===undefined?1:Number(effect.multiplier)):(Number(effect.value)||0))),0);
  const activeConditionForced=key=>(state().activeEffects||[]).some(effect=>effect.type==='force_condition'&&effect.key===key);
- const abilityConditionMatches=condition=>{
+ const abilityConditionMatches=(condition,maxHp)=>{
   if(!condition)return true;
   if(condition.partyCharacterId&&!partySlots.some(id=>String(id)===condition.partyCharacterId))return false;
-  if(condition.key==='current_hp_ratio<=')return activeConditionForced('current_hp_ratio<=')||(state().currentHp!==null&&state().currentHp<=base('hp')*Number(condition.value));
+  if(condition.key==='current_hp_ratio<=')return activeConditionForced('current_hp_ratio<=')||(state().currentHp!==null&&state().currentHp<=maxHp*Number(condition.value));
   if(condition.key==='target_mark')return (Number(currentOpponent?.markStacks)||0)>=(Number(condition.min)||0);
   return condition.min!==undefined?abilityControlValue(condition.key)>=Number(condition.min):abilityControlValue(condition.key)===Number(condition.equals);
  };
- const abilityModifierValue=rule=>{
-  if(!abilityConditionMatches(rule.when))return 0;
+ const abilityModifierValue=(rule,maxHp)=>{
+  if(!abilityConditionMatches(rule.when,maxHp))return 0;
   if(rule.formula==='fixed')return Number(rule.value)||0;
   let source=rule.source==='target_mark'?(Number(currentOpponent?.markStacks)||0):abilityControlValue(rule.source);
   if(rule.sourceCap!==undefined)source=Math.min(source,Number(rule.sourceCap));
@@ -113,7 +113,7 @@
    result[rule.target]+=valueOf(rule,maxBonus);
   }
   for(const rule of abilityRules()?.modifiers||[]){
-   if(['atk','def','move','damageReduce'].includes(rule.target))result[rule.target]+=abilityModifierValue(rule);
+   if(['atk','def','move','damageReduce'].includes(rule.target))result[rule.target]+=abilityModifierValue(rule,maxHp);
   }
   for(const stat of ['atk','def','move'])result[stat]+=activeSkillStatBonus(stat);
   for(const c of partySupportControls)if(c.stat){const amount=c.number?abilityControlValue(c.key):(abilityControlValue(c.key)?(c.marked?(Number(currentOpponent?.markStacks)||0):c.value):0);result[c.stat]+=amount;}
@@ -643,7 +643,10 @@
     button.addEventListener('click',()=>{
      if(!selectedCharacter){chipStatus.textContent='先にキャラクターを選択してください。';return;}
      if(chipOwnerState()!==state()){
-      const member=chipOwnerState();if(member.chips.includes(row.id))member.chips=member.chips.filter(id=>id!==row.id);else member.chips.push(row.id);renderParty();return;
+      const member=chipOwnerState(),owner=characters.find(item=>String(item.id)===String(partyEditId));
+      if(member.chips.includes(row.id))member.chips=member.chips.filter(id=>id!==row.id);
+      else {const oldMax=calculatePartyMember(owner).hp,oldHp=member.currentHp;member.chips.push(row.id);const newMax=calculatePartyMember(owner).hp;member.currentHp=Math.min(newMax,oldHp+Math.max(0,newMax-oldMax));}
+      renderParty();return;
      }
      chipStatus.textContent='';
      if(state().chips.includes(row.id)){
@@ -652,7 +655,7 @@
        if(!state().chips.some(id=>(byChip.get(id)||[]).some(rule=>triggers.includes(rule.trigger))))state().phases[key]=false;
       }
      }
-     else{state().chips.push(row.id);state().phases??={attack:false,move:false};state().phases.attack=false;}
+     else{const oldMax=calculate().hp,oldHp=state().currentHp;state().chips.push(row.id);state().phases??={attack:false,move:false};state().phases.attack=false;const newMax=calculate().hp;state().currentHp=Math.min(newMax,oldHp+Math.max(0,newMax-oldMax));}
      renderSelectedCharacter();
     });
    }

@@ -404,9 +404,9 @@ test('07 skill: PT editing isolates chips, modifiers and icon HP from self and o
  const slot=id=>page.locator('.party-member-slot[data-character-id="'+id+'"]'),stat=(id,key)=>slot(id).locator('[data-stat="'+key+'"] b'),icon=(id,key)=>slot(id).locator('[data-stat="'+key+'"] button');
  await slot('1').locator('.party-slot-name').click();await expect(slot('1')).toHaveAttribute('aria-current','true');await selectChipCategory(page,'共通');
  for(const id of ['1','4','7','10','9','13'])await page.locator('.chip-select[data-id="'+id+'"]').click();
- await expect(stat('1','atk')).toHaveText('4');await expect(stat('1','def')).toHaveText('2');await expect(stat('1','move')).toHaveText('1');await expect(stat('1','hp')).toHaveText('9/14');await expect(slot('1').locator('.party-slot-chip')).toHaveCount(6);
+ await expect(stat('1','atk')).toHaveText('4');await expect(stat('1','def')).toHaveText('2');await expect(stat('1','move')).toHaveText('1');await expect(stat('1','hp')).toHaveText('14/14');await expect(slot('1').locator('.party-slot-chip')).toHaveCount(6);
  await expect(slot('2').locator('.party-slot-chip')).toHaveCount(0);await expect(slot('27').locator('.party-slot-chip')).toHaveCount(0);await expect(page.locator('#selected-character-atk')).toHaveValue(ownAtk);await expect(slot('1').locator('input')).toHaveCount(0);
- for(let i=0;i<3;i++)await icon('1','hp').click();await expect(stat('1','hp')).toHaveText('6/14');await expect(stat('1','atk')).toHaveText('8');await icon('1','hp').click({button:'right'});await expect(stat('1','atk')).toHaveText('4');
+ for(let i=0;i<8;i++)await icon('1','hp').click();await expect(stat('1','hp')).toHaveText('6/14');await expect(stat('1','atk')).toHaveText('8');await icon('1','hp').click({button:'right'});await expect(stat('1','atk')).toHaveText('4');
  await icon('1','atk').click();await icon('1','def').click();await icon('1','move').click();await expect(stat('1','atk')).toHaveText('5');await expect(stat('1','def')).toHaveText('3');await expect(stat('1','move')).toHaveText('2');
  await slot('1').dragTo(page.locator('.party-member-slot[data-slot="4"]'));await expect(slot('1')).toHaveAttribute('aria-current','true');await expect(page.locator('.chip-select[data-id="1"]')).toHaveAttribute('aria-pressed','true');
  await page.locator('.chip-select[data-id="1"]').click();await expect(stat('1','atk')).toHaveText('4');await expect(slot('1').locator('.party-slot-chip')).toHaveCount(5);
@@ -1390,4 +1390,31 @@ test('07 game lifecycle: defeat button returns to map and Undo restores the mons
  await card.locator('.roster-portrait').click();await expect(page.locator('.role-tab[data-role="attack"]')).toHaveClass(/active/);
  await card.locator('.roster-remove').click();await expect(page.locator('.role-tab[data-role="map"]')).toHaveClass(/active/);
  await expect(page.locator('#roster-counts')).toContainText('撃破 1');await page.locator('#roster-undo').click();await expect(page.locator('#roster-counts')).toContainText('撃破 0');
+});
+
+for(const protocol of ['http','file'])test('07 Papara: chip HP gains preserve damage and use the full maximum '+protocol,async({page})=>{
+ await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve('07_skill/index.html')).href:'/07_skill/');
+ await selectCharacter(page,'7');
+ const hp=page.locator('#selected-character-current-hp'),atk=page.locator('#selected-character-atk');
+ await hp.fill('4');await hp.dispatchEvent('change');await selectChipCategory(page,'共通');
+ const cookie=page.locator('.chip-select[data-id="7"]');await cookie.click();
+ await expect(hp).toHaveValue('6');await expect(hp).toHaveAttribute('max','12');await expect(atk).toHaveValue('5');
+ await hp.fill('7');await hp.dispatchEvent('change');await expect(atk).toHaveValue('2');
+ await page.locator('.chip-select[data-id="1"]').click();await expect(hp).toHaveValue('7');
+ await cookie.click();await expect(hp).toHaveValue('7');await cookie.click();await expect(hp).toHaveValue('9');
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('.role-tab[data-role="character"]').click();await expect(hp).toHaveValue('9');
+ await cookie.click();await hp.fill('10');await hp.dispatchEvent('change');await cookie.click();await expect(hp).toHaveValue('12');
+});
+
+test('07 party chip HP gains affect only the chip owner',async({page})=>{
+ await page.goto('/07_skill/');await selectCharacter(page,'7');await page.locator('#selected-party-tab').click();
+ await page.locator('.character-select[data-id="1"]').click();await page.locator('.character-select[data-id="2"]').click();
+ const slot=id=>page.locator('.party-member-slot[data-character-id="'+id+'"]');
+ const hp=slot('1').locator('[data-stat="hp"] b');
+ await slot('1').locator('[data-stat="hp"] button').click();await slot('1').locator('.party-slot-name').click();
+ await selectChipCategory(page,'共通');await page.locator('.chip-select[data-id="7"]').click();
+ await expect(hp).toHaveText('10/11');await expect(slot('2').locator('[data-stat="hp"] b')).toHaveText('10/10');
+ await expect(page.locator('#selected-character-current-hp')).toHaveValue('10');
+ await page.locator('.chip-select[data-id="1"]').click();await expect(hp).toHaveText('10/11');
+ await page.locator('.chip-select[data-id="7"]').click();await expect(hp).toHaveText('9/9');
 });
