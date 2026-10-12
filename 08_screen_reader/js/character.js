@@ -99,11 +99,16 @@
   if(rule.formula==='percent_of_ceil')return Math.ceil(source*amount);
   return 0;
  }
- function calculate(){
+ // Keep unmodeled HP bonuses observed on screen, while allowing later known
+ // level/chip/skill changes. Re-anchor only when a new maximum is observed.
+ function observedMaxHp(s,computed){return Math.max(1,s.screenMaxHp===undefined?computed:s.screenMaxHp+computed-(s.screenMaxHpBasis??computed));}
+ function calculate(naturalMaxHpOnly=false){
   const active=activeRules().filter(r=>r.kind==='modifier'||r.kind==='event_modifier');
   const startingHp=base('hp')+(Number(state().maxHpBonus)||0);
   const maxBonus=active.filter(r=>r.target==='max_hp'&&triggerMatches(r)&&conditionMatches(r,startingHp)).reduce((sum,r)=>sum+valueOf(r,0),0);
-  const maxHp=Math.max(1,state().screenMaxHp??(startingHp+maxBonus));
+  const computedMaxHp=Math.max(1,startingHp+maxBonus);
+  if(naturalMaxHpOnly)return computedMaxHp;
+  const maxHp=observedMaxHp(state(),computedMaxHp);
   if(state().currentHp===null)state().currentHp=maxHp;
   state().currentHp=Math.max(0,Math.min(maxHp,Number(state().currentHp)||0));
   const result={atk:base('atk'),def:base('def'),move:base('move'),hp:maxHp,damageReduce:0,damageAdd:(currentOpponent?.markStacks>0?1:0)+(currentOpponent?.fateEchoStacks>0?1:0)+(Number(currentOpponent?.erosionStacks)||0)};
@@ -454,12 +459,14 @@
   event.preventDefault();event.stopImmediatePropagation();suppressChipClick=false;
  },true);
 
- function calculatePartyMember(row){
+ function calculatePartyMember(row,naturalMaxHpOnly=false){
   const member=getPartyState(row.id),baseValue=stat=>Number(row['lv'+member.level+'_'+stat])||0;
   const active=member.chips.flatMap(id=>byChip.get(id)||[]).filter(rule=>['modifier','event_modifier'].includes(rule.kind)&&rule.trigger==='while_owned');
   const matches=(rule,maxHp)=>!rule.condition||rule.condition==='hp_full'&&(member.currentHp===null||member.currentHp>=maxHp)||rule.condition==='hp_ratio<0.5'&&member.currentHp!==null&&member.currentHp<maxHp/2||rule.condition==='hp_ratio<=0.5'&&member.currentHp!==null&&member.currentHp<=maxHp/2;
   const value=(rule,maxBonus)=>{const amount=Number(rule.value)||0;if(rule.formula==='fixed')return amount;if(rule.source_key!=='追加最大HP')return 0;const source=rule.source_cap===''?maxBonus:Math.min(maxBonus,Number(rule.source_cap));if(rule.formula==='per_stack')return source*amount;if(rule.formula==='floor_per_unit')return Math.floor(source/(Number(rule.unit)||1))*amount;if(rule.formula==='percent_of_ceil')return Math.ceil(source*amount);return 0;};
-  const maxBonus=active.filter(rule=>rule.target==='max_hp'&&matches(rule,baseValue('hp'))).reduce((sum,rule)=>sum+value(rule,0),0),maxHp=Math.max(1,member.screenMaxHp??(baseValue('hp')+maxBonus));
+  const maxBonus=active.filter(rule=>rule.target==='max_hp'&&matches(rule,baseValue('hp'))).reduce((sum,rule)=>sum+value(rule,0),0),computedMaxHp=Math.max(1,baseValue('hp')+maxBonus);
+  if(naturalMaxHpOnly)return computedMaxHp;
+  const maxHp=observedMaxHp(member,computedMaxHp);
   if(member.currentHp===null)member.currentHp=maxHp;member.currentHp=Math.max(0,Math.min(maxHp,member.currentHp));
   const result={level:member.level,hp:maxHp,currentHp:member.currentHp};
   for(const stat of ['atk','def','move'])result[stat]=Math.max(0,baseValue(stat)+(member.manual[stat]||0)+active.filter(rule=>rule.target===stat&&matches(rule,maxHp)).reduce((sum,rule)=>sum+value(rule,maxBonus),0));
@@ -574,14 +581,18 @@
   apply:observation=>{
    if(!observation||!Array.isArray(observation.members))return {updated:0,added:0};
    const rowFor=id=>characters.find(row=>String(row.id)===String(id)),valid=(value,min,max)=>Number.isSafeInteger(value)&&value>=min&&value<=max;
-   const seen=observation.members.filter(m=>rowFor(m.id)),self=rowFor(observation.selfId);let updated=0,added=0;
+   const candidates=observation.members.filter(m=>m&&rowFor(m.id));
+   const seen=candidates.filter(m=>candidates.filter(other=>String(other.id)===String(m.id)).length===1&&(m.slot===undefined||valid(m.slot,0,3)&&candidates.filter(other=>other.slot===m.slot).length===1));
+   const self=rowFor(observation.selfId);let updated=0,added=0;
    const before=partySlots.map(id=>id===null?null:String(id)).join(',');
    if(!selectedCharacter){if(!self)return {updated:0,added:0};selectCharacter(self);}
    if(self&&String(self.id)!==String(selectedCharacter.id)){
-    const oldId=String(selectedCharacter.id),oldIndex=partySlots.findIndex(id=>String(id)===oldId),old=state();
-    partyStates.set(oldId,{level:old.level,currentHp:old.currentHp,chips:[...old.chips],manual:{...old.manual},screenMaxHp:old.screenMaxHp,screenCoin:old.screenCoin});
-    const fromParty=partyStates.get(String(self.id));if(fromParty)Object.assign(getState(self.id),{...fromParty,manual:{...fromParty.manual},chips:[...fromParty.chips]});
+    const oldId=String(selectedCharacter.id),oldIndex=partySlots.findIndex(id=>String(id)===oldId),old=state(),oldMax=calculate().hp;
+    const oldMember={level:old.level,currentHp:old.currentHp,chips:[...old.chips],manual:{...old.manual},screenMaxHp:old.screenMaxHp===undefined?undefined:oldMax,screenCoin:old.screenCoin};
+    partyStates.set(oldId,oldMember);if(oldMember.screenMaxHp!==undefined)oldMember.screenMaxHpBasis=calculatePartyMember(selectedCharacter,true);
+    const fromParty=partyStates.get(String(self.id)),newMax=fromParty?calculatePartyMember(self).hp:null;if(fromParty)Object.assign(getState(self.id),{...fromParty,manual:{...fromParty.manual},chips:[...fromParty.chips]});
     partyStates.delete(String(self.id));selectedCharacter=self;partyEditId=null;
+    if(fromParty?.screenMaxHp!==undefined){state().screenMaxHp=newMax;state().screenMaxHpBasis=calculate(true);}
     for(let i=0;i<4;i++)if(String(partySlots[i])===String(self.id))partySlots[i]=null;
     partySlots[oldIndex<0?0:oldIndex]=self.id;
     window.dispatchEvent(new Event('character-selection-change'));
@@ -594,13 +605,15 @@
     for(let i=0;i<4;i++)if(i!==m.slot&&String(partySlots[i])===String(m.id))partySlots[i]=null;
     partySlots[m.slot]=rowFor(m.id).id;
    }
+   const hpBefore=new Map();
+   for(const id of partySlots){const row=rowFor(id);if(!row)continue;const own=String(id)===ownId,s=own?state():getPartyState(id);if(s.screenMaxHp!==undefined)hpBefore.set(String(id),own?calculate().hp:calculatePartyMember(row).hp);}
    for(const m of seen){
     const row=rowFor(m.id),own=String(row.id)===ownId;
     if(!partySlots.some(id=>String(id)===String(row.id)))continue;
     const s=own?state():getPartyState(row.id);
     if(valid(m.level,0,3))s.level=m.level;
     if(valid(m.maxHp,1,999))s.screenMaxHp=m.maxHp;
-    if(valid(m.currentHp,0,999))s.currentHp=Math.min(s.screenMaxHp??999,m.currentHp);
+    if(valid(m.currentHp,0,999))s.currentHp=m.currentHp;
     if(valid(m.coin,0,999))s.screenCoin=m.coin;
     updated++;
    }
@@ -608,6 +621,16 @@
    if(owner&&partySlots.some(id=>String(id)===String(owner.id))&&Array.isArray(observation.chipIds)){
     const s=String(owner.id)===ownId?state():getPartyState(owner.id);
     for(const raw of observation.chipIds){const chip=chips.find(c=>String(c.id)===String(raw));if(chip&&!s.chips.includes(chip.id)){s.chips.push(chip.id);added++;}}
+   }
+   // Reading an existing chip/level is not a manual acquisition. If the
+   // maximum is hidden, retain the last total instead of counting it twice.
+   const hpOwners=new Set([...seen.map(m=>String(m.id)),...(owner?[String(owner.id)]:[])]);
+   for(const id of hpOwners){
+    if(!partySlots.some(member=>String(member)===id))continue;
+    const row=rowFor(id),own=id===ownId,s=own?state():getPartyState(id),m=seen.find(item=>String(item.id)===id);
+    if(valid(m?.maxHp,1,999))s.screenMaxHp=m.maxHp;
+    else if(hpBefore.has(id))s.screenMaxHp=hpBefore.get(id);
+    if(s.screenMaxHp!==undefined)s.screenMaxHpBasis=own?calculate(true):calculatePartyMember(row,true);
    }
    // Correct total values after level/chip/HP changes; retain all unobserved stats.
    for(const m of seen){const row=rowFor(m.id);if(!partySlots.some(id=>String(id)===String(row.id)))continue;const own=String(row.id)===ownId,s=own?state():getPartyState(row.id),totals=own?calculate():calculatePartyMember(row);s.manual??={atk:0,def:0,move:0};for(const key of ['atk','def','move'])if(valid(m[key],0,999))s.manual[key]=(s.manual[key]||0)+m[key]-totals[key];}

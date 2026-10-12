@@ -34,12 +34,41 @@
   window.ScreenReaderMiniCharacterMapping.load(catalog.characters).then(updateMappingPreview);
  }
  function showFrame(source){frame=vision.normalize(source,area);ctx.drawImage(frame,0,0);$('area').disabled=false;$('learn').disabled=!catalog;}
- function drawResults(observation){
-  $('result-body').replaceChildren(...observation.members.filter(m=>Number.isInteger(m.slot)).map(m=>{const tr=document.createElement('tr'),name=catalog.characters.find(c=>c.id===m.id)?.name??'未判定';for(const value of [m.slot+1,name+(m.id===observation.selfId?'（自分）':''),m.level??'—',m.currentHp===undefined&&m.maxHp===undefined?'—':(m.currentHp??'—')+'/'+(m.maxHp??'—'),m.coin??'—',['atk','def'].map(k=>m[k]??'—').join('／')]){const td=document.createElement('td');td.textContent=String(value);tr.append(td);}return tr;}));
+ function drawResults(observation,accepted,automatic){
+  const current=bridge.snapshot(),apply=$('apply').checked;
+  $('result-body').replaceChildren(...observation.members.filter(m=>Number.isInteger(m.slot)).map(m=>{
+   const tr=document.createElement('tr'),previous=current.members.find(p=>p.slot===m.slot);
+   // Never label the previous occupant's numbers as a new candidate's values.
+   const held=previous?.id&&(!m.id||previous.id===m.id)?previous:null;
+   const confirmed=accepted.members.find(p=>p.id===m.id&&p.slot===m.slot);
+   const name=catalog.characters.find(c=>c.id===m.id)?.name??held?.name??'未判定';
+   const cell=value=>{const td=document.createElement('td');if(typeof value==='string')td.textContent=value;else td.append(value);tr.append(td);return td;};
+   const value=key=>{
+    const field=document.createElement('span'),number=document.createElement('span'),label=document.createElement('small');field.className='reader-field';
+    let state,text;
+    if(m[key]!==undefined){number.textContent=String(m[key]);state=automatic&&confirmed?.[key]===undefined?'pending':!apply?'preview':held?.[key]===m[key]?'read':'rejected';text={pending:'安定待ち',read:'今回',preview:'確認のみ',rejected:'反映保留'}[state];}
+    else if(held?.[key]!==undefined){number.textContent=String(held[key]);state='held';text='保持';}
+    else {number.textContent='—';state='unknown';text='未判定';}
+    field.dataset.state=state;label.textContent=text;field.append(number,label);
+    if(['pending','rejected'].includes(state)&&held?.[key]!==undefined)field.title=(state==='pending'?'連続2回の一致を待っています。':'ツールの状態と一致しないため反映していません。')+'ツールは '+held[key]+' を保持しています。';
+    if(state==='held')field.title='今回この項目は読めなかったため、ツールの値を保持しています。';
+    return field;
+   };
+   const pair=(a,b)=>{const span=document.createElement('span');span.className='reader-field-pair';span.append(value(a),document.createTextNode(' / '),value(b));return span;};
+   cell(String(m.slot+1));
+   const own=(m.id||held?.id)===current.selfId?'（自分）':m.id&&m.id===observation.selfId?'（自分候補）':'';
+   const nameCell=cell(name+own);
+   if(previous?.id&&m.id&&previous.id!==m.id){const note=document.createElement('small');note.className='reader-held-name';note.textContent='保持：'+previous.name;nameCell.append(note);}
+   cell(value('level'));cell(pair('currentHp','maxHp'));cell(value('coin'));cell(pair('atk','def'));
+   const pending=tr.querySelector('[data-state="pending"]'),keeping=tr.querySelector('[data-state="held"]'),rejected=tr.querySelector('[data-state="rejected"]');
+   cell(!apply?'確認のみ':!m.id?'前回保持':automatic&&!confirmed?'安定待ち':pending?'一部安定待ち':rejected?'一部反映保留':keeping?'一部保持':'反映');
+   return tr;
+  }));
   const world=observation.world,names={M0017:'爆竹ゲロゲロ',M0014:'指揮センター'};if(world)$('world-result').textContent=(world.clock?'ラウンド '+world.clock.round+' ／ 進捗 '+world.clock.progress:'ラウンド・進捗：未判定')+' ／ '+(world.monsters.map(m=>(names[m.monsterId]||m.monsterId)+(m.serial===null?'':' '+m.serial)+' HP '+m.currentHp+'/'+m.maxHp).join('、')||'モンスター：未判定');
-  $('view').textContent=observation.view+'：今回読み取れた情報';
-  const owner=catalog.characters.find(c=>c.id===observation.chipOwnerId)?.name;
-  $('chip-result').textContent=observation.chipOwnerId?(owner+'のチップ：'+(observation.chipIds.map(id=>catalog.chips.find(c=>c.id===id)?.name??id).join('、')||'判定できたチップなし')):'チップの対象キャラは未判定です。';
+  $('view').textContent=observation.view+'：今回の読取と保持している値'+(!apply?'（確認のみ）':'');
+  const owner=catalog.characters.find(c=>c.id===observation.chipOwnerId)?.name,owned=current.members.find(m=>m.id===observation.chipOwnerId)?.chips||[];
+  const chipNames=observation.chipIds.map(id=>(catalog.chips.find(c=>c.id===id)?.name??id)+(automatic&&!accepted.chipIds.includes(id)?'（安定待ち）':apply?'（今回）':'（確認のみ）'));
+  $('chip-result').textContent=observation.chipOwnerId?(owner+'のチップ：'+(chipNames.join('、')||'今回判定できたチップなし')+' ／ 取得済み '+owned.length+'件を保持'):'チップの対象キャラは未判定です。取得済みチップは保持しています。';
  }
  function accept(key,value){const prior=stable.get(key);const count=prior&&prior.value===value&&prior.tick===stableTick-1?prior.count+1:1;stable.set(key,{value,count,tick:stableTick});return count>=2;}
  function stabilize(observation){
@@ -71,7 +100,8 @@
    // Yield to paint without overlapping jobs. Stop/reset invalidates this frame.
    await new Promise(resolve=>requestAnimationFrame(resolve));if(token!==generation)return;
    const observation=vision.analyze(frame,custom);if($('world-sync').checked)observation.world=window.ScreenReaderWorldVision.analyze(frame);else $('world-result').textContent='マップ読取はOFFです。マップ・難易度を選び、反映をONにしてください。';if($('self').value)observation.selfId=$('self').value;
-   drawResults(observation);const accepted=automatic?stabilize(observation):observation;const result=$('apply').checked?bridge.apply(accepted):{updated:0,added:0};
+   const accepted=automatic?stabilize(observation):observation;const result=$('apply').checked?bridge.apply(accepted):{updated:0,added:0};
+   drawResults(observation,accepted,automatic);
    if($('apply').checked&&$('world-sync').checked){const applied=window.ScreenReaderMapBridge.apply(accepted.world);if(applied.skipped)$('world-result').textContent+=' ／ マップ・難易度・既存個体と一致しない情報 '+applied.skipped+'件は保持';}
    const names=observation.members.filter(m=>m.id).length;
    status((automatic?'自動読取':'画面読取')+'：'+names+'人を判定／チップ '+result.added+'件追加。'+(!observation.selfId?' 自キャラが未判定の場合は「自キャラ」を指定してください。':''));

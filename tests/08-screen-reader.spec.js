@@ -267,3 +267,69 @@ test('08: automatic capture resumes for a coin-only HUD change after a static sc
  await expect.poll(async()=> (await snapshot(page)).members[0].coin,{timeout:10000}).toBe(17);
  expect((await snapshot(page)).selfId).toBe('105');await page.locator('#reader-stop').click();
 });
+
+async function closeReader(page){
+ if(await page.locator('#reader-toggle').getAttribute('aria-expanded')==='true')await page.locator('#reader-toggle').click();
+ await page.mouse.move(0,700);await expect(page.locator('#reader-panel')).toBeHidden();
+}
+async function commonChips(page){await page.locator('.role-tab[data-role="character"]').click();await page.locator('#character-chip-tab').click();await page.locator('.chip-category-tabs button[data-category="共通"]').click();}
+
+for(const protocol of ['http','file'])test('08: observed maximum permits manual HP, chip and level changes and re-anchors on '+protocol,async({page})=>{
+ if(protocol==='http')await open(page);else {await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);await page.waitForFunction(()=>ScreenReaderCharacterBridge?.catalog().characters.length===35);}
+ await page.evaluate(()=>ScreenReaderCharacterBridge.apply({selfId:'7',members:[{id:'7',slot:0,level:0,maxHp:14,currentHp:6,coin:12}]}));
+ if(protocol==='http')await closeReader(page);await commonChips(page);
+ const hp=page.locator('#selected-character-current-hp'),atk=page.locator('#selected-character-atk'),cookie=page.locator('.chip-select[data-id="7"]');
+ await cookie.click();await expect(hp).toHaveValue('8');await expect(hp).toHaveAttribute('max','16');await expect(atk).toHaveValue('5');
+ await cookie.click();await expect(hp).toHaveValue('8');await expect(hp).toHaveAttribute('max','14');await expect(atk).toHaveValue('2');
+ await cookie.click();await expect(hp).toHaveValue('10');await page.locator('#selected-character-hp-fill').click();await expect(hp).toHaveValue('9');await page.locator('#selected-character-hp-fill').click({button:'right'});await expect(hp).toHaveValue('10');
+ await page.locator('#selected-character-portrait').click();await expect(hp).toHaveValue('11');await expect(hp).toHaveAttribute('max','17');
+ await page.evaluate(()=>ScreenReaderCharacterBridge.apply({members:[{id:'7',slot:0,coin:15}],chipOwnerId:'7',chipIds:['7']}));await expect(hp).toHaveValue('11');await expect(hp).toHaveAttribute('max','17');
+ for(let i=0;i<2;i++)await page.evaluate(()=>ScreenReaderCharacterBridge.apply({members:[{id:'7',slot:0,level:1,maxHp:18,currentHp:12}],chipOwnerId:'7',chipIds:['7','7']}));
+ await expect(hp).toHaveValue('12');await expect(hp).toHaveAttribute('max','18');expect((await snapshot(page)).members[0].chips).toEqual(['7']);
+});
+
+test('08: party observed HP bonuses survive manual edits and self/party role changes',async({page})=>{
+ await open(page);await page.evaluate(()=>ScreenReaderCharacterBridge.apply({selfId:'7',members:[{id:'7',slot:0,maxHp:14,currentHp:6},{id:'1',slot:1,level:0,maxHp:13,currentHp:8,coin:6}]}));await closeReader(page);
+ await page.locator('.role-tab[data-role="character"]').click();await page.locator('#selected-party-tab').click();const slot=page.locator('.party-member-slot[data-character-id="1"]');
+ await slot.locator('.party-slot-portrait').click();await expect(slot.locator('[data-stat="hp"] b')).toHaveText('10/15');await slot.locator('.party-slot-name').click();await commonChips(page);
+ await page.locator('.chip-select[data-id="7"]').click();await expect(slot.locator('[data-stat="hp"] b')).toHaveText('12/17');
+ const values=s=>s.members.filter(m=>m.id).map(m=>[m.id,m.currentHp,m.maxHp,m.level,m.coin,m.chips]).sort();const before=values(await snapshot(page));
+ await page.evaluate(()=>ScreenReaderCharacterBridge.apply({selfId:'1',members:[]}));expect(values(await snapshot(page))).toEqual(before);
+ await page.evaluate(()=>ScreenReaderCharacterBridge.apply({selfId:'7',members:[]}));expect(values(await snapshot(page))).toEqual(before);
+});
+
+test('08: discovering an existing HP chip with hidden max HP preserves the total and current HP',async({page})=>{
+ await open(page);await page.evaluate(()=>ScreenReaderCharacterBridge.apply({members:[{id:'1',slot:0,maxHp:13,currentHp:7,level:0}]}));
+ await page.evaluate(()=>ScreenReaderCharacterBridge.apply({members:[{id:'1',slot:0,level:1}],chipOwnerId:'1',chipIds:['7']}));let s=await snapshot(page);expect([s.members[0].currentHp,s.members[0].maxHp]).toEqual([7,13]);
+ await closeReader(page);await commonChips(page);await page.locator('.chip-select[data-id="7"]').click();await expect(page.locator('#selected-character-current-hp')).toHaveAttribute('max','11');
+ await page.locator('.chip-select[data-id="7"]').click();s=await snapshot(page);expect([s.members[0].currentHp,s.members[0].maxHp]).toEqual([9,13]);
+});
+
+test('08: conflicting member IDs or slots cannot overwrite retained numbers',async({page})=>{
+ await open(page);await readFixture(page,'left-hud');const before=await snapshot(page);
+ for(const members of [[{id:'105',slot:0,currentHp:1,coin:1},{id:'105',slot:1,currentHp:2,coin:2}],[{id:'105',slot:0,currentHp:1},{id:'106',slot:0,currentHp:2}],[{id:'105',slot:9,currentHp:1}]])await page.evaluate(members=>ScreenReaderCharacterBridge.apply({members}),members);
+ expect(await snapshot(page)).toEqual(before);
+});
+
+test('08: results distinguish new readings, retained fields, stability waiting and preview',async({page})=>{
+ await open(page);await readFixture(page,'left-hud');
+ await page.evaluate(()=>{const original=ScreenReaderVision.analyze;ScreenReaderVision.analyze=source=>{const o=original(source);delete o.members[1].coin;return o;};});
+ await page.locator('#reader-read').click();await expect(page.locator('#reader-result-body tr').nth(1).locator('td').nth(4)).toContainText('12');await expect(page.locator('#reader-result-body tr').nth(1).locator('[data-state="held"]')).not.toHaveCount(0);
+ await page.locator('#reader-apply').uncheck();await page.locator('#reader-read').click();await expect(page.locator('#reader-result-body')).toContainText('確認のみ');
+ await page.locator('#reader-apply').check();const before=await snapshot(page);await page.evaluate(()=>ScreenReaderController.read(true));await expect(page.locator('#reader-result-body')).toContainText('安定待ち');expect(await snapshot(page)).toEqual(before);
+ await page.evaluate(()=>ScreenReaderController.read(true));await expect(page.locator('#reader-result-body [data-state="pending"]')).toHaveCount(0);await expect(page.locator('#reader-result-body [data-state="read"]')).not.toHaveCount(0);
+ await page.screenshot({path:'test-results/08-reader-field-states.png',fullPage:true});
+});
+
+for(const [scale,blur] of [[.75,0],[.5,0],[1,.5],[1,1]])test(`08: reviewed HUD stays identifiable under scale ${scale} and blur ${blur}`,async({page})=>{
+ await open(page);const o=await page.evaluate(async({image,scale,blur})=>{const im=new Image();im.src=image;await im.decode();const c=document.createElement('canvas');c.width=Math.round(im.width*scale);c.height=Math.round(im.height*scale);const ctx=c.getContext('2d');ctx.filter=`blur(${blur}px)`;ctx.drawImage(im,0,0,c.width,c.height);return ScreenReaderVision.analyze(ScreenReaderVision.normalize(c));},{image:fixture('left-hud'),scale,blur});
+ expect(o.members.map(m=>m.id)).toEqual(['105','106','3','18']);expect(o.selfId).toBe('105');expect(o.chipIds).toEqual([]);
+ const expected=[{currentHp:9,maxHp:9,coin:12,level:0},{currentHp:10,maxHp:10,coin:12,level:0},{currentHp:10,maxHp:10,coin:12,level:0},{currentHp:9,maxHp:9,coin:6,level:0}];
+ for(let i=0;i<4;i++)for(const key of Object.keys(expected[i]))if(o.members[i][key]!==undefined)expect(o.members[i][key]).toBe(expected[i][key]);
+});
+
+test('08: obscured faces and numbers retain state without deciding self or erasing chips',async({page})=>{
+ await open(page);await readFixture(page,'left-hud');await page.evaluate(()=>ScreenReaderCharacterBridge.apply({members:[],chipOwnerId:'106',chipIds:['121']}));const before=await snapshot(page);
+ const o=await page.evaluate(async image=>{const im=new Image();im.src=image;await im.decode();const c=ScreenReaderVision.normalize(im),ctx=c.getContext('2d');ctx.fillStyle='#141414';for(const box of [[55,159,73,42],[23,103,60,42],[167,98,27,24],[116,445,139,116]])ctx.fillRect(...box);const o=ScreenReaderVision.analyze(c);ScreenReaderCharacterBridge.apply(o);return o;},fixture('left-hud'));
+ expect(o.selfId).toBeNull();expect(o.members[1].id).toBeUndefined();expect(o.members[0].currentHp).toBeUndefined();expect(o.members[0].coin).toBeUndefined();expect(o.chipIds).toEqual([]);expect(await snapshot(page)).toEqual(before);
+});

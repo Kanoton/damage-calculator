@@ -24,3 +24,12 @@
 .reader-dock:hover .screen-reader,.reader-dock.is-open .screen-reader,.reader-dock:has(.screen-reader :focus-visible) .screen-reader{display:block}
 
 .mobile-ui .reader-dock{display:none}
+
+/* State words remain visible without relying on colors alone. */
+.reader-field{display:inline-flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:16px}
+.reader-field small,.reader-held-name{display:block;font-size:10px;line-height:1.3;color:#656a7d}
+.reader-field[data-state="read"] small{color:#276441}
+.reader-field[data-state="pending"] small,.reader-field[data-state="rejected"] small{color:#895817}
+.reader-field[data-state="preview"] small{color:#51458f}
+.reader-field-pair{display:inline-flex;align-items:flex-start;gap:4px}
+.reader-held-name{margin-top:3px;white-space:normal}
