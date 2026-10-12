@@ -212,3 +212,40 @@ test('08: lower popup uses scaled geometry, selected tab and PT identity without
  }
  await readFixture(page,'popup-11');const s=await snapshot(page);expect(s.members.find(m=>m.id==='18').chips).toEqual(['42','36','24']);
 });
+
+for(const [width,height] of [[2048,1152],[1280,720],[2560,1080]])test(`08: height-scaled left HUD preserves the reviewed party at ${width}x${height}`,async({page})=>{
+ await open(page);
+ const result=await page.evaluate(async({image,width,height})=>{
+  const im=new Image();im.src=image;await im.decode();
+  const c=document.createElement('canvas');c.width=width;c.height=height;
+  const ctx=c.getContext('2d');ctx.fillStyle='#141414';ctx.fillRect(0,0,width,height);
+  ctx.drawImage(im,0,0,im.width*height/im.height,height);
+  const frame=ScreenReaderVision.normalize(c),o=ScreenReaderVision.analyze(frame);
+  ScreenReaderCharacterBridge.apply(o);
+  return {o,learned:ScreenReaderVision.learn(frame,'avatar','106',1).data,expected:btoa(String.fromCharCode(...ScreenReaderVision.feature(frame.popupFrame,[55,159,73,42])))};
+ },{image:fixture('left-hud'),width,height});
+ expect(result.o.selfId).toBe('105');
+ expect(result.o.members.map(m=>[m.id,m.currentHp,m.maxHp,m.coin,m.level])).toEqual([
+  ['105',9,9,12,0],['106',10,10,12,0],['3',10,10,12,0],['18',9,9,6,0]
+ ]);
+ expect(result.learned).toBe(result.expected);
+});
+
+test('08: calculator reset clears reader stabilization and a fresh frame can select self again',async({page})=>{
+ await open(page);await readFixture(page,'left-hud');
+ await page.locator('#reader-toggle').click();await page.mouse.move(0,500);
+ await page.locator('#new-game').click();await page.locator('#new-game-confirm').click();
+ expect((await snapshot(page)).selfId).toBe('');
+ await page.locator('#reader-toggle').click();await readFixture(page,'left-hud');
+ const s=await snapshot(page);expect(s.selfId).toBe('105');expect(s.members.map(m=>m.id)).toEqual(['105','106','3','18']);
+});
+
+test('08: synchronized wide and mobile layouts keep reader overlay independent',async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.setViewportSize({width:1920,height:1080});await open(page);await readFixture(page,'left-hud');
+ const before=await page.locator('.tool-wrapper').boundingBox();
+ await page.locator('#reader-toggle').click();await page.mouse.move(0,500);
+ await expect(page.locator('#reader-panel')).toBeHidden();expect(await page.locator('.tool-wrapper').boundingBox()).toEqual(before);
+ await page.setViewportSize({width:375,height:812});await expect(page.locator('body')).toHaveClass(/mobile-ui/);await expect(page.locator('#reader-toggle')).toBeHidden();
+ await page.setViewportSize({width:1280,height:900});await expect(page.locator('#reader-toggle')).toBeVisible();expect((await snapshot(page)).selfId).toBe('105');expect(errors).toEqual([]);
+});

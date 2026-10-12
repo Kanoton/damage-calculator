@@ -50,7 +50,17 @@
   if(observation.world){const w=observation.world;out.world={clock:null,monsters:[]};if(w.clock&&accept('world-clock',JSON.stringify(w.clock)))out.world.clock=w.clock;for(const m of w.monsters||[])if(accept('world-monster:'+m.monsterId+':'+m.serial,JSON.stringify(m)))out.world.monsters.push(m);}
   return out;
  }
- function frameHash(){let hash=0;for(const box of [[0,0,1536,709],[0,0,1536,430],[165,498,288,187],[465,324,286,184],[125,430,435,40]])for(const v of vision.feature(frame,box))hash=(hash*31+v)|0;return hash;}
+ function frameHash(){
+  let hash=0;
+  // The coarse full-frame hash keeps world/popup changes visible. Exact HUD
+  // pixels additionally catch HP/coin/star changes that 16x16 sampling loses.
+  for(const box of [[0,0,1536,709],[165,498,288,187],[465,324,286,184],[125,430,435,40]])for(const v of vision.feature(frame,box))hash=(hash*31+v)|0;
+  for(const source of frame.statusFrame?[frame,frame.popupFrame]:[frame]){
+   const pixels=source.getContext('2d').getImageData(0,60,340,360).data;
+   for(let i=0;i<pixels.length;i+=4)for(let channel=0;channel<3;channel++)hash=(hash*31+pixels[i+channel])|0;
+  }
+  return hash;
+ }
  async function read(automatic=false){
   if(busy||!rawSource||!catalog||selecting)return;busy=true;$('read').disabled=true;const token=generation;
   try{
@@ -104,6 +114,8 @@
  $('learn').addEventListener('click',()=>{if(!frame||!catalog)return;const [kind,index]=$('learn-kind').value.split(':'),id=$('learn-id').value,ref=vision.learn(frame,kind,id,kind.startsWith('chip-')?Number($('learn-slot').value):Number(index)),list=kind.startsWith('chip-')?custom.chips:custom.characters;if(custom.characters.length+custom.chips.length>=500){status('見本は最大500件です。');return;}if(!list.some(r=>r.id===ref.id&&r.kind===ref.kind&&r.data===ref.data))list.push(ref);generation++;stable.clear();sameFrames=0;lastHash=null;save();read();});
  $('export').addEventListener('click',()=>{const url=URL.createObjectURL(new Blob([JSON.stringify({version:1,...custom,area},null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='screen-reader-profile.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
  $('import').addEventListener('change',async()=>{try{const file=$('import').files[0];if(!file)return;if(file.size>1000000)throw Error('ファイルが大きすぎます。');const p=validateProfile(JSON.parse(await file.text()));custom={characters:p.characters,chips:p.chips};area=p.area||null;generation++;stable.clear();sameFrames=0;lastHash=null;save();if(rawSource)read();status('見本を読み込みました。');}catch(error){status(error.message);}finally{$('import').value='';}});
+ window.addEventListener('new-game-reset',()=>{generation++;clearTimeout(timer);timer=null;stable.clear();lastHash=null;sameFrames=0;$('auto').checked=false;$('self').value='';$('world-sync').checked=false;$('world-result').textContent='';$('result-body').replaceChildren();$('chip-result').textContent='';$('view').textContent='リセット後の読取を待っています。';status('ゲーム状態をリセットしました。次のゲーム画面を読み取ってください。');});
+ window.addEventListener('mobile-ui-change',()=>{if(document.body.classList.contains('mobile-ui'))stop();});
  window.addEventListener('pagehide',stop);
  $('learn-id').addEventListener('change',updateMappingPreview);
  window.ScreenReaderController={read,stop,stabilize,validateProfile};ready();

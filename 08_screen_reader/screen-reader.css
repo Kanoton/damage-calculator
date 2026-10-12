@@ -22,3 +22,5 @@
 .reader-toggle{display:block;margin:0 auto;padding:2px 16px;border:1px solid #b9bdd3;border-top:0;border-radius:0 0 6px 6px;background:#f5f6fc;color:#25283a;font:inherit;font-size:12px;cursor:pointer;pointer-events:auto}
 .reader-dock .screen-reader{display:none;pointer-events:auto;margin:0;max-height:calc(100dvh - 30px);overflow:auto;box-shadow:0 6px 20px #0003}
 .reader-dock:hover .screen-reader,.reader-dock.is-open .screen-reader,.reader-dock:has(.screen-reader :focus-visible) .screen-reader{display:block}
+
+.mobile-ui .reader-dock{display:none}

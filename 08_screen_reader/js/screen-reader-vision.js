@@ -122,31 +122,39 @@
   });
  }
  function selectLayout(source,charRefs,digits){
-  const candidates=layouts.map(layout=>({layout,members:readMembers(source,layout,charRefs,digits)}));
+  // Test both the legacy stretch and a height-scaled, left-anchored HUD.
+  // Keep the legacy geometry unless multiple identities and numeric anchors
+  // independently support the alternative; a single face is insufficient.
+  const candidates=layouts.map(layout=>({source,layout,members:readMembers(source,layout,charRefs,digits)}));
+  if(source.statusFrame&&source.popupFrame)for(const layout of layouts)candidates.push({source:source.popupFrame,layout,members:readMembers(source.popupFrame,layout,charRefs,digits)});
   const count=c=>new Set(c.members.filter(m=>m.id).map(m=>m.id)).size;
-  const original=candidates[0],left=candidates[1];
-  // A second layout needs multiple independent identities and numeric anchors;
-  // a coincidental match against the map must not move the readout regions.
-  return count(left)>=2&&count(left)>count(original)&&left.members.filter(m=>m.id&&m.coin!==undefined&&m.level!==undefined).length>=2?left:original;
+  const anchors=c=>c.members.filter(m=>m.id&&m.coin!==undefined&&m.level!==undefined).length;
+  const fields=c=>c.members.reduce((n,m)=>n+(m.id?['currentHp','maxHp','coin','level'].filter(k=>m[k]!==undefined).length:0),0);
+  let best=candidates[0];
+  for(const candidate of candidates.slice(1)){
+   if(count(candidate)<2||anchors(candidate)<2)continue;
+   if(count(candidate)>count(best)||count(candidate)===count(best)&&fields(candidate)>fields(best))best=candidate;
+  }
+  return best;
  }
  function analyze(source,custom={characters:[],chips:[]}){
   const refs=window.ScreenReaderReferences,extra=window.ScreenReaderLayoutReferences||{},statusRefs=window.ScreenReaderStatusReferences||{},charRefs=[...refs.characters,...(extra.characters||[]),...(statusRefs.characters||[]),...(custom.characters||[])],chipRefs=[...refs.chips,...(window.ScreenReaderPopupReferences?.chips||[]),...(statusRefs.chips||[]),...(custom.chips||[])],digits=[...refs.digits,...(extra.digits||[])];
-  const {layout,members}=selectLayout(source,charRefs,digits);
+  const {layout,members,source:hudSource}=selectLayout(source,charRefs,digits);
   // Repeated IDs signal a bad match; do not use either conflicting slot.
   const repeated=new Set(members.filter(m=>m.id&&members.filter(other=>other.id===m.id).length>1).map(m=>m.id));
   for(const m of members)if(repeated.has(m.id)){delete m.id;m.unreadable=true;}
   const statusSource=source.statusFrame||source;
   const header=match(feature(statusSource,regions.header),charRefs.filter(r=>r.kind==='header'));
-  const lower=source.popupFrame&&source.statusFrame?lowerTab(source.popupFrame):null,tab=lower??activeTab(source);
+  const lower=source.popupFrame&&source.statusFrame?lowerTab(source.popupFrame):null,tab=lower??activeTab(hudSource);
   // The small popup covers the self portrait. Never identify self from its
   // chip contents or selected tab; keep the previous self or explicit choice.
-  const own=header||tab===null?match(feature(source,layout.regions.self),charRefs.filter(r=>r.kind==='self')):null;
+  const own=header||tab===null?match(feature(hudSource,layout.regions.self),charRefs.filter(r=>r.kind==='self')):null;
   const observation={members,selfId:own?.id??null,view:'通常画面',chipOwnerId:null,chipIds:[]};
   if(header){
    observation.view='ステータス画面';observation.chipOwnerId=header.id;observation.chipIds=chipMatches(statusSource,largeCenters,chipRefs);
    let target=members.find(m=>m.id===header.id);if(!target){target={id:header.id};members.push(target);}
    for(const [stat,box] of [['atk',[542,239,26,37]],['def',[619,239,26,37]]]){const v=numberAt(statusSource,box,'white',refs.digits);if(v!==null)target[stat]=v;}
-  }else if(tab!==null){observation.view='チップ画面';observation.chipOwnerId=members[tab]?.id??null;observation.chipIds=chipMatches(lower!==null?source.popupFrame:source,lower!==null?lowerCenters:smallCenters,chipRefs);}
+  }else if(tab!==null){observation.view='チップ画面';observation.chipOwnerId=members[tab]?.id??null;observation.chipIds=chipMatches(lower!==null?source.popupFrame:hudSource,lower!==null?lowerCenters:smallCenters,chipRefs);}
   return observation;
  }
  function normalize(source,area){const c=document.createElement('canvas');c.width=WIDTH;c.height=HEIGHT;const w=source.videoWidth||source.naturalWidth||source.width,h=source.videoHeight||source.naturalHeight||source.height;const a=area||{x:0,y:0,w:1,h:1};c.getContext('2d').drawImage(source,a.x*w,a.y*h,a.w*w,a.h*h,0,0,WIDTH,HEIGHT);
@@ -155,6 +163,6 @@
   if(Math.abs(statusWidth-WIDTH)>1){const status=document.createElement('canvas');status.width=WIDTH;status.height=HEIGHT;status.getContext('2d').drawImage(source,a.x*w,a.y*h,a.w*w,a.h*h,(WIDTH-statusWidth)/2,0,statusWidth,HEIGHT);c.statusFrame=status;}
   const popup=document.createElement('canvas');popup.width=WIDTH;popup.height=HEIGHT;popup.getContext('2d').drawImage(source,a.x*w,a.y*h,a.w*w,a.h*h,0,0,statusWidth,HEIGHT);c.popupFrame=popup;
   return c;}
- function learn(source,kind,id,index=0){const refs=window.ScreenReaderReferences,extra=window.ScreenReaderLayoutReferences||{},layout=selectLayout(source,[...refs.characters,...(extra.characters||[])],[...refs.digits,...(extra.digits||[])]).layout;const lower=source.popupFrame&&source.statusFrame&&lowerTab(source.popupFrame)!==null;const box=kind==='chip-small'?(lower?lowerCenters:smallCenters)[index]:kind==='chip-large'?largeCenters[index]:kind==='avatar'?layout.regions.avatar[index]:layout.regions[kind];if(!box)throw Error('見本の位置が不正です。');const region=kind.startsWith('chip-')?[box[0]-18,box[1]-18,36,36]:box;return {id:String(id),kind:kind.startsWith('chip-')?'chip':kind,data:encode(feature(kind==='chip-small'&&lower?source.popupFrame:(kind==='header'||kind==='chip-large')?(source.statusFrame||source):source,region))};}
+ function learn(source,kind,id,index=0){const refs=window.ScreenReaderReferences,extra=window.ScreenReaderLayoutReferences||{},selected=selectLayout(source,[...refs.characters,...(extra.characters||[]),...(window.ScreenReaderStatusReferences?.characters||[])],[...refs.digits,...(extra.digits||[])]),layout=selected.layout;const lower=source.popupFrame&&source.statusFrame&&lowerTab(source.popupFrame)!==null;const box=kind==='chip-small'?(lower?lowerCenters:smallCenters)[index]:kind==='chip-large'?largeCenters[index]:kind==='avatar'?layout.regions.avatar[index]:layout.regions[kind];if(!box)throw Error('見本の位置が不正です。');const region=kind.startsWith('chip-')?[box[0]-18,box[1]-18,36,36]:box;return {id:String(id),kind:kind.startsWith('chip-')?'chip':kind,data:encode(feature(kind==='chip-small'&&lower?source.popupFrame:(kind==='header'||kind==='chip-large')?(source.statusFrame||source):selected.source,region))};}
  window.ScreenReaderVision={analyze,normalize,learn,numberAt,feature,profileMatch,regions,WIDTH,HEIGHT};
 })();
