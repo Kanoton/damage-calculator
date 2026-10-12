@@ -6,17 +6,17 @@
   "files": {
     "README.md": "80fb46f1810f3c527b2a957e730af6269d46368a99a9f5d0ce6be2477eb95784",
     "csv/character_hero_card_mapping.csv": "e30feede38e283e2ea80bd2adbdc5128c5f8f07cc93c354c3da63750298eb037",
-    "data/hover-descriptions.csv": "eabad34df46e6dc66d374667e12c02c852b6b0ab564c5b0e292a6bbb94a22292",
+    "data/hover-descriptions.csv": "bdd36c3970f37b846810f67c62db3e09748503eb851f6f84dcfc557848f5d17c",
     "index.html": "f4db8d1aa8d6c0ba8894d7c3dbfe190ae2e452cb319566b821d5c59855849094",
     "js/calculator.js": "a7909770ebd53331536d1167a6dd926b45656af3e6bd5c8d74ed2d2d44814a8e",
-    "js/character-ability-rules.js": "c47d73091a1d2ba60cad03bc9236eb1d989bcee7b389005052545f35fdf3fab7",
+    "js/character-ability-rules.js": "cd8fd9811c94c00790d699a4d4de2af904f7a86ec1e52c70c86b5eb908df6e6b",
     "js/character-data-loader.js": "3f919c9ff2d8a1106bf0241089919ead3a69111ae18fbb8ed26d65cec4fd30ed",
     "js/character-data.js": "a53c7dd841e441daf5201154cfdf23f5106e8feee3a8792998d640a381cc7c39",
     "js/character-skill-tooltip.js": "a5d0de82c9ddd55ccb2e4994fa0044731c5f0b2046ef3363ca5acee69ef98609",
     "js/character-tabs.js": "8f0d7a8e5ba03536a0b124e1c6a623afe39de4a76df682c8cecaf4d802c95862",
     "js/character-view.js": "8cec516cc218501c940fd76e9aa3db91049ae47769a67d8597a1a9584f2aac49",
-    "js/character.js": "5f89c3fbd823f85332b093cc19331cafa0c9fcef1f2f419666a3dd791a49f374",
-    "js/hover-text.js": "753d5e5067857dc1c1522d50c015a376610b7972cbdf44372f19a96ffa4cccb3",
+    "js/character.js": "96de0c59c650ff5893495d78f3e6c2a45960ee89ed1a9ab7765377a07b80372a",
+    "js/hover-text.js": "26506ea1e4ed6218f0837307c3aa6e498cdebf88424e4f881df137fe1550cc58",
     "js/map-data.js": "5d095df064e3e358ca77f7602ec028a7a77ded34539add1ea0497d0a93af67b1",
     "js/map-events.js": "c7470c7134e6b65ced51f79661ff02902e9a2adb8a8f9ff4c80faebd0299cc85",
     "js/map-gimmick-view.js": "779f87be4cd13290d45a55682617c74f5cf01793a359b1ad3de94f58f378f61b",
@@ -33,5 +33,11 @@
     "streamdeck.js": "f27e3899f49e32059c9967184ee6c6f353e0127fa2474cb93bcbbf498e0e585c",
     "style.css": "93daa5d7c292b3426a8090a38e520289545d0295e816d6d22107ab334315aeed",
     "wide.css": "057fc8610b52f351ea26f0128712282d375ae11aba7eb631e1168f1ed5f84be3"
-  }
+  },
+  "patches": [
+    {
+      "baseCommit": "ddb4984c3bbbf1e6dab59a464a17492ac5e6f647",
+      "description": "2026-10-12 user-requested Padman movement removal and Sherry turn-end cleanup"
+    }
+  ]
 }

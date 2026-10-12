@@ -33,13 +33,11 @@ const CHARACTER_ABILITY_RULES={
    {key:'マジで怒ったぞ',type:'toggle',duration:'turn',placement:'internal'},
    {key:'次の攻撃ダイス6',type:'toggle'},
    {key:'自己主張なし攻撃補正',type:'number',min:-2,max:2},
-   {key:'自己主張なし防御補正',type:'number',min:-2,max:2},
-   {key:'自己主張なし移動補正',type:'number',min:-2,max:2}
+   {key:'自己主張なし防御補正',type:'number',min:-2,max:2}
   ],
   modifiers:[
    {target:'atk',formula:'per_stack',source:'自己主張なし攻撃補正',value:1},
-   {target:'def',formula:'per_stack',source:'自己主張なし防御補正',value:1},
-   {target:'move',formula:'per_stack',source:'自己主張なし移動補正',value:1}
+   {target:'def',formula:'per_stack',source:'自己主張なし防御補正',value:1}
   ]
  },
  '15':{
