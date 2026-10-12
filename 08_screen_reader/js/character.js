@@ -587,14 +587,15 @@
    const before=partySlots.map(id=>id===null?null:String(id)).join(',');
    if(!selectedCharacter){if(!self)return {updated:0,added:0};selectCharacter(self);}
    if(self&&String(self.id)!==String(selectedCharacter.id)){
-    const oldId=String(selectedCharacter.id),oldIndex=partySlots.findIndex(id=>String(id)===oldId),old=state(),oldMax=calculate().hp;
+    const oldId=String(selectedCharacter.id),oldIndex=partySlots.findIndex(id=>String(id)===oldId),newIndex=partySlots.findIndex(id=>String(id)===String(self.id)),old=state(),oldMax=calculate().hp;
     const oldMember={level:old.level,currentHp:old.currentHp,chips:[...old.chips],manual:{...old.manual},screenMaxHp:old.screenMaxHp===undefined?undefined:oldMax,screenCoin:old.screenCoin};
     partyStates.set(oldId,oldMember);if(oldMember.screenMaxHp!==undefined)oldMember.screenMaxHpBasis=calculatePartyMember(selectedCharacter,true);
     const fromParty=partyStates.get(String(self.id)),newMax=fromParty?calculatePartyMember(self).hp:null;if(fromParty)Object.assign(getState(self.id),{...fromParty,manual:{...fromParty.manual},chips:[...fromParty.chips]});
     partyStates.delete(String(self.id));selectedCharacter=self;partyEditId=null;
     if(fromParty?.screenMaxHp!==undefined){state().screenMaxHp=newMax;state().screenMaxHpBasis=calculate(true);}
     for(let i=0;i<4;i++)if(String(partySlots[i])===String(self.id))partySlots[i]=null;
-    partySlots[oldIndex<0?0:oldIndex]=self.id;
+    // A known PT member becoming self keeps the observed party order.
+    partySlots[newIndex>=0?newIndex:oldIndex<0?0:oldIndex]=self.id;
     window.dispatchEvent(new Event('character-selection-change'));
    }
    const ownId=String(selectedCharacter.id),knownSlots=seen.filter(m=>valid(m.slot,0,3));
