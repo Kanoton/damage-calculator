@@ -318,6 +318,8 @@ test('08: results distinguish new readings, retained fields, stability waiting a
  await page.locator('#reader-apply').uncheck();await page.locator('#reader-read').click();await expect(page.locator('#reader-result-body')).toContainText('確認のみ');
  await page.locator('#reader-apply').check();const before=await snapshot(page);await page.evaluate(()=>ScreenReaderController.read(true));await expect(page.locator('#reader-result-body')).toContainText('安定待ち');expect(await snapshot(page)).toEqual(before);
  await page.evaluate(()=>ScreenReaderController.read(true));await expect(page.locator('#reader-result-body [data-state="pending"]')).toHaveCount(0);await expect(page.locator('#reader-result-body [data-state="read"]')).not.toHaveCount(0);
+ await page.evaluate(()=>{const original=ScreenReaderVision.analyze;ScreenReaderVision.analyze=source=>{const o=original(source);delete o.members[0].id;o.members[0].currentHp=1;return o;};});
+ await page.locator('#reader-read').click();const first=page.locator('#reader-result-body tr').first();await expect(first.locator('td').nth(3)).toContainText('9');await expect(first.locator('td').nth(3).locator('[data-state="held"]')).toHaveCount(2);expect((await snapshot(page)).members[0].currentHp).toBe(9);
  await page.screenshot({path:'test-results/08-reader-field-states.png',fullPage:true});
 });
 

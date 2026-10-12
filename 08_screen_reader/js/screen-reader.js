@@ -46,7 +46,7 @@
    const value=key=>{
     const field=document.createElement('span'),number=document.createElement('span'),label=document.createElement('small');field.className='reader-field';
     let state,text;
-    if(m[key]!==undefined){number.textContent=String(m[key]);state=automatic&&confirmed?.[key]===undefined?'pending':!apply?'preview':held?.[key]===m[key]?'read':'rejected';text={pending:'安定待ち',read:'今回',preview:'確認のみ',rejected:'反映保留'}[state];}
+    if(m.id&&m[key]!==undefined){number.textContent=String(m[key]);state=automatic&&confirmed?.[key]===undefined?'pending':!apply?'preview':held?.[key]===m[key]?'read':'rejected';text={pending:'安定待ち',read:'今回',preview:'確認のみ',rejected:'反映保留'}[state];}
     else if(held?.[key]!==undefined){number.textContent=String(held[key]);state='held';text='保持';}
     else {number.textContent='—';state='unknown';text='未判定';}
     field.dataset.state=state;label.textContent=text;field.append(number,label);
