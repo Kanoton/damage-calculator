@@ -1418,3 +1418,47 @@ test('07 party chip HP gains affect only the chip owner',async({page})=>{
  await page.locator('.chip-select[data-id="1"]').click();await expect(hp).toHaveText('10/11');
  await page.locator('.chip-select[data-id="7"]').click();await expect(hp).toHaveText('9/9');
 });
+
+async function acquireEffectChip(page,id,map){
+ if(map){await page.locator('#mp-map-select').selectOption(map);await selectChipCategory(page,'マップ固有');}
+ else await selectChipCategory(page,'共通');
+ await page.locator('.chip-select[data-id="'+id+'"]').click();
+}
+for(const protocol of ['http','file'])test('07 chip reductions: HP and Mind boundaries, Snake expiry and Undo '+protocol,async({page})=>{
+ await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve('07_skill/index.html')).href:'/07_skill/');await selectCharacter(page,'1');
+ const hp=page.locator('#selected-character-current-hp'),reduce=page.locator('#damageReduce2');
+ await acquireEffectChip(page,'13');await hp.fill('4');await hp.dispatchEvent('change');await expect(reduce).toHaveValue('1');
+ await hp.fill('5');await hp.dispatchEvent('change');await expect(reduce).toHaveValue('0');
+ await acquireEffectChip(page,'205','MAP0101');const mind=page.getByLabel('マインドの数',{exact:true});
+ for(const [value,expected] of [[0,1],[3,1],[4,0]]){await mind.fill(String(value));await mind.dispatchEvent('change');await expect(reduce).toHaveValue(String(expected));}
+ await acquireEffectChip(page,'206','MAP0101');await acquireEffectChip(page,'145','MAP0005');
+ const snake=page.getByRole('button',{name:/^蛇のぬいぐるみ：/});await snake.click();await expect(reduce).toHaveValue('2');
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#turn-end').click();await expect(mind).toHaveValue('3');await expect(reduce).toHaveValue('1');await expect(snake).toHaveAttribute('aria-pressed','false');
+ await page.locator('#roster-undo').click();await expect(mind).toHaveValue('4');await expect(reduce).toHaveValue('2');await expect(snake).toHaveAttribute('aria-pressed','true');
+});
+for(const protocol of ['http','file'])test('07 Great Bell: skill activation, party toggle, no stacking, expiry and Undo '+protocol,async({page})=>{
+ await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve('07_skill/index.html')).href:'/07_skill/');await selectCharacter(page,'1');
+ const atk=page.locator('#selected-character-atk'),reduce=page.locator('#damageReduce2'),base=Number(await atk.inputValue());
+ await acquireEffectChip(page,'121','MAP0003');await expect(page.getByRole('button',{name:/^大鉦：/})).toHaveCount(0);
+ await page.locator('#selected-character-skill').click();await expect(atk).toHaveValue(String(base+1));await expect(reduce).toHaveValue('1');
+ await page.locator('#selected-party-tab').click();await page.locator('#character-list-tab').click();await page.locator('.character-select[data-id="2"]').click();await page.locator('.party-member-slot[data-character-id="2"] .party-slot-name').click();
+ await acquireEffectChip(page,'121','MAP0003');await page.locator('#selected-self-tab').click();
+ const bell=page.getByRole('button',{name:/^PT大鉦：/});await bell.click();await expect(atk).toHaveValue(String(base+1));await expect(reduce).toHaveValue('1');
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#turn-end').click();await expect(atk).toHaveValue(String(base));await expect(reduce).toHaveValue('0');await expect(bell).toHaveAttribute('aria-pressed','false');
+ await page.locator('#roster-undo').click();await expect(atk).toHaveValue(String(base+1));await expect(reduce).toHaveValue('1');
+ await page.locator('.role-tab[data-role="character"]').click();await bell.click();await expect(reduce).toHaveValue('1');
+ await acquireEffectChip(page,'121','MAP0003');await expect(reduce).toHaveValue('0');await bell.click();await expect(reduce).toHaveValue('1');
+});
+for(const protocol of ['http','file'])test('07 dice chips: own 1/6 dice and attack fixed six share grid and card probabilities '+protocol,async({page})=>{
+ await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve('07_skill/index.html')).href:'/07_skill/');await selectCharacter(page,'1');await acquireEffectChip(page,'142','MAP0005');
+ const results=await page.evaluate(()=>['attack','defense'].map(role=>{
+  const c=document.querySelector('.mode-content[data-role="'+role+'"]'),dice=getCombatDiceValues(c);
+  const grid=calculateDefenseDamageGrid(7,3,0,0,10,false,false,false,null,{attackDice:dice.attack,defenseDice:dice.defense});
+  const cards=calculateCardAwareDamage(c,7,3,0,0,10,role==='defense');
+  return {role,dice,count:grid.totalCombinations,mean:grid.totalDamage/grid.totalCombinations,cardMean:cards.expectedDamage,sum:[...cards.damageCounts.values()].reduce((a,b)=>a+b,0)};
+ }));
+ expect(results[0].dice).toEqual({attack:[1,6],defense:[1,2,3,4,5,6]});expect(results[1].dice).toEqual({attack:[1,2,3,4,5,6],defense:[1,6]});
+ for(const r of results){expect(r.count).toBe(12);expect(r.sum).toBeCloseTo(1);expect(r.cardMean).toBeCloseTo(r.mean);}
+ await acquireEffectChip(page,'144','MAP0005');expect(await page.evaluate(()=>getCombatDiceValues(document.querySelector('.mode-content[data-role="attack"]')).attack)).toEqual([6]);
+ await page.locator('.chip-select[data-id="142"]').click();const values=await page.evaluate(()=>['attack','defense'].map(role=>getCombatDiceValues(document.querySelector('.mode-content[data-role="'+role+'"]'))));expect(values[0].attack).toEqual([6]);expect(values[1].defense).toEqual([1,2,3,4,5,6]);
+});

@@ -12,6 +12,7 @@ class Element{
  replaceChildren(...children){this.children=[];this.append(...children);}
  setAttribute(key,value){this.attributes[key]=String(value);}
  addEventListener(){}
+ querySelector(tag){return this.children.find(child=>child.tagName===tag)||null;}
  get textContent(){return this._text+this.children.map(c=>c.textContent||'').join('');}
  set textContent(value){this._text=String(value);this.children=[];}
 }
@@ -37,6 +38,7 @@ exec(section(character,'function updateActiveSkillUi(','\n function updateStats'
 exec(section(character,'const activeSkillMaxCooldown=','\n const activeEffectConditionMatches'));
 exec(section(character,'function toggleable(','\n function updateChipListSelection'));
 context.updateStats=()=>{};
+context.partyChipIds={};context.getPartyState=id=>({chips:context.partyChipIds[id]||[]});
 context.byChip=new Map(chips.map(c=>[c.id,chipRules.filter(r=>r.chip_id===c.id)]));
 context.abilityRules=()=>rules[String(context.selectedCharacter.id)];
 context.state=()=>context.currentState;
@@ -81,6 +83,12 @@ for(const donor of ['8','103','104','20','27','105','23','10','11']){
   if(d.type==='ボタン'&&d.key!=='PTパンダマン回復＋2'){const values=d.key==='潜入調査'?[1,2,3]:[1];for(const value of values){const active=render('1',{[d.key]:value},[donor]).find(e=>describe(e).key===d.key);capture(`pt:${donor}:${d.key}:${value}`,'PT受領',donor,'自キャラ状態欄',condition,active,d.key==='潜入調査'?'フェーズ値 '+value:'オン');}}
  }
 }
+context.partyChipIds={'2':['121']};
+for(const value of [0,1]){
+ const element=render('1',{'PT大鉦':value},['2']).find(e=>describe(e).key==='PT大鉦');
+ capture('pt:chip:121:'+value,'PT受領','2','自キャラ状態欄','PTメンバーが大鉦を所持。効果は手動確認、ターン終了で解除',element,value?'オン':'オフ');
+}
+context.partyChipIds={};
 const blessing=render('106',{},['105']).find(e=>describe(e).key==='PTハンナ推理タイム＋1');capture('pt:105:blessing:106','PT受領','105','橘シェリーの状態欄','自キャラが橘シェリー、PTに遠野ハンナ／受領移動状態が残る間',blessing,'通常','aria-labelはPTハンナ推理タイム＋1。人形完成と祝福は別操作');
 for(const id of ['16','26','23']){
  const specs=id==='23'?exec(character.match(/container\.append\(sourceInput\((\{key:'三神憑依攻撃補正'.*?\})\),sourceInput\((\{key:'三神憑依防御補正'.*?\})\)\)/).slice(1).join(',').replace(/^/,'[').replace(/$/,']')):rules[id].activeSkills[0].inputStats;
