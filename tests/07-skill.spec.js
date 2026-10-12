@@ -149,7 +149,8 @@ test('07 skill: Sykes clears all erosion at turn end even when hidden, including
 
 test('07 skill: Padman signed adjustments clamp independently and use the confirmed icon',async({page})=>{
  await page.goto('/07_skill/');await selectCharacter(page,'6');
- const configs=[['攻撃','atk'],['防御','def'],['移動','move']];
+ const configs=[['攻撃','atk'],['防御','def']];
+ await expect(page.getByLabel('自己主張なし移動補正の数')).toHaveCount(0);
  for(const [name,stat] of configs){
   const key='自己主張なし'+name+'補正',input=page.getByLabel(key+'の数'),button=page.getByRole('button',{name:key+'を増やす',exact:true});
   await expect(input).toHaveValue('0');await expect(input).toHaveAttribute('min','-2');await expect(input).toHaveAttribute('max','2');
@@ -174,7 +175,7 @@ test('07 skill: Padman signed adjustments clamp independently and use the confir
 test('07 skill: Padman icon fallback works when the status CSV cannot be fetched',async({page})=>{
  await page.route('**/csv/status_icon_map_all.csv',route=>route.abort());
  await page.goto('/07_skill/');await selectCharacter(page,'6');
- for(const stat of ['攻撃','防御','移動']){
+ for(const stat of ['攻撃','防御']){
   await expect(page.getByRole('button',{name:'自己主張なし'+stat+'補正を増やす',exact:true}).locator('img')).toHaveAttribute('src','../images/UT_Buff/'+({'攻撃':'Attack.png','防御':'Defense.png','移動':'run.png'})[stat]);
  }
 });
