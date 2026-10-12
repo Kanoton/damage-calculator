@@ -157,3 +157,7 @@ npm run test:06b
 `npm run check:07` は生成一致・差し込み処理・script構文を確認します。対応確認用の418行は `docs/hover-descriptions/inventory.csv`、編集方法は同フォルダの `README.md`。`node scripts/export-07-hover-inventory.js` で再生成し、`--check` で一致を確認します。旧一覧のID単位の修正文・メモを保持しますが、今後の編集元は167行の正本です。抽出はオフライン表示処理で、全キャラCT巡回・PT総当たり検証ではありません。
 
 横長・モバイルの共通テスト操作と入力枠の配置確認は `test-helpers/07-ui.js` に置きます。画面固有のタップ・起動条件・検証は各specへ残し、共通ヘルパー変更時も両CIを起動します。
+
+## 14. v1p3保存版
+
+`v1p3/` はmain `4f78ebc` の `07_skill/` を29ファイルそのままコピーした保存版です。開発対象は引き続き07。保存版を自動同期・上書きせず、変更する場合はユーザーの指示を確認します。親の共有CSV・画像を参照するため、当時の一式を再現するにはGitタグ `v1p3` を使用します。コピーのハッシュ正本は `docs/releases/v1p3.json`、検証は `node scripts/check-v1p3-snapshot.js` と `npx playwright test --config=playwright.snapshot.config.js`。初回main反映後のCI成功でタグを作成し、既存タグは移動しません。
