@@ -1,0 +1,47 @@
+name: v1p3 snapshot verification
+on:
+  pull_request:
+    paths: ['v1p3/**', 'docs/releases/v1p3.json', 'scripts/check-v1p3-snapshot.js', 'snapshot-tests/**', 'test-helpers/**', 'playwright.snapshot.config.js', '.github/workflows/v1p3-snapshot.yml']
+  push:
+    branches: [main]
+    paths: ['v1p3/**', 'docs/releases/v1p3.json', 'scripts/check-v1p3-snapshot.js', 'snapshot-tests/**', 'test-helpers/**', 'playwright.snapshot.config.js', '.github/workflows/v1p3-snapshot.yml']
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: node scripts/check-v1p3-snapshot.js
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npx playwright test --config=playwright.snapshot.config.js
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v1p3-snapshot-results
+          path: |
+            snapshot-test-report.json
+            snapshot-test-results/
+          retention-days: 14
+  tag:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: verify
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Create v1p3 tag without moving an existing tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/v1p3" > "$RUNNER_TEMP/v1p3-ref.json"; then
+            echo "v1p3 already exists; preserving its target."
+            jq -r '.object.sha' "$RUNNER_TEMP/v1p3-ref.json"
+          else
+            gh api --method POST "repos/$GITHUB_REPOSITORY/git/refs" -f ref=refs/tags/v1p3 -f sha="$GITHUB_SHA" --jq '.ref'
+          fi
