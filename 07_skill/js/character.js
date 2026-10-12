@@ -59,8 +59,8 @@
   return 0;
  };
  window.getCharacterActiveSkillEffects=skillKey=>{const skill=activeSkill();return skill?.key===skillKey?(skill.effects||[]).map(effect=>({...effect,...(effect.type==='damage_monster'&&effect.sourceStat?{value:calculate()[effect.sourceStat]+(Number(effect.offset)||0)}:{})})):[];};
- window.captureCharacterAbilityState=()=>selectedCharacter?{id:selectedCharacter.id,numbers:{...state().numbers},skillCooldowns:{...state().skillCooldowns},activeEffects:(state().activeEffects||[]).map(effect=>({...effect})),currentHp:state().currentHp,maxHpBonus:Number(state().maxHpBonus)||0,controlMaxBonuses:{...state().controlMaxBonuses}}:null;
- window.restoreCharacterAbilityState=snapshot=>{if(!snapshot)return;const target=getState(snapshot.id);if(Object.hasOwn(snapshot,'currentHp'))target.currentHp=snapshot.currentHp;target.numbers={...snapshot.numbers};target.skillCooldowns={...snapshot.skillCooldowns};target.activeEffects=(snapshot.activeEffects||[]).map(effect=>({...effect}));target.maxHpBonus=Number(snapshot.maxHpBonus)||0;target.controlMaxBonuses={...target.controlMaxBonuses,...snapshot.controlMaxBonuses};if(selectedCharacter?.id===snapshot.id){renderConditions();updateStats();}};
+ window.captureCharacterAbilityState=()=>selectedCharacter?{id:selectedCharacter.id,numbers:{...state().numbers},modes:{...state().modes},skillCooldowns:{...state().skillCooldowns},activeEffects:(state().activeEffects||[]).map(effect=>({...effect})),currentHp:state().currentHp,maxHpBonus:Number(state().maxHpBonus)||0,controlMaxBonuses:{...state().controlMaxBonuses}}:null;
+ window.restoreCharacterAbilityState=snapshot=>{if(!snapshot)return;const target=getState(snapshot.id);if(Object.hasOwn(snapshot,'currentHp'))target.currentHp=snapshot.currentHp;target.numbers={...snapshot.numbers};if(snapshot.modes)target.modes={...snapshot.modes};target.skillCooldowns={...snapshot.skillCooldowns};target.activeEffects=(snapshot.activeEffects||[]).map(effect=>({...effect}));target.maxHpBonus=Number(snapshot.maxHpBonus)||0;target.controlMaxBonuses={...target.controlMaxBonuses,...snapshot.controlMaxBonuses};if(selectedCharacter?.id===snapshot.id){renderConditions();updateStats();}};
  const modeFor=rule=>Number(state().modes[rule.chip_id])||0;
  const base=(stat)=>Number(selectedCharacter['lv'+state().level+'_'+stat]||0);
  function activeRules(){
@@ -108,7 +108,7 @@
   state().currentHp=Math.max(0,Math.min(maxHp,Number(state().currentHp)||0));
   const result={atk:base('atk'),def:base('def'),move:base('move'),hp:maxHp,damageReduce:0,damageAdd:(currentOpponent?.markStacks>0?1:0)+(currentOpponent?.fateEchoStacks>0?1:0)+(Number(currentOpponent?.erosionStacks)||0)};
   for(const rule of active){
-   if(!['atk','def','move'].includes(rule.target))continue;
+   if(!['atk','def','move','damageReduce'].includes(rule.target))continue;
    if(!triggerMatches(rule)||!conditionMatches(rule,maxHp))continue;
    result[rule.target]+=valueOf(rule,maxBonus);
   }
@@ -116,6 +116,7 @@
    if(['atk','def','move','damageReduce'].includes(rule.target))result[rule.target]+=abilityModifierValue(rule,maxHp);
   }
   for(const stat of ['atk','def','move'])result[stat]+=activeSkillStatBonus(stat);
+  if(abilityControlValue('PT大鉦')&&!(state().chips.includes('121')&&state().modes['121'])){result.atk+=1;result.damageReduce+=1;}
   for(const c of partySupportControls)if(c.stat){const amount=c.number?abilityControlValue(c.key):(abilityControlValue(c.key)?(c.marked?(Number(currentOpponent?.markStacks)||0):c.value):0);result[c.stat]+=amount;}
   if(String(selectedCharacter?.id)==='106'&&abilityControlValue('PTハンナ親友の祝福')&&!abilityControlValue('PTハンナ次の移動'))result.move+=2;
   for(const rule of mapKeywords.filter(row=>row.map_id===mapPicker.value)){
@@ -164,6 +165,12 @@
  ];
  function renderPartySupport(){
   const donors=new Set(partySlots.filter(id=>String(id)!==String(selectedCharacter?.id)).map(String));
+  const bellDonor=[...donors].some(id=>getPartyState(id).chips.includes('121'));
+  if(bellDonor||abilityControlValue('PT大鉦')){
+   const chip=chips.find(row=>row.id==='121'),icon=createOwnedChipView(chip,null,()=>{}).querySelector('img');
+   const active=!!abilityControlValue('PT大鉦');
+   conditionsBox.append(createCharacterAbilityToggleView('PT大鉦',active,icon,()=>{window.rememberCharacterSkillActivation?.();state().numbers['PT大鉦']=active?0:1;renderConditions();updateStats();}));
+  }
   for(const c of partySupportControls){
    if(c.key==='反撃'&&String(selectedCharacter?.id)==='8')continue;
    if(abilityRules()?.controls?.some(control=>control.key===c.key))continue;
@@ -349,7 +356,8 @@
   if(!totals)return;
   document.querySelector('[data-role="attack"].mode-content').dataset.ignoreDefenseOnAttackSix=String(Boolean(abilityRules()?.ignoreDefenseOnAttackSix));
   const attackMode=document.querySelector('[data-role="attack"].mode-content'),defenseMode=document.querySelector('[data-role="defense"].mode-content');
-  attackMode.dataset.fixedAttackDice=String(String(selectedCharacter.id)==='6'&&abilityControlValue('次の攻撃ダイス6')?6:0);
+  attackMode.dataset.fixedAttackDice=String(state().chips.includes('144')||String(selectedCharacter.id)==='6'&&abilityControlValue('次の攻撃ダイス6')?6:0);
+  attackMode.dataset.selfDiceOneSix=defenseMode.dataset.selfDiceOneSix=String(state().chips.includes('142'));
   defenseMode.dataset.moses=String(String(selectedCharacter.id)==='24');
   defenseMode.dataset.evadeMinimum=String(String(selectedCharacter.id)==='24'?1+abilityControlValue('精確無比'):1);
   if(String(selectedCharacter.id)!=='24')defenseMode.dataset.evadeTable='false';
@@ -384,7 +392,7 @@
   state().manual[stat]=desired-(current-previous);
   updateStats();
  });
- function toggleable(id){return (byChip.get(id)||[]).some(rule=>{
+ function toggleable(id){if(id==='121')return false;return (byChip.get(id)||[]).some(rule=>{
   if(!['modifier','event_modifier'].includes(rule.kind))return false;
   if(['on_skill_use','while_checked'].includes(rule.trigger))return true;
   const condition=rule.condition;
@@ -597,6 +605,7 @@
   window.dispatchEvent(new CustomEvent('character-skill-target-request',{detail:{target:skill.target,skillKey:skill.key,label:skill.label,characterId:selectedCharacter.id,multipleTargets:!!skill.multipleTargets,attackAfterSkill:String(selectedCharacter.id)==='9'&&calculate().atk>=7}}));
  }
  function applyActiveSkillEffects(skill){
+  if(state().chips.includes('121'))state().modes['121']=1;
   state().activeEffects=(state().activeEffects||[]).filter(effect=>effect.source!==skill.key);
   // Decide conditional branches before any effect changes its source control.
   const effects=(skill.effects||[]).filter(activeEffectAllowed);
@@ -646,7 +655,7 @@
       const member=chipOwnerState(),owner=characters.find(item=>String(item.id)===String(partyEditId));
       if(member.chips.includes(row.id))member.chips=member.chips.filter(id=>id!==row.id);
       else {const oldMax=calculatePartyMember(owner).hp,oldHp=member.currentHp;member.chips.push(row.id);const newMax=calculatePartyMember(owner).hp;member.currentHp=Math.min(newMax,oldHp+Math.max(0,newMax-oldMax));}
-      renderParty();return;
+      renderConditions();updateStats();return;
      }
      chipStatus.textContent='';
      if(state().chips.includes(row.id)){
@@ -679,8 +688,10 @@
  applyCharacterTurnStartEffects=()=>{
   if(!selectedCharacter)return;
   let changed=false;
+  for(const id of ['121','145'])if(state().modes[id]){state().modes[id]=0;changed=true;}
+  if(state().chips.includes('206')&&number(state(),'マインド')>0){state().numbers['マインド']=number(state(),'マインド')-1;changed=true;}
   for(const key of Object.keys(state().skillCooldowns)){const current=Number(state().skillCooldowns[key])||0;if(current>0){state().skillCooldowns[key]=current-1;changed=true;}}
-  for(const key of ['PTカクテル攻撃','PTカクテル防御','PTドロシー攻撃','PTユメ攻撃補正','PT潜伏'])if(state().numbers[key]){state().numbers[key]=0;changed=true;}
+  for(const key of ['PT大鉦','PTカクテル攻撃','PTカクテル防御','PTドロシー攻撃','PTユメ攻撃補正','PT潜伏'])if(state().numbers[key]){state().numbers[key]=0;changed=true;}
   for(const control of abilityRules()?.controls||[])if(control.duration==='turn'&&state().numbers[control.key]){state().numbers[control.key]=0;changed=true;}
   const beforeEffects=state().activeEffects.length;
   state().activeEffects=state().activeEffects.filter(effect=>effect.duration!=='turn').map(effect=>effect.durationTurns?{...effect,durationTurns:effect.durationTurns-1}:effect).filter(effect=>effect.durationTurns===undefined||effect.durationTurns>0);

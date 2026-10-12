@@ -503,6 +503,10 @@ HPを回復する時、「温もり」を+1。
 "pt:23:PTテル狐光:base","PT受領","23","テル","自キャラ状態欄","自キャラは受領側（抽出例ミミ）、PTにテル。受領状態が残ればPT解除後も表示される場合あり","PTテル狐光","数値入力","初期表示","UT_Buff/UT_Buff_124.png","ゲームで確認した狐光。カードの所持・使用は管理しません","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "pt:10:PTパンダマン回復＋2:base","PT受領","10","パンダマン","自キャラ状態欄","自キャラは受領側（抽出例ミミ）、PTにパンダマン","PTパンダマン回復＋2","ボタン","初期表示","UT_Buff/UT_Buff_Heal.png","PTパンダマン回復＋2：ゲームで発生した回復を自キャラへ反映（最大HPまで）。範囲・通過は手動確認","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "pt:11:ヒール:base","PT受領","11","ルル","自キャラ状態欄","自キャラは受領側（抽出例ミミ）、PTにルル。受領状態が残ればPT解除後も表示される場合あり","ヒール","数値入力","初期表示","UT_Buff/UT_Buff_Heal.png","ヒール：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
+"pt:chip:121:0","PT受領","2","パルナン","自キャラ状態欄","PTメンバーが大鉦を所持。効果は手動確認、ターン終了で解除","PT大鉦","ボタン","オフ","chip_icon/121_大鉦.png","PT大鉦：オフ
+クリックで切り替え","","","07_skill/js/character.js:renderConditions / character-view.js",""
+"pt:chip:121:1","PT受領","2","パルナン","自キャラ状態欄","PTメンバーが大鉦を所持。効果は手動確認、ターン終了で解除","PT大鉦","ボタン","オン","chip_icon/121_大鉦.png","PT大鉦：オン
+クリックで切り替え","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "pt:105:blessing:106","PT受領","105","遠野ハンナ","橘シェリーの状態欄","自キャラが橘シェリー、PTに遠野ハンナ／受領移動状態が残る間","PTハンナ推理タイム＋1","ボタン","通常","UT_Buff/UT_Platform_305.png","親友の祝福：次の移動力＋2（人形完成と重複しない）、推理タイム＋1（最大4、ターン終了で−1）。移動後は右クリックで移動補正を解除","","aria-labelはPTハンナ推理タイム＋1。人形完成と祝福は別操作","07_skill/js/character.js:renderConditions / character-view.js",""
 "input:16:オーバードライブ出目","スキル入力","16","ジャスミン","スキル入力枠","自キャラがジャスミン、スキルボタン押下後","オーバードライブのダイスの出目","数値入力","通常","","オーバードライブのダイスの出目","","現在のtitleは入力対象名のみ","07_skill/js/character.js:sourceInput",""
 "input:26:吸収した影","スキル入力","26","スミカゲ","スキル入力枠","自キャラがスミカゲ、スキルボタン押下後","吸収した影の数","数値入力","通常","","吸収した影の数","","現在のtitleは入力対象名のみ","07_skill/js/character.js:sourceInput",""
@@ -809,10 +813,6 @@ HPが満タン時、攻撃力+4、それに加えて攻撃時に【ヒール】�
 スキル使用後、4マス以内の全キャラクターの攻撃力+1、受けるダメージ-1、1ターン継続。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:121:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","大鉦","チップ表示","通常","chip_icon/121_大鉦.png","大鉦
 スキル使用後、4マス以内の全キャラクターの攻撃力+1、受けるダメージ-1、1ターン継続。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
-"chip:121:toggle:0","チップ","","共通","自キャラ状態欄","該当チップ所持、条件切替対象","大鉦","ボタン","モード 0","chip_icon/121_大鉦.png","大鉦：オフ
-クリックで条件を切り替え","","","07_skill/js/character-view.js:createChipConditionToggleView",""
-"chip:121:toggle:1","チップ","","共通","自キャラ状態欄","該当チップ所持、条件切替対象","大鉦","ボタン","モード 1","chip_icon/121_大鉦.png","大鉦：オン
-クリックで条件を切り替え","","","07_skill/js/character-view.js:createChipConditionToggleView",""
 "chip:122:owned","チップ","","お年玉","自キャラ所持チップ","該当チップ所持","お年玉","所持表示","通常","chip_icon/122_お年玉.png","お年玉
 爆竹使用後、カード使用数+1。振り込み後、爆竹を1枚獲得。爆竹3枚使用するごとに、全キャラクターにランダムで最大3種類の新春祝福を獲得。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:122:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","お年玉","チップ表示","通常","chip_icon/122_お年玉.png","お年玉

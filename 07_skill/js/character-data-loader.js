@@ -34,7 +34,14 @@ async function loadCharacterData({listStatus,chipStatus,statusIconSnapshot}){
   }
   return new Map(parseMapCSV(csv).filter(row=>row.id&&/^UT_Hero_Card2_[\w]+\.png$/.test(row.hero_card_img)).map(row=>[row.id,row.hero_card_img]));
  }
- const [characters,chips,rules,icons,characterSkills,cardImages]=await Promise.all([load('characters','character_stats.csv',listStatus),load('chips','chip_list.csv',chipStatus),loadRules(),loadStatusIcons(),loadCharacterSkills(),loadCharacterCardImages()]);
+ const [characters,chips,baseRules,icons,characterSkills,cardImages]=await Promise.all([load('characters','character_stats.csv',listStatus),load('chips','chip_list.csv',chipStatus),loadRules(),loadStatusIcons(),loadCharacterSkills(),loadCharacterCardImages()]);
+ // 07-only additions keep shared CSV and the screen-reader generation unchanged.
+ const rules=[...baseRules,...[
+  ['13','1','hp_ratio<0.5','while_owned'],
+  ['121','1','','on_skill_use'],
+  ['145','2','被ダメージ後','while_owned'],
+  ['205','1','マインド<=3','while_owned']
+ ].map(([chip_id,value,condition,trigger])=>({rule_id:'07-reduce-'+chip_id,chip_id,kind:'modifier',target:'damageReduce',formula:'fixed',value,source_key:'',source_cap:'',condition,trigger}))];
  for(const row of characters)row.hero_card_img=cardImages.get(String(row.id))||'';
  return {characters,chips,rules,statusIcons:icons.statusIcons,mapKeywords:icons.mapKeywords,characterSkills};
 }

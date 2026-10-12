@@ -4,11 +4,11 @@
     "スキル": 70,
     "能力全文": 35,
     "自キャラ": 44,
-    "PT受領": 24,
+    "PT受領": 26,
     "スキル入力": 4,
     "モンスター状態": 7,
     "共通・マップ": 8,
-    "チップ": 200,
+    "チップ": 198,
     "共通・チップ": 16,
     "共通パラメータ": 10
   },
@@ -16,7 +16,7 @@
   "sourceHashes": {
     "07_skill/data/hover-descriptions.csv": "eabad34df46e6dc66d374667e12c02c852b6b0ab564c5b0e292a6bbb94a22292",
     "07_skill/js/hover-text.js": "753d5e5067857dc1c1522d50c015a376610b7972cbdf44372f19a96ffa4cccb3",
-    "07_skill/js/character.js": "f160b561d5adda441ffd3bf8360c88a1a35dcd6604429fe34d040547a32c18b6",
+    "07_skill/js/character.js": "5f89c3fbd823f85332b093cc19331cafa0c9fcef1f2f419666a3dd791a49f374",
     "07_skill/js/character-view.js": "8cec516cc218501c940fd76e9aa3db91049ae47769a67d8597a1a9584f2aac49",
     "07_skill/js/character-ability-rules.js": "c47d73091a1d2ba60cad03bc9236eb1d989bcee7b389005052545f35fdf3fab7",
     "07_skill/js/roster-view.js": "9ec9f103a18237541ce3fc5f862dd31afeca4e9db91770d3d95ea770504f43a9",
