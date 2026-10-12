@@ -154,10 +154,12 @@ npm run test:06b
 
 07の説明文の正本は `07_skill/data/hover-descriptions.csv`（167行）です。説明文の列だけを編集し、`node scripts/build-07-hover-text.js` で同期script `js/hover-text.js` を生成します。生成JSは手編集せず、CSVと同時にコミットしてください。HTTP／file://はこの同じデータを読み、旧能力全文snapshotや共有CSVの文章にはフォールバックしません。キャラ・チップの数値、アイコン、ゲームルール等の既存フォールバックは保持します。共有 `csv/` と08の説明表示は従来どおりです。
 
-`npm run check:07` は生成一致・差し込み処理・script構文を確認します。対応確認用の418行は `docs/hover-descriptions/inventory.csv`、編集方法は同フォルダの `README.md`。`node scripts/export-07-hover-inventory.js` で再生成し、`--check` で一致を確認します。旧一覧のID単位の修正文・メモを保持しますが、今後の編集元は167行の正本です。抽出はオフライン表示処理で、全キャラCT巡回・PT総当たり検証ではありません。
+`npm run check:07` は生成一致・差し込み処理・script構文を確認します。対応確認用の417行は `docs/hover-descriptions/inventory.csv`、編集方法は同フォルダの `README.md`。`node scripts/export-07-hover-inventory.js` で再生成し、`--check` で一致を確認します。旧一覧のID単位の修正文・メモを保持しますが、今後の編集元は167行の正本です。抽出はオフライン表示処理で、全キャラCT巡回・PT総当たり検証ではありません。
 
 横長・モバイルの共通テスト操作と入力枠の配置確認は `test-helpers/07-ui.js` に置きます。画面固有のタップ・起動条件・検証は各specへ残し、共通ヘルパー変更時も両CIを起動します。
 
 ## 14. v1p3保存版
 
 `v1p3/` はmain `4f78ebc` の `07_skill/` を29ファイルそのままコピーした保存版です。開発対象は引き続き07。保存版を自動同期・上書きせず、変更する場合はユーザーの指示を確認します。親の共有CSV・画像を参照するため、当時の一式を再現するにはGitタグ `v1p3` を使用します。コピーのハッシュ正本は `docs/releases/v1p3.json`、検証は `node scripts/check-v1p3-snapshot.js` と `npx playwright test --config=playwright.snapshot.config.js`。初回main反映後のCI成功でタグを作成し、既存タグは移動しません。
+
+2026-10-12、ユーザーの明示指示で07/v1p3へパッドマンの移動補正削除とシェリーの支援移動補正のターン終了解除を同時適用。保存版ハッシュを更新し、初回保存のGitタグv1p3は保持します。公開フォルダはこの修正を含み、タグとは異なります。

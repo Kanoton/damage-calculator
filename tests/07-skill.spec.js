@@ -1045,7 +1045,7 @@ test('07 PT support: confirmed KAngel fan debuff is permanent once-only and undo
 
 test('07 PT support: Hanna next movement is manually consumed; Sherry reasoning stacks and expires',async({page})=>{
  await page.goto('/07_skill/');await selectCharacter(page,'106');await registerSupport(page,'105');const atk=Number(await page.locator('#attackPower1').inputValue());await page.getByRole('button',{name:'PTハンナ推理タイム＋1'}).click();expect(Number(await page.locator('#attackPower1').inputValue())).toBe(atk+1);
- const move=page.getByRole('button',{name:/^PTハンナ次の移動：/});await move.click();expect((await page.evaluate(()=>captureCharacterAbilityState())).numbers['PTハンナ次の移動']).toBe(1);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#turn-end').click();expect(Number(await page.locator('#attackPower1').inputValue())).toBe(atk);await page.locator('.role-tab.character-tab').click();await expect(move).toHaveAttribute('aria-pressed','true');await move.click();await expect(move).toHaveAttribute('aria-pressed','false');
+ const move=page.getByRole('button',{name:/^PTハンナ次の移動：/});await move.click();expect((await page.evaluate(()=>captureCharacterAbilityState())).numbers['PTハンナ次の移動']).toBe(1);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#turn-end').click();expect(Number(await page.locator('#attackPower1').inputValue())).toBe(atk);await page.locator('.role-tab.character-tab').click();await expect(move).toHaveAttribute('aria-pressed','false');
 });
 
 
@@ -1078,7 +1078,7 @@ test('07 Padman: skill enables maximum parameters, preserves manual values, fixe
  const atk=page.getByLabel('自己主張なし攻撃補正の数');await atk.fill('-1');await atk.dispatchEvent('change');
  await page.getByRole('button',{name:'マジで怒ったぞを発動'}).click();await expect(atk).toHaveValue('2');await expect(atk).toBeDisabled();await expect(page.locator('#selected-character-atk')).toHaveValue('4');
  await expect(page.getByRole('button',{name:/^マジで怒ったぞ：/})).toHaveCount(0);
- for(const [label,file] of [['自己主張なし攻撃補正','Attack.png'],['自己主張なし防御補正','Defense.png'],['自己主張なし移動補正','run.png']])await expect(page.getByRole('button',{name:label+'を増やす',exact:true}).locator('img')).toHaveAttribute('src','../images/UT_Buff/'+file);
+ for(const [label,file] of [['自己主張なし攻撃補正','Attack.png'],['自己主張なし防御補正','Defense.png']])await expect(page.getByRole('button',{name:label+'を増やす',exact:true}).locator('img')).toHaveAttribute('src','../images/UT_Buff/'+file);
  await page.locator('#turn-end').click();await expect(atk).toHaveValue('-1');await expect(atk).toBeEnabled();
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();await expect(atk).toHaveValue('2');await expect(atk).toBeDisabled();
  await page.locator('#turn-end').click();

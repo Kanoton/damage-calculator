@@ -1,9 +1,9 @@
 {
-  "rows": 418,
+  "rows": 417,
   "categories": {
     "スキル": 70,
     "能力全文": 35,
-    "自キャラ": 44,
+    "自キャラ": 43,
     "PT受領": 26,
     "スキル入力": 4,
     "モンスター状態": 7,
@@ -14,11 +14,11 @@
   },
   "characters": 35,
   "sourceHashes": {
-    "07_skill/data/hover-descriptions.csv": "eabad34df46e6dc66d374667e12c02c852b6b0ab564c5b0e292a6bbb94a22292",
-    "07_skill/js/hover-text.js": "753d5e5067857dc1c1522d50c015a376610b7972cbdf44372f19a96ffa4cccb3",
-    "07_skill/js/character.js": "5f89c3fbd823f85332b093cc19331cafa0c9fcef1f2f419666a3dd791a49f374",
+    "07_skill/data/hover-descriptions.csv": "bdd36c3970f37b846810f67c62db3e09748503eb851f6f84dcfc557848f5d17c",
+    "07_skill/js/hover-text.js": "26506ea1e4ed6218f0837307c3aa6e498cdebf88424e4f881df137fe1550cc58",
+    "07_skill/js/character.js": "96de0c59c650ff5893495d78f3e6c2a45960ee89ed1a9ab7765377a07b80372a",
     "07_skill/js/character-view.js": "8cec516cc218501c940fd76e9aa3db91049ae47769a67d8597a1a9584f2aac49",
-    "07_skill/js/character-ability-rules.js": "c47d73091a1d2ba60cad03bc9236eb1d989bcee7b389005052545f35fdf3fab7",
+    "07_skill/js/character-ability-rules.js": "cd8fd9811c94c00790d699a4d4de2af904f7a86ec1e52c70c86b5eb908df6e6b",
     "07_skill/js/roster-view.js": "9ec9f103a18237541ce3fc5f862dd31afeca4e9db91770d3d95ea770504f43a9",
     "07_skill/js/map.js": "12dd613e53b252f65f3aa615a4aee5a791d08ce45565c899b19b596e37574a45",
     "07_skill/js/map-utils.js": "c751b7c4d0d6024454acad8817b44694eaf32208c4fbf556b0f100e851d16125",

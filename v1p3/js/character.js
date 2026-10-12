@@ -691,7 +691,8 @@
   for(const id of ['121','145'])if(state().modes[id]){state().modes[id]=0;changed=true;}
   if(state().chips.includes('206')&&number(state(),'マインド')>0){state().numbers['マインド']=number(state(),'マインド')-1;changed=true;}
   for(const key of Object.keys(state().skillCooldowns)){const current=Number(state().skillCooldowns[key])||0;if(current>0){state().skillCooldowns[key]=current-1;changed=true;}}
-  for(const key of ['PT大鉦','PTカクテル攻撃','PTカクテル防御','PTドロシー攻撃','PTユメ攻撃補正','PT潜伏'])if(state().numbers[key]){state().numbers[key]=0;changed=true;}
+  for(const key of ['PT大鉦','PTカクテル攻撃','PTカクテル防御','PTドロシー攻撃','PTユメ攻撃補正','PT潜伏','PTハンナ親友の祝福'])if(state().numbers[key]){state().numbers[key]=0;changed=true;}
+  if(String(selectedCharacter.id)==='106'&&state().numbers['PTハンナ次の移動']){state().numbers['PTハンナ次の移動']=0;changed=true;}
   for(const control of abilityRules()?.controls||[])if(control.duration==='turn'&&state().numbers[control.key]){state().numbers[control.key]=0;changed=true;}
   const beforeEffects=state().activeEffects.length;
   state().activeEffects=state().activeEffects.filter(effect=>effect.duration!=='turn').map(effect=>effect.durationTurns?{...effect,durationTurns:effect.durationTurns-1}:effect).filter(effect=>effect.durationTurns===undefined||effect.durationTurns>0);
