@@ -240,7 +240,9 @@ test('08: calculator reset clears reader stabilization and a fresh frame can sel
  const s=await snapshot(page);expect(s.selfId).toBe('105');expect(s.members.map(m=>m.id)).toEqual(['105','106','3','18']);
 });
 
-test('08: synchronized wide and mobile layouts keep reader overlay independent',async({page})=>{
+test.describe('08 touch display transitions',()=>{
+ test.use({hasTouch:true});
+ test('08: synchronized wide and mobile layouts keep reader overlay independent',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.setViewportSize({width:1920,height:1080});await open(page);await readFixture(page,'left-hud');
  const before=await page.locator('.tool-wrapper').boundingBox();
@@ -248,4 +250,20 @@ test('08: synchronized wide and mobile layouts keep reader overlay independent',
  await expect(page.locator('#reader-panel')).toBeHidden();expect(await page.locator('.tool-wrapper').boundingBox()).toEqual(before);
  await page.setViewportSize({width:375,height:812});await expect(page.locator('body')).toHaveClass(/mobile-ui/);await expect(page.locator('#reader-toggle')).toBeHidden();
  await page.setViewportSize({width:1280,height:900});await expect(page.locator('#reader-toggle')).toBeVisible();expect((await snapshot(page)).selfId).toBe('105');expect(errors).toEqual([]);
+ });
+});
+
+test('08: automatic capture resumes for a coin-only HUD change after a static screen',async({page})=>{
+ await open(page);
+ await page.evaluate(async image=>{
+  const im=new Image();im.src=image;await im.decode();const c=document.createElement('canvas');c.width=1536;c.height=709;c.getContext('2d').drawImage(im,0,0);
+  window.testCaptureCanvas=c;window.testCapture=c.captureStream(5);navigator.mediaDevices.getDisplayMedia=async()=>testCapture;
+ },fixture('left-hud'));
+ await page.locator('#reader-connect').click();await page.locator('#reader-auto').check();
+ await expect.poll(async()=> (await snapshot(page)).members[0].coin,{timeout:10000}).toBe(12);
+ // Allow the unchanged-frame optimization to engage, then change only coins.
+ await page.waitForTimeout(4000);
+ await page.evaluate(async image=>{const im=new Image();im.src=image;await im.decode();testCaptureCanvas.getContext('2d').drawImage(im,235,98,27,24,167,98,27,24);},fixture('6248'));
+ await expect.poll(async()=> (await snapshot(page)).members[0].coin,{timeout:10000}).toBe(17);
+ expect((await snapshot(page)).selfId).toBe('105');await page.locator('#reader-stop').click();
 });

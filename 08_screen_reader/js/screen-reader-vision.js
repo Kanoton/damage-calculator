@@ -80,10 +80,12 @@
     for(let y=top;y<bottom;y++)for(let xx=start;xx<x;xx++){const i=((y-top)*glyph.width+xx-start)*4,value=mask[y][xx]*255;pixels.data[i]=pixels.data[i+1]=pixels.data[i+2]=value;pixels.data[i+3]=255;}gc.putImageData(pixels,0,0);
     const normalized=crop(glyph,[0,0,glyph.width,glyph.height],18,28).getContext('2d').getImageData(0,0,18,28).data,a=new Uint8Array(504);for(let i=0;i<a.length;i++)a[i]=Number(normalized[i*4]>110);
     const ranks=new Map();for(const ref of refs){const b=bytes(ref);let error=0;for(let i=0;i<a.length;i++)error+=a[i]!==b[i];const score=error/a.length+Math.min(.2,Math.abs(glyph.width/glyph.height-ref.ratio)*.15);ranks.set(ref.digit,Math.min(ranks.get(ref.digit)??Infinity,score));}
+    // Resampling can move a clipped HUD fragment one pixel inside the crop.
     const sorted=[...ranks].sort((a,b)=>a[1]-b[1]),clipped=start===0||x===w||top===0||bottom===h;
+    const clippedFragment=clipped||start<=1||x>=w-1||top<=1||bottom>=h-1;
     if(!sorted.length||sorted[0][1]>.19||(sorted[1]&&sorted[1][1]-sorted[0][1]<.018)){
      // Ignore unrecognizable background fragments cut by the left HUD crop.
-     if(rejectClipped&&clipped){start=null;continue;}return null;
+     if(rejectClipped&&clippedFragment){start=null;continue;}return null;
     }
     // A recognizable but clipped digit is not safe to drop from a number.
     if(rejectClipped&&clipped)return null;glyphs.push(sorted[0][0]);
