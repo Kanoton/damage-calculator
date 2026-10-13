@@ -43,3 +43,36 @@ test('08 world: only consecutive observations stabilize and actual controller ap
  await page.locator('#reader-file').setInputFiles({name:'world.png',mimeType:'image/png',buffer:Buffer.from(fixture('11').split(',')[1],'base64')});await expect(page.locator('#reader-file')).toHaveValue('');await expect(page.locator('#reader-world-result')).toContainText('進捗 4');
  expect((await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).round).toBe(4);
 });
+
+const videoLabels=require('./fixtures/screen-reader/monster-labels.json');
+async function readVideoLabel(page,row,hidden){
+ return page.evaluate(async({image,hidden})=>{
+  const im=new Image();im.src=image;await im.decode();const source=ScreenReaderVision.normalize(im);
+  if(hidden){const ctx=source.popupFrame.getContext('2d'),scale=709/im.height;ctx.fillStyle='#141414';ctx.fillRect(hidden[0]*scale-2,hidden[1]*scale-2,hidden[2]*scale+4,hidden[3]*scale+4);}
+  return ScreenReaderWorldVision.analyze(source);
+ },{image:require('./fixtures/screen-reader/'+row.fixture+'.json').image,hidden});
+}
+
+test('08 world: academy and water-town video labels link exact names, serials and HP',async({page})=>{
+ await open(page);
+ for(const row of videoLabels){const result=await readVideoLabel(page,row);expect(result.monsters,row.fixture).toEqual(row.expected?[row.expected]:[]);}
+});
+
+test('08 world: video labels abstain when a name, individual serial or HP is hidden',async({page})=>{
+ await open(page);
+ for(const row of videoLabels.filter(r=>r.training)){
+  for(const hidden of [row.nameBox,row.hpBox,row.serialBox].filter(Boolean))expect((await readVideoLabel(page,row,hidden)).monsters,row.fixture).toEqual([]);
+ }
+});
+
+test('08 world: academy boss HP and separate guardian numbers use the existing opt-in bridge',async({page})=>{
+ await open(page);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0004');await page.locator('#mp-difficulty').selectOption('普通');
+ const boss=await readVideoLabel(page,videoLabels.find(r=>r.id==='M0020'&&r.training));
+ const guardians=await Promise.all(videoLabels.filter(r=>r.id==='M0023').map(r=>readVideoLabel(page,r)));
+ await page.evaluate(observations=>observations.forEach(o=>ScreenReaderMapBridge.apply(o)),[boss,...guardians]);
+ let state=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(state.monsters.find(m=>m.monsterId==='M0020').hp).toBe(86);
+ expect(state.monsters.find(m=>m.monsterId==='M0023'&&m.serial===1).hp).toBe(12);expect(state.monsters.find(m=>m.monsterId==='M0023'&&m.serial===2).hp).toBe(15);
+ const next=await readVideoLabel(page,videoLabels.find(r=>r.id==='M0020'&&!r.training));await page.evaluate(o=>ScreenReaderMapBridge.apply(o),next);
+ state=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(state.monsters.find(m=>m.monsterId==='M0020').hp).toBe(66);
+ await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[]}));expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(state);
+});

@@ -1,0 +1,492 @@
+[
+  {
+    "fixture": "labels-academy-59-M0023",
+    "id": "M0023",
+    "boss": false,
+    "nameBox": [
+      447,
+      398,
+      290,
+      40
+    ],
+    "serialBox": [
+      748,
+      405,
+      28,
+      35
+    ],
+    "hpBox": [
+      544,
+      449,
+      93,
+      40
+    ],
+    "expected": {
+      "monsterId": "M0023",
+      "serial": 2,
+      "currentHp": 15,
+      "maxHp": 15
+    },
+    "source": "academy",
+    "frame": 59,
+    "seconds": 7.02,
+    "training": true
+  },
+  {
+    "fixture": "labels-academy-220-M0022",
+    "id": "M0022",
+    "boss": false,
+    "nameBox": [
+      1196,
+      398,
+      264,
+      40
+    ],
+    "serialBox": [
+      1465,
+      405,
+      28,
+      35
+    ],
+    "hpBox": [
+      1275,
+      449,
+      100,
+      40
+    ],
+    "expected": {
+      "monsterId": "M0022",
+      "serial": 1,
+      "currentHp": 31,
+      "maxHp": 35
+    },
+    "source": "academy",
+    "frame": 220,
+    "seconds": 26.34,
+    "training": true
+  },
+  {
+    "fixture": "labels-academy-209-M0025",
+    "id": "M0025",
+    "boss": false,
+    "nameBox": [
+      1035,
+      545,
+      291,
+      39
+    ],
+    "serialBox": [
+      1332,
+      550,
+      30,
+      37
+    ],
+    "hpBox": [
+      1131,
+      598,
+      103,
+      42
+    ],
+    "expected": {
+      "monsterId": "M0025",
+      "serial": 1,
+      "currentHp": 10,
+      "maxHp": 10
+    },
+    "source": "academy",
+    "frame": 209,
+    "seconds": 25.02,
+    "training": true
+  },
+  {
+    "fixture": "labels-academy-200-M0005",
+    "id": "M0005",
+    "boss": false,
+    "nameBox": [
+      750,
+      402,
+      64,
+      40
+    ],
+    "serialBox": [
+      827,
+      408,
+      29,
+      35
+    ],
+    "hpBox": [
+      740,
+      451,
+      64,
+      42
+    ],
+    "expected": {
+      "monsterId": "M0005",
+      "serial": 1,
+      "currentHp": 6,
+      "maxHp": 6
+    },
+    "source": "academy",
+    "frame": 200,
+    "seconds": 23.94,
+    "training": true
+  },
+  {
+    "fixture": "labels-academy-440-M0020",
+    "id": "M0020",
+    "boss": true,
+    "nameBox": [
+      1291,
+      396,
+      165,
+      40
+    ],
+    "serialBox": null,
+    "hpBox": [
+      1328,
+      450,
+      107,
+      41
+    ],
+    "expected": {
+      "monsterId": "M0020",
+      "serial": null,
+      "currentHp": 86,
+      "maxHp": 99
+    },
+    "source": "academy",
+    "frame": 440,
+    "seconds": 52.74,
+    "training": true
+  },
+  {
+    "fixture": "labels-new-video-251-M0013",
+    "id": "M0013",
+    "boss": true,
+    "nameBox": [
+      1021,
+      539,
+      231,
+      39
+    ],
+    "serialBox": null,
+    "hpBox": [
+      1085,
+      592,
+      135,
+      43
+    ],
+    "expected": {
+      "monsterId": "M0013",
+      "serial": null,
+      "currentHp": 112,
+      "maxHp": 120
+    },
+    "source": "new-video",
+    "frame": 251,
+    "seconds": 30.06,
+    "training": true
+  },
+  {
+    "fixture": "labels-new-video-217-M0018",
+    "id": "M0018",
+    "boss": false,
+    "nameBox": [
+      971,
+      251,
+      198,
+      39
+    ],
+    "serialBox": [
+      1178,
+      258,
+      28,
+      36
+    ],
+    "hpBox": [
+      1024,
+      303,
+      92,
+      42
+    ],
+    "expected": {
+      "monsterId": "M0018",
+      "serial": 1,
+      "currentHp": 16,
+      "maxHp": 21
+    },
+    "source": "new-video",
+    "frame": 217,
+    "seconds": 25.98,
+    "training": true
+  },
+  {
+    "fixture": "labels-new-video-651-M0019",
+    "id": "M0019",
+    "boss": false,
+    "nameBox": [
+      1090,
+      399,
+      136,
+      39
+    ],
+    "serialBox": [
+      1230,
+      405,
+      30,
+      36
+    ],
+    "hpBox": [
+      1107,
+      450,
+      66,
+      42
+    ],
+    "expected": {
+      "monsterId": "M0019",
+      "serial": 1,
+      "currentHp": 8,
+      "maxHp": 8
+    },
+    "source": "new-video",
+    "frame": 651,
+    "seconds": 78.06,
+    "training": true
+  },
+  {
+    "fixture": "labels-new-video-651-M0014",
+    "id": "M0014",
+    "boss": true,
+    "nameBox": [
+      975,
+      748,
+      200,
+      38
+    ],
+    "serialBox": null,
+    "hpBox": [
+      1031,
+      799,
+      138,
+      42
+    ],
+    "expected": {
+      "monsterId": "M0014",
+      "serial": null,
+      "currentHp": 103,
+      "maxHp": 120
+    },
+    "source": "new-video",
+    "frame": 651,
+    "seconds": 78.06,
+    "training": true
+  },
+  {
+    "fixture": "labels-new-video-317-M0017",
+    "id": "M0017",
+    "boss": false,
+    "nameBox": [
+      568,
+      399,
+      199,
+      40
+    ],
+    "serialBox": [
+      778,
+      406,
+      28,
+      35
+    ],
+    "hpBox": [
+      622,
+      452,
+      66,
+      42
+    ],
+    "expected": {
+      "monsterId": "M0017",
+      "serial": 4,
+      "currentHp": 7,
+      "maxHp": 7
+    },
+    "source": "new-video",
+    "frame": 317,
+    "seconds": 37.98,
+    "training": true
+  },
+  {
+    "fixture": "labels-academy-109-M0023",
+    "id": "M0023",
+    "boss": false,
+    "nameBox": [
+      351,
+      193,
+      296,
+      40
+    ],
+    "serialBox": [
+      657,
+      201,
+      28,
+      35
+    ],
+    "hpBox": [
+      451,
+      245,
+      92,
+      41
+    ],
+    "expected": {
+      "monsterId": "M0023",
+      "serial": 1,
+      "currentHp": 12,
+      "maxHp": 15
+    },
+    "source": "academy",
+    "frame": 109,
+    "seconds": 13.02,
+    "training": false
+  },
+  {
+    "fixture": "labels-academy-476-M0020",
+    "id": "M0020",
+    "boss": true,
+    "nameBox": [
+      601,
+      406,
+      167,
+      40
+    ],
+    "serialBox": null,
+    "hpBox": [
+      639,
+      459,
+      109,
+      42
+    ],
+    "expected": {
+      "monsterId": "M0020",
+      "serial": null,
+      "currentHp": 66,
+      "maxHp": 99
+    },
+    "source": "academy",
+    "frame": 476,
+    "seconds": 57.06,
+    "training": false
+  },
+  {
+    "fixture": "labels-academy-405-M0025",
+    "id": "M0025",
+    "boss": false,
+    "nameBox": [
+      546,
+      399,
+      292,
+      41
+    ],
+    "serialBox": [
+      847,
+      406,
+      28,
+      36
+    ],
+    "hpBox": [
+      641,
+      451,
+      76,
+      42
+    ],
+    "expected": {
+      "monsterId": "M0025",
+      "serial": 1,
+      "currentHp": 1,
+      "maxHp": 10
+    },
+    "source": "academy",
+    "frame": 405,
+    "seconds": 48.54,
+    "training": false
+  },
+  {
+    "fixture": "labels-new-video-635-M0018",
+    "id": "M0018",
+    "boss": false,
+    "nameBox": [
+      568,
+      399,
+      201,
+      40
+    ],
+    "serialBox": [
+      778,
+      406,
+      29,
+      36
+    ],
+    "hpBox": [
+      622,
+      451,
+      85,
+      42
+    ],
+    "expected": null,
+    "source": "new-video",
+    "frame": 635,
+    "seconds": 76.14,
+    "training": false,
+    "note": "Ambiguous serial/label overlapping a sprite; must abstain."
+  },
+  {
+    "fixture": "labels-new-video-635-M0014",
+    "id": "M0014",
+    "boss": true,
+    "nameBox": [
+      975,
+      748,
+      200,
+      38
+    ],
+    "serialBox": null,
+    "hpBox": [
+      1031,
+      799,
+      138,
+      42
+    ],
+    "expected": {
+      "monsterId": "M0014",
+      "serial": null,
+      "currentHp": 103,
+      "maxHp": 120
+    },
+    "source": "new-video",
+    "frame": 635,
+    "seconds": 76.14,
+    "training": false
+  },
+  {
+    "fixture": "labels-new-video-316-M0013",
+    "id": "M0013",
+    "boss": true,
+    "nameBox": [
+      318,
+      560,
+      225,
+      40
+    ],
+    "serialBox": null,
+    "hpBox": [
+      385,
+      614,
+      142,
+      42
+    ],
+    "expected": null,
+    "source": "new-video",
+    "frame": 316,
+    "seconds": 37.86,
+    "training": false,
+    "note": "Ambiguous serial/label overlapping a sprite; must abstain."
+  }
+]

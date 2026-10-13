@@ -14,15 +14,15 @@
   const seen=new Uint8Array(mask.length),out=[],queue=new Int32Array(mask.length);
   for(let y=60;y<Math.min(600,h);y++)for(let x=270;x<w;x++){const start=y*w+x;if(!mask[start]||seen[start])continue;let head=0,tail=1,count=0,x0=x,x1=x,y0=y,y1=y;queue[0]=start;seen[start]=1;
    while(head<tail){const i=queue[head++],xx=i%w,yy=Math.floor(i/w);count++;x0=Math.min(x0,xx);x1=Math.max(x1,xx);y0=Math.min(y0,yy);y1=Math.max(y1,yy);for(const j of [i-1,i+1,i-w,i+w])if(j>=0&&j<mask.length&&!seen[j]&&mask[j]&&Math.abs(j%w-xx)<=1){seen[j]=1;queue[tail++]=j;}}
-   const bw=x1-x0+1,bh=y1-y0+1;if(bh>=12&&bh<=32&&bw<=24&&count>=15)out.push({x:x0,y:y0,w:bw,h:bh});
+   const bw=x1-x0+1,bh=y1-y0+1;if(bh>=8&&bh<=32&&bw<=24&&count>=10)out.push({x:x0,y:y0,w:bw,h:bh});
   }return out;
  }
  function nameAt(mask,w,h,hp,refs){
   const candidates=[];
   for(const ref of refs){const a=data(ref),rw=ref.width,rh=ref.height;let best={score:1};
    const scoreAt=(x,y,step=1)=>{let diff=0,total=0;for(let yy=0;yy<rh;yy+=step)for(let xx=0;xx<rw;xx+=step){const av=a[yy*rw+xx],bv=mask[(y+yy)*w+x+xx];diff+=av!==bv;total+=av+bv;}return total?diff/total:1;};
-   for(let y=Math.max(0,hp.y-46);y<=hp.y-12;y+=2)for(let x=Math.max(200,Math.floor(hp.x+hp.w/2)-125);x<=Math.min(w-rw,hp.x+25);x+=2){const score=scoreAt(x,y,3);if(score<best.score)best={score,x,y};}
-   if(best.x===undefined)continue;let fine={score:1};for(let y=Math.max(0,best.y-3);y<=Math.min(h-rh,best.y+3);y++)for(let x=Math.max(0,best.x-3);x<=Math.min(w-rw,best.x+3);x++){const score=scoreAt(x,y);if(score<fine.score)fine={score,x,y};}if(fine.score<.28)candidates.push({...fine,ref});
+   for(let y=Math.max(0,hp.y-46);y<=hp.y-12;y+=2)for(let x=Math.max(200,Math.floor(hp.x+hp.w/2-Math.max(125,rw/2+35)));x<=Math.min(w-rw,hp.x+25);x+=2){const score=scoreAt(x,y,3);if(score<best.score)best={score,x,y};}
+   if(best.x===undefined)continue;let fine={score:1};for(let y=Math.max(0,best.y-3);y<=Math.min(h-rh,best.y+3);y++)for(let x=Math.max(0,best.x-3);x<=Math.min(w-rw,best.x+3);x++){const score=scoreAt(x,y);if(score<fine.score)fine={score,x,y};}if(fine.score<.25)candidates.push({...fine,ref});
   }
   candidates.sort((a,b)=>a.score-b.score);const best=candidates[0];if(!best||candidates.some(c=>c.ref.id!==best.ref.id&&c.score-best.score<.06))return null;return best;
  }
@@ -33,7 +33,7 @@
   for(const row of rows){const sorted=row.parts.sort((a,b)=>a.x-b.x),groups=[];for(const p of sorted){let group=groups.at(-1);if(!group||p.x-(group.at(-1).x+group.at(-1).w)>8){group=[];groups.push(group);}group.push(p);}
    for(const group of groups){if(group.length<3||group.length>7)continue;const chars=group.map(p=>glyph(red,w,[p.x,p.y,p.w,p.h],refs.digits));if(chars.some(c=>c===null))continue;const text=chars.join('');if(!/^\d{1,3}\/\d{1,3}$/.test(text))continue;const [currentHp,maxHp]=text.split('/').map(Number);if(maxHp<1||currentHp>maxHp)continue;
     const hp={x:group[0].x,y:Math.min(...group.map(p=>p.y)),w:group.at(-1).x+group.at(-1).w-group[0].x};const name=nameAt(white,w,h,hp,refs.names);if(!name)continue;
-    let serial=null;if(name.ref.id!=='M0014'){serial=ScreenReaderVision.numberAt(source,[name.x+name.ref.width+3,name.y-2,30,name.ref.height+6],'white',refs.digits);if(!Number.isInteger(serial)||serial<1||serial>999)continue;}
+    let serial=null;if(!(name.ref.boss||name.ref.id==='M0014')){serial=ScreenReaderVision.numberAt(source,[name.x+name.ref.width+3,name.y-2,30,name.ref.height+6],'white',refs.digits);if(!Number.isInteger(serial)||serial<1||serial>999)continue;}
     observations.push({monsterId:name.ref.id,serial,currentHp,maxHp});
    }
   }
