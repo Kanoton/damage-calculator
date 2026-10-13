@@ -714,5 +714,269 @@
     "training": false,
     "learnHpDigits": false,
     "note": "Learn the clear boss name; existing digit references read 85/88 without rebuilding merged column glyphs."
+  },
+  {
+    "fixture": "labels-ghost-126-M0041",
+    "id": "M0041",
+    "boss": false,
+    "nameBox": [
+      960,
+      775,
+      346,
+      55
+    ],
+    "serialBox": [
+      1318,
+      784,
+      35,
+      46
+    ],
+    "hpBox": [
+      1065,
+      848,
+      146,
+      55
+    ],
+    "expected": {
+      "monsterId": "M0041",
+      "serial": 1,
+      "currentHp": 26,
+      "maxHp": 26
+    },
+    "source": "ghost",
+    "frame": 126,
+    "seconds": 15.06,
+    "training": true
+  },
+  {
+    "fixture": "labels-ghost-142-M0038",
+    "id": "M0038",
+    "boss": false,
+    "nameBox": [
+      1012,
+      338,
+      264,
+      55
+    ],
+    "serialBox": [
+      1289,
+      348,
+      34,
+      46
+    ],
+    "hpBox": [
+      1072,
+      410,
+      146,
+      56
+    ],
+    "expected": {
+      "monsterId": "M0038",
+      "serial": 1,
+      "currentHp": 16,
+      "maxHp": 16
+    },
+    "source": "ghost",
+    "frame": 142,
+    "seconds": 16.98,
+    "training": true
+  },
+  {
+    "fixture": "labels-ghost-559-M0037",
+    "id": "M0037",
+    "boss": false,
+    "nameBox": [
+      624,
+      506,
+      352,
+      55
+    ],
+    "serialBox": [
+      989,
+      518,
+      35,
+      45
+    ],
+    "hpBox": [
+      731,
+      580,
+      98,
+      55
+    ],
+    "expected": {
+      "monsterId": "M0037",
+      "serial": 3,
+      "currentHp": 8,
+      "maxHp": 8
+    },
+    "source": "ghost",
+    "frame": 559,
+    "seconds": 67.02,
+    "training": true
+  },
+  {
+    "fixture": "labels-ghost-1092-M0039",
+    "id": "M0039",
+    "boss": false,
+    "nameBox": [
+      1788,
+      525,
+      435,
+      58
+    ],
+    "serialBox": [
+      2235,
+      536,
+      34,
+      46
+    ],
+    "hpBox": [
+      1935,
+      600,
+      145,
+      55
+    ],
+    "expected": {
+      "monsterId": "M0039",
+      "serial": 1,
+      "currentHp": 22,
+      "maxHp": 22
+    },
+    "source": "ghost",
+    "frame": 1092,
+    "seconds": 130.98,
+    "training": true
+  },
+  {
+    "fixture": "labels-ghost-750-M0040",
+    "id": "M0040",
+    "boss": false,
+    "nameBox": [
+      1656,
+      525,
+      436,
+      58
+    ],
+    "serialBox": [
+      2106,
+      538,
+      34,
+      46
+    ],
+    "hpBox": [
+      1806,
+      600,
+      99,
+      55
+    ],
+    "expected": {
+      "monsterId": "M0040",
+      "serial": 2,
+      "currentHp": 8,
+      "maxHp": 8
+    },
+    "source": "ghost",
+    "frame": 750,
+    "seconds": 89.94,
+    "training": true
+  },
+  {
+    "fixture": "labels-ghost-920-M0037",
+    "id": "M0037",
+    "boss": false,
+    "nameBox": [
+      1760,
+      525,
+      352,
+      56
+    ],
+    "serialBox": [
+      2125,
+      536,
+      34,
+      45
+    ],
+    "hpBox": [
+      1868,
+      599,
+      99,
+      56
+    ],
+    "expected": {
+      "monsterId": "M0037",
+      "serial": 7,
+      "currentHp": 8,
+      "maxHp": 8
+    },
+    "source": "ghost",
+    "frame": 920,
+    "seconds": 110.34,
+    "training": false
+  },
+  {
+    "fixture": "labels-ghost-500-M0038",
+    "id": "M0038",
+    "boss": false,
+    "nameBox": [
+      878,
+      106,
+      264,
+      55
+    ],
+    "serialBox": [
+      1154,
+      116,
+      34,
+      46
+    ],
+    "hpBox": [
+      940,
+      178,
+      144,
+      56
+    ],
+    "expected": {
+      "monsterId": "M0038",
+      "serial": 1,
+      "currentHp": 16,
+      "maxHp": 16
+    },
+    "source": "ghost",
+    "frame": 500,
+    "seconds": 59.94,
+    "training": false
+  },
+  {
+    "fixture": "labels-ghost-800-M0041",
+    "id": "M0041",
+    "boss": false,
+    "nameBox": [
+      1571,
+      525,
+      350,
+      58
+    ],
+    "serialBox": [
+      1932,
+      539,
+      34,
+      46
+    ],
+    "hpBox": [
+      1676,
+      600,
+      146,
+      55
+    ],
+    "expected": {
+      "monsterId": "M0041",
+      "serial": 1,
+      "currentHp": 23,
+      "maxHp": 26
+    },
+    "source": "ghost",
+    "frame": 800,
+    "seconds": 95.94,
+    "training": false
   }
 ]
