@@ -517,5 +517,202 @@
     "seconds": 78.06,
     "training": false,
     "note": "Spawn animation temporarily displays 0/0; must abstain."
+  },
+  {
+    "fixture": "labels-dream-317-M0003",
+    "id": "M0003",
+    "boss": false,
+    "nameBox": [
+      905,
+      469,
+      179,
+      50
+    ],
+    "serialBox": [
+      1094,
+      478,
+      35,
+      42
+    ],
+    "hpBox": [
+      926,
+      535,
+      139,
+      58
+    ],
+    "expected": {
+      "monsterId": "M0003",
+      "serial": 2,
+      "currentHp": 25,
+      "maxHp": 25
+    },
+    "source": "dream",
+    "frame": 317,
+    "seconds": 37.98,
+    "training": true,
+    "learnHpDigits": false,
+    "allowAbstain": true,
+    "note": "Use clear name/serial as references. Pink map tile contaminates this HP crop; abstention is allowed, incorrect values are not."
+  },
+  {
+    "fixture": "labels-dream-317-M0004",
+    "id": "M0004",
+    "boss": false,
+    "nameBox": [
+      840,
+      601,
+      174,
+      48
+    ],
+    "serialBox": [
+      1030,
+      608,
+      36,
+      42
+    ],
+    "hpBox": [
+      860,
+      666,
+      100,
+      58
+    ],
+    "expected": {
+      "monsterId": "M0004",
+      "serial": 4,
+      "currentHp": 6,
+      "maxHp": 9
+    },
+    "source": "dream",
+    "frame": 317,
+    "seconds": 37.98,
+    "training": true
+  },
+  {
+    "fixture": "labels-dream-686-M0001",
+    "id": "M0001",
+    "boss": true,
+    "nameBox": [
+      1051,
+      751,
+      262,
+      52
+    ],
+    "serialBox": null,
+    "hpBox": [
+      1112,
+      820,
+      152,
+      59
+    ],
+    "expected": {
+      "monsterId": "M0001",
+      "serial": null,
+      "currentHp": 85,
+      "maxHp": 88
+    },
+    "source": "dream",
+    "frame": 686,
+    "seconds": 82.26,
+    "training": true,
+    "learnHpDigits": false,
+    "note": "Learn the clear boss name; existing digit references read 85/88 without rebuilding merged column glyphs."
+  },
+  {
+    "fixture": "labels-dream-207-M0001",
+    "id": "M0001",
+    "boss": true,
+    "nameBox": [
+      1609,
+      530,
+      262,
+      52
+    ],
+    "serialBox": null,
+    "hpBox": [
+      1671,
+      600,
+      154,
+      59
+    ],
+    "expected": {
+      "monsterId": "M0001",
+      "serial": null,
+      "currentHp": 85,
+      "maxHp": 88
+    },
+    "source": "dream",
+    "frame": 207,
+    "seconds": 24.78,
+    "training": false,
+    "learnHpDigits": false,
+    "note": "Learn the clear boss name; existing digit references read 85/88 without rebuilding merged column glyphs."
+  },
+  {
+    "fixture": "labels-dream-140-M0004",
+    "id": "M0004",
+    "boss": false,
+    "nameBox": [
+      1758,
+      55,
+      178,
+      50
+    ],
+    "serialBox": [
+      1942,
+      62,
+      36,
+      42
+    ],
+    "hpBox": [
+      1780,
+      122,
+      99,
+      56
+    ],
+    "expected": {
+      "monsterId": "M0004",
+      "serial": 1,
+      "currentHp": 4,
+      "maxHp": 9
+    },
+    "source": "dream",
+    "frame": 140,
+    "seconds": 16.74,
+    "training": false
+  },
+  {
+    "fixture": "labels-dream-454-M0003",
+    "id": "M0003",
+    "boss": false,
+    "nameBox": [
+      1268,
+      154,
+      180,
+      51
+    ],
+    "serialBox": [
+      1459,
+      161,
+      36,
+      44
+    ],
+    "hpBox": [
+      1289,
+      222,
+      139,
+      59
+    ],
+    "expected": {
+      "monsterId": "M0003",
+      "serial": 1,
+      "currentHp": 19,
+      "maxHp": 25
+    },
+    "source": "dream",
+    "frame": 454,
+    "seconds": 54.42,
+    "training": false,
+    "learnHpDigits": false,
+    "note": "Learn the clear boss name; existing digit references read 85/88 without rebuilding merged column glyphs."
   }
 ]

@@ -21,7 +21,9 @@ def append_video_references(refs,helpers):
   points=[(x,y) for y,line in enumerate(mask) for x,v in enumerate(line) if v]
   x0=min(x for x,y in points);y0=min(y for x,y in points);x1=max(x for x,y in points)+1;y1=max(y for x,y in points)+1
   refs['names'].append({'id':row['id'],'boss':row['boss'],'width':x1-x0,'height':y1-y0,'data':base64.b64encode(bytes(mask[y][x] for y in range(y0,y1) for x in range(x0,x1))).decode()})
-  for raw,kind,text in [(row['hpBox'],'red',f"{row['expected']['currentHp']}/{row['expected']['maxHp']}")]+([(row['serialBox'],'white',str(row['expected']['serial']))] if row['serialBox'] else []):
+  numbers=([(row['hpBox'],'red',f"{row['expected']['currentHp']}/{row['expected']['maxHp']}")] if row.get('learnHpDigits',True) else [])
+  numbers+=([(row['serialBox'],'white',str(row['expected']['serial']))] if row['serialBox'] else [])
+  for raw,kind,text in numbers:
    glyphs=helpers['glyphs'](helpers['crop'](im,box(raw)),kind)
    if len(glyphs)!=len(text):raise ValueError((row['fixture'],kind,text,len(glyphs)))
    refs['digits'].extend({'digit':d,**g} for d,g in zip(text,glyphs))

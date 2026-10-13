@@ -53,9 +53,9 @@ async function readVideoLabel(page,row,hidden){
  },{image:require('./fixtures/screen-reader/'+row.fixture+'.json').image,hidden});
 }
 
-test('08 world: academy and water-town video labels link exact names, serials and HP',async({page})=>{
+test('08 world: recorded video labels link exact names, serials and HP',async({page})=>{
  await open(page);
- for(const row of videoLabels){const result=await readVideoLabel(page,row);expect(result.monsters,row.fixture).toEqual(row.expected?[row.expected]:[]);}
+ for(const row of videoLabels){const result=await readVideoLabel(page,row);if(row.allowAbstain&&!result.monsters.length)continue;expect(result.monsters,row.fixture).toEqual(row.expected?[row.expected]:[]);}
 });
 
 test('08 world: video labels abstain when a name, individual serial or HP is hidden',async({page})=>{
@@ -74,5 +74,19 @@ test('08 world: academy boss HP and separate guardian numbers use the existing o
  expect(state.monsters.find(m=>m.monsterId==='M0023'&&m.serial===1).hp).toBe(12);expect(state.monsters.find(m=>m.monsterId==='M0023'&&m.serial===2).hp).toBe(15);
  const next=await readVideoLabel(page,videoLabels.find(r=>r.id==='M0020'&&!r.training));await page.evaluate(o=>ScreenReaderMapBridge.apply(o),next);
  state=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(state.monsters.find(m=>m.monsterId==='M0020').hp).toBe(66);
+ await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[]}));expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(state);
+});
+
+
+test('08 world: dream boss damage and individual monster HP reach the opt-in bridge',async({page})=>{
+ await open(page);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0001');await page.locator('#mp-difficulty').selectOption('普通');
+ for(const [id,frame] of [['M0001',207],['M0003',454],['M0004',317],['M0004',140]]){
+  const observation=await readVideoLabel(page,videoLabels.find(r=>r.source==='dream'&&r.id===id&&r.frame===frame));await page.evaluate(o=>ScreenReaderMapBridge.apply(o),observation);
+ }
+ const state=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());
+ expect(state.monsters.find(m=>m.monsterId==='M0001').hp).toBe(85);
+ expect(state.monsters.find(m=>m.monsterId==='M0003'&&m.serial===1).hp).toBe(19);
+ expect(state.monsters.find(m=>m.monsterId==='M0004'&&m.serial===4).hp).toBe(6);
+ expect(state.monsters.find(m=>m.monsterId==='M0004'&&m.serial===1).hp).toBe(4);
  await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[]}));expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(state);
 });
