@@ -221,25 +221,25 @@
     "training": true
   },
   {
-    "fixture": "labels-new-video-651-M0019",
+    "fixture": "labels-new-video-653-M0019",
     "id": "M0019",
     "boss": false,
     "nameBox": [
-      1090,
+      1186,
       399,
       136,
       39
     ],
     "serialBox": [
-      1230,
+      1329,
       405,
       30,
       36
     ],
     "hpBox": [
-      1107,
+      1205,
       450,
-      66,
+      68,
       42
     ],
     "expected": {
@@ -249,8 +249,8 @@
       "maxHp": 8
     },
     "source": "new-video",
-    "frame": 651,
-    "seconds": 78.06,
+    "frame": 653,
+    "seconds": 78.3,
     "training": true
   },
   {
@@ -488,5 +488,34 @@
     "seconds": 37.86,
     "training": false,
     "note": "Ambiguous serial/label overlapping a sprite; must abstain."
+  },
+  {
+    "fixture": "labels-new-video-651-M0019",
+    "id": "M0019",
+    "boss": false,
+    "nameBox": [
+      1090,
+      399,
+      136,
+      39
+    ],
+    "serialBox": [
+      1230,
+      405,
+      30,
+      36
+    ],
+    "hpBox": [
+      1107,
+      450,
+      66,
+      42
+    ],
+    "expected": null,
+    "source": "new-video",
+    "frame": 651,
+    "seconds": 78.06,
+    "training": false,
+    "note": "Spawn animation temporarily displays 0/0; must abstain."
   }
 ]
