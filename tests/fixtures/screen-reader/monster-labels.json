@@ -978,5 +978,34 @@
     "frame": 800,
     "seconds": 95.94,
     "training": false
+  },
+  {
+    "fixture": "labels-ghost-388-M0037",
+    "id": "M0037",
+    "boss": false,
+    "nameBox": [
+      891,
+      345,
+      352,
+      58
+    ],
+    "serialBox": [
+      1244,
+      335,
+      94,
+      81
+    ],
+    "hpBox": [
+      1000,
+      415,
+      100,
+      55
+    ],
+    "expected": null,
+    "source": "ghost",
+    "frame": 388,
+    "seconds": 46.5,
+    "training": false,
+    "note": "Chest background crosses the serial crop: reject the spurious serial 15 rather than linking HP to another individual."
   }
 ]
