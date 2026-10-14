@@ -21,6 +21,10 @@ def append_video_references(refs,helpers):
   points=[(x,y) for y,line in enumerate(mask) for x,v in enumerate(line) if v]
   x0=min(x for x,y in points);y0=min(y for x,y in points);x1=max(x for x,y in points)+1;y1=max(y for x,y in points)+1
   refs['names'].append({'id':row['id'],'boss':row['boss'],'width':x1-x0,'height':y1-y0,'data':base64.b64encode(bytes(mask[y][x] for y in range(y0,y1) for x in range(x0,x1))).decode()})
+  if 'serialMinHeightRatio' in row:
+   ratio=row['serialMinHeightRatio']
+   if not isinstance(ratio,(int,float)) or not 0<ratio<=1:raise ValueError('Invalid serial height ratio')
+   refs['names'][-1]['serialMinHeightRatio']=ratio
   # Both forms display the identical name. Their HP scales are disjoint:
   # truth base 229..231, at most five clue reductions of 20, ordinary base 9..11.
   if row['id']=='M0115':

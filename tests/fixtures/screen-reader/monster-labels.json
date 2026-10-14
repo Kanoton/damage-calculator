@@ -1072,7 +1072,8 @@
     "source": "library",
     "frame": 405,
     "seconds": 48.54,
-    "training": true
+    "training": true,
+    "serialMinHeightRatio": 0.5
   },
   {
     "fixture": "labels-library-405-M0118",
