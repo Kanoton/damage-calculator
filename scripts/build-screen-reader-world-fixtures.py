@@ -21,6 +21,11 @@ def append_video_references(refs,helpers):
   points=[(x,y) for y,line in enumerate(mask) for x,v in enumerate(line) if v]
   x0=min(x for x,y in points);y0=min(y for x,y in points);x1=max(x for x,y in points)+1;y1=max(y for x,y in points)+1
   refs['names'].append({'id':row['id'],'boss':row['boss'],'width':x1-x0,'height':y1-y0,'data':base64.b64encode(bytes(mask[y][x] for y in range(y0,y1) for x in range(x0,x1))).decode()})
+  # Both forms display the identical name. Their HP scales are disjoint:
+  # truth base 229..231, at most five clue reductions of 20, ordinary base 9..11.
+  if row['id']=='M0115':
+   refs['names'][-1]['minMaxHp']=100
+   refs['names'].append({**refs['names'][-1],'id':'M0116','boss':False,'noSerial':True,'minMaxHp':1,'maxMaxHp':99})
   numbers=([(row['hpBox'],'red',f"{row['expected']['currentHp']}/{row['expected']['maxHp']}")] if row.get('learnHpDigits',True) else [])
   numbers+=([(row['serialBox'],'white',str(row['expected']['serial']))] if row['serialBox'] else [])
   for raw,kind,text in numbers:

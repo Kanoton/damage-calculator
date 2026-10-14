@@ -102,3 +102,30 @@ test('08 world: ghost alley HP changes keep different box serials and unrelated 
  expect(state.monsters.find(m=>m.monsterId==='M0037'&&m.serial===3).hp).toBe(8);expect(state.monsters.find(m=>m.monsterId==='M0037'&&m.serial===7).hp).toBe(8);
  await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[]}));expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(state);
 });
+
+
+test('08 world: library native and shared monster labels update individual HP',async({page})=>{
+ await open(page);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0104');await page.locator('#mp-difficulty').selectOption('普通');
+ for(const row of videoLabels.filter(r=>r.source==='library'&&r.id!=='M0115'))await page.evaluate(o=>ScreenReaderMapBridge.apply(o),await readVideoLabel(page,row));
+ const state=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());
+ for(const [id,serial,hp] of [['M0117',2,17],['M0117',3,17],['M0119',2,13],['M0118',1,14],['M0118',2,12],['M0024',1,12]])expect(state.monsters.find(m=>m.monsterId===id&&m.serial===serial).hp).toBe(hp);
+ await page.locator('#reader-toggle').click();await page.locator('#reader-details').evaluate(e=>e.open=true);await page.locator('#reader-world-sync').check();
+ const row=videoLabels.find(r=>r.source==='library'&&r.id==='M0117');const image=require('./fixtures/screen-reader/'+row.fixture+'.json').image;
+ await page.locator('#reader-file').setInputFiles({name:'library.png',mimeType:'image/png',buffer:Buffer.from(image.split(',')[1],'base64')});await expect(page.locator('#reader-world-result')).toContainText('看守');
+});
+
+test('08 world: warden truth requires matching HP and persists through absence or old ordinary labels; undo restores the form',async({page})=>{
+ await open(page);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0104');await page.locator('#mp-difficulty').selectOption('普通');
+ await page.evaluate(o=>ScreenReaderMapBridge.apply(o),await readVideoLabel(page,videoLabels.find(r=>r.source==='library'&&r.id==='M0116')));
+ const before=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(before.monsters.filter(m=>m.monsterId==='M0116')).toHaveLength(1);expect(before.monsters.find(m=>m.monsterId==='M0116').hp).toBe(8);
+ await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[{monsterId:'M0115',serial:null,currentHp:200,maxHp:230}]}));expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(before);
+ const truth=await readVideoLabel(page,videoLabels.find(r=>r.source==='library'&&r.id==='M0115'));await page.evaluate(o=>ScreenReaderMapBridge.apply(o),truth);
+ const state=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(state.monsters.some(m=>m.monsterId==='M0116')).toBe(false);expect(state.monsters.find(m=>m.monsterId==='M0115').hp).toBe(228);
+ for(const o of [{monsters:[]},{monsters:[{monsterId:'M0116',serial:null,currentHp:8,maxHp:9}]}])await page.evaluate(o=>ScreenReaderMapBridge.apply(o),o);
+ expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(state);await page.locator('#roster-undo').click();expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(before);
+});
+
+test('08 world: shared names still reject maps without the registered relation',async({page})=>{
+ await open(page);await map(page);const before=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());
+ const wizard=await readVideoLabel(page,videoLabels.find(r=>r.source==='library'&&r.id==='M0024'&&r.training));await page.evaluate(o=>ScreenReaderMapBridge.apply(o),wizard);expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(before);
+});

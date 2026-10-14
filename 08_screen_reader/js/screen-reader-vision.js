@@ -66,7 +66,7 @@
   if(kind==='gold')return r>180&&g>110&&b<125&&r>g*1.1;
   return Math.min(r,g,b)>215&&Math.max(r,g,b)-Math.min(r,g,b)<35;
  }
- function numberAt(source,box,kind,refs,rejectClipped=false){
+ function numberAt(source,box,kind,refs,rejectClipped=false,minHeightRatio=.38){
   const c=crop(source,box,box[2],box[3]),ctx=c.getContext('2d'),d=ctx.getImageData(0,0,c.width,c.height),w=c.width,h=c.height;
   const mask=Array.from({length:h},()=>new Uint8Array(w)),columns=new Uint16Array(w);
   for(let y=0;y<h;y++)for(let x=0;x<w;x++){const i=(y*w+x)*4;if(isInk(d.data[i],d.data[i+1],d.data[i+2],kind)){mask[y][x]=1;columns[x]++;}}
@@ -75,7 +75,7 @@
    if(x<w&&columns[x]>=2){if(start===null)start=x;continue;}
    if(start===null)continue;let top=h,bottom=0,count=0;
    for(let y=0;y<h;y++)for(let xx=start;xx<x;xx++)if(mask[y][xx]){top=Math.min(top,y);bottom=Math.max(bottom,y+1);count++;}
-   if(bottom-top>=h*.38&&count>=12){
+   if(bottom-top>=h*minHeightRatio&&count>=12){
     const glyph=document.createElement('canvas');glyph.width=x-start;glyph.height=bottom-top;const gc=glyph.getContext('2d'),pixels=gc.createImageData(glyph.width,glyph.height);
     for(let y=top;y<bottom;y++)for(let xx=start;xx<x;xx++){const i=((y-top)*glyph.width+xx-start)*4,value=mask[y][xx]*255;pixels.data[i]=pixels.data[i+1]=pixels.data[i+2]=value;pixels.data[i+3]=255;}gc.putImageData(pixels,0,0);
     const normalized=crop(glyph,[0,0,glyph.width,glyph.height],18,28).getContext('2d').getImageData(0,0,18,28).data,a=new Uint8Array(504);for(let i=0;i<a.length;i++)a[i]=Number(normalized[i*4]>110);

@@ -64,7 +64,7 @@
    cell(!apply?'確認のみ':!m.id?'前回保持':automatic&&!confirmed?'安定待ち':pending?'一部安定待ち':rejected?'一部反映保留':keeping?'一部保持':'反映');
    return tr;
   }));
-  const world=observation.world,names={M0017:'爆竹ゲロゲロ',M0014:'指揮センター'};if(world)$('world-result').textContent=(world.clock?'ラウンド '+world.clock.round+' ／ 進捗 '+world.clock.progress:'ラウンド・進捗：未判定')+' ／ '+(world.monsters.map(m=>(names[m.monsterId]||m.monsterId)+(m.serial===null?'':' '+m.serial)+' HP '+m.currentHp+'/'+m.maxHp).join('、')||'モンスター：未判定');
+  const world=observation.world;if(world)$('world-result').textContent=(world.clock?'ラウンド '+world.clock.round+' ／ 進捗 '+world.clock.progress:'ラウンド・進捗：未判定')+' ／ '+(world.monsters.map(m=>(window.ScreenReaderMapBridge.monsterName(m.monsterId))+(m.serial===null?'':' '+m.serial)+' HP '+m.currentHp+'/'+m.maxHp).join('、')||'モンスター：未判定');
   $('view').textContent=observation.view+'：今回の読取と保持している値'+(!apply?'（確認のみ）':'');
   const owner=catalog.characters.find(c=>c.id===observation.chipOwnerId)?.name,owned=current.members.find(m=>m.id===observation.chipOwnerId)?.chips||[];
   const chipNames=observation.chipIds.map(id=>(catalog.chips.find(c=>c.id===id)?.name??id)+(automatic&&!accepted.chipIds.includes(id)?'（安定待ち）':apply?'（今回）':'（確認のみ）'));
