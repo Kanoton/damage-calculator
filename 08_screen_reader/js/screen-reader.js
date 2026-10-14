@@ -118,7 +118,7 @@
    drawResults(observation,accepted,automatic);
    let worldSkipped=0;
    if($('apply').checked&&$('world-sync').checked){const applied=window.ScreenReaderMapBridge.apply(accepted.world);worldSkipped=applied.skipped||0;if(applied.skipped)$('world-result').textContent+=' ／ マップ・難易度・既存個体と一致しない情報 '+applied.skipped+'件は保持';}
-   monitorInfo((observation.world?'今回 '+observation.world.monsters.length+'体 ／ '+(automatic?'連続一致 '+accepted.world.monsters.length+'体':'手動読取')+' ／ '+(!$('apply').checked?'確認のみ ／ ':worldSkipped?'反映保留 '+worldSkipped+'体 ／ ':''):'')+timing());
+   monitorInfo((observation.world?'今回 '+observation.world.monsters.length+'体 ／ '+(automatic?'連続一致 '+accepted.world.monsters.length+'体':'手動読取')+' ／ '+(!$('apply').checked?'確認のみ ／ ':worldSkipped?'反映保留 '+worldSkipped+'件 ／ ':''):'')+timing());
    const names=observation.members.filter(m=>m.id).length;
    status((automatic?'自動読取':'画面読取')+'：'+names+'人を判定／チップ '+result.added+'件追加。'+(!observation.selfId?' 自キャラが未判定の場合は「自キャラ」を指定してください。':''));
   }catch(error){status('読み取れませんでした：'+error.message);}finally{busy=false;$('read').disabled=!rawSource;}
