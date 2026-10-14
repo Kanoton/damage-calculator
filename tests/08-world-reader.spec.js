@@ -129,3 +129,43 @@ test('08 world: shared names still reject maps without the registered relation',
  await open(page);await map(page);const before=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());
  const wizard=await readVideoLabel(page,videoLabels.find(r=>r.source==='library'&&r.id==='M0024'&&r.training));await page.evaluate(o=>ScreenReaderMapBridge.apply(o),wizard);expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(before);
 });
+
+
+test('08 world: visible monitor diagnostics distinguish disabled reading and preview from detection',async({page})=>{
+ await open(page);await page.locator('#reader-toggle').click();
+ await expect(page.locator('#reader-monitor-info')).toContainText('OFF');
+ await expect(page.locator('#reader-monitor-info')).toContainText('24種類');
+ await expect(page.locator('#reader-interval')).toHaveValue('500');
+ await expect(page.locator('#reader-world-sync')).toBeVisible();
+ const before=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());
+ await page.locator('#reader-world-sync').check();await page.locator('#reader-details').evaluate(e=>e.open=true);await page.locator('#reader-apply').uncheck();
+ await page.locator('#reader-file').setInputFiles({name:'world.png',mimeType:'image/png',buffer:Buffer.from(fixture('11').split(',')[1],'base64')});
+ await expect(page.locator('#reader-monitor-info')).toContainText('今回 2体');
+ await expect(page.locator('#reader-monitor-info')).toContainText('確認のみ');
+ await expect(page.locator('#reader-monitor-info')).toContainText('処理');
+ expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(before);
+});
+
+test('08 world: automatic capture resumes for tiny map-only changes after a static screen',async({page})=>{
+ await open(page);await page.locator('#reader-toggle').click();await page.locator('#reader-world-sync').check();await page.locator('#reader-interval').selectOption('250');
+ await page.evaluate(async image=>{
+  const im=new Image();im.src=image;await im.decode();const c=document.createElement('canvas');c.width=1536;c.height=709;c.getContext('2d').drawImage(im,0,0);
+  window.testCaptureCanvas=c;window.testCapture=c.captureStream(10);window.testWorldReads=0;
+  const analyze=ScreenReaderWorldVision.analyze;ScreenReaderWorldVision.analyze=(...args)=>{testWorldReads++;return analyze(...args);};
+  navigator.mediaDevices.getDisplayMedia=async options=>{window.testCaptureOptions=options;return testCapture;};
+ },fixture('11'));
+ await page.locator('#reader-connect').click();await page.locator('#reader-auto').check();
+ await expect(page.locator('#reader-monitor-info')).toContainText('画面変化待ち',{timeout:15000});
+ const count=await page.evaluate(()=>testWorldReads);
+ // This small pixel change is invisible to all coarse hash samples and the HUD.
+ const coarseUnchanged=await page.evaluate(()=>{
+  const boxes=[[0,0,1536,709],[165,498,288,187],[465,324,286,184],[125,430,435,40]];
+  const features=()=>JSON.stringify(boxes.map(b=>Array.from(ScreenReaderVision.feature(testCaptureCanvas,b))));
+  const before=features();testCaptureCanvas.getContext('2d').fillStyle='#ffffff';testCaptureCanvas.getContext('2d').fillRect(1001,301,2,2);return before===features();
+ });
+ expect(coarseUnchanged).toBe(true);
+ await expect.poll(()=>page.evaluate(()=>testWorldReads),{timeout:10000}).toBeGreaterThan(count);
+ await expect(page.locator('#reader-monitor-info')).toContainText('実間隔');
+ expect(await page.evaluate(()=>testCaptureOptions.video.frameRate)).toEqual({ideal:5,max:10});
+ await page.locator('#reader-stop').click();expect(await page.evaluate(()=>testCapture.getTracks().every(t=>t.readyState==='ended'))).toBe(true);
+});
