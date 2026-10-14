@@ -96,7 +96,7 @@
   // Monster HP/name/serial changes can fall between coarse 16x16 samples.
   // Include exact map pixels only while world reading is enabled.
   if($('world-sync').checked){
-   for(const [source,box] of [[frame.popupFrame||frame,[270,0,1266,600]],[frame.statusFrame||frame,[570,0,460,30]]]){
+   for(const [source,box] of [[frame.popupFrame||frame,[0,0,1536,709]],[frame.statusFrame||frame,[570,0,460,30]]]){
     const pixels=source.getContext('2d').getImageData(...box).data;
     for(let i=0;i<pixels.length;i+=4)for(let channel=0;channel<3;channel++)hash=(hash*31+pixels[i+channel])|0;
    }
