@@ -71,3 +71,4 @@
 "R073","207","modifier","atk","per_stack","1","マインド減少ボーナス","","","","","while_owned","while_owned","self"
 "R074","211","modifier","atk","per_stack","1","罪証","","4","","","while_owned","while_owned","self"
 "R075","211","modifier","def","per_stack","1","罪証","","4","","","while_owned","while_owned","self"
+R076,54,modifier,atk,per_stack,2,電撃グローブ命中数,,,,,while_owned,this_round,self
