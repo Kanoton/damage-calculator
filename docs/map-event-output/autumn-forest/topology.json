@@ -6,8 +6,8 @@
     {
       "id": "O01",
       "type": "1st",
-      "x": 1686,
-      "y": 403,
+      "x": 1688,
+      "y": 396,
       "status": "screenshot_reading",
       "minimap_xy": [
         993,
@@ -17,7 +17,7 @@
     {
       "id": "O02",
       "type": "TeleportPoint",
-      "x": 1686,
+      "x": 1688,
       "y": 544,
       "status": "screenshot_reading",
       "minimap_xy": [
@@ -28,7 +28,7 @@
     {
       "id": "O03",
       "type": "MoveAgain",
-      "x": 1686,
+      "x": 1688,
       "y": 686,
       "status": "screenshot_reading",
       "minimap_xy": [
@@ -39,8 +39,8 @@
     {
       "id": "O04",
       "type": "Event",
-      "x": 1686,
-      "y": 827,
+      "x": 1688,
+      "y": 826,
       "status": "screenshot_reading",
       "minimap_xy": [
         1059,
@@ -51,7 +51,7 @@
       "id": "O05",
       "type": "Monster",
       "x": 1686,
-      "y": 969,
+      "y": 970,
       "status": "screenshot_reading",
       "minimap_xy": [
         1081,
@@ -61,7 +61,7 @@
     {
       "id": "O06",
       "type": "Damage",
-      "x": 1690,
+      "x": 1688,
       "y": 1114,
       "status": "screenshot_reading",
       "minimap_xy": [
@@ -72,8 +72,8 @@
     {
       "id": "O07",
       "type": "Relic",
-      "x": 1690,
-      "y": 1255,
+      "x": 1688,
+      "y": 1254,
       "status": "screenshot_reading",
       "minimap_xy": [
         1126,
@@ -83,8 +83,8 @@
     {
       "id": "O08",
       "type": "TeleportPoint",
-      "x": 1690,
-      "y": 1397,
+      "x": 1688,
+      "y": 1396,
       "status": "screenshot_reading",
       "minimap_xy": [
         1148,
@@ -94,8 +94,8 @@
     {
       "id": "O09",
       "type": "2nd",
-      "x": 1690,
-      "y": 1551,
+      "x": 1688,
+      "y": 1544,
       "status": "screenshot_reading",
       "minimap_xy": [
         1172,
@@ -105,8 +105,8 @@
     {
       "id": "O10",
       "type": "Gold",
-      "x": 1542,
-      "y": 1545,
+      "x": 1540,
+      "y": 1544,
       "status": "screenshot_reading",
       "minimap_xy": [
         1148,
@@ -116,8 +116,8 @@
     {
       "id": "O11",
       "type": "MoveAgain",
-      "x": 1400,
-      "y": 1545,
+      "x": 1398,
+      "y": 1544,
       "status": "screenshot_reading",
       "minimap_xy": [
         1126,
@@ -127,8 +127,8 @@
     {
       "id": "O12",
       "type": "Shop",
-      "x": 1259,
-      "y": 1545,
+      "x": 1257,
+      "y": 1544,
       "status": "user_confirmed_shop",
       "minimap_xy": [
         1104,
@@ -138,7 +138,7 @@
     {
       "id": "O13",
       "type": "Gold",
-      "x": 1259,
+      "x": 1257,
       "y": 1686,
       "status": "screenshot_reading",
       "minimap_xy": [
@@ -149,7 +149,7 @@
     {
       "id": "O14",
       "type": "Card",
-      "x": 1259,
+      "x": 1257,
       "y": 1828,
       "status": "screenshot_reading",
       "minimap_xy": [
@@ -160,7 +160,7 @@
     {
       "id": "O15",
       "type": "Damage",
-      "x": 1117,
+      "x": 1116,
       "y": 1828,
       "status": "screenshot_reading",
       "minimap_xy": [
@@ -172,7 +172,7 @@
       "id": "O16",
       "type": "Monster",
       "x": 969,
-      "y": 1834,
+      "y": 1832,
       "status": "screenshot_reading",
       "minimap_xy": [
         1104,
@@ -183,7 +183,7 @@
       "id": "O17",
       "type": "Event",
       "x": 824,
-      "y": 1831,
+      "y": 1829,
       "status": "screenshot_reading",
       "minimap_xy": [
         1081,
@@ -193,8 +193,8 @@
     {
       "id": "O18",
       "type": "MoveAgain",
-      "x": 541,
-      "y": 1831,
+      "x": 542,
+      "y": 1830,
       "status": "screenshot_reading",
       "minimap_xy": [
         1037,
@@ -204,8 +204,8 @@
     {
       "id": "O19",
       "type": "3rd",
-      "x": 400,
-      "y": 1690,
+      "x": 398,
+      "y": 1686,
       "status": "screenshot_reading",
       "minimap_xy": [
         993,
@@ -216,7 +216,7 @@
       "id": "O20",
       "type": "Gold",
       "x": 255,
-      "y": 1545,
+      "y": 1542,
       "status": "screenshot_reading",
       "minimap_xy": [
         948,
@@ -226,7 +226,7 @@
     {
       "id": "O21",
       "type": "TeleportPoint",
-      "x": 110,
+      "x": 112,
       "y": 1400,
       "status": "screenshot_reading",
       "minimap_xy": [
@@ -238,7 +238,7 @@
       "id": "O22",
       "type": "Shop",
       "x": 110,
-      "y": 1259,
+      "y": 1256,
       "status": "user_confirmed_shop",
       "minimap_xy": [
         881,
@@ -249,7 +249,7 @@
       "id": "O23",
       "type": "Event",
       "x": 110,
-      "y": 1117,
+      "y": 1115,
       "status": "screenshot_reading",
       "minimap_xy": [
         859,
@@ -260,7 +260,7 @@
       "id": "O24",
       "type": "Monster",
       "x": 110,
-      "y": 975,
+      "y": 970,
       "status": "screenshot_reading",
       "minimap_xy": [
         837,
@@ -271,7 +271,7 @@
       "id": "O25",
       "type": "Damage",
       "x": 110,
-      "y": 827,
+      "y": 825,
       "status": "screenshot_reading",
       "minimap_xy": [
         814,
@@ -282,7 +282,7 @@
       "id": "O26",
       "type": "Relic",
       "x": 110,
-      "y": 686,
+      "y": 684,
       "status": "screenshot_reading",
       "minimap_xy": [
         792,
@@ -292,8 +292,8 @@
     {
       "id": "O27",
       "type": "TeleportPoint",
-      "x": 113,
-      "y": 541,
+      "x": 112,
+      "y": 540,
       "status": "screenshot_reading",
       "minimap_xy": [
         770,
@@ -304,7 +304,7 @@
       "id": "O28",
       "type": "Gold",
       "x": 255,
-      "y": 400,
+      "y": 398,
       "status": "screenshot_reading",
       "minimap_xy": [
         770,
@@ -314,8 +314,8 @@
     {
       "id": "O29",
       "type": "4th",
-      "x": 396,
-      "y": 258,
+      "x": 398,
+      "y": 254,
       "status": "screenshot_reading",
       "minimap_xy": [
         770,
@@ -325,7 +325,7 @@
     {
       "id": "O30",
       "type": "Card",
-      "x": 544,
+      "x": 542,
       "y": 110,
       "status": "screenshot_reading",
       "minimap_xy": [
@@ -337,7 +337,7 @@
       "id": "O31",
       "type": "Event",
       "x": 824,
-      "y": 113,
+      "y": 111,
       "status": "screenshot_reading",
       "minimap_xy": [
         814,
@@ -348,7 +348,7 @@
       "id": "O32",
       "type": "Monster",
       "x": 969,
-      "y": 110,
+      "y": 108,
       "status": "screenshot_reading",
       "minimap_xy": [
         836,
@@ -358,8 +358,8 @@
     {
       "id": "O33",
       "type": "Damage",
-      "x": 1114,
-      "y": 113,
+      "x": 1116,
+      "y": 112,
       "status": "screenshot_reading",
       "minimap_xy": [
         859,
@@ -369,8 +369,8 @@
     {
       "id": "O34",
       "type": "MoveAgain",
-      "x": 1255,
-      "y": 113,
+      "x": 1257,
+      "y": 112,
       "status": "screenshot_reading",
       "minimap_xy": [
         881,
@@ -380,8 +380,8 @@
     {
       "id": "O35",
       "type": "Heal",
-      "x": 1255,
-      "y": 255,
+      "x": 1257,
+      "y": 254,
       "status": "screenshot_reading",
       "minimap_xy": [
         903,
@@ -391,7 +391,7 @@
     {
       "id": "O36",
       "type": "Shop",
-      "x": 1255,
+      "x": 1257,
       "y": 396,
       "status": "user_confirmed_shop",
       "minimap_xy": [
@@ -402,7 +402,7 @@
     {
       "id": "O37",
       "type": "Event",
-      "x": 1397,
+      "x": 1398,
       "y": 396,
       "status": "screenshot_reading",
       "minimap_xy": [
@@ -413,7 +413,7 @@
     {
       "id": "O38",
       "type": "Card",
-      "x": 1538,
+      "x": 1540,
       "y": 396,
       "status": "screenshot_reading",
       "minimap_xy": [
@@ -425,7 +425,7 @@
       "id": "I01",
       "type": "Start",
       "x": 686,
-      "y": 972,
+      "y": 970,
       "status": "screenshot_reading",
       "minimap_xy": [
         926,
@@ -435,7 +435,7 @@
     {
       "id": "I02",
       "type": "Card",
-      "x": 683,
+      "x": 686,
       "y": 827,
       "status": "screenshot_reading",
       "minimap_xy": [
@@ -446,7 +446,7 @@
     {
       "id": "I03",
       "type": "Heal",
-      "x": 683,
+      "x": 686,
       "y": 686,
       "status": "screenshot_reading",
       "minimap_xy": [
@@ -490,7 +490,7 @@
     {
       "id": "I07",
       "type": "Gold",
-      "x": 1255,
+      "x": 1257,
       "y": 686,
       "status": "screenshot_reading",
       "minimap_xy": [
@@ -501,7 +501,7 @@
     {
       "id": "I08",
       "type": "Monster",
-      "x": 1255,
+      "x": 1257,
       "y": 544,
       "status": "screenshot_reading",
       "minimap_xy": [
@@ -512,8 +512,8 @@
     {
       "id": "I09",
       "type": "Gold",
-      "x": 683,
-      "y": 1117,
+      "x": 686,
+      "y": 1113,
       "status": "screenshot_reading",
       "minimap_xy": [
         948,
@@ -523,8 +523,8 @@
     {
       "id": "I10",
       "type": "TeleportPoint",
-      "x": 683,
-      "y": 1259,
+      "x": 686,
+      "y": 1254,
       "status": "screenshot_reading",
       "minimap_xy": [
         970,
@@ -535,7 +535,7 @@
       "id": "I11",
       "type": "Damage",
       "x": 824,
-      "y": 1259,
+      "y": 1254,
       "status": "screenshot_reading",
       "minimap_xy": [
         992,
@@ -545,8 +545,8 @@
     {
       "id": "I12",
       "type": "Event",
-      "x": 972,
-      "y": 1259,
+      "x": 966,
+      "y": 1254,
       "status": "screenshot_reading",
       "minimap_xy": [
         1015,
@@ -556,8 +556,8 @@
     {
       "id": "I13",
       "type": "Card",
-      "x": 1111,
-      "y": 1262,
+      "x": 1114,
+      "y": 1254,
       "status": "screenshot_reading",
       "minimap_xy": [
         1037,
@@ -567,8 +567,8 @@
     {
       "id": "I14",
       "type": "Heal",
-      "x": 1181,
-      "y": 1333,
+      "x": 1257,
+      "y": 1254,
       "status": "screenshot_reading",
       "minimap_xy": [
         1059,
@@ -578,8 +578,8 @@
     {
       "id": "I15",
       "type": "Monster",
-      "x": 1185,
-      "y": 1471,
+      "x": 1257,
+      "y": 1396,
       "status": "screenshot_reading",
       "minimap_xy": [
         1081,
@@ -590,7 +590,7 @@
       "id": "I16",
       "type": "Gold",
       "x": 538,
-      "y": 972,
+      "y": 970,
       "status": "screenshot_reading",
       "minimap_xy": [
         903,
@@ -601,7 +601,7 @@
       "id": "I17",
       "type": "MoveAgain",
       "x": 396,
-      "y": 972,
+      "y": 970,
       "status": "screenshot_reading",
       "minimap_xy": [
         881,
@@ -612,7 +612,7 @@
       "id": "I18",
       "type": "Heal",
       "x": 255,
-      "y": 972,
+      "y": 970,
       "status": "screenshot_reading",
       "minimap_xy": [
         859,
@@ -917,7 +917,8 @@
     "時計回り45度。反時計回りより縦長になり、長い辺が縦方向に収まる。",
     "マス素材は回転後の縦横の辺に合わせ、正立した72px角で配置。",
     "I18–O24の接続と初期進行方向は引き続き暫定。",
-    "通常の間隔は約144px。角の訂正に伴う端の間隔には元の図を基にした差が残る。"
+    "通常の間隔は約144px。角の訂正に伴う端の間隔には元の図を基にした差が残る。",
+    "図として上下の線対称になるよう各マスの描画座標を整形。内側の上下ルートの曲がりを直角に揃え、接続とマス順序は維持。minimap_xyは元の読取座標を保持。"
   ],
   "rotation_degrees_clockwise": 45,
   "event_spawns_normal": {
@@ -985,5 +986,6 @@
         "monster_id": "M0121"
       }
     ]
-  }
+  },
+  "diagram_symmetry_axis_y": 970
 }
