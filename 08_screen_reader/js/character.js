@@ -588,10 +588,18 @@
   apply:observation=>{
    if(!observation||!Array.isArray(observation.members))return {updated:0,added:0};
    const rowFor=id=>characters.find(row=>String(row.id)===String(id)),valid=(value,min,max)=>Number.isSafeInteger(value)&&value>=min&&value<=max;
-   const candidates=observation.members.filter(m=>m&&rowFor(m.id));
+   const fixed=Array.isArray(observation.partyIds)&&observation.partyIds.length===4&&new Set(observation.partyIds.map(String)).size===4&&observation.partyIds.every(id=>rowFor(id))?observation.partyIds.map(String):null;
+   const candidates=observation.members.filter(m=>m&&rowFor(m.id)&&(!fixed||fixed.includes(String(m.id))&&(m.slot===undefined||fixed[m.slot]===String(m.id))));
    const seen=candidates.filter(m=>candidates.filter(other=>String(other.id)===String(m.id)).length===1&&(m.slot===undefined||valid(m.slot,0,3)&&candidates.filter(other=>other.slot===m.slot).length===1));
-   const self=rowFor(observation.selfId);let updated=0,added=0;
+   const self=fixed&&!fixed.includes(String(observation.selfId))?null:rowFor(observation.selfId);let updated=0,added=0;
    const before=partySlots.map(id=>id===null?null:String(id)).join(',');
+   if(fixed){
+    const clearSelf=selectedCharacter&&!fixed.some(id=>String(id)===String(selectedCharacter.id));
+    if(clearSelf){closeSkillDialogs();selectedCharacter=null;partyEditId=null;}
+    for(let i=0;i<4;i++)partySlots[i]=rowFor(fixed[i]).id;
+    if(clearSelf)window.dispatchEvent(new Event('character-selection-change'));
+   }
+
    if(!selectedCharacter&&self){
     const fromParty=partyStates.get(String(self.id)),newMax=fromParty?calculatePartyMember(self).hp:null,index=partySlots.findIndex(id=>String(id)===String(self.id));
     if(fromParty)Object.assign(getState(self.id),{...fromParty,manual:{...fromParty.manual},chips:[...fromParty.chips]});

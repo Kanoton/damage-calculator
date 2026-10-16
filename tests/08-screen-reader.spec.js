@@ -466,3 +466,27 @@ for(const width of [1280,1920])test('08: observed party is visible before self i
  await page.locator('#reader-toggle').click();await page.locator('#reader-new-game').click();await closeReader(page);
  await expect(page.locator('#selected-character')).toBeHidden();expect((await snapshot(page)).members.every(m=>!m.id)).toBe(true);expect(errors).toEqual([]);
 });
+
+test('08: party can be fixed before self, survives wrong battle identities and resize, and accepts self without unlocking',async({page})=>{
+ await open(page);await readFixture(page,'6250');
+ await page.locator('#reader-party-confirm').click();await expect(page.locator('#reader-party-status')).toContainText('PT確定');
+ await expect(page.locator('#reader-party-0')).toBeDisabled();
+ // A battle overlay is adversarial input. The controller must reject its identities even if a matcher returns them.
+ await page.evaluate(()=>{const analyze=ScreenReaderVision.analyze;ScreenReaderVision.analyze=(...args)=>{const o=analyze(...args);return {...o,selfId:'1',members:[{id:'1',slot:0,coin:99},{id:'2',slot:1,coin:99}]};};});
+ await page.locator('#reader-read').click();await expect(page.locator('#reader-read')).toBeEnabled();
+ await page.evaluate(()=>ScreenReaderCharacterBridge.apply({partyIds:['105','13','21','26'],selfId:'1',members:[{id:'1',slot:0,coin:99}]}));
+ let s=await snapshot(page);expect(s.selfId).toBe('');expect(s.members.map(m=>m.id)).toEqual(['105','13','21','26']);expect(s.members[0].coin).not.toBe(99);
+ await page.locator('#reader-self').selectOption('26');await page.locator('#reader-read').click();
+ await expect.poll(async()=> (await snapshot(page)).selfId).toBe('26');await expect(page.locator('#reader-party-0')).toBeDisabled();
+ // Changing capture dimensions must not silently release the confirmed identities.
+ const data=await page.evaluate(async image=>{const im=new Image();im.src=image;await im.decode();const c=document.createElement('canvas');c.width=1200;c.height=700;c.getContext('2d').drawImage(im,0,0,1200,700);return c.toDataURL();},fixture('6250'));
+ await page.locator('#reader-file').setInputFiles({name:'resized.png',mimeType:'image/png',buffer:Buffer.from(data.split(',')[1],'base64')});await expect(page.locator('#reader-file')).toHaveValue('');
+ expect((await snapshot(page)).members.map(m=>m.id)).toEqual(['105','13','21','26']);await expect(page.locator('#reader-party-0')).toBeDisabled();
+});
+
+test('08: two stable automatic party observations fix the order without requiring a self identity',async({page})=>{
+ await open(page);await readFixture(page,'6250');
+ await page.evaluate(()=>ScreenReaderController.read(true));await page.evaluate(()=>ScreenReaderController.read(true));
+ await expect(page.locator('#reader-party-confirm')).toBeDisabled();await expect(page.locator('#reader-party-status')).toContainText('PT確定');
+ expect((await snapshot(page)).selfId).toBe('');
+});

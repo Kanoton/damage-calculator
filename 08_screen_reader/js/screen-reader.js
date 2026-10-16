@@ -45,7 +45,14 @@
   window.ScreenReaderMiniCharacterMapping.load(catalog.characters).then(updateMappingPreview);
  }
  function releaseParty(){partyLock=null;lastObservation=null;partyEdited=false;$('party-confirm').disabled=false;$('party-unlock').disabled=true;$('party-status').textContent='PT未確定';for(const select of $('party-slots').querySelectorAll('select')){select.disabled=false;select.value='';}}
- function partySignature(){return [(rawSource?.videoWidth||rawSource?.naturalWidth||rawSource?.width),(rawSource?.videoHeight||rawSource?.naturalHeight||rawSource?.height),JSON.stringify(area)].join(':');}
+
+ function lockParty(ids,selfId,hud){
+  const previousSelf=bridge.snapshot().selfId;
+  partyLock={ids:[...ids],selfId:ids.includes(selfId)?selfId:ids.includes(previousSelf)?previousSelf:null,hud:{...hud}};
+  for(let i=0;i<4;i++){$('party-'+i).value=ids[i];$('party-'+i).disabled=true;}
+  $('party-confirm').disabled=true;$('party-unlock').disabled=false;
+  $('party-status').textContent='PT確定：編成は再設定まで固定。'+(partyLock.selfId?'':'自キャラは未判定です。「自キャラ」で指定してください。');
+ }
  function startReaderSession(keepAutomatic=false){
   const automatic=keepAutomatic&&$('auto').checked;
   window.ScreenReaderMapBridge.resetForReader();readerSession=true;$('auto').checked=automatic;$('world-sync').checked=true;monitorInfo();
@@ -131,9 +138,14 @@
    if(automatic&&sameFrames>2){monitorInfo('画面変化待ち ／ '+timing());return;}
    // Yield to paint without overlapping jobs. Stop/reset invalidates this frame.
    await new Promise(resolve=>requestAnimationFrame(resolve));if(token!==generation)return;
-   if(partyLock&&partyLock.signature!==partySignature())releaseParty();
    const observation=vision.analyze(frame,custom,partyLock);if($('world-sync').checked)observation.world=window.ScreenReaderWorldVision.analyze(frame);else $('world-result').textContent='マップ読取はOFFです。マップ・難易度を選び、反映をONにしてください。';if(!partyLock&&$('self').value)observation.selfId=$('self').value;
-   const accepted=automatic?stabilize(observation):observation;const result=$('apply').checked?bridge.apply(accepted):{updated:0,added:0};
+   const accepted=automatic?stabilize(observation):{...observation,members:[...observation.members]};
+   if(automatic&&!partyLock&&!partyEdited&&$('apply').checked){
+    const slots=[0,1,2,3].map(slot=>accepted.members.find(m=>m.slot===slot));
+    if(slots.every(m=>m?.id)&&slots.filter(m=>m.coin!==undefined&&m.level!==undefined).length>=2&&new Set(slots.map(m=>m.id)).size===4)lockParty(slots.map(m=>m.id),accepted.selfId,observation.hud);
+   }
+   if(partyLock){accepted.selfId=partyLock.selfId;accepted.partyIds=[...partyLock.ids];accepted.members=accepted.members.filter(m=>partyLock.ids.includes(m.id)&&(m.slot===undefined||partyLock.ids[m.slot]===m.id));}
+   const result=$('apply').checked?bridge.apply(accepted):{updated:0,added:0};
    drawResults(observation,accepted,automatic);
    let worldSkipped=0;
    if($('apply').checked&&$('world-sync').checked){const applied=window.ScreenReaderMapBridge.apply(accepted.world);worldSkipped=applied.skipped||0;if(applied.skipped)$('world-result').textContent+=' ／ マップ・難易度・既存個体と一致しない情報 '+applied.skipped+'件は保持';}
@@ -168,18 +180,16 @@
   const ids=Array.from({length:4},(_,i)=>$('party-'+i).value),selfId=$('self').value||lastObservation?.selfId;
   if(!lastObservation?.hud){$('party-status').textContent='ゲーム画面を一度読み取ってから確定してください。';return;}
   if(ids.some(id=>!catalog.characters.some(c=>c.id===id))||new Set(ids).size!==4){$('party-status').textContent='異なる4人を上から順に指定してください。';return;}
-  if(!ids.includes(selfId)){$('party-status').textContent='「自キャラ」でこのPTにいる自分のキャラを指定してください。';return;}
+  if(selfId&&!ids.includes(selfId)){$('party-status').textContent='「自キャラ」でこのPTにいる自分のキャラを指定してください。';return;}
   if(!$('apply').checked){$('party-status').textContent='「判定できた情報を反映」をONにしてから確定してください。';return;}
   generation++;stable.clear();lastHash=null;sameFrames=0;
-  partyLock={ids,selfId,hud:{...lastObservation.hud},signature:partySignature()};
-  bridge.apply({selfId,members:ids.map((id,slot)=>({id,slot}))});
-  for(const select of $('party-slots').querySelectorAll('select'))select.disabled=true;
-  $('party-confirm').disabled=true;$('party-unlock').disabled=false;$('party-status').textContent='PT確定：Lv・HP・コインを追跡中。攻撃・防御・チップは表示された画面から更新します。';
+  lockParty(ids,selfId,lastObservation.hud);
+  bridge.apply({selfId:partyLock.selfId,partyIds:ids,members:ids.map((id,slot)=>({id,slot}))});
   if(rawSource&&!busy)read();
  });
- $('party-unlock').addEventListener('click',()=>{generation++;stable.clear();lastHash=null;sameFrames=0;releaseParty();if(rawSource&&!busy)read();});
+ $('party-unlock').addEventListener('click',()=>{const ids=partyLock?.ids||bridge.snapshot().members.map(m=>m.id);generation++;stable.clear();lastHash=null;sameFrames=0;releaseParty();partyEdited=true;for(let i=0;i<4;i++)$('party-'+i).value=ids[i]||'';if(rawSource&&!busy)read();});
  $('new-game').addEventListener('click',()=>{startReaderSession();status('読取用にゲーム状態をすべてリセットしました。自キャラ・PT・マップ・難易度は未判定です。');});
- $('self').addEventListener('change',()=>{if(partyLock)releaseParty();generation++;stable.clear();sameFrames=0;lastHash=null;});
+ $('self').addEventListener('change',()=>{if(partyLock){if(partyLock.ids.includes($('self').value))partyLock.selfId=$('self').value;else{$('self').value=partyLock.selfId||'';$('party-status').textContent='PTは固定中です。自キャラはPT内の人を指定してください。';}}generation++;stable.clear();sameFrames=0;lastHash=null;});
  $('world-sync').addEventListener('change',()=>{stable.clear();sameFrames=0;lastHash=null;monitorInfo();});
  $('interval').addEventListener('change',()=>{if(!busy)schedule();});
  $('apply').addEventListener('change',()=>{stable.clear();sameFrames=0;lastHash=null;});
