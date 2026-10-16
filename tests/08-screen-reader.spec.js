@@ -490,3 +490,44 @@ test('08: two stable automatic party observations fix the order without requirin
  await expect(page.locator('#reader-party-confirm')).toBeDisabled();await expect(page.locator('#reader-party-status')).toContainText('PT確定');
  expect((await snapshot(page)).selfId).toBe('');
 });
+
+test('08: chip icons and active tabs alone cannot authorize chip additions without panel rims',async({page})=>{
+ await open(page);
+ const results=await page.evaluate(async images=>{
+  const outputs=[];
+  for(const [name,image] of images){
+   const im=new Image();im.src=image;await im.decode();const source=ScreenReaderVision.normalize(im);
+   const kind=name==='6250'?'small':name==='popup-41'?'lower':'large';
+   const centers=kind==='small'?[[239,527],[312,527],[386,527],[199,591],[273,591],[347,591],[421,591],[239,655],[312,655],[386,655]]:kind==='lower'?[[142,527],[216,527],[289,527],[103,591],[177,591],[251,591],[325,591],[142,655],[216,655],[289,655]]:[[535,352],[609,352],[682,352],[495,416],[570,416],[644,416],[719,416],[535,481],[609,481],[682,481]];
+   const target=kind==='lower'?source.popupFrame:kind==='large'?(source.statusFrame||source):source;
+   const ctx=target.getContext('2d');ctx.fillStyle='#141414';for(const [x,y] of centers){ctx.fillRect(x-9,y-30,18,8);ctx.fillRect(x-9,y+22,18,8);}
+   const o=ScreenReaderVision.analyze(source);outputs.push({name,owner:o.chipOwnerId,chips:o.chipIds});
+  }return outputs;
+ },['6250','popup-41','status-184601'].map(n=>[n,fixture(n)]));
+ for(const o of results){expect(o.owner,o.name).toBeNull();expect(o.chips,o.name).toEqual([]);}
+});
+
+test('08: a confirmed party with unknown self identifies the later lower-left portrait without changing order',async({page})=>{
+ await open(page);await readFixture(page,'popup-11');await page.locator('#reader-party-confirm').click();
+ expect((await snapshot(page)).selfId).toBe('');
+ const data=await page.evaluate(async({base,own})=>{
+  const a=new Image(),b=new Image();a.src=base;b.src=own;await Promise.all([a.decode(),b.decode()]);
+  const c=ScreenReaderVision.normalize(a);c.getContext('2d').drawImage(b,116,445,139,116,116,445,139,116);return c.toDataURL();
+ },{base:fixture('left-hud'),own:fixture('self-sherry-24')});
+ await page.locator('#reader-apply').uncheck();
+ await page.locator('#reader-file').setInputFiles({name:'self-later.png',mimeType:'image/png',buffer:Buffer.from(data.split(',')[1],'base64')});await expect(page.locator('#reader-file')).toHaveValue('');
+ expect((await snapshot(page)).selfId).toBe('');
+ await page.locator('#reader-apply').check();await page.locator('#reader-read').click();
+ let s=await snapshot(page);expect(s.selfId).toBe('106');expect(s.members.map(m=>m.id)).toEqual(['105','106','3','18']);await expect(page.locator('#reader-party-0')).toBeDisabled();
+ await readFixture(page,'left-hud');s=await snapshot(page);expect(s.selfId).toBe('106');expect(s.members.map(m=>m.id)).toEqual(['105','106','3','18']);
+});
+
+test('08: later self portrait still needs two automatic observations and cannot identify someone outside the fixed party',async({page})=>{
+ await open(page);
+ const result=await page.evaluate(async({base,own})=>{
+  const a=new Image(),b=new Image();a.src=base;b.src=own;await Promise.all([a.decode(),b.decode()]);const c=ScreenReaderVision.normalize(a);c.getContext('2d').drawImage(b,116,445,139,116,116,445,139,116);c.popupFrame=c;
+  const party={ids:['105','106','3','18'],selfId:null,hud:{layout:'left',source:'primary'}},o=ScreenReaderVision.analyze(c,undefined,party);
+  return {first:ScreenReaderController.stabilize(o).selfId,second:ScreenReaderController.stabilize(o).selfId,outside:ScreenReaderVision.analyze(c,undefined,{...party,ids:['105','13','3','18']}).selfId,known:ScreenReaderVision.analyze(c,undefined,{...party,selfId:'18'}).selfId};
+ },{base:fixture('left-hud'),own:fixture('self-sherry-15')});
+ expect(result).toEqual({first:null,second:'106',outside:null,known:'18'});
+});

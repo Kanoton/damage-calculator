@@ -144,7 +144,7 @@
     const slots=[0,1,2,3].map(slot=>accepted.members.find(m=>m.slot===slot));
     if(slots.every(m=>m?.id)&&slots.filter(m=>m.coin!==undefined&&m.level!==undefined).length>=2&&new Set(slots.map(m=>m.id)).size===4)lockParty(slots.map(m=>m.id),accepted.selfId,observation.hud);
    }
-   if(partyLock){accepted.selfId=partyLock.selfId;accepted.partyIds=[...partyLock.ids];accepted.members=accepted.members.filter(m=>partyLock.ids.includes(m.id)&&(m.slot===undefined||partyLock.ids[m.slot]===m.id));}
+   if(partyLock){if($('apply').checked&&!partyLock.selfId&&partyLock.ids.includes(accepted.selfId)){partyLock.selfId=accepted.selfId;$('self').value=accepted.selfId;$('party-status').textContent='PT確定：編成は再設定まで固定。自キャラも判定済みです。';}accepted.selfId=partyLock.selfId;accepted.partyIds=[...partyLock.ids];accepted.members=accepted.members.filter(m=>partyLock.ids.includes(m.id)&&(m.slot===undefined||partyLock.ids[m.slot]===m.id));}
    const result=$('apply').checked?bridge.apply(accepted):{updated:0,added:0};
    drawResults(observation,accepted,automatic);
    let worldSkipped=0;

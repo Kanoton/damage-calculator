@@ -211,3 +211,12 @@ test('08 world: first sighting at zero HP is held, while a previously observed a
  await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[{monsterId:'M0004',serial:1,currentHp:0,maxHp:10}]}));expect((await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).monsters[0].defeated).toBe(true);
  await page.locator('#roster-undo').click();expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(alive);
 });
+
+test('08 world: complete labels below the old scan limit are readable while edge-clipped HP abstains',async({page})=>{
+ await open(page);
+ const results=await page.evaluate(async image=>{
+  const im=new Image();im.src=image;await im.decode();const src=ScreenReaderVision.normalize(im).popupFrame;
+  return [625,655].map(y=>{const c=document.createElement('canvas');c.width=1536;c.height=709;const ctx=c.getContext('2d');ctx.fillStyle='#141414';ctx.fillRect(0,0,1536,709);ctx.drawImage(src,370,225,170,70,650,y,170,70);return ScreenReaderWorldVision.analyze(c).monsters;});
+ },fixture('11'));
+ expect(results[0]).toEqual([{monsterId:'M0017',serial:5,currentHp:7,maxHp:7}]);expect(results[1]).toEqual([]);
+});
