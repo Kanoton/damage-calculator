@@ -112,9 +112,9 @@
  function activeTab(source){
   const scores=[179,285,392,495].map(x=>{const p=crop(source,[x-30,438,60,6],60,6).getContext('2d').getImageData(0,0,60,6).data;let gold=0;for(let i=0;i<p.length;i+=4)if(p[i]>180&&p[i+1]>105&&p[i+1]<220&&p[i+2]<85)gold++;return gold;});const max=Math.max(...scores);return max>180&&scores.filter(v=>v>180).length===1?scores.indexOf(max):null;
  }
- function readMembers(source,layout,charRefs,digits){
+ function readMembers(source,layout,charRefs,digits,partyIds=null){
   return layout.regions.avatar.map((box,index)=>{
-   const data=feature(source,box),found=hasFaceTexture(data)?match(data,charRefs.filter(r=>r.kind==='avatar'))||profileMatch(data):null;if(!found)return {slot:index,unreadable:true};
+   const data=partyIds?null:feature(source,box),found=partyIds?{id:partyIds[index],confidence:100}:hasFaceTexture(data)?match(data,charRefs.filter(r=>r.kind==='avatar'))||profileMatch(data):null;if(!found)return {slot:index,unreadable:true};
    const member={slot:index,id:found.id,confidence:found.confidence},kind=['red','green','blue','gold'][index];
    const shifted=box=>[box[0],box[1]+Y[index],box[2],box[3]];
    const hp=numberAt(source,shifted(layout.hp),kind,digits,layout.id==='left'),maxHp=numberAt(source,shifted(layout.maxHp),kind,digits),coin=numberAt(source,shifted(layout.coin),'white',digits),level=levelAt(source,index,layout.stars);
@@ -139,9 +139,28 @@
   }
   return best;
  }
- function analyze(source,custom={characters:[],chips:[]}){
+ // Sword/shield anchors from anonymized self-hud-frame24; numbers use the existing digit matcher.
+ const selfHudReferences=[{"id":"atk","icon":[8,625,30,30],"box":[45,623,29,34],"data":"PDw5Ojo3ODg1ODg1Ozs4Ozs4Ojo3Nzc0OTg2MzQxFxcXFhYWFBISCwsJAwQCBAQDODg1Ojo3Ozs4Ozs4Nzc0Nzc0OTk2OTk2Njg0GRgaHAACYwAJcAAIhQAHkAELFAABNzc0Ojo3PDw5PDw5ODg1Nzc0ODk2Ozs6KSonEAACsgAX6gAb7AAY6AAa1AQdGwAEOjo3OTk2Ozs4Ojo3Nzc0Nzc0NTg1MTEyBgMDbwIK6QAb6wAb6AAX6AAX0QUcGQEDPDw5Ojo3Nzc0OTk2Ojo3Ojw5ODg1FBIUOAEG4AMe7AAY6wAa6gAY6QAczgMbGAADOzs4Ojo3ODg1Nzc0OTk5Ojw8IyIjFAECtQEZ6AAZ6QAZ6wAZ6AAZ5wEbggYRCAEBOjo4Ojo3Ozs4Ojo4ODo6MS8xBwMEewQT6gAd7AAa6QAZ6wAY2AIYVAQICQEBCwwLNzY4Ojo6PDw8PDw8NTg0DAsLOwQK3AEa7AAZ6gAZ6AAYtAMVLAIFAwEBHBsZNDQyOjk7ODg5KSkpKSkpGBobDQEBugIX6wAX5wEZ3gIZhgQQEQAADAoMKiooNzczNzc0PDw8IiIiCwIBCwEBAgMCfgYW5gAa6gAaygIXVwIHBwIDGRcWODczODg1ODc1ODY0PDw8HBwcHwIGlwEOCQAAkgYT5QAZrQIUJQECCQoKLi0rOjUxOTcyNTc0NzY1ODY3OTk5MzMzBQUFKAIDogAMCgAARQAHCwIBGBkWNjYzNzc0Nzc0Nzc0Nzc0Nzc0Nzc0NDQ0Hh4eBQMBngoe4AAVmwEPBwAAIiIfPTo1ODg1Nzc0Nzc0ODg1OTk2Nzc0Nzc0BAMEDAQElAcW1QAXJwACLQMHewEPCAYGNjc0Nzc0Nzc0Nzc0Nzc0Nzc0Nzc0Nzc0AgICaQcRzAAXIQABGBUTDg0NDQEBFxUUOTc0Nzc0OTk2Nzc0Nzc0Nzc0Nzc0Nzc0IiMiCAICGgICDQwKODo0Ojg2JyYlNTUyNzczODg1OTk2Nzc0Nzc0Nzc0Nzc0Nzc0"},{"id":"def","icon":[8,670,29,31],"box":[45,668,29,35],"data":"Ojo6Ojo5OTk3MjIyKikoHx0cFRUWDAsODQ0PDAsNEA8RGhoaIiIiLy8vMTExNzc0PDw8IyMjDQwMAwYPBiAtCzA9EEtlE2mLG2mEAAEDAAABAAAAAAAAAAAABAQEFhYVPDw8HBwcBAYHKqHKIbbsI8H6Hr/6G8D4E422AQEFAAABAAACAAACAAAAAAAADAwMNzc2HBwbAwUHHrbrG7/6Hb/4HMD7HMH3FY23AQEFAAABAAACAAACAAAAAAABCwsLOTk4HR0bBQUIH7XrHr75HsD3HcD5GsL2FI67AQIFAAAAAAAAAAAAAAACAAABDAwLOzs7HR0dBAYHG7LpHMH7HcH7HcL7GsH5FI2+AQEGAAABAAAAAAAAAAACAAABDAwLPDw8HBwcBQUIH6zbHrbtHrXqHrfpH7nqEIOuAQMJAAIEAQEDAQEDAQIDAAACDAwLOzs7HR0cAgAAAAEGAQIKAgILAQMIAAIHE0RSJ7LeKbTgKLPhKbPiLLLiEE9qDAwMOTk5GxsbAAAAAAAAAAABAAAAAAABAQABF0VZHsD0HcD4HcD5HcH4HMP6ClZuCwwLOTk5GxsbAAAAAAAAAAABAAAAAAAAAQAAF0VYHr/0HcD4HcD5Hb/3Hr74CU1nDAwLOjo6KioqAAAAAAAAAAAAAAAAAAABAAAAF0VZHr/0HcD4HcD5HL/4J7TlBxwmEhEQOzs7OTk5CwsLAAAAAAAAAAAAAAABAAAAF0ZYH7/zHsH3HcD6IL30D0BSAwUFLi4sOzs4Ozs4NDQxCgoHAQEDAAADAQEBAAAAFkdTHL7yHcD1JqbPFDpIAgECKSMjNzc2OTk4Ojo3Ojo3ODg1ExIUAAABAAAAAAEBF0RRJKrXHmB7BxIYCAkIKykqODg4Nzc2Ojg5Ozk6PDo7PDs8OTc4IB0eBwYGAgICBAYICQ8TAgIGFhUXMzMuOTgxOjkxOjkxspUospUospUospUos5UotJUosJIonIEnnX4on3wrpIcqr5MpsJMsr5Ipr5Ipr5Ip"}];
+ function readSelfStats(source){
+  const out={},digits=window.ScreenReaderReferences.digits;
+  for(const ref of selfHudReferences){
+   if(distance(feature(source,ref.icon),bytes(ref))>.08)continue;
+   const value=numberAt(source,ref.box,'white',digits,true);if(value!==null)out[ref.id]=value;
+  }
+  return out;
+ }
+ function analyze(source,custom={characters:[],chips:[]},party=null){
   const refs=window.ScreenReaderReferences,extra=window.ScreenReaderLayoutReferences||{},statusRefs=window.ScreenReaderStatusReferences||{},charRefs=[...refs.characters,...(extra.characters||[]),...(statusRefs.characters||[]),...(custom.characters||[])],chipRefs=[...refs.chips,...(window.ScreenReaderPopupReferences?.chips||[]),...(statusRefs.chips||[]),...(custom.chips||[])],digits=[...refs.digits,...(extra.digits||[])];
-  const {layout,members,source:hudSource}=selectLayout(source,charRefs,digits);
+  const locked=party&&Array.isArray(party.ids)&&party.ids.length===4&&new Set(party.ids).size===4&&layouts.some(l=>l.id===party.hud?.layout);
+  let selected;
+  if(locked){
+   const layout=layouts.find(l=>l.id===party.hud.layout),hudSource=party.hud.source==='popup'?(source.popupFrame||source):source;
+   let members=readMembers(hudSource,layout,charRefs,digits,party.ids);
+   // A confirmed order does not prove that a game HUD is currently visible.
+   if(members.filter(m=>m.coin!==undefined&&m.level!==undefined).length<2)members=members.map(m=>({slot:m.slot,unreadable:true}));
+   selected={layout,source:hudSource,members};
+  }else selected=selectLayout(source,charRefs,digits);
+  const {layout,members,source:hudSource}=selected;
   // Repeated IDs signal a bad match; do not use either conflicting slot.
   const repeated=new Set(members.filter(m=>m.id&&members.filter(other=>other.id===m.id).length>1).map(m=>m.id));
   for(const m of members)if(repeated.has(m.id)){delete m.id;m.unreadable=true;}
@@ -150,13 +169,14 @@
   const lower=source.popupFrame&&source.statusFrame?lowerTab(source.popupFrame):null,tab=lower??activeTab(hudSource);
   // The small popup covers the self portrait. Never identify self from its
   // chip contents or selected tab; keep the previous self or explicit choice.
-  const own=header||tab===null?match(feature(hudSource,layout.regions.self),charRefs.filter(r=>r.kind==='self')):null;
-  const observation={members,selfId:own?.id??null,view:'通常画面',chipOwnerId:null,chipIds:[]};
+  const own=!locked&&(header||tab===null)?match(feature(hudSource,layout.regions.self),charRefs.filter(r=>r.kind==='self')):null;
+  const observation={members,selfId:locked?party.selfId:own?.id??null,hud:{layout:layout.id,source:hudSource===source?'primary':'popup'},view:'通常画面',chipOwnerId:null,chipIds:[]};
   if(header){
    observation.view='ステータス画面';observation.chipOwnerId=header.id;observation.chipIds=chipMatches(statusSource,largeCenters,chipRefs);
    let target=members.find(m=>m.id===header.id);if(!target){target={id:header.id};members.push(target);}
    for(const [stat,box] of [['atk',[542,239,26,37]],['def',[619,239,26,37]]]){const v=numberAt(statusSource,box,'white',refs.digits);if(v!==null)target[stat]=v;}
   }else if(tab!==null){observation.view='チップ画面';observation.chipOwnerId=members[tab]?.id??null;observation.chipIds=chipMatches(lower!==null?source.popupFrame:hudSource,lower!==null?lowerCenters:smallCenters,chipRefs);}
+  if(locked&&!header&&tab===null){const self=members.find(m=>m.id===party.selfId);if(self)Object.assign(self,readSelfStats(source.popupFrame||source));}
   return observation;
  }
  function normalize(source,area){const c=document.createElement('canvas');c.width=WIDTH;c.height=HEIGHT;const w=source.videoWidth||source.naturalWidth||source.width,h=source.videoHeight||source.naturalHeight||source.height;const a=area||{x:0,y:0,w:1,h:1};c.getContext('2d').drawImage(source,a.x*w,a.y*h,a.w*w,a.h*h,0,0,WIDTH,HEIGHT);
@@ -166,5 +186,5 @@
   const popup=document.createElement('canvas');popup.width=WIDTH;popup.height=HEIGHT;popup.getContext('2d').drawImage(source,a.x*w,a.y*h,a.w*w,a.h*h,0,0,statusWidth,HEIGHT);c.popupFrame=popup;
   return c;}
  function learn(source,kind,id,index=0){const refs=window.ScreenReaderReferences,extra=window.ScreenReaderLayoutReferences||{},selected=selectLayout(source,[...refs.characters,...(extra.characters||[]),...(window.ScreenReaderStatusReferences?.characters||[])],[...refs.digits,...(extra.digits||[])]),layout=selected.layout;const lower=source.popupFrame&&source.statusFrame&&lowerTab(source.popupFrame)!==null;const box=kind==='chip-small'?(lower?lowerCenters:smallCenters)[index]:kind==='chip-large'?largeCenters[index]:kind==='avatar'?layout.regions.avatar[index]:layout.regions[kind];if(!box)throw Error('見本の位置が不正です。');const region=kind.startsWith('chip-')?[box[0]-18,box[1]-18,36,36]:box;return {id:String(id),kind:kind.startsWith('chip-')?'chip':kind,data:encode(feature(kind==='chip-small'&&lower?source.popupFrame:(kind==='header'||kind==='chip-large')?(source.statusFrame||source):selected.source,region))};}
- window.ScreenReaderVision={analyze,normalize,learn,numberAt,feature,profileMatch,regions,WIDTH,HEIGHT};
+ window.ScreenReaderVision={analyze,normalize,learn,numberAt,feature,profileMatch,readSelfStats,regions,WIDTH,HEIGHT};
 })();
