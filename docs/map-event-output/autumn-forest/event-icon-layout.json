@@ -1,0 +1,226 @@
+{
+  "tile_size": 72,
+  "icon_max_size": 86,
+  "corner_overlap": 18,
+  "line_clearance": 8,
+  "events": {
+    "1": [
+      {
+        "node": "O12",
+        "monster_id": "M0123",
+        "corner": "top-left",
+        "box": [
+          1153,
+          1445,
+          1239,
+          1526
+        ],
+        "size": [
+          86,
+          81
+        ]
+      },
+      {
+        "node": "O22",
+        "monster_id": "M0123",
+        "corner": "top-right",
+        "box": [
+          128,
+          1157,
+          214,
+          1238
+        ],
+        "size": [
+          86,
+          81
+        ]
+      },
+      {
+        "node": "O36",
+        "monster_id": "M0123",
+        "corner": "bottom-left",
+        "box": [
+          1153,
+          414,
+          1239,
+          495
+        ],
+        "size": [
+          86,
+          81
+        ]
+      },
+      {
+        "node": "O26",
+        "monster_id": "M0122",
+        "corner": "bottom-right",
+        "box": [
+          128,
+          702,
+          214,
+          778
+        ],
+        "size": [
+          86,
+          76
+        ]
+      }
+    ],
+    "3": [
+      {
+        "node": "O24",
+        "monster_id": "M0120",
+        "corner": "bottom-right",
+        "box": [
+          128,
+          988,
+          214,
+          1068
+        ],
+        "size": [
+          86,
+          80
+        ]
+      },
+      {
+        "node": "I08",
+        "monster_id": "M0121",
+        "corner": "bottom-left",
+        "box": [
+          1153,
+          562,
+          1239,
+          641
+        ],
+        "size": [
+          86,
+          79
+        ]
+      },
+      {
+        "node": "I15",
+        "monster_id": "M0123",
+        "corner": "top-left",
+        "box": [
+          1153,
+          1297,
+          1239,
+          1378
+        ],
+        "size": [
+          86,
+          81
+        ]
+      }
+    ],
+    "7": [
+      {
+        "node": "O32",
+        "monster_id": "M0121",
+        "corner": "bottom-left",
+        "box": [
+          865,
+          126,
+          951,
+          205
+        ],
+        "size": [
+          86,
+          79
+        ]
+      },
+      {
+        "node": "O16",
+        "monster_id": "M0121",
+        "corner": "top-left",
+        "box": [
+          865,
+          1735,
+          951,
+          1814
+        ],
+        "size": [
+          86,
+          79
+        ]
+      },
+      {
+        "node": "O16",
+        "monster_id": "M0122",
+        "corner": "top-right",
+        "box": [
+          987,
+          1738,
+          1073,
+          1814
+        ],
+        "size": [
+          86,
+          76
+        ]
+      }
+    ],
+    "10": [
+      {
+        "node": "O38",
+        "monster_id": "M0122",
+        "corner": "bottom-left",
+        "box": [
+          1436,
+          414,
+          1522,
+          490
+        ],
+        "size": [
+          86,
+          76
+        ]
+      },
+      {
+        "node": "O10",
+        "monster_id": "M0121",
+        "corner": "top-left",
+        "box": [
+          1436,
+          1447,
+          1522,
+          1526
+        ],
+        "size": [
+          86,
+          79
+        ]
+      },
+      {
+        "node": "O20",
+        "monster_id": "M0122",
+        "corner": "top-right",
+        "box": [
+          273,
+          1448,
+          359,
+          1524
+        ],
+        "size": [
+          86,
+          76
+        ]
+      },
+      {
+        "node": "O26",
+        "monster_id": "M0121",
+        "corner": "bottom-right",
+        "box": [
+          128,
+          702,
+          214,
+          781
+        ],
+        "size": [
+          86,
+          79
+        ]
+      }
+    ]
+  }
+}

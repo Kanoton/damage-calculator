@@ -1,0 +1,991 @@
+{
+  "map_name": "秋幻の森",
+  "status": "user_corrected_corners_other_connections_provisional",
+  "coordinate_basis": "ミニマップ上の白点、提供スクショの種類・順序を照合。全移動を独立追跡して確認したものではない。",
+  "nodes": [
+    {
+      "id": "O01",
+      "type": "1st",
+      "x": 1688,
+      "y": 396,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        993,
+        103
+      ]
+    },
+    {
+      "id": "O02",
+      "type": "TeleportPoint",
+      "x": 1688,
+      "y": 544,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        1015,
+        125
+      ]
+    },
+    {
+      "id": "O03",
+      "type": "MoveAgain",
+      "x": 1688,
+      "y": 686,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        1037,
+        147
+      ]
+    },
+    {
+      "id": "O04",
+      "type": "Event",
+      "x": 1688,
+      "y": 826,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        1059,
+        169
+      ]
+    },
+    {
+      "id": "O05",
+      "type": "Monster",
+      "x": 1686,
+      "y": 970,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        1081,
+        191
+      ]
+    },
+    {
+      "id": "O06",
+      "type": "Damage",
+      "x": 1688,
+      "y": 1114,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        1104,
+        213
+      ]
+    },
+    {
+      "id": "O07",
+      "type": "Relic",
+      "x": 1688,
+      "y": 1254,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        1126,
+        235
+      ]
+    },
+    {
+      "id": "O08",
+      "type": "TeleportPoint",
+      "x": 1688,
+      "y": 1396,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        1148,
+        257
+      ]
+    },
+    {
+      "id": "O09",
+      "type": "2nd",
+      "x": 1688,
+      "y": 1544,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        1172,
+        281
+      ]
+    },
+    {
+      "id": "O10",
+      "type": "Gold",
+      "x": 1540,
+      "y": 1544,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        1148,
+        303
+      ]
+    },
+    {
+      "id": "O11",
+      "type": "MoveAgain",
+      "x": 1398,
+      "y": 1544,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        1126,
+        325
+      ]
+    },
+    {
+      "id": "O12",
+      "type": "Shop",
+      "x": 1257,
+      "y": 1544,
+      "status": "user_confirmed_shop",
+      "minimap_xy": [
+        1104,
+        347
+      ]
+    },
+    {
+      "id": "O13",
+      "type": "Gold",
+      "x": 1257,
+      "y": 1686,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        1126,
+        369
+      ]
+    },
+    {
+      "id": "O14",
+      "type": "Card",
+      "x": 1257,
+      "y": 1828,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        1148,
+        391
+      ]
+    },
+    {
+      "id": "O15",
+      "type": "Damage",
+      "x": 1116,
+      "y": 1828,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        1126,
+        413
+      ]
+    },
+    {
+      "id": "O16",
+      "type": "Monster",
+      "x": 969,
+      "y": 1832,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        1104,
+        437
+      ]
+    },
+    {
+      "id": "O17",
+      "type": "Event",
+      "x": 824,
+      "y": 1829,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        1081,
+        459
+      ]
+    },
+    {
+      "id": "O18",
+      "type": "MoveAgain",
+      "x": 542,
+      "y": 1830,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        1037,
+        503
+      ]
+    },
+    {
+      "id": "O19",
+      "type": "3rd",
+      "x": 398,
+      "y": 1686,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        993,
+        503
+      ]
+    },
+    {
+      "id": "O20",
+      "type": "Gold",
+      "x": 255,
+      "y": 1542,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        948,
+        503
+      ]
+    },
+    {
+      "id": "O21",
+      "type": "TeleportPoint",
+      "x": 112,
+      "y": 1400,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        903,
+        503
+      ]
+    },
+    {
+      "id": "O22",
+      "type": "Shop",
+      "x": 110,
+      "y": 1256,
+      "status": "user_confirmed_shop",
+      "minimap_xy": [
+        881,
+        481
+      ]
+    },
+    {
+      "id": "O23",
+      "type": "Event",
+      "x": 110,
+      "y": 1115,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        859,
+        459
+      ]
+    },
+    {
+      "id": "O24",
+      "type": "Monster",
+      "x": 110,
+      "y": 970,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        837,
+        437
+      ]
+    },
+    {
+      "id": "O25",
+      "type": "Damage",
+      "x": 110,
+      "y": 825,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        814,
+        414
+      ]
+    },
+    {
+      "id": "O26",
+      "type": "Relic",
+      "x": 110,
+      "y": 684,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        792,
+        392
+      ]
+    },
+    {
+      "id": "O27",
+      "type": "TeleportPoint",
+      "x": 112,
+      "y": 540,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        770,
+        369
+      ]
+    },
+    {
+      "id": "O28",
+      "type": "Gold",
+      "x": 255,
+      "y": 398,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        770,
+        325
+      ]
+    },
+    {
+      "id": "O29",
+      "type": "4th",
+      "x": 398,
+      "y": 254,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        770,
+        281
+      ]
+    },
+    {
+      "id": "O30",
+      "type": "Card",
+      "x": 542,
+      "y": 110,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        770,
+        235
+      ]
+    },
+    {
+      "id": "O31",
+      "type": "Event",
+      "x": 824,
+      "y": 111,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        814,
+        192
+      ]
+    },
+    {
+      "id": "O32",
+      "type": "Monster",
+      "x": 969,
+      "y": 108,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        836,
+        169
+      ]
+    },
+    {
+      "id": "O33",
+      "type": "Damage",
+      "x": 1116,
+      "y": 112,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        859,
+        147
+      ]
+    },
+    {
+      "id": "O34",
+      "type": "MoveAgain",
+      "x": 1257,
+      "y": 112,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        881,
+        125
+      ]
+    },
+    {
+      "id": "O35",
+      "type": "Heal",
+      "x": 1257,
+      "y": 254,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        903,
+        147
+      ]
+    },
+    {
+      "id": "O36",
+      "type": "Shop",
+      "x": 1257,
+      "y": 396,
+      "status": "user_confirmed_shop",
+      "minimap_xy": [
+        925,
+        169
+      ]
+    },
+    {
+      "id": "O37",
+      "type": "Event",
+      "x": 1398,
+      "y": 396,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        947,
+        147
+      ]
+    },
+    {
+      "id": "O38",
+      "type": "Card",
+      "x": 1540,
+      "y": 396,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        969,
+        125
+      ]
+    },
+    {
+      "id": "I01",
+      "type": "Start",
+      "x": 686,
+      "y": 970,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        926,
+        347
+      ]
+    },
+    {
+      "id": "I02",
+      "type": "Card",
+      "x": 686,
+      "y": 827,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        903,
+        325
+      ]
+    },
+    {
+      "id": "I03",
+      "type": "Heal",
+      "x": 686,
+      "y": 686,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        881,
+        303
+      ]
+    },
+    {
+      "id": "I04",
+      "type": "Monster",
+      "x": 824,
+      "y": 686,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        903,
+        281
+      ]
+    },
+    {
+      "id": "I05",
+      "type": "Damage",
+      "x": 966,
+      "y": 686,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        925,
+        259
+      ]
+    },
+    {
+      "id": "I06",
+      "type": "TeleportPoint",
+      "x": 1114,
+      "y": 686,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        948,
+        236
+      ]
+    },
+    {
+      "id": "I07",
+      "type": "Gold",
+      "x": 1257,
+      "y": 686,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        970,
+        214
+      ]
+    },
+    {
+      "id": "I08",
+      "type": "Monster",
+      "x": 1257,
+      "y": 544,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        948,
+        192
+      ]
+    },
+    {
+      "id": "I09",
+      "type": "Gold",
+      "x": 686,
+      "y": 1113,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        948,
+        370
+      ]
+    },
+    {
+      "id": "I10",
+      "type": "TeleportPoint",
+      "x": 686,
+      "y": 1254,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        970,
+        392
+      ]
+    },
+    {
+      "id": "I11",
+      "type": "Damage",
+      "x": 824,
+      "y": 1254,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        992,
+        370
+      ]
+    },
+    {
+      "id": "I12",
+      "type": "Event",
+      "x": 966,
+      "y": 1254,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        1015,
+        347
+      ]
+    },
+    {
+      "id": "I13",
+      "type": "Card",
+      "x": 1114,
+      "y": 1254,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        1037,
+        326
+      ]
+    },
+    {
+      "id": "I14",
+      "type": "Heal",
+      "x": 1257,
+      "y": 1254,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        1059,
+        326
+      ]
+    },
+    {
+      "id": "I15",
+      "type": "Monster",
+      "x": 1257,
+      "y": 1396,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        1081,
+        347
+      ]
+    },
+    {
+      "id": "I16",
+      "type": "Gold",
+      "x": 538,
+      "y": 970,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        903,
+        370
+      ]
+    },
+    {
+      "id": "I17",
+      "type": "MoveAgain",
+      "x": 396,
+      "y": 970,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        881,
+        392
+      ]
+    },
+    {
+      "id": "I18",
+      "type": "Heal",
+      "x": 255,
+      "y": 970,
+      "status": "screenshot_reading",
+      "minimap_xy": [
+        859,
+        414
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "a": "O01",
+      "b": "O02",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O02",
+      "b": "O03",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O03",
+      "b": "O04",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O04",
+      "b": "O05",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O05",
+      "b": "O06",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O06",
+      "b": "O07",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O07",
+      "b": "O08",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O08",
+      "b": "O09",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O09",
+      "b": "O10",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O10",
+      "b": "O11",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O11",
+      "b": "O12",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O12",
+      "b": "O13",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O13",
+      "b": "O14",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O14",
+      "b": "O15",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O15",
+      "b": "O16",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O16",
+      "b": "O17",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O17",
+      "b": "O18",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O19",
+      "b": "O20",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O20",
+      "b": "O21",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O21",
+      "b": "O22",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O22",
+      "b": "O23",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O23",
+      "b": "O24",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O24",
+      "b": "O25",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O25",
+      "b": "O26",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O26",
+      "b": "O27",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O27",
+      "b": "O28",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O28",
+      "b": "O29",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O30",
+      "b": "O31",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O31",
+      "b": "O32",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O32",
+      "b": "O33",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O33",
+      "b": "O34",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O34",
+      "b": "O35",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O35",
+      "b": "O36",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O36",
+      "b": "O37",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O37",
+      "b": "O38",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "O38",
+      "b": "O01",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "I01",
+      "b": "I02",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "I02",
+      "b": "I03",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "I03",
+      "b": "I04",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "I04",
+      "b": "I05",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "I05",
+      "b": "I06",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "I06",
+      "b": "I07",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "I07",
+      "b": "I08",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "I08",
+      "b": "O36",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "I01",
+      "b": "I09",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "I09",
+      "b": "I10",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "I10",
+      "b": "I11",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "I11",
+      "b": "I12",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "I12",
+      "b": "I13",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "I13",
+      "b": "I14",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "I14",
+      "b": "I15",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "I15",
+      "b": "O12",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "I01",
+      "b": "I16",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "I16",
+      "b": "I17",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "I17",
+      "b": "I18",
+      "status": "layout_inferred"
+    },
+    {
+      "a": "I18",
+      "b": "O24",
+      "status": "junction_candidate"
+    },
+    {
+      "a": "O18",
+      "b": "O19",
+      "status": "user_confirmed_corner"
+    },
+    {
+      "a": "O29",
+      "b": "O30",
+      "status": "user_confirmed_corner"
+    }
+  ],
+  "notes": [
+    "O18a・O29aは存在しないため削除。O18・O30を角に配置。",
+    "時計回り45度。反時計回りより縦長になり、長い辺が縦方向に収まる。",
+    "マス素材は回転後の縦横の辺に合わせ、正立した72px角で配置。",
+    "I18–O24の接続と初期進行方向は引き続き暫定。",
+    "通常の間隔は約144px。角の訂正に伴う端の間隔には元の図を基にした差が残る。",
+    "図として上下の線対称になるよう各マスの描画座標を整形。内側の上下ルートの曲がりを直角に揃え、接続とマス順序は維持。minimap_xyは元の読取座標を保持。"
+  ],
+  "rotation_degrees_clockwise": 45,
+  "event_spawns_normal": {
+    "1": [
+      {
+        "node": "O12",
+        "monster_id": "M0123"
+      },
+      {
+        "node": "O22",
+        "monster_id": "M0123"
+      },
+      {
+        "node": "O36",
+        "monster_id": "M0123"
+      },
+      {
+        "node": "O26",
+        "monster_id": "M0122"
+      }
+    ],
+    "3": [
+      {
+        "node": "O24",
+        "monster_id": "M0120"
+      },
+      {
+        "node": "I08",
+        "monster_id": "M0121"
+      },
+      {
+        "node": "I15",
+        "monster_id": "M0123"
+      }
+    ],
+    "7": [
+      {
+        "node": "O32",
+        "monster_id": "M0121"
+      },
+      {
+        "node": "O16",
+        "monster_id": "M0121"
+      },
+      {
+        "node": "O16",
+        "monster_id": "M0122"
+      }
+    ],
+    "10": [
+      {
+        "node": "O38",
+        "monster_id": "M0122"
+      },
+      {
+        "node": "O10",
+        "monster_id": "M0121"
+      },
+      {
+        "node": "O20",
+        "monster_id": "M0122"
+      },
+      {
+        "node": "O26",
+        "monster_id": "M0121"
+      }
+    ]
+  },
+  "diagram_symmetry_axis_y": 970
+}

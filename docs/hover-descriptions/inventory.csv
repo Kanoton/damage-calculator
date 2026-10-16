@@ -171,6 +171,7 @@ HP+2、エネルギー保存が発動中の場合、このターンの間攻撃�
 パッシブスキル - チャージステップ
 累計移動ステップ数が13スタック増加するごとに、攻撃力と防御力が交互に1ずつ増加する。
 疾走マスを踏んだ時、CT-2。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+"self:17:潜在能力の攻撃補正:base","自キャラ","17","ルカ","自キャラ状態欄","自キャラがルカ","潜在能力の攻撃補正","数値入力","初期表示","","潜在能力の攻撃補正：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "skill:17","スキル","17","ルカ","スキル使用ボタン","自キャラがルカ","真夜の一閃","ボタン","通常／CT中（無効）","","真夜の一閃を発動","","CT中はボタン無効。効果全文とは別","07_skill/js/character.js:updateActiveSkillUi",""
 "ct:17","スキル","17","ルカ","CTボタン","自キャラがルカ","CT","ボタン","通常上限 3","","CT上限 3：左クリックで1減らす／右クリックで1増やす","","CT短縮チップ15所持時は上限・説明の数字が1少なくなる","07_skill/js/character.js:updateActiveSkillUi",""
 "ability:17","能力全文","17","ルカ","キャラクター一覧／詳細","スキルを表示がオンの時に一覧でホバー／詳細表示","ルカの能力","能力説明","07の表示文面","","スキル - 真夜の一閃［CT 3］
@@ -178,7 +179,11 @@ HP+2、エネルギー保存が発動中の場合、このターンの間攻撃�
 （スキル使用時に戦闘不可）
 
 パッシブスキル - 攻めの姿勢
-1ターンに1回、セーフティポイントを経過または滞在時にCT-2。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
+1ターンに1回、セーフティポイントを経過または滞在時にCT-2。
+
+潜在能力解放［協力チャレンジレベル6］
+スキル使用時、戦闘カードを1枚捨てることができ、捨てた場合はこのターンの攻撃力が追加で+（現在のスター数+捨てたバトルカードの戦闘コスト）。
+スキル使用後、移動方向を自由に選べる。","","07限定の見出し・文面調整反映済み。ボタンのtitleではない","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createCharacterSkillTooltipView",""
 "self:18:ファイアウォール:base","自キャラ","18","ナンシーロー","自キャラ状態欄","自キャラがナンシーロー","ファイアウォール","ボタン","初期表示","UT_Buff/UT_Buff_120.png","ファイアウォール：オフ
 クリックで切り替え","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "self:18:ファイアウォール:1","自キャラ","18","ナンシーロー","自キャラ状態欄","自キャラがナンシーロー","ファイアウォール","ボタン","オン","UT_Buff/UT_Buff_120.png","ファイアウォール：オン
@@ -618,9 +623,9 @@ CT-1。","","チャージ操作の追記なし","07_skill/data/hover-description
 "chip:22:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","探天衛星","チップ表示","通常","chip_icon/022_探天衛星.png","探天衛星
 全ての効果カードの効果距離+3。ターン終了時、手札が6より少ない場合、軌道レールキャノンを1枚得る。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:23:owned","チップ","","しおり","自キャラ所持チップ","該当チップ所持","しおり","所持表示","通常","chip_icon/023_しおり.png","しおり
-効果カードダメージ+1。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
+効果カードダメージ+2。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:23:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","しおり","チップ表示","通常","chip_icon/023_しおり.png","しおり
-効果カードダメージ+1。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+効果カードダメージ+2。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:24:owned","チップ","","循環往来","自キャラ所持チップ","該当チップ所持","循環往来","所持表示","通常","chip_icon/024_循環往来.png","循環往来
 強化チップの再抽選回数を3回獲得する。3ターン後、強化チップを選択し、1個獲得する。","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:24:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","循環往来","チップ表示","通常","chip_icon/024_循環往来.png","循環往来
@@ -744,15 +749,15 @@ HPが満タン時、攻撃力+4、それに加えて攻撃時に【ヒール】�
 "chip:52:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","エナジーソード","チップ表示","通常","chip_icon/052_エナジーソード.png","エナジーソード
 攻撃命中ごとに【チャージ】を2獲得する。【チャージ】が7より大きい時、攻撃力+2。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:53:owned","チップ","","ワープエンジン","自キャラ所持チップ","該当チップ所持","ワープエンジン","操作ボタン","通常","chip_icon/053_ワープエンジン.png","ワープエンジン
-突撃ゲートまたは疾走マスに止まった時、【チャージ】を2獲得し、次の移動時に移動力+2。
+突撃ゲートまたは疾走マスに止まった時、【チャージ】を3獲得し、次の移動時に移動力+2。
 クリック：チャージ+2","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:53:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","ワープエンジン","チップ表示","通常","chip_icon/053_ワープエンジン.png","ワープエンジン
-突撃ゲートまたは疾走マスに止まった時、【チャージ】を2獲得し、次の移動時に移動力+2。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+突撃ゲートまたは疾走マスに止まった時、【チャージ】を3獲得し、次の移動時に移動力+2。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:54:owned","チップ","","電撃グローブ","自キャラ所持チップ","該当チップ所持","電撃グローブ","操作ボタン","通常","chip_icon/054_電撃グローブ.png","電撃グローブ
-効果カードを使用した時、【チャージ】を2スタック獲得する。ターン終了時、チャージを4消費して、自身から2マス以内の全モンスターに2ダメージを与える。
+スキル使用後、自身から3マス以内の全モンスターに2ダメージを与える。モンスター1体に命中するごとに、自身の攻撃力+2（1ラウンド継続）、さらに【チャージ】を1スタック獲得する。
 クリック：チャージ+2","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
 "chip:54:pt","チップ","","共通","PT所持チップ／チップ選択一覧","該当チップをPTが所持／チップ一覧表示","電撃グローブ","チップ表示","通常","chip_icon/054_電撃グローブ.png","電撃グローブ
-効果カードを使用した時、【チャージ】を2スタック獲得する。ターン終了時、チャージを4消費して、自身から2マス以内の全モンスターに2ダメージを与える。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
+スキル使用後、自身から3マス以内の全モンスターに2ダメージを与える。モンスター1体に命中するごとに、自身の攻撃力+2（1ラウンド継続）、さらに【チャージ】を1スタック獲得する。","","チャージ操作の追記なし","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips",""
 "chip:55:owned","チップ","","エアバッグ","自キャラ所持チップ","該当チップ所持","エアバッグ","操作ボタン","通常","chip_icon/055_エアバッグ.png","エアバッグ
 現在HPを超えるダメージを受ける場合、【チャージ】を6消費してそのダメージを0にする。ダメージを受けた後、【チャージ】を1獲得する。
 クリック：チャージ-6（6以上必要）","","キャラクター列はチップ名。PT所持／選択一覧の文面は別行","07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView",""
@@ -937,6 +942,7 @@ HPが満タン時、攻撃力+4、それに加えて攻撃時に【ヒール】�
 "shared:スターコイン","共通・チップ","","共通","自キャラ状態欄","入力を参照するチップを所持：ID 31","スターコイン","数値入力","初期表示","UT_Buff/Coin.png","スターコイン：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "shared:ヒール","共通・チップ","","共通","自キャラ状態欄","入力を参照するチップを所持：ID 42 / 43。自キャラ／PTルルまたは保持数>0でも表示","ヒール","数値入力","初期表示","UT_Buff/UT_Buff_Heal.png","ヒール：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "shared:チャージ","共通・チップ","","共通","自キャラ状態欄","入力を参照するチップを所持：ID 51 / 52 / 53 / 54 / 55 / 56 / 57 / 58","チャージ","数値入力","初期表示","UT_Buff/UT_Buff_Charge.png","チャージ：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
+"shared:電撃グローブ命中数","共通・チップ","","共通","自キャラ状態欄","入力を参照するチップを所持：ID 54","電撃グローブ命中数","数値入力","初期表示","","電撃グローブ命中数：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "shared:ギガントアンカーボーナス","共通・チップ","","共通","自キャラ状態欄","入力を参照するチップを所持：ID 101","ギガントアンカーボーナス","数値入力","初期表示","chip_icon/101_ギガントアンカー.png","ギガントアンカーボーナス：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "shared:呪いの剣ボーナス","共通・チップ","","共通","自キャラ状態欄","入力を参照するチップを所持：ID 111","呪いの剣ボーナス","数値入力","初期表示","chip_icon/111_呪いの剣.png","呪いの剣ボーナス：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
 "shared:反撃による永続ボーナス","共通・チップ","","共通","自キャラ状態欄","入力を参照するチップを所持：ID 146","反撃による永続ボーナス","数値入力","初期表示","UT_Buff/UT_Buff_Counter.png","反撃による永続ボーナス：アイコンを左クリックで+1、右クリックで-1","","","07_skill/js/character.js:renderConditions / character-view.js",""
