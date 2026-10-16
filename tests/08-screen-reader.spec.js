@@ -124,7 +124,7 @@ test('08: blank/unknown frames retain previously observed state and never invent
 });
 
 test('08: an occluding small chip popup does not decide which party member is self',async({page})=>{
- await open(page);await readFixture(page,'6250');expect((await snapshot(page)).selfId).toBe('1');
+ await open(page);await readFixture(page,'6250');expect((await snapshot(page)).selfId).toBe('');
  await page.locator('#reader-self').selectOption('105');await page.locator('#reader-read').click();await expect.poll(async()=> (await snapshot(page)).selfId).toBe('105');
  const s=await snapshot(page);expect(s.members[1].chips).toEqual(['26']);expect(s.members[0].chips).toEqual([]);
 });
@@ -135,7 +135,7 @@ test('08: partial observations preserve invisible chips, unknown stats and self 
  let s=await snapshot(page);expect(s.selfId).toBe('105');expect(s.members[0].chips).toEqual(['30']);expect(s.members[1].currentHp).toBe(4);expect(s.members[1].coin).toBe(19);expect(s.members[1].maxHp).toBe(10);
  await page.evaluate(()=>ScreenReaderCharacterBridge.apply({members:[{id:'105',slot:0,maxHp:13,currentHp:12,atk:5,move:6}],chipOwnerId:null,chipIds:[]}));
  s=await snapshot(page);expect([s.members[0].maxHp,s.members[0].currentHp,s.members[0].atk,s.members[0].move]).toEqual([13,12,5,6]);
- await page.locator('#reader-new-game').click();s=await snapshot(page);expect(s.members[0].level).toBe(0);expect(s.members[0].chips).toEqual([]);expect(s.members.slice(1).every(m=>!m.id)).toBe(true);expect(s.members[0].maxHp).toBe(9);
+ await page.locator('#reader-new-game').click();s=await snapshot(page);expect(s.selfId).toBe('');expect(s.members.every(m=>!m.id)).toBe(true);
 });
 
 test('08: owned coin reading preserves separate manually tracked coin controls',async({page})=>{
@@ -169,11 +169,11 @@ test('08: learning persists locally and profile validation rejects invalid refer
 });
 
 test('08: 16:9 status screenshots identify chip owners and preserve additive ownership',async({page})=>{
- await open(page);
+ await open(page);await page.locator('#reader-new-game').click();
  await page.evaluate(()=>ScreenReaderCharacterBridge.apply({members:[{id:'18',slot:1},{id:'3',slot:2},{id:'106',slot:3}]}));
  for(const [stamp,owner,chip] of [['184601','18','42'],['184606','3','26'],['184610','106','121']]){
   await readFixture(page,'status-'+stamp);
-  const s=await snapshot(page);expect(s.members.find(m=>m.id===owner).chips).toEqual([chip]);expect(s.selfId).toBe('1');
+  const s=await snapshot(page);expect(s.members.find(m=>m.id===owner).chips).toEqual([chip]);expect(s.selfId).toBe('');
   const result=await page.evaluate(async image=>{const im=new Image();im.src=image;await im.decode();const c=ScreenReaderVision.normalize(im),o=ScreenReaderVision.analyze(c);const learned=ScreenReaderVision.learn(c,'chip-large',o.chipIds[0],0);return {o,learned:learned.data,expected:btoa(String.fromCharCode(...ScreenReaderVision.feature(c.statusFrame,[517,334,36,36])))};},fixture('status-'+stamp));
   expect(result.o.view).toBe('ステータス画面');expect(result.o.chipOwnerId).toBe(owner);expect(result.o.chipIds).toEqual([chip]);expect(result.learned).toBe(result.expected);
  }
@@ -407,4 +407,45 @@ for(const [name,atk] of [['frame15',8],['frame24',9],['frame46',8]])test('08: ow
  expect(result.before.members.every(m=>m.atk===undefined&&m.def===undefined)).toBe(true);
  expect(result.after.members.filter(m=>m.atk!==undefined||m.def!==undefined).map(m=>[m.id,m.atk,m.def])).toEqual([['18',atk,2]]);
  expect(result.hidden).toEqual({});
+});
+
+test('08: first applied read clears the previous game, including Mimi, context, roster and Undo',async({page})=>{
+ await open(page);
+ await page.evaluate(()=>{
+  ScreenReaderCharacterBridge.apply({selfId:'1',members:[{id:'1',slot:0,level:2,currentHp:3,coin:99}],chipOwnerId:'1',chipIds:['30']});
+  ScreenReaderMapBridge.apply({clock:{round:6,progress:6},monsters:[]});
+ });
+ await readFixture(page,'6250'); // The popup does not identify self.
+ const s=await snapshot(page);expect(s.selfId).toBe('');expect(s.members.map(m=>m.id)).toEqual(['105','13','21','26']);
+ expect(s.members.find(m=>m.id==='13').chips).toEqual(['26']);expect(s.members.some(m=>m.id==='1')).toBe(false);
+ const map=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(map).toMatchObject({map:'',difficulty:'',round:null,progress:null,events:[],monsters:[]});
+ await expect(page.locator('#roster-undo')).toBeDisabled();await expect(page.locator('#reader-monitor-info')).toContainText('マップ名・難易度：未判定');
+ await page.locator('#reader-self').selectOption('105');await page.locator('#reader-read').click();
+ await expect.poll(async()=> (await snapshot(page)).selfId).toBe('105');
+ const after=await snapshot(page);expect(after.members.map(m=>m.id)).toEqual(['105','13','21','26']);expect(after.members[1].chips).toEqual(['26']);
+});
+
+test('08: party observations survive until self is known without assigning the first slot to self',async({page})=>{
+ await open(page);await page.evaluate(()=>ScreenReaderCharacterBridge.reset());
+ await page.evaluate(()=>ScreenReaderCharacterBridge.apply({members:[{id:'2',slot:0,currentHp:7,maxHp:10,coin:21,level:1},{id:'18',slot:3,currentHp:6,maxHp:9,coin:5}],chipOwnerId:'18',chipIds:['30']}));
+ let s=await snapshot(page);expect(s.selfId).toBe('');expect(s.members[0]).toMatchObject({id:'2',currentHp:7,coin:21});expect(s.members[3].chips).toEqual(['30']);
+ await page.evaluate(()=>ScreenReaderCharacterBridge.apply({selfId:'18',members:[]}));s=await snapshot(page);
+ expect(s.selfId).toBe('18');expect(s.members[3]).toMatchObject({id:'18',currentHp:6,maxHp:9,coin:5,chips:['30']});expect(s.members[0].id).toBe('2');
+});
+
+test('08: map and difficulty remain unknown after reader reset and late CSV refresh',async({page})=>{
+ let release;const gate=new Promise(resolve=>release=resolve);
+ await page.route('**/csv/maps_renumbered.csv',async route=>{await gate;await route.continue();});
+ await open(page);await page.locator('#reader-new-game').click();
+ const response=page.waitForResponse(response=>response.url().endsWith('/csv/maps_renumbered.csv'));release();await response;
+ await expect(page.locator('#mp-map-select')).toHaveValue('');await expect(page.locator('#mp-difficulty')).toHaveValue('');
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0003');
+ await expect(page.locator('#mp-difficulty')).toHaveValue('');
+ const rejected=await page.evaluate(()=>ScreenReaderMapBridge.apply({clock:{round:4,progress:4},monsters:[]}));expect(rejected.skipped).toBe(1);
+ await page.locator('#mp-difficulty').selectOption('普通');
+ await page.evaluate(()=>ScreenReaderMapBridge.apply({clock:{round:4,progress:4},monsters:[]}));
+ expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toMatchObject({map:'MAP0003',difficulty:'普通',round:4,progress:4});
+ // Identifying self later must not rewind the clock or synthesize progress 1.
+ await page.evaluate(()=>ScreenReaderCharacterBridge.apply({selfId:'18',members:[]}));
+ expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toMatchObject({round:4,progress:4});
 });

@@ -7,12 +7,13 @@
  dock.addEventListener('keydown',event=>{if(event.key==='Escape'){setDock(false);toggle.focus();}});
  const STORAGE='astral-08-screen-reader-profile-v1';
  let stream=null,rawSource=null,frame=null,busy=false,timer=null,generation=0,selecting=false,selectionStart=null,area=null,catalog=null,custom={characters:[],chips:[]};
- let worldContext=null,readStarted=null,partyLock=null,lastObservation=null,partyEdited=false;
+ let worldContext=null,readStarted=null,partyLock=null,lastObservation=null,partyEdited=false,readerSession=false;
  const stable=new Map();let lastHash=null,sameFrames=0,stableTick=0;
  function status(text){$('status').textContent=text;}
  function monitorInfo(text=''){
   const count=new Set((window.ScreenReaderWorldReferences?.names||[]).map(r=>r.id)).size;
-  $('monitor-info').textContent='モンスター読取：'+($('world-sync').checked?'ON':'OFF（反映をONにすると読取開始）')+' ／ 照合見本 '+count+'種類'+(text?' ／ '+text:'');
+  const map=window.ScreenReaderMapBridge?.snapshot(),pending=readerSession&&(!map?.map||!map?.difficulty);
+  $('monitor-info').textContent=(pending?'マップ名・難易度：未判定（画像判定は未対応。マップ情報で指定してください） ／ ':'')+'モンスター読取：'+($('world-sync').checked?'ON':'OFF（反映をONにすると読取開始）')+' ／ 照合見本 '+count+'種類'+(text?' ／ '+text:'');
  }
  const interval=()=>[250,500,1200].includes(Number($('interval').value))?Number($('interval').value):500;
  function isArea(a){return a&&['x','y','w','h'].every(k=>Number.isFinite(a[k]))&&a.x>=0&&a.y>=0&&a.w>=.05&&a.h>=.05&&a.x+a.w<=1.00001&&a.y+a.h<=1.00001;}
@@ -45,6 +46,10 @@
  }
  function releaseParty(){partyLock=null;lastObservation=null;partyEdited=false;$('party-confirm').disabled=false;$('party-unlock').disabled=true;$('party-status').textContent='PT未確定';for(const select of $('party-slots').querySelectorAll('select')){select.disabled=false;select.value='';}}
  function partySignature(){return [(rawSource?.videoWidth||rawSource?.naturalWidth||rawSource?.width),(rawSource?.videoHeight||rawSource?.naturalHeight||rawSource?.height),JSON.stringify(area)].join(':');}
+ function startReaderSession(keepAutomatic=false){
+  const automatic=keepAutomatic&&$('auto').checked;
+  window.ScreenReaderMapBridge.resetForReader();readerSession=true;$('auto').checked=automatic;$('world-sync').checked=true;monitorInfo();
+ }
  function showFrame(source){frame=vision.normalize(source,area);ctx.drawImage(frame,0,0);$('area').disabled=false;$('learn').disabled=!catalog;}
  function drawResults(observation,accepted,automatic){
   lastObservation=observation;
@@ -117,7 +122,7 @@
   return hash;
  }
  async function read(automatic=false){
-  if(busy||!rawSource||!catalog||selecting)return;busy=true;$('read').disabled=true;const token=generation,started=performance.now(),gap=readStarted===null?null:started-readStarted;readStarted=started;
+  if(busy||!rawSource||!catalog||selecting)return;if(!readerSession&&$('apply').checked)startReaderSession(true);busy=true;$('read').disabled=true;const token=generation,started=performance.now(),gap=readStarted===null?null:started-readStarted;readStarted=started;
   const timing=()=> '処理 '+Math.round(performance.now()-started)+'ms'+(automatic&&gap!==null?' ／ 実間隔 '+Math.round(gap)+'ms':'')+' ／ 取得 '+(rawSource.videoWidth||rawSource.width)+'×'+(rawSource.videoHeight||rawSource.height);
   try{
    if(stream){if(!video.videoWidth)throw Error('共有映像を待っています。');rawSource=video;}
@@ -145,7 +150,7 @@
   try{
    // Request immediately inside the click, preserving transient activation.
    const request=navigator.mediaDevices.getDisplayMedia({video:{displaySurface:'window',frameRate:{ideal:5,max:10}},audio:false});selected=await request;
-   stop();stream=selected;const token=generation;video.srcObject=stream;
+   stop();readerSession=false;stream=selected;const token=generation;video.srcObject=stream;
    stream.getVideoTracks()[0].addEventListener('ended',()=>{if(stream===selected)stop();});await video.play();if(token!==generation)return;
    rawSource=video;$('read').disabled=false;$('auto').disabled=false;$('stop').disabled=false;
    status('ゲーム画面を共有中です。「画面読取」または「自動読取」を選んでください。');
@@ -173,7 +178,7 @@
   if(rawSource&&!busy)read();
  });
  $('party-unlock').addEventListener('click',()=>{generation++;stable.clear();lastHash=null;sameFrames=0;releaseParty();if(rawSource&&!busy)read();});
- $('new-game').addEventListener('click',()=>{releaseParty();generation++;clearTimeout(timer);$('auto').checked=false;stable.clear();lastHash=null;sameFrames=0;bridge.reset();$('world-sync').checked=false;monitorInfo();$('world-result').textContent='';$('result-body').replaceChildren();$('chip-result').textContent='';$('view').textContent='新しいゲームの読取を待っています。';status('Lv、HP、補正、取得チップを初期化し、自動読取を停止しました。次のゲームで読取を再開してください。');});
+ $('new-game').addEventListener('click',()=>{startReaderSession();status('読取用にゲーム状態をすべてリセットしました。自キャラ・PT・マップ・難易度は未判定です。');});
  $('self').addEventListener('change',()=>{if(partyLock)releaseParty();generation++;stable.clear();sameFrames=0;lastHash=null;});
  $('world-sync').addEventListener('change',()=>{stable.clear();sameFrames=0;lastHash=null;monitorInfo();});
  $('interval').addEventListener('change',()=>{if(!busy)schedule();});
@@ -189,7 +194,7 @@
  $('learn').addEventListener('click',()=>{if(!frame||!catalog)return;const [kind,index]=$('learn-kind').value.split(':'),id=$('learn-id').value,ref=vision.learn(frame,kind,id,kind.startsWith('chip-')?Number($('learn-slot').value):Number(index)),list=kind.startsWith('chip-')?custom.chips:custom.characters;if(custom.characters.length+custom.chips.length>=500){status('見本は最大500件です。');return;}if(!list.some(r=>r.id===ref.id&&r.kind===ref.kind&&r.data===ref.data))list.push(ref);generation++;stable.clear();sameFrames=0;lastHash=null;save();read();});
  $('export').addEventListener('click',()=>{const url=URL.createObjectURL(new Blob([JSON.stringify({version:1,...custom,area},null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='screen-reader-profile.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
  $('import').addEventListener('change',async()=>{try{const file=$('import').files[0];if(!file)return;if(file.size>1000000)throw Error('ファイルが大きすぎます。');const p=validateProfile(JSON.parse(await file.text()));custom={characters:p.characters,chips:p.chips};area=p.area||null;generation++;stable.clear();sameFrames=0;lastHash=null;save();if(rawSource)read();status('見本を読み込みました。');}catch(error){status(error.message);}finally{$('import').value='';}});
- window.addEventListener('new-game-reset',()=>{releaseParty();generation++;clearTimeout(timer);timer=null;stable.clear();lastHash=null;sameFrames=0;$('auto').checked=false;$('self').value='';$('world-sync').checked=false;monitorInfo();$('world-result').textContent='';$('result-body').replaceChildren();$('chip-result').textContent='';$('view').textContent='リセット後の読取を待っています。';status('ゲーム状態をリセットしました。次のゲーム画面を読み取ってください。');});
+ window.addEventListener('new-game-reset',()=>{readerSession=false;releaseParty();generation++;clearTimeout(timer);timer=null;stable.clear();lastHash=null;sameFrames=0;$('auto').checked=false;$('self').value='';$('world-sync').checked=false;monitorInfo();$('world-result').textContent='';$('result-body').replaceChildren();$('chip-result').textContent='';$('view').textContent='リセット後の読取を待っています。';status('ゲーム状態をリセットしました。次のゲーム画面を読み取ってください。');});
  window.addEventListener('mobile-ui-change',()=>{if(document.body.classList.contains('mobile-ui'))stop();});
  window.addEventListener('pagehide',stop);
  $('learn-id').addEventListener('change',updateMappingPreview);
