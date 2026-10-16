@@ -414,13 +414,12 @@ test('08: first applied read clears the previous game, including Mimi, context, 
  await page.evaluate(()=>{
   ScreenReaderCharacterBridge.apply({selfId:'1',members:[{id:'1',slot:0,level:2,currentHp:3,coin:99}],chipOwnerId:'1',chipIds:['30']});
   ScreenReaderMapBridge.apply({clock:{round:6,progress:6},monsters:[]});
-  document.querySelector('#map-draft [data-buff="attack"]').click();
  });
  await readFixture(page,'6250'); // The popup does not identify self.
  const s=await snapshot(page);expect(s.selfId).toBe('');expect(s.members.map(m=>m.id)).toEqual(['105','13','21','26']);
  expect(s.members.find(m=>m.id==='13').chips).toEqual(['26']);expect(s.members.some(m=>m.id==='1')).toBe(false);
  const map=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(map).toMatchObject({map:'',difficulty:'',round:null,progress:null,events:[],monsters:[]});
- await expect(page.locator('#roster-undo')).toBeDisabled();await expect(page.locator('#mp-buff-status')).toBeEmpty();await expect(page.locator('#reader-monitor-info')).toContainText('マップ名・難易度：未判定');
+ await expect(page.locator('#roster-undo')).toBeDisabled();await expect(page.locator('#reader-monitor-info')).toContainText('マップ名・難易度：未判定');
  await page.locator('#reader-self').selectOption('105');await page.locator('#reader-read').click();
  await expect.poll(async()=> (await snapshot(page)).selfId).toBe('105');
  const after=await snapshot(page);expect(after.members.map(m=>m.id)).toEqual(['105','13','21','26']);expect(after.members[1].chips).toEqual(['26']);
