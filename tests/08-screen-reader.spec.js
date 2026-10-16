@@ -341,3 +341,55 @@ test('08: Yume 123_02 outfit matches the recorded avatar without weakening ambig
  const actual=await page.evaluate(async image=>{const im=new Image();im.src=image;await im.decode();return ScreenReaderVision.profileMatch(ScreenReaderVision.feature(im,[55,159,73,42]));},fixture('yume-outfit-123-02'));
  expect(actual?.id).toBe('20');expect(actual?.confidence).toBeGreaterThanOrEqual(90);
 });
+
+test('08: confirmed party reads slot numbers without portraits and rejects an absent HUD',async({page})=>{
+ await open(page);
+ const result=await page.evaluate(async image=>{
+  const im=new Image();im.src=image;await im.decode();
+  const c=ScreenReaderVision.normalize(im),first=ScreenReaderVision.analyze(c),ctx=c.getContext('2d');
+  const party={ids:['2','106','3','18'],selfId:'18',hud:first.hud};
+  for(const box of [[55,66,73,42],[55,159,73,42],[55,253,73,42],[55,345,73,42],[116,445,139,116]]){ctx.fillStyle='#141414';ctx.fillRect(...box);}
+  const o=ScreenReaderVision.analyze(c,undefined,party);
+  ctx.fillStyle='#141414';ctx.fillRect(0,0,1536,709);
+  return {o,blank:ScreenReaderVision.analyze(c,undefined,party)};
+ },fixture('left-hud'));
+ expect(result.o.members.map(m=>[m.id,m.currentHp,m.maxHp,m.coin,m.level])).toEqual([
+  ['2',9,9,12,0],['106',10,10,12,0],['3',10,10,12,0],['18',9,9,6,0]
+ ]);
+ expect(result.o.selfId).toBe('18');expect(result.o.chipIds).toEqual([]);
+ expect(result.blank.members.every(m=>!m.id&&m.coin===undefined&&m.level===undefined)).toBe(true);
+});
+
+test('08: party confirmation resolves initial self conflict, pins order and resets for a new game',async({page})=>{
+ await open(page);await readFixture(page,'left-hud');
+ // Reproduce the initial Mimi occupying the first slot while the correct self is elsewhere.
+ await page.evaluate(()=>ScreenReaderCharacterBridge.apply({members:[],selfId:'1'}));
+ await page.locator('#reader-self').selectOption('18');
+ await page.locator('#reader-party-0').selectOption('2');
+ await page.locator('#reader-party-1').selectOption('106');
+ await page.locator('#reader-party-2').selectOption('3');
+ await page.locator('#reader-party-3').selectOption('18');
+ await page.locator('#reader-party-confirm').click();
+ await expect(page.locator('#reader-party-status')).toContainText('PT確定');
+ await expect.poll(async()=> (await snapshot(page)).members[0].coin).toBe(12);
+ let s=await snapshot(page);expect(s.selfId).toBe('18');expect(s.members.map(m=>m.id)).toEqual(['2','106','3','18']);
+ await page.locator('#reader-read').click();await expect(page.locator('#reader-party-0')).toBeDisabled();
+ s=await snapshot(page);expect(s.members[0].id).toBe('2');expect(s.members[0].currentHp).toBe(9);
+ await page.locator('#reader-new-game').click();await expect(page.locator('#reader-party-status')).toHaveText('PT未確定');await expect(page.locator('#reader-party-0')).toBeEnabled();
+});
+
+test('08: party confirmation requires a unique full party and a self from that party',async({page})=>{
+ await open(page);await readFixture(page,'left-hud');
+ await page.locator('#reader-party-1').selectOption('105');await page.locator('#reader-party-confirm').click();await expect(page.locator('#reader-party-status')).toContainText('異なる4人');
+ await page.locator('#reader-party-1').selectOption('106');await page.locator('#reader-self').selectOption('1');await page.locator('#reader-party-confirm').click();await expect(page.locator('#reader-party-status')).toContainText('自分のキャラを指定');
+ await expect(page.locator('#reader-party-unlock')).toBeDisabled();
+});
+
+test('08: a status screen updates its owner while the confirmed self stays fixed',async({page})=>{
+ await open(page);await readFixture(page,'6248');
+ await page.locator('#reader-self').selectOption('26');await page.locator('#reader-party-confirm').click();await expect(page.locator('#reader-party-status')).toContainText('PT確定');
+ await expect(page.locator('#reader-read')).toBeEnabled();await readFixture(page,'6252');
+ const s=await snapshot(page);expect(s.selfId).toBe('26');expect(s.members.map(m=>m.id)).toEqual(['105','13','21','26']);
+ expect(s.members[1].chips).toEqual(['26']);expect([s.members[1].atk,s.members[1].def]).toEqual([1,1]);
+ await page.locator('#reader-party-unlock').click();await expect(page.locator('#reader-party-status')).toHaveText('PT未確定');await expect(page.locator('#reader-party-0')).toBeEnabled();
+});

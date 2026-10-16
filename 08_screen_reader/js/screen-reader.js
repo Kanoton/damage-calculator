@@ -7,7 +7,7 @@
  dock.addEventListener('keydown',event=>{if(event.key==='Escape'){setDock(false);toggle.focus();}});
  const STORAGE='astral-08-screen-reader-profile-v1';
  let stream=null,rawSource=null,frame=null,busy=false,timer=null,generation=0,selecting=false,selectionStart=null,area=null,catalog=null,custom={characters:[],chips:[]};
- let worldContext=null,readStarted=null;
+ let worldContext=null,readStarted=null,partyLock=null,lastObservation=null,partyEdited=false;
  const stable=new Map();let lastHash=null,sameFrames=0,stableTick=0;
  function status(text){$('status').textContent=text;}
  function monitorInfo(text=''){
@@ -35,11 +35,20 @@
   catalog=bridge.catalog();if(!catalog.characters.length){setTimeout(ready,100);return;}
   for(const row of catalog.characters)$('self').append(Object.assign(document.createElement('option'),{value:row.id,textContent:row.name}));
   try{const value=localStorage.getItem(STORAGE);if(value){const p=validateProfile(JSON.parse(value));custom={characters:p.characters,chips:p.chips};area=p.area||null;}}catch{status('保存済みの見本を読み込めませんでした。初期の見本で開始します。');}
+  for(let slot=0;slot<4;slot++){
+   const label=document.createElement('label'),select=document.createElement('select');select.id='reader-party-'+slot;label.append((slot+1)+'番目 ',select);
+   select.append(Object.assign(document.createElement('option'),{value:'',textContent:'未判定'}),...catalog.characters.map(row=>Object.assign(document.createElement('option'),{value:row.id,textContent:row.name})));
+   select.addEventListener('change',()=>{partyEdited=true;});$('party-slots').append(label);
+  }
   updateLearningOptions();updateReferenceStatus();monitorInfo();
   window.ScreenReaderMiniCharacterMapping.load(catalog.characters).then(updateMappingPreview);
  }
+ function releaseParty(){partyLock=null;lastObservation=null;partyEdited=false;$('party-confirm').disabled=false;$('party-unlock').disabled=true;$('party-status').textContent='PT未確定';for(const select of $('party-slots').querySelectorAll('select')){select.disabled=false;select.value='';}}
+ function partySignature(){return [(rawSource?.videoWidth||rawSource?.naturalWidth||rawSource?.width),(rawSource?.videoHeight||rawSource?.naturalHeight||rawSource?.height),JSON.stringify(area)].join(':');}
  function showFrame(source){frame=vision.normalize(source,area);ctx.drawImage(frame,0,0);$('area').disabled=false;$('learn').disabled=!catalog;}
  function drawResults(observation,accepted,automatic){
+  lastObservation=observation;
+  if(!partyLock&&!partyEdited)for(const m of observation.members)if(Number.isInteger(m.slot))$('party-'+m.slot).value=m.id||'';
   const current=bridge.snapshot(),apply=$('apply').checked;
   $('result-body').replaceChildren(...observation.members.filter(m=>Number.isInteger(m.slot)).map(m=>{
    const tr=document.createElement('tr'),previous=current.members.find(p=>p.slot===m.slot);
@@ -113,7 +122,8 @@
    if(automatic&&sameFrames>2){monitorInfo('画面変化待ち ／ '+timing());return;}
    // Yield to paint without overlapping jobs. Stop/reset invalidates this frame.
    await new Promise(resolve=>requestAnimationFrame(resolve));if(token!==generation)return;
-   const observation=vision.analyze(frame,custom);if($('world-sync').checked)observation.world=window.ScreenReaderWorldVision.analyze(frame);else $('world-result').textContent='マップ読取はOFFです。マップ・難易度を選び、反映をONにしてください。';if($('self').value)observation.selfId=$('self').value;
+   if(partyLock&&partyLock.signature!==partySignature())releaseParty();
+   const observation=vision.analyze(frame,custom,partyLock);if($('world-sync').checked)observation.world=window.ScreenReaderWorldVision.analyze(frame);else $('world-result').textContent='マップ読取はOFFです。マップ・難易度を選び、反映をONにしてください。';if(!partyLock&&$('self').value)observation.selfId=$('self').value;
    const accepted=automatic?stabilize(observation):observation;const result=$('apply').checked?bridge.apply(accepted):{updated:0,added:0};
    drawResults(observation,accepted,automatic);
    let worldSkipped=0;
@@ -145,8 +155,22 @@
  }
  $('file').addEventListener('change',()=>loadImage($('file').files[0]));
  document.addEventListener('paste',event=>{const file=[...(event.clipboardData?.items||[])].find(i=>i.type.startsWith('image/'))?.getAsFile();if(file){event.preventDefault();loadImage(file);}});
- $('new-game').addEventListener('click',()=>{generation++;clearTimeout(timer);$('auto').checked=false;stable.clear();lastHash=null;sameFrames=0;bridge.reset();$('world-sync').checked=false;monitorInfo();$('world-result').textContent='';$('result-body').replaceChildren();$('chip-result').textContent='';$('view').textContent='新しいゲームの読取を待っています。';status('Lv、HP、補正、取得チップを初期化し、自動読取を停止しました。次のゲームで読取を再開してください。');});
- $('self').addEventListener('change',()=>{generation++;stable.clear();sameFrames=0;lastHash=null;});
+ $('party-confirm').addEventListener('click',()=>{
+  const ids=Array.from({length:4},(_,i)=>$('party-'+i).value),selfId=$('self').value||lastObservation?.selfId;
+  if(!lastObservation?.hud){$('party-status').textContent='ゲーム画面を一度読み取ってから確定してください。';return;}
+  if(ids.some(id=>!catalog.characters.some(c=>c.id===id))||new Set(ids).size!==4){$('party-status').textContent='異なる4人を上から順に指定してください。';return;}
+  if(!ids.includes(selfId)){$('party-status').textContent='「自キャラ」でこのPTにいる自分のキャラを指定してください。';return;}
+  if(!$('apply').checked){$('party-status').textContent='「判定できた情報を反映」をONにしてから確定してください。';return;}
+  generation++;stable.clear();lastHash=null;sameFrames=0;
+  partyLock={ids,selfId,hud:{...lastObservation.hud},signature:partySignature()};
+  bridge.apply({selfId,members:ids.map((id,slot)=>({id,slot}))});
+  for(const select of $('party-slots').querySelectorAll('select'))select.disabled=true;
+  $('party-confirm').disabled=true;$('party-unlock').disabled=false;$('party-status').textContent='PT確定：Lv・HP・コインを追跡中。攻撃・防御・チップは表示された画面から更新します。';
+  if(rawSource&&!busy)read();
+ });
+ $('party-unlock').addEventListener('click',()=>{generation++;stable.clear();lastHash=null;sameFrames=0;releaseParty();if(rawSource&&!busy)read();});
+ $('new-game').addEventListener('click',()=>{releaseParty();generation++;clearTimeout(timer);$('auto').checked=false;stable.clear();lastHash=null;sameFrames=0;bridge.reset();$('world-sync').checked=false;monitorInfo();$('world-result').textContent='';$('result-body').replaceChildren();$('chip-result').textContent='';$('view').textContent='新しいゲームの読取を待っています。';status('Lv、HP、補正、取得チップを初期化し、自動読取を停止しました。次のゲームで読取を再開してください。');});
+ $('self').addEventListener('change',()=>{if(partyLock)releaseParty();generation++;stable.clear();sameFrames=0;lastHash=null;});
  $('world-sync').addEventListener('change',()=>{stable.clear();sameFrames=0;lastHash=null;monitorInfo();});
  $('interval').addEventListener('change',()=>{if(!busy)schedule();});
  $('apply').addEventListener('change',()=>{stable.clear();sameFrames=0;lastHash=null;});
@@ -161,7 +185,7 @@
  $('learn').addEventListener('click',()=>{if(!frame||!catalog)return;const [kind,index]=$('learn-kind').value.split(':'),id=$('learn-id').value,ref=vision.learn(frame,kind,id,kind.startsWith('chip-')?Number($('learn-slot').value):Number(index)),list=kind.startsWith('chip-')?custom.chips:custom.characters;if(custom.characters.length+custom.chips.length>=500){status('見本は最大500件です。');return;}if(!list.some(r=>r.id===ref.id&&r.kind===ref.kind&&r.data===ref.data))list.push(ref);generation++;stable.clear();sameFrames=0;lastHash=null;save();read();});
  $('export').addEventListener('click',()=>{const url=URL.createObjectURL(new Blob([JSON.stringify({version:1,...custom,area},null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='screen-reader-profile.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
  $('import').addEventListener('change',async()=>{try{const file=$('import').files[0];if(!file)return;if(file.size>1000000)throw Error('ファイルが大きすぎます。');const p=validateProfile(JSON.parse(await file.text()));custom={characters:p.characters,chips:p.chips};area=p.area||null;generation++;stable.clear();sameFrames=0;lastHash=null;save();if(rawSource)read();status('見本を読み込みました。');}catch(error){status(error.message);}finally{$('import').value='';}});
- window.addEventListener('new-game-reset',()=>{generation++;clearTimeout(timer);timer=null;stable.clear();lastHash=null;sameFrames=0;$('auto').checked=false;$('self').value='';$('world-sync').checked=false;monitorInfo();$('world-result').textContent='';$('result-body').replaceChildren();$('chip-result').textContent='';$('view').textContent='リセット後の読取を待っています。';status('ゲーム状態をリセットしました。次のゲーム画面を読み取ってください。');});
+ window.addEventListener('new-game-reset',()=>{releaseParty();generation++;clearTimeout(timer);timer=null;stable.clear();lastHash=null;sameFrames=0;$('auto').checked=false;$('self').value='';$('world-sync').checked=false;monitorInfo();$('world-result').textContent='';$('result-body').replaceChildren();$('chip-result').textContent='';$('view').textContent='リセット後の読取を待っています。';status('ゲーム状態をリセットしました。次のゲーム画面を読み取ってください。');});
  window.addEventListener('mobile-ui-change',()=>{if(document.body.classList.contains('mobile-ui'))stop();});
  window.addEventListener('pagehide',stop);
  $('learn-id').addEventListener('change',updateMappingPreview);
