@@ -179,7 +179,7 @@
   // The small popup covers the self portrait. Never identify self from its
   // chip contents or selected tab; keep the previous self or explicit choice.
   const selfRefs=charRefs.filter(r=>r.kind==='self');
-  const own=(!locked||!party.selfId)&&(header||tab===null)?match(feature(hudSource,layout.regions.self),selfRefs)||match(feature(source.popupFrame||source,layouts[1].regions.self),selfRefs):null;
+  const own=(!locked||!party.selfId)&&(header||tab===null)?match(feature(hudSource,layout.regions.self),selfRefs)||(source.statusFrame&&hudSource!==source.popupFrame?match(feature(source.popupFrame,layouts[1].regions.self),selfRefs):null):null;
   const selfId=locked?(party.selfId||(party.ids.includes(own?.id)?own.id:null)):own?.id??null;
   const observation={members,selfId,hud:{layout:layout.id,source:hudSource===source?'primary':'popup'},view:'通常画面',chipOwnerId:null,chipIds:[]};
   if(header){
