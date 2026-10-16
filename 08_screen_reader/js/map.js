@@ -79,7 +79,7 @@ const defeatTotals=new Map();
 const executedEvents=new Set();
 const missionCounters=new Map();
 const rosterState=createRosterState({map:pick.value,difficulty:difficulty.value,route:'',moved:false});
-function addPlacedMonster(enemy){return addRosterMonster(rosterState,enemy);}
+function addPlacedMonster(enemy,observedSerial=null){return addRosterMonster(rosterState,enemy,observedSerial);}
 function monsterDisplayName(enemy){return rosterMonsterDisplayName(enemy);}
 const roster=document.getElementById('map-roster-list'),rosterEmpty=document.getElementById('map-roster-empty'),rosterNotice=document.createElement('span');
 const rosterError=document.getElementById('roster-error'),rosterUndo=document.getElementById('roster-undo'),eventError=document.getElementById('mp-event-error');
@@ -103,7 +103,7 @@ window.ScreenReaderMapBridge={
    if(clock.round!==rosterState.round||clock.progress!==rosterState.progress){save();rosterState.round=clock.round;rosterState.progress=clock.progress;result.updated++;}
    // Catch up missing progress events in order, with the existing once-only keys.
    const groups=groupMapEvents(routeRows(data.events)).filter(g=>/^\d+$/.test(String(g['進捗']))&&Number(g['進捗'])<=clock.progress).sort((a,b)=>Number(a['進捗'])-Number(b['進捗']));
-   for(const group of groups)if(!executedEvents.has(eventKey(group))){save();executeEvent(group,{remember:false,render:false});if(executedEvents.has(eventKey(group)))result.events++;}
+   for(const group of groups)if(!executedEvents.has(eventKey(group))){save();executeEvent(group,{remember:false,render:false,observeOnly:true});if(executedEvents.has(eventKey(group)))result.events++;}
   }
   const observations=Array.isArray(observation.monsters)?observation.monsters:[],seen=new Set();
   for(const o of observations){
@@ -112,13 +112,14 @@ window.ScreenReaderMapBridge={
    const stats=data.stats.find(r=>r.monster_id===o.monsterId&&r['難易度']===difficulty.value);if(!stats){result.skipped++;continue;}
    const boss=String(stats['ボス']).trim()==='1',unnumbered=o.monsterId==='M0116';if((boss||unnumbered)?o.serial!==null:!valid(o.serial,1,999)){result.skipped++;continue;}
    if(unnumbered&&executedEvents.has(libraryTruthKey())){result.skipped++;continue;}
-   const matches=rosterState.monsters.filter(e=>e.monsterId===o.monsterId&&e.mapId===pick.value&&(boss||unnumbered||e.serial===o.serial)&&(!unnumbered||!e.defeated));
+   const matches=rosterState.monsters.filter(e=>e.monsterId===o.monsterId&&e.mapId===pick.value&&e.difficulty===difficulty.value&&(boss||unnumbered||e.serial===o.serial)&&(!unnumbered||!e.defeated));
    if(matches.length>1||matches[0]?.defeated||Number(rosterStat(stats,'HP'))!==o.maxHp||(!matches.length&&!data.maps[pick.value]?.ids.includes(o.monsterId))){result.skipped++;continue;}
+   if(o.currentHp===0&&(!matches[0]||!matches[0].screenSeenAlive)){result.skipped++;continue;}
    if(o.monsterId==='M0115'&&!executedEvents.has(libraryTruthKey())){save();executeLibraryTruth(false);}
    let enemy=matches[0]||((o.monsterId==='M0115')?rosterState.monsters.find(e=>e.monsterId==='M0115'&&!e.defeated):null);if(!enemy){
-    save();enemy=addPlacedMonster({instanceId:rosterState.nextId++,monsterId:o.monsterId,name:stats['モンスター名'],mapName:data.maps[pick.value].name,mapId:pick.value,difficulty:difficulty.value,image:data.images[stats.image],base:{...stats},damageTaken:0,attack:rosterStat(stats,'攻撃'),defense:rosterStat(stats,'防御'),hp:o.maxHp,coin:stats['コイン']===''?null:Number(stats['コイン']),boss,reflect:String(stats['反撃']).trim()==='1'});
-    if(!boss&&!unnumbered){enemy.serial=o.serial;rosterState.serials.set(o.monsterId,Math.max(rosterState.serials.get(o.monsterId)||0,o.serial));}result.added++;
+    save();enemy=addPlacedMonster({instanceId:rosterState.nextId++,monsterId:o.monsterId,name:stats['モンスター名'],mapName:data.maps[pick.value].name,mapId:pick.value,difficulty:difficulty.value,image:data.images[stats.image],base:{...stats},damageTaken:0,attack:rosterStat(stats,'攻撃'),defense:rosterStat(stats,'防御'),hp:o.maxHp,coin:stats['コイン']===''?null:Number(stats['コイン']),boss,reflect:String(stats['反撃']).trim()==='1'},!boss&&!unnumbered?o.serial:null);result.added++;
    }
+   if(o.currentHp>0&&!enemy.screenSeenAlive){save();enemy.screenSeenAlive=true;}
    if(enemy.hp!==o.currentHp){save();enemy.manualHp=o.currentHp;enemy.hp=o.currentHp;enemy.damageTaken=o.maxHp-o.currentHp;if(o.currentHp===0)removeEnemy(enemy);result.updated++;}
   }
   if(saved){renderRoundProgress();updateEventRows();renderRoster();}return result;
@@ -373,7 +374,7 @@ function executeEvent(group,options={}){
   absorbSoulSpirits(rosterState.monsters,pick.value,difficulty.value);
   if(rosterState.selectedId!==null&&!rosterState.monsters.some(enemy=>enemy.instanceId===rosterState.selectedId))rosterState.selectedId=null;
  }
- for(const {stats,count} of pending){for(let i=0;i<count;i++)addPlacedMonster({instanceId:rosterState.nextId++,monsterId:stats.monster_id,name:stats['モンスター名'],mapName:data.maps[pick.value].name,mapId:pick.value,difficulty:difficulty.value,image:data.images[stats.image],base:{...stats},damageTaken:0,attack:rosterStat(stats,'攻撃'),defense:rosterStat(stats,'防御'),hp:rosterStat(stats,'HP'),coin:stats['コイン']===''?null:Number(stats['コイン']),boss:String(stats['ボス']).trim()==='1',reflect:String(stats['反撃']).trim()==='1'});}
+ for(const {stats,count} of (options.observeOnly?[]:pending)){for(let i=0;i<count;i++)addPlacedMonster({instanceId:rosterState.nextId++,monsterId:stats.monster_id,name:stats['モンスター名'],mapName:data.maps[pick.value].name,mapId:pick.value,difficulty:difficulty.value,image:data.images[stats.image],base:{...stats},damageTaken:0,attack:rosterStat(stats,'攻撃'),defense:rosterStat(stats,'防御'),hp:rosterStat(stats,'HP'),coin:stats['コイン']===''?null:Number(stats['コイン']),boss:String(stats['ボス']).trim()==='1',reflect:String(stats['反撃']).trim()==='1'});}
  executedEvents.add(key);eventError.textContent='';if(rerender)renderRoster();
 }
 function executeGhostDefeatEvent(monsterId){

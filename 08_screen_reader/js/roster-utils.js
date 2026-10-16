@@ -1,8 +1,8 @@
 // Pure roster helpers. Keep DOM and map-controller state in map.js.
 function createRosterState(context){return {monsters:[],nextId:1,selectedId:null,serials:new Map(),history:[],round:1,progress:1,context};}
-function addRosterMonster(state,enemy){
+function addRosterMonster(state,enemy,observedSerial=null){
  enemy.markStacks=Math.max(0,Math.floor(Number(enemy.markStacks)||0));
- if(!enemy.boss){const serial=(state.serials.get(enemy.monsterId)||0)+1;state.serials.set(enemy.monsterId,serial);enemy.serial=serial;}
+ if(!enemy.boss){const prior=state.serials.get(enemy.monsterId)||0,serial=Number.isSafeInteger(observedSerial)&&observedSerial>0?observedSerial:prior+1;state.serials.set(enemy.monsterId,Math.max(prior,serial));enemy.serial=serial;}
  state.monsters.push(enemy);return enemy;
 }
 function rosterMonsterDisplayName(enemy){return enemy.name+(enemy.boss?'':' '+enemy.serial);}

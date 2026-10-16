@@ -189,3 +189,25 @@ test('08 world: Dream ship shark label records number and HP; two explicit zero 
  for(const [id,serial] of [['M0002',1],['M0004',9]])expect(after.monsters.find(m=>m.monsterId===id&&m.serial===serial)?.defeated).toBe(true);
  await page.locator('#roster-undo').click();expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(before);
 });
+
+test('08 world: observed serials do not consume phantom numbers and progress events do not duplicate observed spawns',async({page})=>{
+ await open(page);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0001');await page.locator('#mp-difficulty').selectOption('狂気');
+ const o={clock:{round:9,progress:9},monsters:[{monsterId:'M0004',serial:4,currentHp:10,maxHp:10},{monsterId:'M0004',serial:2,currentHp:8,maxHp:10}]};
+ await page.evaluate(o=>ScreenReaderMapBridge.apply(o),o);
+ const first=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(first.monsters.map(m=>[m.monsterId,m.serial])).toEqual([['M0004',4],['M0004',2]]);
+ await page.evaluate(o=>ScreenReaderMapBridge.apply(o),o);expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(first);
+ await page.locator('#mp-tab-monsters').click();await page.locator('.mp-monster[data-id="M0004"]').click();
+ const after=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(after.monsters.filter(m=>m.monsterId==='M0004').map(m=>m.serial)).toEqual([4,2,5]);
+});
+
+test('08 world: first sighting at zero HP is held, while a previously observed alive serial can be defeated and undone',async({page})=>{
+ await open(page);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0001');await page.locator('#mp-difficulty').selectOption('狂気');
+ const zero={monsters:[{monsterId:'M0004',serial:3,currentHp:0,maxHp:10}]};
+ const rejected=await page.evaluate(o=>ScreenReaderMapBridge.apply(o),zero);expect(rejected.skipped).toBe(1);expect((await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).monsters).toEqual([]);
+ await page.locator('#mp-tab-monsters').click();await page.locator('.mp-monster[data-id="M0004"]').click();
+ const manualBefore=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());
+ await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[{monsterId:'M0004',serial:1,currentHp:0,maxHp:10}]}));expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(manualBefore);
+ await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[{monsterId:'M0004',serial:1,currentHp:5,maxHp:10}]}));const alive=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());
+ await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[{monsterId:'M0004',serial:1,currentHp:0,maxHp:10}]}));expect((await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).monsters[0].defeated).toBe(true);
+ await page.locator('#roster-undo').click();expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(alive);
+});
