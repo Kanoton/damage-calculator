@@ -1,8 +1,29 @@
 const { test, expect } = require('@playwright/test');
-
 // Run the same behavioral regressions against the reader edition after a sync.
 const skillFolder=process.env.SKILL_TEST_FOLDER||'07_skill';
 if(!['07_skill','08_screen_reader'].includes(skillFolder))throw Error('Unknown skill test folder');
+
+for(const protocol of ['http','file'])test('07 autumn data: map, four difficulties, chip hit count and Luka potential '+protocol,async({page})=>{
+ await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve(skillFolder+'/index.html')).href:`/${skillFolder}/`);
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');
+ await expect(page.locator('#mp-event-body')).toContainText('ゲームオーバー');await expect(page.locator('#mp-mission-body')).toContainText('建物を8個建てる');
+ await page.locator('#mp-tab-monsters').click();
+ for(const [difficulty,hp] of [['普通','120'],['困難','130'],['悪夢','140'],['狂気','150']]){
+  await page.locator('#mp-difficulty').selectOption(difficulty);await expect(page.locator('#mp-monster-list .mp-monster')).toHaveCount(5);
+  await expect(page.locator('#mp-monster-list .mp-monster').filter({hasText:'キッズガオー'})).toContainText(hp);
+ }
+ await expect.poll(()=>page.locator('#mp-monster-list .mp-monster img').evaluateAll(imgs=>imgs.every(img=>img.complete&&img.naturalWidth>0))).toBe(true);
+ await selectCharacter(page,'17');const atk=page.locator('#selected-character-atk'),base=Number(await atk.inputValue());
+ const potential=page.getByLabel('潜在能力の攻撃補正の数',{exact:true});await potential.fill('3');await potential.dispatchEvent('change');await expect(atk).toHaveValue(String(base+3));
+ await selectChipCategory(page,'チャージ');await page.locator('.chip-select[data-id="53"]').click();await page.locator('.chip-select[data-id="54"]').click();
+ const owned=name=>page.locator('.selected-character-chips .selected-chip').filter({has:page.getByAltText(name,{exact:true})});
+ await owned('ワープエンジン').click();await expect(page.getByLabel('チャージの数',{exact:true})).toHaveValue('3');
+ await owned('電撃グローブ').click();await owned('電撃グローブ').click();await expect(page.getByLabel('チャージの数',{exact:true})).toHaveValue('5');await expect(atk).toHaveValue(String(base+7));
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#turn-end').click();await expect(atk).toHaveValue(String(base));
+ await page.locator('#roster-undo').click();await expect(atk).toHaveValue(String(base+7));
+});
+
+
 
 async function prepareSherryTargets(page){
  await page.goto(`/${skillFolder}/`);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-tab-monsters').click();

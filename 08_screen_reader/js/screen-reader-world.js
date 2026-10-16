@@ -28,7 +28,7 @@
  }
  function readMonsters(source,refs){
   const {w,h,red,white}=masks(source),parts=components(red,w,h),rows=[];
-  for(const p of parts){let row=rows.find(r=>Math.abs(r.cy-(p.y+p.h/2))<3);if(!row){row={cy:p.y+p.h/2,parts:[]};rows.push(row);}row.parts.push(p);}
+  for(const p of parts){let row=rows.find(r=>Math.abs(r.cy-(p.y+p.h/2))<4);if(!row){row={cy:p.y+p.h/2,parts:[]};rows.push(row);}row.parts.push(p);}
   const observations=[];
   for(const row of rows){const sorted=row.parts.sort((a,b)=>a.x-b.x),groups=[];for(const p of sorted){let group=groups.at(-1);if(!group||p.x-(group.at(-1).x+group.at(-1).w)>8){group=[];groups.push(group);}group.push(p);}
    for(const group of groups){if(group.length<3||group.length>7)continue;const chars=group.map(p=>glyph(red,w,[p.x,p.y,p.w,p.h],refs.digits));if(chars.some(c=>c===null))continue;const text=chars.join('');if(!/^\d{1,3}\/\d{1,3}$/.test(text))continue;const [currentHp,maxHp]=text.split('/').map(Number);if(maxHp<1||currentHp>maxHp)continue;

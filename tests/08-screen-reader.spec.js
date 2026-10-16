@@ -335,3 +335,9 @@ test('08: obscured faces and numbers retain state without deciding self or erasi
  const o=await page.evaluate(async image=>{const im=new Image();im.src=image;await im.decode();const c=ScreenReaderVision.normalize(im),ctx=c.getContext('2d');ctx.fillStyle='#141414';for(const box of [[55,159,73,42],[23,103,60,42],[167,98,27,24],[116,445,139,116]])ctx.fillRect(...box);const o=ScreenReaderVision.analyze(c);ScreenReaderCharacterBridge.apply(o);return o;},fixture('left-hud'));
  expect(o.selfId).toBeNull();expect(o.members[1].id).toBeUndefined();expect(o.members[0].currentHp).toBeUndefined();expect(o.members[0].coin).toBeUndefined();expect(o.chipIds).toEqual([]);expect(await snapshot(page)).toEqual(before);
 });
+
+test('08: Yume 123_02 outfit matches the recorded avatar without weakening ambiguity checks',async({page})=>{
+ await open(page);
+ const actual=await page.evaluate(async image=>{const im=new Image();im.src=image;await im.decode();return ScreenReaderVision.profileMatch(ScreenReaderVision.feature(im,[55,159,73,42]));},fixture('yume-outfit-123-02'));
+ expect(actual?.id).toBe('20');expect(actual?.confidence).toBeGreaterThanOrEqual(90);
+});

@@ -415,12 +415,13 @@
   ownedBox.replaceChildren();
   for(const id of state().chips){
    const chip=chips.find(c=>c.id===id);if(!chip)continue;
-   const chargeDelta=chip.category==='チャージ'&&id!=='57'?({'51':2,'52':2,'53':2,'54':2,'55':-6,'56':-5,'58':-4}[id]||0):null;
+   const chargeDelta=chip.category==='チャージ'&&id!=='57'?({'51':2,'52':2,'53':3,'54':1,'55':-6,'56':-5,'58':-4}[id]||0):null;
    const item=createOwnedChipView(chip,chargeDelta,()=>{
     if(!chargeDelta)return;
     const charge=number(state(),'チャージ');
     if(chargeDelta<0&&charge<-chargeDelta)return;
     state().numbers['チャージ']=Math.max(0,Math.min(10,charge+chargeDelta));
+    if(id==='54')state().numbers['電撃グローブ命中数']=number(state(),'電撃グローブ命中数')+1;
     if(id==='56'){const skill=activeSkill();if(skill)state().skillCooldowns[skill.key]=Math.max(0,activeSkillCooldown(skill)-1);}
     renderConditions();updateStats();
    });
@@ -763,6 +764,7 @@
   if(!selectedCharacter)return;
   let changed=false;
   for(const id of ['121','145'])if(state().modes[id]){state().modes[id]=0;changed=true;}
+  if(state().numbers['電撃グローブ命中数']){state().numbers['電撃グローブ命中数']=0;changed=true;}
   if(state().chips.includes('206')&&number(state(),'マインド')>0){state().numbers['マインド']=number(state(),'マインド')-1;changed=true;}
   for(const key of Object.keys(state().skillCooldowns)){const current=Number(state().skillCooldowns[key])||0;if(current>0){state().skillCooldowns[key]=current-1;changed=true;}}
   for(const key of ['PT大鉦','PTカクテル攻撃','PTカクテル防御','PTドロシー攻撃','PTユメ攻撃補正','PT潜伏','PTハンナ親友の祝福'])if(state().numbers[key]){state().numbers[key]=0;changed=true;}

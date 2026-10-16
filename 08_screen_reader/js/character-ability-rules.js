@@ -6,6 +6,8 @@ const CHARACTER_ABILITY_RULES={
   modifiers:[{target:'atk',formula:'per_stack',source:'このターンに受けたダメージ',value:1,when:{key:'反撃',equals:1}}]
  },
  '17':{
+  controls:[{key:'潜在能力の攻撃補正',type:'number',min:0,duration:'turn'}],
+  modifiers:[{target:'atk',formula:'per_stack',source:'潜在能力の攻撃補正',value:1}],
   activeSkills:[{key:'active',label:"真夜の一閃",cooldown:3,target:'monster',multipleTargets:true,effects:[{type:'damage_monster',sourceStat:'atk',offset:2}]}]
  },
  '23':{

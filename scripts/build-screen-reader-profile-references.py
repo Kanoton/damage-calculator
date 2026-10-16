@@ -30,8 +30,12 @@ def build():
         inputs.update(path.read_bytes())
         with Image.open(path) as source:
             source = source.convert('RGBA')
-            for x, y, width in CROPS:
-                image = source.crop((x, y, x + width, y + width * 42 / 73)).resize((SIDE, SIDE), Image.Resampling.BILINEAR)
+            # 123_02 has a wider left ornament; this HUD-calibrated crop excludes it.
+            crops = CROPS + ([(59, 67, 125), (42, 67, 100, 72)] if row['image_file'] == 'UT_Hero_ProfilePhoto_123_02.png' else [])
+            for raw in crops:
+                x, y, width = raw[:3]
+                height = raw[3] if len(raw) == 4 else width * 42 / 73
+                image = source.crop((x, y, x + width, y + height)).resize((SIDE, SIDE), Image.Resampling.BILINEAR)
                 pixels = list(image.getdata())
                 mask = [p[3] > 240 for p in pixels]
                 # Small transparent or nearly flat patches are not identity evidence.

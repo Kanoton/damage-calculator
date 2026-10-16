@@ -169,3 +169,19 @@ test('08 world: automatic capture resumes for tiny map-only changes after a stat
  expect(await page.evaluate(()=>testCaptureOptions.video.frameRate)).toEqual({ideal:5,max:10});
  await page.locator('#reader-stop').click();expect(await page.evaluate(()=>testCapture.getTracks().every(t=>t.readyState==='ended'))).toBe(true);
 });
+
+test('08 world: Dream ship shark label records number and HP; two explicit zero HP observations are applied together with undo',async({page})=>{
+ await open(page);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0001');await page.locator('#mp-difficulty').selectOption('狂気');
+ const shark=await readVideoLabel(page,videoLabels.find(r=>r.id==='M0002'));
+ expect(shark.monsters).toEqual([{monsterId:'M0002',serial:1,currentHp:15,maxHp:22}]);
+ const pirate={monsterId:'M0004',serial:9,currentHp:10,maxHp:10};
+ await page.evaluate(o=>ScreenReaderMapBridge.apply(o),{monsters:[...shark.monsters,pirate]});
+ const before=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());
+ expect(before.monsters.find(m=>m.monsterId==='M0002'&&m.serial===1)?.hp).toBe(15);
+ await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[]}));expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(before);
+ // Explicit zero-HP input is synthetic: the video disappearance itself is not a death signal.
+ await page.evaluate(o=>ScreenReaderMapBridge.apply(o),{monsters:[...shark.monsters,pirate].map(m=>({...m,currentHp:0}))});
+ const after=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());
+ for(const [id,serial] of [['M0002',1],['M0004',9]])expect(after.monsters.find(m=>m.monsterId===id&&m.serial===serial)?.defeated).toBe(true);
+ await page.locator('#roster-undo').click();expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(before);
+});

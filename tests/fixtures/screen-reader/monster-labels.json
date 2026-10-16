@@ -1380,5 +1380,37 @@
     "seconds": 56.34,
     "training": false,
     "note": "Progress bar cuts the individual serial. Reject the fragment instead of reading serial 7."
+  },
+  {
+    "fixture": "labels-dream-24-M0002",
+    "id": "M0002",
+    "boss": false,
+    "nameBox": [
+      307,
+      306,
+      110,
+      27
+    ],
+    "serialBox": [
+      423,
+      310,
+      18,
+      26
+    ],
+    "hpBox": [
+      333,
+      342,
+      64,
+      26
+    ],
+    "expected": {
+      "monsterId": "M0002",
+      "serial": 1,
+      "currentHp": 15,
+      "maxHp": 22
+    },
+    "training": true,
+    "source": "dream-20261016",
+    "time_seconds": 24
   }
 ]
