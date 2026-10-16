@@ -43,3 +43,145 @@ test('08 world: only consecutive observations stabilize and actual controller ap
  await page.locator('#reader-file').setInputFiles({name:'world.png',mimeType:'image/png',buffer:Buffer.from(fixture('11').split(',')[1],'base64')});await expect(page.locator('#reader-file')).toHaveValue('');await expect(page.locator('#reader-world-result')).toContainText('進捗 4');
  expect((await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).round).toBe(4);
 });
+
+const videoLabels=require('./fixtures/screen-reader/monster-labels.json');
+async function readVideoLabel(page,row,hidden){
+ return page.evaluate(async({image,hidden})=>{
+  const im=new Image();im.src=image;await im.decode();const source=ScreenReaderVision.normalize(im);
+  if(hidden){const ctx=source.popupFrame.getContext('2d'),scale=709/im.height;ctx.fillStyle='#141414';ctx.fillRect(hidden[0]*scale-2,hidden[1]*scale-2,hidden[2]*scale+4,hidden[3]*scale+4);}
+  return ScreenReaderWorldVision.analyze(source);
+ },{image:require('./fixtures/screen-reader/'+row.fixture+'.json').image,hidden});
+}
+
+test('08 world: recorded video labels link exact names, serials and HP',async({page})=>{
+ await open(page);
+ for(const row of videoLabels){const result=await readVideoLabel(page,row);if(row.allowAbstain&&!result.monsters.length)continue;expect(result.monsters,row.fixture).toEqual(row.expected?[row.expected]:[]);}
+});
+
+test('08 world: video labels abstain when a name, individual serial or HP is hidden',async({page})=>{
+ await open(page);
+ for(const row of videoLabels.filter(r=>r.training)){
+  for(const hidden of [row.nameBox,row.hpBox,row.serialBox].filter(Boolean))expect((await readVideoLabel(page,row,hidden)).monsters,row.fixture).toEqual([]);
+ }
+});
+
+test('08 world: academy boss HP and separate guardian numbers use the existing opt-in bridge',async({page})=>{
+ await open(page);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0004');await page.locator('#mp-difficulty').selectOption('普通');
+ const boss=await readVideoLabel(page,videoLabels.find(r=>r.id==='M0020'&&r.training));
+ const guardians=await Promise.all(videoLabels.filter(r=>r.id==='M0023').map(r=>readVideoLabel(page,r)));
+ await page.evaluate(observations=>observations.forEach(o=>ScreenReaderMapBridge.apply(o)),[boss,...guardians]);
+ let state=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(state.monsters.find(m=>m.monsterId==='M0020').hp).toBe(86);
+ expect(state.monsters.find(m=>m.monsterId==='M0023'&&m.serial===1).hp).toBe(12);expect(state.monsters.find(m=>m.monsterId==='M0023'&&m.serial===2).hp).toBe(15);
+ const next=await readVideoLabel(page,videoLabels.find(r=>r.id==='M0020'&&!r.training));await page.evaluate(o=>ScreenReaderMapBridge.apply(o),next);
+ state=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(state.monsters.find(m=>m.monsterId==='M0020').hp).toBe(66);
+ await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[]}));expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(state);
+});
+
+
+test('08 world: dream boss damage and individual monster HP reach the opt-in bridge',async({page})=>{
+ await open(page);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0001');await page.locator('#mp-difficulty').selectOption('普通');
+ for(const [id,frame] of [['M0001',207],['M0003',454],['M0004',317],['M0004',140]]){
+  const observation=await readVideoLabel(page,videoLabels.find(r=>r.source==='dream'&&r.id===id&&r.frame===frame));await page.evaluate(o=>ScreenReaderMapBridge.apply(o),observation);
+ }
+ const state=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());
+ expect(state.monsters.find(m=>m.monsterId==='M0001').hp).toBe(85);
+ expect(state.monsters.find(m=>m.monsterId==='M0003'&&m.serial===1).hp).toBe(19);
+ expect(state.monsters.find(m=>m.monsterId==='M0004'&&m.serial===4).hp).toBe(6);
+ expect(state.monsters.find(m=>m.monsterId==='M0004'&&m.serial===1).hp).toBe(4);
+ await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[]}));expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(state);
+});
+
+
+test('08 world: ghost alley HP changes keep different box serials and unrelated monsters separate',async({page})=>{
+ await open(page);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0006');await page.locator('#mp-difficulty').selectOption('普通');
+ for(const row of videoLabels.filter(r=>r.source==='ghost'&&r.training))await page.evaluate(o=>ScreenReaderMapBridge.apply(o),await readVideoLabel(page,row));
+ let state=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());
+ for(const [id,serial,hp] of [['M0037',3,8],['M0038',1,16],['M0039',1,22],['M0040',2,8],['M0041',1,26]])expect(state.monsters.find(m=>m.monsterId===id&&m.serial===serial).hp).toBe(hp);
+ for(const row of videoLabels.filter(r=>r.source==='ghost'&&!r.training))await page.evaluate(o=>ScreenReaderMapBridge.apply(o),await readVideoLabel(page,row));
+ state=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(state.monsters.find(m=>m.monsterId==='M0041'&&m.serial===1).hp).toBe(23);
+ expect(state.monsters.find(m=>m.monsterId==='M0037'&&m.serial===3).hp).toBe(8);expect(state.monsters.find(m=>m.monsterId==='M0037'&&m.serial===7).hp).toBe(8);
+ await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[]}));expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(state);
+});
+
+
+test('08 world: library native and shared monster labels update individual HP',async({page})=>{
+ await open(page);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0104');await page.locator('#mp-difficulty').selectOption('普通');
+ for(const row of videoLabels.filter(r=>r.source==='library'&&r.id!=='M0115'))await page.evaluate(o=>ScreenReaderMapBridge.apply(o),await readVideoLabel(page,row));
+ const state=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());
+ for(const [id,serial,hp] of [['M0117',2,17],['M0117',3,17],['M0119',2,13],['M0118',1,14],['M0118',2,12],['M0024',1,12]])expect(state.monsters.find(m=>m.monsterId===id&&m.serial===serial).hp).toBe(hp);
+ await page.locator('#reader-toggle').click();await page.locator('#reader-details').evaluate(e=>e.open=true);await page.locator('#reader-world-sync').check();
+ const row=videoLabels.find(r=>r.source==='library'&&r.id==='M0117');const image=require('./fixtures/screen-reader/'+row.fixture+'.json').image;
+ await page.locator('#reader-file').setInputFiles({name:'library.png',mimeType:'image/png',buffer:Buffer.from(image.split(',')[1],'base64')});await expect(page.locator('#reader-world-result')).toContainText('看守');
+});
+
+test('08 world: warden truth requires matching HP and persists through absence or old ordinary labels; undo restores the form',async({page})=>{
+ await open(page);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0104');await page.locator('#mp-difficulty').selectOption('普通');
+ await page.evaluate(o=>ScreenReaderMapBridge.apply(o),await readVideoLabel(page,videoLabels.find(r=>r.source==='library'&&r.id==='M0116')));
+ const before=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(before.monsters.filter(m=>m.monsterId==='M0116')).toHaveLength(1);expect(before.monsters.find(m=>m.monsterId==='M0116').hp).toBe(8);
+ await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[{monsterId:'M0115',serial:null,currentHp:200,maxHp:230}]}));expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(before);
+ const truth=await readVideoLabel(page,videoLabels.find(r=>r.source==='library'&&r.id==='M0115'));await page.evaluate(o=>ScreenReaderMapBridge.apply(o),truth);
+ const state=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(state.monsters.some(m=>m.monsterId==='M0116')).toBe(false);expect(state.monsters.find(m=>m.monsterId==='M0115').hp).toBe(228);
+ for(const o of [{monsters:[]},{monsters:[{monsterId:'M0116',serial:null,currentHp:8,maxHp:9}]}])await page.evaluate(o=>ScreenReaderMapBridge.apply(o),o);
+ expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(state);await page.locator('#roster-undo').click();expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(before);
+});
+
+test('08 world: shared names still reject maps without the registered relation',async({page})=>{
+ await open(page);await map(page);const before=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());
+ const wizard=await readVideoLabel(page,videoLabels.find(r=>r.source==='library'&&r.id==='M0024'&&r.training));await page.evaluate(o=>ScreenReaderMapBridge.apply(o),wizard);expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(before);
+});
+
+
+test('08 world: visible monitor diagnostics distinguish disabled reading and preview from detection',async({page})=>{
+ await open(page);await page.locator('#reader-toggle').click();
+ await expect(page.locator('#reader-monitor-info')).toContainText('OFF');
+ await expect(page.locator('#reader-monitor-info')).toContainText('25種類');
+ await expect(page.locator('#reader-interval')).toHaveValue('500');
+ await expect(page.locator('#reader-world-sync')).toBeVisible();
+ const before=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());
+ await page.locator('#reader-world-sync').check();await page.locator('#reader-details').evaluate(e=>e.open=true);await page.locator('#reader-apply').uncheck();
+ await page.locator('#reader-file').setInputFiles({name:'world.png',mimeType:'image/png',buffer:Buffer.from(fixture('11').split(',')[1],'base64')});
+ await expect(page.locator('#reader-monitor-info')).toContainText('今回 2体');
+ await expect(page.locator('#reader-monitor-info')).toContainText('確認のみ');
+ await expect(page.locator('#reader-monitor-info')).toContainText('処理');
+ expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(before);
+});
+
+test('08 world: automatic capture resumes for tiny map-only changes after a static screen',async({page})=>{
+ await open(page);await page.locator('#reader-toggle').click();await page.locator('#reader-world-sync').check();await page.locator('#reader-interval').selectOption('250');
+ await page.evaluate(async image=>{
+  const im=new Image();im.src=image;await im.decode();const c=document.createElement('canvas');c.width=1536;c.height=709;c.getContext('2d').drawImage(im,0,0);
+  window.testCaptureCanvas=c;window.testCapture=c.captureStream(10);window.testWorldReads=0;
+  const analyze=ScreenReaderWorldVision.analyze;ScreenReaderWorldVision.analyze=(...args)=>{testWorldReads++;return analyze(...args);};
+  navigator.mediaDevices.getDisplayMedia=async options=>{window.testCaptureOptions=options;return testCapture;};
+ },fixture('11'));
+ await page.locator('#reader-connect').click();await page.locator('#reader-auto').check();
+ await expect(page.locator('#reader-monitor-info')).toContainText('画面変化待ち',{timeout:15000});
+ const count=await page.evaluate(()=>testWorldReads);
+ // This small pixel change is invisible to all coarse hash samples and the HUD.
+ const coarseUnchanged=await page.evaluate(()=>{
+  const boxes=[[0,0,1536,709],[165,498,288,187],[465,324,286,184],[125,430,435,40]];
+  const features=()=>JSON.stringify(boxes.map(b=>Array.from(ScreenReaderVision.feature(testCaptureCanvas,b))));
+  const before=features();testCaptureCanvas.getContext('2d').fillStyle='#ffffff';testCaptureCanvas.getContext('2d').fillRect(1001,301,2,2);return before===features();
+ });
+ expect(coarseUnchanged).toBe(true);
+ await expect.poll(()=>page.evaluate(()=>testWorldReads),{timeout:10000}).toBeGreaterThan(count);
+ await expect(page.locator('#reader-monitor-info')).toContainText('実間隔');
+ expect(await page.evaluate(()=>testCaptureOptions.video.frameRate)).toEqual({ideal:5,max:10});
+ await page.locator('#reader-stop').click();expect(await page.evaluate(()=>testCapture.getTracks().every(t=>t.readyState==='ended'))).toBe(true);
+});
+
+test('08 world: Dream ship shark label records number and HP; two explicit zero HP observations are applied together with undo',async({page})=>{
+ await open(page);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0001');await page.locator('#mp-difficulty').selectOption('狂気');
+ const shark=await readVideoLabel(page,videoLabels.find(r=>r.id==='M0002'));
+ expect(shark.monsters).toEqual([{monsterId:'M0002',serial:1,currentHp:15,maxHp:22}]);
+ const pirate={monsterId:'M0004',serial:9,currentHp:10,maxHp:10};
+ await page.evaluate(o=>ScreenReaderMapBridge.apply(o),{monsters:[...shark.monsters,pirate]});
+ const before=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());
+ expect(before.monsters.find(m=>m.monsterId==='M0002'&&m.serial===1)?.hp).toBe(15);
+ await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[]}));expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(before);
+ // Explicit zero-HP input is synthetic: the video disappearance itself is not a death signal.
+ await page.evaluate(o=>ScreenReaderMapBridge.apply(o),{monsters:[...shark.monsters,pirate].map(m=>({...m,currentHp:0}))});
+ const after=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());
+ for(const [id,serial] of [['M0002',1],['M0004',9]])expect(after.monsters.find(m=>m.monsterId===id&&m.serial===serial)?.defeated).toBe(true);
+ await page.locator('#roster-undo').click();expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(before);
+});

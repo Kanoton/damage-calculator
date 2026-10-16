@@ -1,0 +1,1416 @@
+[
+  {
+    "fixture": "labels-academy-59-M0023",
+    "id": "M0023",
+    "boss": false,
+    "nameBox": [
+      447,
+      398,
+      290,
+      40
+    ],
+    "serialBox": [
+      748,
+      405,
+      28,
+      35
+    ],
+    "hpBox": [
+      544,
+      449,
+      93,
+      40
+    ],
+    "expected": {
+      "monsterId": "M0023",
+      "serial": 2,
+      "currentHp": 15,
+      "maxHp": 15
+    },
+    "source": "academy",
+    "frame": 59,
+    "seconds": 7.02,
+    "training": true
+  },
+  {
+    "fixture": "labels-academy-220-M0022",
+    "id": "M0022",
+    "boss": false,
+    "nameBox": [
+      1196,
+      398,
+      264,
+      40
+    ],
+    "serialBox": [
+      1465,
+      405,
+      28,
+      35
+    ],
+    "hpBox": [
+      1275,
+      449,
+      100,
+      40
+    ],
+    "expected": {
+      "monsterId": "M0022",
+      "serial": 1,
+      "currentHp": 31,
+      "maxHp": 35
+    },
+    "source": "academy",
+    "frame": 220,
+    "seconds": 26.34,
+    "training": true
+  },
+  {
+    "fixture": "labels-academy-209-M0025",
+    "id": "M0025",
+    "boss": false,
+    "nameBox": [
+      1035,
+      545,
+      291,
+      39
+    ],
+    "serialBox": [
+      1332,
+      550,
+      30,
+      37
+    ],
+    "hpBox": [
+      1131,
+      598,
+      103,
+      42
+    ],
+    "expected": {
+      "monsterId": "M0025",
+      "serial": 1,
+      "currentHp": 10,
+      "maxHp": 10
+    },
+    "source": "academy",
+    "frame": 209,
+    "seconds": 25.02,
+    "training": true
+  },
+  {
+    "fixture": "labels-academy-200-M0005",
+    "id": "M0005",
+    "boss": false,
+    "nameBox": [
+      750,
+      402,
+      64,
+      40
+    ],
+    "serialBox": [
+      827,
+      408,
+      29,
+      35
+    ],
+    "hpBox": [
+      740,
+      451,
+      64,
+      42
+    ],
+    "expected": {
+      "monsterId": "M0005",
+      "serial": 1,
+      "currentHp": 6,
+      "maxHp": 6
+    },
+    "source": "academy",
+    "frame": 200,
+    "seconds": 23.94,
+    "training": true
+  },
+  {
+    "fixture": "labels-academy-440-M0020",
+    "id": "M0020",
+    "boss": true,
+    "nameBox": [
+      1291,
+      396,
+      165,
+      40
+    ],
+    "serialBox": null,
+    "hpBox": [
+      1328,
+      450,
+      107,
+      41
+    ],
+    "expected": {
+      "monsterId": "M0020",
+      "serial": null,
+      "currentHp": 86,
+      "maxHp": 99
+    },
+    "source": "academy",
+    "frame": 440,
+    "seconds": 52.74,
+    "training": true
+  },
+  {
+    "fixture": "labels-new-video-251-M0013",
+    "id": "M0013",
+    "boss": true,
+    "nameBox": [
+      1021,
+      539,
+      231,
+      39
+    ],
+    "serialBox": null,
+    "hpBox": [
+      1085,
+      592,
+      135,
+      43
+    ],
+    "expected": {
+      "monsterId": "M0013",
+      "serial": null,
+      "currentHp": 112,
+      "maxHp": 120
+    },
+    "source": "new-video",
+    "frame": 251,
+    "seconds": 30.06,
+    "training": true
+  },
+  {
+    "fixture": "labels-new-video-217-M0018",
+    "id": "M0018",
+    "boss": false,
+    "nameBox": [
+      971,
+      251,
+      198,
+      39
+    ],
+    "serialBox": [
+      1178,
+      258,
+      28,
+      36
+    ],
+    "hpBox": [
+      1024,
+      303,
+      92,
+      42
+    ],
+    "expected": {
+      "monsterId": "M0018",
+      "serial": 1,
+      "currentHp": 16,
+      "maxHp": 21
+    },
+    "source": "new-video",
+    "frame": 217,
+    "seconds": 25.98,
+    "training": true
+  },
+  {
+    "fixture": "labels-new-video-653-M0019",
+    "id": "M0019",
+    "boss": false,
+    "nameBox": [
+      1186,
+      399,
+      136,
+      39
+    ],
+    "serialBox": [
+      1329,
+      405,
+      30,
+      36
+    ],
+    "hpBox": [
+      1205,
+      450,
+      68,
+      42
+    ],
+    "expected": {
+      "monsterId": "M0019",
+      "serial": 1,
+      "currentHp": 8,
+      "maxHp": 8
+    },
+    "source": "new-video",
+    "frame": 653,
+    "seconds": 78.3,
+    "training": true
+  },
+  {
+    "fixture": "labels-new-video-651-M0014",
+    "id": "M0014",
+    "boss": true,
+    "nameBox": [
+      975,
+      748,
+      200,
+      38
+    ],
+    "serialBox": null,
+    "hpBox": [
+      1031,
+      799,
+      138,
+      42
+    ],
+    "expected": {
+      "monsterId": "M0014",
+      "serial": null,
+      "currentHp": 103,
+      "maxHp": 120
+    },
+    "source": "new-video",
+    "frame": 651,
+    "seconds": 78.06,
+    "training": true
+  },
+  {
+    "fixture": "labels-new-video-317-M0017",
+    "id": "M0017",
+    "boss": false,
+    "nameBox": [
+      568,
+      399,
+      199,
+      40
+    ],
+    "serialBox": [
+      778,
+      406,
+      28,
+      35
+    ],
+    "hpBox": [
+      622,
+      452,
+      66,
+      42
+    ],
+    "expected": {
+      "monsterId": "M0017",
+      "serial": 4,
+      "currentHp": 7,
+      "maxHp": 7
+    },
+    "source": "new-video",
+    "frame": 317,
+    "seconds": 37.98,
+    "training": true
+  },
+  {
+    "fixture": "labels-academy-109-M0023",
+    "id": "M0023",
+    "boss": false,
+    "nameBox": [
+      351,
+      193,
+      296,
+      40
+    ],
+    "serialBox": [
+      657,
+      201,
+      28,
+      35
+    ],
+    "hpBox": [
+      451,
+      245,
+      92,
+      41
+    ],
+    "expected": {
+      "monsterId": "M0023",
+      "serial": 1,
+      "currentHp": 12,
+      "maxHp": 15
+    },
+    "source": "academy",
+    "frame": 109,
+    "seconds": 13.02,
+    "training": false
+  },
+  {
+    "fixture": "labels-academy-476-M0020",
+    "id": "M0020",
+    "boss": true,
+    "nameBox": [
+      601,
+      406,
+      167,
+      40
+    ],
+    "serialBox": null,
+    "hpBox": [
+      639,
+      459,
+      109,
+      42
+    ],
+    "expected": {
+      "monsterId": "M0020",
+      "serial": null,
+      "currentHp": 66,
+      "maxHp": 99
+    },
+    "source": "academy",
+    "frame": 476,
+    "seconds": 57.06,
+    "training": false
+  },
+  {
+    "fixture": "labels-academy-405-M0025",
+    "id": "M0025",
+    "boss": false,
+    "nameBox": [
+      546,
+      399,
+      292,
+      41
+    ],
+    "serialBox": [
+      847,
+      406,
+      28,
+      36
+    ],
+    "hpBox": [
+      641,
+      451,
+      76,
+      42
+    ],
+    "expected": {
+      "monsterId": "M0025",
+      "serial": 1,
+      "currentHp": 1,
+      "maxHp": 10
+    },
+    "source": "academy",
+    "frame": 405,
+    "seconds": 48.54,
+    "training": false
+  },
+  {
+    "fixture": "labels-new-video-635-M0018",
+    "id": "M0018",
+    "boss": false,
+    "nameBox": [
+      568,
+      399,
+      201,
+      40
+    ],
+    "serialBox": [
+      778,
+      406,
+      29,
+      36
+    ],
+    "hpBox": [
+      622,
+      451,
+      85,
+      42
+    ],
+    "expected": null,
+    "source": "new-video",
+    "frame": 635,
+    "seconds": 76.14,
+    "training": false,
+    "note": "Ambiguous serial/label overlapping a sprite; must abstain."
+  },
+  {
+    "fixture": "labels-new-video-635-M0014",
+    "id": "M0014",
+    "boss": true,
+    "nameBox": [
+      975,
+      748,
+      200,
+      38
+    ],
+    "serialBox": null,
+    "hpBox": [
+      1031,
+      799,
+      138,
+      42
+    ],
+    "expected": {
+      "monsterId": "M0014",
+      "serial": null,
+      "currentHp": 103,
+      "maxHp": 120
+    },
+    "source": "new-video",
+    "frame": 635,
+    "seconds": 76.14,
+    "training": false
+  },
+  {
+    "fixture": "labels-new-video-316-M0013",
+    "id": "M0013",
+    "boss": true,
+    "nameBox": [
+      318,
+      560,
+      225,
+      40
+    ],
+    "serialBox": null,
+    "hpBox": [
+      385,
+      614,
+      142,
+      42
+    ],
+    "expected": null,
+    "source": "new-video",
+    "frame": 316,
+    "seconds": 37.86,
+    "training": false,
+    "note": "Ambiguous serial/label overlapping a sprite; must abstain."
+  },
+  {
+    "fixture": "labels-new-video-651-M0019",
+    "id": "M0019",
+    "boss": false,
+    "nameBox": [
+      1090,
+      399,
+      136,
+      39
+    ],
+    "serialBox": [
+      1230,
+      405,
+      30,
+      36
+    ],
+    "hpBox": [
+      1107,
+      450,
+      66,
+      42
+    ],
+    "expected": null,
+    "source": "new-video",
+    "frame": 651,
+    "seconds": 78.06,
+    "training": false,
+    "note": "Spawn animation temporarily displays 0/0; must abstain."
+  },
+  {
+    "fixture": "labels-dream-317-M0003",
+    "id": "M0003",
+    "boss": false,
+    "nameBox": [
+      905,
+      469,
+      179,
+      50
+    ],
+    "serialBox": [
+      1094,
+      478,
+      35,
+      42
+    ],
+    "hpBox": [
+      926,
+      535,
+      139,
+      58
+    ],
+    "expected": {
+      "monsterId": "M0003",
+      "serial": 2,
+      "currentHp": 25,
+      "maxHp": 25
+    },
+    "source": "dream",
+    "frame": 317,
+    "seconds": 37.98,
+    "training": true,
+    "learnHpDigits": false,
+    "allowAbstain": true,
+    "note": "Use clear name/serial as references. Pink map tile contaminates this HP crop; abstention is allowed, incorrect values are not."
+  },
+  {
+    "fixture": "labels-dream-317-M0004",
+    "id": "M0004",
+    "boss": false,
+    "nameBox": [
+      840,
+      601,
+      174,
+      48
+    ],
+    "serialBox": [
+      1030,
+      608,
+      36,
+      42
+    ],
+    "hpBox": [
+      860,
+      666,
+      100,
+      58
+    ],
+    "expected": {
+      "monsterId": "M0004",
+      "serial": 4,
+      "currentHp": 6,
+      "maxHp": 9
+    },
+    "source": "dream",
+    "frame": 317,
+    "seconds": 37.98,
+    "training": true
+  },
+  {
+    "fixture": "labels-dream-686-M0001",
+    "id": "M0001",
+    "boss": true,
+    "nameBox": [
+      1051,
+      751,
+      262,
+      52
+    ],
+    "serialBox": null,
+    "hpBox": [
+      1112,
+      820,
+      152,
+      59
+    ],
+    "expected": {
+      "monsterId": "M0001",
+      "serial": null,
+      "currentHp": 85,
+      "maxHp": 88
+    },
+    "source": "dream",
+    "frame": 686,
+    "seconds": 82.26,
+    "training": true,
+    "learnHpDigits": false,
+    "note": "Learn the clear boss name; existing digit references read 85/88 without rebuilding merged column glyphs."
+  },
+  {
+    "fixture": "labels-dream-207-M0001",
+    "id": "M0001",
+    "boss": true,
+    "nameBox": [
+      1609,
+      530,
+      262,
+      52
+    ],
+    "serialBox": null,
+    "hpBox": [
+      1671,
+      600,
+      154,
+      59
+    ],
+    "expected": {
+      "monsterId": "M0001",
+      "serial": null,
+      "currentHp": 85,
+      "maxHp": 88
+    },
+    "source": "dream",
+    "frame": 207,
+    "seconds": 24.78,
+    "training": false,
+    "learnHpDigits": false,
+    "note": "Learn the clear boss name; existing digit references read 85/88 without rebuilding merged column glyphs."
+  },
+  {
+    "fixture": "labels-dream-140-M0004",
+    "id": "M0004",
+    "boss": false,
+    "nameBox": [
+      1758,
+      55,
+      178,
+      50
+    ],
+    "serialBox": [
+      1942,
+      62,
+      36,
+      42
+    ],
+    "hpBox": [
+      1780,
+      122,
+      99,
+      56
+    ],
+    "expected": {
+      "monsterId": "M0004",
+      "serial": 1,
+      "currentHp": 4,
+      "maxHp": 9
+    },
+    "source": "dream",
+    "frame": 140,
+    "seconds": 16.74,
+    "training": false
+  },
+  {
+    "fixture": "labels-dream-454-M0003",
+    "id": "M0003",
+    "boss": false,
+    "nameBox": [
+      1268,
+      154,
+      180,
+      51
+    ],
+    "serialBox": [
+      1459,
+      161,
+      36,
+      44
+    ],
+    "hpBox": [
+      1289,
+      222,
+      139,
+      59
+    ],
+    "expected": {
+      "monsterId": "M0003",
+      "serial": 1,
+      "currentHp": 19,
+      "maxHp": 25
+    },
+    "source": "dream",
+    "frame": 454,
+    "seconds": 54.42,
+    "training": false,
+    "learnHpDigits": false,
+    "note": "Learn the clear boss name; existing digit references read 85/88 without rebuilding merged column glyphs."
+  },
+  {
+    "fixture": "labels-ghost-126-M0041",
+    "id": "M0041",
+    "boss": false,
+    "nameBox": [
+      960,
+      775,
+      346,
+      55
+    ],
+    "serialBox": [
+      1318,
+      784,
+      35,
+      46
+    ],
+    "hpBox": [
+      1065,
+      848,
+      146,
+      55
+    ],
+    "expected": {
+      "monsterId": "M0041",
+      "serial": 1,
+      "currentHp": 26,
+      "maxHp": 26
+    },
+    "source": "ghost",
+    "frame": 126,
+    "seconds": 15.06,
+    "training": true
+  },
+  {
+    "fixture": "labels-ghost-142-M0038",
+    "id": "M0038",
+    "boss": false,
+    "nameBox": [
+      1012,
+      338,
+      264,
+      55
+    ],
+    "serialBox": [
+      1289,
+      348,
+      34,
+      46
+    ],
+    "hpBox": [
+      1072,
+      410,
+      146,
+      56
+    ],
+    "expected": {
+      "monsterId": "M0038",
+      "serial": 1,
+      "currentHp": 16,
+      "maxHp": 16
+    },
+    "source": "ghost",
+    "frame": 142,
+    "seconds": 16.98,
+    "training": true
+  },
+  {
+    "fixture": "labels-ghost-559-M0037",
+    "id": "M0037",
+    "boss": false,
+    "nameBox": [
+      624,
+      506,
+      352,
+      55
+    ],
+    "serialBox": [
+      989,
+      518,
+      35,
+      45
+    ],
+    "hpBox": [
+      731,
+      580,
+      98,
+      55
+    ],
+    "expected": {
+      "monsterId": "M0037",
+      "serial": 3,
+      "currentHp": 8,
+      "maxHp": 8
+    },
+    "source": "ghost",
+    "frame": 559,
+    "seconds": 67.02,
+    "training": true
+  },
+  {
+    "fixture": "labels-ghost-1092-M0039",
+    "id": "M0039",
+    "boss": false,
+    "nameBox": [
+      1788,
+      525,
+      435,
+      58
+    ],
+    "serialBox": [
+      2235,
+      536,
+      34,
+      46
+    ],
+    "hpBox": [
+      1935,
+      600,
+      145,
+      55
+    ],
+    "expected": {
+      "monsterId": "M0039",
+      "serial": 1,
+      "currentHp": 22,
+      "maxHp": 22
+    },
+    "source": "ghost",
+    "frame": 1092,
+    "seconds": 130.98,
+    "training": true
+  },
+  {
+    "fixture": "labels-ghost-750-M0040",
+    "id": "M0040",
+    "boss": false,
+    "nameBox": [
+      1656,
+      525,
+      436,
+      58
+    ],
+    "serialBox": [
+      2106,
+      538,
+      34,
+      46
+    ],
+    "hpBox": [
+      1806,
+      600,
+      99,
+      55
+    ],
+    "expected": {
+      "monsterId": "M0040",
+      "serial": 2,
+      "currentHp": 8,
+      "maxHp": 8
+    },
+    "source": "ghost",
+    "frame": 750,
+    "seconds": 89.94,
+    "training": true
+  },
+  {
+    "fixture": "labels-ghost-920-M0037",
+    "id": "M0037",
+    "boss": false,
+    "nameBox": [
+      1760,
+      525,
+      352,
+      56
+    ],
+    "serialBox": [
+      2125,
+      536,
+      34,
+      45
+    ],
+    "hpBox": [
+      1868,
+      599,
+      99,
+      56
+    ],
+    "expected": {
+      "monsterId": "M0037",
+      "serial": 7,
+      "currentHp": 8,
+      "maxHp": 8
+    },
+    "source": "ghost",
+    "frame": 920,
+    "seconds": 110.34,
+    "training": false
+  },
+  {
+    "fixture": "labels-ghost-500-M0038",
+    "id": "M0038",
+    "boss": false,
+    "nameBox": [
+      878,
+      106,
+      264,
+      55
+    ],
+    "serialBox": [
+      1154,
+      116,
+      34,
+      46
+    ],
+    "hpBox": [
+      940,
+      178,
+      144,
+      56
+    ],
+    "expected": {
+      "monsterId": "M0038",
+      "serial": 1,
+      "currentHp": 16,
+      "maxHp": 16
+    },
+    "source": "ghost",
+    "frame": 500,
+    "seconds": 59.94,
+    "training": false
+  },
+  {
+    "fixture": "labels-ghost-800-M0041",
+    "id": "M0041",
+    "boss": false,
+    "nameBox": [
+      1571,
+      525,
+      350,
+      58
+    ],
+    "serialBox": [
+      1932,
+      539,
+      34,
+      46
+    ],
+    "hpBox": [
+      1676,
+      600,
+      146,
+      55
+    ],
+    "expected": {
+      "monsterId": "M0041",
+      "serial": 1,
+      "currentHp": 23,
+      "maxHp": 26
+    },
+    "source": "ghost",
+    "frame": 800,
+    "seconds": 95.94,
+    "training": false
+  },
+  {
+    "fixture": "labels-ghost-388-M0037",
+    "id": "M0037",
+    "boss": false,
+    "nameBox": [
+      891,
+      345,
+      352,
+      58
+    ],
+    "serialBox": [
+      1244,
+      335,
+      94,
+      81
+    ],
+    "hpBox": [
+      1000,
+      415,
+      100,
+      55
+    ],
+    "expected": null,
+    "source": "ghost",
+    "frame": 388,
+    "seconds": 46.5,
+    "training": false,
+    "note": "Chest background crosses the serial crop: reject the spurious serial 15 rather than linking HP to another individual."
+  },
+  {
+    "fixture": "labels-library-400-M0117",
+    "id": "M0117",
+    "boss": false,
+    "nameBox": [
+      979,
+      330,
+      91,
+      51
+    ],
+    "serialBox": [
+      1086,
+      339,
+      34,
+      45
+    ],
+    "hpBox": [
+      954,
+      400,
+      145,
+      54
+    ],
+    "expected": {
+      "monsterId": "M0117",
+      "serial": 2,
+      "currentHp": 17,
+      "maxHp": 17
+    },
+    "source": "library",
+    "frame": 400,
+    "seconds": 47.94,
+    "training": true
+  },
+  {
+    "fixture": "labels-library-405-M0119",
+    "id": "M0119",
+    "boss": false,
+    "nameBox": [
+      766,
+      336,
+      136,
+      54
+    ],
+    "serialBox": [
+      912,
+      345,
+      35,
+      45
+    ],
+    "hpBox": [
+      768,
+      408,
+      139,
+      55
+    ],
+    "expected": {
+      "monsterId": "M0119",
+      "serial": 2,
+      "currentHp": 13,
+      "maxHp": 13
+    },
+    "source": "library",
+    "frame": 405,
+    "seconds": 48.54,
+    "training": true,
+    "serialMinHeightRatio": 0.5
+  },
+  {
+    "fixture": "labels-library-405-M0118",
+    "id": "M0118",
+    "boss": false,
+    "nameBox": [
+      1759,
+      565,
+      394,
+      56
+    ],
+    "serialBox": [
+      2165,
+      580,
+      34,
+      45
+    ],
+    "hpBox": [
+      1884,
+      638,
+      150,
+      56
+    ],
+    "expected": {
+      "monsterId": "M0118",
+      "serial": 1,
+      "currentHp": 14,
+      "maxHp": 14
+    },
+    "source": "library",
+    "frame": 405,
+    "seconds": 48.54,
+    "training": true
+  },
+  {
+    "fixture": "labels-library-380-M0024",
+    "id": "M0024",
+    "boss": false,
+    "nameBox": [
+      650,
+      526,
+      349,
+      55
+    ],
+    "serialBox": [
+      1014,
+      538,
+      35,
+      45
+    ],
+    "hpBox": [
+      756,
+      601,
+      139,
+      55
+    ],
+    "expected": {
+      "monsterId": "M0024",
+      "serial": 1,
+      "currentHp": 15,
+      "maxHp": 15
+    },
+    "source": "library",
+    "frame": 380,
+    "seconds": 45.54,
+    "training": true
+  },
+  {
+    "fixture": "labels-library-640-M0115",
+    "id": "M0115",
+    "boss": true,
+    "nameBox": [
+      815,
+      522,
+      225,
+      60
+    ],
+    "serialBox": null,
+    "hpBox": [
+      860,
+      600,
+      201,
+      56
+    ],
+    "expected": {
+      "monsterId": "M0115",
+      "serial": null,
+      "currentHp": 228,
+      "maxHp": 229
+    },
+    "source": "library",
+    "frame": 640,
+    "seconds": 76.74,
+    "training": true
+  },
+  {
+    "fixture": "labels-library-405-M0024",
+    "id": "M0024",
+    "boss": false,
+    "nameBox": [
+      650,
+      526,
+      349,
+      55
+    ],
+    "serialBox": [
+      1014,
+      538,
+      35,
+      45
+    ],
+    "hpBox": [
+      756,
+      601,
+      139,
+      55
+    ],
+    "expected": {
+      "monsterId": "M0024",
+      "serial": 1,
+      "currentHp": 12,
+      "maxHp": 15
+    },
+    "source": "library",
+    "frame": 405,
+    "seconds": 48.54,
+    "training": false
+  },
+  {
+    "fixture": "labels-library-640-M0118",
+    "id": "M0118",
+    "boss": false,
+    "nameBox": [
+      944,
+      792,
+      392,
+      58
+    ],
+    "serialBox": [
+      1350,
+      805,
+      32,
+      46
+    ],
+    "hpBox": [
+      1068,
+      868,
+      139,
+      56
+    ],
+    "expected": {
+      "monsterId": "M0118",
+      "serial": 2,
+      "currentHp": 12,
+      "maxHp": 14
+    },
+    "source": "library",
+    "frame": 640,
+    "seconds": 76.74,
+    "training": false
+  },
+  {
+    "fixture": "labels-library-580-M0117",
+    "id": "M0117",
+    "boss": false,
+    "nameBox": [
+      1681,
+      525,
+      91,
+      58
+    ],
+    "serialBox": [
+      1790,
+      539,
+      32,
+      44
+    ],
+    "hpBox": [
+      1664,
+      600,
+      141,
+      55
+    ],
+    "expected": {
+      "monsterId": "M0117",
+      "serial": 3,
+      "currentHp": 17,
+      "maxHp": 17
+    },
+    "source": "library",
+    "frame": 580,
+    "seconds": 69.54,
+    "training": false
+  },
+  {
+    "fixture": "labels-library-389-M0116",
+    "id": "M0116",
+    "boss": false,
+    "nameBox": [
+      1262,
+      189,
+      225,
+      58
+    ],
+    "serialBox": null,
+    "hpBox": [
+      1306,
+      262,
+      98,
+      55
+    ],
+    "expected": {
+      "monsterId": "M0116",
+      "serial": null,
+      "currentHp": 8,
+      "maxHp": 9
+    },
+    "source": "library",
+    "frame": 389,
+    "seconds": 46.62,
+    "training": false
+  },
+  {
+    "fixture": "labels-library-554-M0116",
+    "id": "M0116",
+    "boss": false,
+    "nameBox": [
+      812,
+      526,
+      225,
+      56
+    ],
+    "serialBox": null,
+    "hpBox": [
+      855,
+      600,
+      99,
+      56
+    ],
+    "expected": {
+      "monsterId": "M0116",
+      "serial": null,
+      "currentHp": 8,
+      "maxHp": 9
+    },
+    "source": "library",
+    "frame": 554,
+    "seconds": 66.42,
+    "training": false
+  },
+  {
+    "fixture": "labels-library-601-M0115",
+    "id": "M0115",
+    "boss": true,
+    "nameBox": [
+      544,
+      322,
+      225,
+      56
+    ],
+    "serialBox": null,
+    "hpBox": [
+      592,
+      395,
+      201,
+      56
+    ],
+    "expected": {
+      "monsterId": "M0115",
+      "serial": null,
+      "currentHp": 228,
+      "maxHp": 229
+    },
+    "source": "library",
+    "frame": 601,
+    "seconds": 72.06,
+    "training": false
+  },
+  {
+    "fixture": "labels-library-470-M0119",
+    "id": "M0119",
+    "boss": false,
+    "nameBox": [
+      1064,
+      75,
+      148,
+      64
+    ],
+    "serialBox": [
+      1219,
+      69,
+      52,
+      78
+    ],
+    "hpBox": [
+      1062,
+      148,
+      145,
+      59
+    ],
+    "expected": null,
+    "source": "library",
+    "frame": 470,
+    "seconds": 56.34,
+    "training": false,
+    "note": "Progress bar cuts the individual serial. Reject the fragment instead of reading serial 7."
+  },
+  {
+    "fixture": "labels-dream-24-M0002",
+    "id": "M0002",
+    "boss": false,
+    "nameBox": [
+      307,
+      306,
+      110,
+      27
+    ],
+    "serialBox": [
+      423,
+      310,
+      18,
+      26
+    ],
+    "hpBox": [
+      333,
+      342,
+      64,
+      26
+    ],
+    "expected": {
+      "monsterId": "M0002",
+      "serial": 1,
+      "currentHp": 15,
+      "maxHp": 22
+    },
+    "training": true,
+    "source": "dream-20261016",
+    "time_seconds": 24
+  }
+]

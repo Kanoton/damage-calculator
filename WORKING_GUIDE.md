@@ -7,9 +7,9 @@
 
 ## 1. 現在の構成例
 
-2026-10-07に、ユーザーの指示で `07_skill` を `08_screen_reader` へコピーし、ゲーム画面読取の独立した試作版を追加しました。画面読取の作業対象は `08_screen_reader`、従来版は `07_skill` です。正本CSV／画像を共用し、通常の計算機、同梱フォールバック、PT編集を保持します。読取仕様・初期見本・制約は `08_screen_reader/README.md` を確認してください。08の検証は `npm run check:08` と `npm run test:08`、CIは `.github/workflows/08-screen-reader-smoke.yml` です。07/06bの回帰チェックも維持します。
+2026-10-07に、ユーザーの指示で `07_skill` を `08_screen_reader` へコピーし、ゲーム画面読取の独立した試作版を追加しました。画面読取の作業対象は `08_screen_reader`、従来版は `07_skill` です。2026-10-12に07のmain `2dc3ad9` までの計算・能力・UIを08へ統合し、読取の開発を再開しました。差分記録は `docs/08-sync-20261012.md`、移植したスキルの回帰は `npm run test:08:sync`（Chromium/WebKit）です。08の説明文は07の正本CSVから生成した同一JSを同梱します。モバイル操作時の読取は非表示・共有停止です。正本CSV／画像を共用し、通常の計算機、同梱フォールバック、PT編集を保持します。読取仕様・初期見本・制約は `08_screen_reader/README.md` を確認してください。08の検証は `npm run check:08` と `npm run test:08`、CIは `.github/workflows/08-screen-reader-smoke.yml` です。07/06bの回帰チェックも維持します。
 
-現在の最新作業フォルダは `07_skill` です。ただしこれは固定ではなく、今後 `06c_chara` など別のフォルダへ更新される可能性があります。`07_skill` は `06b_chara` を基に、キャラクター固有スキルの状態・ステータス補正を追加した作業フォルダです。以下の構成説明は現時点の `07_skill` を基準にしています。将来の作業では、ユーザーが指定した最新作業フォルダを基準に読み替えてください。
+従来の計算機の開発フォルダは `07_skill`、画面読取の開発フォルダは `08_screen_reader` です。作業対象はユーザーの指定を優先します。`07_skill` は `06b_chara` を基に、キャラクター固有スキルの状態・ステータス補正を追加した作業フォルダです。以下の構成説明は現時点の `07_skill` を基準にしています。将来の作業では、ユーザーが指定した最新作業フォルダを基準に読み替えてください。
 
 現在の `07_skill` は、既存挙動を維持しながらJavaScriptを責務別に分離し、固有能力ルールを小さな共通形式で追加できる構成です。
 
@@ -154,7 +154,7 @@ npm run test:06b
 
 ## 13. 07のマウスオーバー文面一覧
 
-07の説明文の正本は `07_skill/data/hover-descriptions.csv`（167行）です。説明文の列だけを編集し、`node scripts/build-07-hover-text.js` で同期script `js/hover-text.js` を生成します。生成JSは手編集せず、CSVと同時にコミットしてください。HTTP／file://はこの同じデータを読み、旧能力全文snapshotや共有CSVの文章にはフォールバックしません。キャラ・チップの数値、アイコン、ゲームルール等の既存フォールバックは保持します。共有 `csv/` と08の説明表示は従来どおりです。
+07の説明文の正本は `07_skill/data/hover-descriptions.csv`（167行）です。説明文の列だけを編集し、`node scripts/build-07-hover-text.js` で同期script `js/hover-text.js` を生成します。生成JSは手編集せず、CSVと同時にコミットしてください。HTTP／file://はこの同じデータを読み、旧能力全文snapshotや共有CSVの文章にはフォールバックしません。キャラ・チップの数値、アイコン、ゲームルール等の既存フォールバックは保持します。共有 `csv/` は変更しません。08の説明文も同じ正本から生成したJSを同梱し、必要な同期時に `08_screen_reader/js/hover-text.js` を更新します。`check:08` で07の生成JSとの一致を確認します。
 
 `npm run check:07` は生成一致・差し込み処理・script構文を確認します。対応確認用の417行は `docs/hover-descriptions/inventory.csv`、編集方法は同フォルダの `README.md`。`node scripts/export-07-hover-inventory.js` で再生成し、`--check` で一致を確認します。旧一覧のID単位の修正文・メモを保持しますが、今後の編集元は167行の正本です。抽出はオフライン表示処理で、全キャラCT巡回・PT総当たり検証ではありません。
 

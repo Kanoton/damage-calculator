@@ -1,7 +1,10 @@
 const { test, expect } = require('@playwright/test');
+// Run the same behavioral regressions against the reader edition after a sync.
+const skillFolder=process.env.SKILL_TEST_FOLDER||'07_skill';
+if(!['07_skill','08_screen_reader'].includes(skillFolder))throw Error('Unknown skill test folder');
 
 for(const protocol of ['http','file'])test('07 autumn data: map, four difficulties, chip hit count and Luka potential '+protocol,async({page})=>{
- await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve('07_skill/index.html')).href:'/07_skill/');
+ await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve(skillFolder+'/index.html')).href:`/${skillFolder}/`);
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');
  await expect(page.locator('#mp-event-body')).toContainText('ゲームオーバー');await expect(page.locator('#mp-mission-body')).toContainText('建物を8個建てる');
  await page.locator('#mp-tab-monsters').click();
@@ -20,8 +23,10 @@ for(const protocol of ['http','file'])test('07 autumn data: map, four difficulti
  await page.locator('#roster-undo').click();await expect(atk).toHaveValue(String(base+7));
 });
 
+
+
 async function prepareSherryTargets(page){
- await page.goto('/07_skill/');await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-tab-monsters').click();
+ await page.goto(`/${skillFolder}/`);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-tab-monsters').click();
  const mapSelect=page.locator('#mp-map-select');
  for(const option of await mapSelect.locator('option').all()){
   await mapSelect.selectOption(await option.getAttribute('value'));await mapSelect.dispatchEvent('change');
@@ -168,7 +173,7 @@ test('07 skill: Sykes clears all erosion at turn end even when hidden, including
 });
 
 test('07 skill: Padman signed adjustments clamp independently and use the confirmed icon',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'6');
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'6');
  const configs=[['攻撃','atk'],['防御','def']];
  await expect(page.getByLabel('自己主張なし移動補正の数')).toHaveCount(0);
  for(const [name,stat] of configs){
@@ -194,7 +199,7 @@ test('07 skill: Padman signed adjustments clamp independently and use the confir
 
 test('07 skill: Padman icon fallback works when the status CSV cannot be fetched',async({page})=>{
  await page.route('**/csv/status_icon_map_all.csv',route=>route.abort());
- await page.goto('/07_skill/');await selectCharacter(page,'6');
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'6');
  for(const stat of ['攻撃','防御']){
   await expect(page.getByRole('button',{name:'自己主張なし'+stat+'補正を増やす',exact:true}).locator('img')).toHaveAttribute('src','../images/UT_Buff/'+({'攻撃':'Attack.png','防御':'Defense.png','移動':'run.png'})[stat]);
  }
@@ -202,7 +207,7 @@ test('07 skill: Padman icon fallback works when the status CSV cannot be fetched
 
 
 test('07 skill: Padman attack die six ignores only base defense in table and probabilities',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'6');
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'6');
  const attack=page.locator('.mode-content[data-role="attack"]'),defense=page.locator('.mode-content[data-role="defense"]');
  await page.locator('.role-tab[data-role="attack"]').click();
  for(const [id,value] of [['attackPower1','2'],['defensePower1','8'],['hp1','5'],['damageAdd1','0'],['damageReduce1','0']]){
@@ -228,7 +233,7 @@ test('07 skill: Padman attack die six ignores only base defense in table and pro
 
 
 test('07 skill: new character controls use confirmed icons and turn lifetimes',async({page})=>{
- await page.goto('/07_skill/');
+ await page.goto(`/${skillFolder}/`);
  await selectCharacter(page,'8');const shield=page.getByRole('button',{name:/ジュジュシールド：オフ/});
  await expect(shield.locator('img')).toHaveAttribute('src',/UT_Buff_Shield\.png$/);await shield.click();await expect(page.locator('#damageReduce2')).toHaveValue('99');
  await selectCharacter(page,'22');const book=page.getByLabel('ライフ・ブックの数');await book.fill('3');await book.dispatchEvent('change');
@@ -334,7 +339,7 @@ test('07 skill: fans include defeated monsters and both attack penalties persist
 
 
 test('07 skill: party registration automatically opens with self first and three unique optional members',async({page})=>{
- await page.goto('/07_skill/');await page.locator('.role-tab.character-tab').click();
+ await page.goto(`/${skillFolder}/`);await page.locator('.role-tab.character-tab').click();
  const select=id=>page.locator('.character-select[data-id="'+id+'"]'),grid=page.locator('#selected-party-grid'),slots=grid.locator('.party-member-slot');
  await select('16').click();await expect(page.locator('#selected-party-tab')).toHaveAttribute('aria-selected','true');await expect(grid).toBeVisible();
  await expect(slots).toHaveCount(4);await expect(slots.nth(0)).toHaveAttribute('data-character-id','16');
@@ -353,7 +358,7 @@ await expect(slots.nth(1)).toHaveAttribute('data-character-id','1');await expect
 });
 
 test('07 skill: party levels are independent and self stats stay linked after dragging',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'16');
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'16');
  await page.locator('#selected-character-portrait').click();
  const atk=page.locator('#selected-character-atk');await atk.fill('7');await atk.dispatchEvent('change');
  const hp=page.locator('#selected-character-current-hp');await hp.fill('5');await hp.dispatchEvent('change');
@@ -383,7 +388,7 @@ test('07 skill: party levels are independent and self stats stay linked after dr
 });
 
 test('07 skill: party identity, HP-first stats and compact self chips stay inside the fixed frame',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'1');
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'1');
  const frame=page.locator('#selected-character'),before=await frame.boundingBox();
  await selectChipCategory(page,'共通');
  const choices=page.locator('#chip-image-list .chip-select'),ids=[];
@@ -419,7 +424,7 @@ test('07 skill: party identity, HP-first stats and compact self chips stay insid
 });
 
 test('07 skill: PT editing isolates chips, modifiers and icon HP from self and other members',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'27');
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'27');
  const ownAtk=await page.locator('#selected-character-atk').inputValue(),round=await page.locator('#current-round').textContent();
  await page.locator('#selected-party-tab').click();await page.locator('.character-select[data-id="1"]').click();await page.locator('.character-select[data-id="2"]').click();
  const slot=id=>page.locator('.party-member-slot[data-character-id="'+id+'"]'),stat=(id,key)=>slot(id).locator('[data-stat="'+key+'"] b'),icon=(id,key)=>slot(id).locator('[data-stat="'+key+'"] button');
@@ -439,7 +444,7 @@ test('07 skill: PT editing isolates chips, modifiers and icon HP from self and o
 });
 
 test('07 skill: monster status buttons combine self and PT membership and preserve hidden values',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'27');await page.locator('#selected-party-tab').click();
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'27');await page.locator('#selected-party-tab').click();
  for(const id of ['29','24','101'])await page.locator('.character-select[data-id="'+id+'"]').click();
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-tab-monsters').click();
  const maps=page.locator('#mp-map-select');for(const option of await maps.locator('option').all()){await maps.selectOption(await option.getAttribute('value'));await maps.dispatchEvent('change');if(await page.locator('#mp-monster-list .mp-monster:visible').count())break;}
@@ -454,7 +459,7 @@ test('07 skill: monster status buttons combine self and PT membership and preser
 });
 
 test('07 skill: self and 2x2 party preserve the exact outer frame and personal controls',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'16');
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'16');
  const frame=page.locator('#selected-character');
  const frameBounds=()=>frame.evaluate(el=>{const r=el.getBoundingClientRect();return {x:r.x+window.scrollX,y:r.y+window.scrollY,width:r.width,height:r.height};});
  const before=await frameBounds();
@@ -475,7 +480,7 @@ async function selectChipCategory(page,category){
 }
 
 test('07 skill: Extra Battery lowers only the owner CT cap and restores it on removal', async ({ page }) => {
- await page.goto('/07_skill/');
+ await page.goto(`/${skillFolder}/`);
  await selectCharacter(page,'1');
  const skill=page.locator('#selected-character-skill'),ct=page.locator('#selected-character-ct');
  await skill.click();await expect(ct).toHaveText('CT 3 / 3');
@@ -493,7 +498,7 @@ test('07 skill: Extra Battery lowers only the owner CT cap and restores it on re
 });
 
 test('07 skill: Extra Battery cap also applies after monster target confirmation', async ({ page }) => {
- await page.goto('/07_skill/');
+ await page.goto(`/${skillFolder}/`);
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-tab-monsters').click();
  const mapSelect=page.locator('#mp-map-select');
  for(const option of await mapSelect.locator('option').all()){
@@ -511,7 +516,7 @@ test('07 skill: Extra Battery cap also applies after monster target confirmation
 });
 
 test('07 skill: charge consumption requires full cost and Lightning Core reduces remaining CT', async ({ page }) => {
- await page.goto('/07_skill/');await selectCharacter(page,'1');
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'1');
  const ct=page.locator('#selected-character-ct');
  await page.locator('#selected-character-skill').click();
  await selectChipCategory(page,'チャージ');
@@ -539,7 +544,7 @@ test('07 skill: charge consumption requires full cost and Lightning Core reduces
 });
 
 test('07 skill: Sherry reasoning stacks modify attack and decay on turn end', async ({ page }) => {
- await page.goto('/07_skill/');
+ await page.goto(`/${skillFolder}/`);
  await selectCharacter(page,'106');
  const stack=page.getByLabel('推理タイムの数');
  await stack.fill('3');await stack.dispatchEvent('change');
@@ -550,7 +555,7 @@ test('07 skill: Sherry reasoning stacks modify attack and decay on turn end', as
 });
 
 test('07 skill: Nancy firewall toggles attack and defense bonuses', async ({ page }) => {
- await page.goto('/07_skill/');
+ await page.goto(`/${skillFolder}/`);
  await selectCharacter(page,'18');
  await page.getByRole('button',{name:/ファイアウォール：オフ/}).click();
  await expect(page.locator('#selected-character-atk')).toHaveValue('3');
@@ -558,7 +563,7 @@ test('07 skill: Nancy firewall toggles attack and defense bonuses', async ({ pag
 });
 
 test('07 skill: Hime Qigong Training heals and conditionally buffs attack for the turn', async ({ page }) => {
- await page.goto('/07_skill/');
+ await page.goto(`/${skillFolder}/`);
  await selectCharacter(page,'12');
  const hp=page.locator('#selected-character-current-hp'),energy=page.getByLabel('エネルギー保存の数'),skill=page.getByRole('button',{name:'気功修練を発動'});
  const maxHp=Number(await page.locator('#selected-character-hp').textContent());
@@ -577,7 +582,7 @@ test('07 skill: Hime Qigong Training heals and conditionally buffs attack for th
 });
 
 test('07 skill: Misaki manually targets a roster monster and applies Sakura Retsukuzan', async ({ page }) => {
- await page.goto('/07_skill/');
+ await page.goto(`/${skillFolder}/`);
  await selectCharacter(page,'14');
  await page.locator('.role-tab[data-role="map"]').click();
  await page.locator('#mp-tab-monsters').click();
@@ -617,7 +622,7 @@ test('07 skill: Misaki manually targets a roster monster and applies Sakura Rets
 });
 
 test('07 skill: Kaisei Bonnie and Rinrin apply targeted monster effects', async ({ page }) => {
- await page.goto('/07_skill/');
+ await page.goto(`/${skillFolder}/`);
  await page.locator('.role-tab[data-role="map"]').click();
  await page.locator('#mp-tab-monsters').click();
  const mapSelect=page.locator('#mp-map-select');
@@ -664,7 +669,7 @@ test('07 skill: Kaisei Bonnie and Rinrin apply targeted monster effects', async 
 
 test('07 skill: affected characters expose active skill CT management; full scan is opt-in', async ({ page }) => {
  if(process.env.FULL_CHARACTER_CHECK==='1')test.setTimeout(120000);
- await page.goto('/07_skill/');
+ await page.goto(`/${skillFolder}/`);
  const expected={1:3,2:2,3:3,4:3,5:3,6:3,7:3,8:3,9:4,10:3,11:3,12:3,13:3,14:3,15:3,16:4,17:3,18:3,19:3,20:3,21:3,22:3,23:3,24:2,25:3,26:3,27:3,28:3,29:3,101:3,102:3,103:3,104:2,105:3,106:2};
  for(const [id,cooldown] of Object.entries(expected)){
   if(process.env.FULL_CHARACTER_CHECK!=='1'&&!['6','8','9','10','11','12','15','23'].includes(id))continue;
@@ -690,7 +695,7 @@ test('07 skill: affected characters expose active skill CT management; full scan
 
 
 test('07 skill: Jasmine uses adjacent dice input and clears effects while CT counts down',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'16');
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'16');
  const skill=page.getByRole('button',{name:'オーバードライブを発動'}),ct=page.locator('#selected-character-ct');
  await page.locator('#selected-character-def').fill('5');await page.locator('#selected-character-def').dispatchEvent('change');
  await skill.click();await page.getByLabel('オーバードライブのダイスの出目',{exact:true}).fill('9');await page.locator('#skill-source-dialog input').last().press('Enter');
@@ -703,7 +708,7 @@ test('07 skill: Jasmine uses adjacent dice input and clears effects while CT cou
 });
 
 test('07 skill: Jasmine canceled and invalid dice consume no CT and cumulative movement remains',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'16');
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'16');
  const movement=page.getByLabel('累計移動ポイントの数');await movement.fill('26');await movement.dispatchEvent('change');
  await expect(page.locator('#selected-character-atk')).toHaveValue('2');await expect(page.locator('#selected-character-def')).toHaveValue('1');
  const skill=page.getByRole('button',{name:'オーバードライブを発動'});
@@ -716,7 +721,7 @@ test('07 skill: Jasmine canceled and invalid dice consume no CT and cumulative m
 });
 
 test('07 skill: compatible character abilities use shared controls and modifiers', async ({ page }) => {
- await page.goto('/07_skill/');
+ await page.goto(`/${skillFolder}/`);
 
  await selectCharacter(page,'12');
  await expect(page.getByRole('button',{name:'エネルギー保存を増やす'}).locator('img')).toHaveAttribute('src',/UT_Buff_113_Passive\.png$/);
@@ -764,7 +769,7 @@ test('07 skill: compatible character abilities use shared controls and modifiers
 
 
 test('07 skill: Z3000 and Al apply bonuses per threshold', async ({ page }) => {
- await page.goto('/07_skill/');
+ await page.goto(`/${skillFolder}/`);
  await selectCharacter(page,'9');
  const defeats=page.getByLabel('モンスター撃破数の数');
  await defeats.fill('5');await defeats.dispatchEvent('change');
@@ -779,7 +784,7 @@ test('07 skill: Z3000 and Al apply bonuses per threshold', async ({ page }) => {
 });
 
 test('07 skill: Papara gains attack at half HP or lower', async ({ page }) => {
- await page.goto('/07_skill/');
+ await page.goto(`/${skillFolder}/`);
  await selectCharacter(page,'7');
  const hp=page.locator('#selected-character-current-hp');
  await hp.fill('5');await hp.dispatchEvent('change');
@@ -790,7 +795,7 @@ test('07 skill: Papara gains attack at half HP or lower', async ({ page }) => {
 
 
 test('07 skill: character list hover shows ability tooltip', async ({ page }) => {
- await page.goto('/07_skill/');
+ await page.goto(`/${skillFolder}/`);
  await page.locator('.role-tab.character-tab').click();
  const mimi=page.locator('.character-select[data-id="1"]');
  await page.locator('#character-hover-skills').check();await mimi.hover();
@@ -805,7 +810,7 @@ test('07 skill: character cards use Hero Card2 artwork and live stats while pres
   const response=await route.fetch();const csv=await response.text();
   await route.fulfill({response,body:csv.replace('12,10,9,1,1,0,11','12,10,19,7,6,0,11')});
  });
- await page.goto('/07_skill/');await page.locator('.role-tab.character-tab').click();
+ await page.goto(`/${skillFolder}/`);await page.locator('.role-tab.character-tab').click();
  await expect(page.locator('.character-select')).toHaveCount(35);
  const mimi=page.locator('.character-select[data-id="1"]');
  await expect(mimi.locator('.character-list-image')).toHaveAttribute('src','../images/UT_Hero_Card2/UT_Hero_Card2_108.png');
@@ -824,15 +829,15 @@ test('07 skill: character cards use Hero Card2 artwork and live stats while pres
 });
 
 test('07 skill: character image mapping falls back when its CSV cannot be fetched', async ({ page }) => {
- await page.route('**/07_skill/csv/character_hero_card_mapping.csv',route=>route.abort());
- await page.goto('/07_skill/');await page.locator('.role-tab.character-tab').click();
+ await page.route(`**/${skillFolder}/csv/character_hero_card_mapping.csv`,route=>route.abort());
+ await page.goto(`/${skillFolder}/`);await page.locator('.role-tab.character-tab').click();
  await expect(page.locator('.character-select[data-id="106"] .character-list-image')).toHaveAttribute('src','../images/UT_Hero_Card2/UT_Hero_Card2_306.png');
  await selectCharacter(page,'106');await expect(page.locator('#selected-character-name')).toHaveText('橘シェリー');
 });
 
 test('07 skill: file protocol keeps character cards, tooltip and selection', async ({ page }) => {
  const path=require('path'),{pathToFileURL}=require('url');
- await page.goto(pathToFileURL(path.resolve(__dirname,'../07_skill/index.html')).href);
+ await page.goto(pathToFileURL(path.resolve(__dirname,'..',skillFolder,'index.html')).href);
  await page.locator('.role-tab.character-tab').click();
  await expect(page.locator('.character-select')).toHaveCount(35);
  const mimi=page.locator('.character-select[data-id="1"]');
@@ -845,7 +850,7 @@ test('07 skill: file protocol keeps character cards, tooltip and selection', asy
 
 
 test('07 skill: additional character stat skills modify parameters', async ({ page }) => {
- await page.goto('/07_skill/');
+ await page.goto(`/${skillFolder}/`);
 
  await selectCharacter(page,'4');
  await page.getByRole('button',{name:/前ターン被ダメなし：オフ/}).click();
@@ -885,7 +890,7 @@ test('07 skill: additional character stat skills modify parameters', async ({ pa
 
 
 test('07 skill: contextual character attacks only apply when enabled', async ({ page }) => {
- await page.goto('/07_skill/');
+ await page.goto(`/${skillFolder}/`);
 
  await selectCharacter(page,'10');
  const damage=page.getByLabel('このターンに受けたダメージの数');
@@ -931,7 +936,7 @@ test('07 skill: contextual character attacks only apply when enabled', async ({ 
 
 
 test('07 skill: edited monster HP stays stable when another monster is defeated', async ({ page }) => {
- await page.goto('/07_skill/');
+ await page.goto(`/${skillFolder}/`);
  const mapTab=page.locator('.role-tab[data-role="map"]');
  await mapTab.click();
  await page.locator('#mp-tab-monsters').click();
@@ -962,7 +967,7 @@ test('07 skill: edited monster HP stays stable when another monster is defeated'
 
 
 test('07 skill: Z3000 Pull In manually targets a monster and deals 5 damage', async ({ page }) => {
- await page.goto('/07_skill/');
+ await page.goto(`/${skillFolder}/`);
  await page.locator('.role-tab[data-role="map"]').click();
  await page.locator('#mp-tab-monsters').click();
  const mapSelect=page.locator('#mp-map-select');
@@ -984,7 +989,7 @@ test('07 skill: Z3000 Pull In manually targets a monster and deals 5 damage', as
 
 
 test('07 skill: Papara active skill forces half-HP attack bonus until turn end', async ({ page }) => {
- await page.goto('/07_skill/');await selectCharacter(page,'7');
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'7');
  const hp=page.locator('#selected-character-current-hp');await hp.fill('10');await hp.dispatchEvent('change');
  await expect(page.locator('#selected-character-atk')).toHaveValue('2');
  await page.getByRole('button',{name:'ひとくちだけを発動'}).click();await expect(page.locator('#selected-character-atk')).toHaveValue('5');
@@ -992,7 +997,7 @@ test('07 skill: Papara active skill forces half-HP attack bonus until turn end',
 });
 
 test('07 skill: Teru dialog commits rounded halves atomically, resets at turn end and Undo restores',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'23');
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'23');
  const atk=page.locator('#selected-character-atk'),def=page.locator('#selected-character-def');
  const beforeAtk=Number(await atk.inputValue()),beforeDef=Number(await def.inputValue());
  await page.getByRole('button',{name:'三神憑依を発動'}).click();
@@ -1005,7 +1010,7 @@ test('07 skill: Teru dialog commits rounded halves atomically, resets at turn en
 });
 
 test('07 skill: Chouten fan count and Ame love are manually managed and referenced', async ({ page }) => {
- await page.goto('/07_skill/');await selectCharacter(page,'101');
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'101');
  const fan=page.getByLabel('ファンの数'),hp=page.locator('#selected-character-current-hp');await fan.fill('3');await fan.dispatchEvent('change');await hp.fill('1');await hp.dispatchEvent('change');
  await page.getByRole('button',{name:'インターネットエンジェルを発動'}).click();await expect(hp).toHaveValue('4');
  await selectCharacter(page,'102');const love=page.getByLabel('愛の数');await expect(love).toHaveValue('2');await love.fill('4');await love.dispatchEvent('change');
@@ -1013,7 +1018,7 @@ test('07 skill: Chouten fan count and Ame love are manually managed and referenc
  await page.getByRole('button',{name:'愛情の過剰摂取を発動'}).click();await expect(page.locator('#selected-character-move')).toHaveText(String(baseMove+4));await expect(love).toHaveValue('0');await expect(love).toHaveAttribute('max','5');await expect(page.locator('#selected-character-hp')).toHaveText(String(baseMaxHp+1));
 });
 
-for(const folder of ['07_skill','08_screen_reader'])test(folder+': Fate Echo icon controls support self and PT countdown; weakness uses its skill icon',async({page})=>{
+for(const folder of process.env.SKILL_TEST_FOLDER?[skillFolder]:['07_skill','08_screen_reader'])test(folder+': Fate Echo icon controls support self and PT countdown; weakness uses its skill icon',async({page})=>{
  await page.goto('/'+folder+'/');await selectCharacter(page,'13');
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-tab-monsters').click();
  const maps=page.locator('#mp-map-select');for(const option of await maps.locator('option').all()){await maps.selectOption(await option.getAttribute('value'));await maps.dispatchEvent('change');if(await page.locator('#mp-monster-list .mp-monster:visible').count())break;}
@@ -1036,7 +1041,7 @@ for(const folder of ['07_skill','08_screen_reader'])test(folder+': Fate Echo ico
 
 async function registerSupport(page,id){await page.locator('#selected-party-tab').click();await page.locator('#character-list-tab').click();await page.locator('.character-select[data-id="'+id+'"]').click();await page.locator('#selected-self-tab').click();}
 test('07 PT support: shield and confirmed Yume bonus affect self, persist after donor removal, and Undo restores',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'1');await registerSupport(page,'8');await registerSupport(page,'20');
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'1');await registerSupport(page,'8');await registerSupport(page,'20');
  const atk=Number(await page.locator('#attackPower1').inputValue()),def=Number(await page.locator('#defensePower2').inputValue());
  await page.getByRole('button',{name:/^PTジュジュシールド：/}).click();expect(Number(await page.locator('#damageReduce2').inputValue())).toBe(99);
  const light=page.getByRole('spinbutton',{name:'PTユメ攻撃補正の数'});await light.fill('4');await light.dispatchEvent('change');expect(Number(await page.locator('#attackPower1').inputValue())).toBe(atk+4);expect(Number(await page.locator('#defensePower2').inputValue())).toBe(def);
@@ -1044,7 +1049,7 @@ test('07 PT support: shield and confirmed Yume bonus affect self, persist after 
  await page.locator('#selected-party-tab').click();await page.locator('.character-select[data-id="8"]').click({button:'right'});await page.locator('#selected-self-tab').click();await expect(page.getByRole('button',{name:/^PTジュジュシールド：/})).toHaveAttribute('aria-pressed','true');
 });
 test('07 PT support: cocktail and Dorothy bonuses expire on turn end; capped healing and Undo',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'1');await registerSupport(page,'103');await registerSupport(page,'104');await registerSupport(page,'10');
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'1');await registerSupport(page,'103');await registerSupport(page,'104');await registerSupport(page,'10');
  const atk=Number(await page.locator('#attackPower1').inputValue());const attack=page.getByRole('spinbutton',{name:'PTカクテル攻撃の数'});await attack.fill('2');await attack.dispatchEvent('change');await page.getByRole('button',{name:/^PTドロシー攻撃：/}).click();expect(Number(await page.locator('#attackPower1').inputValue())).toBe(atk+3);
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#turn-end').click();await page.locator('.role-tab.character-tab').click();expect(Number(await page.locator('#attackPower1').inputValue())).toBe(atk);await expect(attack).toHaveValue('0');
  const before=await page.evaluate(()=>captureCharacterAbilityState().currentHp);await page.locator('#selected-character-hp-fill').click();await page.getByRole('button',{name:'PTパンダマン回復＋2'}).click();expect(await page.evaluate(()=>captureCharacterAbilityState().currentHp)).toBe(before);
@@ -1052,7 +1057,7 @@ test('07 PT support: cocktail and Dorothy bonuses expire on turn end; capped hea
 });
 
 test('07 PT support: explicit Yume bonus and Bonnie stealth use received amounts without card tracking',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'1');await registerSupport(page,'20');await registerSupport(page,'27');await registerSupport(page,'103');const base=Number(await page.locator('#attackPower1').inputValue());
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'1');await registerSupport(page,'20');await registerSupport(page,'27');await registerSupport(page,'103');const base=Number(await page.locator('#attackPower1').inputValue());
  const bonus=page.getByRole('spinbutton',{name:'PTユメ攻撃補正の数'});await bonus.fill('4');await bonus.dispatchEvent('change');expect(Number(await page.locator('#attackPower1').inputValue())).toBe(base+4);
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:{name:'test monster',markStacks:2}})));await page.getByRole('button',{name:/^PT潜伏：/}).click();expect(Number(await page.locator('#attackPower1').inputValue())).toBe(base+6);
  await page.getByRole('button',{name:/^PT潜伏：/}).click();expect(Number(await page.locator('#attackPower1').inputValue())).toBe(base+4);
@@ -1060,18 +1065,18 @@ test('07 PT support: explicit Yume bonus and Bonnie stealth use received amounts
 });
 
 test('07 PT support: confirmed KAngel fan debuff is permanent once-only and undoable',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'1');await registerSupport(page,'101');await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-tab-monsters').click();const maps=page.locator('#mp-map-select');for(const option of await maps.locator('option').all()){await maps.selectOption(await option.getAttribute('value'));if(await page.locator('#mp-monster-list .mp-monster:visible').count())break;}
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'1');await registerSupport(page,'101');await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-tab-monsters').click();const maps=page.locator('#mp-map-select');for(const option of await maps.locator('option').all()){await maps.selectOption(await option.getAttribute('value'));if(await page.locator('#mp-monster-list .mp-monster:visible').count())break;}
  await page.locator('#mp-monster-list .mp-monster:visible').first().click();const card=page.locator('#map-roster-list .roster-card').first(),attack=card.locator('input[aria-label$="の攻撃力"]');await attack.fill('5');await attack.dispatchEvent('change');await card.locator('.roster-status-fan button').click();await page.locator('#roster-pt-fan-reduce').click();await expect(attack).toHaveValue('4');await expect(page.locator('#roster-pt-fan-reduce')).toBeDisabled();await page.locator('#turn-end').click();await expect(attack).toHaveValue('4');await page.locator('#roster-undo').click();await page.locator('#roster-undo').click();await expect(attack).toHaveValue('5');await expect(page.locator('#roster-pt-fan-reduce')).toBeEnabled();
 });
 
 test('07 PT support: Hanna next movement is manually consumed; Sherry reasoning stacks and expires',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'106');await registerSupport(page,'105');const atk=Number(await page.locator('#attackPower1').inputValue());await page.getByRole('button',{name:'PTハンナ推理タイム＋1'}).click();expect(Number(await page.locator('#attackPower1').inputValue())).toBe(atk+1);
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'106');await registerSupport(page,'105');const atk=Number(await page.locator('#attackPower1').inputValue());await page.getByRole('button',{name:'PTハンナ推理タイム＋1'}).click();expect(Number(await page.locator('#attackPower1').inputValue())).toBe(atk+1);
  const move=page.getByRole('button',{name:/^PTハンナ次の移動：/});await move.click();expect((await page.evaluate(()=>captureCharacterAbilityState())).numbers['PTハンナ次の移動']).toBe(1);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#turn-end').click();expect(Number(await page.locator('#attackPower1').inputValue())).toBe(atk);await page.locator('.role-tab.character-tab').click();await expect(move).toHaveAttribute('aria-pressed','false');
 });
 
 
 test('07 Teru: separate follow-up uses pre-consumption stacks, minimum one, no dice and only survivors',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'1');await registerSupport(page,'23');
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'1');await registerSupport(page,'23');
  const set=async(label,value)=>{const input=page.getByLabel(label,{exact:true});await input.fill(String(value));await input.dispatchEvent('change');};
  await setTeruPartyAttack(page,8);await set('PTテル狐光の数',3);await page.getByRole('button',{name:/^PTテル憑依：/}).click();
  await page.locator('.role-tab[data-role="attack"]').click();
@@ -1095,7 +1100,7 @@ test('07 Teru: separate follow-up uses pre-consumption stacks, minimum one, no d
 
 
 test('07 Padman: skill enables maximum parameters, preserves manual values, fixed-six die excludes other rows',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'6');
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'6');
  const atk=page.getByLabel('自己主張なし攻撃補正の数');await atk.fill('-1');await atk.dispatchEvent('change');
  await page.getByRole('button',{name:'マジで怒ったぞを発動'}).click();await expect(atk).toHaveValue('2');await expect(atk).toBeDisabled();await expect(page.locator('#selected-character-atk')).toHaveValue('4');
  await expect(page.getByRole('button',{name:/^マジで怒ったぞ：/})).toHaveCount(0);
@@ -1109,7 +1114,7 @@ test('07 Padman: skill enables maximum parameters, preserves manual values, fixe
 });
 
 test('07 Moses: evade minimum excludes faces from table and probability but not ordinary defense',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'24');const stacks=page.getByLabel('精確無比の数');await stacks.fill('1');await stacks.dispatchEvent('change');await page.locator('.role-tab[data-role="defense"]').click();
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'24');const stacks=page.getByLabel('精確無比の数');await stacks.fill('1');await stacks.dispatchEvent('change');await page.locator('.role-tab[data-role="defense"]').click();
  await page.getByRole('button',{name:'回避の表',exact:true}).click();
  const mode=page.locator('.mode-content[data-role="defense"]');for(const [id,value] of [['attackPower2',10],['hp2',1],['damageAdd2',0],['damageReduce2',0]]){await page.locator('#'+id).fill(String(value));await page.locator('#'+id).dispatchEvent('input');}
  await expect(mode.locator('.damage-table tbody tr td:first-of-type')).toHaveText(['－','－','－','－','－','－']);await expect(mode.locator('.result-rate')).toHaveText('53.33%');await expect(mode.locator('.future-result-rate')).toHaveText('53.33%');
@@ -1119,7 +1124,7 @@ test('07 Moses: evade minimum excludes faces from table and probability but not 
 });
 
 test('07 Teru: target Mark and Fate Echo plus reduction apply separately to main and follow-up',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'1');await registerSupport(page,'23');
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'1');await registerSupport(page,'23');
  await setTeruPartyAttack(page,8);for(const [label,value] of [['PTテル狐光の数',3]]){const field=page.getByLabel(label,{exact:true});await field.fill(String(value));await field.dispatchEvent('change');}await page.getByRole('button',{name:/^PTテル憑依：/}).click();
  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:{markStacks:1,fateEchoStacks:2,erosionStacks:0}})));
  const effect=await page.evaluate(()=>getTeruFollowUp());expect(effect.damageAdd).toBe(2);
@@ -1137,7 +1142,7 @@ test('07 skill: HP icons decrement on click and increment on right click for sel
 
 
 test('07 Teru: dialog cancel preserves stats, recast replaces halves and Undo restores one cast',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'23');await page.locator('#selected-character-atk-button').click();
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'23');await page.locator('#selected-character-atk-button').click();
  const skill=page.getByRole('button',{name:'三神憑依を発動'}),source=page.getByLabel('憑依する味方の攻撃力',{exact:true});
  await skill.click();await source.fill('5');await page.getByLabel('憑依する味方の防御力',{exact:true}).fill('3');await page.locator('#teru-stat-dialog input').last().press('Enter');
  await expect(page.locator('#selected-character-atk')).toHaveValue('6');await expect(page.locator('#selected-character-def')).toHaveValue('3');
@@ -1150,7 +1155,7 @@ test('07 Teru: dialog cancel preserves stats, recast replaces halves and Undo re
 });
 
 test('07 Teru: pursuit directly follows PT ATK and stops when the donor is removed',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'1');await registerSupport(page,'23');
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'1');await registerSupport(page,'23');
  await expect(page.getByLabel('PTテル攻撃力の数',{exact:true})).toHaveCount(0);
  const fox=page.getByLabel('PTテル狐光の数',{exact:true}),base=await page.locator('#selected-character-atk').inputValue();
  await setTeruPartyAttack(page,8);await fox.fill('3');await fox.dispatchEvent('change');await page.getByRole('button',{name:/^PTテル憑依：/}).click();
@@ -1166,7 +1171,7 @@ test('07 Teru: pursuit directly follows PT ATK and stops when the donor is remov
 });
 
 test('07 Teru: file protocol stat dialog supports number pad',async({page})=>{
- const path=require('path'),{pathToFileURL}=require('url');await page.goto(pathToFileURL(path.resolve(__dirname,'../07_skill/index.html')).href);await selectCharacter(page,'23');
+ const path=require('path'),{pathToFileURL}=require('url');await page.goto(pathToFileURL(path.resolve(__dirname,'..',skillFolder,'index.html')).href);await selectCharacter(page,'23');
  await page.getByRole('button',{name:'三神憑依を発動'}).click();const input=page.getByLabel('憑依する味方の攻撃力',{exact:true});await input.focus();await page.locator('#character-number-pad button[data-key="5"]').click();await page.locator('#character-number-pad button[data-key="確定"]').click();await page.locator('#teru-stat-dialog input').last().press('Enter');await expect(page.locator('#selected-character-atk')).toHaveValue('5');
 });
 
@@ -1180,7 +1185,7 @@ async function setTeruPartyAttack(page,value){
 
 test('07 Nardis: actual hand count is retained while attack bonus caps at three',async({page})=>{
  const iconRequests=[];page.on('request',request=>{if(request.url().endsWith('/UT_Buff_Hand.png'))iconRequests.push(request.url());});
- await page.goto('/07_skill/');await selectCharacter(page,'15');
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'15');
  const hand=page.getByLabel('手札枚数の数',{exact:true}),atk=page.locator('#selected-character-atk'),base=Number(await atk.inputValue());
  await expect(page.getByLabel('相手より多い手札の数',{exact:true})).toHaveCount(0);
  for(const count of [0,2,3,10,1]){await hand.fill(String(count));await hand.dispatchEvent('change');await expect(hand).toHaveValue(String(count));await expect(atk).toHaveValue(String(base+Math.min(count,3)));}
@@ -1188,7 +1193,7 @@ test('07 Nardis: actual hand count is retained while attack bonus caps at three'
 });
 
 test('07 Ren: party support exposes one counter toggle with independent shield and Undo',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'1');await registerSupport(page,'8');
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'1');await registerSupport(page,'8');
  const counter=page.getByRole('button',{name:/^反撃：/}),shield=page.getByRole('button',{name:/^PTジュジュシールド：/});
  await expect(counter.locator('img')).toHaveAttribute('src','../images/UT_Buff/UT_Buff_Counter.png');
  const atk=await page.locator('#selected-character-atk').inputValue();await counter.click();await shield.click();await counter.click();
@@ -1198,7 +1203,7 @@ test('07 Ren: party support exposes one counter toggle with independent shield a
 });
 
 test('07 Lulu: self or party membership exposes Heal stacks and received stacks retain independent state',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'11');const heal=page.getByLabel('ヒールの数',{exact:true});await expect(heal).toHaveValue('0');
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'11');const heal=page.getByLabel('ヒールの数',{exact:true});await expect(heal).toHaveValue('0');
  await heal.fill('3');await heal.dispatchEvent('change');await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();await expect(heal).toHaveValue('0');
  await selectCharacter(page,'1');await expect(heal).toHaveCount(0);await registerSupport(page,'11');await expect(heal).toHaveValue('0');
  await heal.fill('4');await heal.dispatchEvent('change');await page.locator('#selected-party-tab').click();await page.locator('.character-select[data-id="11"]').click({button:'right'});await page.locator('#selected-self-tab').click();await expect(heal).toHaveValue('4');
@@ -1206,14 +1211,14 @@ test('07 Lulu: self or party membership exposes Heal stacks and received stacks 
 });
 
 test('07 Hime: energy count changes stacks without multiplying the fixed stat bonus',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'12');const energy=page.getByLabel('エネルギー保存の数',{exact:true});
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'12');const energy=page.getByLabel('エネルギー保存の数',{exact:true});
  const atk=page.locator('#selected-character-atk'),def=page.locator('#selected-character-def'),baseAtk=Number(await atk.inputValue()),baseDef=Number(await def.inputValue());
  for(const count of [1,5,2,0,5]){await energy.fill(String(count));await energy.dispatchEvent('change');await expect(atk).toHaveValue(String(baseAtk+(count?2:0)));await expect(def).toHaveValue(String(baseDef+(count?2:0)));}
  await page.getByRole('button',{name:'気功修練を発動'}).click();await expect(atk).toHaveValue(String(baseAtk+6));await page.locator('#turn-end').click();await expect(atk).toHaveValue(String(baseAtk+2));await expect(energy).toHaveValue('5');
 });
 
 async function prepareZ3000Survivor(page){
- await page.goto('/07_skill/');await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-tab-monsters').click();
+ await page.goto(`/${skillFolder}/`);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-tab-monsters').click();
  const picker=page.locator('#mp-map-select');let found=false;
  for(const value of await picker.locator('option').evaluateAll(options=>options.map(o=>o.value).filter(Boolean))){
   await picker.selectOption(value);await picker.dispatchEvent('change');const tiles=page.locator('#mp-monster-list .mp-monster:visible');
@@ -1239,7 +1244,7 @@ test('07 Z3000: a kill raising ATK from six to seven does not retroactively open
 
 
 test('07 Ren: self has no counter; PT shield grants counter with independent off switches',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'8');
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'8');
  for(const party of [false,true]){
   if(party){await selectCharacter(page,'1');await registerSupport(page,'8');}
   const shield=page.getByRole('button',{name:party?/^PTジュジュシールド：/:/^ジュジュシールド：/}),counter=page.getByRole('button',{name:/^反撃：/});
@@ -1258,13 +1263,13 @@ test('07 Misaki: skill branches on initial Sword Aura 2 versus 3 and Undo restor
 });
 
 test('07 Nardis: skill adds three actual cards without automatic turn-end removal and Undo restores',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'15');const hand=page.getByLabel('手札枚数の数');await hand.fill('2');await hand.dispatchEvent('change');
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'15');const hand=page.getByLabel('手札枚数の数');await hand.fill('2');await hand.dispatchEvent('change');
  await page.getByRole('button',{name:'クィーン プリビレッジを発動'}).click();await expect(hand).toHaveValue('5');await expect(page.locator('#selected-character-atk')).toHaveValue('4');await page.locator('#turn-end').click();await expect(hand).toHaveValue('5');
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();await page.locator('#roster-undo').click();await expect(hand).toHaveValue('2');
 });
 
 for(const [id,label,key,value] of [['16','オーバードライブのダイスの出目','オーバードライブ',10],['26','吸収した影の数','暗影融合',4]])test('07 skill adjacent number pad: '+id,async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,id);const base=Number(await page.locator('#selected-character-atk').inputValue());await page.getByRole('button',{name:key+'を発動'}).click();const input=page.getByLabel(label,{exact:true});await input.focus();await page.locator('#character-number-pad [data-key="消去"]').click();await page.locator('#character-number-pad [data-key="確定"]').click();await expect(page.locator('#character-number-pad')).toBeVisible();await expect(page.locator('#selected-character-ct')).toContainText('CT 0');for(const digit of String(value))await page.locator('#character-number-pad button[data-key="'+digit+'"]').click();await page.locator('#character-number-pad button[data-key="確定"]').click();await expect(page.locator('#skill-source-dialog')).toBeHidden();
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,id);const base=Number(await page.locator('#selected-character-atk').inputValue());await page.getByRole('button',{name:key+'を発動'}).click();const input=page.getByLabel(label,{exact:true});await input.focus();await page.locator('#character-number-pad [data-key="消去"]').click();await page.locator('#character-number-pad [data-key="確定"]').click();await expect(page.locator('#character-number-pad')).toBeVisible();await expect(page.locator('#selected-character-ct')).toContainText('CT 0');for(const digit of String(value))await page.locator('#character-number-pad button[data-key="'+digit+'"]').click();await page.locator('#character-number-pad button[data-key="確定"]').click();await expect(page.locator('#skill-source-dialog')).toBeHidden();
  await expect(page.locator('#selected-character-atk')).toHaveValue(String(base+(id==='16'?2:4)));await page.locator('#turn-end').click();await expect(page.locator('#selected-character-atk')).toHaveValue(String(base));
 });
 
@@ -1274,13 +1279,13 @@ test('07 Luka: Enter confirms selected targets without toggling the focused mons
 });
 
 test('07 Bonnie: PT phase editor matches self controls and preserves received state and Undo',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'1');await registerSupport(page,'27');const phase=page.getByRole('button',{name:/^潜入調査：/});await expect(phase).toHaveAttribute('title',/フェーズ・ワン/);
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'1');await registerSupport(page,'27');const phase=page.getByRole('button',{name:/^潜入調査：/});await expect(phase).toHaveAttribute('title',/フェーズ・ワン/);
  for(let i=0;i<3;i++)await phase.click();await expect(phase).toHaveAttribute('title',/真相解明/);await phase.click();await expect(phase).toHaveAttribute('title',/真相解明/);await phase.click({button:'right'});await expect(phase).toHaveAttribute('title',/フェーズ・スリー/);
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();await expect(phase).toHaveAttribute('title',/真相解明/);await page.locator('.role-tab.character-tab').click();await page.locator('#selected-party-tab').click();await page.locator('.character-select[data-id="27"]').click({button:'right'});await page.locator('#selected-self-tab').click();await expect(phase).toHaveAttribute('title',/真相解明/);
 });
 
 test('07 Moses: two stacks make evade faces 3..6 equally likely in base and card-aware results',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'24');await page.getByLabel('精確無比の数').fill('2');await page.getByLabel('精確無比の数').dispatchEvent('change');await page.locator('.role-tab[data-role="defense"]').click();await page.getByRole('button',{name:'回避の表',exact:true}).click();
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'24');await page.getByLabel('精確無比の数').fill('2');await page.getByLabel('精確無比の数').dispatchEvent('change');await page.locator('.role-tab[data-role="defense"]').click();await page.getByRole('button',{name:'回避の表',exact:true}).click();
  const mode=page.locator('.mode-content[data-role="defense"]');await expect(mode).toHaveAttribute('data-evade-minimum','3');for(const [id,value] of [['attackPower2',10],['hp2',1],['damageAdd2',0],['damageReduce2',0]]){await page.locator('#'+id).fill(String(value));await page.locator('#'+id).dispatchEvent('input');}
  await expect(mode.locator('.result-rate')).toHaveText('62.50%');await expect(mode.locator('.future-result-rate')).toHaveText('62.50%');
  const grid=await page.evaluate(()=>calculateDefenseDamageGrid(10,2,0,0,1,false,false,false,null,{evade:true,minimum:3}));expect(grid.totalCombinations).toBe(24);expect(grid.rows.every(row=>row.damages[0]===null&&row.damages[1]===null)).toBe(true);
@@ -1288,13 +1293,13 @@ test('07 Moses: two stacks make evade faces 3..6 equally likely in base and card
 
 
 test('07 skill: Rinrin passage confirmation works from file fallback',async({page})=>{
- const path=require('path'),{pathToFileURL}=require('url');await page.goto(pathToFileURL(path.resolve(__dirname,'../07_skill/index.html')).href);await selectCharacter(page,'28');
+ const path=require('path'),{pathToFileURL}=require('url');await page.goto(pathToFileURL(path.resolve(__dirname,'..',skillFolder,'index.html')).href);await selectCharacter(page,'28');
  await page.locator('#selected-character-skill').click();await page.locator('#rinrin-area-dialog').getByRole('button',{name:'No',exact:true}).click();await expect(page.locator('#selected-character-ct')).toHaveText('CT 3 / 3');
  await page.locator('#roster-undo').click();await expect(page.locator('#selected-character-ct')).toHaveText('CT 0 / 3');
 });
 
 for(const protocol of ['http','file'])test('07 descriptions: Ren shield and Hanna Float sections have requested order '+protocol,async({page})=>{
- if(protocol==='file'){const {pathToFileURL}=require('url'),path=require('path');await page.goto(pathToFileURL(path.resolve(__dirname,'../07_skill/index.html')).href);}else await page.goto('/07_skill/');
+ if(protocol==='file'){const {pathToFileURL}=require('url'),path=require('path');await page.goto(pathToFileURL(path.resolve(__dirname,'..',skillFolder,'index.html')).href);}else await page.goto(`/${skillFolder}/`);
  await page.locator('.role-tab.character-tab').click();await page.locator('#character-hover-skills').check();
  const tooltip=page.locator('#character-skill-tooltip');await page.locator('.character-select[data-id="8"]').hover();await expect(tooltip).toBeVisible();
  const ren=await tooltip.locator('.character-skill-text').textContent();expect(ren).not.toContain('※ジュジュシールド効果：');expect(ren).toContain('\nジュジュシールド\n次に受けるダメージ-99');expect(ren.indexOf('\nジュジュシールド\n')).toBeGreaterThan(ren.indexOf('パッシブスキル'));
@@ -1304,7 +1309,7 @@ for(const protocol of ['http','file'])test('07 descriptions: Ren shield and Hann
 });
 
 test('07 Dorothy: Warmth five snapshots full DEF before consuming; four stays and Undo restores',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'104');const warm=page.getByLabel('温もりの数'),atk=page.locator('#selected-character-atk'),def=page.locator('#selected-character-def'),ct=page.locator('#selected-character-ct');
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'104');const warm=page.getByLabel('温もりの数'),atk=page.locator('#selected-character-atk'),def=page.locator('#selected-character-def'),ct=page.locator('#selected-character-ct');
  await warm.fill('5');await warm.dispatchEvent('change');await page.locator('#selected-character-def-button').click();
  const oldAtk=Number(await atk.inputValue()),oldDef=Number(await def.inputValue());await page.locator('#selected-character-skill').click();
  await expect(warm).toHaveValue('0');await expect(atk).toHaveValue(String(oldAtk+oldDef));await expect(def).toHaveValue(String(oldDef-5));await expect(ct).toHaveText('CT 2 / 2');
@@ -1314,7 +1319,7 @@ test('07 Dorothy: Warmth five snapshots full DEF before consuming; four stays an
 });
 
 test('07 Jill and Dorothy: no received healing controls; cocktail colors and independent stat Undo',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'103');await expect(page.getByRole('button',{name:/一生を変えるカクテル：/})).toHaveCount(0);await page.locator('#selected-character-skill').click();await expect(page.locator('#selected-character-move')).toHaveText('0');
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'103');await expect(page.getByRole('button',{name:/一生を変えるカクテル：/})).toHaveCount(0);await page.locator('#selected-character-skill').click();await expect(page.locator('#selected-character-move')).toHaveText('0');
  await selectCharacter(page,'1');await registerSupport(page,'103');await registerSupport(page,'104');await expect(page.getByRole('button',{name:'PTカクテル回復＋1',exact:true})).toHaveCount(0);await expect(page.getByRole('button',{name:'PTドロシー通過回復＋1',exact:true})).toHaveCount(0);
  const atk=page.locator('#selected-character-atk'),def=page.locator('#selected-character-def'),baseAtk=Number(await atk.inputValue()),baseDef=Number(await def.inputValue());
  for(const [key,color] of [['PTカクテル攻撃','rgb(204, 51, 51)'],['PTカクテル防御','rgb(38, 115, 201)']])await expect(page.getByRole('button',{name:key+'を増やす'})).toHaveCSS('border-top-color',color);
@@ -1323,7 +1328,7 @@ test('07 Jill and Dorothy: no received healing controls; cocktail colors and ind
 });
 
 test('07 Hanna: protection requires PT Sherry; blessing icons are explicit and loaded',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'105');const protect=page.getByRole('button',{name:/^親友を守る：/});await expect(protect).toHaveCount(0);
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'105');const protect=page.getByRole('button',{name:/^親友を守る：/});await expect(protect).toHaveCount(0);
  await registerSupport(page,'106');await protect.click();await expect(page.locator('#damageReduce2')).toHaveValue('1');
  await page.locator('#selected-party-tab').click();await page.locator('.party-member-slot[data-character-id="106"] .party-slot-name').click({button:'right'});await expect(protect).toHaveCount(0);await expect(page.locator('#damageReduce2')).toHaveValue('0');
  await page.locator('.character-select[data-id="106"]').click();await page.locator('#selected-self-tab').click();await expect(protect).toBeVisible();await expect(page.locator('#damageReduce2')).toHaveValue('1');
@@ -1333,7 +1338,7 @@ test('07 Hanna: protection requires PT Sherry; blessing icons are explicit and l
 
 
 for(const [id,label] of [['16','オーバードライブのダイスの出目'],['26','吸収した影の数'],['23','憑依する味方の攻撃力']])test('07 skill popup cancels draft on outside click and Escape: '+id,async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,id);
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,id);
  const dialog=page.locator(id==='23'?'#teru-stat-dialog':'#skill-source-dialog'),skill=page.locator('#selected-character-skill'),ct=page.locator('#selected-character-ct'),atk=page.locator('#selected-character-atk');
  const initialCT=await ct.textContent(),initialATK=await atk.inputValue();
  for(const cancel of ['outside','escape','button']){
@@ -1346,7 +1351,7 @@ for(const [id,label] of [['16','オーバードライブのダイスの出目'],
 
 
 test('07 Teru: keypad and Enter advance ATK to DEF then confirm one cast',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'23');await page.locator('#selected-character-skill').click();
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'23');await page.locator('#selected-character-skill').click();
  const atk=page.getByLabel('憑依する味方の攻撃力',{exact:true}),def=page.getByLabel('憑依する味方の防御力',{exact:true}),pad=page.locator('#character-number-pad');
  await pad.locator('[data-key="5"]').click();await pad.locator('[data-key="確定"]').click();await expect(def).toBeFocused();await expect(page.locator('#selected-character-ct')).toContainText('CT 0');
  await def.fill('3');await def.press('Enter');await expect(page.locator('#teru-stat-dialog')).toBeHidden();await expect(page.locator('#selected-character-atk')).toHaveValue('5');await expect(page.locator('#selected-character-def')).toHaveValue('3');
@@ -1355,7 +1360,7 @@ test('07 Teru: keypad and Enter advance ATK to DEF then confirm one cast',async(
 });
 
 test('07 Sherry: blessing movement and Doll Complete overlap at plus two and Undo restores',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'106');await registerSupport(page,'105');
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'106');await registerSupport(page,'105');
  const blessing=page.getByRole('button',{name:'PTハンナ推理タイム＋1',exact:true}),doll=page.getByRole('button',{name:/^PTハンナ次の移動：/}),move=page.locator('#selected-character-move');
  await blessing.click();await expect(blessing).toHaveAttribute('aria-pressed','true');await expect(move).toHaveText('2');await doll.click();await expect(move).toHaveText('2');await blessing.click({button:'right'});await expect(blessing).toHaveAttribute('aria-pressed','false');await expect(move).toHaveText('2');await doll.click();await expect(move).toHaveText('0');
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();await expect(move).toHaveText('2');
@@ -1363,13 +1368,13 @@ test('07 Sherry: blessing movement and Doll Complete overlap at plus two and Und
 });
 
 for(const protocol of ['http','file'])test('07 Padman: passive description omits movement '+protocol,async({page})=>{
- if(protocol==='file')await page.goto(require('node:url').pathToFileURL(require('node:path').resolve('07_skill/index.html')).href);else await page.goto('/07_skill/');
+ if(protocol==='file')await page.goto(require('node:url').pathToFileURL(require('node:path').resolve(skillFolder,'index.html')).href);else await page.goto(`/${skillFolder}/`);
  await page.locator('.role-tab.character-tab').click();await page.locator('#character-hover-skills').check();await page.locator('.character-select[data-id="6"]').hover();const text=await page.locator('#character-skill-tooltip .character-skill-text').textContent();expect(text.split('パッシブスキル')[1]).not.toMatch(/移動/);expect(text).toContain('攻撃力-2～2、防御力-2～2');
 });
 
 for(const protocol of ['http','file'])test(`07 skill: canonical hover text is shared on ${protocol}`,async({page})=>{
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
- if(protocol==='file')await page.goto(require('node:url').pathToFileURL(require('node:path').resolve('07_skill/index.html')).href);else await page.goto('/07_skill/');
+ if(protocol==='file')await page.goto(require('node:url').pathToFileURL(require('node:path').resolve(skillFolder,'index.html')).href);else await page.goto(`/${skillFolder}/`);
  await selectCharacter(page,'8');
  const expected=await page.evaluate(()=>({atk:getSkillHoverText('parameter.increase',{name:'攻撃力'}),skill:getSkillHoverText('skill.cast',{name:CHARACTER_ABILITY_RULES['8'].activeSkills[0].label})}));
  await expect(page.locator('#selected-character-atk-button')).toHaveAttribute('title',expected.atk);
@@ -1382,7 +1387,7 @@ for(const protocol of ['http','file'])test(`07 skill: canonical hover text is sh
 
 for(const protocol of ['http','file'])test(`07 game lifecycle: initial event waits for selection and NewGame clears all on ${protocol}`,async({page})=>{
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
- if(protocol==='file')await page.goto(require('node:url').pathToFileURL(require('node:path').resolve('07_skill/index.html')).href);else await page.goto('/07_skill/');
+ if(protocol==='file')await page.goto(require('node:url').pathToFileURL(require('node:path').resolve(skillFolder,'index.html')).href);else await page.goto(`/${skillFolder}/`);
  await expect(page.locator('#selected-character-name')).toHaveText('ミミ');
  await expect(page.locator('#mp-map-select')).toHaveValue('MAP0001');await expect(page.locator('#map-roster-list .roster-card')).toHaveCount(0);
  await selectCharacter(page,'23');await expect(page.locator('#map-roster-list .roster-card')).toHaveCount(4);
@@ -1407,14 +1412,14 @@ for(const protocol of ['http','file'])test(`07 game lifecycle: initial event wai
 });
 
 test('07 game lifecycle: defeat button returns to map and Undo restores the monster',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'1');const card=page.locator('#map-roster-list .roster-card').first();
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'1');const card=page.locator('#map-roster-list .roster-card').first();
  await card.locator('.roster-portrait').click();await expect(page.locator('.role-tab[data-role="attack"]')).toHaveClass(/active/);
  await card.locator('.roster-remove').click();await expect(page.locator('.role-tab[data-role="map"]')).toHaveClass(/active/);
  await expect(page.locator('#roster-counts')).toContainText('撃破 1');await page.locator('#roster-undo').click();await expect(page.locator('#roster-counts')).toContainText('撃破 0');
 });
 
 for(const protocol of ['http','file'])test('07 Papara: chip HP gains preserve damage and use the full maximum '+protocol,async({page})=>{
- await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve('07_skill/index.html')).href:'/07_skill/');
+ await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve(skillFolder,'index.html')).href:`/${skillFolder}/`);
  await selectCharacter(page,'7');
  const hp=page.locator('#selected-character-current-hp'),atk=page.locator('#selected-character-atk');
  await hp.fill('4');await hp.dispatchEvent('change');await selectChipCategory(page,'共通');
@@ -1428,7 +1433,7 @@ for(const protocol of ['http','file'])test('07 Papara: chip HP gains preserve da
 });
 
 test('07 party chip HP gains affect only the chip owner',async({page})=>{
- await page.goto('/07_skill/');await selectCharacter(page,'7');await page.locator('#selected-party-tab').click();
+ await page.goto(`/${skillFolder}/`);await selectCharacter(page,'7');await page.locator('#selected-party-tab').click();
  await page.locator('.character-select[data-id="1"]').click();await page.locator('.character-select[data-id="2"]').click();
  const slot=id=>page.locator('.party-member-slot[data-character-id="'+id+'"]');
  const hp=slot('1').locator('[data-stat="hp"] b');
@@ -1446,7 +1451,7 @@ async function acquireEffectChip(page,id,map){
  await page.locator('.chip-select[data-id="'+id+'"]').click();
 }
 for(const protocol of ['http','file'])test('07 chip reductions: HP and Mind boundaries, Snake expiry and Undo '+protocol,async({page})=>{
- await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve('07_skill/index.html')).href:'/07_skill/');await selectCharacter(page,'1');
+ await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve(skillFolder,'index.html')).href:`/${skillFolder}/`);await selectCharacter(page,'1');
  const hp=page.locator('#selected-character-current-hp'),reduce=page.locator('#damageReduce2');
  await acquireEffectChip(page,'13');await hp.fill('4');await hp.dispatchEvent('change');await expect(reduce).toHaveValue('1');
  await hp.fill('5');await hp.dispatchEvent('change');await expect(reduce).toHaveValue('0');
@@ -1458,7 +1463,7 @@ for(const protocol of ['http','file'])test('07 chip reductions: HP and Mind boun
  await page.locator('#roster-undo').click();await expect(mind).toHaveValue('4');await expect(reduce).toHaveValue('2');await expect(snake).toHaveAttribute('aria-pressed','true');
 });
 for(const protocol of ['http','file'])test('07 Great Bell: skill activation, party toggle, no stacking, expiry and Undo '+protocol,async({page})=>{
- await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve('07_skill/index.html')).href:'/07_skill/');await selectCharacter(page,'1');
+ await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve(skillFolder,'index.html')).href:`/${skillFolder}/`);await selectCharacter(page,'1');
  const atk=page.locator('#selected-character-atk'),reduce=page.locator('#damageReduce2'),base=Number(await atk.inputValue());
  await acquireEffectChip(page,'121','MAP0003');await expect(page.getByRole('button',{name:/^大鉦：/})).toHaveCount(0);
  await page.locator('#selected-character-skill').click();await expect(atk).toHaveValue(String(base+1));await expect(reduce).toHaveValue('1');
@@ -1471,7 +1476,7 @@ for(const protocol of ['http','file'])test('07 Great Bell: skill activation, par
  await acquireEffectChip(page,'121','MAP0003');await expect(reduce).toHaveValue('0');await bell.click();await expect(reduce).toHaveValue('1');
 });
 for(const protocol of ['http','file'])test('07 dice chips: own 1/6 dice and attack fixed six share grid and card probabilities '+protocol,async({page})=>{
- await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve('07_skill/index.html')).href:'/07_skill/');await selectCharacter(page,'1');await acquireEffectChip(page,'142','MAP0005');
+ await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve(skillFolder,'index.html')).href:`/${skillFolder}/`);await selectCharacter(page,'1');await acquireEffectChip(page,'142','MAP0005');
  const results=await page.evaluate(()=>['attack','defense'].map(role=>{
   const c=document.querySelector('.mode-content[data-role="'+role+'"]'),dice=getCombatDiceValues(c);
   const grid=calculateDefenseDamageGrid(7,3,0,0,10,false,false,false,null,{attackDice:dice.attack,defenseDice:dice.defense});

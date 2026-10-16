@@ -2,16 +2,18 @@
 const CHARACTER_ABILITY_RULES={
  '10':{
   activeSkills:[{key:'active',label:"食べ放題",cooldown:3,effects:[]}],
-  controls:[{key:'カウンター攻撃',type:'toggle'},{key:'このターンに受けたダメージ',type:'number',min:0}],
-  modifiers:[{target:'atk',formula:'per_stack',source:'このターンに受けたダメージ',value:1,when:{key:'カウンター攻撃',equals:1}}]
+  controls:[{key:'反撃',type:'toggle'},{key:'このターンに受けたダメージ',type:'number',min:0}],
+  modifiers:[{target:'atk',formula:'per_stack',source:'このターンに受けたダメージ',value:1,when:{key:'反撃',equals:1}}]
  },
  '17':{
+  controls:[{key:'潜在能力の攻撃補正',type:'number',min:0,duration:'turn'}],
+  modifiers:[{target:'atk',formula:'per_stack',source:'潜在能力の攻撃補正',value:1}],
   activeSkills:[{key:'active',label:"真夜の一閃",cooldown:3,target:'monster',multipleTargets:true,effects:[{type:'damage_monster',sourceStat:'atk',offset:2}]}]
  },
  '23':{
-  activeSkills:[{key:'active',label:"三神憑依",cooldown:3,inputStats:[{key:'三神憑依対象攻撃力',label:'憑依する味方の攻撃力'},{key:'三神憑依対象防御力',label:'憑依する味方の防御力'}],effects:[{type:'modify_stat',target:'self',stat:'atk',sourceKey:'三神憑依対象攻撃力',multiplier:0.5,duration:'turn'},{type:'modify_stat',target:'self',stat:'def',sourceKey:'三神憑依対象防御力',multiplier:0.5,duration:'turn'}]}],
-  controls:[{key:'狐光追加攻撃',type:'toggle'},{key:'狐光',type:'number',min:0}],
-  modifiers:[{target:'atk',formula:'per_stack',source:'狐光',value:1,when:{key:'狐光追加攻撃',equals:1}}]
+  activeSkills:[{key:'active',label:"三神憑依",cooldown:3,effects:[]}],
+  controls:[{key:'狐光',type:'number',min:0},{key:'三神憑依攻撃補正',type:'number',min:0,duration:'turn',placement:'skill'},{key:'三神憑依防御補正',type:'number',min:0,duration:'turn',placement:'skill'}],
+  modifiers:[{target:'atk',formula:'percent_of_ceil',source:'三神憑依攻撃補正',value:0.5},{target:'def',formula:'percent_of_ceil',source:'三神憑依防御補正',value:0.5}]
  },
  '27':{
   activeSkills:[{key:'active',label:"ミッション：インシークレット",cooldown:3,target:'monster',effects:[{type:'modify_monster_mark',delta:1},{type:'set_monster_status',key:'investigationTarget',value:true}]}],
@@ -28,35 +30,31 @@ const CHARACTER_ABILITY_RULES={
  },
  '6':{
   ignoreDefenseOnAttackSix:true,
-  activeSkills:[{key:'active',label:"マジで怒ったぞ",cooldown:3,effects:[]}],
+  activeSkills:[{key:'active',label:"マジで怒ったぞ",cooldown:3,effects:[{type:'modify_control',key:'マジで怒ったぞ',delta:1,max:1}]}],
   controls:[
+   {key:'マジで怒ったぞ',type:'toggle',duration:'turn',placement:'internal'},
+   {key:'次の攻撃ダイス6',type:'toggle'},
    {key:'自己主張なし攻撃補正',type:'number',min:-2,max:2},
-   {key:'自己主張なし防御補正',type:'number',min:-2,max:2},
-   {key:'自己主張なし移動補正',type:'number',min:-2,max:2}
+   {key:'自己主張なし防御補正',type:'number',min:-2,max:2}
   ],
   modifiers:[
    {target:'atk',formula:'per_stack',source:'自己主張なし攻撃補正',value:1},
-   {target:'def',formula:'per_stack',source:'自己主張なし防御補正',value:1},
-   {target:'move',formula:'per_stack',source:'自己主張なし移動補正',value:1}
+   {target:'def',formula:'per_stack',source:'自己主張なし防御補正',value:1}
   ]
  },
  '15':{
-  activeSkills:[{key:'active',label:"クィーン プリビレッジ",cooldown:3,effects:[]}],
-  controls:[{key:'相手より多い手札',type:'number',min:0,max:3}],
-  modifiers:[{target:'atk',formula:'per_stack',source:'相手より多い手札',value:1}]
+  activeSkills:[{key:'active',label:"クィーン プリビレッジ",cooldown:3,effects:[{type:'modify_control',key:'手札枚数',delta:3}]}],
+  controls:[{key:'手札枚数',type:'number',min:0}],
+  modifiers:[{target:'atk',formula:'per_stack',source:'手札枚数',sourceCap:3,value:1}]
  },
  '26':{
   activeSkills:[{key:'active',label:"暗影融合",cooldown:3,inputStats:[{key:'吸収した影',label:'吸収した影の数',integer:true}],effects:[{type:'modify_stat',target:'self',stat:'atk',sourceKey:'吸収した影',duration:'turn'}]}]
  },
  '28':{
-  activeSkills:[{key:'active',label:"インターセプトタックル",cooldown:3,target:'monster',multipleTargets:true,effects:[{type:'modify_monster_def',value:-2,durationTurns:2},{type:'modify_stat',target:'self',stat:'atk',value:2,durationTurns:2}]}],
-  controls:[{key:'エリア拒止通過',type:'toggle'}],
-  modifiers:[{target:'atk',formula:'fixed',value:2,when:{key:'エリア拒止通過',equals:1}}]
+  activeSkills:[{key:'active',label:"インターセプトタックル",cooldown:3,target:'monster',multipleTargets:true,effects:[{type:'modify_monster_def',value:-2,durationTurns:2},{type:'modify_stat',target:'self',stat:'atk',value:2,durationTurns:2}]}]
  },
  '103':{
-  activeSkills:[{key:'active',label:"カクテルを作る",cooldown:3,effects:[]}],
-  controls:[{key:'一生を変えるカクテル',type:'toggle',duration:'turn'}],
-  modifiers:[{target:'move',formula:'fixed',value:3,when:{key:'一生を変えるカクテル',equals:1}}]
+  activeSkills:[{key:'active',label:"カクテルを作る",cooldown:3,effects:[]}]
  },
  '7':{
   activeSkills:[{key:'active',label:"ひとくちだけ",cooldown:3,effects:[{type:'force_condition',key:'current_hp_ratio<=',duration:'turn'}]}],
@@ -79,8 +77,8 @@ const CHARACTER_ABILITY_RULES={
   activeSkills:[{key:'active',label:"気功修練",cooldown:3,effects:[{type:'heal',target:'self',value:2},{type:'modify_stat',target:'self',stat:'atk',value:4,duration:'turn',when:{key:'エネルギー保存',min:1}}]}],
   controls:[{key:'エネルギー保存',type:'number',min:0,max:5}],
   modifiers:[
-   {target:'atk',formula:'per_stack',source:'エネルギー保存',value:2},
-   {target:'def',formula:'per_stack',source:'エネルギー保存',value:2}
+   {target:'atk',formula:'fixed',value:2,when:{key:'エネルギー保存',min:1}},
+   {target:'def',formula:'fixed',value:2,when:{key:'エネルギー保存',min:1}}
   ]
  },
  '14':{
@@ -100,7 +98,7 @@ const CHARACTER_ABILITY_RULES={
   modifiers:[{target:'atk',formula:'fixed',value:4,when:{key:'覚醒',equals:8}}]
  },
  '104':{
-  activeSkills:[{key:'active',label:"本当の私",cooldown:2,effects:[{type:'modify_stat',target:'self',stat:'atk',sourceStat:'def',duration:'turn',when:{key:'温もり',equals:5}}]}],
+  activeSkills:[{key:'active',label:"本当の私",cooldown:2,effects:[{type:'modify_stat',target:'self',stat:'atk',sourceStat:'def',duration:'turn',when:{key:'温もり',equals:5}},{type:'modify_control',key:'温もり',delta:-5,min:0,when:{key:'温もり',equals:5}}]}],
   controls:[{key:'温もり',type:'number',min:0,max:5},{key:'本当の私',type:'toggle',duration:'turn'}],
   modifiers:[{target:'def',formula:'per_stack',source:'温もり',value:1},{target:'atk',formula:'fixed',value:1,when:{key:'本当の私',equals:1}}]
  },
@@ -169,7 +167,7 @@ const CHARACTER_ABILITY_RULES={
  },
  '105':{
   activeSkills:[{key:'active',label:"浮遊魔法",cooldown:3,effects:[{type:'modify_stat',target:'self',stat:'move',value:2,duration:'turn'}]}],
-  controls:[{key:'人形制作',type:'number',min:0,max:7,iconAtMax:'人形完成'},{key:'親友を守る',type:'toggle'}],
-  modifiers:[{target:'damageReduce',formula:'fixed',value:1,when:{key:'親友を守る',equals:1}}]
+  controls:[{key:'人形制作',type:'number',min:0,max:7,iconAtMax:'人形完成'},{key:'親友を守る',type:'toggle',requiresParty:'106'}],
+  modifiers:[{target:'damageReduce',formula:'fixed',value:1,when:{key:'親友を守る',equals:1,partyCharacterId:'106'}}]
  },
 };

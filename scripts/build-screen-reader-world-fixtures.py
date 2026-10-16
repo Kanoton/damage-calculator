@@ -1,10 +1,41 @@
 """Build privacy-cropped world fixtures and compact text masks (no full screenshots)."""
-import argparse,base64,io,json,runpy
+import argparse,base64,csv,io,json,runpy
 from pathlib import Path
 from PIL import Image
 ROOT=Path(__file__).resolve().parents[1]
 # Coordinates at height 709, with the left screen edge as x=0.
 LABELS={'11':[(374,228,130,28),(409,264,41,24),(375,294,132,28),(409,330,76,24)],'36':[(374,261,132,28),(246,362,132,28),(281,400,82,25)],'41':[],'43':[(374,261,132,28),(408,296,44,25)]}
+def append_video_references(refs,helpers):
+ rows=json.loads((ROOT/'tests/fixtures/screen-reader/monster-labels.json').read_text())
+ known={r['monster_id']:r for r in csv.DictReader((ROOT/'csv/monster_stats.csv').open(encoding='utf-8-sig'))}
+ for row in rows:
+  if not row['training']:continue
+  if row['id'] not in known or row['boss']!=(known[row['id']]['ボス']=='1'):raise ValueError('Unknown monster or boss flag')
+  path=ROOT/'tests/fixtures/screen-reader'/ (row['fixture']+'.json')
+  im=Image.open(io.BytesIO(base64.b64decode(json.loads(path.read_text())['image'].split(',')[1]))).convert('RGB');scale=709/im.height
+  im=im.resize((round(im.width*scale),709),Image.Resampling.BILINEAR)
+  def box(raw):
+   x,y,w,h=raw;left,top=round(x*scale),round(y*scale)
+   return (left,top,round((x+w)*scale)-left,round((y+h)*scale)-top)
+  mask=helpers['mask'](helpers['crop'](im,box(row['nameBox'])),'white')
+  points=[(x,y) for y,line in enumerate(mask) for x,v in enumerate(line) if v]
+  x0=min(x for x,y in points);y0=min(y for x,y in points);x1=max(x for x,y in points)+1;y1=max(y for x,y in points)+1
+  refs['names'].append({'id':row['id'],'boss':row['boss'],'width':x1-x0,'height':y1-y0,'data':base64.b64encode(bytes(mask[y][x] for y in range(y0,y1) for x in range(x0,x1))).decode()})
+  if 'serialMinHeightRatio' in row:
+   ratio=row['serialMinHeightRatio']
+   if not isinstance(ratio,(int,float)) or not 0<ratio<=1:raise ValueError('Invalid serial height ratio')
+   refs['names'][-1]['serialMinHeightRatio']=ratio
+  # Both forms display the identical name. Their HP scales are disjoint:
+  # truth base 229..231, at most five clue reductions of 20, ordinary base 9..11.
+  if row['id']=='M0115':
+   refs['names'][-1]['minMaxHp']=100
+   refs['names'].append({**refs['names'][-1],'id':'M0116','boss':False,'noSerial':True,'minMaxHp':1,'maxMaxHp':99})
+  numbers=([(row['hpBox'],'red',f"{row['expected']['currentHp']}/{row['expected']['maxHp']}")] if row.get('learnHpDigits',True) else [])
+  numbers+=([(row['serialBox'],'white',str(row['expected']['serial']))] if row['serialBox'] else [])
+  for raw,kind,text in numbers:
+   glyphs=helpers['glyphs'](helpers['crop'](im,box(raw)),kind)
+   if len(glyphs)!=len(text):raise ValueError((row['fixture'],kind,text,len(glyphs)))
+   refs['digits'].extend({'digit':d,**g} for d,g in zip(text,glyphs))
 def main():
  p=argparse.ArgumentParser();p.add_argument('--screens');p.add_argument('--check',action='store_true');a=p.parse_args();helpers=runpy.run_path(str(ROOT/'scripts/build-screen-reader-references.py'));refs={'digits':[],'names':[]}
  frames={}
@@ -31,9 +62,10 @@ def main():
  for stamp,ident,box in [('11','M0017',(374,228,130,28)),('43','M0017',(374,261,130,28)),('11','M0014',(375,294,132,28))]:
   im=helpers['crop'](frames[stamp],box);mask=helpers['mask'](im,'white');pts=[(x,y)for y,row in enumerate(mask)for x,v in enumerate(row)if v];x0=min(x for x,y in pts);y0=min(y for x,y in pts);x1=max(x for x,y in pts)+1;y1=max(y for x,y in pts)+1
   data=bytes(mask[y][x]for y in range(y0,y1)for x in range(x0,x1));refs['names'].append({'id':ident,'width':x1-x0,'height':y1-y0,'data':base64.b64encode(data).decode()})
+ append_video_references(refs,helpers)
  out=ROOT/'08_screen_reader/js/screen-reader-world-references.js';content='// Generated from privacy-cropped world labels.\nwindow.ScreenReaderWorldReferences='+json.dumps(refs,separators=(',',':'))+';\n'
  if a.check:
   if out.read_text()!=content:raise ValueError('Rebuild world references')
  else:out.write_text(content)
- print('Validated world digits, slash and two monster names')
+ print(f"Validated world digits, slash and {len({r['id'] for r in refs['names']})} monster names")
 if __name__=='__main__':main()

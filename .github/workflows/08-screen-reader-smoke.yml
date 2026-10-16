@@ -8,6 +8,9 @@ on:
       - 'images/**'
       - 'tests/08-screen-reader.spec.js'
       - 'tests/08-world-reader.spec.js'
+      - 'tests/07-skill.spec.js'
+      - 'playwright.reader-sync.config.js'
+      - 'scripts/check-08-hover-text.js'
       - 'tests/fixtures/screen-reader/**'
       - 'scripts/check-07-syntax.js'
       - 'scripts/build-screen-reader-references.py'
@@ -34,6 +37,9 @@ on:
       - 'scripts/build-screen-reader-world-fixtures.py'
       - 'tests/08-screen-reader.spec.js'
       - 'tests/08-world-reader.spec.js'
+      - 'tests/07-skill.spec.js'
+      - 'playwright.reader-sync.config.js'
+      - 'scripts/check-08-hover-text.js'
       - 'tests/fixtures/screen-reader/**'
       - 'package.json'
       - '.github/workflows/08-screen-reader-smoke.yml'
@@ -41,6 +47,7 @@ on:
 jobs:
   smoke:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -55,8 +62,9 @@ jobs:
       - run: python3 scripts/build-screen-reader-status-fixtures.py --check
       - run: python3 scripts/build-screen-reader-popup-fixtures.py --check
       - run: python3 scripts/build-screen-reader-world-fixtures.py --check
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install --with-deps chromium webkit
       - run: npm run test:08
+      - run: npm run test:08:sync -- --workers=2
       - uses: actions/upload-artifact@v4
         if: always()
         with:
