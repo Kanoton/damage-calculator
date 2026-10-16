@@ -172,8 +172,10 @@
   for(const m of members)if(repeated.has(m.id)){delete m.id;m.unreadable=true;}
   const statusSource=source.statusFrame||source;
   const header=match(feature(statusSource,regions.header),charRefs.filter(r=>r.kind==='header'));
-  const lower=source.popupFrame&&source.statusFrame&&chipPanelVisible(source.popupFrame,'lower',lowerCenters)?lowerTab(source.popupFrame):null;
-  const tab=lower??(chipPanelVisible(hudSource,'small',smallCenters)?activeTab(hudSource):null);
+  const lowerCandidate=source.popupFrame&&source.statusFrame?lowerTab(source.popupFrame):null;
+  const lower=lowerCandidate!==null&&chipPanelVisible(source.popupFrame,'lower',lowerCenters)?lowerCandidate:null;
+  const smallCandidate=lower===null?activeTab(hudSource):null;
+  const tab=lower??(smallCandidate!==null&&chipPanelVisible(hudSource,'small',smallCenters)?smallCandidate:null);
   // The small popup covers the self portrait. Never identify self from its
   // chip contents or selected tab; keep the previous self or explicit choice.
   const selfRefs=charRefs.filter(r=>r.kind==='self');
