@@ -522,9 +522,9 @@
   if(row&&ability){const view=createCharacterSkillTooltipView(row,ability);window.showMobileInformation?.(row.name,[view.stats,view.description]);}
  });
  function setPartyMode(active){
-  partyMode=Boolean(active&&selectedCharacter);if(!partyMode){partyEditId=null;chipStatus.textContent='';}selectedPanel.classList.toggle('is-party-view',partyMode);partyGrid.hidden=!partyMode;
+  partyMode=Boolean(active&&(selectedCharacter||partySlots.some(id=>id!==null)));if(!partyMode){partyEditId=null;chipStatus.textContent='';}selectedPanel.classList.toggle('is-party-view',partyMode);partyGrid.hidden=!partyMode;
   selfTab.setAttribute('aria-selected',String(!partyMode));partyTab.setAttribute('aria-selected',String(partyMode));selfTab.tabIndex=partyMode?-1:0;partyTab.tabIndex=partyMode?0:-1;
-  listStatus.textContent=partyMode?(document.body.classList.contains('mobile-ui')?'PT登録：一覧をタップで追加、PTの操作ボタンから解除（自分を含めて最大4人）':'PT登録：キャラをクリックで追加、右クリックで解除（自分を含めて最大4人）'):'';
+  listStatus.textContent=partyMode?(!selectedCharacter?'読取済みPTを表示しています。画面読取の「自キャラ」で自分のキャラを指定してください。':document.body.classList.contains('mobile-ui')?'PT登録：一覧をタップで追加、PTの操作ボタンから解除（自分を含めて最大4人）':'PT登録：キャラをクリックで追加、右クリックで解除（自分を含めて最大4人）'):'';
   renderParty();
  }
  function registerPartyMember(row){
@@ -544,7 +544,12 @@
  for(const tab of [selfTab,partyTab])tab.addEventListener('keydown',event=>{if(!['ArrowUp','ArrowDown','Home','End'].includes(event.key))return;event.preventDefault();const target=event.key==='Home'?selfTab:event.key==='End'?partyTab:tab===selfTab?partyTab:selfTab;target.click();target.focus();});
 
  function renderSelectedCharacter(){
-  if(!selectedCharacter)return;
+  if(!selectedCharacter){
+   const hasParty=partySlots.some(id=>id!==null);selectedPanel.hidden=!hasParty;
+   selfTab.disabled=hasParty;selfTab.textContent=hasParty?'自分未判定':'自キャラ';selfTab.title=hasParty?'画面読取の「自キャラ」で自分のキャラを指定してください。':'';
+   if(hasParty)setPartyMode(true);return;
+  }
+  selfTab.disabled=false;selfTab.textContent='自キャラ';selfTab.title='';
   selectedPanel.hidden=false;
   document.getElementById('selected-character-name').textContent=selectedCharacter.name;
   document.getElementById('selected-character-level').textContent='Lv.'+state().level;
@@ -568,7 +573,7 @@
   document.getElementById('selected-character-name').textContent='';
   for(const id of ['selected-character-current-hp','selected-character-atk','selected-character-def'])document.getElementById(id).value='';
   document.getElementById('selected-character-skill-controls').hidden=true;
-  setPartyMode(false);listStatus.textContent='';chipStatus.textContent='';
+  selfTab.disabled=false;selfTab.textContent='自キャラ';selfTab.title='';setPartyMode(false);listStatus.textContent='';chipStatus.textContent='';
   document.getElementById('selected-self-tab').click();document.getElementById('character-list-tab').click();
   root.querySelector('.chip-category-tabs button[data-category="マーク"]')?.click();renderChips();
   window.dispatchEvent(new Event('character-selection-change'));window.dispatchEvent(new Event('party-members-change'));
@@ -644,7 +649,7 @@
    }
    // Correct total values after level/chip/HP changes; retain all unobserved stats.
    for(const m of seen){const row=rowFor(m.id);if(!partySlots.some(id=>String(id)===String(row.id)))continue;const own=String(row.id)===ownId,s=own?state():getPartyState(row.id),totals=own?calculate():calculatePartyMember(row);s.manual??={atk:0,def:0,move:0};for(const key of ['atk','def','move'])if(valid(m[key],0,999))s.manual[key]=(s.manual[key]||0)+m[key]-totals[key];}
-   renderSelectedCharacter();if(!selectedCharacter)renderParty();if(before!==partySlots.map(id=>id===null?null:String(id)).join(','))window.dispatchEvent(new Event('party-members-change'));
+   renderSelectedCharacter();if(before!==partySlots.map(id=>id===null?null:String(id)).join(','))window.dispatchEvent(new Event('party-members-change'));
    return {updated,added};
   }
  };
