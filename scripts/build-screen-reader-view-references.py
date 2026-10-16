@@ -38,6 +38,8 @@ def build():
         out['panels'][kind] = panels
     for t in [15,24,46]:
         out['characters'].append({'id':'106','kind':'self','data':feature(image(f'self-sherry-{t}'),(116,445,139,116))})
+    for name, ident in [('live-map','13'),('replay-map','2')]:
+        out['characters'].append({'id':ident,'kind':'self','data':feature(image('self-start-'+name),(116,445,139,116))})
     return '// Generated from privacy-cropped panel and self fixtures.\nwindow.ScreenReaderViewReferences=' + json.dumps(out,separators=(',',':')) + ';\n'
 
 if __name__ == '__main__':
@@ -51,4 +53,4 @@ if __name__ == '__main__':
             raise ValueError('Rebuild screen reader view references')
     else:
         path.write_text(content)
-    print('Validated chip-panel rim anchors and Sherry self portraits')
+    print('Validated chip-panel rim anchors and reviewed self portraits')

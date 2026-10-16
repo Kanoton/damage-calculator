@@ -531,3 +531,11 @@ test('08: later self portrait still needs two automatic observations and cannot 
  },{base:fixture('left-hud'),own:fixture('self-sherry-15')});
  expect(result).toEqual({first:null,second:'106',outside:null,known:'18'});
 });
+
+for(const [name,id]of [['live-map','13'],['replay-map','2']])test('08: reviewed '+name+' self portrait identifies the fixed party member',async({page})=>{
+ await open(page);
+ const result=await page.evaluate(async({base,own,id})=>{
+  const a=new Image(),b=new Image();a.src=base;b.src=own;await Promise.all([a.decode(),b.decode()]);const c=ScreenReaderVision.normalize(a);c.getContext('2d').drawImage(b,116,445,139,116,116,445,139,116);c.popupFrame=c;
+  return ScreenReaderVision.analyze(c,undefined,{ids:[id,'106','3','18'],selfId:null,hud:{layout:'left',source:'primary'}}).selfId;
+ },{base:fixture('left-hud'),own:fixture('self-start-'+name),id});expect(result).toBe(id);
+});
