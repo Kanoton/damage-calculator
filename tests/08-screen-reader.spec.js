@@ -449,3 +449,20 @@ test('08: map and difficulty remain unknown after reader reset and late CSV refr
  await page.evaluate(()=>ScreenReaderCharacterBridge.apply({selfId:'18',members:[]}));
  expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toMatchObject({round:4,progress:4});
 });
+
+for(const width of [1280,1920])test('08: observed party is visible before self is identified at width '+width,async({page})=>{
+ await page.setViewportSize({width,height:1080});const errors=[];page.on('pageerror',error=>errors.push(error.message));
+ await open(page);await readFixture(page,'6250');
+ const before=await snapshot(page);expect(before.selfId).toBe('');expect(before.members.map(m=>m.id)).toEqual(['105','13','21','26']);
+ await closeReader(page);
+ await expect(page.locator('#selected-character')).toBeVisible();await expect(page.locator('#selected-party-grid')).toBeVisible();
+ for(const m of before.members)await expect(page.locator('.party-member-slot[data-character-id="'+m.id+'"]')).toBeVisible();
+ await expect(page.locator('#selected-self-tab')).toBeDisabled();await expect(page.locator('#selected-self-tab')).toHaveText('自分未判定');
+ await page.locator('#reader-toggle').click();await page.locator('#reader-self').selectOption('105');await page.locator('#reader-read').click();
+ await expect.poll(async()=> (await snapshot(page)).selfId).toBe('105');await closeReader(page);
+ await expect(page.locator('#selected-party-grid')).toBeVisible();await expect(page.locator('#selected-self-tab')).toBeEnabled();
+ const after=await snapshot(page);expect(after.members.map(m=>m.id)).toEqual(before.members.map(m=>m.id));expect(after.members[1].chips).toEqual(['26']);
+ await page.locator('#selected-self-tab').click();await expect(page.locator('#selected-character-name')).toHaveText('遠野ハンナ');await expect(page.locator('#selected-character-details')).toBeVisible();
+ await page.locator('#reader-toggle').click();await page.locator('#reader-new-game').click();await closeReader(page);
+ await expect(page.locator('#selected-character')).toBeHidden();expect((await snapshot(page)).members.every(m=>!m.id)).toBe(true);expect(errors).toEqual([]);
+});
