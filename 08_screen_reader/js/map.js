@@ -142,7 +142,7 @@ function startNewGame({reader=false}={}){
  clearRoster();rosterState.history.length=0;rosterState.nextId=1;
  missionCounters.clear();gimmickCounts.clear();buff.attack=0;buff.defense=0;selected=null;
  populateMaps();pick.value=reader?'':pick.options[0]?.value||'';difficulty.value=reader?'':'普通';Object.assign(routeState,{context:'',route:'',moved:false});
- eventPreview.reset();hideMonsterTip();status.textContent='';eventError.textContent='';
+ eventPreview.reset();hideMonsterTip();routeNote.hidden=true;document.getElementById('mp-buff-status').textContent='';status.textContent='';eventError.textContent='';
  for(const mode of document.querySelectorAll('.mode-content[data-role="attack"],.mode-content[data-role="defense"]')){
   for(const key of Object.keys(mode.dataset))if(key!=='role')delete mode.dataset[key];
   for(const input of mode.querySelectorAll('input')){input.value=input.defaultValue;input.checked=input.defaultChecked;for(const key of ['fanReduction','mapKeywordBonus','monsterMarkBonus'])delete input.dataset[key];}
