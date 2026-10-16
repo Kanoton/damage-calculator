@@ -133,3 +133,7 @@
 - `event_label_layout.json`：確認用ラベルの配置座標。
 - `data/topology.json`：マスと接続の座標データ。
 - `data/monster_stats.csv`／`data/monster_skills.csv`：今回使った5種類のモンスターの参照データ。最新GitHubと照合してから使用する。
+
+## 2026-10-16の画像差し替え
+
+利用者提供の基本図とイベント図4枚を既存の正規名へリネームして使用する。ツールの参照先は `images/Map/Layout_Autumn_Forest.png` と `images/MapEvent/Autumn_Normal_{01,03,07,10}.png`。これらをまとめ画像の制作でも使用し、以前の素材から描き直さない。受領名・参照先・SHA-256の対応は `production/replacement-assets-20261016.json`、調整済みイベント図の控えは `production/approved-event-maps/` に保存する。Frames／Namesは画像を貼る前の作業用なので、完成したまとめ画像に差し戻さない。

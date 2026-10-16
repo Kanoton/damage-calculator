@@ -1,0 +1,31 @@
+{
+  "date": "2026-10-16",
+  "source": "user-supplied final PNGs; renamed before use; bytes preserved",
+  "files": [
+    {
+      "uploaded_name": "Autumn_Forest_Map_Buildings_20261015.png",
+      "canonical_path": "images/Map/Layout_Autumn_Forest.png",
+      "sha256": "f12848423f3719b76128c2d7ec49019796707575d47e81ebaed6dbd03f3358e7"
+    },
+    {
+      "uploaded_name": "Autumn_Normal_01(2).png",
+      "canonical_path": "images/MapEvent/Autumn_Normal_01.png",
+      "sha256": "e1430f1c72eef4c8c817c43daec9c4f8bd8405daac3602301d4d52198b8e10d3"
+    },
+    {
+      "uploaded_name": "Autumn_Normal_03(2).png",
+      "canonical_path": "images/MapEvent/Autumn_Normal_03.png",
+      "sha256": "287907dc6ce87ab7e543915fbedef6f40a6088f5b706f42c6237f8a8ff2a252e"
+    },
+    {
+      "uploaded_name": "Autumn_Normal_07(2).png",
+      "canonical_path": "images/MapEvent/Autumn_Normal_07.png",
+      "sha256": "b2dd5283051a2c97535c4b716d10ff3a6cbed5f6525c93618e87467e03392f69"
+    },
+    {
+      "uploaded_name": "Autumn_Normal_10(2).png",
+      "canonical_path": "images/MapEvent/Autumn_Normal_10.png",
+      "sha256": "04ad21f237c3de1122b19768632cbfeadad011d18531eca305a4dd27978426db"
+    }
+  ]
+}

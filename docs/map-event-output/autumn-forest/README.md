@@ -6,6 +6,10 @@
 
 利用者調整図により進捗3のボスはO05、進捗7の恐竜はO24、進捗10の左上のクマはO28へ訂正。最新図は1804×1948px、対称軸y=974。旧 `topology.json`・`event-icon-layout.json`・`scripts/render-autumn-map.py` は以下の初期取り込みの記録で、最新版の制作にそのまま使用しない。最新座標は `production/data/topology.json`、最新対応表は `production/event_spawn_locations.csv`。
 
+## 2026-10-16の利用者調整図への差し替え
+
+ツール参照先 `images/Map/Layout_Autumn_Forest.png` と `images/MapEvent/Autumn_Normal_{01,03,07,10}.png` を利用者提供の最終PNGへ差し替えた。ファイル名は既存CSVの参照名を維持し、画像のピクセル・透過情報は変更しない。基本図には利用者の青い建物設置枠を含む。`production/Autumn_Map_Buildings.png` と `production/approved-event-maps/`、縦横のまとめ12枚も同期。元ファイル名とSHA-256は `production/replacement-assets-20261016.json`。CSVの列・難易度・進捗・能力値は今回変更しない。
+
 ## 初期取り込みの記録（制作方針・図の仕様は上記で更新済み）
 
 ユーザー提供の通常プレイ動画2本、ミニマップ、マス素材、`261015.zip` の32画像を根拠とする。
