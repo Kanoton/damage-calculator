@@ -393,3 +393,18 @@ test('08: a status screen updates its owner while the confirmed self stays fixed
  expect(s.members[1].chips).toEqual(['26']);expect([s.members[1].atk,s.members[1].def]).toEqual([1,1]);
  await page.locator('#reader-party-unlock').click();await expect(page.locator('#reader-party-status')).toHaveText('PT未確定');await expect(page.locator('#reader-party-0')).toBeEnabled();
 });
+
+for(const [name,atk] of [['frame15',8],['frame24',9],['frame46',8]])test('08: own persistent HUD '+name+' updates only confirmed self',async({page})=>{
+ await open(page);
+ const result=await page.evaluate(async({hud,partyImage})=>{
+  const im=new Image(),base=new Image();im.src=hud;base.src=partyImage;await Promise.all([im.decode(),base.decode()]);
+  const c=ScreenReaderVision.normalize(base),ctx=c.getContext('2d'),first=ScreenReaderVision.analyze(c);
+  for(const target of [c,c.popupFrame])target.getContext('2d').drawImage(im,3,620,78,89,3,620,78,89);
+  const before=ScreenReaderVision.analyze(c),after=ScreenReaderVision.analyze(c,undefined,{ids:['105','106','3','18'],selfId:'18',hud:first.hud});
+  ctx.fillStyle='#141414';ctx.fillRect(3,620,38,89);const hidden=ScreenReaderVision.readSelfStats(c);
+  return {before,after,hidden};
+ },{hud:fixture('self-hud-'+name),partyImage:fixture('left-hud')});
+ expect(result.before.members.every(m=>m.atk===undefined&&m.def===undefined)).toBe(true);
+ expect(result.after.members.filter(m=>m.atk!==undefined||m.def!==undefined).map(m=>[m.id,m.atk,m.def])).toEqual([['18',atk,2]]);
+ expect(result.hidden).toEqual({});
+});
