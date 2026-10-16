@@ -139,7 +139,7 @@
    // Yield to paint without overlapping jobs. Stop/reset invalidates this frame.
    await new Promise(resolve=>requestAnimationFrame(resolve));if(token!==generation)return;
    const observation=vision.analyze(frame,custom,partyLock);if($('world-sync').checked)observation.world=window.ScreenReaderWorldVision.analyze(frame);else $('world-result').textContent='マップ読取はOFFです。マップ・難易度を選び、反映をONにしてください。';if(!partyLock&&$('self').value)observation.selfId=$('self').value;
-   const accepted=automatic?stabilize(observation):observation;
+   const accepted=automatic?stabilize(observation):{...observation,members:[...observation.members]};
    if(automatic&&!partyLock&&!partyEdited&&$('apply').checked){
     const slots=[0,1,2,3].map(slot=>accepted.members.find(m=>m.slot===slot));
     if(slots.every(m=>m?.id)&&slots.filter(m=>m.coin!==undefined&&m.level!==undefined).length>=2&&new Set(slots.map(m=>m.id)).size===4)lockParty(slots.map(m=>m.id),accepted.selfId,observation.hud);
