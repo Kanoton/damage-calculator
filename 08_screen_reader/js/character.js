@@ -561,7 +561,7 @@
   partyStates.delete(String(row.id));partyEditId=null;partySlots[ownIndex<0?0:ownIndex]=row.id;
   selectedCharacter=row;renderSelectedCharacter();window.dispatchEvent(new Event(notify?'character-selection-change':'character-initialized'));if(openParty)setPartyMode(true);
  }
- window.addEventListener('new-game-reset',()=>{
+ function resetCharacterForNewGame(){
   gameResetRequested=true;closeSkillDialogs();if(skillTooltipController)skillTooltipController.element.hidden=true;
   selectedCharacter=null;currentOpponent=null;states.clear();partyStates.clear();partySlots.fill(null);partyEditId=null;draggedPartyIndex=null;
   conditionsBox.replaceChildren();ownedBox.replaceChildren();selectedPanel.hidden=true;
@@ -572,13 +572,14 @@
   document.getElementById('selected-self-tab').click();document.getElementById('character-list-tab').click();
   root.querySelector('.chip-category-tabs button[data-category="マーク"]')?.click();renderChips();
   window.dispatchEvent(new Event('character-selection-change'));window.dispatchEvent(new Event('party-members-change'));
- });
+ }
+ window.addEventListener('new-game-reset',resetCharacterForNewGame);
  // Dedicated bridge for the isolated screen-reader edition. Values are absolute
  // observations; chip pages are additive, and missing fields never clear state.
  window.ScreenReaderCharacterBridge={
   catalog:()=>({characters:characters.map(row=>({id:String(row.id),name:row.name})),chips:chips.map(row=>({id:String(row.id),name:row.name}))}),
   snapshot:()=>({selfId:String(selectedCharacter?.id||''),members:partySlots.map((id,slot)=>{const row=characters.find(r=>String(r.id)===String(id));if(!row)return {slot};const own=String(id)===String(selectedCharacter?.id),s=own?state():getPartyState(id),totals=own?calculate():calculatePartyMember(row);return {slot,id:String(id),name:row.name,level:s.level,currentHp:s.currentHp,maxHp:totals.hp,atk:totals.atk,def:totals.def,move:totals.move,coin:s.screenCoin,chips:[...s.chips]};})}),
-  reset:()=>{states.clear();partyStates.clear();partySlots.fill(null);if(selectedCharacter)partySlots[0]=selectedCharacter.id;partyEditId=null;renderSelectedCharacter();window.dispatchEvent(new Event('party-members-change'));},
+  reset:resetCharacterForNewGame,
   apply:observation=>{
    if(!observation||!Array.isArray(observation.members))return {updated:0,added:0};
    const rowFor=id=>characters.find(row=>String(row.id)===String(id)),valid=(value,min,max)=>Number.isSafeInteger(value)&&value>=min&&value<=max;
@@ -586,8 +587,15 @@
    const seen=candidates.filter(m=>candidates.filter(other=>String(other.id)===String(m.id)).length===1&&(m.slot===undefined||valid(m.slot,0,3)&&candidates.filter(other=>other.slot===m.slot).length===1));
    const self=rowFor(observation.selfId);let updated=0,added=0;
    const before=partySlots.map(id=>id===null?null:String(id)).join(',');
-   if(!selectedCharacter){if(!self)return {updated:0,added:0};selectCharacter(self);}
-   if(self&&String(self.id)!==String(selectedCharacter.id)){
+   if(!selectedCharacter&&self){
+    const fromParty=partyStates.get(String(self.id)),newMax=fromParty?calculatePartyMember(self).hp:null,index=partySlots.findIndex(id=>String(id)===String(self.id));
+    if(fromParty)Object.assign(getState(self.id),{...fromParty,manual:{...fromParty.manual},chips:[...fromParty.chips]});
+    partyStates.delete(String(self.id));selectedCharacter=self;partyEditId=null;
+    if(fromParty?.screenMaxHp!==undefined){state().screenMaxHp=newMax;state().screenMaxHpBasis=calculate(true);}
+    partySlots[index>=0?index:Math.max(0,partySlots.indexOf(null))]=self.id;
+    window.dispatchEvent(new Event('character-selection-change'));
+   }
+   if(self&&String(self.id)!==String(selectedCharacter?.id)){
     const oldId=String(selectedCharacter.id),oldIndex=partySlots.findIndex(id=>String(id)===oldId),newIndex=partySlots.findIndex(id=>String(id)===String(self.id)),old=state(),oldMax=calculate().hp;
     const oldMember={level:old.level,currentHp:old.currentHp,chips:[...old.chips],manual:{...old.manual},screenMaxHp:old.screenMaxHp===undefined?undefined:oldMax,screenCoin:old.screenCoin};
     partyStates.set(oldId,oldMember);if(oldMember.screenMaxHp!==undefined)oldMember.screenMaxHpBasis=calculatePartyMember(selectedCharacter,true);
@@ -599,7 +607,7 @@
     partySlots[newIndex>=0?newIndex:oldIndex<0?0:oldIndex]=self.id;
     window.dispatchEvent(new Event('character-selection-change'));
    }
-   const ownId=String(selectedCharacter.id),knownSlots=seen.filter(m=>valid(m.slot,0,3));
+   const ownId=String(selectedCharacter?.id||''),knownSlots=seen.filter(m=>valid(m.slot,0,3));
    // Apply only unambiguous slot observations and preserve unidentified occupants.
    for(const m of knownSlots){
     if(knownSlots.filter(other=>other.id===m.id||other.slot===m.slot).length!==1)continue;
@@ -636,7 +644,7 @@
    }
    // Correct total values after level/chip/HP changes; retain all unobserved stats.
    for(const m of seen){const row=rowFor(m.id);if(!partySlots.some(id=>String(id)===String(row.id)))continue;const own=String(row.id)===ownId,s=own?state():getPartyState(row.id),totals=own?calculate():calculatePartyMember(row);s.manual??={atk:0,def:0,move:0};for(const key of ['atk','def','move'])if(valid(m[key],0,999))s.manual[key]=(s.manual[key]||0)+m[key]-totals[key];}
-   renderSelectedCharacter();if(before!==partySlots.map(id=>id===null?null:String(id)).join(','))window.dispatchEvent(new Event('party-members-change'));
+   renderSelectedCharacter();if(!selectedCharacter)renderParty();if(before!==partySlots.map(id=>id===null?null:String(id)).join(','))window.dispatchEvent(new Event('party-members-change'));
    return {updated,added};
   }
  };

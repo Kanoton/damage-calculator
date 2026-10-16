@@ -41,7 +41,11 @@ test('08 world: only consecutive observations stabilize and actual controller ap
  const o=await read(page,'11');const stabilized=await page.evaluate(world=>{const o={members:[],selfId:null,chipOwnerId:null,chipIds:[],world};return [ScreenReaderController.stabilize(o),ScreenReaderController.stabilize(o)];},o);expect(stabilized[0].world).toEqual({clock:null,monsters:[]});expect(stabilized[1].world).toEqual(o);
  await page.locator('#reader-toggle').click();await page.locator('#reader-details').evaluate(e=>e.open=true);await page.locator('#reader-world-sync').check();
  await page.locator('#reader-file').setInputFiles({name:'world.png',mimeType:'image/png',buffer:Buffer.from(fixture('11').split(',')[1],'base64')});await expect(page.locator('#reader-file')).toHaveValue('');await expect(page.locator('#reader-world-result')).toContainText('進捗 4');
- expect((await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).round).toBe(4);
+ expect((await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).round).toBeNull();
+ // The first applied read starts empty; choose the context after that reset.
+ await page.locator('#reader-toggle').click();await page.mouse.move(0,700);await map(page);
+ await page.locator('#reader-toggle').click();await page.locator('#reader-read').click();
+ await expect.poll(()=>page.evaluate(()=>ScreenReaderMapBridge.snapshot().round)).toBe(4);
 });
 
 const videoLabels=require('./fixtures/screen-reader/monster-labels.json');
