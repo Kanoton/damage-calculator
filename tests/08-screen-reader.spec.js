@@ -439,7 +439,7 @@ test('08: map and difficulty remain unknown after reader reset and late CSV refr
  await open(page);await page.locator('#reader-new-game').click();
  const response=page.waitForResponse(response=>response.url().endsWith('/csv/maps_renumbered.csv'));release();await response;
  await expect(page.locator('#mp-map-select')).toHaveValue('');await expect(page.locator('#mp-difficulty')).toHaveValue('');
- await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0003');
+ await closeReader(page);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0003');
  await expect(page.locator('#mp-difficulty')).toHaveValue('');
  const rejected=await page.evaluate(()=>ScreenReaderMapBridge.apply({clock:{round:4,progress:4},monsters:[]}));expect(rejected.skipped).toBe(1);
  await page.locator('#mp-difficulty').selectOption('普通');
