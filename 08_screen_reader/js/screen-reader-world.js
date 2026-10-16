@@ -12,7 +12,7 @@
  }
  function components(mask,w,h){
   const seen=new Uint8Array(mask.length),out=[],queue=new Int32Array(mask.length);
-  for(let y=60;y<Math.min(600,h);y++)for(let x=270;x<w;x++){const start=y*w+x;if(!mask[start]||seen[start])continue;let head=0,tail=1,count=0,x0=x,x1=x,y0=y,y1=y;queue[0]=start;seen[start]=1;
+  for(let y=60;y<h;y++)for(let x=270;x<w;x++){const start=y*w+x;if(!mask[start]||seen[start])continue;let head=0,tail=1,count=0,x0=x,x1=x,y0=y,y1=y;queue[0]=start;seen[start]=1;
    while(head<tail){const i=queue[head++],xx=i%w,yy=Math.floor(i/w);count++;x0=Math.min(x0,xx);x1=Math.max(x1,xx);y0=Math.min(y0,yy);y1=Math.max(y1,yy);for(const j of [i-1,i+1,i-w,i+w])if(j>=0&&j<mask.length&&!seen[j]&&mask[j]&&Math.abs(j%w-xx)<=1){seen[j]=1;queue[tail++]=j;}}
    const bw=x1-x0+1,bh=y1-y0+1;if(bh>=8&&bh<=32&&bw<=24&&count>=10)out.push({x:x0,y:y0,w:bw,h:bh});
   }return out;
@@ -31,7 +31,7 @@
   for(const p of parts){let row=rows.find(r=>Math.abs(r.cy-(p.y+p.h/2))<4);if(!row){row={cy:p.y+p.h/2,parts:[]};rows.push(row);}row.parts.push(p);}
   const observations=[];
   for(const row of rows){const sorted=row.parts.sort((a,b)=>a.x-b.x),groups=[];for(const p of sorted){let group=groups.at(-1);if(!group||p.x-(group.at(-1).x+group.at(-1).w)>8){group=[];groups.push(group);}group.push(p);}
-   for(const group of groups){if(group.length<3||group.length>7)continue;const chars=group.map(p=>glyph(red,w,[p.x,p.y,p.w,p.h],refs.digits));if(chars.some(c=>c===null))continue;const text=chars.join('');if(!/^\d{1,3}\/\d{1,3}$/.test(text))continue;const [currentHp,maxHp]=text.split('/').map(Number);if(maxHp<1||currentHp>maxHp)continue;
+   for(const group of groups){if(group.length<3||group.length>7||group.some(p=>p.x===0||p.x+p.w>=w||p.y===0||p.y+p.h>=h))continue;const chars=group.map(p=>glyph(red,w,[p.x,p.y,p.w,p.h],refs.digits));if(chars.some(c=>c===null))continue;const text=chars.join('');if(!/^\d{1,3}\/\d{1,3}$/.test(text))continue;const [currentHp,maxHp]=text.split('/').map(Number);if(maxHp<1||currentHp>maxHp)continue;
     const hp={x:group[0].x,y:Math.min(...group.map(p=>p.y)),w:group.at(-1).x+group.at(-1).w-group[0].x,maxHp};const name=nameAt(white,w,h,hp,refs.names);if(!name)continue;
     let serial=null;if(!(name.ref.boss||name.ref.noSerial||name.ref.id==='M0014')){serial=ScreenReaderVision.numberAt(source,[name.x+name.ref.width+3,name.y-2,30,name.ref.height+6],'white',refs.digits,true,name.ref.serialMinHeightRatio??.38);if(!Number.isInteger(serial)||serial<1||serial>999)continue;}
     observations.push({monsterId:name.ref.id,serial,currentHp,maxHp});

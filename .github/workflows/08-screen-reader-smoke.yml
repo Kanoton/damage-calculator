@@ -19,6 +19,7 @@ on:
       - 'scripts/build-screen-reader-left-hud-fixture.py'
       - 'scripts/build-screen-reader-status-fixtures.py'
       - 'scripts/build-screen-reader-popup-fixtures.py'
+      - 'scripts/build-screen-reader-view-references.py'
       - 'scripts/build-screen-reader-world-fixtures.py'
       - 'package.json'
       - 'playwright.config.js'
@@ -34,6 +35,7 @@ on:
       - 'scripts/build-screen-reader-left-hud-fixture.py'
       - 'scripts/build-screen-reader-status-fixtures.py'
       - 'scripts/build-screen-reader-popup-fixtures.py'
+      - 'scripts/build-screen-reader-view-references.py'
       - 'scripts/build-screen-reader-world-fixtures.py'
       - 'tests/08-screen-reader.spec.js'
       - 'tests/08-world-reader.spec.js'
@@ -61,6 +63,7 @@ jobs:
       - run: python3 scripts/build-screen-reader-left-hud-fixture.py --check
       - run: python3 scripts/build-screen-reader-status-fixtures.py --check
       - run: python3 scripts/build-screen-reader-popup-fixtures.py --check
+      - run: python3 scripts/build-screen-reader-view-references.py --check
       - run: python3 scripts/build-screen-reader-world-fixtures.py --check
       - run: npx playwright install --with-deps chromium webkit
       - run: npm run test:08

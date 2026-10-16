@@ -108,6 +108,12 @@
  const smallCenters=[[239,527],[312,527],[386,527],[199,591],[273,591],[347,591],[421,591],[239,655],[312,655],[386,655]];
  const largeCenters=[[535,352],[609,352],[682,352],[495,416],[570,416],[644,416],[719,416],[535,481],[609,481],[682,481]];
  const lowerCenters=[[142,527],[216,527],[289,527],[103,591],[177,591],[251,591],[325,591],[142,655],[216,655],[289,655]];
+ function chipPanelVisible(source,kind,centers){
+  const samples=window.ScreenReaderViewReferences?.panels?.[kind]||[];
+  const rims=centers.map(([x,y])=>[feature(source,[x-9,y-30,18,8]),feature(source,[x-9,y+22,18,8])]);
+  // Require the grid's rims, independently of icon contents and the gold tab.
+  return samples.some(panel=>rims.filter((pair,i)=>pair.every((pixels,j)=>distance(pixels,decode(panel[i][j]))<.10)).length>=7);
+ }
  function lowerTab(source){const scores=[64,130,196,264].map(x=>{const p=crop(source,[x-20,434,40,6],40,6).getContext('2d').getImageData(0,0,40,6).data;let n=0;for(let i=0;i<p.length;i+=4)if(p[i]>180&&p[i+1]>105&&p[i+1]<220&&p[i+2]<85)n++;return n;});return scores.filter(n=>n>100).length===1?scores.findIndex(n=>n>100):null;}
  function activeTab(source){
   const scores=[179,285,392,495].map(x=>{const p=crop(source,[x-30,438,60,6],60,6).getContext('2d').getImageData(0,0,60,6).data;let gold=0;for(let i=0;i<p.length;i+=4)if(p[i]>180&&p[i+1]>105&&p[i+1]<220&&p[i+2]<85)gold++;return gold;});const max=Math.max(...scores);return max>180&&scores.filter(v=>v>180).length===1?scores.indexOf(max):null;
@@ -150,7 +156,7 @@
   return out;
  }
  function analyze(source,custom={characters:[],chips:[]},party=null){
-  const refs=window.ScreenReaderReferences,extra=window.ScreenReaderLayoutReferences||{},statusRefs=window.ScreenReaderStatusReferences||{},charRefs=[...refs.characters,...(extra.characters||[]),...(statusRefs.characters||[]),...(custom.characters||[])],chipRefs=[...refs.chips,...(window.ScreenReaderPopupReferences?.chips||[]),...(statusRefs.chips||[]),...(custom.chips||[])],digits=[...refs.digits,...(extra.digits||[])];
+  const refs=window.ScreenReaderReferences,extra=window.ScreenReaderLayoutReferences||{},statusRefs=window.ScreenReaderStatusReferences||{},charRefs=[...refs.characters,...(extra.characters||[]),...(statusRefs.characters||[]),...(window.ScreenReaderViewReferences?.characters||[]),...(custom.characters||[])],chipRefs=[...refs.chips,...(window.ScreenReaderPopupReferences?.chips||[]),...(statusRefs.chips||[]),...(custom.chips||[])],digits=[...refs.digits,...(extra.digits||[])];
   const locked=party&&Array.isArray(party.ids)&&party.ids.length===4&&new Set(party.ids).size===4&&layouts.some(l=>l.id===party.hud?.layout);
   let selected;
   if(locked){
@@ -166,17 +172,22 @@
   for(const m of members)if(repeated.has(m.id)){delete m.id;m.unreadable=true;}
   const statusSource=source.statusFrame||source;
   const header=match(feature(statusSource,regions.header),charRefs.filter(r=>r.kind==='header'));
-  const lower=source.popupFrame&&source.statusFrame?lowerTab(source.popupFrame):null,tab=lower??activeTab(hudSource);
+  const lowerCandidate=source.popupFrame&&source.statusFrame?lowerTab(source.popupFrame):null;
+  const lower=lowerCandidate!==null&&chipPanelVisible(source.popupFrame,'lower',lowerCenters)?lowerCandidate:null;
+  const smallCandidate=lower===null?activeTab(hudSource):null;
+  const tab=lower??(smallCandidate!==null&&chipPanelVisible(hudSource,'small',smallCenters)?smallCandidate:null);
   // The small popup covers the self portrait. Never identify self from its
   // chip contents or selected tab; keep the previous self or explicit choice.
-  const own=!locked&&(header||tab===null)?match(feature(hudSource,layout.regions.self),charRefs.filter(r=>r.kind==='self')):null;
-  const observation={members,selfId:locked?party.selfId:own?.id??null,hud:{layout:layout.id,source:hudSource===source?'primary':'popup'},view:'通常画面',chipOwnerId:null,chipIds:[]};
+  const selfRefs=charRefs.filter(r=>r.kind==='self');
+  const own=(!locked||!party.selfId)&&(header||tab===null)?match(feature(hudSource,layout.regions.self),selfRefs)||(source.statusFrame&&hudSource!==source.popupFrame?match(feature(source.popupFrame,layouts[1].regions.self),selfRefs):null):null;
+  const selfId=locked?(party.selfId||(party.ids.includes(own?.id)?own.id:null)):own?.id??null;
+  const observation={members,selfId,hud:{layout:layout.id,source:hudSource===source?'primary':'popup'},view:'通常画面',chipOwnerId:null,chipIds:[]};
   if(header){
-   observation.view='ステータス画面';observation.chipOwnerId=header.id;observation.chipIds=chipMatches(statusSource,largeCenters,chipRefs);
+   observation.view='ステータス画面';if(chipPanelVisible(statusSource,'large',largeCenters)){observation.chipOwnerId=header.id;observation.chipIds=chipMatches(statusSource,largeCenters,chipRefs);}
    let target=members.find(m=>m.id===header.id);if(!target){target={id:header.id};members.push(target);}
    for(const [stat,box] of [['atk',[542,239,26,37]],['def',[619,239,26,37]]]){const v=numberAt(statusSource,box,'white',refs.digits);if(v!==null)target[stat]=v;}
   }else if(tab!==null){observation.view='チップ画面';observation.chipOwnerId=members[tab]?.id??null;observation.chipIds=chipMatches(lower!==null?source.popupFrame:hudSource,lower!==null?lowerCenters:smallCenters,chipRefs);}
-  if(locked&&!header&&tab===null){const self=members.find(m=>m.id===party.selfId);if(self)Object.assign(self,readSelfStats(source.popupFrame||source));}
+  if(locked&&!header&&tab===null){const self=members.find(m=>m.id===selfId);if(self)Object.assign(self,readSelfStats(source.popupFrame||source));}
   return observation;
  }
  function normalize(source,area){const c=document.createElement('canvas');c.width=WIDTH;c.height=HEIGHT;const w=source.videoWidth||source.naturalWidth||source.width,h=source.videoHeight||source.naturalHeight||source.height;const a=area||{x:0,y:0,w:1,h:1};c.getContext('2d').drawImage(source,a.x*w,a.y*h,a.w*w,a.h*h,0,0,WIDTH,HEIGHT);
