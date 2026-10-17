@@ -66,7 +66,7 @@ function normalizeMapData(raw){
  });
  const nativeMapByMonster={};
  raw.relations.forEach(row=>{if(!Object.hasOwn(nativeMapByMonster,row.monster_id))nativeMapByMonster[row.monster_id]=row.map_id;});
- return {maps,nativeMapByMonster,gimmicks:raw.gimmicks||[],stats:raw.stats,missions:raw.missions,events:raw.events,images:Object.fromEntries(raw.stats.map(s=>[s.image,'../images/Monster/'+s.image])),icons:{'攻撃':'../images/icon/Attack.png','防御':'../images/icon/Defense.png','HP':'../images/icon/Hp.png','コイン':'../images/icon/Coin.png',reflect:'../images/icon/Reflect.png'}};
+ return {maps,nativeMapByMonster,gimmicks:raw.gimmicks||[],features:raw.features||[],stats:raw.stats,missions:raw.missions,events:raw.events,images:Object.fromEntries(raw.stats.map(s=>[s.image,'../images/Monster/'+s.image])),icons:{'攻撃':'../images/icon/Attack.png','防御':'../images/icon/Defense.png','HP':'../images/icon/Hp.png','コイン':'../images/icon/Coin.png',reflect:'../images/icon/Reflect.png'}};
 }
 function assignMapImage(image,url){
  const variants=[...new Set([url,url.replace('../images/','../Image/'),url.replace('../images/','../Images/'),url.replace('/Icon/','/icon/'),url.replace('/Monster/','/MonsterImg/'),url.replace('/Map/','/MapImg/')])];

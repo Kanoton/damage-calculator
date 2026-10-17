@@ -1696,3 +1696,13 @@ dialog[data-inline-pad] .skill-entry-row>[data-cancel]{min-width:72px;align-self
 #new-game-dialog p{margin:0 0 16px;font:inherit}
 #new-game-dialog>div{display:flex;justify-content:flex-end;gap:12px}
 #new-game-dialog button{padding:8px 20px;font:inherit;min-height:44px}
+
+/* Map card images and transcribed building/status descriptions share the scrollable map details. */
+#map-draft .mp-feature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#map-draft .mp-feature{min-width:0;border:1px solid var(--mp-line);border-radius:8px;padding:10px}
+#map-draft .mp-feature h3{font-size:14px;margin:8px 0}
+#map-draft .mp-feature p{font-size:13px;line-height:1.65;margin:8px 0;overflow-wrap:anywhere}
+#map-draft .mp-feature img{display:block;width:100%;max-width:180px;height:auto;margin:auto}
+#map-draft .mp-feature[data-feature-name="みなぎる元気"] h3{color:#7546a6}
+#map-draft .mp-feature[data-feature-name="ガオーの注目"] h3{color:#246b9b}
+@media(max-width:400px){#map-draft .mp-feature-grid{grid-template-columns:1fr}}
