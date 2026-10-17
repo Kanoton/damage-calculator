@@ -91,6 +91,12 @@ function executeProgressEvents(){if(!roundProgressReady())return;groupMapEvents(
 // Screen observations synchronize absolute values, never synthesize turn-end clicks.
 window.ScreenReaderMapBridge={
  resetForReader:()=>startNewGame({reader:true}),
+ configure:observation=>{
+  if(!readerMapMode||!observation||!data.maps[observation.map]||!['普通','困難','悪夢','狂気'].includes(observation.difficulty)||rosterState.round||rosterState.monsters.length)return false;
+  if((pick.value&&pick.value!==observation.map)||(difficulty.value&&difficulty.value!==observation.difficulty))return false;
+  if(pick.value&&difficulty.value)return false;
+  pick.value=observation.map;render();difficulty.value=observation.difficulty;render();renderRoundProgress();return true;
+ },
  monsterName:id=>data.stats.find(r=>r.monster_id===id)?.['モンスター名']||id,
  context:()=>JSON.stringify([pick.value,difficulty.value,routeState.route]),
  snapshot:()=>({map:pick.value,difficulty:difficulty.value,round:readerMapMode&&!rosterState.round?null:rosterState.round,progress:readerMapMode&&!rosterState.progress?null:rosterState.progress,events:[...executedEvents],monsters:rosterState.monsters.map(e=>({monsterId:e.monsterId,serial:(e.boss||e.monsterId==='M0116')?null:e.serial,hp:e.hp,defeated:!!e.defeated,attack:e.attack,defense:e.defense,instanceId:e.instanceId}))}),

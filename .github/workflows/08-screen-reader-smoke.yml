@@ -21,6 +21,7 @@ on:
       - 'scripts/build-screen-reader-popup-fixtures.py'
       - 'scripts/build-screen-reader-view-references.py'
       - 'scripts/build-screen-reader-world-fixtures.py'
+      - 'scripts/build-screen-reader-start-references.py'
       - 'package.json'
       - 'playwright.config.js'
       - '.github/workflows/08-screen-reader-smoke.yml'
@@ -37,6 +38,7 @@ on:
       - 'scripts/build-screen-reader-popup-fixtures.py'
       - 'scripts/build-screen-reader-view-references.py'
       - 'scripts/build-screen-reader-world-fixtures.py'
+      - 'scripts/build-screen-reader-start-references.py'
       - 'tests/08-screen-reader.spec.js'
       - 'tests/08-world-reader.spec.js'
       - 'tests/07-skill.spec.js'
@@ -65,6 +67,7 @@ jobs:
       - run: python3 scripts/build-screen-reader-popup-fixtures.py --check
       - run: python3 scripts/build-screen-reader-view-references.py --check
       - run: python3 scripts/build-screen-reader-world-fixtures.py --check
+      - run: python3 scripts/build-screen-reader-start-references.py --check
       - run: npx playwright install --with-deps chromium webkit
       - run: npm run test:08
       - run: npm run test:08:sync -- --workers=2
