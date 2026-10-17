@@ -19,14 +19,15 @@ for(const [name,owner,chips]of [['sherry-late','106',['52','58','9','45','43','5
 });
 
 test('08: party stars update red and green levels and retain a level when stars are hidden',async({page})=>{
- await open(page);
+ await open(page);await page.locator('#reader-new-game').click();
  const result=await page.evaluate(async image=>{
   ScreenReaderCharacterBridge.apply({members:[{id:'2',slot:0,level:0},{id:'20',slot:1,level:0},{id:'106',slot:2,level:0},{id:'17',slot:3,level:0}]});
-  const im=new Image();im.src=image;await im.decode();const frame=ScreenReaderVision.normalize(im),o=ScreenReaderVision.analyze(frame);ScreenReaderCharacterBridge.apply(o);
+  const initial=ScreenReaderCharacterBridge.snapshot();const im=new Image();im.src=image;await im.decode();const frame=ScreenReaderVision.normalize(im),o=ScreenReaderVision.analyze(frame);ScreenReaderCharacterBridge.apply(o);
   const updated=ScreenReaderCharacterBridge.snapshot();const c=document.createElement('canvas');c.width=1536;c.height=709;const ctx=c.getContext('2d');ctx.drawImage(frame,0,0);ctx.fillStyle='#141414';ctx.fillRect(210,98,64,26);
-  const hidden=ScreenReaderVision.analyze(c);ScreenReaderCharacterBridge.apply(hidden);return {o,updated,hidden,retained:ScreenReaderCharacterBridge.snapshot()};
+  const hidden=ScreenReaderVision.analyze(c);ScreenReaderCharacterBridge.apply(hidden);return {initial,o,updated,hidden,retained:ScreenReaderCharacterBridge.snapshot()};
  },fixture('party-stars-late'));
  expect(result.o.members.map(m=>[m.id,m.level])).toEqual([['2',2],['20',1],['106',3],['17',3]]);
+ expect(result.initial.members.map(m=>[m.id,m.level])).toEqual([['2',0],['20',0],['106',0],['17',0]]);
  expect(result.updated.members.find(m=>m.id==='2').level).toBe(2);expect(result.updated.members.find(m=>m.id==='20').level).toBe(1);
  expect(result.hidden.members.find(m=>m.id==='2').level).toBeUndefined();expect(result.retained.members.find(m=>m.id==='2').level).toBe(2);
  expect(result.o.chipIds).toEqual([]);
