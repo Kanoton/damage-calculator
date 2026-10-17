@@ -18,10 +18,12 @@
 #reader-mapping-preview img{width:64px;height:64px;object-fit:contain;background:#edf0f5;border-radius:4px}
 
 /* Overlay controls never take space from the calculator layout. */
-.reader-dock{position:fixed;top:0;left:50%;transform:translateX(-50%);width:min(1420px,calc(100vw - 16px));z-index:10000;pointer-events:none}
-.reader-toggle{display:block;margin:0 auto;padding:2px 16px;border:1px solid #b9bdd3;border-top:0;border-radius:0 0 6px 6px;background:#f5f6fc;color:#25283a;font:inherit;font-size:12px;cursor:pointer;pointer-events:auto}
-.reader-dock .screen-reader{display:none;pointer-events:auto;margin:0;max-height:calc(100dvh - 30px);overflow:auto;box-shadow:0 6px 20px #0003}
-.reader-dock:hover .screen-reader,.reader-dock.is-open .screen-reader,.reader-dock:has(.screen-reader :focus-visible) .screen-reader{display:block}
+.reader-dock{position:fixed;inset:0;z-index:10000;pointer-events:none}
+.reader-toggle{position:absolute;bottom:0;left:50%;transform:translateX(-50%);z-index:2;display:block;margin:0;padding:4px 16px;border:1px solid #b9bdd3;border-bottom:0;border-radius:6px 6px 0 0;background:#f5f6fc;color:#25283a;font:inherit;font-size:12px;cursor:pointer;pointer-events:auto}
+.reader-dock .screen-reader{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);z-index:1;width:min(1100px,calc(100vw - 16px));display:none;pointer-events:auto;margin:0;max-height:calc(100dvh - 40px);overflow:auto;box-shadow:0 6px 20px #0003;resize:both;min-width:min(360px,calc(100vw - 16px));max-width:calc(100vw - 16px)}
+.reader-dock:not(.is-dismissed):has(.reader-toggle:hover) .screen-reader,.reader-dock:not(.is-dismissed):has(.screen-reader:hover) .screen-reader,.reader-dock.is-open .screen-reader,.reader-dock:has(.screen-reader :focus-visible) .screen-reader{display:block}
+.reader-windowbar{display:flex;gap:6px;align-items:center;margin-bottom:6px;position:sticky;top:-8px;background:#fff;padding:4px 0;z-index:1}
+.reader-windowbar #reader-move{flex:1;text-align:left;cursor:move;touch-action:none;user-select:none}
 
 .mobile-ui .reader-dock{display:none}
 

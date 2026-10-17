@@ -94,7 +94,7 @@ window.ScreenReaderMapBridge={
  monsterName:id=>data.stats.find(r=>r.monster_id===id)?.['モンスター名']||id,
  context:()=>JSON.stringify([pick.value,difficulty.value,routeState.route]),
  snapshot:()=>({map:pick.value,difficulty:difficulty.value,round:readerMapMode&&!rosterState.round?null:rosterState.round,progress:readerMapMode&&!rosterState.progress?null:rosterState.progress,events:[...executedEvents],monsters:rosterState.monsters.map(e=>({monsterId:e.monsterId,serial:(e.boss||e.monsterId==='M0116')?null:e.serial,hp:e.hp,defeated:!!e.defeated,attack:e.attack,defense:e.defense,instanceId:e.instanceId}))}),
- apply:observation=>{
+ apply:(observation,{allowDefeat=true}={})=>{
   const result={updated:0,added:0,events:0,skipped:0};if(!observation)return result;if(!roundProgressReady()){result.skipped=(observation.monsters?.length||0)+(observation.clock?1:0);return result;}
   const valid=(n,min,max)=>Number.isSafeInteger(n)&&n>=min&&n<=max,clock=observation.clock;
   if(clock&&(!valid(clock.round,1,99)||!valid(clock.progress,1,99)||clock.round<rosterState.round)){result.skipped++;return result;}
@@ -114,7 +114,7 @@ window.ScreenReaderMapBridge={
    if(unnumbered&&executedEvents.has(libraryTruthKey())){result.skipped++;continue;}
    const matches=rosterState.monsters.filter(e=>e.monsterId===o.monsterId&&e.mapId===pick.value&&e.difficulty===difficulty.value&&(boss||unnumbered||e.serial===o.serial)&&(!unnumbered||!e.defeated));
    if(matches.length>1||matches[0]?.defeated||Number(rosterStat(stats,'HP'))!==o.maxHp||(!matches.length&&!data.maps[pick.value]?.ids.includes(o.monsterId))){result.skipped++;continue;}
-   if(o.currentHp===0&&(!matches[0]||!matches[0].screenSeenAlive)){result.skipped++;continue;}
+   if(o.currentHp===0&&(!allowDefeat||!matches[0]||!matches[0].screenSeenAlive)){result.skipped++;continue;}
    if(o.monsterId==='M0115'&&!executedEvents.has(libraryTruthKey())){save();executeLibraryTruth(false);}
    let enemy=matches[0]||((o.monsterId==='M0115')?rosterState.monsters.find(e=>e.monsterId==='M0115'&&!e.defeated):null);if(!enemy){
     save();enemy=addPlacedMonster({instanceId:rosterState.nextId++,monsterId:o.monsterId,name:stats['モンスター名'],mapName:data.maps[pick.value].name,mapId:pick.value,difficulty:difficulty.value,image:data.images[stats.image],base:{...stats},damageTaken:0,attack:rosterStat(stats,'攻撃'),defense:rosterStat(stats,'防御'),hp:o.maxHp,coin:stats['コイン']===''?null:Number(stats['コイン']),boss,reflect:String(stats['反撃']).trim()==='1'},!boss&&!unnumbered?o.serial:null);result.added++;

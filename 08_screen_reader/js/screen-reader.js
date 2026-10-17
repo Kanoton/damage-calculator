@@ -2,9 +2,19 @@
  'use strict';
  const $=id=>document.getElementById('reader-'+id),video=$('video'),preview=$('preview'),ctx=preview.getContext('2d'),vision=window.ScreenReaderVision,bridge=window.ScreenReaderCharacterBridge;
  const dock=document.getElementById('reader-dock'),toggle=$('toggle');
- const setDock=open=>{dock.classList.toggle('is-open',open);toggle.setAttribute('aria-expanded',String(open));};
+ const setDock=open=>{dock.classList.toggle('is-open',open);dock.classList.toggle('is-dismissed',!open);toggle.setAttribute('aria-expanded',String(open));};
+ toggle.addEventListener('pointerenter',()=>dock.classList.remove('is-dismissed'));
  toggle.addEventListener('click',()=>setDock(!dock.classList.contains('is-open')));
  dock.addEventListener('keydown',event=>{if(event.key==='Escape'){setDock(false);toggle.focus();}});
+ const panel=$('panel'),moveHandle=$('move');let drag=null;
+ function movePanel(x,y){const rect=panel.getBoundingClientRect();panel.style.left=Math.max(0,Math.min(innerWidth-rect.width,x))+'px';panel.style.top=Math.max(0,Math.min(innerHeight-rect.height,y))+'px';panel.style.bottom='auto';panel.style.transform='none';}
+ moveHandle.addEventListener('pointerdown',event=>{if(event.button!==0)return;setDock(true);const r=panel.getBoundingClientRect();drag={id:event.pointerId,x:event.clientX-r.left,y:event.clientY-r.top};moveHandle.setPointerCapture(event.pointerId);event.preventDefault();});
+ moveHandle.addEventListener('pointermove',event=>{if(drag?.id===event.pointerId)movePanel(event.clientX-drag.x,event.clientY-drag.y);});
+ const endDrag=()=>{drag=null;};moveHandle.addEventListener('pointerup',endDrag);moveHandle.addEventListener('pointercancel',endDrag);moveHandle.addEventListener('lostpointercapture',endDrag);
+ moveHandle.addEventListener('keydown',event=>{const steps={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]},step=steps[event.key];if(!step)return;event.preventDefault();const r=panel.getBoundingClientRect(),amount=event.shiftKey?40:10;movePanel(r.left+step[0]*amount,r.top+step[1]*amount);});
+ $('position-reset').addEventListener('click',()=>{for(const key of ['left','top','bottom','transform','width','height'])panel.style.removeProperty(key);});
+ $('close').addEventListener('click',()=>{setDock(false);toggle.focus();});
+ window.addEventListener('resize',()=>{if(panel.style.top&&dock.classList.contains('is-open')){const r=panel.getBoundingClientRect();movePanel(r.left,r.top);}});
  const STORAGE='astral-08-screen-reader-profile-v1';
  let stream=null,rawSource=null,frame=null,busy=false,timer=null,generation=0,selecting=false,selectionStart=null,area=null,catalog=null,custom={characters:[],chips:[]};
  let worldContext=null,readStarted=null,partyLock=null,lastObservation=null,partyEdited=false,readerSession=false;
@@ -148,7 +158,7 @@
    const result=$('apply').checked?bridge.apply(accepted):{updated:0,added:0};
    drawResults(observation,accepted,automatic);
    let worldSkipped=0;
-   if($('apply').checked&&$('world-sync').checked){const applied=window.ScreenReaderMapBridge.apply(accepted.world);worldSkipped=applied.skipped||0;if(applied.skipped)$('world-result').textContent+=' ／ マップ・難易度・既存個体と一致しない情報 '+applied.skipped+'件は保持';}
+   if($('apply').checked&&$('world-sync').checked){const applied=window.ScreenReaderMapBridge.apply(accepted.world,{allowDefeat:false});worldSkipped=applied.skipped||0;if(applied.skipped)$('world-result').textContent+=' ／ 反映保留 '+applied.skipped+'件'+(accepted.world?.monsters?.some(m=>m.currentHp===0)?'（HP0候補は撃破未確認のため保持）':'（マップ・難易度・既存個体との一致を確認してください）');}
    monitorInfo((observation.world?'今回 '+observation.world.monsters.length+'体 ／ '+(automatic?'連続一致 '+accepted.world.monsters.length+'体':'手動読取')+' ／ '+(!$('apply').checked?'確認のみ ／ ':worldSkipped?'反映保留 '+worldSkipped+'件 ／ ':''):'')+timing());
    const names=observation.members.filter(m=>m.id).length;
    status((automatic?'自動読取':'画面読取')+'：'+names+'人を判定／チップ '+result.added+'件追加。'+(!observation.selfId?' 自キャラが未判定の場合は「自キャラ」を指定してください。':''));
