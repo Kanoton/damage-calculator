@@ -287,7 +287,7 @@ test('08 world: late observations display same-species serials numerically while
  await page.evaluate(o=>ScreenReaderMapBridge.apply(o),observation([4,2,10]));
  const cards=page.locator('#map-roster-list .roster-select'),labels=serials=>serials.map(n=>'海賊サメ '+n+'を計算機に登録');
  await expect.poll(()=>cards.evaluateAll(nodes=>nodes.map(n=>n.getAttribute('aria-label')))).toEqual(labels([2,4,10]));
- await page.getByRole('button',{name:'海賊サメ 4を計算機に登録',exact:true}).click();const selected=await page.locator('#map-roster-list .roster-card.selected').getAttribute('data-instance-id');
+ await page.getByRole('button',{name:'海賊サメ 4を計算機に登録',exact:true}).press('Enter');const selected=await page.locator('#map-roster-list .roster-card.selected').getAttribute('data-instance-id');
  const before=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());await page.evaluate(o=>ScreenReaderMapBridge.apply(o),observation([1]));
  await expect.poll(()=>cards.evaluateAll(nodes=>nodes.map(n=>n.getAttribute('aria-label')))).toEqual(labels([1,2,4,10]));expect(await page.locator('#map-roster-list .roster-card.selected').getAttribute('data-instance-id')).toBe(selected);
  const after=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(after.monsters.slice(0,3)).toEqual(before.monsters);

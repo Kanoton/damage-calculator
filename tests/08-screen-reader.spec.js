@@ -560,3 +560,10 @@ test('08: chip diagnostics distinguish a missing list from an empty or unreadabl
  await readFixture(page,'6248');await expect(page.locator('#reader-chip-result')).toContainText('取得済み 1件を保持');expect((await snapshot(page)).members.find(m=>m.id==='105').chips).toEqual(['30']);
  await readFixture(page,'popup-11');await expect(page.locator('#reader-chip-result')).toContainText('一覧と持ち主は確認済み');await expect(page.locator('#reader-chip-result')).toContainText('アイコンは未判定または空欄');expect((await snapshot(page)).members.find(m=>m.id==='105').chips).toEqual(['30']);
 });
+
+test('08: a visible large chip grid with an unknown header reports missing ownership without assigning another party member',async({page})=>{
+ await open(page);await page.locator('#reader-new-game').click();await page.evaluate(()=>ScreenReaderCharacterBridge.apply({members:[{id:'18',slot:1},{id:'3',slot:2},{id:'106',slot:3}]}));await readFixture(page,'status-184601');const before=await snapshot(page);
+ const o=await page.evaluate(async image=>{const im=new Image();im.src=image;await im.decode();const c=ScreenReaderVision.normalize(im),ctx=c.statusFrame.getContext('2d');ctx.fillStyle='#141414';ctx.fillRect(427,80,51,50);return ScreenReaderVision.analyze(c);},fixture('status-184601'));
+ expect(o.chipRead).toMatchObject({stage:'owner'});expect(o.chipRead.matchedRims).toBeGreaterThanOrEqual(7);expect(o.chipOwnerId).toBeNull();expect(o.chipIds).toEqual([]);
+ await page.evaluate(o=>ScreenReaderCharacterBridge.apply(o),o);expect((await snapshot(page)).members.map(m=>m.chips)).toEqual(before.members.map(m=>m.chips));
+});
