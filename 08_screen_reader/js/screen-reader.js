@@ -23,7 +23,7 @@
  function monitorInfo(text=''){
   const count=new Set((window.ScreenReaderWorldReferences?.names||[]).map(r=>r.id)).size;
   const map=window.ScreenReaderMapBridge?.snapshot(),pending=readerSession&&(!map?.map||!map?.difficulty);
-  $('monitor-info').textContent=(pending?'マップ名・難易度：未判定（対応する開始前表示を待っています。手動指定もできます） ／ ':'')+'モンスター読取：'+($('world-sync').checked?'ON':'OFF（反映をONにすると読取開始）')+' ／ 照合見本 '+count+'種類'+(text?' ／ '+text:'');
+  $('monitor-info').textContent=(pending?'マップ名・難易度：未判定（対応する開始前表示を待っています。手動指定もできます） ／ ':'')+'モンスター読取：'+($('world-sync').checked?'ON':'OFF（反映をONにすると読取開始）')+' ／ 照合見本 '+count+'種類 ／ 自動撃破：未対応（手動で確定）'+(text?' ／ '+text:'');
  }
  const interval=()=>[250,500,1200].includes(Number($('interval').value))?Number($('interval').value):500;
  function isArea(a){return a&&['x','y','w','h'].every(k=>Number.isFinite(a[k]))&&a.x>=0&&a.y>=0&&a.w>=.05&&a.h>=.05&&a.x+a.w<=1.00001&&a.y+a.h<=1.00001;}
@@ -104,7 +104,9 @@
   $('view').textContent=observation.view+'：今回の読取と保持している値'+(!apply?'（確認のみ）':'');
   const owner=catalog.characters.find(c=>c.id===observation.chipOwnerId)?.name,owned=current.members.find(m=>m.id===observation.chipOwnerId)?.chips||[];
   const chipNames=observation.chipIds.map(id=>(catalog.chips.find(c=>c.id===id)?.name??id)+(automatic&&!accepted.chipIds.includes(id)?'（安定待ち）':apply?'（今回）':'（確認のみ）'));
-  $('chip-result').textContent=observation.chipOwnerId?(owner+'のチップ：'+(chipNames.join('、')||'今回判定できたチップなし')+' ／ 取得済み '+owned.length+'件を保持'):'チップの対象キャラは未判定です。取得済みチップは保持しています。';
+  const chipRead=observation.chipRead;
+  const reason=chipRead?.stage==='screen'?'一覧画面・選択タブを未判定。チップ一覧かステータス画面を表示してください。':chipRead?.stage==='panel'?'一覧の枠を確認できません（'+chipRead.matchedRims+'/10一致、7以上で読取）。':chipRead?.stage==='owner'?'一覧を確認。持ち主のキャラが未判定です。':null;
+  $('chip-result').textContent=reason?'チップ読取：'+reason:observation.chipOwnerId?(owner+'のチップ：'+(chipNames.join('、')||(chipRead?.stage==='icons'?'一覧と持ち主は確認済み。アイコンは未判定または空欄です。':'今回判定できたチップなし'))+' ／ 取得済み '+owned.length+'件を保持'+(apply&&!current.members.some(m=>m.id===observation.chipOwnerId)?' ／ 持ち主のPT登録待ち':'')):'チップの対象キャラは未判定です。取得済みチップは保持しています。';
  }
  function accept(key,value){const prior=stable.get(key);const count=prior&&prior.value===value&&prior.tick===stableTick-1?prior.count+1:1;stable.set(key,{value,count,tick:stableTick});return count>=2;}
  function stabilize(observation){

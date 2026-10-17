@@ -175,7 +175,7 @@ test('08: 16:9 status screenshots identify chip owners and preserve additive own
   await readFixture(page,'status-'+stamp);
   const s=await snapshot(page);expect(s.members.find(m=>m.id===owner).chips).toEqual([chip]);expect(s.selfId).toBe('');
   const result=await page.evaluate(async image=>{const im=new Image();im.src=image;await im.decode();const c=ScreenReaderVision.normalize(im),o=ScreenReaderVision.analyze(c);const learned=ScreenReaderVision.learn(c,'chip-large',o.chipIds[0],0);return {o,learned:learned.data,expected:btoa(String.fromCharCode(...ScreenReaderVision.feature(c.statusFrame,[517,334,36,36])))};},fixture('status-'+stamp));
-  expect(result.o.view).toBe('ステータス画面');expect(result.o.chipOwnerId).toBe(owner);expect(result.o.chipIds).toEqual([chip]);expect(result.learned).toBe(result.expected);
+  expect(result.o.view).toBe('ステータス画面');expect(result.o.chipOwnerId).toBe(owner);expect(result.o.chipIds).toEqual([chip]);expect(result.o.chipRead.stage).toBe('read');expect(result.o.chipRead.matchedRims).toBeGreaterThanOrEqual(7);expect(result.learned).toBe(result.expected);
  }
  const s=await snapshot(page);for(const [owner,chip] of [['18','42'],['3','26'],['106','121']])expect(s.members.find(m=>m.id===owner).chips).toEqual([chip]);
 });
@@ -501,10 +501,10 @@ test('08: chip icons and active tabs alone cannot authorize chip additions witho
    const centers=kind==='small'?[[239,527],[312,527],[386,527],[199,591],[273,591],[347,591],[421,591],[239,655],[312,655],[386,655]]:kind==='lower'?[[142,527],[216,527],[289,527],[103,591],[177,591],[251,591],[325,591],[142,655],[216,655],[289,655]]:[[535,352],[609,352],[682,352],[495,416],[570,416],[644,416],[719,416],[535,481],[609,481],[682,481]];
    const target=kind==='lower'?source.popupFrame:kind==='large'?(source.statusFrame||source):source;
    const ctx=target.getContext('2d');ctx.fillStyle='#141414';for(const [x,y] of centers){ctx.fillRect(x-9,y-30,18,8);ctx.fillRect(x-9,y+22,18,8);}
-   const o=ScreenReaderVision.analyze(source);outputs.push({name,owner:o.chipOwnerId,chips:o.chipIds});
+   const o=ScreenReaderVision.analyze(source);outputs.push({name,owner:o.chipOwnerId,chips:o.chipIds,chipRead:o.chipRead});
   }return outputs;
  },['6250','popup-41','status-184601'].map(n=>[n,fixture(n)]));
- for(const o of results){expect(o.owner,o.name).toBeNull();expect(o.chips,o.name).toEqual([]);}
+ for(const o of results){expect(o.owner,o.name).toBeNull();expect(o.chips,o.name).toEqual([]);expect(o.chipRead.stage,o.name).toBe('panel');expect(o.chipRead.matchedRims,o.name).toBeLessThan(7);}
 });
 
 test('08: a confirmed party with unknown self identifies the later lower-left portrait without changing order',async({page})=>{
@@ -553,4 +553,10 @@ test('08: bottom reader launcher opens a draggable panel, clamps after resize, c
  await page.setViewportSize({width:1200,height:720});await expect.poll(async()=>{const r=await panel.boundingBox();return r.x+r.width;}).toBeLessThanOrEqual(1201);const resized=await panel.boundingBox();expect(resized.x).toBeGreaterThanOrEqual(0);expect(resized.x+resized.width).toBeLessThanOrEqual(1201);expect(resized.y).toBeGreaterThanOrEqual(0);expect(resized.y+resized.height).toBeLessThanOrEqual(721);
  await page.locator('#reader-close').click();await expect(panel).toBeHidden();
  await toggle.click();await page.locator('#reader-position-reset').click();expect(await panel.evaluate(el=>el.style.top)).toBe('');
+});
+
+test('08: chip diagnostics distinguish a missing list from an empty or unreadable inventory and retain registered chips',async({page})=>{
+ await open(page);await readFixture(page,'left-hud');await expect(page.locator('#reader-chip-result')).toContainText('一覧画面・選択タブを未判定');await expect(page.locator('#reader-monitor-info')).toContainText('自動撃破：未対応');
+ await readFixture(page,'6248');await expect(page.locator('#reader-chip-result')).toContainText('取得済み 1件を保持');expect((await snapshot(page)).members.find(m=>m.id==='105').chips).toEqual(['30']);
+ await readFixture(page,'popup-11');await expect(page.locator('#reader-chip-result')).toContainText('一覧と持ち主は確認済み');await expect(page.locator('#reader-chip-result')).toContainText('アイコンは未判定または空欄');expect((await snapshot(page)).members.find(m=>m.id==='105').chips).toEqual(['30']);
 });
