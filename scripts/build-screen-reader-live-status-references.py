@@ -7,7 +7,7 @@ CASES=[('sherry','106','52',(102,473,1653)),('luka','17','1',(59,488,1653))]
 BOXES=[(410,75,245,55),(593,178,235,44),(542,239,26,37),(619,239,26,37),(465,324,286,184),(420,298,818,5)]
 def aligned(im,line):
  x,y,width=line;scale=815.5/width;dx=421-x*scale;dy=299-y*scale
- return im.transform((1536,709),Image.Transform.AFFINE,(1/scale,0,-dx/scale,0,1/scale,-dy/scale),Image.Resampling.BILINEAR)
+ frame=Image.new('RGB',(1536,709));frame.paste(im.resize((round(im.width*scale),round(im.height*scale)),Image.Resampling.BILINEAR),(round(dx),round(dy)));return frame
 def main():
  p=argparse.ArgumentParser();p.add_argument('--screens');p.add_argument('--check',action='store_true');a=p.parse_args();h=runpy.run_path(str(ROOT/'scripts/build-screen-reader-references.py'));out={'names':[],'chips':[],'digits':[]}
  for n,owner,chip,line in CASES:
