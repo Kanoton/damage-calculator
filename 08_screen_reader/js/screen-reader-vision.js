@@ -121,7 +121,10 @@
  }
  function chipMatches(source,centers,refs){
   const out=[];for(const [x,y] of centers){
-   const result=match(feature(source,[x-18,y-18,36,36]),refs,.225,.03);
+   const color=match(feature(source,[x-18,y-18,36,36]),refs,.225,.03);
+   // Exact reviewed/empty samples stay authoritative; weaker color matches
+   // need independent foreground confirmation when token backgrounds differ.
+   const result=color&&color.confidence>=88?color:window.ScreenReaderChipShape?.match(source,x,y);
    if(result?.id&&!out.includes(result.id))out.push(result.id);
   }return out;
  }
@@ -200,7 +203,7 @@
   return out;
  }
  function analyze(source,custom={characters:[],chips:[]},party=null){
-  const refs=window.ScreenReaderReferences,extra=window.ScreenReaderLayoutReferences||{},statusRefs=window.ScreenReaderStatusReferences||{},charRefs=[...refs.characters,...(extra.characters||[]),...(statusRefs.characters||[]),...(window.ScreenReaderViewReferences?.characters||[]),...(custom.characters||[])],chipRefs=[...refs.chips,...(window.ScreenReaderPopupReferences?.chips||[]),...(statusRefs.chips||[]),...(window.ScreenReaderLiveStatusReferences?.chips||[]),...(custom.chips||[])],digits=[...refs.digits,...(extra.digits||[]),...(window.ScreenReaderLiveStatusReferences?.digits||[])];
+  const refs=window.ScreenReaderReferences,extra=window.ScreenReaderLayoutReferences||{},statusRefs=window.ScreenReaderStatusReferences||{},charRefs=[...refs.characters,...(extra.characters||[]),...(statusRefs.characters||[]),...(window.ScreenReaderViewReferences?.characters||[]),...(custom.characters||[])],chipRefs=[...refs.chips,...(window.ScreenReaderPopupReferences?.chips||[]),...(statusRefs.chips||[]),...(window.ScreenReaderLiveStatusReferences?.chips||[]),...(window.ScreenReaderChipShapeReferences?.reviewed||[]),...(custom.chips||[])],digits=[...refs.digits,...(extra.digits||[]),...(window.ScreenReaderLiveStatusReferences?.digits||[])];
   const locked=party&&Array.isArray(party.ids)&&party.ids.length===4&&new Set(party.ids).size===4&&layouts.some(l=>l.id===party.hud?.layout);
   let selected;
   if(locked){
