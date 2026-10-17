@@ -75,6 +75,7 @@ jobs:
       - run: python3 scripts/build-screen-reader-name-references.py --check
       - run: npx playwright install --with-deps chromium webkit
       - run: npm run test:08
+      - run: npx playwright test tests/08-screen-reader.spec.js --browser=webkit -g "printed status name|status names require"
       - run: npm run test:08:sync -- --workers=2
       - uses: actions/upload-artifact@v4
         if: always()

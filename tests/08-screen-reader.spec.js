@@ -568,7 +568,7 @@ test('08: a visible large chip grid with an unknown header reports missing owner
  await page.evaluate(o=>ScreenReaderCharacterBridge.apply(o),o);expect((await snapshot(page)).members.map(m=>m.chips)).toEqual(before.members.map(m=>m.chips));
 });
 
-test('08: printed status name owns parameters and chips independently of the pixel portrait and confirmed self',async({page})=>{
+test('08: printed status name owns parameters and chips independently of the pixel portrait and current self',async({page})=>{
  await open(page);await page.locator('#reader-new-game').click();
  await page.evaluate(()=>ScreenReaderCharacterBridge.apply({selfId:'105',members:[{id:'105',slot:0},{id:'13',slot:1},{id:'20',slot:2},{id:'2',slot:3}]}));
  await readFixture(page,'status-name-kaisei');await expect(page.locator('#reader-chip-result')).toContainText('カイセイのチップ（名前で判定）');
