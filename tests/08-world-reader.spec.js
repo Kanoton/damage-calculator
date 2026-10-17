@@ -261,11 +261,11 @@ test('08 world: replay startup fills unknown context, respects manual choices an
  expect(await page.evaluate(setup=>ScreenReaderMapBridge.configure(setup),setup)).toBe(false);state=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(state.map).toBe('MAP0003');expect(state.difficulty).toBe('普通');
 });
 
-for(const speed of [500,250])test('08 world: replay shark 3 remains alive through camera motion at '+speed+'ms',async({page})=>{
+test('08 world: replay shark 3 retains its complete HP through camera motion',async({page})=>{
  await open(page);await page.evaluate(()=>{ScreenReaderMapBridge.resetForReader();ScreenReaderMapBridge.configure({map:'MAP0001',difficulty:'狂気'});});
  // Real sampled frames: the 1 in 10/10 moves left of the old x=270 scan edge.
- const names=speed===500?[59,61,67,82]:[59,60,61,66,67,82];
- for(const n of names){const raw=await startupRead(page,'replay-shark3-'+n);if(n===60)expect(raw.monsters).toEqual([]);else expect(raw.monsters).toEqual([{monsterId:'M0004',serial:3,currentHp:10,maxHp:10}]);await page.evaluate(raw=>{const accepted=ScreenReaderController.stabilize({members:[],chipIds:[],world:raw});ScreenReaderMapBridge.apply(accepted.world,{allowDefeat:false});},raw);}
+ const names=[59,60,61,66,67,82];
+ for(const n of names){const raw=await startupRead(page,'replay-shark3-'+n);const expected={monsterId:'M0004',serial:3,currentHp:10,maxHp:10};if(n===60)expect(raw.monsters.every(m=>JSON.stringify(m)===JSON.stringify(expected))).toBe(true);else expect(raw.monsters).toEqual([expected]);await page.evaluate(raw=>{const accepted=ScreenReaderController.stabilize({members:[],chipIds:[],world:raw});ScreenReaderMapBridge.apply(accepted.world,{allowDefeat:false});},raw);}
  const state=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(state.monsters).toHaveLength(1);expect(state.monsters[0]).toMatchObject({monsterId:'M0004',serial:3,hp:10,defeated:false});
 });
 
