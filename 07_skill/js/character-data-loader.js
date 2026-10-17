@@ -20,7 +20,7 @@ async function loadCharacterData({listStatus,chipStatus,statusIconSnapshot}){
    try{const response=await fetch('../csv/status_icon_map_all.csv',{cache:'no-cache'});if(!response.ok)throw Error('status_icon_map_all.csv');csv=await response.text();}
    catch(error){console.warn('アイコン対応CSVを取得できないため、同梱データを使用します。',error);}
   }
-  const rows=parseMapCSV(csv);
+  const rows=parseMapCSV(csv);for(const row of rows)if(row.effect_key==='チャージ')row.effect_key='エナジー';
   return {mapKeywords:rows.filter(row=>row.group==='マップ固有'&&row.map_id&&['number','checkbox'].includes(row.input_kind)),statusIcons:new Map(rows.filter(row=>['number','checkbox'].includes(row.input_kind)&&/^(?:(?:chip_icon|UT_Buff)\/)?[^/\\]+\.png$/i.test(row.icon_file)).map(row=>[row.effect_key,row.icon_file]))};
  }
  function loadCharacterSkills(){
@@ -36,8 +36,12 @@ async function loadCharacterData({listStatus,chipStatus,statusIconSnapshot}){
  }
  const [characters,chips,baseRules,icons,characterSkills,cardImages]=await Promise.all([load('characters','character_stats.csv',listStatus),load('chips','chip_list.csv',chipStatus),loadRules(),loadStatusIcons(),loadCharacterSkills(),loadCharacterCardImages()]);
  // 07-only additions keep shared CSV and the screen-reader generation unchanged.
- const rules=[...baseRules,...[
-  ['13','1','hp_ratio<0.5','while_owned'],
+ // Shared identifiers remain compatible with preserved editions.
+ const energyKey=value=>String(value||'').replace(/^チャージ(?=$|[><=])/, 'エナジー');
+ for(const row of chips)if(row.category==='チャージ')row.category='エナジー';
+ const normalizedBaseRules=baseRules.map(rule=>({...rule,condition:energyKey(rule.condition),source_key:energyKey(rule.source_key)}));
+ const rules=[...normalizedBaseRules,...[
+  ['13','1','hp_ratio<=0.5','while_owned'],
   ['121','1','','on_skill_use'],
   ['145','2','被ダメージ後','while_owned'],
   ['205','1','マインド<=3','while_owned']

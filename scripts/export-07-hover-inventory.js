@@ -24,6 +24,10 @@ exec(section(read('07_skill/js/map-utils.js'),'function parseMapCSV(','function 
 const csv=file=>{context.csvText=read(file);return exec('parseMapCSV(csvText)');};
 exec(read('07_skill/js/hover-text.js'));exec(read('07_skill/js/character-ability-rules.js'));exec(read('07_skill/js/character-view.js'));exec(read('07_skill/js/roster-view.js'));
 const rules=exec('CHARACTER_ABILITY_RULES'),characters=csv('csv/character_stats.csv'),abilities=exec("Object.keys(SKILL_HOVER_TEXT).filter(key=>key.startsWith('ability.')).map(key=>({id:key.slice(8),ability:getSkillHoverText(key)}))"),chips=csv('csv/chip_list.csv'),chipRules=csv('csv/chip_stat_rules.csv'),icons=csv('csv/status_icon_map_all.csv');
+// Match the current loader's display aliases while shared identifiers remain stable.
+for(const row of chips)if(row.category==='チャージ')row.category='エナジー';
+for(const row of chipRules)for(const key of ['condition','source_key'])row[key]=String(row[key]||'').replace(/^チャージ(?=$|[><=])/,'エナジー');
+for(const row of icons)if(row.effect_key==='チャージ')row.effect_key='エナジー';
 const names=new Map(characters.map(c=>[c.id,c.name]));
 context.chips=chips;context.statusIcons=new Map(icons.map(c=>[c.effect_key,c.icon_file]));context.mapKeywords=[];context.conditionsBox=new Element('div');
 exec(section(character,'const specialIcons=','\n const getState'));
@@ -43,7 +47,7 @@ context.byChip=new Map(chips.map(c=>[c.id,chipRules.filter(r=>r.chip_id===c.id)]
 context.abilityRules=()=>rules[String(context.selectedCharacter.id)];
 context.state=()=>context.currentState;
 context.abilityControlValue=key=>{const s=context.currentState,id=String(context.selectedCharacter.id);if(id==='6'&&key.startsWith('自己主張なし')&&s.numbers['マジで怒ったぞ'])return 2;return Number(s.numbers[key]??rules[id]?.controls?.find(c=>c.key===key)?.default)||0;};
-context.number=(s,key)=>Math.min(key==='チャージ'?10:Infinity,Math.max(0,Number(s.numbers[key])||0));
+context.number=(s,key)=>Math.min(key==='エナジー'?15:Infinity,Math.max(0,Number(s.numbers[key])||0));
 context.activeRules=()=>chipRules.filter(r=>context.currentState.chips.includes(r.chip_id));
 context.activeSkill=()=>rules[String(context.selectedCharacter.id)]?.activeSkills?.[0];
 function render(id,numbers={},party=[],owned=[],mapId='',opponent=null){
@@ -105,9 +109,9 @@ const shared=new Map();
 for(const chip of chips){
  const numeric=render('1',{},[],[chip.id]);
  for(const e of numeric){const d=describe(e);if(d.type==='数値入力'){if(!shared.has(d.key))shared.set(d.key,{element:e,ids:[]});shared.get(d.key).ids.push(chip.id);}}
- context.chip=chip;context.chargeDelta=chip.category==='チャージ'&&chip.id!=='57'?({'51':2,'52':2,'53':2,'54':2,'55':-6,'56':-5,'58':-4}[chip.id]||0):null;
+ context.chip=chip;context.chargeDelta=chip.category==='エナジー'&&chip.id!=='57'?({'51':2,'52':2,'53':3,'54':1,'55':-6,'56':-5,'58':-4}[chip.id]||0):null;
  const item=exec('createOwnedChipView(chip,chargeDelta,()=>{})');const d=describe(item);add(`chip:${chip.id}:owned`,'チップ',chip.id,'自キャラ所持チップ','該当チップ所持',chip.name,context.chargeDelta===null?'所持表示':'操作ボタン','通常',d.icon,item.title,'07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createOwnedChipView','キャラクター列はチップ名。PT所持／選択一覧の文面は別行');rows.at(-1)['キャラクター']=chip.name;rows.at(-1)['キャラID']='';
- add(`chip:${chip.id}:pt`,'チップ','','PT所持チップ／チップ選択一覧','該当チップをPTが所持／チップ一覧表示',chip.name,'チップ表示','通常',d.icon,exec("getSkillHoverText('chip.'+chip.id)"),'07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips','チャージ操作の追記なし');
+ add(`chip:${chip.id}:pt`,'チップ','','PT所持チップ／チップ選択一覧','該当チップをPTが所持／チップ一覧表示',chip.name,'チップ表示','通常',d.icon,exec("getSkillHoverText('chip.'+chip.id)"),'07_skill/data/hover-descriptions.csv / 07_skill/js/character-view.js:createPartyMemberView / character.js:renderChips','エナジー操作の追記なし');
  if(exec('toggleable(chip.id)'))for(const mode of chip.id==='112'?[0,1,2,3]:[0,1]){context.mode=mode;const element=exec('createChipConditionToggleView(chip,chip.id,mode,()=>{})');add(`chip:${chip.id}:toggle:${mode}`,'チップ','','自キャラ状態欄','該当チップ所持、条件切替対象',chip.name,'ボタン','モード '+mode,describe(element).icon,element.title,'07_skill/js/character-view.js:createChipConditionToggleView');}
 }
 for(const [key,value] of shared)capture('shared:'+key,'共通・チップ','','自キャラ状態欄','入力を参照するチップを所持：ID '+[...new Set(value.ids)].join(' / ')+(key==='ヒール'?'。自キャラ／PTルルまたは保持数>0でも表示':''),value.element);

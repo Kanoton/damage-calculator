@@ -15,12 +15,27 @@ for(const protocol of ['http','file'])test('07 autumn data: map, four difficulti
  await expect.poll(()=>page.locator('#mp-monster-list .mp-monster img').evaluateAll(imgs=>imgs.every(img=>img.complete&&img.naturalWidth>0))).toBe(true);
  await selectCharacter(page,'17');const atk=page.locator('#selected-character-atk'),base=Number(await atk.inputValue());
  const potential=page.getByLabel('潜在能力の攻撃補正の数',{exact:true});await potential.fill('3');await potential.dispatchEvent('change');await expect(atk).toHaveValue(String(base+3));
- await selectChipCategory(page,'チャージ');await page.locator('.chip-select[data-id="53"]').click();await page.locator('.chip-select[data-id="54"]').click();
+ await selectChipCategory(page,'エナジー');await page.locator('.chip-select[data-id="53"]').click();await page.locator('.chip-select[data-id="54"]').click();
  const owned=name=>page.locator('.selected-character-chips .selected-chip').filter({has:page.getByAltText(name,{exact:true})});
- await owned('ワープエンジン').click();await expect(page.getByLabel('チャージの数',{exact:true})).toHaveValue('3');
- await owned('電撃グローブ').click();await owned('電撃グローブ').click();await expect(page.getByLabel('チャージの数',{exact:true})).toHaveValue('5');await expect(atk).toHaveValue(String(base+7));
+ await owned('ワープエンジン').click();await expect(page.getByLabel('エナジーの数',{exact:true})).toHaveValue('3');
+ await owned('電撃グローブ').click();await owned('電撃グローブ').click();await expect(page.getByLabel('エナジーの数',{exact:true})).toHaveValue('5');await expect(atk).toHaveValue(String(base+7));
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#turn-end').click();await expect(atk).toHaveValue(String(base));
  await page.locator('#roster-undo').click();await expect(atk).toHaveValue(String(base+7));
+ await page.locator('.role-tab[data-role="character"]').click();
+ const energy=page.getByLabel('エナジーの数',{exact:true});await expect(energy).toHaveAttribute('max','15');
+ await energy.fill('20');await energy.dispatchEvent('change');await expect(energy).toHaveValue('15');
+ await owned('電撃グローブ').click();await expect(energy).toHaveValue('15');await expect(atk).toHaveValue(String(base+9));
+});
+
+for(const protocol of ['http','file'])test('07 chip update: Whetstone includes exactly half HP on '+protocol,async({page})=>{
+ await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve(skillFolder+'/index.html')).href:`/${skillFolder}/`);
+ await selectCharacter(page,'2');await expect(page.locator('#selected-character-hp')).toHaveText('10');await selectChipCategory(page,'共通');
+ const chip=page.locator('.chip-select[data-id="13"]'),hp=page.locator('#selected-character-current-hp'),atk=page.locator('#selected-character-atk'),reduce=page.locator('#damageReduce2');
+ for(const [current,active]of [[6,false],[5,true],[4,true]]){
+  await hp.fill(String(current));await hp.dispatchEvent('change');const beforeAtk=Number(await atk.inputValue()),beforeReduce=Number(await reduce.inputValue());
+  await chip.click();await expect(atk).toHaveValue(String(beforeAtk+(active?4:0)));await expect(reduce).toHaveValue(String(beforeReduce+(active?1:0)));
+  await chip.click();await expect(atk).toHaveValue(String(beforeAtk));await expect(reduce).toHaveValue(String(beforeReduce));
+ }
 });
 
 
@@ -432,7 +447,9 @@ test('07 skill: PT editing isolates chips, modifiers and icon HP from self and o
  for(const id of ['1','4','7','10','9','13'])await page.locator('.chip-select[data-id="'+id+'"]').click();
  await expect(stat('1','atk')).toHaveText('4');await expect(stat('1','def')).toHaveText('2');await expect(stat('1','move')).toHaveText('1');await expect(stat('1','hp')).toHaveText('14/14');await expect(slot('1').locator('.party-slot-chip')).toHaveCount(6);
  await expect(slot('2').locator('.party-slot-chip')).toHaveCount(0);await expect(slot('27').locator('.party-slot-chip')).toHaveCount(0);await expect(page.locator('#selected-character-atk')).toHaveValue(ownAtk);await expect(slot('1').locator('input')).toHaveCount(0);
- for(let i=0;i<8;i++)await icon('1','hp').click();await expect(stat('1','hp')).toHaveText('6/14');await expect(stat('1','atk')).toHaveText('8');await icon('1','hp').click({button:'right'});await expect(stat('1','atk')).toHaveText('4');
+ for(let i=0;i<8;i++)await icon('1','hp').click();await expect(stat('1','hp')).toHaveText('6/14');await expect(stat('1','atk')).toHaveText('8');
+ await icon('1','hp').click({button:'right'});await expect(stat('1','hp')).toHaveText('7/14');await expect(stat('1','atk')).toHaveText('8');
+ await icon('1','hp').click({button:'right'});await expect(stat('1','hp')).toHaveText('8/14');await expect(stat('1','atk')).toHaveText('4');
  await icon('1','atk').click();await icon('1','def').click();await icon('1','move').click();await expect(stat('1','atk')).toHaveText('5');await expect(stat('1','def')).toHaveText('3');await expect(stat('1','move')).toHaveText('2');
  await slot('1').dragTo(page.locator('.party-member-slot[data-slot="4"]'));await expect(slot('1')).toHaveAttribute('aria-current','true');await expect(page.locator('.chip-select[data-id="1"]')).toHaveAttribute('aria-pressed','true');
  await page.locator('.chip-select[data-id="1"]').click();await expect(stat('1','atk')).toHaveText('4');await expect(slot('1').locator('.party-slot-chip')).toHaveCount(5);
@@ -519,10 +536,10 @@ test('07 skill: charge consumption requires full cost and Lightning Core reduces
  await page.goto(`/${skillFolder}/`);await selectCharacter(page,'1');
  const ct=page.locator('#selected-character-ct');
  await page.locator('#selected-character-skill').click();
- await selectChipCategory(page,'チャージ');
+ await selectChipCategory(page,'エナジー');
  for(const [id,cost,name] of [['55',6,'エアバッグ'],['56',5,'ライトニングコア'],['58',4,'レールガン']]){
   const chip=page.locator(`.chip-select[data-id="${id}"]`);await chip.click();
-  const charge=page.getByLabel('チャージの数'),owned=page.locator('.selected-character-chips .selected-chip').filter({has:page.getByAltText(name,{exact:true})});
+  const charge=page.getByLabel('エナジーの数'),owned=page.locator('.selected-character-chips .selected-chip').filter({has:page.getByAltText(name,{exact:true})});
   await charge.fill(String(cost-1));await charge.dispatchEvent('change');
   const before=await ct.textContent();
   await owned.click();await expect(charge).toHaveValue(String(cost-1));await expect(ct).toHaveText(before);
@@ -533,14 +550,14 @@ test('07 skill: charge consumption requires full cost and Lightning Core reduces
   await chip.click();
  }
  await page.locator('.chip-select[data-id="56"]').click();
- const charge=page.getByLabel('チャージの数'),core=page.locator('.selected-character-chips .selected-chip').filter({has:page.getByAltText('ライトニングコア',{exact:true})});
+ const charge=page.getByLabel('エナジーの数'),core=page.locator('.selected-character-chips .selected-chip').filter({has:page.getByAltText('ライトニングコア',{exact:true})});
  await ct.click();await ct.click();await expect(ct).toHaveText(/^CT 0 \/ \d+$/);
  await charge.fill('5');await charge.dispatchEvent('change');await core.focus();await core.press(' ');
  await expect(ct).toHaveText(/^CT 0 \/ \d+$/);await expect(charge).toHaveValue('0');
  await page.locator('.chip-select[data-id="51"]').click();
  await charge.fill('9');await charge.dispatchEvent('change');
  await page.locator('.selected-character-chips .selected-chip').filter({has:page.getByAltText('エネルギー回収',{exact:true})}).click();
- await expect(charge).toHaveValue('10');
+ await expect(charge).toHaveValue('11');
 });
 
 test('07 skill: Sherry reasoning stacks modify attack and decay on turn end', async ({ page }) => {
