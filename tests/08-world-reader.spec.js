@@ -280,3 +280,17 @@ test('08 world: automatic reader takes explicit setup then the first live event 
  await page.locator('#reader-file').setInputFiles({name:'shark.png',mimeType:'image/png',buffer:Buffer.from(startupFixture('replay-shark3-66').split(',')[1],'base64')});await expect(page.locator('#reader-file')).toHaveValue('');
  const after=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(after.monsters).toHaveLength(1);expect(after.monsters[0]).toMatchObject({monsterId:'M0004',serial:3,hp:10,defeated:false});expect(after.events).toEqual(state.events);
 });
+
+test('08 world: late observations display same-species serials numerically while preserving card identity and undo',async({page})=>{
+ await open(page);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0001');await page.locator('#mp-difficulty').selectOption('狂気');await page.locator('#mp-tab-monsters').click();
+ const observation=serials=>({monsters:serials.map(serial=>({monsterId:'M0004',serial,currentHp:10,maxHp:10}))});
+ await page.evaluate(o=>ScreenReaderMapBridge.apply(o),observation([4,2,10]));
+ const cards=page.locator('#map-roster-list .roster-select'),labels=serials=>serials.map(n=>'海賊サメ '+n+'を計算機に登録');
+ await expect.poll(()=>cards.evaluateAll(nodes=>nodes.map(n=>n.getAttribute('aria-label')))).toEqual(labels([2,4,10]));
+ await page.getByRole('button',{name:'海賊サメ 4を計算機に登録',exact:true}).press('Enter');const selected=await page.locator('#map-roster-list .roster-card.selected').getAttribute('data-instance-id');
+ const before=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());await page.evaluate(o=>ScreenReaderMapBridge.apply(o),observation([1]));
+ await expect.poll(()=>cards.evaluateAll(nodes=>nodes.map(n=>n.getAttribute('aria-label')))).toEqual(labels([1,2,4,10]));expect(await page.locator('#map-roster-list .roster-card.selected').getAttribute('data-instance-id')).toBe(selected);
+ const after=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(after.monsters.slice(0,3)).toEqual(before.monsters);
+ await page.getByRole('button',{name:'海賊サメ 4を撃破',exact:true}).click();await expect.poll(()=>cards.evaluateAll(nodes=>nodes.map(n=>n.getAttribute('aria-label')))).toEqual(labels([1,2,10,4]));await expect(page.locator('#map-roster-list .roster-card.defeated')).toHaveCount(1);
+ await page.locator('#roster-undo').click();await expect.poll(()=>cards.evaluateAll(nodes=>nodes.map(n=>n.getAttribute('aria-label')))).toEqual(labels([1,2,4,10]));await expect(page.locator('#map-roster-list .roster-card.defeated')).toHaveCount(0);
+});
