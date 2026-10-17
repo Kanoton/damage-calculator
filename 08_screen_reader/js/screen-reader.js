@@ -23,7 +23,7 @@
  function monitorInfo(text=''){
   const count=new Set((window.ScreenReaderWorldReferences?.names||[]).map(r=>r.id)).size;
   const map=window.ScreenReaderMapBridge?.snapshot(),pending=readerSession&&(!map?.map||!map?.difficulty);
-  $('monitor-info').textContent=(pending?'マップ名・難易度：未判定（画像判定は未対応。マップ情報で指定してください） ／ ':'')+'モンスター読取：'+($('world-sync').checked?'ON':'OFF（反映をONにすると読取開始）')+' ／ 照合見本 '+count+'種類'+(text?' ／ '+text:'');
+  $('monitor-info').textContent=(pending?'マップ名・難易度：未判定（対応する開始前表示を待っています。手動指定もできます） ／ ':'')+'モンスター読取：'+($('world-sync').checked?'ON':'OFF（反映をONにすると読取開始）')+' ／ 照合見本 '+count+'種類'+(text?' ／ '+text:'');
  }
  const interval=()=>[250,500,1200].includes(Number($('interval').value))?Number($('interval').value):500;
  function isArea(a){return a&&['x','y','w','h'].every(k=>Number.isFinite(a[k]))&&a.x>=0&&a.y>=0&&a.w>=.05&&a.h>=.05&&a.x+a.w<=1.00001&&a.y+a.h<=1.00001;}
@@ -109,7 +109,7 @@
  function accept(key,value){const prior=stable.get(key);const count=prior&&prior.value===value&&prior.tick===stableTick-1?prior.count+1:1;stable.set(key,{value,count,tick:stableTick});return count>=2;}
  function stabilize(observation){
   stableTick++;
-  const out={...observation,members:[],selfId:null,chipIds:[]};if(observation.selfId&&accept('self',observation.selfId))out.selfId=observation.selfId;
+  const out={...observation,members:[],selfId:null,chipIds:[],setup:null};if(observation.setup&&accept('start-context',JSON.stringify(observation.setup)))out.setup=observation.setup;if(observation.selfId&&accept('self',observation.selfId))out.selfId=observation.selfId;
   for(const m of observation.members){if(!m.id)continue;const identityReady=accept('slot:'+m.slot,m.id),item={id:m.id,slot:m.slot};for(const key of ['level','currentHp','maxHp','coin','atk','def'])if(m[key]!==undefined&&accept(m.id+':'+key,m[key]))item[key]=m[key];if(identityReady)out.members.push(item);}
   const ownerReady=observation.chipOwnerId&&accept('chipOwner',observation.chipOwnerId),chipIds=observation.chipIds.filter(id=>accept(observation.chipOwnerId+':chip:'+id,id));if(ownerReady)out.chipIds=chipIds;else out.chipOwnerId=null;
   if(observation.world){const w=observation.world;out.world={clock:null,monsters:[]};if(w.clock&&accept('world-clock',JSON.stringify(w.clock)))out.world.clock=w.clock;for(const m of w.monsters||[])if(accept('world-monster:'+m.monsterId+':'+m.serial,JSON.stringify(m)))out.world.monsters.push(m);}
@@ -148,8 +148,9 @@
    if(automatic&&sameFrames>2){monitorInfo('画面変化待ち ／ '+timing());return;}
    // Yield to paint without overlapping jobs. Stop/reset invalidates this frame.
    await new Promise(resolve=>requestAnimationFrame(resolve));if(token!==generation)return;
-   const observation=vision.analyze(frame,custom,partyLock);if($('world-sync').checked)observation.world=window.ScreenReaderWorldVision.analyze(frame);else $('world-result').textContent='マップ読取はOFFです。マップ・難易度を選び、反映をONにしてください。';if(!partyLock&&$('self').value)observation.selfId=$('self').value;
+   const observation=vision.analyze(frame,custom,partyLock);observation.setup=window.ScreenReaderStartVision.analyze(frame);if($('world-sync').checked)observation.world=window.ScreenReaderWorldVision.analyze(frame);else $('world-result').textContent='マップ読取はOFFです。マップ・難易度を選び、反映をONにしてください。';if(!partyLock&&$('self').value)observation.selfId=$('self').value;
    const accepted=automatic?stabilize(observation):{...observation,members:[...observation.members]};
+   if($('apply').checked&&$('world-sync').checked&&accepted.setup)window.ScreenReaderMapBridge.configure(accepted.setup);
    if(automatic&&!partyLock&&!partyEdited&&$('apply').checked){
     const slots=[0,1,2,3].map(slot=>accepted.members.find(m=>m.slot===slot));
     if(slots.every(m=>m?.id)&&slots.filter(m=>m.coin!==undefined&&m.level!==undefined).length>=2&&new Set(slots.map(m=>m.id)).size===4)lockParty(slots.map(m=>m.id),accepted.selfId,observation.hud);

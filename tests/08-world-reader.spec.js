@@ -236,3 +236,47 @@ test('08 world: image HP zero candidates never defeat an observed living shark a
  // Explicit non-image updates still support confirmed zero and Undo.
  await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[{monsterId:'M0004',serial:3,currentHp:0,maxHp:10}]}));expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot().monsters.find(m=>m.monsterId==='M0004'&&m.serial===3).defeated)).toBe(true);
 });
+
+const startupFixture=n=>require('./fixtures/screen-reader/'+n+'.json').image;
+async function startupRead(page,name){return page.evaluate(async image=>{const im=new Image();im.src=image;await im.decode();const source=ScreenReaderVision.normalize(im);return {setup:ScreenReaderStartVision.analyze(source),...ScreenReaderWorldVision.analyze(source)};},startupFixture(name));}
+
+test('08 world: explicit replay map and difficulty are independent from the previous result round',async({page})=>{
+ await open(page);
+ for(const name of ['start-dream-result','start-dream-result-held']){const result=await startupRead(page,name);expect(result.setup).toEqual({map:'MAP0001',difficulty:'狂気'});expect(result.clock).toBeNull();expect(result.monsters).toEqual([]);}
+ expect((await startupRead(page,'start-dream-loading')).setup).toBeNull();
+ const hud=await startupRead(page,'start-dream-hud');expect(hud.setup).toBeNull();expect(hud.clock).toEqual({round:1,progress:1});
+ // Either explicit text being absent must prevent a context guess.
+ for(const box of [[357,646,539,49],[1049,657,72,35]]){
+  const result=await page.evaluate(async({image,box})=>{const im=new Image();im.src=image;await im.decode();const c=ScreenReaderVision.normalize(im);c.getContext('2d').clearRect(...box);return ScreenReaderStartVision.analyze(c);},{image:startupFixture('start-dream-result'),box});expect(result).toBeNull();
+ }
+});
+
+test('08 world: replay startup fills unknown context, respects manual choices and catches up the first event once',async({page})=>{
+ await open(page);const setup=(await startupRead(page,'start-dream-result')).setup,hud=await startupRead(page,'start-dream-hud');
+ await page.evaluate(setup=>{ScreenReaderMapBridge.resetForReader();ScreenReaderMapBridge.configure(setup);},setup);
+ let state=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(state.map).toBe('MAP0001');expect(state.difficulty).toBe('狂気');expect(state.round).toBeNull();expect(state.events).toEqual([]);
+ await page.evaluate(hud=>ScreenReaderMapBridge.apply(hud,{allowDefeat:false}),hud);state=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(state.round).toBe(1);expect(state.progress).toBe(1);expect(state.events.length).toBeGreaterThan(0);expect(state.monsters).toEqual([]);
+ await page.evaluate(hud=>ScreenReaderMapBridge.apply(hud,{allowDefeat:false}),hud);expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(state);
+ await page.evaluate(()=>ScreenReaderMapBridge.resetForReader());await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0003');await page.locator('#mp-difficulty').selectOption('普通');
+ expect(await page.evaluate(setup=>ScreenReaderMapBridge.configure(setup),setup)).toBe(false);state=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(state.map).toBe('MAP0003');expect(state.difficulty).toBe('普通');
+});
+
+test('08 world: replay shark 3 retains its complete HP through camera motion',async({page})=>{
+ await open(page);await page.evaluate(()=>{ScreenReaderMapBridge.resetForReader();ScreenReaderMapBridge.configure({map:'MAP0001',difficulty:'狂気'});});
+ // Real sampled frames: the 1 in 10/10 moves left of the old x=270 scan edge.
+ const names=[59,60,61,66,67,82];
+ for(const n of names){const raw=await startupRead(page,'replay-shark3-'+n);const expected={monsterId:'M0004',serial:3,currentHp:10,maxHp:10};if(n===60)expect(raw.monsters.every(m=>JSON.stringify(m)===JSON.stringify(expected))).toBe(true);else expect(raw.monsters).toEqual([expected]);await page.evaluate(raw=>{const accepted=ScreenReaderController.stabilize({members:[],chipIds:[],world:raw});ScreenReaderMapBridge.apply(accepted.world,{allowDefeat:false});},raw);}
+ const state=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(state.monsters).toHaveLength(1);expect(state.monsters[0]).toMatchObject({monsterId:'M0004',serial:3,hp:10,defeated:false});
+});
+
+test('08 world: automatic reader takes explicit setup then the first live event without manual map input',async({page})=>{
+ await open(page);await page.locator('#reader-toggle').click();await page.locator('#reader-details').evaluate(e=>e.open=true);
+ // Seed a source without applying; the following automatic read must reset it.
+ await page.locator('#reader-apply').uncheck();await page.locator('#reader-file').setInputFiles({name:'result.png',mimeType:'image/png',buffer:Buffer.from(startupFixture('start-dream-result').split(',')[1],'base64')});await expect(page.locator('#reader-file')).toHaveValue('');await page.locator('#reader-apply').check();
+ await page.evaluate(async()=>{await ScreenReaderController.read(true);await ScreenReaderController.read(true);});
+ let state=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(state.map).toBe('MAP0001');expect(state.difficulty).toBe('狂気');expect(state.round).toBeNull();expect(state.events).toEqual([]);
+ await page.locator('#reader-file').setInputFiles({name:'hud.png',mimeType:'image/png',buffer:Buffer.from(startupFixture('start-dream-hud').split(',')[1],'base64')});await expect(page.locator('#reader-file')).toHaveValue('');
+ state=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(state.round).toBe(1);expect(state.progress).toBe(1);expect(state.events.length).toBeGreaterThan(0);
+ await page.locator('#reader-file').setInputFiles({name:'shark.png',mimeType:'image/png',buffer:Buffer.from(startupFixture('replay-shark3-66').split(',')[1],'base64')});await expect(page.locator('#reader-file')).toHaveValue('');
+ const after=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(after.monsters).toHaveLength(1);expect(after.monsters[0]).toMatchObject({monsterId:'M0004',serial:3,hp:10,defeated:false});expect(after.events).toEqual(state.events);
+});

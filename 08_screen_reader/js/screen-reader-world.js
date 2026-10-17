@@ -12,7 +12,7 @@
  }
  function components(mask,w,h){
   const seen=new Uint8Array(mask.length),out=[],queue=new Int32Array(mask.length);
-  for(let y=60;y<h;y++)for(let x=270;x<w;x++){const start=y*w+x;if(!mask[start]||seen[start])continue;let head=0,tail=1,count=0,x0=x,x1=x,y0=y,y1=y;queue[0]=start;seen[start]=1;
+  for(let y=60;y<h;y++)for(let x=0;x<w;x++){const start=y*w+x;if(!mask[start]||seen[start])continue;let head=0,tail=1,count=0,x0=x,x1=x,y0=y,y1=y;queue[0]=start;seen[start]=1;
    while(head<tail){const i=queue[head++],xx=i%w,yy=Math.floor(i/w);count++;x0=Math.min(x0,xx);x1=Math.max(x1,xx);y0=Math.min(y0,yy);y1=Math.max(y1,yy);for(const j of [i-1,i+1,i-w,i+w])if(j>=0&&j<mask.length&&!seen[j]&&mask[j]&&Math.abs(j%w-xx)<=1){seen[j]=1;queue[tail++]=j;}}
    const bw=x1-x0+1,bh=y1-y0+1;if(bh>=8&&bh<=32&&bw<=24&&count>=10)out.push({x:x0,y:y0,w:bw,h:bh});
   }return out;
@@ -40,12 +40,16 @@
   // Conflicting labels for one individual must not overwrite each other.
   return observations.filter(o=>observations.filter(p=>p.monsterId===o.monsterId&&p.serial===o.serial).length===1);
  }
- function readClock(source,refs){
-  const left=canvas(source),center=source.statusFrame||source,vision=ScreenReaderVision,round=vision.numberAt(left,[54,7,43,30],'white',refs.digits),ctx=center.getContext('2d'),digits=refs.digits.filter(r=>r.digit!=='/'),cells=[];
-  for(let i=0;i<9;i++){const x=593+i*48,p=ctx.getImageData(x-20,2,40,24).data;let blue=0;for(let k=0;k<p.length;k+=4)if(p[k]<70&&p[k+1]>110&&p[k+2]>180)blue++;const value=vision.numberAt(center,[x-15,1,30,25],'white',digits);cells.push({index:i,blue:blue>300,value});}
+ function clockAt(source,refs,shift){
+  const left=canvas(source),center=source.statusFrame||source,vision=ScreenReaderVision,round=window.ScreenReaderStartVision?.readRound(left)??vision.numberAt(left,[54,7,43,30],'white',refs.digits),ctx=center.getContext('2d'),digits=refs.digits.filter(r=>r.digit!=='/'),cells=[];
+  for(let i=0;i<9;i++){const x=593+shift+i*48,p=ctx.getImageData(x-20,2,40,24).data;let blue=0;for(let k=0;k<p.length;k+=4)if(p[k]<70&&p[k+1]>110&&p[k+2]>180)blue++;const value=vision.numberAt(center,[x-15,1,30,25],'white',digits);cells.push({index:i,blue:blue>180,value});}
   const active=cells.filter(c=>c.blue);if(active.length!==1)return null;const anchors=cells.filter(c=>Number.isInteger(c.value)&&c.value>=1&&c.value<=99),offsets=new Map();for(const c of anchors){const offset=c.value-c.index;offsets.set(offset,(offsets.get(offset)||0)+1);}const ranks=[...offsets].sort((a,b)=>b[1]-a[1]);if(!ranks[0]||ranks[0][1]<3||(ranks[1]&&ranks[1][1]>1))return null;
   const progress=ranks[0][0]+active[0].index;if(progress<1||progress>99||!Number.isInteger(round)||round<1||round>99)return null;if(active[0].value!==null&&active[0].value!==progress)return null;return {round,progress};
  }
- function analyze(source){const base=window.ScreenReaderWorldReferences;if(!base)return {clock:null,monsters:[]};const refs={...base,digits:[...base.digits,...ScreenReaderReferences.digits]};return {clock:readClock(source,refs),monsters:readMonsters(canvas(source),refs)};}
+ function readClock(source,refs){
+  const candidates=[0,-18].map(shift=>clockAt(source,refs,shift)).filter(Boolean);
+  return candidates.length&&candidates.every(c=>c.round===candidates[0].round&&c.progress===candidates[0].progress)?candidates[0]:null;
+ }
+ function analyze(source){const base=window.ScreenReaderWorldReferences;if(!base)return {clock:null,monsters:[]};const refs={...base,digits:[...base.digits,...ScreenReaderReferences.digits,...(window.ScreenReaderStartReferences?.digits||[])]};return {clock:readClock(source,refs),monsters:readMonsters(canvas(source),refs)};}
  window.ScreenReaderWorldVision={analyze,readClock,readMonsters};
 })();
