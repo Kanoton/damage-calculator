@@ -114,8 +114,8 @@
   if(!ranked.length||ranked[0][1]>.205||(ranked[1]&&ranked[1][1]-ranked[0][1]<.035))return {visible:true,id:null};
   return {visible:true,id:ranked[0][0],confidence:Math.round((1-ranked[0][1])*100)};
  }
- function levelAt(source,index,stars){
-  const values=[];for(const x of stars){const c=crop(source,[x-3,106+Y[index]-3,6,6],6,6),p=c.getContext('2d').getImageData(0,0,6,6).data;let colored=0,gray=0;for(let i=0;i<p.length;i+=4){const v=[p[i],p[i+1],p[i+2]];if(Math.max(...v)-Math.min(...v)>65&&Math.max(...v)>150)colored++;if(Math.max(...v)-Math.min(...v)<40&&Math.max(...v)>70&&Math.max(...v)<200)gray++;}if(colored>8)values.push(1);else if(gray>8)values.push(0);else return null;}
+ function levelAt(source,index,stars,centerY){
+  const values=[];for(const x of stars){const c=crop(source,[x-3,centerY+Y[index]-3,6,6],6,6),p=c.getContext('2d').getImageData(0,0,6,6).data;let colored=0,gray=0;for(let i=0;i<p.length;i+=4){const v=[p[i],p[i+1],p[i+2]];if(Math.max(...v)-Math.min(...v)>65&&Math.max(...v)>150)colored++;if(Math.max(...v)-Math.min(...v)<40&&Math.max(...v)>70&&Math.max(...v)<200)gray++;}if(colored>8)values.push(1);else if(gray>8)values.push(0);else return null;}
   // Filled stars must form a prefix. Reject transient/glowing unreadable stars.
   if(values.some((v,i)=>v&&values.slice(0,i).includes(0)))return null;return values.reduce((a,b)=>a+b,0);
  }
@@ -170,7 +170,9 @@
    const data=partyIds?null:feature(source,box),found=partyIds?{id:partyIds[index],confidence:100}:hasFaceTexture(data)?match(data,charRefs.filter(r=>r.kind==='avatar'))||profileMatch(data):null;if(!found)return {slot:index,unreadable:true};
    const member={slot:index,id:found.id,confidence:found.confidence},kind=['red','green','blue','gold'][index];
    const shifted=box=>[box[0],box[1]+Y[index],box[2],box[3]];
-   const hp=numberAt(source,shifted(layout.hp),kind,digits,layout.id==='left'),maxHp=numberAt(source,shifted(layout.maxHp),kind,digits),coin=numberAt(source,shifted(layout.coin),'white',digits),level=levelAt(source,index,layout.stars);
+   // The left HUD's stars sit lower than the legacy HUD. Sampling the top
+   // indentation reads gray background instead of a red/green filled star.
+   const hp=numberAt(source,shifted(layout.hp),kind,digits,layout.id==='left'),maxHp=numberAt(source,shifted(layout.maxHp),kind,digits),coin=numberAt(source,shifted(layout.coin),'white',digits),level=levelAt(source,index,layout.stars,layout.id==='left'?112:106);
    if(maxHp!==null&&maxHp>=1&&maxHp<=999)member.maxHp=maxHp;
    if(hp!==null&&(member.maxHp===undefined||hp<=member.maxHp))member.currentHp=hp;
    if(coin!==null)member.coin=coin;if(level!==null)member.level=level;return member;

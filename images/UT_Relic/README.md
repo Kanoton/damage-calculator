@@ -30,18 +30,19 @@
 
 | rarity | rarity_color | 今回のチップ件数 |
 | --- | --- | ---: |
-| blue | 水色 | 28 |
-| purple | 紫色 | 34 |
+| blue | 水色 | 27 |
+| purple | 紫色 | 35 |
 | gold | 金色（黄色） | 28 |
 
-レア度は `images/chip_icon/` の既存トークンの枠色から自動分類しました。効果量・名前の強弱や元画像のグラデーションからは決めません。たとえば `UT_Relic_Attack.png` はID1（水色）・2（紫色）・3（金色）で共有します。絵柄とレア度を組にすると今回の90件は一意に区別できます。
+レア度は確認済み実画面の枠色を優先し、実画面未取得分は `images/chip_icon/` の既存トークンの枠色から自動分類します。しおり（ID23）は保存素材が水色、提供された実画面が紫色のため、実画面の紫色を正本にしました。双方の表示見本は読取用データへ保持します。効果量・名前の強弱や元画像のグラデーションからは決めません。たとえば `UT_Relic_Attack.png` はID1（水色）・2（紫色）・3（金色）で共有します。絵柄とレア度を組にすると今回の90件は一意に区別できます。
 
-- 対応表の列：`chip_id`（ツール内ID）、`chip_name`、`artwork_file`（本フォルダ内のファイル名）、`rarity`、`rarity_color`。
+- 対応表の列：`chip_id`（ツール内ID）、`chip_name`、`artwork_file`（本フォルダ内のファイル名）、`rarity_fixture`、`rarity_slot`、`rarity`、`rarity_color`。実画面の根拠がある場合は匿名化fixture名と0始まりのスロット番号を指定し、その画面の色を優先します。空欄なら既存トークンの枠色を使います。
 - 絵柄の対応は画像を比較して確認します。新しい画像番号だけからIDを推定しません。
 - 対応表の検証：`python3 scripts/check-chip-artwork-mapping.py`。
-- 既存アイコンの枠色からレア度を再分類：`python3 scripts/check-chip-artwork-mapping.py --assign-rarity`。色が曖昧なら停止します。
+- 確認済み実画面／既存アイコンの枠色からレア度を再分類：`python3 scripts/check-chip-artwork-mapping.py --assign-rarity`。色が曖昧なら停止します。
 - 読取用の見本へ反映：`python3 scripts/build-screen-reader-chip-shapes.py`。元画像を黒背景に合成した4倍率の輪郭を追加し、枠色は対応表のレア度を使用します。元のトークン見本・実画面見本も保持します。
 - 生成一致の確認：`python3 scripts/build-screen-reader-chip-shapes.py --check`。
+- 新しい実画面だけを追加する場合：`python3 scripts/build-screen-reader-chip-shapes.py --screens /path/to/screens --cases sherry-late yume-late`。以前の全スクリーンショットを再収集せず、指定したcaseの匿名化fixtureだけを更新します。
 
 チップ名・効果の `chip_list.csv` 自体の列や効果量は変えていません。ゲーム画面側で枠色・輪郭が十分見えない場合は保留し、対応表が完成していても全90件の実画面認識を保証するものではありません。
 
