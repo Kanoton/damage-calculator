@@ -95,6 +95,8 @@ npm run test:06b
 
 チップ名・効果は `csv/chip_list.csv`、元絵柄との対応・枠色レア度は `csv/chip_artwork_mapping.csv`（いずれもタブ区切り）を正本とする。後者は `chip_id / chip_name / artwork_file / rarity / rarity_color`。`blue=水色 / purple=紫色 / gold=金色（黄色）`。同じ元画像を複数レア度で共有できるが、絵柄＋レア度は一意にする。元画像番号をツール内IDと同一視しない。
 
+実画面と既存トークンの枠色が違う場合は実画面を優先し、任意列 `rarity_fixture / rarity_slot` に匿名化fixture名・0始まりのスロットを記録する（ID23しおりは実画面が紫色、素材が水色）。空欄の行は既存トークンから分類する。確認済み実画面の輪郭・RGB見本も生成へ追加する。以前の見本を一律に捨てたり、誤認識を直すために閾値を無条件で緩和したりしない。
+
 元画像は `images/UT_Relic/`。絵柄を照合した対応表に対し `python3 scripts/check-chip-artwork-mapping.py --assign-rarity` で既存 `images/chip_icon/` の枠色から分類でき、曖昧な色では停止する。検証だけなら同コマンドから引数を外す。08の生成は `python3 scripts/build-screen-reader-chip-shapes.py`、一致確認は `--check`。検証・生成手順と制約は `images/UT_Relic/README.md` を参照する。
 
 表示や計算の元データを変える依頼では、まず `csv/` の該当ファイルを確認してください。JSに同梱スナップショットがあるデータの場合、Web配信時と `file://` 時で内容が食い違わないよう注意してください。

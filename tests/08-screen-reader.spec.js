@@ -11,6 +11,27 @@ async function readFixture(page,n){
 }
 const snapshot=page=>page.evaluate(()=>window.ScreenReaderCharacterBridge.snapshot());
 
+for(const [name,owner,chips]of [['sherry-late','106',['52','58','9','45','43','55']],['yume-late','20',['23','102','48']]])test('08: chip artwork reads reviewed late '+name+' without missing chips or inventing a whetstone',async({page})=>{
+ await open(page);await page.locator('#reader-new-game').click();await page.evaluate(()=>ScreenReaderCharacterBridge.apply({members:[{id:'2',slot:0},{id:'20',slot:1},{id:'106',slot:2},{id:'17',slot:3}]}));
+ await readFixture(page,'chip-grid-'+name);const s=await snapshot(page);expect(s.members.find(m=>m.id===owner).chips).toEqual(chips);
+ const actual=await page.evaluate(async image=>{const im=new Image();im.src=image;await im.decode();return ScreenReaderVision.analyze(ScreenReaderVision.normalize(im));},fixture('chip-grid-'+name));
+ expect(actual.chipOwnerId).toBe(owner);expect(actual.chipIds).toEqual(chips);expect(actual.chipIds).not.toContain('13');
+});
+
+test('08: party stars update red and green levels and retain a level when stars are hidden',async({page})=>{
+ await open(page);
+ const result=await page.evaluate(async image=>{
+  ScreenReaderCharacterBridge.apply({members:[{id:'2',slot:0,level:0},{id:'20',slot:1,level:0},{id:'106',slot:2,level:0},{id:'17',slot:3,level:0}]});
+  const im=new Image();im.src=image;await im.decode();const frame=ScreenReaderVision.normalize(im),o=ScreenReaderVision.analyze(frame);ScreenReaderCharacterBridge.apply(o);
+  const updated=ScreenReaderCharacterBridge.snapshot();const c=document.createElement('canvas');c.width=1536;c.height=709;const ctx=c.getContext('2d');ctx.drawImage(frame,0,0);ctx.fillStyle='#141414';ctx.fillRect(210,98,64,26);
+  const hidden=ScreenReaderVision.analyze(c);ScreenReaderCharacterBridge.apply(hidden);return {o,updated,hidden,retained:ScreenReaderCharacterBridge.snapshot()};
+ },fixture('party-stars-late'));
+ expect(result.o.members.map(m=>[m.id,m.level])).toEqual([['2',2],['20',1],['106',3],['17',3]]);
+ expect(result.updated.members.find(m=>m.id==='2').level).toBe(2);expect(result.updated.members.find(m=>m.id==='20').level).toBe(1);
+ expect(result.hidden.members.find(m=>m.id==='2').level).toBeUndefined();expect(result.retained.members.find(m=>m.id==='2').level).toBe(2);
+ expect(result.o.chipIds).toEqual([]);
+});
+
 test('08: left-aligned HUD reads the reviewed party, all numbers and independent self portrait',async({page})=>{
  await open(page);await readFixture(page,'left-hud');
  const s=await snapshot(page);expect(s.selfId).toBe('105');

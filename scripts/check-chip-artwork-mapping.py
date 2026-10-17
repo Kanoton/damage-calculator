@@ -1,11 +1,13 @@
-"""Validate reviewed artwork links; assign rarity from existing token rings.
+"""Validate artwork links; assign rarity from reviewed screens or token rings.
 
 The source-art number is not a chip ID. Artwork links are visually reviewed;
 only rarity is classified automatically. No rarity is inferred from effects.
 """
 import argparse
+import base64
 import csv
 import io
+import json
 from collections import Counter
 from pathlib import Path
 from PIL import Image
@@ -14,8 +16,8 @@ ROOT = Path(__file__).resolve().parents[1]
 RARITIES = [('blue', '水色'), ('purple', '紫色'), ('gold', '金色')]
 
 
-def ring_rarity(path):
-    im = Image.open(path).convert('RGB').resize((96, 96), Image.Resampling.BILINEAR)
+def ring_rarity(path, image=None):
+    im = (image if image is not None else Image.open(path)).convert('RGB').resize((96, 96), Image.Resampling.BILINEAR)
     votes = [0, 0, 0]
     for y in range(96):
         for x in range(96):
@@ -53,11 +55,27 @@ def validate(assign=False):
             raise ValueError(f'Invalid artwork filename: {filename}')
         with Image.open(ROOT / 'images/UT_Relic' / filename) as im:
             im.verify()
-        rarity, color = ring_rarity(ROOT / 'images/chip_icon' / chip['images'])
+        evidence = row.get('rarity_fixture', '')
+        if evidence:
+            if Path(evidence).name != evidence or not evidence.endswith('.json'):
+                raise ValueError(f'Invalid rarity fixture: {evidence}')
+            fixture = ROOT / 'tests/fixtures/screen-reader' / evidence
+            im = Image.open(io.BytesIO(base64.b64decode(json.loads(fixture.read_text())['image'].split(',')[1]))).convert('RGB')
+            width = round(im.width * 709 / im.height)
+            frame = Image.new('RGB', (1536, 709))
+            frame.paste(im.resize((width, 709), Image.Resampling.BILINEAR), ((1536-width)//2, 0))
+            centers = [(535,352),(609,352),(682,352),(495,416),(570,416),(644,416),(719,416),(535,481),(609,481),(682,481)]
+            slot = int(row['rarity_slot'])
+            if not 0 <= slot < len(centers):
+                raise ValueError(f'Invalid rarity evidence slot: {slot}')
+            x, y = centers[slot]
+            rarity, color = ring_rarity(fixture, frame.crop((x-26,y-26,x+26,y+26)))
+        else:
+            rarity, color = ring_rarity(ROOT / 'images/chip_icon' / chip['images'])
         if assign:
             row.update(rarity=rarity, rarity_color=color)
         elif (row['rarity'], row['rarity_color']) != (rarity, color):
-            raise ValueError(f'Rarity differs from canonical token ring: {ident}')
+            raise ValueError(f'Rarity differs from reviewed evidence: {ident}')
         key = (filename, rarity)
         if key in identities:
             raise ValueError(f'Ambiguous artwork + rarity pair: {key}')
@@ -79,6 +97,6 @@ def validate(assign=False):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--assign-rarity', action='store_true', help='update rarity/color from token rings')
+    parser.add_argument('--assign-rarity', action='store_true', help='update rarity/color from reviewed screen or token rings')
     args = parser.parse_args()
     validate(args.assign_rarity)
