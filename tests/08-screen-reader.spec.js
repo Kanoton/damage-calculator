@@ -645,3 +645,44 @@ test('08: zoomed status alignment rejects a divider and status-colored tab witho
  const o=await page.evaluate(()=>{const c=document.createElement('canvas');c.width=1536;c.height=709;const ctx=c.getContext('2d');ctx.fillStyle='#141414';ctx.fillRect(0,0,c.width,c.height);ctx.fillStyle='white';ctx.fillRect(100,350,1200,3);ctx.fillStyle='#78ff20';ctx.fillRect(100,20,360,80);return ScreenReaderVision.analyze(c);});
  expect(o.chipRead.aligned).toBe(false);expect(o.chipOwnerId).toBeNull();expect(o.chipIds).toEqual([]);
 });
+
+for(const [name,owner,chips] of [['luka','17',['1','41','6','42','43']],['parunan','2',['29','30','44']]])test('08: chip grid '+name+' reads every supplied occupied position and preserves additions',async({page})=>{
+ await open(page);await page.locator('#reader-new-game').click();await page.evaluate(()=>ScreenReaderCharacterBridge.apply({members:[{id:'2',slot:0},{id:'20',slot:1},{id:'106',slot:2},{id:'17',slot:3}]}));
+ await readFixture(page,'chip-grid-'+name);let s=await snapshot(page);expect(s.members.find(m=>m.id===owner).chips).toEqual(chips);
+ await readFixture(page,name==='luka'?'live-status-luka':'chip-grid-luka');s=await snapshot(page);expect(s.members.find(m=>m.id===owner).chips).toEqual(chips);
+});
+
+test('08: chip artwork uses real foreground and rarity independently of the reviewed color samples',async({page})=>{
+ await open(page);
+ const outputs=await page.evaluate(async images=>{
+  const out=[];
+  for(const [src,slots]of images){const im=new Image();im.src=src;await im.decode();const panel=ScreenReaderVision.statusPanel(ScreenReaderVision.normalize(im)).source;for(const [x,y,id]of slots)out.push({id,actual:ScreenReaderChipShape.match(panel,x,y)?.id??null});}
+  return out;
+ },[[fixture('chip-grid-luka'),[[535,352,'1'],[609,352,'41'],[495,416,'42'],[570,416,'43']]],[fixture('chip-grid-parunan'),[[535,352,'29'],[609,352,'30'],[682,352,'44']]]]);
+ for(const result of outputs)expect(result.actual,result.id).toBe(result.id);
+});
+
+test('08: chip grid reads the first item in all ten slots and retains an earlier page',async({page})=>{
+ await open(page);await page.locator('#reader-new-game').click();await page.evaluate(()=>ScreenReaderCharacterBridge.apply({members:[{id:'2',slot:0}]}));
+ const outputs=await page.evaluate(async src=>{
+  const im=new Image();im.src=src;await im.decode();const panel=ScreenReaderVision.statusPanel(ScreenReaderVision.normalize(im)).source,centers=[[535,352],[609,352],[682,352],[495,416],[570,416],[644,416],[719,416],[535,481],[609,481],[682,481]],out=[];
+  for(const [x,y]of centers){
+   const c=document.createElement('canvas');c.width=1536;c.height=709;const ctx=c.getContext('2d');ctx.drawImage(panel,0,0);
+   for(const [xx,yy]of centers)ctx.drawImage(panel,591,463,36,36,xx-18,yy-18,36,36);
+   ctx.drawImage(panel,517,334,36,36,x-18,y-18,36,36);
+   const observation=ScreenReaderVision.analyze(ScreenReaderVision.normalize(c));ScreenReaderCharacterBridge.apply(observation);out.push(observation);
+  }
+  return out;
+ },fixture('chip-grid-parunan'));
+ for(const o of outputs){expect(o.chipOwnerId).toBe('2');expect(o.chipIds).toEqual(['29']);}
+ await readFixture(page,'chip-grid-parunan');expect((await snapshot(page)).members.find(m=>m.id==='2').chips).toEqual(['29','30','44']);
+});
+
+test('08: chip artwork holds empty highlighted slots and unknown artwork instead of a weak color guess',async({page})=>{
+ await open(page);
+ const results=await page.evaluate(()=>{
+  const c=document.createElement('canvas');c.width=c.height=80;const ctx=c.getContext('2d'),out=[];
+  for(const kind of ['highlight','unknown']){ctx.fillStyle='#00bbff';ctx.fillRect(0,0,80,80);if(kind==='unknown'){ctx.fillStyle='white';ctx.beginPath();ctx.arc(40,40,22,0,Math.PI*2);ctx.fill();}out.push(ScreenReaderChipShape.match(c,40,40));}
+  return out;
+ });expect(results).toEqual([null,null]);
+});

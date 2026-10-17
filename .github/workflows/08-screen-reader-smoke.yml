@@ -24,6 +24,7 @@ on:
       - 'scripts/build-screen-reader-start-references.py'
       - 'scripts/build-screen-reader-name-references.py'
       - 'scripts/build-screen-reader-live-status-references.py'
+      - 'scripts/build-screen-reader-chip-shapes.py'
       - 'scripts/assets/status-name/**'
       - 'package.json'
       - 'playwright.config.js'
@@ -33,6 +34,8 @@ on:
     paths:
       - '08_screen_reader/**'
       - 'csv/mini_character_mapping.csv'
+      - 'csv/chip_list.csv'
+      - 'images/chip_icon/**'
       - 'images/UT_Hero_ProfilePhoto/**'
       - 'scripts/build-mini-character-mapping.py'
       - 'scripts/build-screen-reader-profile-references.py'
@@ -44,6 +47,7 @@ on:
       - 'scripts/build-screen-reader-start-references.py'
       - 'scripts/build-screen-reader-name-references.py'
       - 'scripts/build-screen-reader-live-status-references.py'
+      - 'scripts/build-screen-reader-chip-shapes.py'
       - 'scripts/assets/status-name/**'
       - 'tests/08-screen-reader.spec.js'
       - 'tests/08-world-reader.spec.js'
@@ -76,9 +80,10 @@ jobs:
       - run: python3 scripts/build-screen-reader-start-references.py --check
       - run: python3 scripts/build-screen-reader-name-references.py --check
       - run: python3 scripts/build-screen-reader-live-status-references.py --check
+      - run: python3 scripts/build-screen-reader-chip-shapes.py --check
       - run: npx playwright install --with-deps chromium webkit
       - run: npm run test:08
-      - run: npx playwright test tests/08-screen-reader.spec.js --browser=webkit -g "printed status name|status names require|zoomed status|fast-changing"
+      - run: npx playwright test tests/08-screen-reader.spec.js --browser=webkit -g "printed status name|status names require|zoomed status|fast-changing|chip artwork|chip grid"
       - run: npm run test:08:sync -- --workers=2
       - uses: actions/upload-artifact@v4
         if: always()
