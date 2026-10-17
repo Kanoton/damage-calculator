@@ -220,3 +220,18 @@ test('08 world: complete labels below the old scan limit are readable while edge
  },fixture('11'));
  expect(results[0]).toEqual([{monsterId:'M0017',serial:5,currentHp:7,maxHp:7}]);expect(results[1]).toEqual([]);
 });
+
+test('08 world: image HP zero candidates never defeat an observed living shark at either polling speed',async({page})=>{
+ await open(page);await page.locator('#reader-toggle').click();
+ await page.locator('#reader-file').setInputFiles({name:'world.png',mimeType:'image/png',buffer:Buffer.from(fixture('11').split(',')[1],'base64')});await expect(page.locator('#reader-file')).toHaveValue('');
+ await page.locator('#mp-map-select').evaluate(el=>{el.value='MAP0001';el.dispatchEvent(new Event('change',{bubbles:true}));});await page.locator('#mp-difficulty').evaluate(el=>{el.value='狂気';el.dispatchEvent(new Event('change',{bubbles:true}));});
+ await page.evaluate(()=>{ScreenReaderMapBridge.apply({monsters:[{monsterId:'M0004',serial:3,currentHp:10,maxHp:10}]});ScreenReaderWorldVision.analyze=()=>({clock:null,monsters:[{monsterId:'M0004',serial:3,currentHp:0,maxHp:10}]});});
+ for(const speed of ['500','250']){
+  await page.locator('#reader-interval').selectOption(speed);
+  for(let i=0;i<4;i++)await page.evaluate(()=>ScreenReaderController.read(true));
+  const shark=await page.evaluate(()=>ScreenReaderMapBridge.snapshot().monsters.find(m=>m.monsterId==='M0004'&&m.serial===3));expect(shark.hp).toBe(10);expect(shark.defeated).toBe(false);
+ }
+ await expect(page.locator('#reader-world-result')).toContainText('撃破未確認');
+ // Explicit non-image updates still support confirmed zero and Undo.
+ await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[{monsterId:'M0004',serial:3,currentHp:0,maxHp:10}]}));expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot().monsters.find(m=>m.monsterId==='M0004'&&m.serial===3).defeated)).toBe(true);
+});
