@@ -93,6 +93,10 @@ npm run test:06b
 
 ## 6. データ変更の考え方
 
+チップ名・効果は `csv/chip_list.csv`、元絵柄との対応・枠色レア度は `csv/chip_artwork_mapping.csv`（いずれもタブ区切り）を正本とする。後者は `chip_id / chip_name / artwork_file / rarity / rarity_color`。`blue=水色 / purple=紫色 / gold=金色（黄色）`。同じ元画像を複数レア度で共有できるが、絵柄＋レア度は一意にする。元画像番号をツール内IDと同一視しない。
+
+元画像は `images/UT_Relic/`。絵柄を照合した対応表に対し `python3 scripts/check-chip-artwork-mapping.py --assign-rarity` で既存 `images/chip_icon/` の枠色から分類でき、曖昧な色では停止する。検証だけなら同コマンドから引数を外す。08の生成は `python3 scripts/build-screen-reader-chip-shapes.py`、一致確認は `--check`。検証・生成手順と制約は `images/UT_Relic/README.md` を参照する。
+
 表示や計算の元データを変える依頼では、まず `csv/` の該当ファイルを確認してください。JSに同梱スナップショットがあるデータの場合、Web配信時と `file://` 時で内容が食い違わないよう注意してください。
 
 データの意味を推測して既存値を書き換えず、既存CSVの列名・利用箇所を検索して影響範囲を確認してください。画像を追加・変更する場合も、CSVやJSが参照するファイル名と実ファイル名を照合してください。

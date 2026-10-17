@@ -18,6 +18,16 @@ def main():
  for row in rows:
   im=Image.open(ROOT/'images/chip_icon'/row['images']).convert('RGB');w,hh=im.size
   for f in [.02,.06,.10,.14]:refs['shapes'].append({'id':row['id'],**shape(im.crop((w*f,hh*f,w*(1-f),hh*(1-f))))})
+ # Raw artwork has no rarity background. Use the reviewed mapping and the
+ # independently checked token-ring rarity, never the raw asset number/color.
+ mapping=runpy.run_path(str(ROOT/'scripts/check-chip-artwork-mapping.py'))['validate']()
+ rarity_codes={'blue':0,'purple':1,'gold':2}
+ for row in mapping:
+  raw=Image.open(ROOT/'images/UT_Relic'/row['artwork_file']).convert('RGBA')
+  for size in [72,80,88,96]:
+   art=raw.resize((size,size),Image.Resampling.BILINEAR);canvas=Image.new('RGB',(100,100));canvas.paste(art,((100-size)//2,(100-size)//2),art)
+   descriptor=shape(canvas);descriptor['rarity']=rarity_codes[row['rarity']]
+   refs['shapes'].append({'id':row['chip_id'],**descriptor})
  for name,stamp,owner,slots in CASES:
   path=ROOT/f'tests/fixtures/screen-reader/chip-grid-{name}.json'
   if a.screens:
