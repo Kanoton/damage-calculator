@@ -40,7 +40,7 @@ test('wide chips: original charge action works in dialog and survives close/resi
  await page.locator('#wide-chip-open').click();
  const dialog=page.locator('.wide-chip-dialog');await expect(dialog).toBeVisible();await info.attach('wide-chip-dialog',{body:await page.screenshot(),contentType:'image/png'});
  await dialog.locator('.selected-chip.is-actionable').first().click();
- await expect(page.getByLabel('チャージの数',{exact:true})).toHaveValue('2');
+ await expect(page.getByLabel('エナジーの数',{exact:true})).toHaveValue('2');
  await page.mouse.click(10,100);await expect(dialog).not.toBeVisible();
  await page.locator('#wide-chip-open').click();await page.setViewportSize({width:1080,height:1920});await expect(dialog).not.toBeVisible();
  await expect(page.locator('#selected-character-chips .selected-chip')).toBeVisible();
