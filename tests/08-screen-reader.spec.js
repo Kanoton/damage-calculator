@@ -143,10 +143,10 @@ test('08: owned coin reading preserves separate manually tracked coin controls',
  await readFixture(page,'6248');expect((await snapshot(page)).members[0].coin).toBe(17);const controls=await page.evaluate(()=>captureCharacterAbilityState().numbers);expect(controls['スターコイン']).toBe(42);expect(controls['コイン']).toBe(3);
 });
 
-test('08: automatic stabilization requires consecutive matching observations for each field',async({page})=>{
+test('08: automatic stabilization confirms identities and chips while numeric values update each readable frame',async({page})=>{
  await open(page);
  const r=await page.evaluate(()=>{const c=ScreenReaderController,o={members:[{id:'13',slot:1,currentHp:8,maxHp:10,coin:12}],selfId:'105',chipOwnerId:'13',chipIds:['26']};return [c.stabilize(o),c.stabilize(o),c.stabilize({...o,members:[{...o.members[0],currentHp:7}]}),c.stabilize({...o,members:[],chipIds:[]}),c.stabilize(o)];});
- expect(r[0].members).toEqual([]);expect(r[0].chipIds).toEqual([]);expect(r[1].members[0].currentHp).toBe(8);expect(r[1].chipIds).toEqual(['26']);expect(r[2].members[0].currentHp).toBeUndefined();expect(r[4].members).toEqual([]);expect(r[4].chipIds).toEqual([]);
+ expect(r[0].members).toEqual([]);expect(r[0].chipIds).toEqual([]);expect(r[1].members[0].currentHp).toBe(8);expect(r[1].chipIds).toEqual(['26']);expect(r[2].members[0].currentHp).toBe(7);expect(r[4].members).toEqual([]);expect(r[4].chipIds).toEqual([]);
 });
 
 test('08: window capture reads real video frames, auto updates and stops tracks',async({page})=>{
@@ -606,4 +606,42 @@ test('08: status names require a real grid and visible unknown text cannot fall 
  expect(outputs.normal.chipOwnerId).toBe('13');expect(outputs.normal.chipIds).toEqual([]);
  for(const kind of ['no-grid','unknown','cropped']){expect(outputs[kind].chipOwnerId,kind).toBeNull();expect(outputs[kind].chipIds,kind).toEqual([]);}
  expect(outputs.unknown.chipRead.stage).toBe('owner');expect(outputs.cropped.chipRead.stage).toBe('owner');
+});
+
+for(const [name,owner,chip,def] of [['sherry','106','52',1],['luka','17','1',2]])test('08: zoomed status '+name+' aligns by panel anchors and reads the owner, chip and parameters',async({page})=>{
+ await open(page);await page.locator('#reader-new-game').click();await page.evaluate(()=>ScreenReaderCharacterBridge.apply({members:[{id:'106',slot:0},{id:'17',slot:1},{id:'105',slot:2},{id:'13',slot:3}]}));
+ await readFixture(page,'live-status-'+name);const s=await snapshot(page),m=s.members.find(m=>m.id===owner);expect(m.chips).toEqual([chip]);expect([m.atk,m.def]).toEqual([3,def]);expect(s.selfId).toBe('');
+ const outputs=await page.evaluate(async({src,owner})=>{
+  const im=new Image();im.src=src;await im.decode();const out=[];
+  for(const scale of [1,.75]){
+   const c=document.createElement('canvas');c.width=Math.round(im.width*scale)+150;c.height=Math.round(im.height*scale)+100;const ctx=c.getContext('2d');ctx.fillStyle='#141414';ctx.fillRect(0,0,c.width,c.height);ctx.drawImage(im,85,45,im.width*scale,im.height*scale);
+   const frame=ScreenReaderVision.normalize(c),o=ScreenReaderVision.analyze(frame);out.push(o);
+   const panel=ScreenReaderVision.statusPanel(frame).source,p=panel.getContext('2d');p.fillStyle='#141414';p.fillRect(427,80,51,50);
+   // The printed name remains sufficient when its outfit portrait is absent.
+   out.push(ScreenReaderVision.analyze(frame));
+  }
+  return out;
+ },{src:fixture('live-status-'+name),owner});
+ for(const o of outputs){expect(o.chipOwnerId).toBe(owner);expect(o.chipIds).toEqual([chip]);expect(o.chipRead.aligned).toBe(true);expect(o.chipRead.matchedRims).toBeGreaterThanOrEqual(7);expect(o.members.find(m=>m.id===owner)).toMatchObject({atk:3,def});expect(o.members.find(m=>m.id===owner).currentHp).toBeUndefined();}
+});
+
+test('08: fast-changing HP attack and defense follow each readable observation after identity confirmation',async({page})=>{
+ await open(page);await page.locator('#reader-new-game').click();
+ const states=await page.evaluate(()=>{
+  ScreenReaderCharacterBridge.apply({selfId:'105',members:[{id:'105',slot:0},{id:'13',slot:1}]});
+  const states=[];
+  for(const [hp,atk,def] of [[9,1,1],[8,3,2],[7,5,4],[6,2,1]]){
+   const accepted=ScreenReaderController.stabilize({members:[{id:'105',slot:0,currentHp:hp,maxHp:10,atk,def}],selfId:'105',chipOwnerId:null,chipIds:[]});ScreenReaderCharacterBridge.apply(accepted);states.push({accepted,snapshot:ScreenReaderCharacterBridge.snapshot()});
+  }
+  return states;
+ });
+ expect(states[0].accepted.members).toEqual([]);
+ for(const [i,hp,atk,def] of [[1,8,3,2],[2,7,5,4],[3,6,2,1]])expect(states[i].snapshot.members[0]).toMatchObject({currentHp:hp,atk,def});
+ const missing=await page.evaluate(()=>{ScreenReaderCharacterBridge.apply(ScreenReaderController.stabilize({members:[{id:'105',slot:0}],selfId:'105',chipOwnerId:null,chipIds:[]}));return ScreenReaderCharacterBridge.snapshot();});expect(missing.members[0]).toMatchObject({currentHp:6,atk:2,def:1});
+});
+
+test('08: zoomed status alignment rejects a divider and status-colored tab without a chip grid',async({page})=>{
+ await open(page);
+ const o=await page.evaluate(()=>{const c=document.createElement('canvas');c.width=1536;c.height=709;const ctx=c.getContext('2d');ctx.fillStyle='#141414';ctx.fillRect(0,0,c.width,c.height);ctx.fillStyle='white';ctx.fillRect(100,350,1200,3);ctx.fillStyle='#78ff20';ctx.fillRect(100,20,360,80);return ScreenReaderVision.analyze(c);});
+ expect(o.chipRead.aligned).toBe(false);expect(o.chipOwnerId).toBeNull();expect(o.chipIds).toEqual([]);
 });
