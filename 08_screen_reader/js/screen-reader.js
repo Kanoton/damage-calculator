@@ -105,8 +105,8 @@
   const owner=catalog.characters.find(c=>c.id===observation.chipOwnerId)?.name,owned=current.members.find(m=>m.id===observation.chipOwnerId)?.chips||[];
   const chipNames=observation.chipIds.map(id=>(catalog.chips.find(c=>c.id===id)?.name??id)+(automatic&&!accepted.chipIds.includes(id)?'（安定待ち）':apply?'（今回）':'（確認のみ）'));
   const chipRead=observation.chipRead;
-  const reason=chipRead?.stage==='screen'?'一覧画面・選択タブを未判定。チップ一覧かステータス画面を表示してください。':chipRead?.stage==='panel'?'一覧の枠を確認できません（'+chipRead.matchedRims+'/10一致、7以上で読取）。':chipRead?.stage==='owner'?'一覧を確認。持ち主のキャラが未判定です。':null;
-  $('chip-result').textContent=reason?'チップ読取：'+reason:observation.chipOwnerId?(owner+'のチップ：'+(chipNames.join('、')||(chipRead?.stage==='icons'?'一覧と持ち主は確認済み。アイコンは未判定または空欄です。':'今回判定できたチップなし'))+' ／ 取得済み '+owned.length+'件を保持'+(apply&&!current.members.some(m=>m.id===observation.chipOwnerId)?' ／ 持ち主のPT登録待ち':'')):'チップの対象キャラは未判定です。取得済みチップは保持しています。';
+  const reason=chipRead?.stage==='screen'?'一覧画面・選択タブを未判定。チップ一覧かステータス画面を表示してください。':chipRead?.stage==='panel'?'一覧の枠を確認できません（'+chipRead.matchedRims+'/10一致、7以上で読取）。':chipRead?.stage==='owner'?(chipRead.ownerSource==='name'?'一覧を確認。持ち主の名前の文字が未判定です。':'一覧を確認。持ち主のキャラが未判定です。'):null;
+  $('chip-result').textContent=reason?'チップ読取：'+reason:observation.chipOwnerId?(owner+'のチップ'+(chipRead?.ownerSource==='name'?'（名前で判定）':'')+'：'+(chipNames.join('、')||(chipRead?.stage==='icons'?'一覧と持ち主は確認済み。アイコンは未判定または空欄です。':'今回判定できたチップなし'))+' ／ 取得済み '+owned.length+'件を保持'+(apply&&!current.members.some(m=>m.id===observation.chipOwnerId)?' ／ 持ち主のPT登録待ち':'')):'チップの対象キャラは未判定です。取得済みチップは保持しています。';
  }
  function accept(key,value){const prior=stable.get(key);const count=prior&&prior.value===value&&prior.tick===stableTick-1?prior.count+1:1;stable.set(key,{value,count,tick:stableTick});return count>=2;}
  function stabilize(observation){

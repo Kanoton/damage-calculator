@@ -94,6 +94,26 @@
   }
   if(!glyphs.length||glyphs.length>3)return null;return Number(glyphs.join(''));
  }
+ // Read only the printed canonical name inside the centered parameter panel.
+ // Whole-word masks keep kana order/length; unknown or ambiguous text abstains.
+ const nameBox=[593,178,400,44],nameCache=new WeakMap();
+ function statusName(source){
+  const c=crop(source,nameBox,nameBox[2],nameBox[3]),ctx=c.getContext('2d'),p=ctx.getImageData(0,0,c.width,c.height),mask=new Uint8Array(c.width*c.height);
+  let left=c.width,right=0,top=c.height,bottom=0,count=0;
+  for(let y=0;y<c.height;y++)for(let x=0;x<c.width;x++){const i=(y*c.width+x)*4;if(isInk(p.data[i],p.data[i+1],p.data[i+2],'white')){mask[y*c.width+x]=1;left=Math.min(left,x);right=Math.max(right,x+1);top=Math.min(top,y);bottom=Math.max(bottom,y+1);count++;}}
+  if(count<35)return {visible:false,id:null};
+  if(bottom-top<14||left===0||right===c.width||top===0||bottom===c.height)return {visible:true,id:null};
+  for(let i=0;i<mask.length;i++){p.data[i*4]=p.data[i*4+1]=p.data[i*4+2]=mask[i]*255;p.data[i*4+3]=255;}ctx.putImageData(p,0,0);
+  const a=crop(c,[left,top,right-left,bottom-top],128,32).getContext('2d').getImageData(0,0,128,32).data,ratio=(right-left)/(bottom-top),scores=new Map();
+  for(const ref of window.ScreenReaderNameReferences||[]){
+   let b=nameCache.get(ref);if(!b){b=decode(ref.data);nameCache.set(ref,b);}let error=0;
+   for(let i=0;i<4096;i++)error+=Number(a[i*4]>110)!==((b[i>>3]>>(i&7))&1);
+   const score=error/4096+Math.min(.3,Math.abs(ratio-ref.ratio)*.045);scores.set(ref.id,Math.min(scores.get(ref.id)??Infinity,score));
+  }
+  const ranked=[...scores].sort((a,b)=>a[1]-b[1]);
+  if(!ranked.length||ranked[0][1]>.205||(ranked[1]&&ranked[1][1]-ranked[0][1]<.035))return {visible:true,id:null};
+  return {visible:true,id:ranked[0][0],confidence:Math.round((1-ranked[0][1])*100)};
+ }
  function levelAt(source,index,stars){
   const values=[];for(const x of stars){const c=crop(source,[x-3,106+Y[index]-3,6,6],6,6),p=c.getContext('2d').getImageData(0,0,6,6).data;let colored=0,gray=0;for(let i=0;i<p.length;i+=4){const v=[p[i],p[i+1],p[i+2]];if(Math.max(...v)-Math.min(...v)>65&&Math.max(...v)>150)colored++;if(Math.max(...v)-Math.min(...v)<40&&Math.max(...v)>70&&Math.max(...v)<200)gray++;}if(colored>8)values.push(1);else if(gray>8)values.push(0);else return null;}
   // Filled stars must form a prefix. Reject transient/glowing unreadable stars.
@@ -171,20 +191,24 @@
   const repeated=new Set(members.filter(m=>m.id&&members.filter(other=>other.id===m.id).length>1).map(m=>m.id));
   for(const m of members)if(repeated.has(m.id)){delete m.id;m.unreadable=true;}
   const statusSource=source.statusFrame||source;
-  const header=match(feature(statusSource,regions.header),charRefs.filter(r=>r.kind==='header'));
+  const portraitHeader=match(feature(statusSource,regions.header),charRefs.filter(r=>r.kind==='header'));
   const lowerCandidate=source.popupFrame&&source.statusFrame?lowerTab(source.popupFrame):null;
   const lowerScore=lowerCandidate!==null?chipPanelScore(source.popupFrame,'lower',lowerCenters):0;
   const lower=lowerCandidate!==null&&lowerScore>=7?lowerCandidate:null;
   const smallCandidate=lower===null?activeTab(hudSource):null;
   const smallScore=smallCandidate!==null?chipPanelScore(hudSource,'small',smallCenters):0;
   const tab=lower??(smallCandidate!==null&&smallScore>=7?smallCandidate:null);
-  const largeScore=header||tab===null?chipPanelScore(statusSource,'large',largeCenters):0;
+  const largeScore=portraitHeader||tab===null?chipPanelScore(statusSource,'large',largeCenters):0;
+  const printedName=largeScore>=7?statusName(statusSource):{visible:false,id:null};
+  // A visible unreadable name must not silently fall back to another face.
+  const header=printedName.visible?(printedName.id?printedName:null):portraitHeader;
   // The small popup covers the self portrait. Never identify self from its
   // chip contents or selected tab; keep the previous self or explicit choice.
   const selfRefs=charRefs.filter(r=>r.kind==='self');
   const own=(!locked||!party.selfId)&&(header||tab===null)?match(feature(hudSource,layout.regions.self),selfRefs)||(source.statusFrame&&hudSource!==source.popupFrame?match(feature(source.popupFrame,layouts[1].regions.self),selfRefs):null):null;
   const selfId=locked?(party.selfId||(party.ids.includes(own?.id)?own.id:null)):own?.id??null;
-  const observation={members,selfId,hud:{layout:layout.id,source:hudSource===source?'primary':'popup'},view:'通常画面',chipOwnerId:null,chipIds:[],chipRead:{stage:'screen',matchedRims:Math.max(lowerScore,smallScore,largeScore)}};
+  const observation={members,selfId,hud:{layout:layout.id,source:hudSource===source?'primary':'popup'},view:'通常画面',chipOwnerId:null,chipIds:[],chipRead:{stage:'screen',matchedRims:Math.max(lowerScore,smallScore,largeScore),ownerSource:printedName.visible?'name':header?'portrait':null}};
+  if(largeScore>=7&&!header)observation.view='ステータス画面';
   if(header){
    observation.view='ステータス画面';observation.chipRead.matchedRims=largeScore;observation.chipRead.stage='panel';if(observation.chipRead.matchedRims>=7){observation.chipOwnerId=header.id;observation.chipIds=chipMatches(statusSource,largeCenters,chipRefs);}
    let target=members.find(m=>m.id===header.id);if(!target){target={id:header.id};members.push(target);}
@@ -203,5 +227,5 @@
   const popup=document.createElement('canvas');popup.width=WIDTH;popup.height=HEIGHT;popup.getContext('2d').drawImage(source,a.x*w,a.y*h,a.w*w,a.h*h,0,0,statusWidth,HEIGHT);c.popupFrame=popup;
   return c;}
  function learn(source,kind,id,index=0){const refs=window.ScreenReaderReferences,extra=window.ScreenReaderLayoutReferences||{},selected=selectLayout(source,[...refs.characters,...(extra.characters||[]),...(window.ScreenReaderStatusReferences?.characters||[])],[...refs.digits,...(extra.digits||[])]),layout=selected.layout;const lower=source.popupFrame&&source.statusFrame&&lowerTab(source.popupFrame)!==null;const box=kind==='chip-small'?(lower?lowerCenters:smallCenters)[index]:kind==='chip-large'?largeCenters[index]:kind==='avatar'?layout.regions.avatar[index]:layout.regions[kind];if(!box)throw Error('見本の位置が不正です。');const region=kind.startsWith('chip-')?[box[0]-18,box[1]-18,36,36]:box;return {id:String(id),kind:kind.startsWith('chip-')?'chip':kind,data:encode(feature(kind==='chip-small'&&lower?source.popupFrame:(kind==='header'||kind==='chip-large')?(source.statusFrame||source):selected.source,region))};}
- window.ScreenReaderVision={analyze,normalize,learn,numberAt,feature,profileMatch,readSelfStats,regions,WIDTH,HEIGHT};
+ window.ScreenReaderVision={analyze,normalize,learn,numberAt,statusName,feature,profileMatch,readSelfStats,regions,WIDTH,HEIGHT};
 })();

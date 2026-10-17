@@ -567,3 +567,43 @@ test('08: a visible large chip grid with an unknown header reports missing owner
  expect(o.chipRead).toMatchObject({stage:'owner'});expect(o.chipRead.matchedRims).toBeGreaterThanOrEqual(7);expect(o.chipOwnerId).toBeNull();expect(o.chipIds).toEqual([]);
  await page.evaluate(o=>ScreenReaderCharacterBridge.apply(o),o);expect((await snapshot(page)).members.map(m=>m.chips)).toEqual(before.members.map(m=>m.chips));
 });
+
+test('08: printed status name owns parameters and chips independently of the pixel portrait and current self',async({page})=>{
+ await open(page);await page.locator('#reader-new-game').click();
+ await page.evaluate(()=>ScreenReaderCharacterBridge.apply({selfId:'105',members:[{id:'105',slot:0},{id:'13',slot:1},{id:'20',slot:2},{id:'2',slot:3}]}));
+ await readFixture(page,'status-name-kaisei');await expect(page.locator('#reader-chip-result')).toContainText('カイセイのチップ（名前で判定）');
+ const outputs=await page.evaluate(async({name,other})=>{
+  const images=await Promise.all([name,other].map(async src=>{const im=new Image();im.src=src;await im.decode();return ScreenReaderVision.normalize(im);}));
+  const out=[];
+  for(const portrait of ['hidden','different']){
+   const c=ScreenReaderVision.normalize(images[0]),ctx=c.getContext('2d');
+   // images[0] already has legacy-stretched geometry; use its centered panel.
+   const target=images[0].statusFrame||images[0];ctx.drawImage(target,0,0);
+   ctx.fillStyle='#141414';ctx.fillRect(427,80,51,50);
+   if(portrait==='different')ctx.drawImage(images[1].statusFrame||images[1],431,84,43,42,431,84,43,42);
+   ctx.drawImage(images[1].statusFrame||images[1],517,334,36,36,517,334,36,36);
+   const observation=ScreenReaderVision.analyze(c);ScreenReaderCharacterBridge.apply(observation);out.push(observation);
+  }
+  return out;
+ },{name:fixture('status-name-kaisei'),other:fixture('status-184601')});
+ for(const o of outputs){expect(o.chipOwnerId).toBe('13');expect(o.chipRead.ownerSource).toBe('name');expect(o.chipIds).toEqual(['42']);expect(o.members.find(m=>m.id==='13')).toMatchObject({atk:1,def:1});expect(o.members.find(m=>m.id==='13').move).toBeUndefined();expect(o.selfId).toBeNull();}
+ const s=await snapshot(page);expect(s.selfId).toBe('105');expect(s.members.map(m=>m.id)).toEqual(['105','13','20','2']);expect(s.members[1].chips).toEqual(['42']);expect(s.members[0].chips).toEqual([]);
+});
+
+test('08: status names require a real grid and visible unknown text cannot fall back to a portrait',async({page})=>{
+ await open(page);
+ const outputs=await page.evaluate(async src=>{
+  const im=new Image();im.src=src;await im.decode();const out={};
+  for(const kind of ['normal','no-grid','unknown','cropped']){
+   const frame=ScreenReaderVision.normalize(im),target=frame.statusFrame||frame,ctx=target.getContext('2d');
+   if(kind==='no-grid'){ctx.fillStyle='#141414';ctx.fillRect(465,324,286,184);ctx.fillRect(427,80,51,50);}
+   if(kind==='unknown'){ctx.fillStyle='#141414';ctx.fillRect(593,178,400,44);ctx.fillStyle='white';ctx.fillRect(610,185,180,28);}
+   if(kind==='cropped'){ctx.fillStyle='#141414';ctx.fillRect(593,178,400,44);ctx.fillStyle='white';ctx.fillRect(593,184,70,30);}
+   out[kind]=ScreenReaderVision.analyze(frame);
+  }
+  return out;
+ },fixture('status-name-kaisei'));
+ expect(outputs.normal.chipOwnerId).toBe('13');expect(outputs.normal.chipIds).toEqual([]);
+ for(const kind of ['no-grid','unknown','cropped']){expect(outputs[kind].chipOwnerId,kind).toBeNull();expect(outputs[kind].chipIds,kind).toEqual([]);}
+ expect(outputs.unknown.chipRead.stage).toBe('owner');expect(outputs.cropped.chipRead.stage).toBe('owner');
+});
