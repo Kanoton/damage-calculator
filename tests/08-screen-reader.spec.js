@@ -541,14 +541,16 @@ for(const [name,id]of [['live-map','13'],['replay-map','2']])test('08: reviewed 
 });
 
 test('08: bottom reader launcher opens a draggable panel, clamps after resize, closes and resets its position',async({page})=>{
+ console.info('reader drag: open');await page.context().tracing.start({screenshots:true,snapshots:true});
  await page.setViewportSize({width:1600,height:1000});await open(page);
+ console.info('reader drag: opened');
  const toggle=page.locator('#reader-toggle'),panel=page.locator('#reader-panel'),body=page.locator('.tool-wrapper');
  const launcher=await toggle.boundingBox();expect(launcher.y+launcher.height).toBeCloseTo(1000,0);
  const layout=await body.boundingBox(),before=await panel.boundingBox(),handle=await page.locator('#reader-move').boundingBox();
- await page.mouse.move(handle.x+50,handle.y+handle.height/2);await page.mouse.down();await page.mouse.move(handle.x+190,handle.y+handle.height/2-100,{steps:5});await page.mouse.up();
+ console.info('reader drag: pointer');await page.mouse.move(handle.x+50,handle.y+handle.height/2);await page.mouse.down();await page.mouse.move(handle.x+190,handle.y+handle.height/2-100,{steps:5});await page.mouse.up();
  const moved=await panel.boundingBox();expect(moved.x-before.x).toBeCloseTo(140,0);expect(moved.y-before.y).toBeCloseTo(-100,0);expect(await body.boundingBox()).toEqual(layout);
- await page.locator('#reader-move').focus();await page.keyboard.press('ArrowLeft');expect((await panel.boundingBox()).x).toBeCloseTo(moved.x-10,0);
- await page.setViewportSize({width:1200,height:720});const resized=await panel.boundingBox();expect(resized.x).toBeGreaterThanOrEqual(0);expect(resized.x+resized.width).toBeLessThanOrEqual(1201);expect(resized.y).toBeGreaterThanOrEqual(0);expect(resized.y+resized.height).toBeLessThanOrEqual(721);
- await page.locator('#reader-close').click();await expect(panel).toBeHidden();
- await toggle.click();await page.locator('#reader-position-reset').click();expect(await panel.evaluate(el=>el.style.top)).toBe('');
+ console.info('reader drag: keyboard');await page.locator('#reader-move').focus();await page.keyboard.press('ArrowLeft');expect((await panel.boundingBox()).x).toBeCloseTo(moved.x-10,0);
+ console.info('reader drag: resize');await page.setViewportSize({width:1200,height:720});const resized=await panel.boundingBox();expect(resized.x).toBeGreaterThanOrEqual(0);expect(resized.x+resized.width).toBeLessThanOrEqual(1201);expect(resized.y).toBeGreaterThanOrEqual(0);expect(resized.y+resized.height).toBeLessThanOrEqual(721);
+ console.info('reader drag: close');await page.locator('#reader-close').click();await expect(panel).toBeHidden();
+ console.info('reader drag: reopen');await toggle.click();console.info('reader drag: reset');await page.locator('#reader-position-reset').click();expect(await panel.evaluate(el=>el.style.top)).toBe('');await page.context().tracing.stop({path:'test-results/reader-drag-trace.zip'});
 });
