@@ -27,6 +27,23 @@ for(const protocol of ['http','file'])test('07 autumn data: map, four difficulti
  await owned('電撃グローブ').click();await expect(energy).toHaveValue('15');await expect(atk).toHaveValue(String(base+9));
 });
 
+for(const protocol of ['http','file'])test('07 autumn completion: all events, building cards and status descriptions on '+protocol,async({page})=>{
+ await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve(skillFolder+'/index.html')).href:`/${skillFolder}/`);
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');await page.locator('#mp-tab-map').click();
+ const features=page.locator('#mp-map-features');await expect(features).toBeVisible();await expect(features.locator('article')).toHaveCount(6);
+ for(const name of ['疾走キノコ','仙果スターフルーツ','芳香ピーチ','金運の木'])await expect(features.getByRole('img',{name,exact:true})).toBeVisible();
+ await expect.poll(()=>features.locator('img').evaluateAll(images=>images.length===4&&images.every(image=>image.complete&&image.naturalWidth>0))).toBe(true);
+ await expect(features).toContainText('次の移動力+3');await expect(features).toContainText('HP上限+1');await expect(features).toContainText('HPを2回復');await expect(features).toContainText('スターコインを3');await expect(features).toContainText('1スタックごとにキッズガオーの攻撃力+2');await expect(features).toContainText('防御力-1、移動力-1');
+ for(const [level,end]of [['普通','18'],['困難','18'],['悪夢','17'],['狂気','17']]){
+  await page.locator('#mp-difficulty').selectOption(level);
+  await expect(page.locator('#mp-event-body tr')).toHaveCount(5);await expect(page.locator('#mp-event-body tr').last().locator('td').first()).toHaveText(end);
+  await page.getByRole('button',{name:'1 のイベントを実行',exact:true}).click();await expect(page.locator('#map-roster-list .roster-card')).toHaveCount(4);
+  const event=page.getByRole('button',{name:'3 のイベントを実行',exact:true});await event.hover();await expect(page.locator('#mp-event-image-layer img')).toHaveAttribute('src',/Autumn_Normal_03\.png$/);await event.click();await expect(page.locator('#map-roster-list .roster-card')).toHaveCount(7);
+  await expect(page.locator('#map-roster-list')).toContainText('キッズガオー');
+ }
+ await page.locator('#mp-map-select').selectOption('MAP0001');await expect(features).toBeHidden();await expect(features.locator('article')).toHaveCount(0);
+});
+
 for(const protocol of ['http','file'])test('07 chip update: Whetstone includes exactly half HP on '+protocol,async({page})=>{
  await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve(skillFolder+'/index.html')).href:`/${skillFolder}/`);
  await selectCharacter(page,'2');await expect(page.locator('#selected-character-hp')).toHaveText('10');await selectChipCategory(page,'共通');

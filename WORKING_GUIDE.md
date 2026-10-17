@@ -93,6 +93,8 @@ npm run test:06b
 
 ## 6. データ変更の考え方
 
+マップ固有カード・建物効果・状態効果の参照説明は `csv/map_features.csv`（map_id / kind / name / image / description / building_effect）を正本とする。kindはcardまたはkeyword、imageはimages/からの相対パス。07/08のマップ詳細欄で表示し、両方の `INITIAL_MAP_DATA.features` を同期する。説明表示は効果の自動実行を意味しない。秋幻の森のカード画像は承認済み縦長まとめから `scripts/extract-autumn-cards.py` で切り出したものを使う。
+
 現行07/08のチャージスタックはゲーム更新後の表示名「エナジー」、上限15。共有CSVのカテゴリ・条件・アイコンの識別キー `チャージ` は旧版との互換のため保持し、現行 `character-data-loader.js` と説明文一覧のexport時に `エナジー` へ正規化する。キャラのパッシブ名「チャージステップ」は別物なので変更しない。HTTPとfile://のチップ／ルールsnapshotも同期し、保存版のJSを無断更新しない。
 
 チップ名・効果は `csv/chip_list.csv`、元絵柄との対応・枠色レア度は `csv/chip_artwork_mapping.csv`（いずれもタブ区切り）を正本とする。後者は `chip_id / chip_name / artwork_file / rarity / rarity_color`。`blue=水色 / purple=紫色 / gold=金色（黄色）`。同じ元画像を複数レア度で共有できるが、絵柄＋レア度は一意にする。元画像番号をツール内IDと同一視しない。
