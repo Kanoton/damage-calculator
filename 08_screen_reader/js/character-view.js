@@ -40,7 +40,7 @@ function createMapConditionToggleView(key,active,icon,onToggle){
 function createConditionNumberView(key,value,icon){
  const item=document.createElement('label');item.className='condition-item';item.title=getSkillHoverText('operation.number',{name:key});
  const button=document.createElement('button');button.type='button';button.className='condition-icon';button.setAttribute('aria-label',key+'を増やす');button.append(icon);
- const input=document.createElement('input');input.type='number';input.min='0';if(key==='チャージ')input.max='10';input.inputMode='numeric';input.className='condition-number';input.setAttribute('aria-label',key+'の数');input.value=value;
+ const input=document.createElement('input');input.type='number';input.min='0';if(key==='エナジー')input.max='15';input.inputMode='numeric';input.className='condition-number';input.setAttribute('aria-label',key+'の数');input.value=value;
  item.append(button,input);return {item,button,input};
 }
 

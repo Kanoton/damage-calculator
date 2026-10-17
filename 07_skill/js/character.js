@@ -27,7 +27,7 @@
  window.restoreCharacterEvidence=snapshot=>{if(!snapshot)return;getState(snapshot.id).numbers['罪証']=snapshot.count;if(selectedCharacter?.id===snapshot.id){renderConditions();updateStats();}};
  window.getCharacterEvidenceStack=()=>selectedCharacter?number(state(),'罪証'):0;
  window.setCharacterEvidenceStack=value=>{if(!selectedCharacter)return;state().numbers['罪証']=Math.max(0,Math.floor(Number(value)||0));renderConditions();updateStats();window.dispatchEvent(new Event('character-evidence-change'));};
- const number=(s,key)=>Math.min(key==='チャージ'?10:Infinity,Math.max(0,Number(s.numbers[key])||0));
+ const number=(s,key)=>Math.min(key==='エナジー'?15:Infinity,Math.max(0,Number(s.numbers[key])||0));
  const abilityRules=()=>CHARACTER_ABILITY_RULES[String(selectedCharacter?.id)]||null;
  const abilityControlValue=key=>{if(String(selectedCharacter?.id)==='6'&&key.startsWith('自己主張なし')&&state().numbers['マジで怒ったぞ'])return 2;if(key==='ファン')return Math.max(0,Number(state().numbers[key])||0)+(window.getRosterFanCount?.()||0);const stored=state().numbers[key];if(stored!==undefined)return Number(stored)||0;const control=abilityRules()?.controls?.find(item=>item.key===key);return Number(control?.default)||0;};
  const activeSkill=()=>abilityRules()?.activeSkills?.[0]||null;
@@ -140,7 +140,7 @@
  }
  function neededInputs(){
   const numeric=new Set();
-  if(state().chips.some(id=>chips.find(chip=>chip.id===id)?.category==='チャージ'))numeric.add('チャージ');
+  if(state().chips.some(id=>chips.find(chip=>chip.id===id)?.category==='エナジー'))numeric.add('エナジー');
   if(String(selectedCharacter.id)==='11'||partySlots.some(id=>String(id)==='11')||number(state(),'ヒール')>0)numeric.add('ヒール');
   for(const rule of activeRules()){
    if(rule.kind==='counter_delta')numeric.add(rule.target);
@@ -328,8 +328,8 @@
   for(const key of new Set([...neededInputs(),...mapNumbers])){
    const item=document.createElement('label');item.className='condition-item';item.title=getSkillHoverText('operation.number',{name:key});
    const button=document.createElement('button');button.type='button';button.className='condition-icon';button.setAttribute('aria-label',key+'を増やす');button.append(makeIcon(key));
-   const input=document.createElement('input');input.type='number';input.min='0';if(key==='チャージ')input.max='10';input.inputMode='numeric';input.className='condition-number';input.setAttribute('aria-label',key+'の数');input.value=number(state(),key);
-   const setValue=value=>{const next=Math.min(key==='チャージ'?10:Infinity,Math.max(0,key==='ヒール'?Math.floor(Number(value)||0):Number(value)||0));if(key==='ヒール'){if(next===number(state(),key)){input.value=next;return;}window.rememberCharacterSkillActivation?.();}state().numbers[key]=next;input.value=next;updateStats();if(key==='罪証')window.dispatchEvent(new Event('character-evidence-change'));};
+   const input=document.createElement('input');input.type='number';input.min='0';if(key==='エナジー')input.max='15';input.inputMode='numeric';input.className='condition-number';input.setAttribute('aria-label',key+'の数');input.value=number(state(),key);
+   const setValue=value=>{const next=Math.min(key==='エナジー'?15:Infinity,Math.max(0,key==='ヒール'?Math.floor(Number(value)||0):Number(value)||0));if(key==='ヒール'){if(next===number(state(),key)){input.value=next;return;}window.rememberCharacterSkillActivation?.();}state().numbers[key]=next;input.value=next;updateStats();if(key==='罪証')window.dispatchEvent(new Event('character-evidence-change'));};
    button.addEventListener('click',()=>setValue(number(state(),key)+1));
    button.addEventListener('contextmenu',e=>{e.preventDefault();setValue(number(state(),key)-1);});
    input.addEventListener('change',()=>setValue(input.value));item.append(button,input);conditionsBox.append(item);
@@ -410,12 +410,12 @@
   ownedBox.replaceChildren();
   for(const id of state().chips){
    const chip=chips.find(c=>c.id===id);if(!chip)continue;
-   const chargeDelta=chip.category==='チャージ'&&id!=='57'?({'51':2,'52':2,'53':3,'54':1,'55':-6,'56':-5,'58':-4}[id]||0):null;
+   const chargeDelta=chip.category==='エナジー'&&id!=='57'?({'51':2,'52':2,'53':3,'54':1,'55':-6,'56':-5,'58':-4}[id]||0):null;
    const item=createOwnedChipView(chip,chargeDelta,()=>{
     if(!chargeDelta)return;
-    const charge=number(state(),'チャージ');
+    const charge=number(state(),'エナジー');
     if(chargeDelta<0&&charge<-chargeDelta)return;
-    state().numbers['チャージ']=Math.max(0,Math.min(10,charge+chargeDelta));
+    state().numbers['エナジー']=Math.max(0,Math.min(15,charge+chargeDelta));
     if(id==='54')state().numbers['電撃グローブ命中数']=number(state(),'電撃グローブ命中数')+1;
     if(id==='56'){const skill=activeSkill();if(skill)state().skillCooldowns[skill.key]=Math.max(0,activeSkillCooldown(skill)-1);}
     renderConditions();updateStats();
@@ -699,7 +699,7 @@
   const beforeEffects=state().activeEffects.length;
   state().activeEffects=state().activeEffects.filter(effect=>effect.duration!=='turn').map(effect=>effect.durationTurns?{...effect,durationTurns:effect.durationTurns-1}:effect).filter(effect=>effect.durationTurns===undefined||effect.durationTurns>0);
   if(state().activeEffects.length!==beforeEffects)changed=true;
-  if(state().chips.includes('57')){const charge=number(state(),'チャージ');if(charge<6){state().numbers['チャージ']=6;changed=true;}}
+  if(state().chips.includes('57')){const charge=number(state(),'エナジー');if(charge<6){state().numbers['エナジー']=6;changed=true;}}
   for(const effect of abilityRules()?.turnEnd||[]){const current=abilityControlValue(effect.key),next=Math.max(Number(effect.min)||0,current+(Number(effect.delta)||0));if(next!==current){state().numbers[effect.key]=next;changed=true;}}
   if(changed){renderConditions();updateStats();}
  };

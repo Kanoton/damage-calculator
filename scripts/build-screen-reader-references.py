@@ -47,7 +47,23 @@ def glyphs(im, kind):
     return runs
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('--screens',required=True);args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('--screens');parser.add_argument('--chips-only',action='store_true');args=parser.parse_args()
+    if args.chips_only:
+        out=ROOT/'08_screen_reader/js/screen-reader-references.js'
+        prefix,body=out.read_text().split('=',1)
+        refs=json.loads(body.strip().rstrip(';'))
+        rows=list(csv.DictReader((ROOT/'csv/chip_list.csv').open(encoding='utf-8-sig'),delimiter='\t'))
+        if [r['id'] for r in refs['chips'][-len(rows):]] != [r['id'] for r in rows]:
+            raise ValueError('Canonical chip reference suffix differs from the chip list')
+        chips=[]
+        for row in rows:
+            im=Image.open(ROOT/'images/chip_icon'/row['images']).convert('RGB');w,h=im.size
+            chips.append({'id':row['id'],'data':feature(im.crop((w*.17,h*.17,w*.83,h*.83)))})
+        refs['chips'][-len(rows):]=chips
+        out.write_text(prefix+'='+json.dumps(refs,separators=(',',':'))+';\n')
+        print(f'Updated {len(chips)} canonical chip references; screen references retained')
+        return
+    if not args.screens:parser.error('--screens is required unless --chips-only is used')
     screens={n:Image.open(Path(args.screens)/('IMG_'+n+'.jpeg')).convert('RGB') for n in ['6234','6248','6250','6251','6252']}
     refs={'version':1,'side':SIDE,'characters':[],'chips':[],'digits':[]}
     for n in ['6248','6250','6251','6252']:
