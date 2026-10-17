@@ -294,3 +294,9 @@ test('08 world: late observations display same-species serials numerically while
  await page.getByRole('button',{name:'海賊サメ 4を撃破',exact:true}).click();await expect.poll(()=>cards.evaluateAll(nodes=>nodes.map(n=>n.getAttribute('aria-label')))).toEqual(labels([1,2,10,4]));await expect(page.locator('#map-roster-list .roster-card.defeated')).toHaveCount(1);
  await page.locator('#roster-undo').click();await expect.poll(()=>cards.evaluateAll(nodes=>nodes.map(n=>n.getAttribute('aria-label')))).toEqual(labels([1,2,4,10]));await expect(page.locator('#map-roster-list .roster-card.defeated')).toHaveCount(0);
 });
+
+test('08 world: fast-changing monster HP follows a confirmed name and serial without requiring repeated HP',async({page})=>{
+ await open(page);
+ const values=await page.evaluate(()=>[10,9,8,7].map(hp=>ScreenReaderController.stabilize({members:[],chipIds:[],world:{clock:null,monsters:[{monsterId:'M0004',serial:3,currentHp:hp,maxHp:10}]}}).world.monsters));
+ expect(values[0]).toEqual([]);expect(values.slice(1).map(ms=>ms[0].currentHp)).toEqual([9,8,7]);
+});

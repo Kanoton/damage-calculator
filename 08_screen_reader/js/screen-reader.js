@@ -112,9 +112,9 @@
  function stabilize(observation){
   stableTick++;
   const out={...observation,members:[],selfId:null,chipIds:[],setup:null};if(observation.setup&&accept('start-context',JSON.stringify(observation.setup)))out.setup=observation.setup;if(observation.selfId&&accept('self',observation.selfId))out.selfId=observation.selfId;
-  for(const m of observation.members){if(!m.id)continue;const identityReady=accept('slot:'+m.slot,m.id),item={id:m.id,slot:m.slot};for(const key of ['level','currentHp','maxHp','coin','atk','def'])if(m[key]!==undefined&&accept(m.id+':'+key,m[key]))item[key]=m[key];if(identityReady)out.members.push(item);}
+  for(const m of observation.members){if(!m.id)continue;const identityReady=accept('slot:'+m.slot,m.id),item={id:m.id,slot:m.slot};for(const key of ['level','currentHp','maxHp','coin','atk','def'])if(m[key]!==undefined)item[key]=m[key];if(identityReady)out.members.push(item);}
   const ownerReady=observation.chipOwnerId&&accept('chipOwner',observation.chipOwnerId),chipIds=observation.chipIds.filter(id=>accept(observation.chipOwnerId+':chip:'+id,id));if(ownerReady)out.chipIds=chipIds;else out.chipOwnerId=null;
-  if(observation.world){const w=observation.world;out.world={clock:null,monsters:[]};if(w.clock&&accept('world-clock',JSON.stringify(w.clock)))out.world.clock=w.clock;for(const m of w.monsters||[])if(accept('world-monster:'+m.monsterId+':'+m.serial,JSON.stringify(m)))out.world.monsters.push(m);}
+  if(observation.world){const w=observation.world;out.world={clock:null,monsters:[]};if(w.clock&&accept('world-clock',JSON.stringify(w.clock)))out.world.clock=w.clock;for(const m of w.monsters||[])if(accept('world-monster:'+m.monsterId+':'+m.serial,m.monsterId+':'+m.serial))out.world.monsters.push(m);}
   return out;
  }
  function frameHash(){
@@ -128,6 +128,12 @@
   }
   if(partyLock){
    const pixels=(frame.popupFrame||frame).getContext('2d').getImageData(0,620,90,89).data;
+   for(let i=0;i<pixels.length;i+=4)for(let channel=0;channel<3;channel++)hash=(hash*31+pixels[i+channel])|0;
+  }
+  // Fast-changing status values must invalidate the hash even with world OFF.
+  const panel=vision.statusPanel(frame);
+  for(const box of [[593,178,235,44],[535,235,120,45],[465,324,286,184]]){
+   const pixels=panel.source.getContext('2d').getImageData(...box).data;
    for(let i=0;i<pixels.length;i+=4)for(let channel=0;channel<3;channel++)hash=(hash*31+pixels[i+channel])|0;
   }
   // Monster HP/name/serial changes can fall between coarse 16x16 samples.

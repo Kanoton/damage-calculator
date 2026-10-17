@@ -96,7 +96,7 @@
  }
  // Read only the printed canonical name inside the centered parameter panel.
  // Whole-word masks keep kana order/length; unknown or ambiguous text abstains.
- const nameBox=[593,178,400,44],nameCache=new WeakMap();
+ const nameBox=[593,178,235,44],nameCache=new WeakMap();
  function statusName(source){
   const c=crop(source,nameBox,nameBox[2],nameBox[3]),ctx=c.getContext('2d'),p=ctx.getImageData(0,0,c.width,c.height),mask=new Uint8Array(c.width*c.height);
   let left=c.width,right=0,top=c.height,bottom=0,count=0;
@@ -105,7 +105,7 @@
   if(bottom-top<14||left===0||right===c.width||top===0||bottom===c.height)return {visible:true,id:null};
   for(let i=0;i<mask.length;i++){p.data[i*4]=p.data[i*4+1]=p.data[i*4+2]=mask[i]*255;p.data[i*4+3]=255;}ctx.putImageData(p,0,0);
   const a=crop(c,[left,top,right-left,bottom-top],128,32).getContext('2d').getImageData(0,0,128,32).data,ratio=(right-left)/(bottom-top),scores=new Map();
-  for(const ref of window.ScreenReaderNameReferences||[]){
+  for(const ref of [...(window.ScreenReaderNameReferences||[]),...(window.ScreenReaderLiveStatusReferences?.names||[])]){
    let b=nameCache.get(ref);if(!b){b=decode(ref.data);nameCache.set(ref,b);}let error=0;
    for(let i=0;i<4096;i++)error+=Number(a[i*4]>110)!==((b[i>>3]>>(i&7))&1);
    const score=error/4096+Math.min(.3,Math.abs(ratio-ref.ratio)*.045);scores.set(ref.id,Math.min(scores.get(ref.id)??Infinity,score));
@@ -133,6 +133,30 @@
   const rims=centers.map(([x,y])=>[feature(source,[x-9,y-30,18,8]),feature(source,[x-9,y+22,18,8])]);
   // Require the grid's rims, independently of icon contents and the gold tab.
   return Math.max(0,...samples.map(panel=>rims.filter((pair,i)=>pair.every((pixels,j)=>distance(pixels,decode(panel[i][j]))<.10)).length));
+ }
+ // Locate the status divider before mapping a scaled/cropped panel to the
+ // existing coordinates. A line alone is insufficient: verify green tab + grid.
+ function statusPanel(frame){
+  if(frame.readerStatusPanel)return frame.readerStatusPanel;
+  const source=frame.statusFrame||frame,ctx=source.getContext('2d',{willReadFrequently:true}),p=ctx.getImageData(0,0,WIDTH,HEIGHT).data,candidates=[];
+  for(let y=150;y<480;y++){
+   let start=null;
+   for(let x=0;x<=WIDTH;x++){
+    const i=(y*WIDTH+x)*4,white=x<WIDTH&&isInk(p[i],p[i+1],p[i+2],'white');
+    if(white){if(start===null)start=x;continue;}
+    if(start!==null){if(x-start>530)candidates.push({x:start,y,width:x-start});start=null;}
+   }
+  }
+  for(const line of candidates.sort((a,b)=>b.width-a.width)){
+   const scale=815.5/line.width;if(scale<.45||scale>1.65)continue;
+   const aligned=document.createElement('canvas');aligned.width=WIDTH;aligned.height=HEIGHT;
+   aligned.getContext('2d').drawImage(source,421-line.x*scale,299-line.y*scale,WIDTH*scale,HEIGHT*scale);
+   const tab=crop(aligned,[420,80,175,42],70,17).getContext('2d').getImageData(0,0,70,17).data;let green=0;
+   for(let i=0;i<tab.length;i+=4)if(isInk(tab[i],tab[i+1],tab[i+2],'green'))green++;
+   if(green<250||chipPanelScore(aligned,'large',largeCenters)<7)continue;
+   return frame.readerStatusPanel={source:aligned,aligned:true};
+  }
+  return frame.readerStatusPanel={source,aligned:false};
  }
  function lowerTab(source){const scores=[64,130,196,264].map(x=>{const p=crop(source,[x-20,434,40,6],40,6).getContext('2d').getImageData(0,0,40,6).data;let n=0;for(let i=0;i<p.length;i+=4)if(p[i]>180&&p[i+1]>105&&p[i+1]<220&&p[i+2]<85)n++;return n;});return scores.filter(n=>n>100).length===1?scores.findIndex(n=>n>100):null;}
  function activeTab(source){
@@ -176,7 +200,7 @@
   return out;
  }
  function analyze(source,custom={characters:[],chips:[]},party=null){
-  const refs=window.ScreenReaderReferences,extra=window.ScreenReaderLayoutReferences||{},statusRefs=window.ScreenReaderStatusReferences||{},charRefs=[...refs.characters,...(extra.characters||[]),...(statusRefs.characters||[]),...(window.ScreenReaderViewReferences?.characters||[]),...(custom.characters||[])],chipRefs=[...refs.chips,...(window.ScreenReaderPopupReferences?.chips||[]),...(statusRefs.chips||[]),...(custom.chips||[])],digits=[...refs.digits,...(extra.digits||[])];
+  const refs=window.ScreenReaderReferences,extra=window.ScreenReaderLayoutReferences||{},statusRefs=window.ScreenReaderStatusReferences||{},charRefs=[...refs.characters,...(extra.characters||[]),...(statusRefs.characters||[]),...(window.ScreenReaderViewReferences?.characters||[]),...(custom.characters||[])],chipRefs=[...refs.chips,...(window.ScreenReaderPopupReferences?.chips||[]),...(statusRefs.chips||[]),...(window.ScreenReaderLiveStatusReferences?.chips||[]),...(custom.chips||[])],digits=[...refs.digits,...(extra.digits||[]),...(window.ScreenReaderLiveStatusReferences?.digits||[])];
   const locked=party&&Array.isArray(party.ids)&&party.ids.length===4&&new Set(party.ids).size===4&&layouts.some(l=>l.id===party.hud?.layout);
   let selected;
   if(locked){
@@ -190,7 +214,7 @@
   // Repeated IDs signal a bad match; do not use either conflicting slot.
   const repeated=new Set(members.filter(m=>m.id&&members.filter(other=>other.id===m.id).length>1).map(m=>m.id));
   for(const m of members)if(repeated.has(m.id)){delete m.id;m.unreadable=true;}
-  const statusSource=source.statusFrame||source;
+  const panel=statusPanel(source),statusSource=panel.source;
   const portraitHeader=match(feature(statusSource,regions.header),charRefs.filter(r=>r.kind==='header'));
   const lowerCandidate=source.popupFrame&&source.statusFrame?lowerTab(source.popupFrame):null;
   const lowerScore=lowerCandidate!==null?chipPanelScore(source.popupFrame,'lower',lowerCenters):0;
@@ -207,12 +231,12 @@
   const selfRefs=charRefs.filter(r=>r.kind==='self');
   const own=(!locked||!party.selfId)&&(header||tab===null)?match(feature(hudSource,layout.regions.self),selfRefs)||(source.statusFrame&&hudSource!==source.popupFrame?match(feature(source.popupFrame,layouts[1].regions.self),selfRefs):null):null;
   const selfId=locked?(party.selfId||(party.ids.includes(own?.id)?own.id:null)):own?.id??null;
-  const observation={members,selfId,hud:{layout:layout.id,source:hudSource===source?'primary':'popup'},view:'通常画面',chipOwnerId:null,chipIds:[],chipRead:{stage:'screen',matchedRims:Math.max(lowerScore,smallScore,largeScore),ownerSource:printedName.visible?'name':header?'portrait':null}};
+  const observation={members,selfId,hud:{layout:layout.id,source:hudSource===source?'primary':'popup'},view:'通常画面',chipOwnerId:null,chipIds:[],chipRead:{stage:'screen',matchedRims:Math.max(lowerScore,smallScore,largeScore),ownerSource:printedName.visible?'name':header?'portrait':null,aligned:panel.aligned}};
   if(largeScore>=7&&!header)observation.view='ステータス画面';
   if(header){
    observation.view='ステータス画面';observation.chipRead.matchedRims=largeScore;observation.chipRead.stage='panel';if(observation.chipRead.matchedRims>=7){observation.chipOwnerId=header.id;observation.chipIds=chipMatches(statusSource,largeCenters,chipRefs);}
    let target=members.find(m=>m.id===header.id);if(!target){target={id:header.id};members.push(target);}
-   for(const [stat,box] of [['atk',[542,239,26,37]],['def',[619,239,26,37]]]){const v=numberAt(statusSource,box,'white',refs.digits);if(v!==null)target[stat]=v;}
+   for(const [stat,box] of [['atk',[542,239,26,37]],['def',[619,239,26,37]]]){const v=numberAt(statusSource,box,'white',digits);if(v!==null)target[stat]=v;}
   }else if(tab!==null){observation.view='チップ画面';observation.chipOwnerId=members[tab]?.id??null;observation.chipIds=chipMatches(lower!==null?source.popupFrame:hudSource,lower!==null?lowerCenters:smallCenters,chipRefs);}
   if(observation.chipOwnerId)observation.chipRead.stage=observation.chipIds.length?'read':'icons';
   else if(tab!==null||largeScore>=7)observation.chipRead.stage='owner';
@@ -226,6 +250,6 @@
   if(Math.abs(statusWidth-WIDTH)>1){const status=document.createElement('canvas');status.width=WIDTH;status.height=HEIGHT;status.getContext('2d').drawImage(source,a.x*w,a.y*h,a.w*w,a.h*h,(WIDTH-statusWidth)/2,0,statusWidth,HEIGHT);c.statusFrame=status;}
   const popup=document.createElement('canvas');popup.width=WIDTH;popup.height=HEIGHT;popup.getContext('2d').drawImage(source,a.x*w,a.y*h,a.w*w,a.h*h,0,0,statusWidth,HEIGHT);c.popupFrame=popup;
   return c;}
- function learn(source,kind,id,index=0){const refs=window.ScreenReaderReferences,extra=window.ScreenReaderLayoutReferences||{},selected=selectLayout(source,[...refs.characters,...(extra.characters||[]),...(window.ScreenReaderStatusReferences?.characters||[])],[...refs.digits,...(extra.digits||[])]),layout=selected.layout;const lower=source.popupFrame&&source.statusFrame&&lowerTab(source.popupFrame)!==null;const box=kind==='chip-small'?(lower?lowerCenters:smallCenters)[index]:kind==='chip-large'?largeCenters[index]:kind==='avatar'?layout.regions.avatar[index]:layout.regions[kind];if(!box)throw Error('見本の位置が不正です。');const region=kind.startsWith('chip-')?[box[0]-18,box[1]-18,36,36]:box;return {id:String(id),kind:kind.startsWith('chip-')?'chip':kind,data:encode(feature(kind==='chip-small'&&lower?source.popupFrame:(kind==='header'||kind==='chip-large')?(source.statusFrame||source):selected.source,region))};}
- window.ScreenReaderVision={analyze,normalize,learn,numberAt,statusName,feature,profileMatch,readSelfStats,regions,WIDTH,HEIGHT};
+ function learn(source,kind,id,index=0){const refs=window.ScreenReaderReferences,extra=window.ScreenReaderLayoutReferences||{},selected=selectLayout(source,[...refs.characters,...(extra.characters||[]),...(window.ScreenReaderStatusReferences?.characters||[])],[...refs.digits,...(extra.digits||[])]),layout=selected.layout;const lower=source.popupFrame&&source.statusFrame&&lowerTab(source.popupFrame)!==null;const box=kind==='chip-small'?(lower?lowerCenters:smallCenters)[index]:kind==='chip-large'?largeCenters[index]:kind==='avatar'?layout.regions.avatar[index]:layout.regions[kind];if(!box)throw Error('見本の位置が不正です。');const region=kind.startsWith('chip-')?[box[0]-18,box[1]-18,36,36]:box;return {id:String(id),kind:kind.startsWith('chip-')?'chip':kind,data:encode(feature(kind==='chip-small'&&lower?source.popupFrame:(kind==='header'||kind==='chip-large')?statusPanel(source).source:selected.source,region))};}
+ window.ScreenReaderVision={analyze,normalize,learn,numberAt,statusName,statusPanel,feature,profileMatch,readSelfStats,regions,WIDTH,HEIGHT};
 })();
