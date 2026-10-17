@@ -550,7 +550,7 @@ test('08: bottom reader launcher opens a draggable panel, clamps after resize, c
  await page.mouse.move(handle.x+50,handle.y+handle.height/2);await page.mouse.down();await page.mouse.move(handle.x+190,handle.y+handle.height/2-100,{steps:5});await page.mouse.up();
  const moved=await panel.boundingBox();expect(moved.x-before.x).toBeCloseTo(140,0);expect(moved.y-before.y).toBeCloseTo(-100,0);expect(await body.boundingBox()).toEqual(layout);
  await page.locator('#reader-move').focus();await page.keyboard.press('ArrowLeft');expect((await panel.boundingBox()).x).toBeCloseTo(moved.x-10,0);
- await page.setViewportSize({width:1200,height:720});const resized=await panel.boundingBox();expect(resized.x).toBeGreaterThanOrEqual(0);expect(resized.x+resized.width).toBeLessThanOrEqual(1201);expect(resized.y).toBeGreaterThanOrEqual(0);expect(resized.y+resized.height).toBeLessThanOrEqual(721);
+ await page.setViewportSize({width:1200,height:720});await expect.poll(async()=>{const r=await panel.boundingBox();return r.x+r.width;}).toBeLessThanOrEqual(1201);const resized=await panel.boundingBox();expect(resized.x).toBeGreaterThanOrEqual(0);expect(resized.x+resized.width).toBeLessThanOrEqual(1201);expect(resized.y).toBeGreaterThanOrEqual(0);expect(resized.y+resized.height).toBeLessThanOrEqual(721);
  await page.locator('#reader-close').click();await expect(panel).toBeHidden();
  await toggle.click();await page.locator('#reader-position-reset').click();expect(await panel.evaluate(el=>el.style.top)).toBe('');
 });

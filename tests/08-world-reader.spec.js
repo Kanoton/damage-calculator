@@ -270,7 +270,7 @@ test('08 world: replay shark 3 retains its complete HP through camera motion',as
 });
 
 test('08 world: automatic reader takes explicit setup then the first live event without manual map input',async({page})=>{
- await open(page);await page.locator('#reader-toggle').click();
+ await open(page);await page.locator('#reader-toggle').click();await page.locator('#reader-details').evaluate(e=>e.open=true);
  // Seed a source without applying; the following automatic read must reset it.
  await page.locator('#reader-apply').uncheck();await page.locator('#reader-file').setInputFiles({name:'result.png',mimeType:'image/png',buffer:Buffer.from(startupFixture('start-dream-result').split(',')[1],'base64')});await expect(page.locator('#reader-file')).toHaveValue('');await page.locator('#reader-apply').check();
  await page.evaluate(async()=>{await ScreenReaderController.read(true);await ScreenReaderController.read(true);});
