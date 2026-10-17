@@ -225,10 +225,11 @@ test('08 world: image HP zero candidates never defeat an observed living shark a
  await open(page);await page.locator('#reader-toggle').click();
  await page.locator('#reader-file').setInputFiles({name:'world.png',mimeType:'image/png',buffer:Buffer.from(fixture('11').split(',')[1],'base64')});await expect(page.locator('#reader-file')).toHaveValue('');
  await page.locator('#mp-map-select').evaluate(el=>{el.value='MAP0001';el.dispatchEvent(new Event('change',{bubbles:true}));});await page.locator('#mp-difficulty').evaluate(el=>{el.value='狂気';el.dispatchEvent(new Event('change',{bubbles:true}));});
- await page.evaluate(()=>{ScreenReaderMapBridge.apply({monsters:[{monsterId:'M0004',serial:3,currentHp:10,maxHp:10}]});ScreenReaderWorldVision.analyze=()=>({clock:null,monsters:[{monsterId:'M0004',serial:3,currentHp:0,maxHp:10}]});});
+ await page.evaluate(()=>{ScreenReaderMapBridge.apply({monsters:[{monsterId:'M0004',serial:3,currentHp:10,maxHp:10}]});window.zeroReadCount=0;ScreenReaderWorldVision.analyze=()=>{zeroReadCount++;return {clock:null,monsters:[{monsterId:'M0004',serial:3,currentHp:0,maxHp:10}]};};const normalize=ScreenReaderVision.normalize;let tick=0;ScreenReaderVision.normalize=(...args)=>{const c=normalize(...args);for(const src of [c,c.popupFrame]){const ctx=src.getContext('2d');ctx.fillStyle='rgb('+(++tick)+',0,0)';ctx.fillRect(1001,301,2,2);}return c;};});
  for(const speed of ['500','250']){
-  await page.locator('#reader-interval').selectOption(speed);
+  await page.locator('#reader-interval').selectOption(speed);const before=await page.evaluate(()=>zeroReadCount);
   for(let i=0;i<4;i++)await page.evaluate(()=>ScreenReaderController.read(true));
+  expect(await page.evaluate(()=>zeroReadCount)).toBe(before+4);
   const shark=await page.evaluate(()=>ScreenReaderMapBridge.snapshot().monsters.find(m=>m.monsterId==='M0004'&&m.serial===3));expect(shark.hp).toBe(10);expect(shark.defeated).toBe(false);
  }
  await expect(page.locator('#reader-world-result')).toContainText('撃破未確認');

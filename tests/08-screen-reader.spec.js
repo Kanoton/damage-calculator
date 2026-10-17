@@ -540,7 +540,7 @@ for(const [name,id]of [['live-map','13'],['replay-map','2']])test('08: reviewed 
  },{base:fixture('left-hud'),own:fixture('self-start-'+name),id});expect(result).toBe(id);
 });
 
-test('08: bottom reader launcher opens a draggable panel, clamps after resize, and closes without stopping capture',async({page})=>{
+test('08: bottom reader launcher opens a draggable panel, clamps after resize, closes and resets its position',async({page})=>{
  await page.setViewportSize({width:1600,height:1000});await open(page);
  const toggle=page.locator('#reader-toggle'),panel=page.locator('#reader-panel'),body=page.locator('.tool-wrapper');
  const launcher=await toggle.boundingBox();expect(launcher.y+launcher.height).toBeCloseTo(1000,0);
