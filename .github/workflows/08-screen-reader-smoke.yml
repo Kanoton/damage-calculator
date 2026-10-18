@@ -23,6 +23,7 @@ on:
       - 'scripts/build-screen-reader-view-references.py'
       - 'scripts/build-screen-reader-world-fixtures.py'
       - 'scripts/build-screen-reader-start-references.py'
+      - 'scripts/build-screen-reader-result-banner-fixture.py'
       - 'scripts/build-screen-reader-name-references.py'
       - 'scripts/build-screen-reader-live-status-references.py'
       - 'scripts/build-screen-reader-chip-shapes.py'
@@ -52,6 +53,7 @@ on:
       - 'scripts/build-screen-reader-view-references.py'
       - 'scripts/build-screen-reader-world-fixtures.py'
       - 'scripts/build-screen-reader-start-references.py'
+      - 'scripts/build-screen-reader-result-banner-fixture.py'
       - 'scripts/build-screen-reader-name-references.py'
       - 'scripts/build-screen-reader-live-status-references.py'
       - 'scripts/build-screen-reader-chip-shapes.py'
@@ -89,13 +91,14 @@ jobs:
       - run: python3 scripts/build-screen-reader-view-references.py --check
       - run: python3 scripts/build-screen-reader-world-fixtures.py --check
       - run: python3 scripts/build-screen-reader-start-references.py --check
+      - run: python3 scripts/build-screen-reader-result-banner-fixture.py --check
       - run: python3 scripts/build-screen-reader-name-references.py --check
       - run: python3 scripts/build-screen-reader-live-status-references.py --check
       - run: python3 scripts/build-screen-reader-chip-shapes.py --check
       - run: npx playwright install --with-deps chromium webkit
       - run: npm run test:08
       - run: npx playwright test tests/08-screen-reader.spec.js --browser=webkit -g "printed status name|status names require|zoomed status|fast-changing|chip artwork|chip grid|party stars"
-      - run: npx playwright test tests/08-world-reader.spec.js --browser=webkit -g "room text|autumn room|replay printed map|recorded video labels|video labels abstain"
+      - run: npx playwright test tests/08-world-reader.spec.js --browser=webkit -g "room text|autumn room|replay printed map|result banner|recorded video labels|video labels abstain"
       - run: npm run test:08:sync -- --workers=2
       - uses: actions/upload-artifact@v4
         if: always()

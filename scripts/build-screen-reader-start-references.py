@@ -38,7 +38,9 @@ def main():
  if any(signature(ch)==missing for ch in set(coverage)):raise ValueError('Extend the map-text font subset for the registered names')
  refs['text']={}
  for key,rows in [('maps',list(maps.items())),('difficulties',[(x,x) for x in ['普通','困難','悪夢','狂気']]),('labels',[(x,x) for x in ['マップ','難易度']])]:
-  refs['text'][key]=[{'id':id,'name':name,**template(name+suffix,font,shear)} for id,name in rows for font in fonts for suffix in (['','（協力チャレンジ）','(協力チャレンジ)'] if key=='maps' else ['']) for shear in [0,-.1,-.2]]
+  refs['text'][key]=[{'id':id,'name':name,'nameOnly':not suffix,**template(name+suffix,font,shear)} for id,name in rows for font in fonts for suffix in (['','（協力チャレンジ）','(協力チャレンジ)'] if key=='maps' else ['']) for shear in [0,-.1,-.2]]
+ # Real qualifier typography is independent of the registered map name.
+ glyph=im.crop((506,648,880,691));m=Image.new('L',glyph.size);m.putdata([255*int(min(v)>215 and max(v)-min(v)<35) for v in glyph.getdata()]);m=m.crop(m.getbbox());bits=[int(v>110) for v in m.resize((128,32),Image.Resampling.BILINEAR).tobytes()];packed=bytes(sum(bits[i+j]<<j for j in range(8)) for i in range(0,len(bits),8));refs['text']['suffixes']=[{'id':'coop','ratio':m.width/m.height,'data':base64.b64encode(packed).decode()}]
  # The game's result font differs from the room font; keep its observed word
  # as a map-only sample, never coupled to the observed difficulty.
  glyph=im.crop((352,644,902,695));m=Image.new('L',glyph.size);m.putdata([255*int(min(v)>215 and max(v)-min(v)<35) for v in glyph.getdata()]);m=m.crop(m.getbbox());bits=[int(v>110) for v in m.resize((128,32),Image.Resampling.BILINEAR).tobytes()];packed=bytes(sum(bits[i+j]<<j for j in range(8)) for i in range(0,len(bits),8));refs['text']['maps'].append({'id':refs['map'],'name':maps[refs['map']],'ratio':m.width/m.height,'data':base64.b64encode(packed).decode()})
