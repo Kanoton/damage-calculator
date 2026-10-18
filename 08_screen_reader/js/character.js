@@ -68,7 +68,7 @@
  window.restoreAutumnAttention=snapshot=>{if(!snapshot)return;for(const s of states.values())s.numbers['ガオーの注目']=0;for(const s of partyStates.values())s.attentionTurns=0;for(const [id,n] of snapshot.self)getState(id).numbers['ガオーの注目']=n;for(const [id,n] of snapshot.party)getPartyState(id).attentionTurns=n;if(selectedCharacter){renderConditions();updateStats();}};
  function attentionControl(id,name,isSelf){
   const field=document.createElement('span');field.className='autumn-attention';const turns=attentionTurns(id);
-  const apply=document.createElement('button');apply.type='button';apply.className='condition-toggle';apply.setAttribute('aria-label',name+'にガオーの注目を付与');apply.textContent='注目 '+turns+'T';apply.title='クリックで残り2ターンに更新、右クリックで解除。能力低下は1回分（防御−1・移動−1）。';
+  const apply=document.createElement('button');apply.type='button';apply.className='condition-toggle';apply.setAttribute('aria-label',name+'にガオーの注目を付与');apply.textContent='注目 '+turns+'T';apply.title=getSkillHoverText('autumn.attention');
   const commit=next=>{window.rememberCharacterSkillActivation?.();setAttention(id,next);renderConditions();updateStats();};
   apply.addEventListener('click',event=>{event.stopPropagation();commit(2);});apply.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();commit(0);});field.append(apply);
   if(!isSelf&&turns){const tick=document.createElement('button');tick.type='button';tick.textContent='残り−1';tick.setAttribute('aria-label',name+'の注目の残りターンを減らす');tick.addEventListener('click',event=>{event.stopPropagation();commit(Math.max(0,turns-1));});field.append(tick);}

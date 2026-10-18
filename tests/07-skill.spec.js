@@ -15,6 +15,7 @@ for(const protocol of ['http','file'])test('07 autumn confirmed rules: energy, H
  await page.locator('#roster-undo').click();await expect(attack).toHaveValue('2');
  await gao.locator('.roster-status-energyStacks button').evaluate(()=>{for(let i=0;i<20;i++)document.querySelector('.roster-status-energyStacks button').click();});
  expect(Number(await attack.inputValue())).toBeGreaterThan(30);
+ await attack.fill('40');await attack.dispatchEvent('change');await expect(attack).toHaveValue('40');await start.click();await expect(attack).toHaveValue('44');
  const before=await attack.inputValue();await page.locator('#turn-end').click();await expect(attack).toHaveValue(before);
  await page.locator('.role-tab[data-role="character"]').click();
  const attention=page.locator('#selected-character-conditions').getByRole('button',{name:'ミミにガオーの注目を付与',exact:true});
