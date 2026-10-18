@@ -1660,5 +1660,170 @@
     "seconds": 71.46666666666667,
     "training": false,
     "allowAbstain": true
+  },
+  {
+    "fixture": "labels-autumn-second-owl",
+    "id": "M0123",
+    "boss": false,
+    "nameBox": [
+      654,
+      481,
+      343,
+      47
+    ],
+    "serialBox": [
+      1007,
+      483,
+      41,
+      51
+    ],
+    "hpBox": [
+      760,
+      548,
+      83,
+      53
+    ],
+    "expected": {
+      "monsterId": "M0123",
+      "serial": 2,
+      "currentHp": 5,
+      "maxHp": 9
+    },
+    "source": "autumn-second",
+    "seconds": 58.46666666666667,
+    "training": true,
+    "learnHpDigits": false,
+    "learnSerialDigits": false
+  },
+  {
+    "fixture": "labels-autumn-second-bear",
+    "id": "M0121",
+    "boss": false,
+    "nameBox": [
+      678,
+      613,
+      307,
+      49
+    ],
+    "serialBox": [
+      997,
+      613,
+      45,
+      55
+    ],
+    "hpBox": [
+      762,
+      680,
+      146,
+      59
+    ],
+    "expected": {
+      "monsterId": "M0121",
+      "serial": 6,
+      "currentHp": 16,
+      "maxHp": 16
+    },
+    "source": "autumn-second",
+    "seconds": 58.46666666666667,
+    "training": true,
+    "learnHpDigits": false,
+    "learnSerialDigits": false
+  },
+  {
+    "fixture": "labels-autumn-second-dinosaur",
+    "id": "M0122",
+    "boss": false,
+    "nameBox": [
+      1322,
+      816,
+      305,
+      51
+    ],
+    "serialBox": [
+      1635,
+      816,
+      41,
+      57
+    ],
+    "hpBox": [
+      1412,
+      883,
+      132,
+      57
+    ],
+    "expected": {
+      "monsterId": "M0122",
+      "serial": 3,
+      "currentHp": 22,
+      "maxHp": 22
+    },
+    "source": "autumn-second",
+    "seconds": 58.46666666666667,
+    "training": true,
+    "learnHpDigits": false,
+    "learnSerialDigits": false
+  },
+  {
+    "fixture": "labels-autumn-second-gao",
+    "id": "M0120",
+    "boss": true,
+    "nameBox": [
+      1219,
+      364,
+      268,
+      48
+    ],
+    "serialBox": null,
+    "hpBox": [
+      1288,
+      431,
+      191,
+      52
+    ],
+    "expected": {
+      "monsterId": "M0120",
+      "serial": null,
+      "currentHp": 125,
+      "maxHp": 130
+    },
+    "source": "autumn-second",
+    "seconds": 26.466666666666665,
+    "training": true,
+    "learnHpDigits": false,
+    "learnSerialDigits": false
+  },
+  {
+    "fixture": "labels-autumn-second-owl-held",
+    "id": "M0123",
+    "boss": false,
+    "nameBox": [
+      624,
+      510,
+      343,
+      53
+    ],
+    "serialBox": [
+      979,
+      510,
+      47,
+      59
+    ],
+    "hpBox": [
+      727,
+      575,
+      102,
+      59
+    ],
+    "expected": {
+      "monsterId": "M0123",
+      "serial": 2,
+      "currentHp": 8,
+      "maxHp": 9
+    },
+    "source": "autumn-second",
+    "seconds": 16.466666666666665,
+    "training": false,
+    "learnHpDigits": false,
+    "learnSerialDigits": false
   }
 ]
