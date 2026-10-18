@@ -23,6 +23,9 @@
   // even when their RGB values also pass the ordinary white-ink threshold.
   const background=kind==='result-white'?Array.from({length:w},(_,xx)=>Math.min(...[0,1,h-2,h-1].map(yy=>{const k=(yy*w+xx)*4;return Math.min(p.data[k],p.data[k+1],p.data[k+2]);}))):null;
   for(let i=0;i<mask.length;i++){const k=i*4,r=p.data[k],g=p.data[k+1],b=p.data[k+2];mask[i]=kind==='pink'?Number(r>180&&g<140&&b>80):Number(Math.min(r,g,b)>(background?Math.max(215,background[i%w]+18):215)&&Math.max(r,g,b)-Math.min(r,g,b)<35);}
+  // Resampling may bleed a full-width white frame line into the first/last
+  // row. A banner edge is not a character; retain ordinary glyph edge checks.
+  if(background)for(const yy of [0,1,h-2,h-1]){let count=0;for(let xx=0;xx<w;xx++)count+=mask[yy*w+xx];if(count>=w*.8)mask.fill(0,yy*w,(yy+1)*w);}
   return {p,mask};
  }
  function word(source,box,kind,refs,minCoverage=0){

@@ -353,8 +353,9 @@ const resultBanner=require('./fixtures/screen-reader/result-banner-synthetic.jso
 test('08 world: result banner rejects its pale background and nearby decorations',async({page})=>{
  await open(page);
  for(const scale of [1,.75]){
-  const result=await page.evaluate(async({image,scale})=>{const im=new Image();im.src=image;await im.decode();const c=document.createElement('canvas');c.width=Math.round(im.width*scale);c.height=Math.round(im.height*scale);c.getContext('2d').drawImage(im,0,0,c.width,c.height);const source=ScreenReaderVision.normalize(c);return {setup:ScreenReaderStartVision.analyze(source),world:ScreenReaderWorldVision.analyze(source)};},{image:resultBanner.image,scale});
-  expect(result.setup).toEqual(resultBanner.expected);expect(result.world.clock).toBeNull();expect(result.world.monsters).toEqual([]);
+  const result=await page.evaluate(async({image,scale})=>{const im=new Image();im.src=image;await im.decode();const c=document.createElement('canvas');c.width=Math.round(im.width*scale);c.height=Math.round(im.height*scale);c.getContext('2d').drawImage(im,0,0,c.width,c.height);const source=ScreenReaderVision.normalize(c);const setup=ScreenReaderStartVision.analyze(source);return {setup,world:ScreenReaderWorldVision.analyze(source),failedImage:setup?null:source.toDataURL()};},{image:resultBanner.image,scale});
+  if(result.failedImage)await test.info().attach('result-banner-scale-'+scale+'.png',{body:Buffer.from(result.failedImage.split(',')[1],'base64'),contentType:'image/png'});
+  expect(result.setup,'scale='+scale).toEqual(resultBanner.expected);expect(result.world.clock).toBeNull();expect(result.world.monsters).toEqual([]);
  }
  const suffix=resultBanner.regions.qualifier;
  for(const box of [resultBanner.regions.map,resultBanner.regions.difficulty,[suffix[0]+70,suffix[1],150,suffix[3]]]){
