@@ -1706,3 +1706,13 @@ dialog[data-inline-pad] .skill-entry-row>[data-cancel]{min-width:72px;align-self
 #map-draft .mp-feature[data-feature-name="みなぎる元気"] h3{color:#7546a6}
 #map-draft .mp-feature[data-feature-name="ガオーの注目"] h3{color:#246b9b}
 @media(max-width:400px){#map-draft .mp-feature-grid{grid-template-columns:1fr}}
+
+/* Overlay in existing whitespace; never changes the map or grid dimensions. */
+#mp-building-legend{position:absolute;left:0;bottom:0;font-size:12px;line-height:1.4;color:#333;pointer-events:none}
+
+.roster-autumn-controls{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px}
+#map-draft .roster-status-energyStacks .roster-mark-button{width:auto;height:auto;white-space:nowrap;font-size:11px}
+.autumn-attention{display:inline-flex;gap:4px;align-items:center}
+
+.autumn-attention button{white-space:nowrap}
+.selected-character-conditions .autumn-attention .condition-toggle{width:auto;min-width:64px;padding:1px 6px;white-space:nowrap}

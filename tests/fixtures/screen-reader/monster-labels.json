@@ -1412,5 +1412,253 @@
     "training": true,
     "source": "dream-20261016",
     "time_seconds": 24
+  },
+  {
+    "fixture": "labels-autumn-gao",
+    "id": "M0120",
+    "boss": true,
+    "nameBox": [
+      916,
+      339,
+      207,
+      40
+    ],
+    "serialBox": null,
+    "hpBox": [
+      966,
+      394,
+      142,
+      42
+    ],
+    "expected": {
+      "monsterId": "M0120",
+      "serial": null,
+      "currentHp": 115,
+      "maxHp": 120
+    },
+    "source": "autumn",
+    "seconds": 50.46666666666667,
+    "training": true
+  },
+  {
+    "fixture": "labels-autumn-bear",
+    "id": "M0121",
+    "boss": false,
+    "nameBox": [
+      823,
+      148,
+      235,
+      39
+    ],
+    "serialBox": [
+      1068,
+      151,
+      24,
+      38
+    ],
+    "hpBox": [
+      891,
+      201,
+      106,
+      42
+    ],
+    "expected": {
+      "monsterId": "M0121",
+      "serial": 1,
+      "currentHp": 14,
+      "maxHp": 14
+    },
+    "source": "autumn",
+    "seconds": 50.46666666666667,
+    "training": true
+  },
+  {
+    "fixture": "labels-autumn-owl",
+    "id": "M0123",
+    "boss": false,
+    "nameBox": [
+      624,
+      247,
+      259,
+      40
+    ],
+    "serialBox": [
+      894,
+      251,
+      27,
+      40
+    ],
+    "hpBox": [
+      706,
+      300,
+      66,
+      43
+    ],
+    "expected": {
+      "monsterId": "M0123",
+      "serial": 5,
+      "currentHp": 3,
+      "maxHp": 8
+    },
+    "source": "autumn",
+    "seconds": 50.46666666666667,
+    "training": true
+  },
+  {
+    "fixture": "labels-autumn-dinosaur",
+    "id": "M0122",
+    "boss": false,
+    "nameBox": [
+      957,
+      286,
+      234,
+      41
+    ],
+    "serialBox": [
+      1200,
+      288,
+      25,
+      40
+    ],
+    "hpBox": [
+      1026,
+      335,
+      100,
+      44
+    ],
+    "expected": {
+      "monsterId": "M0122",
+      "serial": 1,
+      "currentHp": 14,
+      "maxHp": 19
+    },
+    "source": "autumn",
+    "seconds": 71.46666666666667,
+    "training": true
+  },
+  {
+    "fixture": "labels-autumn-gao-held",
+    "id": "M0120",
+    "boss": true,
+    "nameBox": [
+      565,
+      394,
+      205,
+      44
+    ],
+    "serialBox": null,
+    "hpBox": [
+      621,
+      449,
+      135,
+      44
+    ],
+    "expected": {
+      "monsterId": "M0120",
+      "serial": null,
+      "currentHp": 112,
+      "maxHp": 120
+    },
+    "source": "autumn",
+    "seconds": 72.46666666666667,
+    "training": false
+  },
+  {
+    "fixture": "labels-autumn-dinosaur-held",
+    "id": "M0122",
+    "boss": false,
+    "nameBox": [
+      1291,
+      387,
+      235,
+      42
+    ],
+    "serialBox": [
+      1528,
+      388,
+      26,
+      43
+    ],
+    "hpBox": [
+      1360,
+      438,
+      102,
+      46
+    ],
+    "expected": {
+      "monsterId": "M0122",
+      "serial": 1,
+      "currentHp": 14,
+      "maxHp": 19
+    },
+    "source": "autumn",
+    "seconds": 74.46666666666667,
+    "training": false
+  },
+  {
+    "fixture": "labels-autumn-bear-later",
+    "id": "M0121",
+    "boss": false,
+    "nameBox": [
+      1045,
+      185,
+      235,
+      40
+    ],
+    "serialBox": [
+      1287,
+      187,
+      25,
+      39
+    ],
+    "hpBox": [
+      1110,
+      232,
+      108,
+      44
+    ],
+    "expected": {
+      "monsterId": "M0121",
+      "serial": 1,
+      "currentHp": 13,
+      "maxHp": 14
+    },
+    "source": "autumn",
+    "seconds": 71.46666666666667,
+    "training": false,
+    "allowAbstain": true
+  },
+  {
+    "fixture": "labels-autumn-owl-later",
+    "id": "M0123",
+    "boss": false,
+    "nameBox": [
+      508,
+      412,
+      258,
+      40
+    ],
+    "serialBox": [
+      778,
+      417,
+      26,
+      40
+    ],
+    "hpBox": [
+      589,
+      461,
+      66,
+      44
+    ],
+    "expected": {
+      "monsterId": "M0123",
+      "serial": 2,
+      "currentHp": 8,
+      "maxHp": 8
+    },
+    "source": "autumn",
+    "seconds": 71.46666666666667,
+    "training": false,
+    "allowAbstain": true
   }
 ]

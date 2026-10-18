@@ -138,7 +138,7 @@ test('08 world: shared names still reject maps without the registered relation',
 test('08 world: visible monitor diagnostics distinguish disabled reading and preview from detection',async({page})=>{
  await open(page);await page.locator('#reader-toggle').click();
  await expect(page.locator('#reader-monitor-info')).toContainText('OFF');
- await expect(page.locator('#reader-monitor-info')).toContainText('25種類');
+ await expect(page.locator('#reader-monitor-info')).toContainText('29種類');
  await expect(page.locator('#reader-interval')).toHaveValue('500');
  await expect(page.locator('#reader-world-sync')).toBeVisible();
  const before=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());

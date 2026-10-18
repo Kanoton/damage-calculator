@@ -3,6 +3,43 @@ const { test, expect } = require('@playwright/test');
 const skillFolder=process.env.SKILL_TEST_FOLDER||'07_skill';
 if(!['07_skill','08_screen_reader'].includes(skillFolder))throw Error('Unknown skill test folder');
 
+for(const protocol of ['http','file'])test('07 autumn confirmed rules: energy, HP boundary, attention refresh and undo '+protocol,async({page})=>{
+ await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve(skillFolder+'/index.html')).href:`/${skillFolder}/`);
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');
+ await page.getByRole('button',{name:'3 のイベントを実行',exact:true}).click();
+ const gao=page.locator('.roster-card').filter({has:page.locator('.roster-gao-start')});
+ const attack=gao.locator('input[aria-label="キッズガオーの攻撃力"]'),hp=gao.locator('input[aria-label="キッズガオーの残りHP"]'),start=gao.locator('.roster-gao-start');
+ await expect(attack).toHaveValue('0');await start.click();await expect(attack).toHaveValue('2');
+ await hp.fill('72');await hp.dispatchEvent('change');await start.click();await expect(attack).toHaveValue('6');
+ await expect(gao.getByAltText('反撃可能')).toBeVisible();
+ await page.locator('#roster-undo').click();await expect(attack).toHaveValue('2');
+ await gao.locator('.roster-status-energyStacks button').evaluate(()=>{for(let i=0;i<20;i++)document.querySelector('.roster-status-energyStacks button').click();});
+ expect(Number(await attack.inputValue())).toBeGreaterThan(30);
+ await attack.fill('40');await attack.dispatchEvent('change');await expect(attack).toHaveValue('40');await start.click();await expect(attack).toHaveValue('44');
+ const before=await attack.inputValue();await page.locator('#turn-end').click();await expect(attack).toHaveValue(before);
+ await page.locator('.role-tab[data-role="character"]').click();
+ const attention=page.locator('#selected-character-conditions').getByRole('button',{name:'ミミにガオーの注目を付与',exact:true});
+ const defense=page.locator('#selected-character-def'),base=Number(await defense.inputValue());
+ expect(await attention.evaluate(button=>button.scrollWidth<=button.clientWidth&&button.scrollHeight<=button.clientHeight)).toBe(true);
+ await attention.click();await expect(attention).toHaveText('注目 2T');await expect(defense).toHaveValue(String(Math.max(0,base-1)));
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#turn-end').click();
+ await page.locator('.role-tab[data-role="character"]').click();await expect(attention).toHaveText('注目 1T');await attention.click();await expect(attention).toHaveText('注目 2T');await expect(defense).toHaveValue(String(Math.max(0,base-1)));
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#roster-undo').click();
+ await page.locator('.role-tab[data-role="character"]').click();await expect(attention).toHaveText('注目 1T');
+ await attention.click({button:'right'});await expect(attention).toHaveText('注目 0T');await expect(defense).toHaveValue(String(base));
+});
+
+test('07 autumn legend leaves map geometry intact at desktop, wide and mobile sizes',async({page})=>{
+ await page.goto(`/${skillFolder}/`);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');await page.locator('#mp-tab-map').click();
+ for(const [width,height] of [[1280,900],[1920,1080],[390,844]]){
+  await page.setViewportSize({width,height});await expect(page.locator('#mp-building-legend')).toBeVisible();
+  const geometry=()=>page.locator('#mp-map-image').evaluate(img=>{const r=img.getBoundingClientRect();return [r.x,r.y,r.width,r.height];});
+  const before=await geometry();await page.locator('#mp-building-legend').evaluate(el=>el.hidden=true);expect(await geometry()).toEqual(before);await page.locator('#mp-building-legend').evaluate(el=>el.hidden=false);
+  await page.screenshot({path:test.info().outputPath(`autumn-legend-${width}.png`)});
+ }
+ await page.locator('#mp-map-select').selectOption('MAP0001');await expect(page.locator('#mp-building-legend')).toBeHidden();
+});
+
 for(const protocol of ['http','file'])test('07 autumn data: map, four difficulties, chip hit count and Luka potential '+protocol,async({page})=>{
  await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve(skillFolder+'/index.html')).href:`/${skillFolder}/`);
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');
