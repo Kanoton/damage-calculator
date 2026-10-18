@@ -31,7 +31,7 @@ def append_video_references(refs,helpers):
    refs['names'][-1]['minMaxHp']=100
    refs['names'].append({**refs['names'][-1],'id':'M0116','boss':False,'noSerial':True,'minMaxHp':1,'maxMaxHp':99})
   numbers=([(row['hpBox'],'red',f"{row['expected']['currentHp']}/{row['expected']['maxHp']}")] if row.get('learnHpDigits',True) else [])
-  numbers+=([(row['serialBox'],'white',str(row['expected']['serial']))] if row['serialBox'] else [])
+  numbers+=([(row['serialBox'],'white',str(row['expected']['serial']))] if row['serialBox'] and row.get('learnSerialDigits',True) else [])
   for raw,kind,text in numbers:
    glyphs=helpers['glyphs'](helpers['crop'](im,box(raw)),kind)
    if len(glyphs)!=len(text):raise ValueError((row['fixture'],kind,text,len(glyphs)))

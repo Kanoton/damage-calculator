@@ -300,3 +300,36 @@ test('08 world: fast-changing monster HP follows a confirmed name and serial wit
  const values=await page.evaluate(()=>[10,9,8,7].map(hp=>ScreenReaderController.stabilize({members:[],chipIds:[],world:{clock:null,monsters:[{monsterId:'M0004',serial:3,currentHp:hp,maxHp:10}]}}).world.monsters));
  expect(values[0]).toEqual([]);expect(values.slice(1).map(ms=>ms[0].currentHp)).toEqual([9,8,7]);
 });
+
+const generatedMapText=require('./fixtures/screen-reader/map-text-generated.json');
+test('08 world: room text resolves registered maps and difficulties independently',async({page})=>{
+ await open(page);
+ // These font-rendered combinations verify coverage/wiring, not live-game accuracy.
+ const results=await page.evaluate(async({room,cases})=>{
+  const load=async src=>{const im=new Image();im.src=src;await im.decode();return im;};
+  const base=await load(room),out=[];
+  for(const map of cases.maps)for(const difficulty of cases.difficulties){
+   const c=ScreenReaderVision.normalize(base),ctx=c.getContext('2d');
+   ctx.fillStyle='black';ctx.fillRect(340,242,280,41);ctx.fillRect(350,330,270,40);
+   ctx.drawImage(await load(map.image),360,242,240,41);ctx.drawImage(await load(difficulty.image),360,330,240,40);
+   out.push({expected:{map:map.id,difficulty:difficulty.id},actual:ScreenReaderStartVision.analyze(c)});
+  }return out;
+ },{room:startupFixture('start-autumn-room'),cases:generatedMapText});
+ expect(results).toHaveLength(36);for(const row of results)expect(row.actual).toEqual(row.expected);
+});
+
+test('08 world: autumn room requires both labelled fields and protects manual context',async({page})=>{
+ await open(page);const setup=(await startupRead(page,'start-autumn-room')).setup;
+ expect(setup).toEqual({map:'MAP0105',difficulty:'困難'});
+ for(const box of [[340,242,280,41],[350,330,270,40],[205,242,96,41],[205,330,96,40]]){
+  const got=await page.evaluate(async({image,box})=>{const im=new Image();im.src=image;await im.decode();const c=ScreenReaderVision.normalize(im);c.getContext('2d').clearRect(...box);return ScreenReaderStartVision.analyze(c);},{image:startupFixture('start-autumn-room'),box});expect(got).toBeNull();
+ }
+ const stability=await page.evaluate(setup=>{const o={members:[],chipIds:[],setup};return [ScreenReaderController.stabilize(o).setup,ScreenReaderController.stabilize(o).setup];},setup);expect(stability).toEqual([null,setup]);
+ const unknown=await page.evaluate(async image=>{const im=new Image();im.src=image;await im.decode();const c=ScreenReaderVision.normalize(im),ctx=c.getContext('2d');ctx.fillStyle='black';ctx.fillRect(340,242,280,41);ctx.fillStyle='white';ctx.font='25px monospace';ctx.fillText('UNKNOWN',400,273);return ScreenReaderStartVision.analyze(c);},startupFixture('start-autumn-room'));expect(unknown).toBeNull();
+ await page.evaluate(()=>ScreenReaderMapBridge.resetForReader());
+ expect(await page.evaluate(o=>ScreenReaderMapBridge.configure(o),setup)).toBe(true);
+ expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toMatchObject(setup);
+ await page.evaluate(()=>ScreenReaderMapBridge.resetForReader());await map(page);
+ expect(await page.evaluate(o=>ScreenReaderMapBridge.configure(o),setup)).toBe(false);
+ expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toMatchObject({map:'MAP0003',difficulty:'普通'});
+});

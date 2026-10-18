@@ -28,6 +28,8 @@ on:
       - 'scripts/build-screen-reader-chip-shapes.py'
       - 'scripts/check-chip-artwork-mapping.py'
       - 'scripts/assets/status-name/**'
+      - 'scripts/assets/map-text/**'
+      - 'scripts/build-autumn-second-fixtures.py'
       - 'package.json'
       - 'playwright.config.js'
       - '.github/workflows/08-screen-reader-smoke.yml'
@@ -55,6 +57,8 @@ on:
       - 'scripts/build-screen-reader-chip-shapes.py'
       - 'scripts/check-chip-artwork-mapping.py'
       - 'scripts/assets/status-name/**'
+      - 'scripts/assets/map-text/**'
+      - 'scripts/build-autumn-second-fixtures.py'
       - 'tests/08-screen-reader.spec.js'
       - 'tests/08-world-reader.spec.js'
       - 'tests/07-skill.spec.js'
@@ -91,6 +95,7 @@ jobs:
       - run: npx playwright install --with-deps chromium webkit
       - run: npm run test:08
       - run: npx playwright test tests/08-screen-reader.spec.js --browser=webkit -g "printed status name|status names require|zoomed status|fast-changing|chip artwork|chip grid|party stars"
+      - run: npx playwright test tests/08-world-reader.spec.js --browser=webkit -g "room text|autumn room|recorded video labels|video labels abstain"
       - run: npm run test:08:sync -- --workers=2
       - uses: actions/upload-artifact@v4
         if: always()
