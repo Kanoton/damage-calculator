@@ -1713,3 +1713,6 @@ dialog[data-inline-pad] .skill-entry-row>[data-cancel]{min-width:72px;align-self
 .roster-autumn-controls{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px}
 #map-draft .roster-status-energyStacks .roster-mark-button{width:auto;height:auto;white-space:nowrap;font-size:11px}
 .autumn-attention{display:inline-flex;gap:4px;align-items:center}
+
+.autumn-attention button{white-space:nowrap}
+.selected-character-conditions .autumn-attention .condition-toggle{width:auto;min-width:64px;padding:1px 6px;white-space:nowrap}

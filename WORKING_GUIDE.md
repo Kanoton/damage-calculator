@@ -164,9 +164,9 @@ npm run test:06b
 
 ## 13. 07のマウスオーバー文面一覧
 
-07の説明文の正本は `07_skill/data/hover-descriptions.csv`（167行）です。説明文の列だけを編集し、`node scripts/build-07-hover-text.js` で同期script `js/hover-text.js` を生成します。生成JSは手編集せず、CSVと同時にコミットしてください。HTTP／file://はこの同じデータを読み、旧能力全文snapshotや共有CSVの文章にはフォールバックしません。キャラ・チップの数値、アイコン、ゲームルール等の既存フォールバックは保持します。共有 `csv/` は変更しません。08の説明文も同じ正本から生成したJSを同梱し、必要な同期時に `08_screen_reader/js/hover-text.js` を更新します。`check:08` で07の生成JSとの一致を確認します。
+07の説明文の正本は `07_skill/data/hover-descriptions.csv`（170行）です。説明文の列だけを編集し、`node scripts/build-07-hover-text.js` で同期script `js/hover-text.js` を生成します。生成JSは手編集せず、CSVと同時にコミットしてください。HTTP／file://はこの同じデータを読み、旧能力全文snapshotや共有CSVの文章にはフォールバックしません。キャラ・チップの数値、アイコン、ゲームルール等の既存フォールバックは保持します。共有 `csv/` は変更しません。08の説明文も同じ正本から生成したJSを同梱し、必要な同期時に `08_screen_reader/js/hover-text.js` を更新します。`check:08` で07の生成JSとの一致を確認します。
 
-`npm run check:07` は生成一致・差し込み処理・script構文を確認します。対応確認用の417行は `docs/hover-descriptions/inventory.csv`、編集方法は同フォルダの `README.md`。`node scripts/export-07-hover-inventory.js` で再生成し、`--check` で一致を確認します。旧一覧のID単位の修正文・メモを保持しますが、今後の編集元は167行の正本です。抽出はオフライン表示処理で、全キャラCT巡回・PT総当たり検証ではありません。
+`npm run check:07` は生成一致・差し込み処理・script構文を確認します。対応確認用の419行は `docs/hover-descriptions/inventory.csv`、編集方法は同フォルダの `README.md`。`node scripts/export-07-hover-inventory.js` で再生成し、`--check` で一致を確認します。旧一覧のID単位の修正文・メモを保持しますが、今後の編集元は170行の正本です。抽出はオフライン表示処理で、全キャラCT巡回・PT総当たり検証ではありません。
 
 横長・モバイルの共通テスト操作と入力枠の配置確認は `test-helpers/07-ui.js` に置きます。画面固有のタップ・起動条件・検証は各specへ残し、共通ヘルパー変更時も両CIを起動します。
 

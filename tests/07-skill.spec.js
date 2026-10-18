@@ -20,6 +20,7 @@ for(const protocol of ['http','file'])test('07 autumn confirmed rules: energy, H
  await page.locator('.role-tab[data-role="character"]').click();
  const attention=page.locator('#selected-character-conditions').getByRole('button',{name:'ミミにガオーの注目を付与',exact:true});
  const defense=page.locator('#selected-character-def'),base=Number(await defense.inputValue());
+ expect(await attention.evaluate(button=>button.scrollWidth<=button.clientWidth&&button.scrollHeight<=button.clientHeight)).toBe(true);
  await attention.click();await expect(attention).toHaveText('注目 2T');await expect(defense).toHaveValue(String(Math.max(0,base-1)));
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#turn-end').click();
  await page.locator('.role-tab[data-role="character"]').click();await expect(attention).toHaveText('注目 1T');await attention.click();await expect(attention).toHaveText('注目 2T');await expect(defense).toHaveValue(String(Math.max(0,base-1)));
