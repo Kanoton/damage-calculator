@@ -23,7 +23,7 @@
  function monitorInfo(text=''){
   const count=new Set((window.ScreenReaderWorldReferences?.names||[]).map(r=>r.id)).size;
   const map=window.ScreenReaderMapBridge?.snapshot(),pending=readerSession&&(!map?.map||!map?.difficulty);
-  $('monitor-info').textContent=(pending?'マップ名・難易度：未判定（対応する開始前表示を待っています。手動指定もできます） ／ ':'')+'モンスター読取：'+($('world-sync').checked?'ON':'OFF（反映をONにすると読取開始）')+' ／ 照合見本 '+count+'種類 ／ 自動撃破：未対応（手動で確定）'+(text?' ／ '+text:'');
+  $('monitor-info').textContent=(pending?'マップ名・難易度：未判定（ルーム設定または結果画面から読み取ります。手動指定もできます） ／ ':'')+'モンスター読取：'+($('world-sync').checked?'ON':'OFF（反映をONにすると読取開始）')+' ／ 照合見本 '+count+'種類 ／ 自動撃破：未対応（手動で確定）'+(text?' ／ '+text:'');
  }
  const interval=()=>[250,500,1200].includes(Number($('interval').value))?Number($('interval').value):500;
  function isArea(a){return a&&['x','y','w','h'].every(k=>Number.isFinite(a[k]))&&a.x>=0&&a.y>=0&&a.w>=.05&&a.h>=.05&&a.x+a.w<=1.00001&&a.y+a.h<=1.00001;}
