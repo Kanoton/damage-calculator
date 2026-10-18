@@ -39,7 +39,9 @@
   return ranked[0]&&ranked[0][1]<.205&&(!ranked[1]||ranked[1][1]-ranked[0][1]>.035)?ranked[0][0]:null;
  }
  function replay(source,text){
-  const difficulty=word(source,[1050,656,74,38],'pink',text.difficulties);if(!difficulty)return null;
+  // The diagonal pink separator enters the bottom-right of the old crop.
+  // Keep the full word width, but end above that decoration.
+  const difficulty=word(source,[1050,656,74,33],'pink',text.difficulties);if(!difficulty)return null;
   const box=[357,647,680,45],[x,y,w,h]=box,{mask}=textPixels(source,box,'result-white'),columns=new Uint16Array(w);
   for(let i=0;i<mask.length;i++)columns[i%w]+=mask[i];
   const maps=text.maps.filter(r=>r.nameOnly),found=new Set();let start=null;
