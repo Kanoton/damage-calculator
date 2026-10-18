@@ -728,3 +728,18 @@ test('08: chip artwork holds empty highlighted slots and unknown artwork instead
   return out;
  });expect(results).toEqual([null,null]);
 });
+
+const autumnLive=require('./fixtures/screen-reader/autumn-live-sequence.json');
+test('08: short autumn replay preserves four identities without reading a clipped 10 as zero',async({page})=>{
+ await open(page);
+ const results=await page.evaluate(async rows=>{
+  const out=[];for(const row of rows){const im=new Image();im.src=row.image;await im.decode();out.push(ScreenReaderVision.analyze(ScreenReaderVision.normalize(im)));}return out;
+ },autumnLive.hud);
+ for(const result of results){expect(result.members.map(m=>m.id)).toEqual(autumnLive.party);expect(result.members[0].currentHp).not.toBe(0);}
+ // Both automatic observations must identify Sykes before fixing the order.
+ await page.locator('#reader-toggle').click();await page.locator('#reader-details').evaluate(e=>e.open=true);await page.locator('#reader-apply').uncheck();
+ await page.locator('#reader-file').setInputFiles({name:'hud.png',mimeType:'image/png',buffer:Buffer.from(autumnLive.hud[0].image.split(',')[1],'base64')});await expect(page.locator('#reader-file')).toHaveValue('');await page.locator('#reader-apply').check();
+ await page.evaluate(async()=>{await ScreenReaderController.read(true);await ScreenReaderController.read(true);});
+ expect((await page.evaluate(()=>ScreenReaderCharacterBridge.snapshot())).members.map(m=>m.id)).toEqual(autumnLive.party);
+ await expect(page.locator('#reader-party-status')).toContainText('PT確定');
+});

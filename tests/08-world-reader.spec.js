@@ -139,7 +139,7 @@ test('08 world: visible monitor diagnostics distinguish disabled reading and pre
  await open(page);await page.locator('#reader-toggle').click();
  await expect(page.locator('#reader-monitor-info')).toContainText('OFF');
  await expect(page.locator('#reader-monitor-info')).toContainText('29種類');
- await expect(page.locator('#reader-interval')).toHaveValue('500');
+ await expect(page.locator('#reader-interval')).toHaveValue('250');
  await expect(page.locator('#reader-world-sync')).toBeVisible();
  const before=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());
  await page.locator('#reader-world-sync').check();await page.locator('#reader-details').evaluate(e=>e.open=true);await page.locator('#reader-apply').uncheck();
@@ -412,4 +412,22 @@ test('08 world: result banner from the actual autumn screenshot survives rescali
    const im=new Image();im.src=image;await im.decode();const c=ScreenReaderVision.normalize(im);c.getContext('2d').clearRect(...box);return ScreenReaderStartVision.analyze(c);
   },{image:realResultBanner.image,box});expect(actual).toBeNull();
  }
+});
+
+const autumnLive=require('./fixtures/screen-reader/autumn-live-sequence.json');
+test('08 world: short autumn replay confirms three owls and one dinosaur at quarter-second sampling',async({page})=>{
+ await open(page);
+ const results=await page.evaluate(async samples=>{
+  const observations=[];for(const row of samples){const im=new Image();im.src=row.image;await im.decode();observations.push(ScreenReaderWorldVision.analyze(ScreenReaderVision.normalize(im)));}return observations;
+ },autumnLive.samples);
+ for(let i=0;i<results.length;i++)expect(results[i].monsters,'sample '+(i+1)).toEqual(autumnLive.samples[i].expected?[autumnLive.samples[i].expected]:[]);
+ const run=async step=>page.evaluate(({observations,step})=>{
+  document.getElementById('reader-new-game').click();ScreenReaderMapBridge.configure({map:'MAP0105',difficulty:'困難'});
+  for(let i=0;i<observations.length;i+=step){const accepted=ScreenReaderController.stabilize({members:[],selfId:null,chipOwnerId:null,chipIds:[],world:observations[i]});ScreenReaderMapBridge.apply(accepted.world,{allowDefeat:false});}
+  return ScreenReaderMapBridge.snapshot();
+ },{observations:results,step});
+ // This observed phase at 500ms reproduces the user's owl-3-only result.
+ const slow=await run(2);expect(slow.monsters.map(m=>[m.monsterId,m.serial])).toEqual([['M0123',3]]);
+ const fast=await run(1);expect(fast).toMatchObject({round:1,progress:1});
+ expect(fast.monsters.map(m=>[m.monsterId,m.serial,m.hp])).toEqual([['M0123',1,9],['M0123',2,9],['M0123',3,9],['M0122',1,22]]);
 });

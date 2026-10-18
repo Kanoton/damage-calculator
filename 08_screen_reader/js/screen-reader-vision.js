@@ -85,7 +85,9 @@
     const clippedFragment=clipped||start<=1||x>=w-1||top<=1||bottom>=h-1;
     if(!sorted.length||sorted[0][1]>.19||(sorted[1]&&sorted[1][1]-sorted[0][1]<.018)){
      // Ignore unrecognizable background fragments cut by the left HUD crop.
-     if(rejectClipped&&clippedFragment){start=null;continue;}return null;
+     // A large fragment spanning the crop height may contain the leading
+     // digit joined to portrait ink. Dropping it can turn 10 into 0.
+     if(rejectClipped&&clippedFragment){if(top===0&&bottom===h&&x-start>=w*.25)return null;start=null;continue;}return null;
     }
     // A recognizable but clipped digit is not safe to drop from a number.
     if(rejectClipped&&clipped)return null;glyphs.push(sorted[0][0]);
