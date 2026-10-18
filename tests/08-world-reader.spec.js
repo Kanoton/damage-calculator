@@ -333,3 +333,18 @@ test('08 world: autumn room requires both labelled fields and protects manual co
  expect(await page.evaluate(o=>ScreenReaderMapBridge.configure(o),setup)).toBe(false);
  expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toMatchObject({map:'MAP0003',difficulty:'普通'});
 });
+
+
+test('08 world: replay printed map is independent of all four difficulty words',async({page})=>{
+ await open(page);
+ const results=await page.evaluate(async({room,cases})=>{
+  const load=async src=>{const im=new Image();im.src=src;await im.decode();return im;};
+  const base=await load(room),out=[];
+  for(const row of cases){
+   const c=ScreenReaderVision.normalize(base),ctx=c.getContext('2d'),token=document.createElement('canvas');token.width=240;token.height=42;const tc=token.getContext('2d');tc.drawImage(await load(row.image),0,0);const p=tc.getImageData(0,0,240,42);
+   for(let i=0;i<p.data.length;i+=4){const ink=p.data[i]>215;p.data[i]=ink?255:20;p.data[i+1]=ink?50:20;p.data[i+2]=ink?140:20;}
+   tc.putImageData(p,0,0);ctx.drawImage(token,970,652);out.push(ScreenReaderStartVision.analyze(c));
+  }return out;
+ },{room:startupFixture('start-dream-result'),cases:generatedMapText.difficulties});
+ expect(results).toEqual(generatedMapText.difficulties.map(r=>({map:'MAP0001',difficulty:r.id})));
+});

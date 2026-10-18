@@ -1,4 +1,4 @@
-"""Build explicit start-context text masks from a privacy-cropped result fixture."""
+"""Build independent map/difficulty word masks from canonical names and anonymous text."""
 import argparse,base64,csv,io,json,runpy
 from pathlib import Path
 from PIL import Image,ImageDraw,ImageFont
@@ -30,9 +30,18 @@ def main():
  # Independent dictionaries: never encode a map/difficulty pair.
  fonts=[ImageFont.truetype(str(ROOT/'scripts/assets/map-text/NotoSansJP.ttf'),size) for size in [28,90]]
  maps={r['map_id']:r['マップ名'] for r in csv.DictReader((ROOT/'csv/maps_renumbered.csv').open(encoding='utf-8-sig')) if r['表示']=='1'}
+ # Fail the build instead of silently adding .notdef boxes for new CSV names.
+ coverage=''.join(maps.values())+'普通困難悪夢狂気マップ難易度（協力チャレンジ）(協力チャレンジ)'
+ def signature(ch):
+  mask=fonts[-1].getmask(ch);return mask.size,bytes(mask)
+ missing=signature('\U0010ffff')
+ if any(signature(ch)==missing for ch in set(coverage)):raise ValueError('Extend the map-text font subset for the registered names')
  refs['text']={}
  for key,rows in [('maps',list(maps.items())),('difficulties',[(x,x) for x in ['普通','困難','悪夢','狂気']]),('labels',[(x,x) for x in ['マップ','難易度']])]:
-  refs['text'][key]=[{'id':id,'name':name,**template(name+suffix,font,shear)} for id,name in rows for font in fonts for suffix in (['','（協力チャレンジ）'] if key=='maps' else ['']) for shear in [0,-.1,-.2]]
+  refs['text'][key]=[{'id':id,'name':name,**template(name+suffix,font,shear)} for id,name in rows for font in fonts for suffix in (['','（協力チャレンジ）','(協力チャレンジ)'] if key=='maps' else ['']) for shear in [0,-.1,-.2]]
+ # The game's result font differs from the room font; keep its observed word
+ # as a map-only sample, never coupled to the observed difficulty.
+ glyph=im.crop((352,644,902,695));m=Image.new('L',glyph.size);m.putdata([255*int(min(v)>215 and max(v)-min(v)<35) for v in glyph.getdata()]);m=m.crop(m.getbbox());bits=[int(v>110) for v in m.resize((128,32),Image.Resampling.BILINEAR).tobytes()];packed=bytes(sum(bits[i+j]<<j for j in range(8)) for i in range(0,len(bits),8));refs['text']['maps'].append({'id':refs['map'],'name':maps[refs['map']],'ratio':m.width/m.height,'data':base64.b64encode(packed).decode()})
  room=json.loads((ROOT/'tests/fixtures/screen-reader/start-autumn-room.json').read_text())
  roomim=Image.open(io.BytesIO(base64.b64decode(room['image'].split(',')[1]))).convert('RGB').resize((1536,709),Image.Resampling.BILINEAR)
  for name,box in [('マップ',(205,242,96,41)),('難易度',(205,330,96,40))]:
