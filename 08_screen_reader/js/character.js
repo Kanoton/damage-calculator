@@ -61,6 +61,19 @@
  window.getCharacterActiveSkillEffects=skillKey=>{const skill=activeSkill();return skill?.key===skillKey?(skill.effects||[]).map(effect=>({...effect,...(effect.type==='damage_monster'&&effect.sourceStat?{value:calculate()[effect.sourceStat]+(Number(effect.offset)||0)}:{})})):[];};
  window.captureCharacterAbilityState=()=>selectedCharacter?{id:selectedCharacter.id,numbers:{...state().numbers},modes:{...state().modes},skillCooldowns:{...state().skillCooldowns},activeEffects:(state().activeEffects||[]).map(effect=>({...effect})),currentHp:state().currentHp,maxHpBonus:Number(state().maxHpBonus)||0,controlMaxBonuses:{...state().controlMaxBonuses}}:null;
  window.restoreCharacterAbilityState=snapshot=>{if(!snapshot)return;const target=getState(snapshot.id);if(Object.hasOwn(snapshot,'currentHp'))target.currentHp=snapshot.currentHp;target.numbers={...snapshot.numbers};if(snapshot.modes)target.modes={...snapshot.modes};target.skillCooldowns={...snapshot.skillCooldowns};target.activeEffects=(snapshot.activeEffects||[]).map(effect=>({...effect}));target.maxHpBonus=Number(snapshot.maxHpBonus)||0;target.controlMaxBonuses={...target.controlMaxBonuses,...snapshot.controlMaxBonuses};if(selectedCharacter?.id===snapshot.id){renderConditions();updateStats();}};
+ // Attention is a duration, never an accumulating stat multiplier.
+ const attentionTurns=id=>String(id)===String(selectedCharacter?.id)?number(getState(id),'ガオーの注目'):(getPartyState(id).attentionTurns||0);
+ const setAttention=(id,turns)=>{if(String(id)===String(selectedCharacter?.id))getState(id).numbers['ガオーの注目']=turns;else getPartyState(id).attentionTurns=turns;};
+ window.captureAutumnAttention=()=>({self:[...states].map(([id,s])=>[id,number(s,'ガオーの注目')]),party:[...partyStates].map(([id,s])=>[id,s.attentionTurns||0])});
+ window.restoreAutumnAttention=snapshot=>{if(!snapshot)return;for(const s of states.values())s.numbers['ガオーの注目']=0;for(const s of partyStates.values())s.attentionTurns=0;for(const [id,n] of snapshot.self)getState(id).numbers['ガオーの注目']=n;for(const [id,n] of snapshot.party)getPartyState(id).attentionTurns=n;if(selectedCharacter){renderConditions();updateStats();}};
+ function attentionControl(id,name,isSelf){
+  const field=document.createElement('span');field.className='autumn-attention';const turns=attentionTurns(id);
+  const apply=document.createElement('button');apply.type='button';apply.className='condition-toggle';apply.setAttribute('aria-label',name+'にガオーの注目を付与');apply.textContent='注目 '+turns+'T';apply.title='クリックで残り2ターンに更新、右クリックで解除。能力低下は1回分（防御−1・移動−1）。';
+  const commit=next=>{window.rememberCharacterSkillActivation?.();setAttention(id,next);renderConditions();updateStats();};
+  apply.addEventListener('click',event=>{event.stopPropagation();commit(2);});apply.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();commit(0);});field.append(apply);
+  if(!isSelf&&turns){const tick=document.createElement('button');tick.type='button';tick.textContent='残り−1';tick.setAttribute('aria-label',name+'の注目の残りターンを減らす');tick.addEventListener('click',event=>{event.stopPropagation();commit(Math.max(0,turns-1));});field.append(tick);}
+  return field;
+ }
  const modeFor=rule=>Number(state().modes[rule.chip_id])||0;
  const base=(stat)=>Number(selectedCharacter['lv'+state().level+'_'+stat]||0);
  function activeRules(){
@@ -130,6 +143,7 @@
    for(const stat of ['atk','def','move'])result[stat]+=stacks*(Number(rule[stat])||0);
    result.damageReduce+=stacks*(Number(rule.damage_reduce)||0);
   }
+  if(mapPicker.value==='MAP0105'&&number(state(),'ガオーの注目')>0){result.def-=1;result.move-=1;}
   for(const stat of ['atk','def','move'])result[stat]+=state().manual?.[stat]||0;
   result.atk=Math.max(0,result.atk);result.def=Math.max(0,result.def);result.move=Math.max(0,result.move);
   return result;
@@ -270,6 +284,7 @@
  function renderConditions(){
   conditionsBox.replaceChildren();
   renderPartySupport();
+  if(mapPicker.value==='MAP0105')conditionsBox.append(attentionControl(selectedCharacter.id,selectedCharacter.name,true));
   renderTeruSupport();
   const ownedRules=activeRules();
   for(const [key,label,triggers] of [['attack','攻撃時',['on_attack','on_attack_after_mark']],['move','移動時',['on_next_move']]]){
@@ -471,6 +486,7 @@
   if(member.currentHp===null)member.currentHp=maxHp;member.currentHp=Math.max(0,Math.min(maxHp,member.currentHp));
   const result={level:member.level,hp:maxHp,currentHp:member.currentHp};
   for(const stat of ['atk','def','move'])result[stat]=Math.max(0,baseValue(stat)+(member.manual[stat]||0)+active.filter(rule=>rule.target===stat&&matches(rule,maxHp)).reduce((sum,rule)=>sum+value(rule,maxBonus),0));
+  if(mapPicker.value==='MAP0105'&&member.attentionTurns>0){result.def=Math.max(0,result.def-1);result.move=Math.max(0,result.move-1);}
   return result;
  }
  function editPartyMember(id){partyEditId=String(id);renderParty();updateChipListSelection();const row=characters.find(item=>String(item.id)===partyEditId);chipStatus.textContent='チップ編集対象：'+(row?.name||'自キャラ');}
@@ -499,6 +515,7 @@
    slot.addEventListener('dragleave',()=>slot.classList.remove('is-drop-target'));
    slot.addEventListener('drop',event=>{if(draggedPartyIndex===null)return;event.preventDefault();const from=draggedPartyIndex;draggedPartyIndex=null;[partySlots[from],partySlots[index]]=[partySlots[index],partySlots[from]];renderParty();listStatus.textContent='PTの順番を変更しました。';});
    slot.addEventListener('dragend',()=>{draggedPartyIndex=null;partyGrid.querySelectorAll('.is-dragging,.is-drop-target').forEach(item=>item.classList.remove('is-dragging','is-drop-target'));});
+   if(row&&mapPicker.value==='MAP0105')slot.append(attentionControl(id,row.name,isSelf));
    partyGrid.append(slot);
   });
   const registered=new Set(slots.filter(Boolean).map(String));
@@ -784,6 +801,7 @@
  applyCharacterTurnStartEffects=()=>{
   if(!selectedCharacter)return;
   let changed=false;
+  if(mapPicker.value==='MAP0105'&&number(state(),'ガオーの注目')>0){state().numbers['ガオーの注目']-=1;changed=true;}
   for(const id of ['121','145'])if(state().modes[id]){state().modes[id]=0;changed=true;}
   if(state().numbers['電撃グローブ命中数']){state().numbers['電撃グローブ命中数']=0;changed=true;}
   if(state().chips.includes('206')&&number(state(),'マインド')>0){state().numbers['マインド']=number(state(),'マインド')-1;changed=true;}
