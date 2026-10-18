@@ -348,3 +348,50 @@ test('08 world: replay printed map is independent of all four difficulty words',
  },{room:startupFixture('start-dream-result'),cases:generatedMapText.difficulties});
  expect(results).toEqual(generatedMapText.difficulties.map(r=>({map:'MAP0001',difficulty:r.id})));
 });
+
+const resultBanner=require('./fixtures/screen-reader/result-banner-synthetic.json');
+test('08 world: result banner rejects its pale background and nearby decorations',async({page})=>{
+ await open(page);
+ // Error diagnostics use the same source with private helpers exposed only in
+ // this isolated test page; no diagnostic API is added to the application.
+ const debugSource=require('fs').readFileSync(require('path').join(__dirname,'../08_screen_reader/js/screen-reader-start.js'),'utf8').replace('{analyze,readRound}','{analyze,readRound,word,textPixels}').replace('const ranked=[...scores].sort((a,b)=>a[1]-b[1]);','const ranked=[...scores].sort((a,b)=>a[1]-b[1]);window.__wordRanks=ranked.slice(0,2);');
+ await page.addScriptTag({content:debugSource});
+ for(const scale of [1,.75]){
+  const result=await page.evaluate(async({image,scale})=>{const im=new Image();im.src=image;await im.decode();const c=document.createElement('canvas');c.width=Math.round(im.width*scale);c.height=Math.round(im.height*scale);c.getContext('2d').drawImage(im,0,0,c.width,c.height);const source=ScreenReaderVision.normalize(c);const setup=ScreenReaderStartVision.analyze(source);let debug=null;
+   if(!setup){const text=ScreenReaderStartReferences.text,maps=text.maps.filter(r=>r.nameOnly),v=ScreenReaderStartVision,box=[357,647,680,45];const check=(box,kind,refs,coverage=0)=>{const {mask}=v.textPixels(source,box,kind),w=box[2];let left=w,right=0,top=box[3],bottom=0;for(let i=0;i<mask.length;i++)if(mask[i]){left=Math.min(left,i%w);right=Math.max(right,i%w+1);top=Math.min(top,Math.floor(i/w));bottom=Math.max(bottom,Math.floor(i/w)+1);}window.__wordRanks=null;const value=v.word(source,box,kind,refs,coverage);return {box,bounds:[left,top,right,bottom],value,ranks:window.__wordRanks};};
+    const {mask}=v.textPixels(source,box,'result-white'),cols=new Uint16Array(680),candidates=[];for(let i=0;i<mask.length;i++)cols[i%680]+=mask[i];let start=null;for(let x=0;x<=680;x++){if(x<680&&cols[x]>=2){if(start===null)start=x;continue;}if(start!==null&&x-start>=7&&x-start<=24&&start>70&&start<600)candidates.push({name:check([357,647,start-2,45],'result-white',maps),suffix:check([357+start-2,647,682-start,45],'result-white',text.suffixes),nameCovered:check([357,647,start-2,45],'result-white',maps,.75),suffixCovered:check([357+start-2,647,682-start,45],'result-white',text.suffixes,.75)});start=null;}
+    debug={difficulty:check([1050,656,74,38],'pink',text.difficulties),candidates};}
+   return {setup,debug,world:ScreenReaderWorldVision.analyze(source),failedImage:setup?null:source.toDataURL()};},{image:resultBanner.image,scale});
+  if(result.failedImage){const path=test.info().outputPath('result-banner-scale-'+scale+'.png');require('fs').writeFileSync(path,Buffer.from(result.failedImage.split(',')[1],'base64'));await test.info().attach('result-banner',{path,contentType:'image/png'});}
+  expect(result.setup,'scale='+scale+' '+JSON.stringify(result.debug)).toEqual(resultBanner.expected);expect(result.world.clock).toBeNull();expect(result.world.monsters).toEqual([]);
+ }
+ const suffix=resultBanner.regions.qualifier;
+ for(const box of [resultBanner.regions.map,resultBanner.regions.difficulty,[suffix[0]+70,suffix[1],150,suffix[3]]]){
+  const got=await page.evaluate(async({image,box})=>{const im=new Image();im.src=image;await im.decode();const c=ScreenReaderVision.normalize(im);c.getContext('2d').clearRect(...box);return ScreenReaderStartVision.analyze(c);},{image:resultBanner.image,box});expect(got).toBeNull();
+ }
+});
+
+test('08 world: result banner separates registered name lengths from the observed qualifier',async({page})=>{
+ await open(page);
+ const results=await page.evaluate(async({image,qualifier,cases})=>{
+  const load=async src=>{const im=new Image();im.src=src;await im.decode();return im;};
+  const base=await load(image),suffix=ScreenReaderVision.normalize(await load(qualifier)),out=[];
+  for(const map of cases.maps)for(const difficulty of cases.difficulties){
+   const c=ScreenReaderVision.normalize(base),ctx=c.getContext('2d');ctx.fillStyle='rgb(235,40,140)';ctx.fillRect(357,647,680,45);
+   const token=document.createElement('canvas');token.width=240;token.height=42;const tc=token.getContext('2d');tc.drawImage(await load(map.image),0,0);let p=tc.getImageData(0,0,240,42),left=240,right=0,top=42,bottom=0;
+   for(let i=0;i<240*42;i++)if(p.data[i*4]>215){const x=i%240,y=Math.floor(i/240);left=Math.min(left,x);right=Math.max(right,x+1);top=Math.min(top,y);bottom=Math.max(bottom,y+1);}
+   const width=(right-left)/(bottom-top)*38;ctx.drawImage(token,left,top,right-left,bottom-top,362,651,width,38);ctx.drawImage(suffix,508,650,370,38,Math.ceil(362+width)+7,651,370,38);
+   tc.clearRect(0,0,240,42);tc.drawImage(await load(difficulty.image),0,0);p=tc.getImageData(0,0,240,42);for(let i=0;i<p.data.length;i+=4){const ink=p.data[i]>215;p.data[i]=ink?255:20;p.data[i+1]=ink?50:20;p.data[i+2]=ink?140:20;}tc.putImageData(p,0,0);
+   ctx.save();ctx.beginPath();ctx.rect(1050,656,74,38);ctx.clip();ctx.drawImage(token,970,652);ctx.restore();
+   out.push({expected:{map:map.id,difficulty:difficulty.id},actual:ScreenReaderStartVision.analyze(c)});
+  }return out;
+ },{image:resultBanner.image,qualifier:startupFixture('start-dream-result'),cases:generatedMapText});
+ expect(results).toHaveLength(36);for(const row of results)expect(row.actual).toEqual(row.expected);
+});
+
+test('08 world: result banner configures the reader without importing the previous round',async({page})=>{
+ await open(page);await page.locator('#reader-toggle').click();await page.locator('#reader-details').evaluate(e=>e.open=true);
+ await page.locator('#reader-apply').uncheck();await page.locator('#reader-file').setInputFiles({name:'result.png',mimeType:'image/png',buffer:Buffer.from(resultBanner.image.split(',')[1],'base64')});await expect(page.locator('#reader-file')).toHaveValue('');await page.locator('#reader-apply').check();
+ await page.evaluate(async()=>{await ScreenReaderController.read(true);await ScreenReaderController.read(true);});
+ expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toMatchObject({map:'MAP0105',difficulty:'困難',round:null,progress:null,events:[],monsters:[]});
+});
