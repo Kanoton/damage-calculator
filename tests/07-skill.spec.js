@@ -8,7 +8,7 @@ for(const protocol of ['http','file'])test('07 autumn confirmed rules: energy, H
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');
  await page.getByRole('button',{name:'1 のイベントを実行',exact:true}).click();
  const gao=page.locator('.roster-card').filter({has:page.locator('.roster-gao-start')});
- const attack=gao.getByRole('spinbutton',{name:'キッズガオーの攻撃力',exact:true}),hp=gao.getByRole('spinbutton',{name:'キッズガオーの残りHP',exact:true}),start=gao.locator('.roster-gao-start');
+ const attack=gao.locator('input[aria-label="キッズガオーの攻撃力"]'),hp=gao.locator('input[aria-label="キッズガオーの残りHP"]'),start=gao.locator('.roster-gao-start');
  await expect(attack).toHaveValue('0');await start.click();await expect(attack).toHaveValue('2');
  await hp.fill('72');await hp.dispatchEvent('change');await start.click();await expect(attack).toHaveValue('6');
  await expect(gao.getByAltText('反撃可能')).toBeVisible();
