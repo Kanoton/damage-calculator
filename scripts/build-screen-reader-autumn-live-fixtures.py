@@ -33,7 +33,7 @@ def main():
         hud=[sanitize(a.frames/f'frame-{n:03}.png',HUD,True) for n in [23,33]]
         samples=[]
         for n in range(1,17):
-            row=sanitize(a.detail/f'frame-{n:03}.png',[[54,5,102,35],[340,0,600,30]]+LABELS.get(n,[]));row['sampleIndex']=n
+            row=sanitize(a.detail/f'frame-{n:03}.png',[[50,0,110,45],[340,0,600,30]]+LABELS.get(n,[]));row['sampleIndex']=n
             serial=1 if n in [3,4] else 2 if n in [6,7,8] else 3 if n in [9,10,11] else None
             row['expected']=({'monsterId':'M0123','serial':serial,'currentHp':9,'maxHp':9} if serial else {'monsterId':'M0122','serial':1,'currentHp':22,'maxHp':22} if n in [12,13,14] else None)
             samples.append(row)
