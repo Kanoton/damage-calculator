@@ -6,7 +6,7 @@ if(!['07_skill','08_screen_reader'].includes(skillFolder))throw Error('Unknown s
 for(const protocol of ['http','file'])test('07 autumn confirmed rules: energy, HP boundary, attention refresh and undo '+protocol,async({page})=>{
  await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve(skillFolder+'/index.html')).href:`/${skillFolder}/`);
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');
- await page.getByRole('button',{name:'1 のイベントを実行',exact:true}).click();
+ await page.getByRole('button',{name:'3 のイベントを実行',exact:true}).click();
  const gao=page.locator('.roster-card').filter({has:page.locator('.roster-gao-start')});
  const attack=gao.locator('input[aria-label="キッズガオーの攻撃力"]'),hp=gao.locator('input[aria-label="キッズガオーの残りHP"]'),start=gao.locator('.roster-gao-start');
  await expect(attack).toHaveValue('0');await start.click();await expect(attack).toHaveValue('2');
