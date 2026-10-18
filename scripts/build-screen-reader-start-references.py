@@ -28,7 +28,7 @@ def main():
   refs['digits'].extend({'digit':d,**g} for d,g in zip(text,glyphs))
  x,y,w,h=(54,7,43,35);refs['roundOne']={'box':[x,y,w,h],'data':base64.b64encode(bytes(int(max(rgb)<110) for rgb in source.crop((x,y,x+w,y+h)).getdata())).decode()}
  # Independent dictionaries: never encode a map/difficulty pair.
- fonts=[ImageFont.truetype(str(ROOT/'scripts/assets/map-text/NotoSansJP.ttf'),size) for size in [28,90]]
+ fonts=[ImageFont.truetype(str(ROOT/'scripts/assets/map-text/NotoSansJP.ttf'),size) for size in [28,40,90]]
  maps={r['map_id']:r['マップ名'] for r in csv.DictReader((ROOT/'csv/maps_renumbered.csv').open(encoding='utf-8-sig')) if r['表示']=='1'}
  # Fail the build instead of silently adding .notdef boxes for new CSV names.
  coverage=''.join(maps.values())+'普通困難悪夢狂気マップ難易度（協力チャレンジ）(協力チャレンジ)'
