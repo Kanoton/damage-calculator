@@ -26,6 +26,9 @@ def main():
     im=Image.open(io.BytesIO(base64.b64decode(json.loads(FIXTURE.read_text())['image'].split(',')[1]))).convert('RGB')
     chars=[{'id':ident,'kind':'avatar','data':helpers['feature'](helpers['crop'](im,box))} for ident,box in zip(['105','106','3','18'],AVATARS)]
     chars.append({'id':'105','kind':'self','data':helpers['feature'](helpers['crop'](im,SELF))})
+    live=json.loads((ROOT/'tests/fixtures/screen-reader/autumn-live-sequence.json').read_text())
+    frame=Image.open(io.BytesIO(base64.b64decode(live['hud'][0]['image'].split(',')[1]))).convert('RGB').resize((1536,709),Image.Resampling.BILINEAR)
+    chars.append({'id':'29','kind':'avatar','data':helpers['feature'](helpers['crop'](frame,AVATARS[3]))})
     glyphs=helpers['glyphs'](helpers['crop'](im,(167,377,27,24)),'white')
     if len(glyphs)!=1: raise ValueError('Expected one reviewed coin digit')
     data={'characters':chars,'digits':[{'digit':'6',**glyphs[0]}]}

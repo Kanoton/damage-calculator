@@ -70,7 +70,7 @@
   const c=crop(source,box,box[2],box[3]),ctx=c.getContext('2d'),d=ctx.getImageData(0,0,c.width,c.height),w=c.width,h=c.height;
   const mask=Array.from({length:h},()=>new Uint8Array(w)),columns=new Uint16Array(w);
   for(let y=0;y<h;y++)for(let x=0;x<w;x++){const i=(y*w+x)*4;if(isInk(d.data[i],d.data[i+1],d.data[i+2],kind)){mask[y][x]=1;columns[x]++;}}
-  const glyphs=[];let start=null;
+  const glyphs=[];let start=null,skippedLeadingInk=false;
   for(let x=0;x<=w;x++){
    if(x<w&&columns[x]>=2){if(start===null)start=x;continue;}
    if(start===null)continue;let top=h,bottom=0,count=0;
@@ -85,14 +85,17 @@
     const clippedFragment=clipped||start<=1||x>=w-1||top<=1||bottom>=h-1;
     if(!sorted.length||sorted[0][1]>.19||(sorted[1]&&sorted[1][1]-sorted[0][1]<.018)){
      // Ignore unrecognizable background fragments cut by the left HUD crop.
-     if(rejectClipped&&clippedFragment){start=null;continue;}return null;
+     // A large fragment spanning the crop height may contain the leading
+     // digit joined to portrait ink. Remember it before skipping background.
+     if(rejectClipped&&clippedFragment){if(!glyphs.length&&top===0&&bottom===h&&x-start>=w*.25)skippedLeadingInk=true;start=null;continue;}return null;
     }
     // A recognizable but clipped digit is not safe to drop from a number.
     if(rejectClipped&&clipped)return null;glyphs.push(sorted[0][0]);
    }
    start=null;
   }
-  if(!glyphs.length||glyphs.length>3)return null;return Number(glyphs.join(''));
+  // An isolated zero after uncertain leading ink may be the tail of 10.
+  if(!glyphs.length||glyphs.length>3||skippedLeadingInk&&glyphs.length===1&&glyphs[0]==='0')return null;return Number(glyphs.join(''));
  }
  // Read only the printed canonical name inside the centered parameter panel.
  // Whole-word masks keep kana order/length; unknown or ambiguous text abstains.
