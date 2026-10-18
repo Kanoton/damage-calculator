@@ -1,7 +1,7 @@
 """Synthetic regression for observed banner clutter; NOT the missing user image."""
 import argparse,base64,io,json
 from pathlib import Path
-from PIL import Image,ImageDraw,ImageFont
+from PIL import Image,ImageDraw,ImageFont,__version__ as PILLOW_VERSION
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'tests/fixtures/screen-reader/result-banner-synthetic.json'
 def build():
@@ -19,7 +19,9 @@ def build():
  b=io.BytesIO();im.save(b,format='PNG')
  return {'synthetic':True,'expected':{'map':'MAP0105','difficulty':'困難'},'regions':{'map':[357,647,width+8,45],'qualifier':[suffix_x,650,370,38],'difficulty':[1050,656,74,38]},'image':'data:image/png;base64,'+base64.b64encode(b.getvalue()).decode()}
 def main():
- p=argparse.ArgumentParser();p.add_argument('--check',action='store_true');a=p.parse_args();value=build()
+ p=argparse.ArgumentParser();p.add_argument('--check',action='store_true');a=p.parse_args()
+ if PILLOW_VERSION!='12.3.0':p.error('Use Pillow==12.3.0 for reproducible fixture pixels (same version as CI)')
+ value=build()
  if a.check:
   old=json.loads(OUT.read_text());left=Image.open(io.BytesIO(base64.b64decode(old.pop('image').split(',')[1])));right=Image.open(io.BytesIO(base64.b64decode(value.pop('image').split(',')[1])))
   if old!=value or left.size!=right.size or left.tobytes()!=right.tobytes():raise ValueError('Rebuild synthetic result banner')

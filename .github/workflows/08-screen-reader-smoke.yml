@@ -82,7 +82,7 @@ jobs:
       - run: npm install
       - run: npm run check:08
       - run: python3 scripts/build-mini-character-mapping.py --check
-      - run: python3 -m pip install Pillow
+      - run: python3 -m pip install Pillow==12.3.0
       - run: python3 scripts/build-screen-reader-profile-references.py --check
       - run: python3 scripts/build-screen-reader-left-hud-fixture.py --check
       - run: python3 scripts/build-screen-reader-star-fixture.py --check
