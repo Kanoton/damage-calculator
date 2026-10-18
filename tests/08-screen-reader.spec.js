@@ -736,8 +736,9 @@ test('08: short autumn replay preserves four identities without reading a clippe
   const out=[];for(const row of rows){const im=new Image();im.src=row.image;await im.decode();out.push(ScreenReaderVision.analyze(ScreenReaderVision.normalize(im)));}return out;
  },autumnLive.hud);
  for(const result of results){expect(result.members.map(m=>m.id)).toEqual(autumnLive.party);expect(result.members[0].currentHp).not.toBe(0);}
+ // open() already opens the reader; keep it open for the controls.
  // Both automatic observations must identify Sykes before fixing the order.
- await page.locator('#reader-toggle').click();await page.locator('#reader-details').evaluate(e=>e.open=true);await page.locator('#reader-apply').uncheck();
+ await page.locator('#reader-details').evaluate(e=>e.open=true);await page.locator('#reader-apply').uncheck();
  await page.locator('#reader-file').setInputFiles({name:'hud.png',mimeType:'image/png',buffer:Buffer.from(autumnLive.hud[0].image.split(',')[1],'base64')});await expect(page.locator('#reader-file')).toHaveValue('');await page.locator('#reader-apply').check();
  await page.evaluate(async()=>{await ScreenReaderController.read(true);await ScreenReaderController.read(true);});
  expect((await page.evaluate(()=>ScreenReaderCharacterBridge.snapshot())).members.map(m=>m.id)).toEqual(autumnLive.party);
