@@ -1,8 +1,10 @@
 from pathlib import Path
-import json,math,io
+import json,math,io,csv
 from PIL import Image,ImageDraw,ImageFont
 R=Path(__file__).resolve().parents[1]
 D=R/'docs/map-event-output/autumn-forest';A=D/'assets'
+with (R/'csv/monster_stats.csv').open(encoding='utf-8-sig',newline='') as source:
+    MONSTER_IMAGES={row['monster_id']:R/'images/Monster'/row['image'] for row in csv.DictReader(source)}
 data=json.loads((D/'topology.json').read_text());nodes=data['nodes'];lookup={n['id']:n for n in nodes}
 W=max(n['x']for n in nodes)+110;H=max(n['y']for n in nodes)+110
 def save_png(im,path):
@@ -31,7 +33,7 @@ LINE_CLEARANCE=8  # Half of the 12px line plus a 2px gap.
 icon_cache={}
 def load_icon(mid):
     if mid not in icon_cache:
-        icon=Image.open(R/f'images/Monster/{mid}_Icon.png').convert('RGBA')
+        icon=Image.open(MONSTER_IMAGES[mid]).convert('RGBA')
         # Ignore detached background specks when measuring the actual illustration.
         w,h=icon.size;alpha=bytearray(icon.getchannel('A').tobytes());largest=[]
         for index in range(w*h):

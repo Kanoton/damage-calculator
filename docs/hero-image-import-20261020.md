@@ -21,7 +21,7 @@
 | Monster/M0122_Icon.png | UT_Hero_ProfilePhoto/UT_Hero_ProfilePhoto_1072.png |
 | Monster/M0123_Icon.png | UT_Hero_ProfilePhoto/UT_Hero_ProfilePhoto_1074.png |
 
-`csv/monster_stats.csv` と秋幻の制作データ内の同CSV、07/08の同梱map-dataを移行した。既存の画像解決がMonsterフォルダを基準にするため、image列は `../UT_Hero_ProfilePhoto/UT_Hero_ProfilePhoto_1071.png` のように指定し、HTTP/file://とも同じ正本へ解決する。数値・能力本文・並び・その他のCSV列は変更していない。秋素材の生成スクリプトも同じ保存先へ更新し、旧コピーを再作成しない。
+`csv/monster_stats.csv` と秋幻の制作データ内の同CSV、07/08の同梱map-dataを移行した。既存の画像解決がMonsterフォルダを基準にするため、image列は `../UT_Hero_ProfilePhoto/UT_Hero_ProfilePhoto_1071.png` のように指定し、HTTP/file://とも同じ正本へ解決する。数値・能力本文・並び・その他のCSV列は変更していない。秋素材の生成スクリプトも同じ保存先へ更新し、旧コピーを再作成しない。旧名を動的に組み立てていた秋の描画スクリプトも、正本CSVの画像パスを参照するように移行した。承認済みの地図・イベント画像は再生成しない。
 
 その他の別名画像では、サイズと表示RGBA画素まで一致する重複はなかった。透明画素のRGBは表示に影響しないため0へ正規化して比較した。似た構図のSFW差分も縮小比較し、部分的な描画差のあるものは別画像として保持した。今回のZIPにない既存6枚（109_Max_2と、前回追加の全身Card_113_04／117_04／119_03の5枚）は別画像なので保持する。ZIPにないことだけで削除しない。
 

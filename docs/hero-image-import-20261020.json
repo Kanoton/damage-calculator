@@ -515,7 +515,8 @@
     "docs/map-event-output/autumn-forest/production/data/monster_stats.csv",
     "07_skill/js/map-data.js",
     "08_screen_reader/js/map-data.js",
-    "scripts/update-autumn-assets-20261018.py"
+    "scripts/update-autumn-assets-20261018.py",
+    "scripts/render-autumn-map.py"
   ],
   "reader_dictionary_changed": false
 }
