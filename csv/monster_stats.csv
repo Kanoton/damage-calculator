@@ -1,296 +1,1951 @@
-﻿monster_id,image,info,モンスター名,種族,ボス,反撃,難易度,攻撃,防御,HP,コイン
-M0001,King_Gawu_Sprite.png,M0001_info.png,海賊王ガオー,海賊王ガオー,1,1,普通,5,6,88,
-M0001,King_Gawu_Sprite.png,M0001_info.png,海賊王ガオー,海賊王ガオー,1,1,困難,6,6,99,
-M0001,King_Gawu_Sprite.png,M0001_info.png,海賊王ガオー,海賊王ガオー,1,1,悪夢,6,6,111,
-M0001,King_Gawu_Sprite.png,M0001_info.png,海賊王ガオー,海賊王ガオー,1,1,狂気,7,6,122,
-M0002,King_Shark_Sprite.png,M0002_info.png,サメタラシ,サメタラシ,,1,狂気,5,2,22,12
-M0002,King_Shark_Sprite.png,,サメタラシ,サメタラシ,,1,,,,,
-M0003,Elite_Pirate_Sprite.png,M0003_info_a.png,海賊精鋭,海賊精鋭,,1,普通,4,2,25,15
-M0003,Elite_Pirate_Sprite.png,M0003_info_b.png,海賊精鋭,海賊精鋭,,1,困難,4,2,30,15
-M0003,Elite_Pirate_Sprite.png,M0003_info_b.png,海賊精鋭,海賊精鋭,,1,悪夢,4,2,33,15
-M0003,Elite_Pirate_Sprite.png,M0003_info_b.png,海賊精鋭,海賊精鋭,,1,狂気,4,2,33,15
-M0003,Elite_Pirate_Sprite.png,,海賊精鋭,海賊精鋭,,1,,,,,
-M0004,Shark_Pirate_Sprite.png,M0004_info.png,海賊サメ,海賊サメ,,,普通,4,1,9,6
-M0004,Shark_Pirate_Sprite.png,M0004_info.png,海賊サメ,海賊サメ,,,困難,4,1,10,6
-M0004,Shark_Pirate_Sprite.png,M0004_info.png,海賊サメ,海賊サメ,,,悪夢,4,1,10,6
-M0004,Shark_Pirate_Sprite.png,M0004_info.png,海賊サメ,海賊サメ,,,狂気,4,1,10,6
-M0004,Shark_Pirate_Sprite.png,,海賊サメ,海賊サメ,,,,,,,
-M0005,Thief_Sprite.png,M0005_info.png,泥棒,アライグマ,,,普通,0,0,6,5
-M0005,Thief_Sprite.png,M0005_info.png,泥棒,アライグマ,,,困難,0,0,6,5
-M0005,Thief_Sprite.png,M0005_info.png,泥棒,アライグマ,,,悪夢,0,0,6,5
-M0005,Thief_Sprite.png,M0005_info.png,泥棒,アライグマ,,,狂気,0,0,6,5
-M0005,Thief_Sprite.png,,泥棒,アライグマ,,,,,,,
-M0006,Tennoji_Masao_Sprite.png,M0006_info_a.png,天王寺雅央,天王寺雅央,1,1,普通,3,1,140,
-M0006,Tennoji_Masao_Sprite.png,M0006_info_a.png,天王寺雅央,天王寺雅央,1,1,困難,4,1,160,
-M0006,Tennoji_Masao_Sprite.png,M0006_info_b.png,天王寺雅央,天王寺雅央,1,1,悪夢,4,1,180,
-M0006,Tennoji_Masao_Sprite.png,M0006_info_b.png,天王寺雅央,天王寺雅央,1,1,狂気,4,1,240,
-M0006,Tennoji_Masao_Sprite.png,,天王寺雅央,天王寺雅央,1,1,,,,,
-M0007,Martial_Spirit_-_Enmity_Sprite.png,,サムライの化身-怨,サムライの化身-怨,,1,,,,,
-M0008,Martial_Spirit_-_Murder_Sprite.png,,サムライの化身-戮,サムライの化身-戮,,1,,,,,
-M0009,Spear_Spirit_Sprite.png,M0009_info_a.png,長戟霊,長戟霊,,1,普通,3,4,11,12
-M0009,Spear_Spirit_Sprite.png,M0009_info_b.png,長戟霊,長戟霊,,1,困難,4,5,12,12
-M0009,Spear_Spirit_Sprite.png,M0009_info_c.png,長戟霊,長戟霊,,1,悪夢,6,7,13,12
-M0009,Spear_Spirit_Sprite.png,M0009_info_d.png,長戟霊,長戟霊,,1,狂気,7,8,15,12
-M0009,Spear_Spirit_Sprite.png,,長戟霊,長戟霊,,1,,,,,
-M0010,Sword_Spirit_Sprite.png,M0010_info_a.png,刀剣霊,刀剣霊,,,普通,4,0,22,12
-M0010,Sword_Spirit_Sprite.png,M0010_info_b.png,刀剣霊,刀剣霊,,,困難,4,0,24,12
-M0010,Sword_Spirit_Sprite.png,M0010_info_c.png,刀剣霊,刀剣霊,,,悪夢,5,1,25,12
-M0010,Sword_Spirit_Sprite.png,M0010_info_d.png,刀剣霊,刀剣霊,,,狂気,5,2,29,12
-M0010,Sword_Spirit_Sprite.png,,刀剣霊,刀剣霊,,,,,,,
-M0011,Fever_Red_Spirit_Sprite.png,M0011_info.png,凶暴赤霊,凶暴赤霊,,1,普通,4,4,5,8
-M0011,Fever_Red_Spirit_Sprite.png,M0011_info.png,凶暴赤霊,凶暴赤霊,,1,困難,5,5,6,8
-M0011,Fever_Red_Spirit_Sprite.png,M0011_info.png,凶暴赤霊,凶暴赤霊,,1,悪夢,5,5,6,8
-M0011,Fever_Red_Spirit_Sprite.png,M0011_info.png,凶暴赤霊,凶暴赤霊,,1,狂気,6,6,6,8
-M0011,Fever_Red_Spirit_Sprite.png,,凶暴赤霊,凶暴赤霊,,1,,,,,
-M0012,Frozen_Blue_Spirit_Sprite.png,M0012_info.png,氷刻青霊,氷刻青霊,,,普通,4,0,10,6
-M0012,Frozen_Blue_Spirit_Sprite.png,M0012_info.png,氷刻青霊,氷刻青霊,,,困難,4,0,10,6
-M0012,Frozen_Blue_Spirit_Sprite.png,M0012_info.png,氷刻青霊,氷刻青霊,,,悪夢,5,0,11,6
-M0012,Frozen_Blue_Spirit_Sprite.png,M0012_info.png,氷刻青霊,氷刻青霊,,,狂気,5,0,11,6
-M0012,Frozen_Blue_Spirit_Sprite.png,,氷刻青霊,氷刻青霊,,,,,,,
-M0013,Lion_Gawu_Sprite.png,M0013_info_a.png,獅子舞いガオー,天王寺雅央,1,1,普通,3,0,120,
-M0013,Lion_Gawu_Sprite.png,M0013_info_b.png,獅子舞いガオー,天王寺雅央,1,1,困難,3,0,145,
-M0013,Lion_Gawu_Sprite.png,M0013_info_b.png,獅子舞いガオー,天王寺雅央,1,1,悪夢,4,1,160,
-M0013,Lion_Gawu_Sprite.png,M0013_info_b.png,獅子舞いガオー,天王寺雅央,1,1,狂気,4,1,188,
-M0013,Lion_Gawu_Sprite.png,,獅子舞いガオー,天王寺雅央,1,1,,,,,
-M0014,Ground_Control_Sprite.png,M0014_info.png,指揮センター,指揮センター,1,,普通,0,0,120,
-M0014,Ground_Control_Sprite.png,M0014_info.png,指揮センター,指揮センター,1,,困難,0,0,145,
-M0014,Ground_Control_Sprite.png,M0014_info.png,指揮センター,指揮センター,1,,悪夢,0,0,160,
-M0014,Ground_Control_Sprite.png,M0014_info.png,指揮センター,指揮センター,1,,狂気,0,0,188,
-M0014,Ground_Control_Sprite.png,,指揮センター,指揮センター,1,,,,,,
-M0015,Lion_Gawu_Sprite.png,,フュージョン！獅子舞いガオー！,天王寺雅央,1,1,,,,,
-M0016,Cracker_Croak_Sprite.png,,三連爆竹ゲロゲロ,三連爆竹ゲロゲロ,,,,,,,
-M0017,Cracker_Croak_Sprite.png,M0017_info.png,爆竹ゲロゲロ,爆竹ゲロゲロ,,,普通,1,1,7,6
-M0017,Cracker_Croak_Sprite.png,M0017_info.png,爆竹ゲロゲロ,爆竹ゲロゲロ,,,困難,1,1,8,6
-M0017,Cracker_Croak_Sprite.png,M0017_info.png,爆竹ゲロゲロ,爆竹ゲロゲロ,,,悪夢,1,2,8,6
-M0017,Cracker_Croak_Sprite.png,M0017_info.png,爆竹ゲロゲロ,爆竹ゲロゲロ,,,狂気,1,2,8,6
-M0017,Cracker_Croak_Sprite.png,,爆竹ゲロゲロ,爆竹ゲロゲロ,,,,,,,
-M0018,Ambient_Enlivener_Robot_Sprite.png,M0018_info.png,雰囲気系ロボ,雰囲気系ロボ,,1,普通,3,0,21,15
-M0018,Ambient_Enlivener_Robot_Sprite.png,M0018_info.png,雰囲気系ロボ,雰囲気系ロボ,,1,困難,3,1,22,15
-M0018,Ambient_Enlivener_Robot_Sprite.png,M0018_info.png,雰囲気系ロボ,雰囲気系ロボ,,1,悪夢,4,1,23,15
-M0018,Ambient_Enlivener_Robot_Sprite.png,M0018_info.png,雰囲気系ロボ,雰囲気系ロボ,,1,狂気,4,1,25,15
-M0018,Ambient_Enlivener_Robot_Sprite.png,,雰囲気系ロボ,雰囲気系ロボ,,1,,,,,
-M0019,Mechanical_Snake_Dragon_Sprite.png,M0019_info.png,機械蛇龍,機械蛇龍,,,普通,0,0,8,9
-M0019,Mechanical_Snake_Dragon_Sprite.png,M0019_info.png,機械蛇龍,機械蛇龍,,,困難,0,0,9,9
-M0019,Mechanical_Snake_Dragon_Sprite.png,M0019_info.png,機械蛇龍,機械蛇龍,,,悪夢,0,0,9,9
-M0019,Mechanical_Snake_Dragon_Sprite.png,M0019_info.png,機械蛇龍,機械蛇龍,,,狂気,0,0,11,9
-M0019,Mechanical_Snake_Dragon_Sprite.png,,機械蛇龍,機械蛇龍,,,,,,,
-M0020,Tennoji_Masao_Academy_Security_Sprite.png,M0020_info.png,学院警備官,天王寺雅央,1,1,普通,2,1,99,
-M0020,Tennoji_Masao_Academy_Security_Sprite.png,M0020_info.png,学院警備官,天王寺雅央,1,1,困難,2,1,110,
-M0020,Tennoji_Masao_Academy_Security_Sprite.png,M0020_info.png,学院警備官,天王寺雅央,1,1,悪夢,3,2,120,
-M0020,Tennoji_Masao_Academy_Security_Sprite.png,M0020_info.png,学院警備官,天王寺雅央,1,1,狂気,4,2,140,
-M0021,Tennoji_Masao_Academy_Sprite.png,M0021_info.png,学院長代理,天王寺雅央,1,1,普通,2,2,111,
-M0021,Tennoji_Masao_Academy_Sprite.png,M0021_info.png,学院長代理,天王寺雅央,1,1,困難,3,2,130,
-M0021,Tennoji_Masao_Academy_Sprite.png,M0021_info.png,学院長代理,天王寺雅央,1,1,悪夢,3,2,160,
-M0021,Tennoji_Masao_Academy_Sprite.png,M0021_info.png,学院長代理,天王寺雅央,1,1,狂気,4,2,200,
-M0022,Jelly_Fighter_Sprite.png,M0022_info.png,ゼリーファイター,ゼリーファイター,,1,普通,2,6,35,6
-M0022,Jelly_Fighter_Sprite.png,M0022_info.png,ゼリーファイター,ゼリーファイター,,1,困難,2,6,36,6
-M0022,Jelly_Fighter_Sprite.png,M0022_info.png,ゼリーファイター,ゼリーファイター,,1,悪夢,3,8,38,6
-M0022,Jelly_Fighter_Sprite.png,M0022_info.png,ゼリーファイター,ゼリーファイター,,1,狂気,4,10,40,6
-M0023,Jelly_Guard_Sprite.png,M0023_info.png,ゼリーガーディアン,ゼリーガーディアン,,1,普通,3,4,15,9
-M0023,Jelly_Guard_Sprite.png,M0023_info.png,ゼリーガーディアン,ゼリーガーディアン,,1,困難,3,4,16,9
-M0023,Jelly_Guard_Sprite.png,M0023_info.png,ゼリーガーディアン,ゼリーガーディアン,,1,悪夢,4,4,18,9
-M0023,Jelly_Guard_Sprite.png,M0023_info.png,ゼリーガーディアン,ゼリーガーディアン,,1,狂気,4,4,20,9
-M0024,Jelly_Wizard_Sprite.png,M0024_info.png,ゼリーウィザード,ゼリーウィザード,,,普通,2,1,15,8
-M0024,Jelly_Wizard_Sprite.png,M0024_info.png,ゼリーウィザード,ゼリーウィザード,,,困難,3,1,16,8
-M0024,Jelly_Wizard_Sprite.png,M0024_info.png,ゼリーウィザード,ゼリーウィザード,,,悪夢,3,1,17,8
-M0024,Jelly_Wizard_Sprite.png,M0024_info.png,ゼリーウィザード,ゼリーウィザード,,,狂気,3,1,21,8
-M0025,Magic_Teapot_Sprite.png,M0025_info.png,魔法のティーポット,魔法のティーポット,,,普通,3,1,10,6
-M0025,Magic_Teapot_Sprite.png,M0025_info.png,魔法のティーポット,魔法のティーポット,,,困難,3,1,11,6
-M0025,Magic_Teapot_Sprite.png,M0025_info.png,魔法のティーポット,魔法のティーポット,,,悪夢,4,1,11,6
-M0025,Magic_Teapot_Sprite.png,M0025_info.png,魔法のティーポット,魔法のティーポット,,,狂気,4,1,12,6
-M0026,Mutant_Teapot_Sprite.png,M0026_info.png,変なティーポット,変なティーポット,,,普通,4,2,7,8
-M0026,Mutant_Teapot_Sprite.png,M0026_info.png,変なティーポット,変なティーポット,,,困難,5,2,7,8
-M0026,Mutant_Teapot_Sprite.png,M0026_info.png,変なティーポット,変なティーポット,,,悪夢,6,3,7,8
-M0026,Mutant_Teapot_Sprite.png,M0026_info.png,変なティーポット,変なティーポット,,,狂気,6,3,8,8
-M0027,Amakawa_Mamushi_Sprite.png,M0027_info.png,天川真夢梓,天川真夢梓,1,1,普通,4,1,99,
-M0027,Amakawa_Mamushi_Sprite.png,M0027_info.png,天川真夢梓,天川真夢梓,1,1,困難,4,1,111,
-M0027,Amakawa_Mamushi_Sprite.png,M0027_info.png,天川真夢梓,天川真夢梓,1,1,悪夢,5,2,120,
-M0027,Amakawa_Mamushi_Sprite.png,M0027_info.png,天川真夢梓,天川真夢梓,1,1,狂気,6,2,150,
-M0028,Amakawa_Souri_Sprite.png,M0028_info.png,天川蒼鯉,天川蒼鯉,1,1,普通,1,1,88,
-M0028,Amakawa_Souri_Sprite.png,M0028_info.png,天川蒼鯉,天川蒼鯉,1,1,困難,2,2,100,
-M0028,Amakawa_Souri_Sprite.png,M0028_info.png,天川蒼鯉,天川蒼鯉,1,1,悪夢,3,3,110,
-M0028,Amakawa_Souri_Sprite.png,M0028_info.png,天川蒼鯉,天川蒼鯉,1,1,狂気,4,4,135,
-M0029,Crab_Soldier_Sprite.png,M0029_info.png,蟹兄い,蟹兄い,,,普通,2,1,7,6
-M0029,Crab_Soldier_Sprite.png,M0029_info.png,蟹兄い,蟹兄い,,,困難,3,1,8,6
-M0029,Crab_Soldier_Sprite.png,M0029_info.png,蟹兄い,蟹兄い,,,悪夢,3,2,8,6
-M0029,Crab_Soldier_Sprite.png,M0029_info.png,蟹兄い,蟹兄い,,,狂気,4,2,9,6
-M0030,Prawn_Soldier_Sprite.png,M0030_info_a.png,蝦兄い,蝦兄い,,1,普通,3,1,20,8
-M0030,Prawn_Soldier_Sprite.png,M0030_info_a.png,蝦兄い,蝦兄い,,1,困難,3,2,22,8
-M0030,Prawn_Soldier_Sprite.png,M0030_info_b.png,蝦兄い,蝦兄い,,1,悪夢,4,2,24,8
-M0030,Prawn_Soldier_Sprite.png,M0030_info_b.png,蝦兄い,蝦兄い,,1,狂気,4,2,26,8
-M0031,Golden_Fish_Sprite.png,M0031_info_a.png,金ちゃん,金ちゃん,,1,普通,2,0,6,5
-M0031,Golden_Fish_Sprite.png,M0031_info_b.png,金ちゃん,金ちゃん,,1,困難,3,0,7,5
-M0031,Golden_Fish_Sprite.png,M0031_info_b.png,金ちゃん,金ちゃん,,1,悪夢,5,0,8,5
-M0031,Golden_Fish_Sprite.png,M0031_info_b.png,金ちゃん,金ちゃん,,1,狂気,6,0,11,5
-M0032,Loudmouth_Sprite.png,M0032_info.png,コエデカフグ,コエデカフグ,,,普通,3,0,18,8
-M0032,Loudmouth_Sprite.png,M0032_info.png,コエデカフグ,コエデカフグ,,,困難,3,0,20,8
-M0032,Loudmouth_Sprite.png,M0032_info.png,コエデカフグ,コエデカフグ,,,悪夢,4,1,20,8
-M0032,Loudmouth_Sprite.png,M0032_info.png,コエデカフグ,コエデカフグ,,,狂気,4,1,24,8
-M0033,Martial_Trainee_Sprite.png,M0033_info.png,ムキムキフグ,ムキムキフグ,,1,普通,3,3,13,8
-M0033,Martial_Trainee_Sprite.png,M0033_info.png,ムキムキフグ,ムキムキフグ,,1,困難,4,4,14,8
-M0033,Martial_Trainee_Sprite.png,M0033_info.png,ムキムキフグ,ムキムキフグ,,1,悪夢,5,4,15,8
-M0033,Martial_Trainee_Sprite.png,M0033_info.png,ムキムキフグ,ムキムキフグ,,1,狂気,5,5,16,8
-M0034,Amakawa_Mamushi_Sprite.png,M0034_info.png,天川真夢梓（味方）,天川真夢梓,,,普通,6,6,99,
-M0034,Amakawa_Mamushi_Sprite.png,M0034_info.png,天川真夢梓（味方）,天川真夢梓,,,困難,6,6,99,
-M0034,Amakawa_Mamushi_Sprite.png,M0034_info.png,天川真夢梓（味方）,天川真夢梓,,,悪夢,6,6,99,
-M0034,Amakawa_Mamushi_Sprite.png,M0034_info.png,天川真夢梓（味方）,天川真夢梓,,,狂気,6,6,99,
-M0035,Amakawa_Souri_Sprite.png,M0035_info.png,天川蒼鯉（味方）,天川蒼鯉,,,普通,4,4,99,
-M0035,Amakawa_Souri_Sprite.png,M0035_info.png,天川蒼鯉（味方）,天川蒼鯉,,,困難,4,4,99,
-M0035,Amakawa_Souri_Sprite.png,M0035_info.png,天川蒼鯉（味方）,天川蒼鯉,,,悪夢,4,4,99,
-M0035,Amakawa_Souri_Sprite.png,M0035_info.png,天川蒼鯉（味方）,天川蒼鯉,,,狂気,4,4,99,
-M0036,Mad_Scientist_Sprite.png,M0036_info.png,ドクター・マサオシュタイン,天王寺雅央,1,,普通,0,0,9,
-M0036,Mad_Scientist_Sprite.png,M0036_info.png,ドクター・マサオシュタイン,天王寺雅央,1,,困難,0,0,9,
-M0036,Mad_Scientist_Sprite.png,M0036_info.png,ドクター・マサオシュタイン,天王寺雅央,1,,悪夢,0,0,9,
-M0036,Mad_Scientist_Sprite.png,M0036_info.png,ドクター・マサオシュタイン,天王寺雅央,1,,狂気,0,0,9,
-M0037,Jack-in-the-Monkey_Sprite.png,M0037_info.png,さるのびっくり箱,さるのびっくり箱,,,普通,4,0,8,6
-M0037,Jack-in-the-Monkey_Sprite.png,M0037_info.png,さるのびっくり箱,さるのびっくり箱,,,困難,4,0,9,6
-M0037,Jack-in-the-Monkey_Sprite.png,M0037_info.png,さるのびっくり箱,さるのびっくり箱,,,悪夢,5,0,10,6
-M0037,Jack-in-the-Monkey_Sprite.png,M0037_info.png,さるのびっくり箱,さるのびっくり箱,,,狂気,5,0,11,6
-M0038,Buzzsaw_Monkey_Assistant_Sprite.png,M0038_info.png,さるの助手君,さるの助手君,,1,普通,3,1,16,8
-M0038,Buzzsaw_Monkey_Assistant_Sprite.png,M0038_info.png,さるの助手君,さるの助手君,,1,困難,3,1,18,8
-M0038,Buzzsaw_Monkey_Assistant_Sprite.png,M0038_info.png,さるの助手君,さるの助手君,,1,悪夢,4,1,20,8
-M0038,Buzzsaw_Monkey_Assistant_Sprite.png,M0038_info.png,さるの助手君,さるの助手君,,1,狂気,4,2,22,8
-M0039,Mad_Ape_Sprite.png,M0039_info.png,ゴリフランケンちゃん,ゴリフランケンちゃん,,1,普通,4,2,22,8
-M0039,Mad_Ape_Sprite.png,M0039_info.png,ゴリフランケンちゃん,ゴリフランケンちゃん,,1,困難,4,2,24,8
-M0039,Mad_Ape_Sprite.png,M0039_info.png,ゴリフランケンちゃん,ゴリフランケンちゃん,,1,悪夢,5,3,26,8
-M0039,Mad_Ape_Sprite.png,M0039_info.png,ゴリフランケンちゃん,ゴリフランケンちゃん,,1,狂気,5,3,27,8
-M0040,Candy_Pinata_Sprite.png,M0040_info.png,キャンディビニャータ,キャンディビニャータ,,1,普通,3,0,8,5
-M0040,Candy_Pinata_Sprite.png,M0040_info.png,キャンディビニャータ,キャンディビニャータ,,1,困難,4,0,9,5
-M0040,Candy_Pinata_Sprite.png,M0040_info.png,キャンディビニャータ,キャンディビニャータ,,1,悪夢,5,0,9,5
-M0040,Candy_Pinata_Sprite.png,M0040_info.png,キャンディビニャータ,キャンディビニャータ,,1,狂気,5,0,10,5
-M0041,Synthetic_Cataclysm_Sprite.png,M0041_info.png,人工生命体―天崩,人工生命体―天崩,,,普通,4,1,26,8
-M0041,Synthetic_Cataclysm_Sprite.png,M0041_info.png,人工生命体―天崩,人工生命体―天崩,,,困難,4,1,28,8
-M0041,Synthetic_Cataclysm_Sprite.png,M0041_info.png,人工生命体―天崩,人工生命体―天崩,,,悪夢,5,2,30,8
-M0041,Synthetic_Cataclysm_Sprite.png,M0041_info.png,人工生命体―天崩,人工生命体―天崩,,,狂気,6,2,33,8
-M0042,Synthetic_Omen_Sprite.png,M0042_info_a.png,人工生命体―厄兆,人工生命体―厄兆,,1,普通,4,2,26,8
-M0042,Synthetic_Omen_Sprite.png,M0042_info_b.png,人工生命体―厄兆,人工生命体―厄兆,,1,困難,4,2,29,8
-M0042,Synthetic_Omen_Sprite.png,M0042_info_b.png,人工生命体―厄兆,人工生命体―厄兆,,1,悪夢,5,3,30,8
-M0042,Synthetic_Omen_Sprite.png,M0042_info_b.png,人工生命体―厄兆,人工生命体―厄兆,,1,狂気,6,3,33,8
-M0043,Synthetic_Chaos_Sprite.png,M0043_info.png,人工生命体―混乱,人工生命体―混乱,,1,普通,5,3,38,8
-M0043,Synthetic_Chaos_Sprite.png,M0043_info.png,人工生命体―混乱,人工生命体―混乱,,1,困難,6,3,42,8
-M0043,Synthetic_Chaos_Sprite.png,M0043_info.png,人工生命体―混乱,人工生命体―混乱,,1,悪夢,7,4,45,8
-M0043,Synthetic_Chaos_Sprite.png,M0043_info.png,人工生命体―混乱,人工生命体―混乱,,1,狂気,7,5,50,8
-M0044,Rampant_Phoenix_Sprite.png,M0044_info_a.png,ダーク・フェニックス,ダーク・フェニックス,1,1,普通,0,0,150,
-M0044,Rampant_Phoenix_Sprite.png,M0044_info_a.png,ダーク・フェニックス,ダーク・フェニックス,1,1,困難,1,1,180,
-M0044,Rampant_Phoenix_Sprite.png,M0044_info_b.png,ダーク・フェニックス,ダーク・フェニックス,1,1,悪夢,1,1,240,
-M0044,Rampant_Phoenix_Sprite.png,M0044_info_b.png,ダーク・フェニックス,ダーク・フェニックス,1,1,狂気,2,1,270,
-M0045,Fen_(Lovebird_Conscious)_Sprite.png,M0045_info_a.png,ヒメ（孔雀）,ヒメ（孔雀）,1,1,普通,4,3,55,
-M0045,Fen_(Lovebird_Conscious)_Sprite.png,M0045_info_b.png,ヒメ（孔雀）,ヒメ（孔雀）,1,1,困難,5,4,70,
-M0045,Fen_(Lovebird_Conscious)_Sprite.png,M0045_info_b.png,ヒメ（孔雀）,ヒメ（孔雀）,1,1,悪夢,5,4,88,
-M0045,Fen_(Lovebird_Conscious)_Sprite.png,M0045_info_b.png,ヒメ（孔雀）,ヒメ（孔雀）,1,1,狂気,6,5,99,
-M0046,Fen_(Lovebird_Conscious)_Sprite.png,M0046_info.png,ヒメ（鷺鷲）,ヒメ（鷺鷲）,1,1,普通,3,2,50,
-M0046,Fen_(Lovebird_Conscious)_Sprite.png,M0046_info.png,ヒメ（鷺鷲）,ヒメ（鷺鷲）,1,1,困難,3,3,65,
-M0046,Fen_(Lovebird_Conscious)_Sprite.png,M0046_info.png,ヒメ（鷺鷲）,ヒメ（鷺鷲）,1,1,悪夢,4,4,80,
-M0046,Fen_(Lovebird_Conscious)_Sprite.png,M0046_info.png,ヒメ（鷺鷲）,ヒメ（鷺鷲）,1,1,狂気,5,5,90,
-M0047,Bronze_Lovebird_Chalice_Sprite.png,M0047_info.png,オシドリ係,オシドリの盃,,1,普通,3,2,20,12
-M0047,Bronze_Lovebird_Chalice_Sprite.png,M0047_info.png,オシドリ係,オシドリの盃,,1,困難,4,2,22,12
-M0047,Bronze_Lovebird_Chalice_Sprite.png,M0047_info.png,オシドリ係,オシドリの盃,,1,悪夢,4,3,26,12
-M0047,Bronze_Lovebird_Chalice_Sprite.png,M0047_info.png,オシドリ係,オシドリの盃,,1,狂気,5,3,28,12
-M0048,Bronze_Peacock_Chalice_Sprite.png,M0048_info.png,クジャク係,クジャクの盃,,1,普通,5,2,40,18
-M0048,Bronze_Peacock_Chalice_Sprite.png,M0048_info.png,クジャク係,クジャクの盃,,1,困難,5,3,45,18
-M0048,Bronze_Peacock_Chalice_Sprite.png,M0048_info.png,クジャク係,クジャクの盃,,1,悪夢,6,4,50,18
-M0048,Bronze_Peacock_Chalice_Sprite.png,M0048_info.png,クジャク係,クジャクの盃,,1,狂気,7,4,55,18
-M0049,Bronze_Crane_Chalice_Sprite.png,M0049_info_a.png,センズル係,ツルの盃,,1,普通,4,2,20,12
-M0049,Bronze_Crane_Chalice_Sprite.png,M0049_info_a.png,センズル係,ツルの盃,,1,困難,5,2,22,12
-M0049,Bronze_Crane_Chalice_Sprite.png,M0049_info_b.png,センズル係,ツルの盃,,1,悪夢,5,2,24,12
-M0049,Bronze_Crane_Chalice_Sprite.png,M0049_info_b.png,センズル係,ツルの盃,,1,狂気,6,3,26,12
-M0050,Poultry_Waiter_Sprite.png,M0050_info.png,ニワトリ係,ニワトリ係,,,普通,4,2,18,10
-M0050,Poultry_Waiter_Sprite.png,M0050_info.png,ニワトリ係,ニワトリ係,,,困難,4,2,20,10
-M0050,Poultry_Waiter_Sprite.png,M0050_info.png,ニワトリ係,ニワトリ係,,,悪夢,5,2,20,10
-M0050,Poultry_Waiter_Sprite.png,M0050_info.png,ニワトリ係,ニワトリ係,,,狂気,5,2,23,10
-M0051,Receptionist_Swallow_Sprite.png,M0051_info_a.png,お出迎え係,お出迎え係,,,普通,3,1,10,7
-M0051,Receptionist_Swallow_Sprite.png,M0051_info_b.png,お出迎え係,お出迎え係,,,困難,4,1,11,7
-M0051,Receptionist_Swallow_Sprite.png,M0051_info_b.png,お出迎え係,お出迎え係,,,悪夢,4,2,12,7
-M0051,Receptionist_Swallow_Sprite.png,M0051_info_b.png,お出迎え係,お出迎え係,,,狂気,5,2,13,7
-M0101,Tennoji_Masao_Academy_Security_Sprite.png,,学院警備官,天王寺雅央,,1,普通,2,1,88,
-M0101,Tennoji_Masao_Academy_Security_Sprite.png,,学院警備官,天王寺雅央,,1,困難,2,1,99,
-M0101,Tennoji_Masao_Academy_Security_Sprite.png,,学院警備官,天王寺雅央,,1,悪夢,3,2,110,
-M0101,Tennoji_Masao_Academy_Security_Sprite.png,,学院警備官,天王寺雅央,,1,狂気,4,2,120,
-M0102,Tennoji_Masao_Academy_Sprite.png,,学院長代理,天王寺雅央,,1,普通,2,2,99,
-M0102,Tennoji_Masao_Academy_Sprite.png,,学院長代理,天王寺雅央,,1,困難,3,2,111,
-M0102,Tennoji_Masao_Academy_Sprite.png,,学院長代理,天王寺雅央,,1,悪夢,3,2,130,
-M0102,Tennoji_Masao_Academy_Sprite.png,,学院長代理,天王寺雅央,,1,狂気,4,2,130,
-M0103,Tennoji_Masao_Academy_Security_Sprite.png,,学院警備官,天王寺雅央,,1,普通,2,1,30,18
-M0103,Tennoji_Masao_Academy_Security_Sprite.png,,学院警備官,天王寺雅央,,1,困難,2,1,35,18
-M0103,Tennoji_Masao_Academy_Security_Sprite.png,,学院警備官,天王寺雅央,,1,悪夢,3,2,40,18
-M0103,Tennoji_Masao_Academy_Security_Sprite.png,,学院警備官,天王寺雅央,,1,狂気,4,2,45,18
-M0104,Referee_Amy_Sprite.png,,審判長エイミー,審判長エイミー,,1,普通,5,1,24,14
-M0104,Referee_Amy_Sprite.png,,審判長エイミー,審判長エイミー,,1,困難,5,1,27,14
-M0104,Referee_Amy_Sprite.png,,審判長エイミー,審判長エイミー,,1,悪夢,6,1,30,14
-M0104,Referee_Amy_Sprite.png,,審判長エイミー,審判長エイミー,,1,狂気,6,2,33,14
-M0105,Treasure_Barrel_Sprite.png,,トレジャーダル,トレジャーダル,,,普通,0,0,4,10
-M0105,Treasure_Barrel_Sprite.png,,トレジャーダル,トレジャーダル,,,困難,0,0,4,10
-M0105,Treasure_Barrel_Sprite.png,,トレジャーダル,トレジャーダル,,,悪夢,0,0,4,10
-M0105,Treasure_Barrel_Sprite.png,,トレジャーダル,トレジャーダル,,,狂気,0,0,4,10
-M0106,Amakawa_Mamushi_Sprite.png,,天川真夢梓,天川真夢梓,1,1,普通,4,1,88,
-M0106,Amakawa_Mamushi_Sprite.png,,天川真夢梓,天川真夢梓,1,1,困難,4,1,99,
-M0106,Amakawa_Mamushi_Sprite.png,,天川真夢梓,天川真夢梓,1,1,悪夢,5,2,111,
-M0106,Amakawa_Mamushi_Sprite.png,,天川真夢梓,天川真夢梓,1,1,狂気,6,2,126,
-M0107,Amakawa_Souri_Sprite.png,,天川蒼鯉,天川蒼鯉,1,1,普通,1,1,80,
-M0107,Amakawa_Souri_Sprite.png,,天川蒼鯉,天川蒼鯉,1,1,困難,1,1,90,
-M0107,Amakawa_Souri_Sprite.png,,天川蒼鯉,天川蒼鯉,1,1,悪夢,2,2,100,
-M0107,Amakawa_Souri_Sprite.png,,天川蒼鯉,天川蒼鯉,1,1,狂気,3,3,111,
-M0108,Amakawa_Souri_Sprite.png,,天川蒼鯉,天川蒼鯉,1,1,普通,1,1,30,18
-M0108,Amakawa_Souri_Sprite.png,,天川蒼鯉,天川蒼鯉,1,1,困難,1,1,35,18
-M0108,Amakawa_Souri_Sprite.png,,天川蒼鯉,天川蒼鯉,1,1,悪夢,2,2,40,18
-M0108,Amakawa_Souri_Sprite.png,,天川蒼鯉,天川蒼鯉,1,1,狂気,3,3,45,18
-M0109,High-Tech_Tycoon_Gawu_Sprite.png,,デックジャイアント ガオー,天王寺雅央,1,1,普通,3,1,128,
-M0109,High-Tech_Tycoon_Gawu_Sprite.png,,デックジャイアント ガオー,天王寺雅央,1,1,困難,3,1,138,
-M0109,High-Tech_Tycoon_Gawu_Sprite.png,,デックジャイアント ガオー,天王寺雅央,1,1,悪夢,4,1,148,
-M0109,High-Tech_Tycoon_Gawu_Sprite.png,,デックジャイアント ガオー,天王寺雅央,1,1,狂気,4,1,158,
-M0110,Mindscape_Airship_Sprite.png,,マインドエアシップ,マインドエアシップ,,1,普通,4,2,15,14
-M0110,Mindscape_Airship_Sprite.png,,マインドエアシップ,マインドエアシップ,,1,困難,4,2,17,14
-M0110,Mindscape_Airship_Sprite.png,,マインドエアシップ,マインドエアシップ,,1,悪夢,5,2,18,14
-M0110,Mindscape_Airship_Sprite.png,,マインドエアシップ,マインドエアシップ,,1,狂気,5,2,20,14
-M0111,Mechanical_Monitor_Sprite.png,,メカ監視員,メカ監視員,,,普通,2,2,14,9
-M0111,Mechanical_Monitor_Sprite.png,,メカ監視員,メカ監視員,,,困難,3,2,16,9
-M0111,Mechanical_Monitor_Sprite.png,,メカ監視員,メカ監視員,,,悪夢,3,3,18,9
-M0111,Mechanical_Monitor_Sprite.png,,メカ監視員,メカ監視員,,,狂気,4,3,20,9
-M0112,Mechanical_Quarterback_Sprite.png,,メカウォーターバック,メカウォーターバック,,1,普通,5,1,18,12
-M0112,Mechanical_Quarterback_Sprite.png,,メカウォーターバック,メカウォーターバック,,1,困難,5,1,20,12
-M0112,Mechanical_Quarterback_Sprite.png,,メカウォーターバック,メカウォーターバック,,1,悪夢,5,2,22,12
-M0112,Mechanical_Quarterback_Sprite.png,,メカウォーターバック,メカウォーターバック,,1,狂気,6,2,24,12
-M0113,Mechanical_Javelin_Thrower_Sprite.png,,メカピッチャー,メカピッチャー,,,普通,3,0,8,7
-M0113,Mechanical_Javelin_Thrower_Sprite.png,,メカピッチャー,メカピッチャー,,,困難,4,0,9,7
-M0113,Mechanical_Javelin_Thrower_Sprite.png,,メカピッチャー,メカピッチャー,,,悪夢,4,1,10,7
-M0113,Mechanical_Javelin_Thrower_Sprite.png,,メカピッチャー,メカピッチャー,,,狂気,4,1,11,7
-M0114,Shark_Pirate_Sprite.png,,メカ海賊サメ,メカ海賊サメ,,1,普通,4,1,10,7
-M0114,Shark_Pirate_Sprite.png,,メカ海賊サメ,メカ海賊サメ,,1,困難,4,1,11,7
-M0114,Shark_Pirate_Sprite.png,,メカ海賊サメ,メカ海賊サメ,,1,悪夢,4,1,11,7
-M0114,Shark_Pirate_Sprite.png,,メカ海賊サメ,メカ海賊サメ,,1,狂気,4,1,11,7
-M0115,Warden_Sprite.png,M0115_info.png,ゴクチョー【真相】,ゴクチョー,1,1,普通,3,10,229,
-M0115,Warden_Sprite.png,M0115_info.png,ゴクチョー【真相】,ゴクチョー,1,1,困難,3,10,230,
-M0115,Warden_Sprite.png,M0115_info.png,ゴクチョー【真相】,ゴクチョー,1,1,悪夢,4,10,231,
-M0115,Warden_Sprite.png,M0115_info.png,ゴクチョー【真相】,ゴクチョー,1,1,狂気,4,11,231,
-M0116,Warden_Sprite.png,M0116_info.png,ゴクチョー,ゴクチョー,,1,普通,0,0,9,6
-M0116,Warden_Sprite.png,M0116_info.png,ゴクチョー,ゴクチョー,,1,困難,0,0,10,6
-M0116,Warden_Sprite.png,M0116_info.png,ゴクチョー,ゴクチョー,,1,悪夢,1,0,11,6
-M0116,Warden_Sprite.png,M0116_info.png,ゴクチョー,ゴクチョー,,1,狂気,1,1,11,6
-M0117,Watcher_Sprite.png,M0117_info.png,看守,看守,,1,普通,4,1,17,12
-M0117,Watcher_Sprite.png,M0117_info.png,看守,看守,,1,困難,4,1,20,12
-M0117,Watcher_Sprite.png,M0117_info.png,看守,看守,,1,悪夢,5,2,20,12
-M0117,Watcher_Sprite.png,M0117_info.png,看守,看守,,1,狂気,5,2,23,12
-M0118,Sinful_Teapot_Sprite.png,M0118_info.png,グリーティーポット,グリーティーポット,,1,普通,2,0,14,9
-M0118,Sinful_Teapot_Sprite.png,M0118_info.png,グリーティーポット,グリーティーポット,,1,困難,3,0,14,9
-M0118,Sinful_Teapot_Sprite.png,M0118_info.png,グリーティーポット,グリーティーポット,,1,悪夢,3,1,16,9
-M0118,Sinful_Teapot_Sprite.png,M0118_info.png,グリーティーポット,グリーティーポット,,1,狂気,3,1,18,9
-M0119,Legendary_Thief_Sprite.png,M0119_info.png,大怪盗,大怪盗,,1,普通,4,0,13,6
-M0119,Legendary_Thief_Sprite.png,M0119_info.png,大怪盗,大怪盗,,1,困難,5,0,14,6
-M0119,Legendary_Thief_Sprite.png,M0119_info.png,大怪盗,大怪盗,,1,悪夢,5,0,16,6
-M0119,Legendary_Thief_Sprite.png,M0119_info.png,大怪盗,大怪盗,,1,狂気,5,1,16,6
-M0120,M0120_Icon.png,M0120_info_1.png,キッズガオー,天王寺雅央,1,1,普通,0,1,120,
-M0120,M0120_Icon.png,M0120_info_2.png,キッズガオー,天王寺雅央,1,1,困難,1,1,130,
-M0120,M0120_Icon.png,M0120_info_3.png,キッズガオー,天王寺雅央,1,1,悪夢,3,1,140,
-M0120,M0120_Icon.png,M0120_info_4.png,キッズガオー,天王寺雅央,1,1,狂気,3,2,150,
-M0121,M0121_Icon.png,M0121_info_1.png,採集クマちゃん,採集クマちゃん,,,普通,3,1,14,8
-M0121,M0121_Icon.png,M0121_info_1.png,採集クマちゃん,採集クマちゃん,,,困難,3,1,16,8
-M0121,M0121_Icon.png,M0121_info_1.png,採集クマちゃん,採集クマちゃん,,,悪夢,4,1,18,8
-M0121,M0121_Icon.png,M0121_info_1.png,採集クマちゃん,採集クマちゃん,,,狂気,4,2,20,8
-M0122,M0122_Icon.png,M0122_info_1.png,おもちゃの恐竜,おもちゃの恐竜,,1,普通,3,1,19,13
-M0122,M0122_Icon.png,M0122_info_1.png,おもちゃの恐竜,おもちゃの恐竜,,1,困難,3,2,22,13
-M0122,M0122_Icon.png,M0122_info_1.png,おもちゃの恐竜,おもちゃの恐竜,,1,悪夢,4,2,25,13
-M0122,M0122_Icon.png,M0122_info_1.png,おもちゃの恐竜,おもちゃの恐竜,,1,狂気,4,2,28,13
-M0123,M0123_Icon.png,M0123_info_1.png,目覚ましフクロウ,目覚ましフクロウ,,,普通,3,0,8,6
-M0123,M0123_Icon.png,M0123_info_1.png,目覚ましフクロウ,目覚ましフクロウ,,,困難,3,1,9,6
-M0123,M0123_Icon.png,M0123_info_3.png,目覚ましフクロウ,目覚ましフクロウ,,,悪夢,3,1,10,6
-M0123,M0123_Icon.png,M0123_info_3.png,目覚ましフクロウ,目覚ましフクロウ,,,狂気,4,1,10,6
+﻿monster_id,image,info,モンスター名,種族,ボス,反撃,難易度,攻撃,防御,HP,コイン,能力
+M0001,King_Gawu_Sprite.png,M0001_info.png,海賊王ガオー,海賊王ガオー,1,1,普通,5,6,88,,"ギミック紹介
+1.ゲーム開始時、海賊王ガオーはフィールドに出現し、休眠状態で移動せず、自ら攻撃しません。
+2.進行バーの進行により、海賊王ガオーは目覚め、目覚めた後はプレイヤーを追いかけて攻撃します。
+3.ミッションをクリアすることで、海賊王ガオーの防御を弱めることができます。
+
+スキル - 一斉砲撃［CT 3］
+HPが最も多いキャラに4ダメージ。"
+M0001,King_Gawu_Sprite.png,M0001_info.png,海賊王ガオー,海賊王ガオー,1,1,困難,6,6,99,,"ギミック紹介
+1.ゲーム開始時、海賊王ガオーはフィールドに出現し、休眠状態で移動せず、自ら攻撃しません。
+2.進行バーの進行により、海賊王ガオーは目覚め、目覚めた後はプレイヤーを追いかけて攻撃します。
+3.ミッションをクリアすることで、海賊王ガオーの防御を弱めることができます。
+
+スキル - 一斉砲撃［CT 3］
+HPが最も多いキャラに4ダメージ。"
+M0001,King_Gawu_Sprite.png,M0001_info.png,海賊王ガオー,海賊王ガオー,1,1,悪夢,6,6,111,,"ギミック紹介
+1.ゲーム開始時、海賊王ガオーはフィールドに出現し、休眠状態で移動せず、自ら攻撃しません。
+2.進行バーの進行により、海賊王ガオーは目覚め、目覚めた後はプレイヤーを追いかけて攻撃します。
+3.ミッションをクリアすることで、海賊王ガオーの防御を弱めることができます。
+
+スキル - 一斉砲撃［CT 3］
+HPが最も多いキャラに4ダメージ。"
+M0001,King_Gawu_Sprite.png,M0001_info.png,海賊王ガオー,海賊王ガオー,1,1,狂気,7,6,122,,"ギミック紹介
+1.ゲーム開始時、海賊王ガオーはフィールドに出現し、休眠状態で移動せず、自ら攻撃しません。
+2.進行バーの進行により、海賊王ガオーは目覚め、目覚めた後はプレイヤーを追いかけて攻撃します。
+3.ミッションをクリアすることで、海賊王ガオーの防御を弱めることができます。
+
+スキル - 一斉砲撃［CT 3］
+HPが最も多いキャラに4ダメージ。"
+M0002,King_Shark_Sprite.png,M0002_info.png,サメタラシ,サメタラシ,,1,狂気,5,2,22,12,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後、反撃出来ません。
+
+スキル - 海王の祝福［CT 1］
+強化されていないモンスターに攻撃力+1、防御力+1を与える。"
+M0002,King_Shark_Sprite.png,,サメタラシ,サメタラシ,,1,,,,,,
+M0003,Elite_Pirate_Sprite.png,M0003_info_a.png,海賊精鋭,海賊精鋭,,1,普通,4,2,25,15,"ギミック紹介
+1.進捗バーの推進と共に登場します。
+2.フィールドにいるプレイヤーを追いかけ、攻撃を受けた後は反撃する。
+3.スキルを使ってサメを召喚する。
+
+スキル - サメ召喚［CT 3］
+3ターンごとに海賊サメを1体召喚する。"
+M0003,Elite_Pirate_Sprite.png,M0003_info_b.png,海賊精鋭,海賊精鋭,,1,困難,4,2,30,15,"ギミック紹介
+1.進捗バーの推進と共に登場します。
+2.フィールドにいるプレイヤーを追いかけ、攻撃を受けた後は反撃する。
+3.スキルを使ってサメを召喚する。
+
+スキル - サメ召喚［CT 3］
+3ターンごとに海賊サメを1体召喚する。
+
+パッシブスキル - 憤怒
+戦闘を仕掛けられた後、攻撃力+1、最大3スタック。"
+M0003,Elite_Pirate_Sprite.png,M0003_info_b.png,海賊精鋭,海賊精鋭,,1,悪夢,4,2,33,15,"ギミック紹介
+1.進捗バーの推進と共に登場します。
+2.フィールドにいるプレイヤーを追いかけ、攻撃を受けた後は反撃する。
+3.スキルを使ってサメを召喚する。
+
+スキル - サメ召喚［CT 3］
+3ターンごとに海賊サメを1体召喚する。
+
+パッシブスキル - 憤怒
+戦闘を仕掛けられた後、攻撃力+1、最大3スタック。"
+M0003,Elite_Pirate_Sprite.png,M0003_info_b.png,海賊精鋭,海賊精鋭,,1,狂気,4,2,33,15,"ギミック紹介
+1.進捗バーの推進と共に登場します。
+2.フィールドにいるプレイヤーを追いかけ、攻撃を受けた後は反撃する。
+3.スキルを使ってサメを召喚する。
+
+スキル - サメ召喚［CT 3］
+3ターンごとに海賊サメを1体召喚する。
+
+パッシブスキル - 憤怒
+戦闘を仕掛けられた後、攻撃力+1、最大3スタック。"
+M0003,Elite_Pirate_Sprite.png,,海賊精鋭,海賊精鋭,,1,,,,,,
+M0004,Shark_Pirate_Sprite.png,M0004_info.png,海賊サメ,海賊サメ,,,普通,4,1,9,6,"ギミック紹介
+1.反撃できません。"
+M0004,Shark_Pirate_Sprite.png,M0004_info.png,海賊サメ,海賊サメ,,,困難,4,1,10,6,"ギミック紹介
+1.反撃できません。"
+M0004,Shark_Pirate_Sprite.png,M0004_info.png,海賊サメ,海賊サメ,,,悪夢,4,1,10,6,"ギミック紹介
+1.反撃できません。"
+M0004,Shark_Pirate_Sprite.png,M0004_info.png,海賊サメ,海賊サメ,,,狂気,4,1,10,6,"ギミック紹介
+1.反撃できません。"
+M0004,Shark_Pirate_Sprite.png,,海賊サメ,海賊サメ,,,,,,,,
+M0005,Thief_Sprite.png,M0005_info.png,泥棒,アライグマ,,,普通,0,0,6,5,"ギミック紹介
+1.主動攻撃しない。
+2.反撃しない。
+3.泥棒はキャラクターを通過する時、スターコインを4枚奪う。
+4.泥棒が奪ったスターコインは累積され、撃破された時は全て撃破者に与えられる。
+5.泥棒は最初からスターコインを5枚所持している。
+
+パッシブスキル - 盗み
+キャラクターを通った時、4コインを盗み、キャラクターに攻撃しない。
+
+パッシブスキル - 飛ぶほど歩く
+6マス以内にキャラクターがいない時、移動ポイント+3。"
+M0005,Thief_Sprite.png,M0005_info.png,泥棒,アライグマ,,,困難,0,0,6,5,"ギミック紹介
+1.主動攻撃しない。
+2.反撃しない。
+3.泥棒はキャラクターを通過する時、スターコインを4枚奪う。
+4.泥棒が奪ったスターコインは累積され、撃破された時は全て撃破者に与えられる。
+5.泥棒は最初からスターコインを5枚所持している。
+
+パッシブスキル - 盗み
+キャラクターを通った時、4コインを盗み、キャラクターに攻撃しない。
+
+パッシブスキル - 飛ぶほど歩く
+6マス以内にキャラクターがいない時、移動ポイント+3。"
+M0005,Thief_Sprite.png,M0005_info.png,泥棒,アライグマ,,,悪夢,0,0,6,5,"ギミック紹介
+1.主動攻撃しない。
+2.反撃しない。
+3.泥棒はキャラクターを通過する時、スターコインを4枚奪う。
+4.泥棒が奪ったスターコインは累積され、撃破された時は全て撃破者に与えられる。
+5.泥棒は最初からスターコインを5枚所持している。
+
+パッシブスキル - 盗み
+キャラクターを通った時、4コインを盗み、キャラクターに攻撃しない。
+
+パッシブスキル - 飛ぶほど歩く
+6マス以内にキャラクターがいない時、移動ポイント+3。"
+M0005,Thief_Sprite.png,M0005_info.png,泥棒,アライグマ,,,狂気,0,0,6,5,"ギミック紹介
+1.主動攻撃しない。
+2.反撃しない。
+3.泥棒はキャラクターを通過する時、スターコインを4枚奪う。
+4.泥棒が奪ったスターコインは累積され、撃破された時は全て撃破者に与えられる。
+5.泥棒は最初からスターコインを5枚所持している。
+
+パッシブスキル - 盗み
+キャラクターを通った時、4コインを盗み、キャラクターに攻撃しない。
+
+パッシブスキル - 飛ぶほど歩く
+6マス以内にキャラクターがいない時、移動ポイント+3。"
+M0005,Thief_Sprite.png,,泥棒,アライグマ,,,,,,,,
+M0006,Tennoji_Masao_Sprite.png,M0006_info_a.png,天王寺雅央,天王寺雅央,1,1,普通,3,1,140,,"ギミック紹介
+1.ゲーム開始時、マップに出現します。
+2.攻撃を受けた後は反撃する。
+
+スキル - 霊体降臨［CT 4］
+刀剣霊や長戟霊のどちらかを1体召喚する。"
+M0006,Tennoji_Masao_Sprite.png,M0006_info_a.png,天王寺雅央,天王寺雅央,1,1,困難,4,1,160,,"ギミック紹介
+1.ゲーム開始時、マップに出現します。
+2.攻撃を受けた後は反撃する。
+
+スキル - 霊体降臨［CT 4］
+刀剣霊や長戟霊のどちらかを1体召喚する。"
+M0006,Tennoji_Masao_Sprite.png,M0006_info_b.png,天王寺雅央,天王寺雅央,1,1,悪夢,4,1,180,,"ギミック紹介
+1.ゲーム開始時、マップに出現します。
+2.攻撃を受けた後は反撃する。
+
+スキル - 霊体降臨［CT 3］
+刀剣霊や長戟霊のどちらかを1体召喚する。"
+M0006,Tennoji_Masao_Sprite.png,M0006_info_b.png,天王寺雅央,天王寺雅央,1,1,狂気,4,1,240,,"ギミック紹介
+1.ゲーム開始時、マップに出現します。
+2.攻撃を受けた後は反撃する。
+
+スキル - 霊体降臨［CT 3］
+刀剣霊や長戟霊のどちらかを1体召喚する。"
+M0006,Tennoji_Masao_Sprite.png,,天王寺雅央,天王寺雅央,1,1,,,,,,
+M0007,Martial_Spirit_-_Enmity_Sprite.png,,サムライの化身-怨,サムライの化身-怨,,1,,,,,,
+M0008,Martial_Spirit_-_Murder_Sprite.png,,サムライの化身-戮,サムライの化身-戮,,1,,,,,,
+M0009,Spear_Spirit_Sprite.png,M0009_info_a.png,長戟霊,長戟霊,,1,普通,3,4,11,12,"ギミック紹介
+1.自ら攻撃を仕掛けません。
+2.攻撃を受けた後は反撃する。
+
+スキル - ポイズンアタック［CT 1］
+7マス以内のHPが最も多いキャラクターに2ダメージと赤き呪いを与える。
+
+パッシブスキル - 霊体補助（長戟）
+場に長戟霊が1体存在するごとに、雅央の攻撃力+2。プレイヤーが長戟霊を1体破壊するごとに、雅央は最大HPの10%（120）を失います。"
+M0009,Spear_Spirit_Sprite.png,M0009_info_b.png,長戟霊,長戟霊,,1,困難,4,5,12,12,"ギミック紹介
+1.自ら攻撃を仕掛けません。
+2.攻撃を受けた後は反撃する。
+
+スキル - ポイズンアタック［CT 1］
+7マス以内のHPが最も多いキャラクターに2ダメージと赤き呪いを与える。
+
+パッシブスキル - 霊体補助（長戟）
+場に長戟霊が1体存在するごとに、雅央の攻撃力+2。プレイヤーが長戟霊を1体破壊するごとに、雅央は最大HPの10%（160）を失います。"
+M0009,Spear_Spirit_Sprite.png,M0009_info_c.png,長戟霊,長戟霊,,1,悪夢,6,7,13,12,"ギミック紹介
+1.自ら攻撃を仕掛けません。
+2.攻撃を受けた後は反撃する。
+
+スキル - ポイズンアタック［CT 1］
+7マス以内のHPが最も多いキャラクターに2ダメージと赤き呪いを与える。
+
+パッシブスキル - 霊体補助（長戟）
+場に長戟霊が1体存在するごとに、雅央の攻撃力+2。プレイヤーが長戟霊を1体破壊するごとに、雅央は最大HPの10%（180）を失います。"
+M0009,Spear_Spirit_Sprite.png,M0009_info_d.png,長戟霊,長戟霊,,1,狂気,7,8,15,12,"ギミック紹介
+1.自ら攻撃を仕掛けません。
+2.攻撃を受けた後は反撃する。
+
+スキル - ポイズンアタック［CT 1］
+7マス以内のHPが最も多いキャラクターに2ダメージと赤き呪いを与える。
+
+パッシブスキル - 霊体補助（長戟）
+場に長戟霊が1体存在するごとに、雅央の攻撃力+2。プレイヤーが長戟霊を1体破壊するごとに、雅央は最大HPの10%（240）を失います。"
+M0009,Spear_Spirit_Sprite.png,,長戟霊,長戟霊,,1,,,,,,
+M0010,Sword_Spirit_Sprite.png,M0010_info_a.png,刀剣霊,刀剣霊,,,普通,4,0,22,12,"ギミック紹介
+1.反撃できません。
+
+パッシブスキル - 霊体補助（刀剣）
+場に刀剣霊が1体存在するごとに、雅央の防御力+2。プレイヤーが刀剣霊を1体破壊するごとに、雅央は最大HPの10%（120）を失います。"
+M0010,Sword_Spirit_Sprite.png,M0010_info_b.png,刀剣霊,刀剣霊,,,困難,4,0,24,12,"ギミック紹介
+1.反撃できません。
+
+パッシブスキル - 霊体補助（刀剣）
+場に刀剣霊が1体存在するごとに、雅央の防御力+2。プレイヤーが刀剣霊を1体破壊するごとに、雅央は最大HPの10%（160）を失います。"
+M0010,Sword_Spirit_Sprite.png,M0010_info_c.png,刀剣霊,刀剣霊,,,悪夢,5,1,25,12,"ギミック紹介
+1.反撃できません。
+
+パッシブスキル - 霊体補助（刀剣）
+場に刀剣霊が1体存在するごとに、雅央の防御力+2。プレイヤーが刀剣霊を1体破壊するごとに、雅央は最大HPの10%（180）を失います。
+
+パッシブスキル - フローズンタッチ
+攻撃命中後、青き呪いを付与する。"
+M0010,Sword_Spirit_Sprite.png,M0010_info_d.png,刀剣霊,刀剣霊,,,狂気,5,2,29,12,"ギミック紹介
+1.反撃できません。
+
+パッシブスキル - 霊体補助（刀剣）
+場に刀剣霊が1体存在するごとに、雅央の防御力+2。プレイヤーが刀剣霊を1体破壊するごとに、雅央は最大HPの10%（240）を失います。
+
+パッシブスキル - フローズンタッチ
+攻撃命中後、青き呪いを付与する。"
+M0010,Sword_Spirit_Sprite.png,,刀剣霊,刀剣霊,,,,,,,,
+M0011,Fever_Red_Spirit_Sprite.png,M0011_info.png,凶暴赤霊,凶暴赤霊,,1,普通,4,4,5,8,"ギミック紹介
+1.自ら攻撃を仕掛けません。
+2.攻撃を受けた後は反撃する。
+
+パッシブスキル - 崩解
+固定3マス移動する、移動中にキャラクターと遭遇した場合、自爆して、3マス以内のプレイヤーに赤き呪いを与える。"
+M0011,Fever_Red_Spirit_Sprite.png,M0011_info.png,凶暴赤霊,凶暴赤霊,,1,困難,5,5,6,8,"ギミック紹介
+1.自ら攻撃を仕掛けません。
+2.攻撃を受けた後は反撃する。
+
+パッシブスキル - 崩解
+固定3マス移動する、移動中にキャラクターと遭遇した場合、自爆して、3マス以内のプレイヤーに赤き呪いを与える。"
+M0011,Fever_Red_Spirit_Sprite.png,M0011_info.png,凶暴赤霊,凶暴赤霊,,1,悪夢,5,5,6,8,"ギミック紹介
+1.自ら攻撃を仕掛けません。
+2.攻撃を受けた後は反撃する。
+
+パッシブスキル - 崩解
+固定3マス移動する、移動中にキャラクターと遭遇した場合、自爆して、3マス以内のプレイヤーに赤き呪いを与える。"
+M0011,Fever_Red_Spirit_Sprite.png,M0011_info.png,凶暴赤霊,凶暴赤霊,,1,狂気,6,6,6,8,"ギミック紹介
+1.自ら攻撃を仕掛けません。
+2.攻撃を受けた後は反撃する。
+
+パッシブスキル - 崩解
+固定3マス移動する、移動中にキャラクターと遭遇した場合、自爆して、3マス以内のプレイヤーに赤き呪いを与える。"
+M0011,Fever_Red_Spirit_Sprite.png,,凶暴赤霊,凶暴赤霊,,1,,,,,,
+M0012,Frozen_Blue_Spirit_Sprite.png,M0012_info.png,氷刻青霊,氷刻青霊,,,普通,4,0,10,6,"ギミック紹介
+1.反撃できません。"
+M0012,Frozen_Blue_Spirit_Sprite.png,M0012_info.png,氷刻青霊,氷刻青霊,,,困難,4,0,10,6,"ギミック紹介
+1.反撃できません。"
+M0012,Frozen_Blue_Spirit_Sprite.png,M0012_info.png,氷刻青霊,氷刻青霊,,,悪夢,5,0,11,6,"ギミック紹介
+1.反撃できません。"
+M0012,Frozen_Blue_Spirit_Sprite.png,M0012_info.png,氷刻青霊,氷刻青霊,,,狂気,5,0,11,6,"ギミック紹介
+1.反撃できません。"
+M0012,Frozen_Blue_Spirit_Sprite.png,,氷刻青霊,氷刻青霊,,,,,,,,
+M0013,Lion_Gawu_Sprite.png,M0013_info_a.png,獅子舞いガオー,天王寺雅央,1,1,普通,3,0,120,,"ギミック紹介
+1.ゲームの進行に応じて登場します。
+2.フィールドにいるプレイヤーを追いかけます。
+3.攻撃を受けた後は反撃する。
+4.指揮センターとHPを共有する。"
+M0013,Lion_Gawu_Sprite.png,M0013_info_b.png,獅子舞いガオー,天王寺雅央,1,1,困難,3,0,145,,"ギミック紹介
+1.ゲームの進行に応じて登場します。
+2.フィールドにいるプレイヤーを追いかけます。
+3.攻撃を受けた後は反撃する。
+4.指揮センターとHPを共有する。
+
+パッシブスキル - 勇往邁進
+攻撃命中時、2スタックの勇往邁進を獲得する。"
+M0013,Lion_Gawu_Sprite.png,M0013_info_b.png,獅子舞いガオー,天王寺雅央,1,1,悪夢,4,1,160,,"ギミック紹介
+1.ゲームの進行に応じて登場します。
+2.フィールドにいるプレイヤーを追いかけます。
+3.攻撃を受けた後は反撃する。
+4.指揮センターとHPを共有する。
+
+パッシブスキル - 勇往邁進
+攻撃命中時、2スタックの勇往邁進を獲得する。"
+M0013,Lion_Gawu_Sprite.png,M0013_info_b.png,獅子舞いガオー,天王寺雅央,1,1,狂気,4,1,188,,"ギミック紹介
+1.ゲームの進行に応じて登場します。
+2.フィールドにいるプレイヤーを追いかけます。
+3.攻撃を受けた後は反撃する。
+4.指揮センターとHPを共有する。
+
+パッシブスキル - 勇往邁進
+攻撃命中時、2スタックの勇往邁進を獲得する。"
+M0013,Lion_Gawu_Sprite.png,,獅子舞いガオー,天王寺雅央,1,1,,,,,,
+M0014,Ground_Control_Sprite.png,M0014_info.png,指揮センター,指揮センター,1,,普通,0,0,120,,"ギミック紹介
+1.獅子舞いガオーと一緒に登場する。
+2.他のユニットを通過する時、または他のユニットに通過される時、戦闘は発生しません。スキルとカードによる攻撃は有効です。
+3.獅子舞いガオーとHPを共有する。
+
+スキル - 祭なら花火っしょ！［CT 1］
+爆竹ゲロゲロを1体召喚する。
+
+パッシブスキル - 脆弱なコア
+他のユニットを通過する時、または他のユニットに通過される時、戦闘は発生しません。ダメージを受けるたびに、このラウンド内で受けるダメージ+1。"
+M0014,Ground_Control_Sprite.png,M0014_info.png,指揮センター,指揮センター,1,,困難,0,0,145,,"ギミック紹介
+1.獅子舞いガオーと一緒に登場する。
+2.他のユニットを通過する時、または他のユニットに通過される時、戦闘は発生しません。スキルとカードによる攻撃は有効です。
+3.獅子舞いガオーとHPを共有する。
+
+スキル - 祭なら花火っしょ！［CT 1］
+爆竹ゲロゲロを1体召喚する。
+
+パッシブスキル - 脆弱なコア
+他のユニットを通過する時、または他のユニットに通過される時、戦闘は発生しません。ダメージを受けるたびに、このラウンド内で受けるダメージ+1。"
+M0014,Ground_Control_Sprite.png,M0014_info.png,指揮センター,指揮センター,1,,悪夢,0,0,160,,"ギミック紹介
+1.獅子舞いガオーと一緒に登場する。
+2.他のユニットを通過する時、または他のユニットに通過される時、戦闘は発生しません。スキルとカードによる攻撃は有効です。
+3.獅子舞いガオーとHPを共有する。
+
+スキル - 祭なら花火っしょ！［CT 1］
+爆竹ゲロゲロを1体召喚する。
+
+パッシブスキル - 脆弱なコア
+他のユニットを通過する時、または他のユニットに通過される時、戦闘は発生しません。ダメージを受けるたびに、このラウンド内で受けるダメージ+1。"
+M0014,Ground_Control_Sprite.png,M0014_info.png,指揮センター,指揮センター,1,,狂気,0,0,188,,"ギミック紹介
+1.獅子舞いガオーと一緒に登場する。
+2.他のユニットを通過する時、または他のユニットに通過される時、戦闘は発生しません。スキルとカードによる攻撃は有効です。
+3.獅子舞いガオーとHPを共有する。
+
+スキル - 祭なら花火っしょ！［CT 1］
+爆竹ゲロゲロを1体召喚する。
+
+パッシブスキル - 脆弱なコア
+他のユニットを通過する時、または他のユニットに通過される時、戦闘は発生しません。ダメージを受けるたびに、このラウンド内で受けるダメージ+1。"
+M0014,Ground_Control_Sprite.png,,指揮センター,指揮センター,1,,,,,,,
+M0015,Lion_Gawu_Sprite.png,,フュージョン！獅子舞いガオー！,天王寺雅央,1,1,,,,,,
+M0016,Cracker_Croak_Sprite.png,,三連爆竹ゲロゲロ,三連爆竹ゲロゲロ,,,,,,,,
+M0017,Cracker_Croak_Sprite.png,M0017_info.png,爆竹ゲロゲロ,爆竹ゲロゲロ,,,普通,1,1,7,6,"ギミック紹介
+1.自ら攻撃を仕掛けません。
+2.反撃できません。
+
+スキル - 不安全な行動［CT 1］
+4マス以内のHPが一番多いキャラクターに自身の攻撃力と同じ数のダメージを与える。
+
+パッシブスキル - 未点火の爆竹
+撃破者に爆竹を1枚与える。"
+M0017,Cracker_Croak_Sprite.png,M0017_info.png,爆竹ゲロゲロ,爆竹ゲロゲロ,,,困難,1,1,8,6,"ギミック紹介
+1.自ら攻撃を仕掛けません。
+2.反撃できません。
+
+スキル - 不安全な行動［CT 1］
+4マス以内のHPが一番多いキャラクターに自身の攻撃力と同じ数のダメージを与える。
+
+パッシブスキル - 未点火の爆竹
+撃破者に爆竹を1枚与える。"
+M0017,Cracker_Croak_Sprite.png,M0017_info.png,爆竹ゲロゲロ,爆竹ゲロゲロ,,,悪夢,1,2,8,6,"ギミック紹介
+1.自ら攻撃を仕掛けません。
+2.反撃できません。
+
+スキル - 不安全な行動［CT 1］
+4マス以内のHPが一番多いキャラクターに自身の攻撃力と同じ数のダメージを与える。
+
+パッシブスキル - 未点火の爆竹
+撃破者に爆竹を1枚与える。"
+M0017,Cracker_Croak_Sprite.png,M0017_info.png,爆竹ゲロゲロ,爆竹ゲロゲロ,,,狂気,1,2,8,6,"ギミック紹介
+1.自ら攻撃を仕掛けません。
+2.反撃できません。
+
+スキル - 不安全な行動［CT 1］
+4マス以内のHPが一番多いキャラクターに自身の攻撃力と同じ数のダメージを与える。
+
+パッシブスキル - 未点火の爆竹
+撃破者に爆竹を1枚与える。"
+M0017,Cracker_Croak_Sprite.png,,爆竹ゲロゲロ,爆竹ゲロゲロ,,,,,,,,
+M0018,Ambient_Enlivener_Robot_Sprite.png,M0018_info.png,雰囲気系ロボ,雰囲気系ロボ,,1,普通,3,0,21,15,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 盛り上がって行くぞ［CT 1］
+周囲4マス以内のモンスター全員に攻撃力+1、防御力+1を付与する。"
+M0018,Ambient_Enlivener_Robot_Sprite.png,M0018_info.png,雰囲気系ロボ,雰囲気系ロボ,,1,困難,3,1,22,15,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 盛り上がって行くぞ［CT 1］
+周囲4マス以内のモンスター全員に攻撃力+1、防御力+1を付与する。"
+M0018,Ambient_Enlivener_Robot_Sprite.png,M0018_info.png,雰囲気系ロボ,雰囲気系ロボ,,1,悪夢,4,1,23,15,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 盛り上がって行くぞ［CT 1］
+周囲4マス以内のモンスター全員に攻撃力+1、防御力+1を付与する。"
+M0018,Ambient_Enlivener_Robot_Sprite.png,M0018_info.png,雰囲気系ロボ,雰囲気系ロボ,,1,狂気,4,1,25,15,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 盛り上がって行くぞ［CT 1］
+周囲4マス以内のモンスター全員に攻撃力+1、防御力+1を付与する。"
+M0018,Ambient_Enlivener_Robot_Sprite.png,,雰囲気系ロボ,雰囲気系ロボ,,1,,,,,,
+M0019,Mechanical_Snake_Dragon_Sprite.png,M0019_info.png,機械蛇龍,機械蛇龍,,,普通,0,0,8,9,"ギミック紹介
+1.他のユニットを通過する時、または他のユニットに通過される時、戦闘は発生しません。
+2.マップイベントの進捗に応じて登場する。
+
+スキル - ガーディアンオーブ［CT 1］
+5マス以内のランダムなモンスターにダメージを受けるまで防御力+9を与える。
+
+パッシブスキル - ソーリング
+他のユニットを通過する時、または他のユニットに通過される時、戦闘は発生しません。
+
+パッシブスキル - 未点火の爆竹
+撃破者に爆竹を1枚与える。"
+M0019,Mechanical_Snake_Dragon_Sprite.png,M0019_info.png,機械蛇龍,機械蛇龍,,,困難,0,0,9,9,"ギミック紹介
+1.他のユニットを通過する時、または他のユニットに通過される時、戦闘は発生しません。
+2.マップイベントの進捗に応じて登場する。
+
+スキル - ガーディアンオーブ［CT 1］
+5マス以内のランダムなモンスターにダメージを受けるまで防御力+9を与える。
+
+パッシブスキル - ソーリング
+他のユニットを通過する時、または他のユニットに通過される時、戦闘は発生しません。
+
+パッシブスキル - 未点火の爆竹
+撃破者に爆竹を1枚与える。"
+M0019,Mechanical_Snake_Dragon_Sprite.png,M0019_info.png,機械蛇龍,機械蛇龍,,,悪夢,0,0,9,9,"ギミック紹介
+1.他のユニットを通過する時、または他のユニットに通過される時、戦闘は発生しません。
+2.マップイベントの進捗に応じて登場する。
+
+スキル - ガーディアンオーブ［CT 1］
+5マス以内のランダムなモンスターにダメージを受けるまで防御力+9を与える。
+
+パッシブスキル - ソーリング
+他のユニットを通過する時、または他のユニットに通過される時、戦闘は発生しません。
+
+パッシブスキル - 未点火の爆竹
+撃破者に爆竹を1枚与える。"
+M0019,Mechanical_Snake_Dragon_Sprite.png,M0019_info.png,機械蛇龍,機械蛇龍,,,狂気,0,0,11,9,"ギミック紹介
+1.他のユニットを通過する時、または他のユニットに通過される時、戦闘は発生しません。
+2.マップイベントの進捗に応じて登場する。
+
+スキル - ガーディアンオーブ［CT 1］
+5マス以内のランダムなモンスターにダメージを受けるまで防御力+9を与える。
+
+パッシブスキル - ソーリング
+他のユニットを通過する時、または他のユニットに通過される時、戦闘は発生しません。
+
+パッシブスキル - 未点火の爆竹
+撃破者に爆竹を1枚与える。"
+M0019,Mechanical_Snake_Dragon_Sprite.png,,機械蛇龍,機械蛇龍,,,,,,,,
+M0020,Tennoji_Masao_Academy_Security_Sprite.png,M0020_info.png,学院警備官,天王寺雅央,1,1,普通,2,1,99,,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 指示［CT 1］
+雅央に一番近いキャラクターは「この人です」を1枚得る。雅央のHPが50%以下の場合、キャラを2体指定する。
+
+パッシブスキル - 怒りに燃える
+場のキャラクターが「この人です」を3枚使うたびに、雅央の攻撃力+1、さらにゼリーガーディアンを1体召喚する。雅央が問題生徒を攻撃する時、与えるダメージ+2、その後問題生徒を解除する。"
+M0020,Tennoji_Masao_Academy_Security_Sprite.png,M0020_info.png,学院警備官,天王寺雅央,1,1,困難,2,1,110,,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 指示［CT 1］
+雅央に一番近いキャラクターは「この人です」を1枚得る。雅央のHPが50%以下の場合、キャラを2体指定する。
+
+パッシブスキル - 怒りに燃える
+場のキャラクターが「この人です」を3枚使うたびに、雅央の攻撃力+1、さらにゼリーガーディアンを1体召喚する。雅央が問題生徒を攻撃する時、与えるダメージ+2、その後問題生徒を解除する。"
+M0020,Tennoji_Masao_Academy_Security_Sprite.png,M0020_info.png,学院警備官,天王寺雅央,1,1,悪夢,3,2,120,,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 指示［CT 1］
+雅央に一番近いキャラクターは「この人です」を1枚得る。雅央のHPが50%以下の場合、キャラを2体指定する。
+
+パッシブスキル - 怒りに燃える
+場のキャラクターが「この人です」を3枚使うたびに、雅央の攻撃力+1、さらにゼリーガーディアンを1体召喚する。雅央が問題生徒を攻撃する時、与えるダメージ+2、その後問題生徒を解除する。"
+M0020,Tennoji_Masao_Academy_Security_Sprite.png,M0020_info.png,学院警備官,天王寺雅央,1,1,狂気,4,2,140,,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 指示［CT 1］
+雅央に一番近いキャラクターは「この人です」を1枚得る。雅央のHPが50%以下の場合、キャラを2体指定する。
+
+パッシブスキル - 怒りに燃える
+場のキャラクターが「この人です」を3枚使うたびに、雅央の攻撃力+1、さらにゼリーガーディアンを1体召喚する。雅央が問題生徒を攻撃する時、与えるダメージ+2、その後問題生徒を解除する。"
+M0021,Tennoji_Masao_Academy_Sprite.png,M0021_info.png,学院長代理,天王寺雅央,1,1,普通,2,2,111,,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - ティータイム［CT 1］
+5マス以内に魔法のティーポットがある場合、それを吸収して攻撃力+1、防御力+1。いない場合は魔法のティーポットを1体召喚する。
+
+パッシブスキル - 甘味枯渇
+このターンに魔法のティーポットを吸収しなかった場合、ターン終了時に最大HPの10%を失う。HPが50%以下の場合、スキル使用時に変なティーポットを追加で1体召喚する。"
+M0021,Tennoji_Masao_Academy_Sprite.png,M0021_info.png,学院長代理,天王寺雅央,1,1,困難,3,2,130,,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - ティータイム［CT 1］
+5マス以内に魔法のティーポットがある場合、それを吸収して攻撃力+1、防御力+1。いない場合は魔法のティーポットを1体召喚する。
+
+パッシブスキル - 甘味枯渇
+このターンに魔法のティーポットを吸収しなかった場合、ターン終了時に最大HPの10%を失う。HPが50%以下の場合、スキル使用時に変なティーポットを追加で1体召喚する。"
+M0021,Tennoji_Masao_Academy_Sprite.png,M0021_info.png,学院長代理,天王寺雅央,1,1,悪夢,3,2,160,,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - ティータイム［CT 1］
+5マス以内に魔法のティーポットがある場合、それを吸収して攻撃力+1、防御力+1。いない場合は魔法のティーポットを1体召喚する。
+
+パッシブスキル - 甘味枯渇
+このターンに魔法のティーポットを吸収しなかった場合、ターン終了時に最大HPの10%を失う。HPが50%以下の場合、スキル使用時に変なティーポットを追加で1体召喚する。"
+M0021,Tennoji_Masao_Academy_Sprite.png,M0021_info.png,学院長代理,天王寺雅央,1,1,狂気,4,2,200,,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - ティータイム［CT 1］
+5マス以内に魔法のティーポットがある場合、それを吸収して攻撃力+1、防御力+1。いない場合は魔法のティーポットを1体召喚する。
+
+パッシブスキル - 甘味枯渇
+このターンに魔法のティーポットを吸収しなかった場合、ターン終了時に最大HPの10%を失う。HPが50%以下の場合、スキル使用時に変なティーポットを追加で1体召喚する。"
+M0022,Jelly_Fighter_Sprite.png,M0022_info.png,ゼリーファイター,ゼリーファイター,,1,普通,2,6,35,6,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+パッシブスキル - 不安定な装甲
+ダメージを受ける時、防御力-2。（最小0まで）
+1ラウンドの間ダメージを受けなかった場合、攻撃力+1。"
+M0022,Jelly_Fighter_Sprite.png,M0022_info.png,ゼリーファイター,ゼリーファイター,,1,困難,2,6,36,6,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+パッシブスキル - 不安定な装甲
+ダメージを受ける時、防御力-2。（最小0まで）
+1ラウンドの間ダメージを受けなかった場合、攻撃力+1。"
+M0022,Jelly_Fighter_Sprite.png,M0022_info.png,ゼリーファイター,ゼリーファイター,,1,悪夢,3,8,38,6,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+パッシブスキル - 不安定な装甲
+ダメージを受ける時、防御力-2。（最小0まで）
+1ラウンドの間ダメージを受けなかった場合、攻撃力+1。"
+M0022,Jelly_Fighter_Sprite.png,M0022_info.png,ゼリーファイター,ゼリーファイター,,1,狂気,4,10,40,6,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+パッシブスキル - 不安定な装甲
+ダメージを受ける時、防御力-2。（最小0まで）
+1ラウンドの間ダメージを受けなかった場合、攻撃力+1。"
+M0023,Jelly_Guard_Sprite.png,M0023_info.png,ゼリーガーディアン,ゼリーガーディアン,,1,普通,3,4,15,9,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+パッシブスキル - 紙装甲
+ダメージを受ける時、防御力-2。（最大0まで）"
+M0023,Jelly_Guard_Sprite.png,M0023_info.png,ゼリーガーディアン,ゼリーガーディアン,,1,困難,3,4,16,9,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+パッシブスキル - 紙装甲
+ダメージを受ける時、防御力-2。（最大0まで）"
+M0023,Jelly_Guard_Sprite.png,M0023_info.png,ゼリーガーディアン,ゼリーガーディアン,,1,悪夢,4,4,18,9,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+パッシブスキル - 紙装甲
+ダメージを受ける時、防御力-2。（最大0まで）"
+M0023,Jelly_Guard_Sprite.png,M0023_info.png,ゼリーガーディアン,ゼリーガーディアン,,1,狂気,4,4,20,9,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+パッシブスキル - 紙装甲
+ダメージを受ける時、防御力-2。（最大0まで）"
+M0024,Jelly_Wizard_Sprite.png,M0024_info.png,ゼリーウィザード,ゼリーウィザード,,,普通,2,1,15,8,"ギミック紹介
+1.反撃できません。
+
+スキル - 魔法追尾弾［CT 1］
+5マスより外の一番HPの多いキャラに3ダメージを与える。"
+M0024,Jelly_Wizard_Sprite.png,M0024_info.png,ゼリーウィザード,ゼリーウィザード,,,困難,3,1,16,8,"ギミック紹介
+1.反撃できません。
+
+スキル - 魔法追尾弾［CT 1］
+5マスより外の一番HPの多いキャラに3ダメージを与える。"
+M0024,Jelly_Wizard_Sprite.png,M0024_info.png,ゼリーウィザード,ゼリーウィザード,,,悪夢,3,1,17,8,"ギミック紹介
+1.反撃できません。
+
+スキル - 魔法追尾弾［CT 1］
+5マスより外の一番HPの多いキャラに3ダメージを与える。"
+M0024,Jelly_Wizard_Sprite.png,M0024_info.png,ゼリーウィザード,ゼリーウィザード,,,狂気,3,1,21,8,"ギミック紹介
+1.反撃できません。
+
+スキル - 魔法追尾弾［CT 1］
+5マスより外の一番HPの多いキャラに3ダメージを与える。"
+M0025,Magic_Teapot_Sprite.png,M0025_info.png,魔法のティーポット,魔法のティーポット,,,普通,3,1,10,6,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後、反撃出来ません。
+
+パッシブスキル - ホットティー
+倒された場合、撃破者のHP+2。"
+M0025,Magic_Teapot_Sprite.png,M0025_info.png,魔法のティーポット,魔法のティーポット,,,困難,3,1,11,6,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後、反撃出来ません。
+
+パッシブスキル - ホットティー
+倒された場合、撃破者のHP+2。"
+M0025,Magic_Teapot_Sprite.png,M0025_info.png,魔法のティーポット,魔法のティーポット,,,悪夢,4,1,11,6,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後、反撃出来ません。
+
+パッシブスキル - ホットティー
+倒された場合、撃破者のHP+2。"
+M0025,Magic_Teapot_Sprite.png,M0025_info.png,魔法のティーポット,魔法のティーポット,,,狂気,4,1,12,6,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後、反撃出来ません。
+
+パッシブスキル - ホットティー
+倒された場合、撃破者のHP+2。"
+M0026,Mutant_Teapot_Sprite.png,M0026_info.png,変なティーポット,変なティーポット,,,普通,4,2,7,8,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後、反撃出来ません。
+
+パッシブスキル - 変質のドリンク
+変なティーポットが倒された時、撃破者はカードを1枚得る。雅央が吸収する場合、何も起こらない。"
+M0026,Mutant_Teapot_Sprite.png,M0026_info.png,変なティーポット,変なティーポット,,,困難,5,2,7,8,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後、反撃出来ません。
+
+パッシブスキル - 変質のドリンク
+変なティーポットが倒された時、撃破者はカードを1枚得る。雅央が吸収する場合、何も起こらない。"
+M0026,Mutant_Teapot_Sprite.png,M0026_info.png,変なティーポット,変なティーポット,,,悪夢,6,3,7,8,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後、反撃出来ません。
+
+パッシブスキル - 変質のドリンク
+変なティーポットが倒された時、撃破者はカードを1枚得る。雅央が吸収する場合、何も起こらない。"
+M0026,Mutant_Teapot_Sprite.png,M0026_info.png,変なティーポット,変なティーポット,,,狂気,6,3,8,8,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後、反撃出来ません。
+
+パッシブスキル - 変質のドリンク
+変なティーポットが倒された時、撃破者はカードを1枚得る。雅央が吸収する場合、何も起こらない。"
+M0027,Amakawa_Mamushi_Sprite.png,M0027_info.png,天川真夢梓,天川真夢梓,1,1,普通,4,1,99,,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 連鎖反応［CT 1］
+5マス以内のキャラ全員に効果カードを1枚捨てさせる。対象キャラの手札が4より少ない場合、3ダメージを与える。
+
+パッシブスキル - 湖の主
+1ラウンドの間、ダメージを受けた場合、逆鱗スタックを1つ得る。1回で20より大きいダメージを受けると、逆鱗スタックを全部失う、このラウンドでスキル【連鎖反応】が使用不可になる。"
+M0027,Amakawa_Mamushi_Sprite.png,M0027_info.png,天川真夢梓,天川真夢梓,1,1,困難,4,1,111,,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 連鎖反応［CT 1］
+5マス以内のキャラ全員に効果カードを1枚捨てさせる。対象キャラの手札が4より少ない場合、3ダメージを与える。
+
+パッシブスキル - 湖の主
+1ラウンドの間、ダメージを受けた場合、逆鱗スタックを1つ得る。1回で20より大きいダメージを受けると、逆鱗スタックを全部失う、このラウンドでスキル【連鎖反応】が使用不可になる。"
+M0027,Amakawa_Mamushi_Sprite.png,M0027_info.png,天川真夢梓,天川真夢梓,1,1,悪夢,5,2,120,,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 連鎖反応［CT 1］
+5マス以内のキャラ全員に効果カードを1枚捨てさせる。対象キャラの手札が4より少ない場合、3ダメージを与える。
+
+パッシブスキル - 湖の主
+1ラウンドの間、ダメージを受けた場合、逆鱗スタックを1つ得る。1回で20より大きいダメージを受けると、逆鱗スタックを全部失う、このラウンドでスキル【連鎖反応】が使用不可になる。"
+M0027,Amakawa_Mamushi_Sprite.png,M0027_info.png,天川真夢梓,天川真夢梓,1,1,狂気,6,2,150,,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 連鎖反応［CT 1］
+5マス以内のキャラ全員に効果カードを1枚捨てさせる。対象キャラの手札が4より少ない場合、3ダメージを与える。
+
+パッシブスキル - 湖の主
+1ラウンドの間、ダメージを受けた場合、逆鱗スタックを1つ得る。1回で20より大きいダメージを受けると、逆鱗スタックを全部失う、このラウンドでスキル【連鎖反応】が使用不可になる。"
+M0028,Amakawa_Souri_Sprite.png,M0028_info.png,天川蒼鯉,天川蒼鯉,1,1,普通,1,1,88,,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 眷属召喚［CT 2］
+金ちゃんを1体召喚する。
+
+パッシブスキル - 川の主
+反撃時、金鱗スタック+2。"
+M0028,Amakawa_Souri_Sprite.png,M0028_info.png,天川蒼鯉,天川蒼鯉,1,1,困難,2,2,100,,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 眷属召喚［CT 2］
+金ちゃんを1体召喚する。
+
+パッシブスキル - 川の主
+反撃時、金鱗スタック+2。"
+M0028,Amakawa_Souri_Sprite.png,M0028_info.png,天川蒼鯉,天川蒼鯉,1,1,悪夢,3,3,110,,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 眷属召喚［CT 2］
+金ちゃんを1体召喚する。
+
+パッシブスキル - 川の主
+反撃時、金鱗スタック+2。"
+M0028,Amakawa_Souri_Sprite.png,M0028_info.png,天川蒼鯉,天川蒼鯉,1,1,狂気,4,4,135,,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 眷属召喚［CT 2］
+金ちゃんを1体召喚する。
+
+パッシブスキル - 川の主
+反撃時、金鱗スタック+2。"
+M0029,Crab_Soldier_Sprite.png,M0029_info.png,蟹兄い,蟹兄い,,,普通,2,1,7,6,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後、反撃出来ません。
+
+パッシブスキル - 川上り
+ダメージを受けた後、攻撃力+1。"
+M0029,Crab_Soldier_Sprite.png,M0029_info.png,蟹兄い,蟹兄い,,,困難,3,1,8,6,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後、反撃出来ません。
+
+パッシブスキル - 川上り
+ダメージを受けた後、攻撃力+1。"
+M0029,Crab_Soldier_Sprite.png,M0029_info.png,蟹兄い,蟹兄い,,,悪夢,3,2,8,6,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後、反撃出来ません。
+
+パッシブスキル - 川上り
+ダメージを受けた後、攻撃力+1。"
+M0029,Crab_Soldier_Sprite.png,M0029_info.png,蟹兄い,蟹兄い,,,狂気,4,2,9,6,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後、反撃出来ません。
+
+パッシブスキル - 川上り
+ダメージを受けた後、攻撃力+1。"
+M0030,Prawn_Soldier_Sprite.png,M0030_info_a.png,蝦兄い,蝦兄い,,1,普通,3,1,20,8,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。"
+M0030,Prawn_Soldier_Sprite.png,M0030_info_a.png,蝦兄い,蝦兄い,,1,困難,3,2,22,8,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。"
+M0030,Prawn_Soldier_Sprite.png,M0030_info_b.png,蝦兄い,蝦兄い,,1,悪夢,4,2,24,8,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+パッシブスキル - 粉砕ブロー
+手札が4より少ないキャラに攻撃する際に、攻撃力+3。"
+M0030,Prawn_Soldier_Sprite.png,M0030_info_b.png,蝦兄い,蝦兄い,,1,狂気,4,2,26,8,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+パッシブスキル - 粉砕ブロー
+手札が4より少ないキャラに攻撃する際に、攻撃力+3。"
+M0031,Golden_Fish_Sprite.png,M0031_info_a.png,金ちゃん,金ちゃん,,1,普通,2,0,6,5,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた時、回避行動を行い、その後反撃する。"
+M0031,Golden_Fish_Sprite.png,M0031_info_b.png,金ちゃん,金ちゃん,,1,困難,3,0,7,5,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた時、回避行動を行い、その後反撃する。
+
+スキル - 眷属の支援［CT 1］
+ボスに金鱗スタックを1つ付与する。"
+M0031,Golden_Fish_Sprite.png,M0031_info_b.png,金ちゃん,金ちゃん,,1,悪夢,5,0,8,5,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた時、回避行動を行い、その後反撃する。
+
+スキル - 眷属の支援［CT 1］
+ボスに金鱗スタックを1つ付与する。"
+M0031,Golden_Fish_Sprite.png,M0031_info_b.png,金ちゃん,金ちゃん,,1,狂気,6,0,11,5,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた時、回避行動を行い、その後反撃する。
+
+スキル - 眷属の支援［CT 1］
+ボスに金鱗スタックを1つ付与する。"
+M0032,Loudmouth_Sprite.png,M0032_info.png,コエデカフグ,コエデカフグ,,,普通,3,0,18,8,"ギミック紹介
+1.攻撃を受けた後、反撃出来ません。
+
+スキル - ストームスパイク［CT 1］
+4マス以内のキャラクターに2ダメージ。
+
+パッシブスキル - アイボウ！！！！
+ムキムキフグが倒された時、攻撃力+2防御力+2、反撃スキルを得る。"
+M0032,Loudmouth_Sprite.png,M0032_info.png,コエデカフグ,コエデカフグ,,,困難,3,0,20,8,"ギミック紹介
+1.攻撃を受けた後、反撃出来ません。
+
+スキル - ストームスパイク［CT 1］
+4マス以内のキャラクターに2ダメージ。
+
+パッシブスキル - アイボウ！！！！
+ムキムキフグが倒された時、攻撃力+2防御力+2、反撃スキルを得る。"
+M0032,Loudmouth_Sprite.png,M0032_info.png,コエデカフグ,コエデカフグ,,,悪夢,4,1,20,8,"ギミック紹介
+1.攻撃を受けた後、反撃出来ません。
+
+スキル - ストームスパイク［CT 1］
+4マス以内のキャラクターに2ダメージ。
+
+パッシブスキル - アイボウ！！！！
+ムキムキフグが倒された時、攻撃力+2防御力+2、反撃スキルを得る。"
+M0032,Loudmouth_Sprite.png,M0032_info.png,コエデカフグ,コエデカフグ,,,狂気,4,1,24,8,"ギミック紹介
+1.攻撃を受けた後、反撃出来ません。
+
+スキル - ストームスパイク［CT 1］
+4マス以内のキャラクターに2ダメージ。
+
+パッシブスキル - アイボウ！！！！
+ムキムキフグが倒された時、攻撃力+2防御力+2、反撃スキルを得る。"
+M0033,Martial_Trainee_Sprite.png,M0033_info.png,ムキムキフグ,ムキムキフグ,,1,普通,3,3,13,8,"ギミック紹介
+1.自ら攻撃を仕掛けません。
+2.攻撃を受けた後は反撃する。
+
+パッシブスキル - アニキ！！！！
+コエデカフグが倒された時、攻撃+3、移動可能になる。"
+M0033,Martial_Trainee_Sprite.png,M0033_info.png,ムキムキフグ,ムキムキフグ,,1,困難,4,4,14,8,"ギミック紹介
+1.自ら攻撃を仕掛けません。
+2.攻撃を受けた後は反撃する。
+
+パッシブスキル - アニキ！！！！
+コエデカフグが倒された時、攻撃+3、移動可能になる。"
+M0033,Martial_Trainee_Sprite.png,M0033_info.png,ムキムキフグ,ムキムキフグ,,1,悪夢,5,4,15,8,"ギミック紹介
+1.自ら攻撃を仕掛けません。
+2.攻撃を受けた後は反撃する。
+
+パッシブスキル - アニキ！！！！
+コエデカフグが倒された時、攻撃+3、移動可能になる。"
+M0033,Martial_Trainee_Sprite.png,M0033_info.png,ムキムキフグ,ムキムキフグ,,1,狂気,5,5,16,8,"ギミック紹介
+1.自ら攻撃を仕掛けません。
+2.攻撃を受けた後は反撃する。
+
+パッシブスキル - アニキ！！！！
+コエデカフグが倒された時、攻撃+3、移動可能になる。"
+M0034,Amakawa_Mamushi_Sprite.png,M0034_info.png,天川真夢梓（味方）,天川真夢梓,,,普通,6,6,99,,"ギミック紹介
+1.戦闘無効効果を持つ。
+
+スキル - 蛟のキッス［CT 1］
+一番近くにいるキャラにカード「毒牙」を1枚与える。"
+M0034,Amakawa_Mamushi_Sprite.png,M0034_info.png,天川真夢梓（味方）,天川真夢梓,,,困難,6,6,99,,"ギミック紹介
+1.戦闘無効効果を持つ。
+
+スキル - 蛟のキッス［CT 1］
+一番近くにいるキャラにカード「毒牙」を1枚与える。"
+M0034,Amakawa_Mamushi_Sprite.png,M0034_info.png,天川真夢梓（味方）,天川真夢梓,,,悪夢,6,6,99,,"ギミック紹介
+1.戦闘無効効果を持つ。
+
+スキル - 蛟のキッス［CT 1］
+一番近くにいるキャラにカード「毒牙」を1枚与える。"
+M0034,Amakawa_Mamushi_Sprite.png,M0034_info.png,天川真夢梓（味方）,天川真夢梓,,,狂気,6,6,99,,"ギミック紹介
+1.戦闘無効効果を持つ。
+
+スキル - 蛟のキッス［CT 1］
+一番近くにいるキャラにカード「毒牙」を1枚与える。"
+M0035,Amakawa_Souri_Sprite.png,M0035_info.png,天川蒼鯉（味方）,天川蒼鯉,,,普通,4,4,99,,"ギミック紹介
+1.主動的に攻撃を行う。
+2.戦闘無効効果を持つ。
+
+スキル - ひょうたん酒［CT 1］
+ランダムな二つのマスにひょうたんを召喚する。
+
+パッシブスキル - 余韻の甘み
+キャラがひょうたんを拾うたびに攻撃力+1。"
+M0035,Amakawa_Souri_Sprite.png,M0035_info.png,天川蒼鯉（味方）,天川蒼鯉,,,困難,4,4,99,,"ギミック紹介
+1.主動的に攻撃を行う。
+2.戦闘無効効果を持つ。
+
+スキル - ひょうたん酒［CT 1］
+ランダムな二つのマスにひょうたんを召喚する。
+
+パッシブスキル - 余韻の甘み
+キャラがひょうたんを拾うたびに攻撃力+1。"
+M0035,Amakawa_Souri_Sprite.png,M0035_info.png,天川蒼鯉（味方）,天川蒼鯉,,,悪夢,4,4,99,,"ギミック紹介
+1.主動的に攻撃を行う。
+2.戦闘無効効果を持つ。
+
+スキル - ひょうたん酒［CT 1］
+ランダムな二つのマスにひょうたんを召喚する。
+
+パッシブスキル - 余韻の甘み
+キャラがひょうたんを拾うたびに攻撃力+1。"
+M0035,Amakawa_Souri_Sprite.png,M0035_info.png,天川蒼鯉（味方）,天川蒼鯉,,,狂気,4,4,99,,"ギミック紹介
+1.主動的に攻撃を行う。
+2.戦闘無効効果を持つ。
+
+スキル - ひょうたん酒［CT 1］
+ランダムな二つのマスにひょうたんを召喚する。
+
+パッシブスキル - 余韻の甘み
+キャラがひょうたんを拾うたびに攻撃力+1。"
+M0036,Mad_Scientist_Sprite.png,M0036_info.png,ドクター・マサオシュタイン,天王寺雅央,1,,普通,0,0,9,,"ギミック紹介
+1.自ら攻撃を仕掛けません。
+2.自身が深層改造を持つ場合、戦闘と選択に対する無効化効果を得る。
+3.マスに毒肥をばら撒く、毒肥に止まったキャラクターは2ダメージを受けます、そのキャラクターが「改造」を持つ場合、毒肥のダメージを受けず、さらにHPを2回復する。
+
+スキル - 身体改造［CT 3］
+最も近い改造されていないキャラクターに改造+3を付与し、自身を中心とした周囲2マスに毒肥をばら撒く。
+
+パッシブスキル - 深層改造
+最初から3スタック持つ、スタック数が0になるまで攻撃対象、選択対象にされません、さらに受けるダメージが0になる。人工生命体が撃破された時、1スタック失う。"
+M0036,Mad_Scientist_Sprite.png,M0036_info.png,ドクター・マサオシュタイン,天王寺雅央,1,,困難,0,0,9,,"ギミック紹介
+1.自ら攻撃を仕掛けません。
+2.自身が深層改造を持つ場合、戦闘と選択に対する無効化効果を得る。
+3.マスに毒肥をばら撒く、毒肥に止まったキャラクターは2ダメージを受けます、そのキャラクターが「改造」を持つ場合、毒肥のダメージを受けず、さらにHPを2回復する。
+
+スキル - 身体改造［CT 3］
+最も近い改造されていないキャラクターに改造+3を付与し、自身を中心とした周囲2マスに毒肥をばら撒く。
+
+パッシブスキル - 深層改造
+最初から3スタック持つ、スタック数が0になるまで攻撃対象、選択対象にされません、さらに受けるダメージが0になる。人工生命体が撃破された時、1スタック失う。"
+M0036,Mad_Scientist_Sprite.png,M0036_info.png,ドクター・マサオシュタイン,天王寺雅央,1,,悪夢,0,0,9,,"ギミック紹介
+1.自ら攻撃を仕掛けません。
+2.自身が深層改造を持つ場合、戦闘と選択に対する無効化効果を得る。
+3.マスに毒肥をばら撒く、毒肥に止まったキャラクターは2ダメージを受けます、そのキャラクターが「改造」を持つ場合、毒肥のダメージを受けず、さらにHPを2回復する。
+
+スキル - 身体改造［CT 3］
+最も近い改造されていないキャラクターに改造+3を付与し、自身を中心とした周囲2マスに毒肥をばら撒く。
+
+パッシブスキル - 深層改造
+最初から3スタック持つ、スタック数が0になるまで攻撃対象、選択対象にされません、さらに受けるダメージが0になる。人工生命体が撃破された時、1スタック失う。"
+M0036,Mad_Scientist_Sprite.png,M0036_info.png,ドクター・マサオシュタイン,天王寺雅央,1,,狂気,0,0,9,,"ギミック紹介
+1.自ら攻撃を仕掛けません。
+2.自身が深層改造を持つ場合、戦闘と選択に対する無効化効果を得る。
+3.マスに毒肥をばら撒く、毒肥に止まったキャラクターは2ダメージを受けます、そのキャラクターが「改造」を持つ場合、毒肥のダメージを受けず、さらにHPを2回復する。
+
+スキル - 身体改造［CT 3］
+最も近い改造されていないキャラクターに改造+3を付与し、自身を中心とした周囲2マスに毒肥をばら撒く。
+
+パッシブスキル - 深層改造
+最初から3スタック持つ、スタック数が0になるまで攻撃対象、選択対象にされません、さらに受けるダメージが0になる。人工生命体が撃破された時、1スタック失う。"
+M0037,Jack-in-the-Monkey_Sprite.png,M0037_info.png,さるのびっくり箱,さるのびっくり箱,,,普通,4,0,8,6,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後、反撃出来ません。
+
+パッシブスキル - びっくりストライク
+改造を持つキャラクターを攻撃する時、攻撃力-2。"
+M0037,Jack-in-the-Monkey_Sprite.png,M0037_info.png,さるのびっくり箱,さるのびっくり箱,,,困難,4,0,9,6,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後、反撃出来ません。
+
+パッシブスキル - びっくりストライク
+改造を持つキャラクターを攻撃する時、攻撃力-2。"
+M0037,Jack-in-the-Monkey_Sprite.png,M0037_info.png,さるのびっくり箱,さるのびっくり箱,,,悪夢,5,0,10,6,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後、反撃出来ません。
+
+パッシブスキル - びっくりストライク
+改造を持つキャラクターを攻撃する時、攻撃力-2。"
+M0037,Jack-in-the-Monkey_Sprite.png,M0037_info.png,さるのびっくり箱,さるのびっくり箱,,,狂気,5,0,11,6,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後、反撃出来ません。
+
+パッシブスキル - びっくりストライク
+改造を持つキャラクターを攻撃する時、攻撃力-2。"
+M0038,Buzzsaw_Monkey_Assistant_Sprite.png,M0038_info.png,さるの助手君,さるの助手君,,1,普通,3,1,16,8,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 名医助手君［CT 3］
+6マス以内の改造されていないキャラクター1名のHPを1回復し、さらに改造+3を付与する。
+
+パッシブスキル - よちよちのお飴ちゃん
+倒された時、撃破者にランダムな怪奇飴カードを1枚与える。"
+M0038,Buzzsaw_Monkey_Assistant_Sprite.png,M0038_info.png,さるの助手君,さるの助手君,,1,困難,3,1,18,8,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 名医助手君［CT 3］
+6マス以内の改造されていないキャラクター1名のHPを1回復し、さらに改造+3を付与する。
+
+パッシブスキル - よちよちのお飴ちゃん
+倒された時、撃破者にランダムな怪奇飴カードを1枚与える。"
+M0038,Buzzsaw_Monkey_Assistant_Sprite.png,M0038_info.png,さるの助手君,さるの助手君,,1,悪夢,4,1,20,8,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 名医助手君［CT 3］
+6マス以内の改造されていないキャラクター1名のHPを1回復し、さらに改造+3を付与する。
+
+パッシブスキル - よちよちのお飴ちゃん
+倒された時、撃破者にランダムな怪奇飴カードを1枚与える。"
+M0038,Buzzsaw_Monkey_Assistant_Sprite.png,M0038_info.png,さるの助手君,さるの助手君,,1,狂気,4,2,22,8,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 名医助手君［CT 3］
+6マス以内の改造されていないキャラクター1名のHPを1回復し、さらに改造+3を付与する。
+
+パッシブスキル - よちよちのお飴ちゃん
+倒された時、撃破者にランダムな怪奇飴カードを1枚与える。"
+M0039,Mad_Ape_Sprite.png,M0039_info.png,ゴリフランケンちゃん,ゴリフランケンちゃん,,1,普通,4,2,22,8,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+パッシブスキル - 不穏な改造パワー
+改造を持つキャラクターを攻撃する時、攻撃力+3、命中後、自身のHPを3回復する。"
+M0039,Mad_Ape_Sprite.png,M0039_info.png,ゴリフランケンちゃん,ゴリフランケンちゃん,,1,困難,4,2,24,8,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+パッシブスキル - 不穏な改造パワー
+改造を持つキャラクターを攻撃する時、攻撃力+3、命中後、自身のHPを3回復する。"
+M0039,Mad_Ape_Sprite.png,M0039_info.png,ゴリフランケンちゃん,ゴリフランケンちゃん,,1,悪夢,5,3,26,8,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+パッシブスキル - 不穏な改造パワー
+改造を持つキャラクターを攻撃する時、攻撃力+3、命中後、自身のHPを3回復する。"
+M0039,Mad_Ape_Sprite.png,M0039_info.png,ゴリフランケンちゃん,ゴリフランケンちゃん,,1,狂気,5,3,27,8,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+パッシブスキル - 不穏な改造パワー
+改造を持つキャラクターを攻撃する時、攻撃力+3、命中後、自身のHPを3回復する。"
+M0040,Candy_Pinata_Sprite.png,M0040_info.png,キャンディビニャータ,キャンディビニャータ,,1,普通,3,0,8,5,"ギミック紹介
+1.自ら攻撃を仕掛けません。
+2.攻撃を受けた時、回避行動を行い、その後反撃する。
+
+スキル - 強制改造［CT 99］
+自身に改造+4を付与する。
+
+パッシブスキル - 特殊装備
+移動ダイスと回避ダイスは常に4になる。移動時、通過するキャラクターに2ダメージを与える、撃破者にランダムな怪奇飴カードを1枚与える。"
+M0040,Candy_Pinata_Sprite.png,M0040_info.png,キャンディビニャータ,キャンディビニャータ,,1,困難,4,0,9,5,"ギミック紹介
+1.自ら攻撃を仕掛けません。
+2.攻撃を受けた時、回避行動を行い、その後反撃する。
+
+スキル - 強制改造［CT 99］
+自身に改造+4を付与する。
+
+パッシブスキル - 特殊装備
+移動ダイスと回避ダイスは常に4になる。移動時、通過するキャラクターに2ダメージを与える、撃破者にランダムな怪奇飴カードを1枚与える。"
+M0040,Candy_Pinata_Sprite.png,M0040_info.png,キャンディビニャータ,キャンディビニャータ,,1,悪夢,5,0,9,5,"ギミック紹介
+1.自ら攻撃を仕掛けません。
+2.攻撃を受けた時、回避行動を行い、その後反撃する。
+
+スキル - 強制改造［CT 99］
+自身に改造+4を付与する。
+
+パッシブスキル - 特殊装備
+移動ダイスと回避ダイスは常に4になる。移動時、通過するキャラクターに2ダメージを与える、撃破者にランダムな怪奇飴カードを1枚与える。"
+M0040,Candy_Pinata_Sprite.png,M0040_info.png,キャンディビニャータ,キャンディビニャータ,,1,狂気,5,0,10,5,"ギミック紹介
+1.自ら攻撃を仕掛けません。
+2.攻撃を受けた時、回避行動を行い、その後反撃する。
+
+スキル - 強制改造［CT 99］
+自身に改造+4を付与する。
+
+パッシブスキル - 特殊装備
+移動ダイスと回避ダイスは常に4になる。移動時、通過するキャラクターに2ダメージを与える、撃破者にランダムな怪奇飴カードを1枚与える。"
+M0041,Synthetic_Cataclysm_Sprite.png,M0041_info.png,人工生命体―天崩,人工生命体―天崩,,,普通,4,1,26,8,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後、反撃出来ません。
+3.倒された後、Dr.マサオシュタインによって復活し、より強くなる。
+
+パッシブスキル - つまり、自己防衛
+倒された後、Dr.マサオシュタインの深層改造スタック-1。"
+M0041,Synthetic_Cataclysm_Sprite.png,M0041_info.png,人工生命体―天崩,人工生命体―天崩,,,困難,4,1,28,8,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後、反撃出来ません。
+3.倒された後、Dr.マサオシュタインによって復活し、より強くなる。
+
+パッシブスキル - つまり、自己防衛
+倒された後、Dr.マサオシュタインの深層改造スタック-1。"
+M0041,Synthetic_Cataclysm_Sprite.png,M0041_info.png,人工生命体―天崩,人工生命体―天崩,,,悪夢,5,2,30,8,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後、反撃出来ません。
+3.倒された後、Dr.マサオシュタインによって復活し、より強くなる。
+
+パッシブスキル - つまり、自己防衛
+倒された後、Dr.マサオシュタインの深層改造スタック-1。"
+M0041,Synthetic_Cataclysm_Sprite.png,M0041_info.png,人工生命体―天崩,人工生命体―天崩,,,狂気,6,2,33,8,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後、反撃出来ません。
+3.倒された後、Dr.マサオシュタインによって復活し、より強くなる。
+
+パッシブスキル - つまり、自己防衛
+倒された後、Dr.マサオシュタインの深層改造スタック-1。"
+M0042,Synthetic_Omen_Sprite.png,M0042_info_a.png,人工生命体―厄兆,人工生命体―厄兆,,1,普通,4,2,26,8,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+3.倒された後、Dr.マサオシュタインによって復活し、より強くなる。
+
+パッシブスキル - つまり、自己防衛
+倒された後、Dr.マサオシュタインの深層改造スタック-1。"
+M0042,Synthetic_Omen_Sprite.png,M0042_info_b.png,人工生命体―厄兆,人工生命体―厄兆,,1,困難,4,2,29,8,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+3.倒された後、Dr.マサオシュタインによって復活し、より強くなる。
+
+スキル - 連鎖反応［CT 2］
+改造を持つプレイヤー全員に2ダメージを与え、与えたダメージの総量と同じ数のHPを回復する。
+
+パッシブスキル - つまり、自己防衛
+倒された後、Dr.マサオシュタインの深層改造スタック-1。"
+M0042,Synthetic_Omen_Sprite.png,M0042_info_b.png,人工生命体―厄兆,人工生命体―厄兆,,1,悪夢,5,3,30,8,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+3.倒された後、Dr.マサオシュタインによって復活し、より強くなる。
+
+スキル - 連鎖反応［CT 2］
+改造を持つプレイヤー全員に2ダメージを与え、与えたダメージの総量と同じ数のHPを回復する。
+
+パッシブスキル - つまり、自己防衛
+倒された後、Dr.マサオシュタインの深層改造スタック-1。"
+M0042,Synthetic_Omen_Sprite.png,M0042_info_b.png,人工生命体―厄兆,人工生命体―厄兆,,1,狂気,6,3,33,8,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+3.倒された後、Dr.マサオシュタインによって復活し、より強くなる。
+
+スキル - 連鎖反応［CT 2］
+改造を持つプレイヤー全員に2ダメージを与え、与えたダメージの総量と同じ数のHPを回復する。
+
+パッシブスキル - つまり、自己防衛
+倒された後、Dr.マサオシュタインの深層改造スタック-1。"
+M0043,Synthetic_Chaos_Sprite.png,M0043_info.png,人工生命体―混乱,人工生命体―混乱,,1,普通,5,3,38,8,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 連鎖反応［CT 2］
+改造を持つプレイヤー全員に2ダメージを与え、与えたダメージの総量と同じ数のHPを回復する。
+
+パッシブスキル - つまり、自己防衛
+倒された後、Dr.マサオシュタインの深層改造スタック-1。"
+M0043,Synthetic_Chaos_Sprite.png,M0043_info.png,人工生命体―混乱,人工生命体―混乱,,1,困難,6,3,42,8,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 連鎖反応［CT 2］
+改造を持つプレイヤー全員に2ダメージを与え、与えたダメージの総量と同じ数のHPを回復する。
+
+パッシブスキル - つまり、自己防衛
+倒された後、Dr.マサオシュタインの深層改造スタック-1。"
+M0043,Synthetic_Chaos_Sprite.png,M0043_info.png,人工生命体―混乱,人工生命体―混乱,,1,悪夢,7,4,45,8,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 連鎖反応［CT 2］
+改造を持つプレイヤー全員に2ダメージを与え、与えたダメージの総量と同じ数のHPを回復する。
+
+パッシブスキル - つまり、自己防衛
+倒された後、Dr.マサオシュタインの深層改造スタック-1。"
+M0043,Synthetic_Chaos_Sprite.png,M0043_info.png,人工生命体―混乱,人工生命体―混乱,,1,狂気,7,5,50,8,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 連鎖反応［CT 2］
+改造を持つプレイヤー全員に2ダメージを与え、与えたダメージの総量と同じ数のHPを回復する。
+
+パッシブスキル - つまり、自己防衛
+倒された後、Dr.マサオシュタインの深層改造スタック-1。"
+M0044,Rampant_Phoenix_Sprite.png,M0044_info_a.png,ダーク・フェニックス,ダーク・フェニックス,1,1,普通,0,0,150,,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 灼翼［CT 2］
+6マスより外のキャラの手札1枚を残り火の羽に変更する。全てのキャラクターに鴛鴦連理を付与、3ターン継続。
+
+パッシブスキル - 浴火
+ターン開始時、5マス以内のキャラクターにジェントル・フレイムを1スタック付与する。その後、自身のHPを10%失う。
+自身がHPを30失う度に、攻撃力+1。自身のHPが50%未満の場合、移動力+2、攻撃力+2。"
+M0044,Rampant_Phoenix_Sprite.png,M0044_info_a.png,ダーク・フェニックス,ダーク・フェニックス,1,1,困難,1,1,180,,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 灼翼［CT 2］
+6マスより外のキャラの手札1枚を残り火の羽に変更する。全てのキャラクターに鴛鴦連理を付与、3ターン継続。
+
+パッシブスキル - 浴火
+ターン開始時、5マス以内のキャラクターにジェントル・フレイムを1スタック付与する。その後、自身のHPを10%失う。
+自身がHPを30失う度に、攻撃力+1。自身のHPが50%未満の場合、移動力+2、攻撃力+2。"
+M0044,Rampant_Phoenix_Sprite.png,M0044_info_b.png,ダーク・フェニックス,ダーク・フェニックス,1,1,悪夢,1,1,240,,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 灼翼［CT 2］
+6マスより外のキャラの手札1枚を残り火の羽に変更する。全てのキャラクターに鴛鴦連理を付与、3ターン継続。
+
+パッシブスキル - 浴火
+ターン開始時、5マス以内のキャラクターにジェントル・フレイムを1スタック付与する。その後、自身のHPを10%失う。
+自身がHPを30失う度に、攻撃力+1。自身のHPが50%未満の場合、移動力+2、攻撃力+2。
+
+パッシブスキル - 残り火
+最初から6スタックの残り火を持つ。キャラクターが彩りの羽を使用するごとに、残り火-1。"
+M0044,Rampant_Phoenix_Sprite.png,M0044_info_b.png,ダーク・フェニックス,ダーク・フェニックス,1,1,狂気,2,1,270,,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 灼翼［CT 2］
+6マスより外のキャラの手札1枚を残り火の羽に変更する。全てのキャラクターに鴛鴦連理を付与、3ターン継続。
+
+パッシブスキル - 浴火
+ターン開始時、5マス以内のキャラクターにジェントル・フレイムを1スタック付与する。その後、自身のHPを10%失う。
+自身がHPを30失う度に、攻撃力+1。自身のHPが50%未満の場合、移動力+2、攻撃力+2。
+
+パッシブスキル - 残り火
+最初から6スタックの残り火を持つ。キャラクターが彩りの羽を使用するごとに、残り火-1。"
+M0045,Fen_(Lovebird_Conscious)_Sprite.png,M0045_info_a.png,ヒメ（孔雀）,ヒメ（孔雀）,1,1,普通,4,3,55,,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+パッシブスキル - 焼燎
+攻撃命中時、対象にジェントル・フレイムを2スタック付与する。"
+M0045,Fen_(Lovebird_Conscious)_Sprite.png,M0045_info_b.png,ヒメ（孔雀）,ヒメ（孔雀）,1,1,困難,5,4,70,,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 百鳥の試練［CT 2］
+5マス以内の全キャラクターにジェントル・フレイムを2スタック付与する。
+
+パッシブスキル - 焼燎
+攻撃命中時、対象にジェントル・フレイムを2スタック付与する。"
+M0045,Fen_(Lovebird_Conscious)_Sprite.png,M0045_info_b.png,ヒメ（孔雀）,ヒメ（孔雀）,1,1,悪夢,5,4,88,,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 百鳥の試練［CT 2］
+5マス以内の全キャラクターにジェントル・フレイムを2スタック付与する。
+
+パッシブスキル - 焼燎
+攻撃命中時、対象にジェントル・フレイムを2スタック付与する。"
+M0045,Fen_(Lovebird_Conscious)_Sprite.png,M0045_info_b.png,ヒメ（孔雀）,ヒメ（孔雀）,1,1,狂気,6,5,99,,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 百鳥の試練［CT 2］
+5マス以内の全キャラクターにジェントル・フレイムを2スタック付与する。
+
+パッシブスキル - 焼燎
+攻撃命中時、対象にジェントル・フレイムを2スタック付与する。"
+M0046,Fen_(Lovebird_Conscious)_Sprite.png,M0046_info.png,ヒメ（鷺鷲）,ヒメ（鷺鷲）,1,1,普通,3,2,50,,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 連理の試練［CT 2］
+ランダムな鴛鴦連理を持っていないキャラクター2人に鴛鴦連理を付与、3ターン継続。
+
+パッシブスキル - 静寂の孤影
+ターン開始時、近く4マス以内に他のキャラクターがいない場合、移動力+2、防御力+2、1ターン継続。
+攻撃命中後、対象に鴛鴦連理を付与、3ターン継続。鴛鴦連理を持つ対象に攻撃する時、攻撃力+3。"
+M0046,Fen_(Lovebird_Conscious)_Sprite.png,M0046_info.png,ヒメ（鷺鷲）,ヒメ（鷺鷲）,1,1,困難,3,3,65,,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 連理の試練［CT 2］
+ランダムな鴛鴦連理を持っていないキャラクター2人に鴛鴦連理を付与、3ターン継続。
+
+パッシブスキル - 静寂の孤影
+ターン開始時、近く4マス以内に他のキャラクターがいない場合、移動力+2、防御力+2、1ターン継続。
+攻撃命中後、対象に鴛鴦連理を付与、3ターン継続。鴛鴦連理を持つ対象に攻撃する時、攻撃力+3。"
+M0046,Fen_(Lovebird_Conscious)_Sprite.png,M0046_info.png,ヒメ（鷺鷲）,ヒメ（鷺鷲）,1,1,悪夢,4,4,80,,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 連理の試練［CT 2］
+ランダムな鴛鴦連理を持っていないキャラクター2人に鴛鴦連理を付与、3ターン継続。
+
+パッシブスキル - 静寂の孤影
+ターン開始時、近く4マス以内に他のキャラクターがいない場合、移動力+2、防御力+2、1ターン継続。
+攻撃命中後、対象に鴛鴦連理を付与、3ターン継続。鴛鴦連理を持つ対象に攻撃する時、攻撃力+3。"
+M0046,Fen_(Lovebird_Conscious)_Sprite.png,M0046_info.png,ヒメ（鷺鷲）,ヒメ（鷺鷲）,1,1,狂気,5,5,90,,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 連理の試練［CT 2］
+ランダムな鴛鴦連理を持っていないキャラクター2人に鴛鴦連理を付与、3ターン継続。
+
+パッシブスキル - 静寂の孤影
+ターン開始時、近く4マス以内に他のキャラクターがいない場合、移動力+2、防御力+2、1ターン継続。
+攻撃命中後、対象に鴛鴦連理を付与、3ターン継続。鴛鴦連理を持つ対象に攻撃する時、攻撃力+3。"
+M0047,Bronze_Lovebird_Chalice_Sprite.png,M0047_info.png,オシドリ係,オシドリの盃,,1,普通,3,2,20,12,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 比翼連理［CT 2］
+一番近くの鴛鴦連理を持たないキャラクター1人に鴛鴦連理を付与、3ターン継続。
+
+パッシブスキル - 連理の絆
+鴛鴦連理を持つキャラクターと交戦する時、攻撃力+2、防御力+2。
+場に鴛鴦連理を持つキャラクターがいる場合、移動方向を自由に選択し、一番近くにいる鴛鴦連理を持つキャラクターに向けて移動する。
+
+パッシブスキル - 遺されし彩りの羽
+倒されたとき、撃破者に彩りの羽を1枚与える。"
+M0047,Bronze_Lovebird_Chalice_Sprite.png,M0047_info.png,オシドリ係,オシドリの盃,,1,困難,4,2,22,12,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 比翼連理［CT 2］
+一番近くの鴛鴦連理を持たないキャラクター1人に鴛鴦連理を付与、3ターン継続。
+
+パッシブスキル - 連理の絆
+鴛鴦連理を持つキャラクターと交戦する時、攻撃力+2、防御力+2。
+場に鴛鴦連理を持つキャラクターがいる場合、移動方向を自由に選択し、一番近くにいる鴛鴦連理を持つキャラクターに向けて移動する。
+
+パッシブスキル - 遺されし彩りの羽
+倒されたとき、撃破者に彩りの羽を1枚与える。"
+M0047,Bronze_Lovebird_Chalice_Sprite.png,M0047_info.png,オシドリ係,オシドリの盃,,1,悪夢,4,3,26,12,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 比翼連理［CT 2］
+一番近くの鴛鴦連理を持たないキャラクター1人に鴛鴦連理を付与、3ターン継続。
+
+パッシブスキル - 連理の絆
+鴛鴦連理を持つキャラクターと交戦する時、攻撃力+2、防御力+2。
+場に鴛鴦連理を持つキャラクターがいる場合、移動方向を自由に選択し、一番近くにいる鴛鴦連理を持つキャラクターに向けて移動する。
+
+パッシブスキル - 遺されし彩りの羽
+倒されたとき、撃破者に彩りの羽を1枚与える。"
+M0047,Bronze_Lovebird_Chalice_Sprite.png,M0047_info.png,オシドリ係,オシドリの盃,,1,狂気,5,3,28,12,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 比翼連理［CT 2］
+一番近くの鴛鴦連理を持たないキャラクター1人に鴛鴦連理を付与、3ターン継続。
+
+パッシブスキル - 連理の絆
+鴛鴦連理を持つキャラクターと交戦する時、攻撃力+2、防御力+2。
+場に鴛鴦連理を持つキャラクターがいる場合、移動方向を自由に選択し、一番近くにいる鴛鴦連理を持つキャラクターに向けて移動する。
+
+パッシブスキル - 遺されし彩りの羽
+倒されたとき、撃破者に彩りの羽を1枚与える。"
+M0048,Bronze_Peacock_Chalice_Sprite.png,M0048_info.png,クジャク係,クジャクの盃,,1,普通,5,2,40,18,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 闘艶［CT 3］
+場にいるHPが最も高いキャラ1人と自身に孔雀の羽ばたきを付与する。
+
+パッシブスキル - 百鳥の舞
+ターン終了時、HPを2回復する。
+
+パッシブスキル - 遺されし彩りの羽
+倒されたとき、撃破者に彩りの羽を1枚与える。"
+M0048,Bronze_Peacock_Chalice_Sprite.png,M0048_info.png,クジャク係,クジャクの盃,,1,困難,5,3,45,18,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 闘艶［CT 3］
+場にいるHPが最も高いキャラ1人と自身に孔雀の羽ばたきを付与する。
+
+パッシブスキル - 百鳥の舞
+ターン終了時、HPを2回復する。
+
+パッシブスキル - 遺されし彩りの羽
+倒されたとき、撃破者に彩りの羽を1枚与える。"
+M0048,Bronze_Peacock_Chalice_Sprite.png,M0048_info.png,クジャク係,クジャクの盃,,1,悪夢,6,4,50,18,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 闘艶［CT 3］
+場にいるHPが最も高いキャラ1人と自身に孔雀の羽ばたきを付与する。
+
+パッシブスキル - 百鳥の舞
+ターン終了時、HPを2回復する。
+
+パッシブスキル - 遺されし彩りの羽
+倒されたとき、撃破者に彩りの羽を1枚与える。"
+M0048,Bronze_Peacock_Chalice_Sprite.png,M0048_info.png,クジャク係,クジャクの盃,,1,狂気,7,4,55,18,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 闘艶［CT 3］
+場にいるHPが最も高いキャラ1人と自身に孔雀の羽ばたきを付与する。
+
+パッシブスキル - 百鳥の舞
+ターン終了時、HPを2回復する。
+
+パッシブスキル - 遺されし彩りの羽
+倒されたとき、撃破者に彩りの羽を1枚与える。"
+M0049,Bronze_Crane_Chalice_Sprite.png,M0049_info_a.png,センズル係,ツルの盃,,1,普通,4,2,20,12,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+パッシブスキル - 遺されし彩りの羽
+倒されたとき、撃破者に彩りの羽を1枚与える。"
+M0049,Bronze_Crane_Chalice_Sprite.png,M0049_info_a.png,センズル係,ツルの盃,,1,困難,5,2,22,12,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+パッシブスキル - 遺されし彩りの羽
+倒されたとき、撃破者に彩りの羽を1枚与える。"
+M0049,Bronze_Crane_Chalice_Sprite.png,M0049_info_b.png,センズル係,ツルの盃,,1,悪夢,5,2,24,12,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 神罰［CT 2］
+3マス以内の全キャラクターに2ダメージを与え、スタート位置にワープさせる。
+
+パッシブスキル - 遺されし彩りの羽
+倒されたとき、撃破者に彩りの羽を1枚与える。"
+M0049,Bronze_Crane_Chalice_Sprite.png,M0049_info_b.png,センズル係,ツルの盃,,1,狂気,6,3,26,12,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後は反撃する。
+
+スキル - 神罰［CT 2］
+3マス以内の全キャラクターに2ダメージを与え、スタート位置にワープさせる。
+
+パッシブスキル - 遺されし彩りの羽
+倒されたとき、撃破者に彩りの羽を1枚与える。"
+M0050,Poultry_Waiter_Sprite.png,M0050_info.png,ニワトリ係,ニワトリ係,,,普通,4,2,18,10,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後、反撃出来ません。
+
+パッシブスキル - 遺されし彩りの羽
+倒されたとき、撃破者に彩りの羽を1枚与える。"
+M0050,Poultry_Waiter_Sprite.png,M0050_info.png,ニワトリ係,ニワトリ係,,,困難,4,2,20,10,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後、反撃出来ません。
+
+パッシブスキル - 遺されし彩りの羽
+倒されたとき、撃破者に彩りの羽を1枚与える。"
+M0050,Poultry_Waiter_Sprite.png,M0050_info.png,ニワトリ係,ニワトリ係,,,悪夢,5,2,20,10,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後、反撃出来ません。
+
+パッシブスキル - 遺されし彩りの羽
+倒されたとき、撃破者に彩りの羽を1枚与える。"
+M0050,Poultry_Waiter_Sprite.png,M0050_info.png,ニワトリ係,ニワトリ係,,,狂気,5,2,23,10,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後、反撃出来ません。
+
+パッシブスキル - 遺されし彩りの羽
+倒されたとき、撃破者に彩りの羽を1枚与える。"
+M0051,Receptionist_Swallow_Sprite.png,M0051_info_a.png,お出迎え係,お出迎え係,,,普通,3,1,10,7,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後、反撃出来ません。"
+M0051,Receptionist_Swallow_Sprite.png,M0051_info_b.png,お出迎え係,お出迎え係,,,困難,4,1,11,7,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後、反撃出来ません。
+
+スキル - 疾走［CT 3］
+5マス以内の全モンスターに移動力+2を付与、2ターン継続。"
+M0051,Receptionist_Swallow_Sprite.png,M0051_info_b.png,お出迎え係,お出迎え係,,,悪夢,4,2,12,7,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後、反撃出来ません。
+
+スキル - 疾走［CT 3］
+5マス以内の全モンスターに移動力+2を付与、2ターン継続。"
+M0051,Receptionist_Swallow_Sprite.png,M0051_info_b.png,お出迎え係,お出迎え係,,,狂気,5,2,13,7,"ギミック紹介
+1.フィールドにいるプレイヤーを追いかけます。
+2.攻撃を受けた後、反撃出来ません。
+
+スキル - 疾走［CT 3］
+5マス以内の全モンスターに移動力+2を付与、2ターン継続。"
+M0101,Tennoji_Masao_Academy_Security_Sprite.png,,学院警備官,天王寺雅央,,1,普通,2,1,88,,
+M0101,Tennoji_Masao_Academy_Security_Sprite.png,,学院警備官,天王寺雅央,,1,困難,2,1,99,,
+M0101,Tennoji_Masao_Academy_Security_Sprite.png,,学院警備官,天王寺雅央,,1,悪夢,3,2,110,,
+M0101,Tennoji_Masao_Academy_Security_Sprite.png,,学院警備官,天王寺雅央,,1,狂気,4,2,120,,
+M0102,Tennoji_Masao_Academy_Sprite.png,,学院長代理,天王寺雅央,,1,普通,2,2,99,,
+M0102,Tennoji_Masao_Academy_Sprite.png,,学院長代理,天王寺雅央,,1,困難,3,2,111,,
+M0102,Tennoji_Masao_Academy_Sprite.png,,学院長代理,天王寺雅央,,1,悪夢,3,2,130,,
+M0102,Tennoji_Masao_Academy_Sprite.png,,学院長代理,天王寺雅央,,1,狂気,4,2,130,,
+M0103,Tennoji_Masao_Academy_Security_Sprite.png,,学院警備官,天王寺雅央,,1,普通,2,1,30,18,
+M0103,Tennoji_Masao_Academy_Security_Sprite.png,,学院警備官,天王寺雅央,,1,困難,2,1,35,18,
+M0103,Tennoji_Masao_Academy_Security_Sprite.png,,学院警備官,天王寺雅央,,1,悪夢,3,2,40,18,
+M0103,Tennoji_Masao_Academy_Security_Sprite.png,,学院警備官,天王寺雅央,,1,狂気,4,2,45,18,
+M0104,Referee_Amy_Sprite.png,,審判長エイミー,審判長エイミー,,1,普通,5,1,24,14,
+M0104,Referee_Amy_Sprite.png,,審判長エイミー,審判長エイミー,,1,困難,5,1,27,14,
+M0104,Referee_Amy_Sprite.png,,審判長エイミー,審判長エイミー,,1,悪夢,6,1,30,14,
+M0104,Referee_Amy_Sprite.png,,審判長エイミー,審判長エイミー,,1,狂気,6,2,33,14,
+M0105,Treasure_Barrel_Sprite.png,,トレジャーダル,トレジャーダル,,,普通,0,0,4,10,
+M0105,Treasure_Barrel_Sprite.png,,トレジャーダル,トレジャーダル,,,困難,0,0,4,10,
+M0105,Treasure_Barrel_Sprite.png,,トレジャーダル,トレジャーダル,,,悪夢,0,0,4,10,
+M0105,Treasure_Barrel_Sprite.png,,トレジャーダル,トレジャーダル,,,狂気,0,0,4,10,
+M0106,Amakawa_Mamushi_Sprite.png,,天川真夢梓,天川真夢梓,1,1,普通,4,1,88,,
+M0106,Amakawa_Mamushi_Sprite.png,,天川真夢梓,天川真夢梓,1,1,困難,4,1,99,,
+M0106,Amakawa_Mamushi_Sprite.png,,天川真夢梓,天川真夢梓,1,1,悪夢,5,2,111,,
+M0106,Amakawa_Mamushi_Sprite.png,,天川真夢梓,天川真夢梓,1,1,狂気,6,2,126,,
+M0107,Amakawa_Souri_Sprite.png,,天川蒼鯉,天川蒼鯉,1,1,普通,1,1,80,,
+M0107,Amakawa_Souri_Sprite.png,,天川蒼鯉,天川蒼鯉,1,1,困難,1,1,90,,
+M0107,Amakawa_Souri_Sprite.png,,天川蒼鯉,天川蒼鯉,1,1,悪夢,2,2,100,,
+M0107,Amakawa_Souri_Sprite.png,,天川蒼鯉,天川蒼鯉,1,1,狂気,3,3,111,,
+M0108,Amakawa_Souri_Sprite.png,,天川蒼鯉,天川蒼鯉,1,1,普通,1,1,30,18,
+M0108,Amakawa_Souri_Sprite.png,,天川蒼鯉,天川蒼鯉,1,1,困難,1,1,35,18,
+M0108,Amakawa_Souri_Sprite.png,,天川蒼鯉,天川蒼鯉,1,1,悪夢,2,2,40,18,
+M0108,Amakawa_Souri_Sprite.png,,天川蒼鯉,天川蒼鯉,1,1,狂気,3,3,45,18,
+M0109,High-Tech_Tycoon_Gawu_Sprite.png,,デックジャイアント ガオー,天王寺雅央,1,1,普通,3,1,128,,
+M0109,High-Tech_Tycoon_Gawu_Sprite.png,,デックジャイアント ガオー,天王寺雅央,1,1,困難,3,1,138,,
+M0109,High-Tech_Tycoon_Gawu_Sprite.png,,デックジャイアント ガオー,天王寺雅央,1,1,悪夢,4,1,148,,
+M0109,High-Tech_Tycoon_Gawu_Sprite.png,,デックジャイアント ガオー,天王寺雅央,1,1,狂気,4,1,158,,
+M0110,Mindscape_Airship_Sprite.png,,マインドエアシップ,マインドエアシップ,,1,普通,4,2,15,14,
+M0110,Mindscape_Airship_Sprite.png,,マインドエアシップ,マインドエアシップ,,1,困難,4,2,17,14,
+M0110,Mindscape_Airship_Sprite.png,,マインドエアシップ,マインドエアシップ,,1,悪夢,5,2,18,14,
+M0110,Mindscape_Airship_Sprite.png,,マインドエアシップ,マインドエアシップ,,1,狂気,5,2,20,14,
+M0111,Mechanical_Monitor_Sprite.png,,メカ監視員,メカ監視員,,,普通,2,2,14,9,
+M0111,Mechanical_Monitor_Sprite.png,,メカ監視員,メカ監視員,,,困難,3,2,16,9,
+M0111,Mechanical_Monitor_Sprite.png,,メカ監視員,メカ監視員,,,悪夢,3,3,18,9,
+M0111,Mechanical_Monitor_Sprite.png,,メカ監視員,メカ監視員,,,狂気,4,3,20,9,
+M0112,Mechanical_Quarterback_Sprite.png,,メカウォーターバック,メカウォーターバック,,1,普通,5,1,18,12,
+M0112,Mechanical_Quarterback_Sprite.png,,メカウォーターバック,メカウォーターバック,,1,困難,5,1,20,12,
+M0112,Mechanical_Quarterback_Sprite.png,,メカウォーターバック,メカウォーターバック,,1,悪夢,5,2,22,12,
+M0112,Mechanical_Quarterback_Sprite.png,,メカウォーターバック,メカウォーターバック,,1,狂気,6,2,24,12,
+M0113,Mechanical_Javelin_Thrower_Sprite.png,,メカピッチャー,メカピッチャー,,,普通,3,0,8,7,
+M0113,Mechanical_Javelin_Thrower_Sprite.png,,メカピッチャー,メカピッチャー,,,困難,4,0,9,7,
+M0113,Mechanical_Javelin_Thrower_Sprite.png,,メカピッチャー,メカピッチャー,,,悪夢,4,1,10,7,
+M0113,Mechanical_Javelin_Thrower_Sprite.png,,メカピッチャー,メカピッチャー,,,狂気,4,1,11,7,
+M0114,Shark_Pirate_Sprite.png,,メカ海賊サメ,メカ海賊サメ,,1,普通,4,1,10,7,
+M0114,Shark_Pirate_Sprite.png,,メカ海賊サメ,メカ海賊サメ,,1,困難,4,1,11,7,
+M0114,Shark_Pirate_Sprite.png,,メカ海賊サメ,メカ海賊サメ,,1,悪夢,4,1,11,7,
+M0114,Shark_Pirate_Sprite.png,,メカ海賊サメ,メカ海賊サメ,,1,狂気,4,1,11,7,
+M0115,Warden_Sprite.png,M0115_info.png,ゴクチョー【真相】,ゴクチョー,1,1,普通,3,10,229,,"ギミック紹介
+1.主動攻撃する。
+2.反撃できる。
+
+スキル - 全員有罪［CT 3］
+全てのキャラクターに罪証を1スタック付与する。
+
+パッシブスキル - 罪人審判
+攻撃時、対象が罪証を1スタック保有するごとに、攻撃力+1。
+
+パッシブスキル - 真相発覚
+真相発覚時、フィールド上で罪証を最も多く保有する全てのキャラクターが真犯人を獲得する。
+ゴクチョーは復活しなくなり、対象制限もなくなり、全てのキャラクターに主動的に挑戦する。
+ゴクチョーの最大HP+220、攻撃力+3、防御力+10、移動力+5。
+キャラクターが手がかりを1つ収集するごとに、ゴクチョーは20ダメージを受け、防御力-2、移動力-1。"
+M0115,Warden_Sprite.png,M0115_info.png,ゴクチョー【真相】,ゴクチョー,1,1,困難,3,10,230,,"ギミック紹介
+1.主動攻撃する。
+2.反撃できる。
+
+スキル - 全員有罪［CT 3］
+全てのキャラクターに罪証を1スタック付与する。
+
+パッシブスキル - 罪人審判
+攻撃時、対象が罪証を1スタック保有するごとに、攻撃力+1。
+
+パッシブスキル - 真相発覚
+真相発覚時、フィールド上で罪証を最も多く保有する全てのキャラクターが真犯人を獲得する。
+ゴクチョーは復活しなくなり、対象制限もなくなり、全てのキャラクターに主動的に挑戦する。
+ゴクチョーの最大HP+220、攻撃力+3、防御力+10、移動力+5。
+キャラクターが手がかりを1つ収集するごとに、ゴクチョーは20ダメージを受け、防御力-2、移動力-1。"
+M0115,Warden_Sprite.png,M0115_info.png,ゴクチョー【真相】,ゴクチョー,1,1,悪夢,4,10,231,,"ギミック紹介
+1.主動攻撃する。
+2.反撃できる。
+
+スキル - 全員有罪［CT 3］
+全てのキャラクターに罪証を1スタック付与する。
+
+パッシブスキル - 罪人審判
+攻撃時、対象が罪証を1スタック保有するごとに、攻撃力+1。
+
+パッシブスキル - 真相発覚
+真相発覚時、フィールド上で罪証を最も多く保有する全てのキャラクターが真犯人を獲得する。
+ゴクチョーは復活しなくなり、対象制限もなくなり、全てのキャラクターに主動的に挑戦する。
+ゴクチョーの最大HP+220、攻撃力+3、防御力+10、移動力+5。
+キャラクターが手がかりを1つ収集するごとに、ゴクチョーは20ダメージを受け、防御力-2、移動力-1。"
+M0115,Warden_Sprite.png,M0115_info.png,ゴクチョー【真相】,ゴクチョー,1,1,狂気,4,11,231,,"ギミック紹介
+1.主動攻撃する。
+2.反撃できる。
+
+スキル - 全員有罪［CT 3］
+全てのキャラクターに罪証を1スタック付与する。
+
+パッシブスキル - 罪人審判
+攻撃時、対象が罪証を1スタック保有するごとに、攻撃力+1。
+
+パッシブスキル - 真相発覚
+真相発覚時、フィールド上で罪証を最も多く保有する全てのキャラクターが真犯人を獲得する。
+ゴクチョーは復活しなくなり、対象制限もなくなり、全てのキャラクターに主動的に挑戦する。
+ゴクチョーの最大HP+220、攻撃力+3、防御力+10、移動力+5。
+キャラクターが手がかりを1つ収集するごとに、ゴクチョーは20ダメージを受け、防御力-2、移動力-1。"
+M0116,Warden_Sprite.png,M0116_info.png,ゴクチョー,ゴクチョー,,1,普通,0,0,9,6,"ギミック紹介
+1.特定条件下で主動攻撃する。
+2.反撃できる。
+3.無限に復活するが、特定条件を満たすと復活能力を失う。
+
+スキル - 証拠の否認［CT 3］
+最も近いキャラクター1体を指定し、対象に罪の疑惑を1枚付与する。
+ラウンド2以降で使用可能。真相発覚後は使用不可。
+
+パッシブスキル - 無限のスペア
+撃破された後、即座に復活する（真相発覚後は復活しない）。
+復活するたびに、最大HP、攻撃力、防御力が永続的に+1。
+ゴクチョーを撃破したキャラクターは、罪証を1スタック獲得する。
+真相発覚後、復活効果は無効化される。
+
+パッシブスキル - 罪人審判
+罪証を保有するキャラクターにのみ主動的に挑戦する（真相発覚後は対象制限がなくなり、全てのキャラクターに主動的に挑戦する）。
+攻撃時、対象が罪証を1スタック保有するごとに、攻撃力+1。
+
+パッシブスキル - 真相発覚
+ラウンド開始時、ラウンドが8に達したか、キャラクターが4つの手がかりを収集した場合、真相発覚を発動させ、以下の全効果が発動する：
+真相発覚時、フィールド上で罪証を最も多く保有する全てのキャラクターが真犯人を獲得する。
+ゴクチョーは復活しなくなり、対象制限もなくなり、全てのキャラクターに主動的に挑戦する。
+ゴクチョーの最大HP+220、攻撃力+3、防御力+10、移動力+5。
+キャラクターが手がかりを1つ収集するごとに、ゴクチョーは20ダメージを受け、防御力-2、移動力-1。
+スキル【全員有罪】がアンロックされ、スキル【証拠の否認】は使用できなくなる。"
+M0116,Warden_Sprite.png,M0116_info.png,ゴクチョー,ゴクチョー,,1,困難,0,0,10,6,"ギミック紹介
+1.特定条件下で主動攻撃する。
+2.反撃できる。
+3.無限に復活するが、特定条件を満たすと復活能力を失う。
+
+スキル - 証拠の否認［CT 3］
+最も近いキャラクター1体を指定し、対象に罪の疑惑を1枚付与する。
+ラウンド2以降で使用可能。真相発覚後は使用不可。
+
+パッシブスキル - 無限のスペア
+撃破された後、即座に復活する（真相発覚後は復活しない）。
+復活するたびに、最大HP、攻撃力、防御力が永続的に+1。
+ゴクチョーを撃破したキャラクターは、罪証を1スタック獲得する。
+真相発覚後、復活効果は無効化される。
+
+パッシブスキル - 罪人審判
+罪証を保有するキャラクターにのみ主動的に挑戦する（真相発覚後は対象制限がなくなり、全てのキャラクターに主動的に挑戦する）。
+攻撃時、対象が罪証を1スタック保有するごとに、攻撃力+1。
+
+パッシブスキル - 真相発覚
+ラウンド開始時、ラウンドが8に達したか、キャラクターが4つの手がかりを収集した場合、真相発覚を発動させ、以下の全効果が発動する：
+真相発覚時、フィールド上で罪証を最も多く保有する全てのキャラクターが真犯人を獲得する。
+ゴクチョーは復活しなくなり、対象制限もなくなり、全てのキャラクターに主動的に挑戦する。
+ゴクチョーの最大HP+220、攻撃力+3、防御力+10、移動力+5。
+キャラクターが手がかりを1つ収集するごとに、ゴクチョーは20ダメージを受け、防御力-2、移動力-1。
+スキル【全員有罪】がアンロックされ、スキル【証拠の否認】は使用できなくなる。"
+M0116,Warden_Sprite.png,M0116_info.png,ゴクチョー,ゴクチョー,,1,悪夢,1,0,11,6,"ギミック紹介
+1.特定条件下で主動攻撃する。
+2.反撃できる。
+3.無限に復活するが、特定条件を満たすと復活能力を失う。
+
+スキル - 証拠の否認［CT 3］
+最も近いキャラクター1体を指定し、対象に罪の疑惑を1枚付与する。
+ラウンド2以降で使用可能。真相発覚後は使用不可。
+
+パッシブスキル - 無限のスペア
+撃破された後、即座に復活する（真相発覚後は復活しない）。
+復活するたびに、最大HP、攻撃力、防御力が永続的に+1。
+ゴクチョーを撃破したキャラクターは、罪証を1スタック獲得する。
+真相発覚後、復活効果は無効化される。
+
+パッシブスキル - 罪人審判
+罪証を保有するキャラクターにのみ主動的に挑戦する（真相発覚後は対象制限がなくなり、全てのキャラクターに主動的に挑戦する）。
+攻撃時、対象が罪証を1スタック保有するごとに、攻撃力+1。
+
+パッシブスキル - 真相発覚
+ラウンド開始時、ラウンドが8に達したか、キャラクターが4つの手がかりを収集した場合、真相発覚を発動させ、以下の全効果が発動する：
+真相発覚時、フィールド上で罪証を最も多く保有する全てのキャラクターが真犯人を獲得する。
+ゴクチョーは復活しなくなり、対象制限もなくなり、全てのキャラクターに主動的に挑戦する。
+ゴクチョーの最大HP+220、攻撃力+3、防御力+10、移動力+5。
+キャラクターが手がかりを1つ収集するごとに、ゴクチョーは20ダメージを受け、防御力-2、移動力-1。
+スキル【全員有罪】がアンロックされ、スキル【証拠の否認】は使用できなくなる。"
+M0116,Warden_Sprite.png,M0116_info.png,ゴクチョー,ゴクチョー,,1,狂気,1,1,11,6,"ギミック紹介
+1.特定条件下で主動攻撃する。
+2.反撃できる。
+3.無限に復活するが、特定条件を満たすと復活能力を失う。
+
+スキル - 証拠の否認［CT 3］
+最も近いキャラクター1体を指定し、対象に罪の疑惑を1枚付与する。
+ラウンド2以降で使用可能。真相発覚後は使用不可。
+
+パッシブスキル - 無限のスペア
+撃破された後、即座に復活する（真相発覚後は復活しない）。
+復活するたびに、最大HP、攻撃力、防御力が永続的に+1。
+ゴクチョーを撃破したキャラクターは、罪証を1スタック獲得する。
+真相発覚後、復活効果は無効化される。
+
+パッシブスキル - 罪人審判
+罪証を保有するキャラクターにのみ主動的に挑戦する（真相発覚後は対象制限がなくなり、全てのキャラクターに主動的に挑戦する）。
+攻撃時、対象が罪証を1スタック保有するごとに、攻撃力+1。
+
+パッシブスキル - 真相発覚
+ラウンド開始時、ラウンドが8に達したか、キャラクターが4つの手がかりを収集した場合、真相発覚を発動させ、以下の全効果が発動する：
+真相発覚時、フィールド上で罪証を最も多く保有する全てのキャラクターが真犯人を獲得する。
+ゴクチョーは復活しなくなり、対象制限もなくなり、全てのキャラクターに主動的に挑戦する。
+ゴクチョーの最大HP+220、攻撃力+3、防御力+10、移動力+5。
+キャラクターが手がかりを1つ収集するごとに、ゴクチョーは20ダメージを受け、防御力-2、移動力-1。
+スキル【全員有罪】がアンロックされ、スキル【証拠の否認】は使用できなくなる。"
+M0117,Watcher_Sprite.png,M0117_info.png,看守,看守,,1,普通,4,1,17,12,"ギミック紹介
+1.特定条件下で主動攻撃する。
+2.反撃できる。
+3.無限に復活するが、特定条件を満たすと復活能力を失う。
+
+パッシブスキル - 不死身
+撃破された後、2ラウンド後に元の位置で復活する（手がかりを2つ収集後は復活しない）。
+復活するたびに、最大HPが永続的に+2。
+看守を撃破したキャラクターは、罪証を1スタック獲得する。
+
+パッシブスキル - 罪人捜索
+罪証を保有するキャラクターを優先的に追跡する。
+罪証を保有するキャラクターにのみ主動的に挑戦する。看守が累計5ダメージを受けた後は、対象制限がなくなり、全てのキャラクターに主動的に挑戦する。
+攻撃時、対象が罪証を1スタック保有するごとに、攻撃力+1。"
+M0117,Watcher_Sprite.png,M0117_info.png,看守,看守,,1,困難,4,1,20,12,"ギミック紹介
+1.特定条件下で主動攻撃する。
+2.反撃できる。
+3.無限に復活するが、特定条件を満たすと復活能力を失う。
+
+パッシブスキル - 不死身
+撃破された後、2ラウンド後に元の位置で復活する（手がかりを2つ収集後は復活しない）。
+復活するたびに、最大HPが永続的に+2。
+看守を撃破したキャラクターは、罪証を1スタック獲得する。
+
+パッシブスキル - 罪人捜索
+罪証を保有するキャラクターを優先的に追跡する。
+罪証を保有するキャラクターにのみ主動的に挑戦する。看守が累計5ダメージを受けた後は、対象制限がなくなり、全てのキャラクターに主動的に挑戦する。
+攻撃時、対象が罪証を1スタック保有するごとに、攻撃力+1。"
+M0117,Watcher_Sprite.png,M0117_info.png,看守,看守,,1,悪夢,5,2,20,12,"ギミック紹介
+1.特定条件下で主動攻撃する。
+2.反撃できる。
+3.無限に復活するが、特定条件を満たすと復活能力を失う。
+
+パッシブスキル - 不死身
+撃破された後、2ラウンド後に元の位置で復活する（手がかりを2つ収集後は復活しない）。
+復活するたびに、最大HPが永続的に+2。
+看守を撃破したキャラクターは、罪証を1スタック獲得する。
+
+パッシブスキル - 罪人捜索
+罪証を保有するキャラクターを優先的に追跡する。
+罪証を保有するキャラクターにのみ主動的に挑戦する。看守が累計5ダメージを受けた後は、対象制限がなくなり、全てのキャラクターに主動的に挑戦する。
+攻撃時、対象が罪証を1スタック保有するごとに、攻撃力+1。"
+M0117,Watcher_Sprite.png,M0117_info.png,看守,看守,,1,狂気,5,2,23,12,"ギミック紹介
+1.特定条件下で主動攻撃する。
+2.反撃できる。
+3.無限に復活するが、特定条件を満たすと復活能力を失う。
+
+パッシブスキル - 不死身
+撃破された後、2ラウンド後に元の位置で復活する（手がかりを2つ収集後は復活しない）。
+復活するたびに、最大HPが永続的に+2。
+看守を撃破したキャラクターは、罪証を1スタック獲得する。
+
+パッシブスキル - 罪人捜索
+罪証を保有するキャラクターを優先的に追跡する。
+罪証を保有するキャラクターにのみ主動的に挑戦する。看守が累計5ダメージを受けた後は、対象制限がなくなり、全てのキャラクターに主動的に挑戦する。
+攻撃時、対象が罪証を1スタック保有するごとに、攻撃力+1。"
+M0118,Sinful_Teapot_Sprite.png,M0118_info.png,グリーティーポット,グリーティーポット,,1,普通,2,0,14,9,"ギミック紹介
+1.主動攻撃する。
+2.反撃できる。
+
+パッシブスキル - 罪への渇望
+初期状態で罪証を1スタック保有する。
+キャラクターに主動的に挑戦した後、対象のキャラクターが罪証を保有している場合、そのキャラクターの罪証を1スタック除去し、自身が罪証を1スタック獲得する。
+自身が罪証を1スタック保有するごとに、攻撃力+1、防御力+1。
+
+パッシブスキル - 原罪の茶飲み
+撃破された後、撃破者にグリーティーポットが保有していた全ての罪証を与える。"
+M0118,Sinful_Teapot_Sprite.png,M0118_info.png,グリーティーポット,グリーティーポット,,1,困難,3,0,14,9,"ギミック紹介
+1.主動攻撃する。
+2.反撃できる。
+
+パッシブスキル - 罪への渇望
+初期状態で罪証を1スタック保有する。
+キャラクターに主動的に挑戦した後、対象のキャラクターが罪証を保有している場合、そのキャラクターの罪証を1スタック除去し、自身が罪証を1スタック獲得する。
+自身が罪証を1スタック保有するごとに、攻撃力+1、防御力+1。
+
+パッシブスキル - 原罪の茶飲み
+撃破された後、撃破者にグリーティーポットが保有していた全ての罪証を与える。"
+M0118,Sinful_Teapot_Sprite.png,M0118_info.png,グリーティーポット,グリーティーポット,,1,悪夢,3,1,16,9,"ギミック紹介
+1.主動攻撃する。
+2.反撃できる。
+
+パッシブスキル - 罪への渇望
+初期状態で罪証を1スタック保有する。
+キャラクターに主動的に挑戦した後、対象のキャラクターが罪証を保有している場合、そのキャラクターの罪証を1スタック除去し、自身が罪証を1スタック獲得する。
+自身が罪証を1スタック保有するごとに、攻撃力+1、防御力+1。
+
+パッシブスキル - 原罪の茶飲み
+撃破された後、撃破者にグリーティーポットが保有していた全ての罪証を与える。"
+M0118,Sinful_Teapot_Sprite.png,M0118_info.png,グリーティーポット,グリーティーポット,,1,狂気,3,1,18,9,"ギミック紹介
+1.主動攻撃する。
+2.反撃できる。
+
+パッシブスキル - 罪への渇望
+初期状態で罪証を1スタック保有する。
+キャラクターに主動的に挑戦した後、対象のキャラクターが罪証を保有している場合、そのキャラクターの罪証を1スタック除去し、自身が罪証を1スタック獲得する。
+自身が罪証を1スタック保有するごとに、攻撃力+1、防御力+1。
+
+パッシブスキル - 原罪の茶飲み
+撃破された後、撃破者にグリーティーポットが保有していた全ての罪証を与える。"
+M0119,Legendary_Thief_Sprite.png,M0119_info.png,大怪盗,大怪盗,,1,普通,4,0,13,6,"ギミック紹介
+1.主動攻撃しない。
+2.反撃できる。
+
+スキル - スティール［CT 3］
+6マス以内でスターコインを最も多く所持しているキャラクターを指定し、スターコインを4枚奪う。
+
+パッシブスキル - 盗人にも三分の理
+キャラクターを通過する時、4スターコインを奪う。
+累計で4スターコインを奪うごとに、移動力+1。
+撃破された時、撃破者に自身が累計で奪ったスターコインを与える。自身がスターコインを奪っていない場合、または累計で12スターコイン以上奪っている場合、追加で撃破者に6スターコインを与える。"
+M0119,Legendary_Thief_Sprite.png,M0119_info.png,大怪盗,大怪盗,,1,困難,5,0,14,6,"ギミック紹介
+1.主動攻撃しない。
+2.反撃できる。
+
+スキル - スティール［CT 3］
+6マス以内でスターコインを最も多く所持しているキャラクターを指定し、スターコインを4枚奪う。
+
+パッシブスキル - 盗人にも三分の理
+キャラクターを通過する時、4スターコインを奪う。
+累計で4スターコインを奪うごとに、移動力+1。
+撃破された時、撃破者に自身が累計で奪ったスターコインを与える。自身がスターコインを奪っていない場合、または累計で12スターコイン以上奪っている場合、追加で撃破者に6スターコインを与える。"
+M0119,Legendary_Thief_Sprite.png,M0119_info.png,大怪盗,大怪盗,,1,悪夢,5,0,16,6,"ギミック紹介
+1.主動攻撃しない。
+2.反撃できる。
+
+スキル - スティール［CT 3］
+6マス以内でスターコインを最も多く所持しているキャラクターを指定し、スターコインを4枚奪う。
+
+パッシブスキル - 盗人にも三分の理
+キャラクターを通過する時、4スターコインを奪う。
+累計で4スターコインを奪うごとに、移動力+1。
+撃破された時、撃破者に自身が累計で奪ったスターコインを与える。自身がスターコインを奪っていない場合、または累計で12スターコイン以上奪っている場合、追加で撃破者に6スターコインを与える。"
+M0119,Legendary_Thief_Sprite.png,M0119_info.png,大怪盗,大怪盗,,1,狂気,5,1,16,6,"ギミック紹介
+1.主動攻撃しない。
+2.反撃できる。
+
+スキル - スティール［CT 3］
+6マス以内でスターコインを最も多く所持しているキャラクターを指定し、スターコインを4枚奪う。
+
+パッシブスキル - 盗人にも三分の理
+キャラクターを通過する時、4スターコインを奪う。
+累計で4スターコインを奪うごとに、移動力+1。
+撃破された時、撃破者に自身が累計で奪ったスターコインを与える。自身がスターコインを奪っていない場合、または累計で12スターコイン以上奪っている場合、追加で撃破者に6スターコインを与える。"
+M0120,M0120_Icon.png,M0120_info_1.png,キッズガオー,天王寺雅央,1,1,普通,0,1,120,,"ギミック紹介
+1.自ら戦闘を仕掛ける
+2.特定の条件下で反撃できる
+
+スキル - 仲間を呼ぼう［CT 3］
+採集クマちゃんを1体召喚する
+
+パッシブスキル - 好奇心
+ターン開始時、みなぎる元気を1スタック獲得し、5マス以内でガオーの注目を持つ全キャラクターに3ダメージを与え、対象のガオーの注目を解除する
+現在HPが最大HPの60%（72）以下の場合、ターン開始時にみなぎる元気を追加で1スタック獲得する
+
+パッシブスキル - 甘く見ないで！
+キャラクターに戦闘を仕掛けられた後、そのキャラクターにガオーの注目を2ターン付与し、自身のみなぎる元気スタック数-1
+現在HPが最大HPの60%（72）以下の場合、反撃できる"
+M0120,M0120_Icon.png,M0120_info_2.png,キッズガオー,天王寺雅央,1,1,困難,1,1,130,,"ギミック紹介
+1.自ら戦闘を仕掛ける
+2.特定の条件下で反撃できる
+
+スキル - 仲間を呼ぼう［CT 3］
+採集クマちゃんを1体召喚する
+
+パッシブスキル - 好奇心
+ターン開始時、みなぎる元気を1スタック獲得し、5マス以内でガオーの注目を持つ全キャラクターに3ダメージを与え、対象のガオーの注目を解除する
+現在HPが最大HPの60%（78）以下の場合、ターン開始時にみなぎる元気を追加で1スタック獲得する
+
+パッシブスキル - 甘く見ないで！
+キャラクターに戦闘を仕掛けられた後、そのキャラクターにガオーの注目を2ターン付与し、自身のみなぎる元気スタック数-1
+現在HPが最大HPの60%（78）以下の場合、反撃できる"
+M0120,M0120_Icon.png,M0120_info_3.png,キッズガオー,天王寺雅央,1,1,悪夢,3,1,140,,"ギミック紹介
+1.自ら戦闘を仕掛ける
+2.特定の条件下で反撃できる
+
+スキル - 仲間を呼ぼう［CT 3］
+採集クマちゃんを1体召喚する
+
+パッシブスキル - 好奇心
+ターン開始時、みなぎる元気を1スタック獲得し、5マス以内でガオーの注目を持つ全キャラクターに3ダメージを与え、対象のガオーの注目を解除する
+現在HPが最大HPの60%（84）以下の場合、ターン開始時にみなぎる元気を追加で1スタック獲得する
+
+パッシブスキル - 甘く見ないで！
+キャラクターに戦闘を仕掛けられた後、そのキャラクターにガオーの注目を2ターン付与し、自身のみなぎる元気スタック数-1
+現在HPが最大HPの60%（84）以下の場合、反撃できる"
+M0120,M0120_Icon.png,M0120_info_4.png,キッズガオー,天王寺雅央,1,1,狂気,3,2,150,,"ギミック紹介
+1.自ら戦闘を仕掛ける
+2.特定の条件下で反撃できる
+
+スキル - 仲間を呼ぼう［CT 3］
+採集クマちゃんを1体召喚する
+
+パッシブスキル - 好奇心
+ターン開始時、みなぎる元気を1スタック獲得し、5マス以内でガオーの注目を持つ全キャラクターに3ダメージを与え、対象のガオーの注目を解除する
+現在HPが最大HPの60%（90）以下の場合、ターン開始時にみなぎる元気を追加で1スタック獲得する
+
+パッシブスキル - 甘く見ないで！
+キャラクターに戦闘を仕掛けられた後、そのキャラクターにガオーの注目を2ターン付与し、自身のみなぎる元気スタック数-1
+現在HPが最大HPの60%（90）以下の場合、反撃できる"
+M0121,M0121_Icon.png,M0121_info_1.png,採集クマちゃん,採集クマちゃん,,,普通,3,1,14,8,"ギミック紹介
+1.主動攻撃する
+2.反撃できない
+
+スキル - 異臭キノコ［CT 2］
+5マス以内で最も近いキャラクターを1体指定し、2ダメージを与え、ガオーの注目を2ターン付与する
+
+パッシブスキル - 置き土産
+倒された時、倒した相手にランダムな植物建築カードを1枚与える"
+M0121,M0121_Icon.png,M0121_info_1.png,採集クマちゃん,採集クマちゃん,,,困難,3,1,16,8,"ギミック紹介
+1.主動攻撃する
+2.反撃できない
+
+スキル - 異臭キノコ［CT 2］
+5マス以内で最も近いキャラクターを1体指定し、2ダメージを与え、ガオーの注目を2ターン付与する
+
+パッシブスキル - 置き土産
+倒された時、倒した相手にランダムな植物建築カードを1枚与える"
+M0121,M0121_Icon.png,M0121_info_1.png,採集クマちゃん,採集クマちゃん,,,悪夢,4,1,18,8,"ギミック紹介
+1.主動攻撃する
+2.反撃できない
+
+スキル - 異臭キノコ［CT 2］
+5マス以内で最も近いキャラクターを1体指定し、2ダメージを与え、ガオーの注目を2ターン付与する
+
+パッシブスキル - 置き土産
+倒された時、倒した相手にランダムな植物建築カードを1枚与える"
+M0121,M0121_Icon.png,M0121_info_1.png,採集クマちゃん,採集クマちゃん,,,狂気,4,2,20,8,"ギミック紹介
+1.主動攻撃する
+2.反撃できない
+
+スキル - 異臭キノコ［CT 2］
+5マス以内で最も近いキャラクターを1体指定し、2ダメージを与え、ガオーの注目を2ターン付与する
+
+パッシブスキル - 置き土産
+倒された時、倒した相手にランダムな植物建築カードを1枚与える"
+M0122,M0122_Icon.png,M0122_info_1.png,おもちゃの恐竜,おもちゃの恐竜,,1,普通,3,1,19,13,"ギミック紹介
+1.主動攻撃する
+2.反撃できる
+
+スキル - ノイズアタック［CT 1］
+2マス以内の全キャラクターに2ダメージを与える
+
+パッシブスキル - 怒りの蓄積
+アクティブスキルがキャラクター1体に命中するたび、自身の攻撃力が永続的に+1"
+M0122,M0122_Icon.png,M0122_info_1.png,おもちゃの恐竜,おもちゃの恐竜,,1,困難,3,2,22,13,"ギミック紹介
+1.主動攻撃する
+2.反撃できる
+
+スキル - ノイズアタック［CT 1］
+2マス以内の全キャラクターに2ダメージを与える
+
+パッシブスキル - 怒りの蓄積
+アクティブスキルがキャラクター1体に命中するたび、自身の攻撃力が永続的に+1"
+M0122,M0122_Icon.png,M0122_info_1.png,おもちゃの恐竜,おもちゃの恐竜,,1,悪夢,4,2,25,13,"ギミック紹介
+1.主動攻撃する
+2.反撃できる
+
+スキル - ノイズアタック［CT 1］
+2マス以内の全キャラクターに2ダメージを与える
+
+パッシブスキル - 怒りの蓄積
+アクティブスキルがキャラクター1体に命中するたび、自身の攻撃力が永続的に+1"
+M0122,M0122_Icon.png,M0122_info_1.png,おもちゃの恐竜,おもちゃの恐竜,,1,狂気,4,2,28,13,"ギミック紹介
+1.主動攻撃する
+2.反撃できる
+
+スキル - ノイズアタック［CT 1］
+2マス以内の全キャラクターに2ダメージを与える
+
+パッシブスキル - 怒りの蓄積
+アクティブスキルがキャラクター1体に命中するたび、自身の攻撃力が永続的に+1"
+M0123,M0123_Icon.png,M0123_info_1.png,目覚ましフクロウ,目覚ましフクロウ,,,普通,3,0,8,6,"ギミック紹介
+1.主動攻撃する
+2.反撃できない
+
+パッシブスキル - ファイナルカウント
+ターン開始時、現在HPが最大HPの50%（4）以下の場合、自身の攻撃力が永続的に+1"
+M0123,M0123_Icon.png,M0123_info_1.png,目覚ましフクロウ,目覚ましフクロウ,,,困難,3,1,9,6,"ギミック紹介
+1.主動攻撃する
+2.反撃できない
+
+パッシブスキル - ファイナルカウント
+ターン開始時、現在HPが最大HPの50%（4）以下の場合、自身の攻撃力が永続的に+1"
+M0123,M0123_Icon.png,M0123_info_3.png,目覚ましフクロウ,目覚ましフクロウ,,,悪夢,3,1,10,6,"ギミック紹介
+1.主動攻撃する
+2.反撃できない
+
+パッシブスキル - ファイナルカウント
+ターン開始時、現在HPが最大HPの50%（5）以下の場合、自身の攻撃力が永続的に+1"
+M0123,M0123_Icon.png,M0123_info_3.png,目覚ましフクロウ,目覚ましフクロウ,,,狂気,4,1,10,6,"ギミック紹介
+1.主動攻撃する
+2.反撃できない
+
+パッシブスキル - ファイナルカウント
+ターン開始時、現在HPが最大HPの50%（5）以下の場合、自身の攻撃力が永続的に+1"

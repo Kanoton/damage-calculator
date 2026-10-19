@@ -35,7 +35,7 @@ function renderRouteControls(){
 let readerMapMode=false;
 function unknownOption(){return Object.assign(document.createElement('option'),{value:'',textContent:'未判定'});}
 function populateMaps(){const previous=pick.value;pick.replaceChildren();if(readerMapMode)pick.append(unknownOption());const entries=Object.entries(data.maps);entries.forEach(([id,map])=>{const option=document.createElement('option');option.value=id;option.textContent=map.name;pick.append(option);});pick.value=data.maps[previous]?previous:readerMapMode?'':(entries[0]?.[0]||'');pick.disabled=!entries.length;}populateMaps();
-let monsterTipVersion=0;
+let monsterTipHideTimer=null,monsterTipAnchor=null;
 let selected=null;const buff={attack:0,defense:0};
 const gimmickCounts=new Map();
 const gimmickArea=document.createElement('div');gimmickArea.className='mp-gimmicks';gimmickArea.setAttribute('aria-label','マップ固有ギミック');
@@ -319,7 +319,7 @@ function renderRoster(){
  [...rosterState.monsters].sort((a,b)=>Number(!!a.defeated)-Number(!!b.defeated)||Number(data.nativeMapByMonster[b.monsterId]===pick.value)-Number(data.nativeMapByMonster[a.monsterId]===pick.value)||a.monsterId.localeCompare(b.monsterId,'en',{numeric:true})||Number(a.serial||0)-Number(b.serial||0)||a.instanceId-b.instanceId).forEach(enemy=>{
    const displayName=monsterDisplayName(enemy),{card,select,nameText,actions,top}=createRosterCardShell(enemy,rosterState.selectedId,displayName,assignMapImage,data.icons);
   card.dataset.instanceId=enemy.instanceId;card.dataset.id=enemy.monsterId;
-  card.addEventListener('mouseenter',()=>showMonsterTip(card));card.addEventListener('mouseleave',hideMonsterTip);
+  card.addEventListener('mouseenter',()=>showMonsterTip(card));card.addEventListener('mouseleave',scheduleMonsterTipHide);card.addEventListener('focusin',()=>showMonsterTip(card));card.addEventListener('focusout',scheduleMonsterTipHide);
   if(characterSkillTargetRequest?.multipleTargets&&!enemy.defeated){const selected=characterSkillTargetRequest.selectedIds.has(enemy.instanceId);card.classList.toggle('is-skill-target-selected',selected);select.dataset.skillTargetId=enemy.instanceId;select.setAttribute('aria-pressed',String(selected));select.setAttribute('aria-label',displayName+(selected?'をスキル対象から解除':'をスキル対象に選択'));}
   const stats=createRosterStats(enemy,displayName,assignMapImage,data.icons,({key,field,label,input,value})=>{const next=Number(value);if(String(value).trim()===''||!Number.isSafeInteger(next)||next<0){input.value=enemy[field];return;}if(next===enemy[field])return;rememberRoster();if(key==='HP'){if(next===0){removeEnemy(enemy);rosterNotice.textContent=displayName+'を撃破しました。';}else{enemy.manualHp=next;enemy.hp=next;enemy.damageTaken=Math.max(0,rosterStat(enemy.base,'HP')-next);}}else{const manualKey=key==='攻撃'?'manualAttack':'manualDefense';enemy[manualKey]=next-rosterStat(enemy.base,key)-(key==='攻撃'?(enemy.eventAttack||0)-(enemy.fanSkillAttackReduction?1:0)+(enemy.monsterId==='M0120'?2*(enemy.energyStacks||0):0):(enemy.eventDefense||0)+(enemy.skillDefenseModifier||0));rosterNotice.textContent=displayName+'の'+label+'を'+next+'に変更しました。';}if(next===0&&key==='HP'){renderRoster();return;}updateEnemy(enemy);input.value=enemy[field];rosterUndo.disabled=false;if(rosterState.selectedId===enemy.instanceId)registerEnemy(enemy,false);if(enemy.monsterId==='M0120'&&key==='HP')renderRoster();});
   select.addEventListener('click',()=>{if(resolveCharacterSkillTarget(enemy))return;rosterState.selectedId=enemy.instanceId;registerEnemy(enemy);renderRoster();rosterNotice.textContent=monsterDisplayName(enemy)+'を計算機に登録しました。';});
@@ -448,6 +448,7 @@ function renderMapInformation(){
 
 function render(){
  hideMonsterTip();
+ hideMonsterTip();
  if(!data.maps[pick.value]){routeControls.hidden=true;root.querySelector('.mp-map-only').classList.remove('has-route-switches');selected=null;list.replaceChildren();difficulty.replaceChildren();if(readerMapMode)difficulty.append(unknownOption());difficulty.disabled=true;const img=document.getElementById('mp-map-image');img.hidden=true;img.removeAttribute('src');img.alt='';renderMapInformation();status.textContent=Object.keys(data.maps).length?'マップを選択してください。':'表示対象のマップがありません。CSVの「表示」列を確認してください。';renderRoster();return;}
  difficulty.disabled=false;
 
@@ -463,7 +464,7 @@ function render(){
  const visibleRows=visibleMonsterRows(data,pick.value,level);
  visibleRows.forEach(stats=>{const id=stats.monster_id;
   const base=stats,tile=document.createElement('button');
-  tile.type='button';tile.className='mp-monster';tile.dataset.id=id;tile.setAttribute('aria-pressed','false');tile.setAttribute('aria-label',base['モンスター名']+'をマップに追加');tile.addEventListener('mouseenter',()=>showMonsterTip(tile));tile.addEventListener('mouseleave',hideMonsterTip);tile.addEventListener('focus',()=>showMonsterTip(tile));tile.addEventListener('blur',hideMonsterTip);
+  tile.type='button';tile.className='mp-monster';tile.dataset.id=id;tile.setAttribute('aria-pressed','false');tile.setAttribute('aria-label',base['モンスター名']+'をマップに追加');tile.addEventListener('mouseenter',()=>showMonsterTip(tile));tile.addEventListener('mouseleave',scheduleMonsterTipHide);tile.addEventListener('focus',()=>showMonsterTip(tile));tile.addEventListener('blur',scheduleMonsterTipHide);
   const name=document.createElement('div');name.className='mp-name';const pic=document.createElement('img');assignMapImage(pic,data.images[base.image]||'');pic.alt='';const nameText=document.createElement('span');nameText.className='monster-name-text';nameText.textContent=base['モンスター名'];name.append(pic,nameText);if(String((stats||base)['ボス']).trim()==='1'){const boss=document.createElement('img');boss.className='mp-boss-icon';boss.alt='マップボス';boss.title='マップボス';assignMapImage(boss,'../images/UT_Buff/Boss.png');nameText.append(boss);}if(String((stats||base)['反撃'])==='1'){const reflect=document.createElement('img');assignMapImage(reflect,data.icons.reflect);reflect.alt='反撃可能';reflect.className='mp-reflect';nameText.append(reflect);}
   const values=document.createElement('div');values.className='mp-stats';
   ['攻撃','防御','HP','コイン'].forEach(key=>{
@@ -486,27 +487,31 @@ pick.addEventListener('change',()=>{rememberRoster();clearRoster();selected=null
 const tabs=[...document.querySelectorAll('.mp-subtabs [role="tab"]')];tabs.forEach((tab,index)=>{tab.addEventListener('click',()=>tabs.forEach(other=>{const active=other===tab;other.setAttribute('aria-selected',String(active));document.getElementById(other.getAttribute('aria-controls')).hidden=!active;}));tab.addEventListener('keydown',e=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();const next=e.key==='Home'?0:e.key==='End'?1:1-index;tabs[next].click();tabs[next].focus();}});});
 render();
 
-function hideMonsterTip(){monsterTipVersion++;const tip=document.getElementById('monster-tooltip');if(tip){tip.hidden=true;tip.replaceChildren();}}
+function hideMonsterTip(){
+ clearTimeout(monsterTipHideTimer);monsterTipAnchor?.removeAttribute('aria-describedby');monsterTipAnchor=null;
+ const tip=document.getElementById('monster-tooltip');if(tip){tip.hidden=true;tip.replaceChildren();}
+}
+function scheduleMonsterTipHide(){clearTimeout(monsterTipHideTimer);monsterTipHideTimer=setTimeout(hideMonsterTip,180);}
 function showMonsterTip(tile){
  hideMonsterTip();const tip=document.getElementById('monster-tooltip');if(!tip)return;
- const stats=data.stats.find(row=>row.monster_id===tile.dataset.id&&row['難易度']===difficulty.value);
- const file=String(stats?.info||stats?.['情報画像']||'').trim();if(!file)return;
- const source=safeAssetUrl('../images/MonsterInfo/',file);if(!source)return;
- const version=monsterTipVersion,img=new Image();img.alt=stats['モンスター名']+'の説明画像';
- img.onload=()=>{if(version!==monsterTipVersion||!tile.isConnected||!img.naturalWidth||!img.naturalHeight)return;
- const margin=8,ratio=img.naturalWidth/img.naturalHeight,width=Math.min(438,img.naturalWidth,window.innerWidth-margin*2,(window.innerHeight-margin*2)*ratio),height=width/ratio;
- const box=tile.getBoundingClientRect(),gap=12;
- let left=box.right+gap;if(left+width>window.innerWidth-margin)left=box.left-width-gap;
- left=Math.max(margin,Math.min(left,window.innerWidth-width-margin));
- const top=Math.max(margin,Math.min(box.top,window.innerHeight-height-margin));
- img.style.width=width+'px';img.style.height=height+'px';tip.style.left=left+'px';tip.style.top=top+'px';tip.replaceChildren(img);tip.hidden=false;
- };
- img.onerror=()=>{if(version===monsterTipVersion)hideMonsterTip();};
- img.src=source;
+ const stats=data.stats.find(row=>row.monster_id===tile.dataset.id&&row['難易度']===difficulty.value);if(!stats)return;
+ tip.replaceChildren(createMonsterSkillTooltipView(stats,data.icons,assignMapImage));tip.hidden=false;tip.scrollTop=0;
+ monsterTipAnchor=tile;tile.setAttribute('aria-describedby',tip.id);
+ const margin=8,box=tile.getBoundingClientRect(),width=tip.offsetWidth,height=tip.offsetHeight;
+ let left=box.right+12;if(left+width>window.innerWidth-margin)left=box.left-width-12;
+ tip.style.left=Math.max(margin,Math.min(left,window.innerWidth-width-margin))+'px';
+ tip.style.top=Math.max(margin,Math.min(box.top,window.innerHeight-height-margin))+'px';
 }
+const monsterTooltip=document.getElementById('monster-tooltip');
+monsterTooltip?.addEventListener('mouseenter',()=>clearTimeout(monsterTipHideTimer));
+monsterTooltip?.addEventListener('mouseleave',scheduleMonsterTipHide);
+monsterTooltip?.addEventListener('focusin',()=>clearTimeout(monsterTipHideTimer));
+monsterTooltip?.addEventListener('focusout',scheduleMonsterTipHide);
 window.addEventListener('resize',hideMonsterTip);
-document.addEventListener('scroll',hideMonsterTip,true);
-list.addEventListener('scroll',hideMonsterTip);root.addEventListener('keydown',e=>{if(e.key==='Escape')hideMonsterTip();});document.querySelectorAll('.role-tab').forEach(b=>b.addEventListener('click',hideMonsterTip));
+document.addEventListener('scroll',event=>{if(!monsterTooltip?.contains(event.target))hideMonsterTip();},true);
+document.addEventListener('keydown',event=>{if(event.key==='Escape')hideMonsterTip();});
+pick.addEventListener('change',hideMonsterTip);difficulty.addEventListener('change',hideMonsterTip);
+document.querySelectorAll('.role-tab,.mp-subtabs [role="tab"]').forEach(button=>button.addEventListener('click',hideMonsterTip));
 async function refreshCSV(){if(location.protocol==='file:')return;const files={maps:'maps_renumbered.csv',relations:'map_monsters_renumbered.csv',stats:'monster_stats.csv',missions:'map_mission.csv',events:'map_event.csv',gimmicks:'map_gimmick.csv',features:'map_features.csv'};const result=await Promise.allSettled(Object.entries(files).map(async([key,file])=>{const response=await fetch('../csv/'+file,{cache:'no-cache'});if(!response.ok)throw Error(file);const rows=parseMapCSV(await response.text());if(rows.length&&!Object.hasOwn(rows[0],key==='stats'?'monster_id':'map_id'))throw Error(file);return [key,rows];}));const raw={...INITIAL_MAP_DATA};result.forEach(item=>{if(item.status==='fulfilled')raw[item.value[0]]=item.value[1];});const next=normalizeMapData(raw);const previousMap=pick.value;Object.assign(data,next);populateMaps();if(pick.value!==previousMap){clearRoster();rosterState.history.length=0;}render();if(result.some(item=>item.status==='rejected'))status.textContent='一部のCSVを取得できないため同梱データを表示しています。';}refreshCSV();
 
 })();

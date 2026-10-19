@@ -37,3 +37,25 @@ function createRosterCharacterStatusControl(enemy,displayName,config){
  if(config.icon){const icon=document.createElement('img');icon.src='../images/UT_Buff/'+config.icon;icon.alt=config.label;button.append(icon);}else button.textContent=config.label;
  field.append(button);if(config.stack){const count=document.createElement('strong');count.textContent=String(value);field.append(count);}return {field,button};
 }
+
+// Plain text from monster_stats.csv; source images are retained only as provenance.
+function createMonsterSkillTooltipView(row,icons,assignImage){
+ const view=document.createDocumentFragment(),heading=document.createElement('strong'),meta=document.createElement('div');
+ heading.className='monster-skill-name';heading.textContent=row['モンスター名'];
+ meta.className='monster-skill-meta';meta.textContent=[row['難易度'],row['種族']].filter(Boolean).join(' ／ ');
+ const stats=document.createElement('div');stats.className='character-skill-stats';
+ for(const key of ['攻撃','防御','HP','コイン']){
+  const entry=document.createElement('span'),icon=document.createElement('img'),value=document.createElement('span');
+  entry.className='character-skill-stat';entry.title=key;entry.setAttribute('aria-label',key+' '+(row[key]||'—'));
+  assignImage(icon,icons[key]);icon.alt='';value.textContent=row[key]||'—';entry.append(icon,value);stats.append(entry);
+ }
+ const text=document.createElement('div');text.className='character-skill-text';
+ const lines=String(row['能力']||'説明は未登録です。').replace(/\r\n/g,'\n').split('\n');
+ lines.forEach((line,index)=>{
+  if(line==='ギミック紹介'||/^(?:スキル|パッシブスキル)\s*[-－]\s*/.test(line)){
+   const title=document.createElement('strong');title.textContent=line;text.append(title);
+  }else text.append(document.createTextNode(line));
+  if(index<lines.length-1)text.append(document.createTextNode('\n'));
+ });
+ view.append(heading,meta,stats,text);return view;
+}

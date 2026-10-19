@@ -1234,7 +1234,6 @@ tbody th {
 #map-draft{height:100%;width:100%;max-width:none;border:0;border-radius:0;background:#fff;--mp-bg:#fff;--mp-text:#25352f;--mp-muted:#66766d;--mp-line:#dce7df;--mp-soft:#f0f8f2;--mp-accent:#39875d}
 #map-draft:not(.active){display:none}.map-tab{background:#eaf6ed;color:#39875d}.role-tab.active.map-tab{border:2px solid #39875d;background:#eaf6ed;color:#39875d}
 #map-draft label{margin:0;justify-content:flex-start}#map-draft .mp-filters label{transform:none}#map-draft table th,#map-draft table td{height:auto}#map-draft h2{letter-spacing:normal}
-#monster-tooltip{position:fixed;z-index:1000;padding:6px 10px;border-radius:4px;background:#25352f;color:#fff;font-size:13px;pointer-events:none}#monster-tooltip[hidden]{display:none}
 @media(max-width:800px){.main-container{height:1000px}.role-tabs{flex-wrap:wrap}#map-draft{height:100%;padding:12px}}
 /* Keep map tables independent of combat table styling. */
 #map-draft .mp-data-table td{border:0;border-bottom:1px solid var(--mp-line);text-align:left}
@@ -1395,8 +1394,6 @@ tbody th {
 @media(max-width:680px){#map-draft .has-route-switches .mp-map{flex:auto;height:330px}#map-draft .mp-route-group+.mp-route-group{padding-left:0;border-left:0}}
 
 /* Monster detail images retain their aspect ratio and fit within the viewport. */
-#monster-tooltip{padding:0;background:transparent;border:0;border-radius:0;max-width:calc(100vw - 16px);max-height:calc(100vh - 16px);line-height:0;filter:drop-shadow(0 4px 10px rgba(0,0,0,.28));pointer-events:none}
-#monster-tooltip img{display:block;object-fit:contain;max-width:100%;max-height:calc(100vh - 16px)}
 
 /* キャラクター：外枠の高さは既存のmain-containerと共通。画像一覧だけスクロール。 */
 .main-container.character-mode{display:block;height:845px;min-height:0;overflow:hidden;padding:0;border-color:#d4ac37}
@@ -1518,8 +1515,8 @@ tbody th {
 #roster-gimmicks .roster-warden-revive{border-color:#b99a69;background:#fff7e9;color:#704e22;font-weight:bold}
 
 /* キャラクター能力：マウスオーバーとキーボードフォーカスで表示 */
-.character-skill-tooltip{position:fixed;z-index:10000;width:min(430px,calc(100vw - 16px));max-height:min(70vh,620px);overflow:auto;pointer-events:none;user-select:none;padding:14px 16px;border:2px solid #b89224;border-radius:8px;background:#fffdf6;color:#302819;box-shadow:0 8px 24px #0005;font-size:14px;line-height:1.55;overscroll-behavior:contain}
-.character-skill-tooltip[hidden]{display:none}
+.character-skill-tooltip,.monster-skill-tooltip{position:fixed;z-index:10000;width:min(430px,calc(100vw - 16px));max-height:min(70vh,620px);overflow:auto;pointer-events:none;user-select:none;padding:14px 16px;border:2px solid #b89224;border-radius:8px;background:#fffdf6;color:#302819;box-shadow:0 8px 24px #0005;font-size:14px;line-height:1.55;overscroll-behavior:contain}
+.character-skill-tooltip[hidden],.monster-skill-tooltip[hidden]{display:none}
 .character-skill-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 12px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid #e1d3a7}
 .character-skill-stat{display:flex;align-items:center;gap:5px;min-width:0;font-size:14px;font-weight:600;white-space:nowrap}
 .character-skill-stat img,.character-skill-move-icon{width:19px;height:19px;flex:none;object-fit:contain}
@@ -1716,3 +1713,9 @@ dialog[data-inline-pad] .skill-entry-row>[data-cancel]{min-width:72px;align-self
 
 .autumn-attention button{white-space:nowrap}
 .selected-character-conditions .autumn-attention .condition-toggle{width:auto;min-width:64px;padding:1px 6px;white-space:nowrap}
+
+/* モンスター説明もキャラ一覧と同じ文字・枠。長文はポインタ／キーでスクロール。 */
+.monster-skill-tooltip{box-sizing:border-box;max-height:min(70vh,620px,calc(100vh - 16px));pointer-events:auto;user-select:text}
+.monster-skill-name{display:block;font-size:16px;overflow-wrap:anywhere}
+.monster-skill-meta{margin:2px 0 10px;color:#6b6049;font-size:12px}
+.monster-skill-tooltip:focus-visible{outline:2px solid #b89224;outline-offset:2px}
