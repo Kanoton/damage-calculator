@@ -5,6 +5,7 @@ Image filename numbers are asset IDs, not character/monster IDs.
 """
 import argparse
 import csv
+import hashlib
 import json
 from pathlib import Path
 
@@ -26,8 +27,26 @@ def validate():
     listed = [r['image_file'] for r in rows]
     if len(listed) != len(set(listed)):
         raise ValueError('Duplicate image_file')
-    if set(listed) != files:
-        raise ValueError(f'Image coverage mismatch: missing={files-set(listed)}, extra={set(listed)-files}')
+    # Received assets may remain unclassified without changing any reader descriptors.
+    pending_path = ROOT / 'images/UT_Hero_ProfilePhoto/pending-images.json'
+    pending = set()
+    if pending_path.exists():
+        manifest = json.loads(pending_path.read_text(encoding='utf-8'))
+        if manifest.get('version') != 1 or not isinstance(manifest.get('images'), list):
+            raise ValueError('Invalid pending image inventory')
+        for item in manifest['images']:
+            name = item.get('image_file', '')
+            if not name or Path(name).name != name or not name.endswith('.png') or name in pending:
+                raise ValueError(f'Invalid/duplicate pending image: {name}')
+            if name in listed or name not in files:
+                raise ValueError(f'Pending image must exist and stay outside the reader mapping: {name}')
+            path = ROOT / 'images/UT_Hero_ProfilePhoto' / name
+            if hashlib.sha256(path.read_bytes()).hexdigest() != item.get('sha256'):
+                raise ValueError(f'Changed pending image: {name}')
+            pending.add(name)
+    covered = set(listed) | pending
+    if covered != files:
+        raise ValueError(f'Image coverage mismatch: missing={files-covered}, extra={covered-files}')
     for row in rows:
         kind = row['entity_type']
         if kind == 'キャラクター':
@@ -63,7 +82,7 @@ def main():
             raise ValueError('Stale fallback; run python3 scripts/build-mini-character-mapping.py')
     else:
         OUTPUT.write_text(output, encoding='utf-8')
-    print(f'Validated {len(rows)} images; {sum(r["entity_type"] == "キャラクター" for r in rows)} character variants; '
+    print(f'Validated {len(rows)} mapped images; {sum(r["entity_type"] == "キャラクター" for r in rows)} character variants; '
           f'{sum(r["entity_type"] == "モンスター" for r in rows)} monster images; '
           f'{sum(r["status"] == "判別不能" for r in rows)} unresolved images.')
 

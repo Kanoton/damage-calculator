@@ -38,7 +38,7 @@ def main():
         result.paste(skills, (0, header.height + 12))
         result.save(ROOT / 'images/MonsterInfo' / name)
     for number, monster in [(1071, 'M0120'), (1073, 'M0121'), (1072, 'M0122'), (1074, 'M0123')]:
-        shutil.copyfile(source / f'UT_Hero_ProfilePhoto_{number}.png', ROOT / f'images/Monster/{monster}_Icon.png')
+        shutil.copyfile(source / f'UT_Hero_ProfilePhoto_{number}.png', ROOT / f'images/UT_Hero_ProfilePhoto/UT_Hero_ProfilePhoto_{number}.png')
 
 if __name__ == '__main__':
     main()
