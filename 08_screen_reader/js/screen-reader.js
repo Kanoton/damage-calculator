@@ -31,7 +31,7 @@
  function monitorInfo(text=''){
   const count=new Set((window.ScreenReaderWorldReferences?.names||[]).map(r=>r.id)).size;
   const map=window.ScreenReaderMapBridge?.snapshot(),pending=readerSession&&(!map?.map||!map?.difficulty);
-  $('monitor-info').textContent=(pending?'マップ名・難易度：未判定（ルーム設定または結果画面から読み取ります。手動指定もできます） ／ ':'')+'モンスター読取：'+($('world-sync').checked?'ON':'OFF（反映をONにすると読取開始）')+' ／ 照合見本 '+count+'種類 ／ 撃破演出：秋幻の森の候補検出（番号は手動確認）'+(text?' ／ '+text:'');
+  $('monitor-info').textContent=(pending?'マップ名・難易度：未判定（ルーム設定または結果画面から読み取ります。手動指定もできます） ／ ':'')+'モンスター読取：'+($('world-sync').checked?'ON':'OFF（反映をONにすると読取開始）')+' ／ 照合見本 '+count+'種類 ／ 自動撃破：未対応（番号は手動確認） ／ 撃破演出：秋幻の森の候補検出'+(text?' ／ '+text:'');
  }
  const interval=()=>[250,500,1200].includes(Number($('interval').value))?Number($('interval').value):250;
  function isArea(a){return a&&['x','y','w','h'].every(k=>Number.isFinite(a[k]))&&a.x>=0&&a.y>=0&&a.w>=.05&&a.h>=.05&&a.x+a.w<=1.00001&&a.y+a.h<=1.00001;}
@@ -218,7 +218,7 @@
  $('party-unlock').addEventListener('click',()=>{const ids=partyLock?.ids||bridge.snapshot().members.map(m=>m.id);generation++;stable.clear();lastHash=null;sameFrames=0;releaseParty();partyEdited=true;for(let i=0;i<4;i++)$('party-'+i).value=ids[i]||'';if(rawSource&&!busy)read();});
  $('new-game').addEventListener('click',()=>{startReaderSession();status('読取用にゲーム状態をすべてリセットしました。自キャラ・PT・マップ・難易度は未判定です。');});
  $('self').addEventListener('change',()=>{if(partyLock){if(partyLock.ids.includes($('self').value))partyLock.selfId=$('self').value;else{$('self').value=partyLock.selfId||'';$('party-status').textContent='PTは固定中です。自キャラはPT内の人を指定してください。';}}generation++;stable.clear();sameFrames=0;lastHash=null;});
- $('world-sync').addEventListener('change',()=>{stable.clear();sameFrames=0;lastHash=null;monitorInfo();});
+ $('world-sync').addEventListener('change',()=>{resetDefeat();stable.clear();sameFrames=0;lastHash=null;monitorInfo();});
  $('interval').addEventListener('change',()=>{if(!busy)schedule();});
  $('apply').addEventListener('change',()=>{stable.clear();sameFrames=0;lastHash=null;});
  $('area').addEventListener('click',()=>{selecting=true;preview.classList.add('is-selecting');status('プレビュー上でゲーム画面の範囲をドラッグしてください。');});
@@ -227,7 +227,7 @@
  preview.addEventListener('pointermove',event=>{if(!selectionStart||!frame)return;const p=point(event);ctx.drawImage(frame,0,0);ctx.strokeStyle='#b8ff44';ctx.lineWidth=4;ctx.strokeRect(selectionStart.x*1536,selectionStart.y*709,(p.x-selectionStart.x)*1536,(p.y-selectionStart.y)*709);});
  preview.addEventListener('pointerup',event=>{if(!selectionStart)return;const p=point(event),a=area||{x:0,y:0,w:1,h:1},next={x:a.x+Math.min(p.x,selectionStart.x)*a.w,y:a.y+Math.min(p.y,selectionStart.y)*a.h,w:Math.abs(p.x-selectionStart.x)*a.w,h:Math.abs(p.y-selectionStart.y)*a.h};selectionStart=null;selecting=false;preview.classList.remove('is-selecting');if(isArea(next)){area=next;generation++;stable.clear();lastHash=null;sameFrames=0;save();read();}else{ctx.drawImage(frame,0,0);status('範囲が小さすぎます。もう一度指定してください。');}});
  preview.addEventListener('pointercancel',()=>{selectionStart=null;selecting=false;preview.classList.remove('is-selecting');if(frame)ctx.drawImage(frame,0,0);});
- $('area-reset').addEventListener('click',()=>{area=null;generation++;stable.clear();lastHash=null;sameFrames=0;save();if(rawSource)read();});
+ $('area-reset').addEventListener('click',()=>{area=null;resetDefeat();generation++;stable.clear();lastHash=null;sameFrames=0;save();if(rawSource)read();});
  $('learn-kind').addEventListener('change',updateLearningOptions);
  $('learn').addEventListener('click',()=>{if(!frame||!catalog)return;const [kind,index]=$('learn-kind').value.split(':'),id=$('learn-id').value,ref=vision.learn(frame,kind,id,kind.startsWith('chip-')?Number($('learn-slot').value):Number(index)),list=kind.startsWith('chip-')?custom.chips:custom.characters;if(custom.characters.length+custom.chips.length>=500){status('見本は最大500件です。');return;}if(!list.some(r=>r.id===ref.id&&r.kind===ref.kind&&r.data===ref.data))list.push(ref);generation++;stable.clear();sameFrames=0;lastHash=null;save();read();});
  $('export').addEventListener('click',()=>{const url=URL.createObjectURL(new Blob([JSON.stringify({version:1,...custom,area},null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='screen-reader-profile.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});

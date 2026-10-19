@@ -813,11 +813,11 @@ for(const protocol of ['http','file'])test('08 autumn icon stacks: derived attac
  const owl=page.locator('#map-roster-list .roster-card[data-id="M0123"]').last(),owlHp=owl.locator('input[aria-label$="の残りHP"]');
  for(const [value,active] of [[5,false],[4,true],[3,true],[5,false]]){await owlHp.fill(String(value));await owlHp.dispatchEvent('change');await expect(owl.locator('.roster-owl-low-hp')).toHaveCount(active?1:0);}
  await page.locator('.role-tab[data-role="character"]').click();await page.locator('#selected-self-tab').click();
- const attention=page.locator('#selected-character-conditions').getByRole('button',{name:'ミミにガオーの注目を付与',exact:true}),defense=page.locator('#selected-character-def'),move=page.locator('#selected-character-move'),def0=Number(await defense.inputValue()),move0=Number(await move.inputValue());
- await expect(attention.locator('img')).toHaveAttribute('src',/UT_Buff_1071_02.png$/);await attention.click();await expect(attention).toContainText('2T');await expect(defense).toHaveValue(String(Math.max(0,def0-1)));await expect(move).toHaveValue(String(Math.max(0,move0-1)));
+ const attention=page.locator('#selected-character-conditions').getByRole('button',{name:'ミミにガオーの注目を付与',exact:true}),defense=page.locator('#selected-character-def'),move=page.locator('#selected-character-move'),def0=Number(await defense.inputValue()),move0=Number(await move.textContent());
+ await expect(attention.locator('img')).toHaveAttribute('src',/UT_Buff_1071_02.png$/);await attention.click();await expect(attention).toContainText('2T');await expect(defense).toHaveValue(String(Math.max(0,def0-1)));await expect(move).toHaveText(String(Math.max(0,move0-1)));
  await attention.click();await expect(defense).toHaveValue(String(Math.max(0,def0-1)));
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#turn-end').click();await page.locator('.role-tab[data-role="character"]').click();await expect(attention).toContainText('1T');
- await attention.click({button:'right'});await expect(defense).toHaveValue(String(def0));await expect(move).toHaveValue(String(move0));
+ await attention.click({button:'right'});await expect(defense).toHaveValue(String(def0));await expect(move).toHaveText(String(move0));
  await page.locator('#selected-party-tab').click();await expect(page.locator('#selected-party-grid .autumn-attention')).toHaveCount(0);
  await page.locator('.role-tab[data-role="map"]').click();await expect.poll(()=>gao.locator('.roster-autumn-controls img').evaluateAll(imgs=>imgs.every(im=>im.complete&&im.naturalWidth>0))).toBe(true);
  await page.screenshot({path:'artifacts/autumn-icons-'+protocol+'-'+test.info().project.name+'.png',fullPage:true});expect(errors).toEqual([]);

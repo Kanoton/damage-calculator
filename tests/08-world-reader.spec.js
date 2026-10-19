@@ -444,8 +444,9 @@ test('08 autumn defeat cues: partial gray patches then beam; spawn, absence and 
  for(const sample of defeatManifest.samples){
   await page.evaluate(()=>window.defeatTestTracker=ScreenReaderDefeatVision.createTracker());const output=[];
   for(const snap of sample.snapshots){const cues=await defeatFrame(page,snap,snap.source_pts_s*1000);if(snap.phase==='before'||snap.phase==='gray')expect(cues,sample.id+' '+snap.phase).toEqual([]);output.push(...cues);}
-  // Moving camera/overlaid boss text remains an abstention, never a guessed boss kill.
-  expect(output.map(c=>[c.monsterId,c.serial]),sample.id).toEqual(sample.expected_event==='defeat'&&sample.id!=='bear-2'?[[sample.monster_id,null]]:[]);
+  // Including the moving camera/overlaid boss text: identify only a species, never a guessed boss or serial.
+  require('fs').mkdirSync('artifacts',{recursive:true});require('fs').writeFileSync('artifacts/defeat-'+test.info().project.name+'-'+sample.id+'.json',JSON.stringify(output,null,2));
+  expect(output.map(c=>[c.monsterId,c.serial]),sample.id).toEqual(sample.expected_event==='defeat'?[[sample.monster_id,null]]:[]);
  }
  expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(initial);
  // Gray by itself, stale frames and a beam in a new independent capture are insufficient.

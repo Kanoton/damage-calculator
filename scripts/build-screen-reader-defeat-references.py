@@ -34,10 +34,31 @@ def build():
    for x in range(x0,x1+1):counts[slot(x,y)]+=1
   for x,y in group:shape[slot(x,y)]+=1
   patches.append(dict(sample=sample['id'],monsterId=sample['monster_id'],source_sha256=hashlib.sha256(raw).hexdigest(),ratio=w/h,shape=[round(v/counts[i],4) if counts[i] else 0 for i,v in enumerate(shape)]))
+ extra=ROOT/'tests/fixtures/screen-reader/defeat/gray-patches-v1'
+ for row in json.loads((extra/'manifest.json').read_text())['patches']:
+  video=FOLDER/row['source_video']
+  if hashlib.sha256(video.read_bytes()).hexdigest()!=row['video_sha256']:raise ValueError('Changed source video')
+  path=extra/row['image'];image=Image.open(path).convert('RGB');w,h=image.size;px=image.load();seen=set();groups=[]
+  def dark(x,y):
+   a=px[x,y];return max(a)<100 and min(a)>12 and max(a)-min(a)<22
+  for y in range(h):
+   for x in range(w):
+    if (x,y) in seen or not dark(x,y):continue
+    q=[(x,y)];seen.add((x,y));group=[]
+    while q:
+     v=q.pop();group.append(v)
+     for xx,yy in [(v[0]-1,v[1]),(v[0]+1,v[1]),(v[0],v[1]-1),(v[0],v[1]+1)]:
+      if 0<=xx<w and 0<=yy<h and (xx,yy) not in seen and dark(xx,yy):seen.add((xx,yy));q.append((xx,yy))
+    groups.append(group)
+  group=max(groups,key=len);shape=[0]*400;counts=[0]*400
+  for y in range(h):
+   for x in range(w):counts[min(19,y*20//h)*20+min(19,x*20//w)]+=1
+  for x,y in group:shape[min(19,y*20//h)*20+min(19,x*20//w)]+=1
+  patches.append(dict(sample=row['sample'],monsterId=row['monsterId'],source_patch=row['image'],source_sha256=hashlib.sha256(path.read_bytes()).hexdigest(),ratio=w/h,shape=[round(v/counts[i],4) if counts[i] else 0 for i,v in enumerate(shape)]))
  return '// Generated visible patches; no full-body requirement or serial inference.\nwindow.ScreenReaderDefeatReferences='+json.dumps(dict(version=1,fullBodyRequired=False,patches=patches),separators=(',',':'))+';\n'
 if __name__=='__main__':
  args=argparse.ArgumentParser();args.add_argument('--check',action='store_true');a=args.parse_args();text=build()
  if a.check:
   if OUT.read_text()!=text:raise ValueError('Stale defeat references; rebuild')
  else:OUT.write_text(text)
- print('Validated 9 partial gray patches / 4 species; individual number remains unknown')
+ print('Validated original and compressed partial gray patches / 4 species; individual number remains unknown')
