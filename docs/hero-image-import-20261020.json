@@ -1,0 +1,522 @@
+{
+  "version": 1,
+  "source_zip": "pic.zip",
+  "source_zip_sha256": "01c7ebb27bdaa20b87b13f051d446717d90ff29c6b4430a5d8be1f2547b28be4",
+  "base_commit": "4be63dc2bf3cf93f829fe3faaa3b374c428aac52",
+  "same_name_skipped": 370,
+  "same_name_all_byte_identical": true,
+  "new_images": [
+    {
+      "path": "images/UT_Hero_ProfilePhoto/UT_Hero_ProfilePhoto_1071.png",
+      "size": [
+        220,
+        220
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "75feada56e1e6db9628ab2a29cba779f122053e24f3eac85c37775fe45982f37",
+      "sha256": "c0739878436862bfed7f3b647199e754c27ca387e5b393e334a20875380f86e2",
+      "bytes": 31641
+    },
+    {
+      "path": "images/UT_Hero_ProfilePhoto/UT_Hero_ProfilePhoto_1072.png",
+      "size": [
+        220,
+        220
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "1bad66b948e88629ac89362d599edfb9e06c54192f0562d7531a912a68984de0",
+      "sha256": "baf77650041007c148e247e5ca754eca419052e67090d2bc0bac93602fa1f0b3",
+      "bytes": 26399
+    },
+    {
+      "path": "images/UT_Hero_ProfilePhoto/UT_Hero_ProfilePhoto_1073.png",
+      "size": [
+        220,
+        220
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "2701690e65b3b2a49c8a075f1b74a5a145515b44bc5cbc0d4c7885d03a644cf0",
+      "sha256": "45a582ab77d496764b2fbc4c436629c542e6e0b00ae1b1fb5a5163481d2e3d1a",
+      "bytes": 33606
+    },
+    {
+      "path": "images/UT_Hero_ProfilePhoto/UT_Hero_ProfilePhoto_1074.png",
+      "size": [
+        220,
+        220
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "c7c060d574b482d28ebe9d2d5fa1145d838cae19db46f0997eab51621b5a7f4b",
+      "sha256": "4d8be6f4f54e258a2c645bf5a073c88ce7be332a7f26d8fc27d43dcbe077c69e",
+      "bytes": 25209
+    },
+    {
+      "path": "images/UT_Hero_ProfilePhoto/UT_Hero_ProfilePhoto_113_04.png",
+      "size": [
+        220,
+        220
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "29069d1cc5c582a869a64b1e27577153d7ed804ac0806b4d67f66e26089877b4",
+      "sha256": "3f21898b748e33f3803aee71f80f761654f15e1375c59ae373a912b82556c512",
+      "bytes": 29016
+    },
+    {
+      "path": "images/UT_Hero_ProfilePhoto/UT_Hero_ProfilePhoto_117_04.png",
+      "size": [
+        220,
+        220
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "b2b5f048ebb30ce03275e25b9d7bad17ac490c5a6e1903d9583111b674db9674",
+      "sha256": "20c133b559da0138729b4fcceb6fccc5b52d16fa10d6c295a2ade24e244b8e28",
+      "bytes": 31315
+    },
+    {
+      "path": "images/UT_Hero_ProfilePhoto/UT_Hero_ProfilePhoto_119_03.png",
+      "size": [
+        220,
+        220
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "dc7479b75749e86d231fce15cae131fe31dadf97cba25ec0ea55e26982e55363",
+      "sha256": "cc492d03d03f93353bd9bfdc7f6e774602fd904c55f4e11e09ec272b72924619",
+      "bytes": 24015
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_102_01_sfw.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "849d67964e475fc6d9eb9fc9b53285f576ccaa29ee12328d0b3bfa9cd193c871",
+      "sha256": "e2f5c2efcf29338c6a10026a5cc009c44440c40dce734e8f7b8258a227c2f227",
+      "bytes": 298989
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_103_01_sfw.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "0020b4d2dd0bb383a1f3b046c532fbe4fc29c611d895aec4a8c3c5954170708c",
+      "sha256": "4eedfcc97afe308d6bc2a57e91164f886e631c32a4ca902ee9e32169e54f373a",
+      "bytes": 281194
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_103_sfw.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "e7ac4f7c1ba5328500da6a33836042f3b0c1988aaae859be87d00915b12af4dd",
+      "sha256": "4159921be3715062330d110dc4e803c30ea3e7f85314cd43a7bb9b1d9c2841d7",
+      "bytes": 283496
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_104_01_sfw.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "d42fd4eae10494cc1ed54fda7bc3768d4b4e13da6169eaa5c5dc33e500964c35",
+      "sha256": "ab2bd772aef1fae9932d9abf5102cad6da081468064593c6b8a590df80aad5de",
+      "bytes": 268528
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_104_02_sfw.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "bbdb86b533e7c2df9abecc9018f6e422c9a7a5bea99df1187bc0120de93cb7e4",
+      "sha256": "4c76b531535f33194c210747b847d7f194241feb0a4d70844a0049c8c18a645a",
+      "bytes": 280394
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_106_02_sfw.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "b6856bce61fc6230689d6698cf95a8e1a4cd0d6b329c17e812045fde662899fe",
+      "sha256": "66e706c89fded6de66162390b6db5e4cbfe83e98b3e0385b647dd54980aa9c4b",
+      "bytes": 264015
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_106_Max_sfw.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "8a0408083b58feb66a89bb61c98322f7ca827e7aa76d8c38c84eacd0d4760854",
+      "sha256": "a107b1319ae93c68a422bb0f95defec76dcd47b3e3da38989db02da4556ee770",
+      "bytes": 229077
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_107_02_sfw_3.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "bd94a79fd42a01c55e9351a0e3a147bf4024865830356a57205f9e1f574dc6f1",
+      "sha256": "b5397ce7257cbba8d6ab79d7fee2d6dfdcaf5199ae50bf9ebeb009c95b297a45",
+      "bytes": 308390
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_107_Max_sfw_3.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "d942807ad5951182a057811e61ec3fe6e134c403761e0a3998581ac12b9a6d9c",
+      "sha256": "003ac58c45368fccfa151adfbea3080528eee28bee8a301f64a16e3716018dfd",
+      "bytes": 316970
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_108_03_sfw_3.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "c289bc0f08f593c188e9f8adface025e32153fcfa8c63aad3f9a31f0416b30c6",
+      "sha256": "05122e8f0b6e20d480961c5e174b3c9b7328fe0f561c043855ef57037124fe67",
+      "bytes": 273372
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_108_04.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "b15d57f7946ccda0c7666b4531d96e048d4cbfca928328b0ec365fd45fecc10c",
+      "sha256": "86933f2f35c864b14f22cdd662e38951cbf7e5ec6580728c121540d32aeaf3da",
+      "bytes": 329250
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_108_04_sfw.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "30180b38ba55991cc91661ed8db2064b3fd2664ce52ab2f08858bafdd257552f",
+      "sha256": "3ed03e61c32c8d6d52f46672c1817e851ff61a89b9c214db9ce606568a82b234",
+      "bytes": 323477
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_108_Max_sfw_3.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "154dacb1bf2d505e7ae39562391f8775b96622f3c84877abb3757963d386773c",
+      "sha256": "58266fa0205a213530ea63518be30927469ada1aca4115f2da99e08f27346bd8",
+      "bytes": 332567
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_112_03_sfw.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "1df205f8641f7ea50bde905a844c85530e0cbb452a56274a41b40ba455c6bdcc",
+      "sha256": "12609b2a0a8983b525e46a1da8f8e6bcce002a2ea8a9c06ae3993243af1e6534",
+      "bytes": 276277
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_113_Max_sfw.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "4c24d1eb2332cd2625cb712149632809d54b4754f80ecdc07c3a6220f9dff063",
+      "sha256": "d0b114f4dede549845020b286c4363d171655681962a6c9571ea5d222c3b38f0",
+      "bytes": 331648
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_114_03_sfw.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "dabd9da1050d26b6cb869c89fbd6952117b8ba7548544b2fa6a79f448882cf6c",
+      "sha256": "09bd73a7271b8969bf8f45948645792fcb5e1b45549fa6e00aa9f17d03d3cb80",
+      "bytes": 262550
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_115_Max_sfw_3.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "6e76acc5867dedaa6bc84a4880d6c98f175e6e12270505c8d9f747e88a39443e",
+      "sha256": "71a0304bae8f12f42ee0dc4460c585c828aba30cf2a8cd658c92b9fe100dc1b5",
+      "bytes": 270769
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_120_02_sfw_3.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "2d0b97225fab312c067155c9c0f19574bfd853ab2432530a6f1141a28cba4fc6",
+      "sha256": "d4e8ad28b79c4645f6ce4c62cca791fedf888b5fed9d0611a42c1af6ea69eeed",
+      "bytes": 346900
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_120_04.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "80938ed865eafb98c11f37bee70e63228b2a810430ab91e0501b75c9b5a02268",
+      "sha256": "cccbe4d93d1b2cd9c1286a6835fb35a11cb6c55596a32565bcc294cb4dc78303",
+      "bytes": 259884
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_120_04_sfw.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "a910e9585b37e8a599b91368c13eb7e96580959e27b9130f773d5a86f88a7050",
+      "sha256": "df19e1972154a0821429701ac2fc00323c4e8063c4fe14ed5808a08faf059d10",
+      "bytes": 263168
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_121_03_sfw.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "34b4c1bfe487c8057531a4e265113338109a2abaa7052f9af8c2cde9719dd550",
+      "sha256": "afae3044ed76b459b3d13f0f3626ff637498946493800b3e5cf0b33e7f190443",
+      "bytes": 267434
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_121_Max_sfw.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "af6f161f2d7b896bc0cbd244a27243c82b3c8fc40d7e238c6aadaa5f71b6741a",
+      "sha256": "9a648d914518f57af7234f3273d237c324163b12a5a754e51eeea73a91c54b2f",
+      "bytes": 256295
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_121_sfw.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "cc48e430e595d99cd0aee81a7b8d87726c5e4caac37b251188a78644bb215781",
+      "sha256": "ce61a68c9c27a7bf963681f43082f39340f66a523a8db73f46dc5dbeb45e8af9",
+      "bytes": 269264
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_123_01_sfw_3.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "f9ea9ea6ab41332e7963f3c82e79e1c24b5c24a64eb208ff31c0a2d63e6f823e",
+      "sha256": "322b305fd5eed69402a3483f3088235a50c46d184407a06e7942f26e1a69a36b",
+      "bytes": 304285
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_123_sfw_3.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "7a65f926604a887e62a6d673f3931c49a02251f28b4801f8892898c65f1af71b",
+      "sha256": "2a1f1c9ea688ffc0379a9a32060d52da2532d9e714def697ea4a02c9eb6dce7a",
+      "bytes": 301344
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_127_02.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "650e4eae997ecbaefedd2548f2356068b5160cb29479826c882c150807b0bf1e",
+      "sha256": "879932bb018b4ec49f5d5a23446c7b7abac7a7b17ad80343076ef7e3570d3ae6",
+      "bytes": 323425
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_128_01.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "db953dbc9ef3e30c2f29848628265a2c04e0e6b52b2e805ff050cc6420c89469",
+      "sha256": "1508d146116d00e67b65baef8d053c7e88f7d17482ab10b1404202a2c208ba3b",
+      "bytes": 284803
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_128_01_sfw.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "001e05bbc1b0aa5e0f3167979c28f96a41c789cec8f03efc400fec04128c31cf",
+      "sha256": "664fc920fda780bbd4a20a92f51f95a8ea6f9951d6b1dc8ffc4a9ef6b1d4e9b5",
+      "bytes": 280666
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_128_sfw_3.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "89d136c277ba45f2f90b823d0a6cbab0793f15ba819c1db81e4b591c47be17b6",
+      "sha256": "54182e18fa4b5dfc3f9cbe8d85debb335c0f487e75dd40c6b09991d7e309e99e",
+      "bytes": 281300
+    }
+  ],
+  "replaced_duplicates": [
+    {
+      "old": "images/Monster/M0121_Icon.png",
+      "incoming": [
+        "images/UT_Hero_ProfilePhoto/UT_Hero_ProfilePhoto_1073.png"
+      ],
+      "same_bytes": [
+        "images/UT_Hero_ProfilePhoto/UT_Hero_ProfilePhoto_1073.png"
+      ]
+    },
+    {
+      "old": "images/Monster/M0122_Icon.png",
+      "incoming": [
+        "images/UT_Hero_ProfilePhoto/UT_Hero_ProfilePhoto_1072.png"
+      ],
+      "same_bytes": [
+        "images/UT_Hero_ProfilePhoto/UT_Hero_ProfilePhoto_1072.png"
+      ]
+    },
+    {
+      "old": "images/Monster/M0120_Icon.png",
+      "incoming": [
+        "images/UT_Hero_ProfilePhoto/UT_Hero_ProfilePhoto_1071.png"
+      ],
+      "same_bytes": [
+        "images/UT_Hero_ProfilePhoto/UT_Hero_ProfilePhoto_1071.png"
+      ]
+    },
+    {
+      "old": "images/Monster/M0123_Icon.png",
+      "incoming": [
+        "images/UT_Hero_ProfilePhoto/UT_Hero_ProfilePhoto_1074.png"
+      ],
+      "same_bytes": [
+        "images/UT_Hero_ProfilePhoto/UT_Hero_ProfilePhoto_1074.png"
+      ]
+    }
+  ],
+  "old_names_absent_from_zip_retained": [
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card2_109_Max_2.png",
+      "size": [
+        420,
+        684
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "e8e285bb618be619d9381ba232c42e3694562f8679f72025f81dc933f08d7fdb",
+      "sha256": "6e104dd395388f876550bcc06a723d77e5e59560f122de5e1d23b9fd120ba2ef",
+      "bytes": 293731
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card_113_04.png",
+      "size": [
+        1416,
+        1612
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "479666d23920cdc47fcec924fefbad48f58e4ff112e586ab9b1325f2abbc725c",
+      "sha256": "e540ceefbe37ec0647cfb34d83705fe0abe2d01807b0ad21baef19774600b34b",
+      "bytes": 1188669
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card_117_04.png",
+      "size": [
+        1261,
+        2048
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "5dbc05ddde123370b58340b943b5b72285c8a3950a2866c346edd54e761c0fa6",
+      "sha256": "acfb8efc6bbf349692ce783f17ad6d042e25f7e076078724afe5ef6d259b368a",
+      "bytes": 1688334
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card_117_04_sfw.png",
+      "size": [
+        1261,
+        2048
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "45676ea91fc2fe6bafc80912dcbc1cd9604179d0f594f36e3e45aa559f3230fa",
+      "sha256": "16b9d71d47c5d611bb71b403b9ec8337018e58effb50e488e7cf08b788f30276",
+      "bytes": 1672902
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card_119_03.png",
+      "size": [
+        1857,
+        2048
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "a859db167dd6952004f61fbd36dd0d39c861f0fb2447b6c2bbf1269eafef71b6",
+      "sha256": "43e6498ddfb2dae8a437ef9b185b966a7efeed75dc987b0b23cf60bcd0e03a53",
+      "bytes": 2084360
+    },
+    {
+      "path": "images/UT_Hero_Card2/UT_Hero_Card_119_03_sfw.png",
+      "size": [
+        1857,
+        2048
+      ],
+      "mode": "RGBA",
+      "pixel_sha256": "0fbd573e7bf315ae98ed211e786393d8cc1f68e90053d5b9f59eec1d6ca0fe3b",
+      "sha256": "4569f8964b7853bbdfc5514ea7c6e6c1430406f75a96965a51d1ffafd3576ef0",
+      "bytes": 1910732
+    }
+  ],
+  "image_identity": "Dimensions and decoded RGBA pixels; RGB under zero alpha is normalized to black. Four retired icons are also byte-for-byte identical.",
+  "reference_files_updated": [
+    "csv/monster_stats.csv",
+    "docs/map-event-output/autumn-forest/production/data/monster_stats.csv",
+    "07_skill/js/map-data.js",
+    "08_screen_reader/js/map-data.js",
+    "scripts/update-autumn-assets-20261018.py",
+    "scripts/render-autumn-map.py"
+  ],
+  "reader_dictionary_changed": false
+}

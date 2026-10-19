@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "images": [
+    {
+      "image_file": "UT_Hero_ProfilePhoto_1071.png",
+      "sha256": "c0739878436862bfed7f3b647199e754c27ca387e5b393e334a20875380f86e2",
+      "source": "pic.zip",
+      "reason": "素材の受領・整理のみ。認識用の分類・照合見本への追加は保留。"
+    },
+    {
+      "image_file": "UT_Hero_ProfilePhoto_1072.png",
+      "sha256": "baf77650041007c148e247e5ca754eca419052e67090d2bc0bac93602fa1f0b3",
+      "source": "pic.zip",
+      "reason": "素材の受領・整理のみ。認識用の分類・照合見本への追加は保留。"
+    },
+    {
+      "image_file": "UT_Hero_ProfilePhoto_1073.png",
+      "sha256": "45a582ab77d496764b2fbc4c436629c542e6e0b00ae1b1fb5a5163481d2e3d1a",
+      "source": "pic.zip",
+      "reason": "素材の受領・整理のみ。認識用の分類・照合見本への追加は保留。"
+    },
+    {
+      "image_file": "UT_Hero_ProfilePhoto_1074.png",
+      "sha256": "4d8be6f4f54e258a2c645bf5a073c88ce7be332a7f26d8fc27d43dcbe077c69e",
+      "source": "pic.zip",
+      "reason": "素材の受領・整理のみ。認識用の分類・照合見本への追加は保留。"
+    },
+    {
+      "image_file": "UT_Hero_ProfilePhoto_113_04.png",
+      "sha256": "3f21898b748e33f3803aee71f80f761654f15e1375c59ae373a912b82556c512",
+      "source": "pic.zip",
+      "reason": "素材の受領・整理のみ。認識用の分類・照合見本への追加は保留。"
+    },
+    {
+      "image_file": "UT_Hero_ProfilePhoto_117_04.png",
+      "sha256": "20c133b559da0138729b4fcceb6fccc5b52d16fa10d6c295a2ade24e244b8e28",
+      "source": "pic.zip",
+      "reason": "素材の受領・整理のみ。認識用の分類・照合見本への追加は保留。"
+    },
+    {
+      "image_file": "UT_Hero_ProfilePhoto_119_03.png",
+      "sha256": "cc492d03d03f93353bd9bfdc7f6e774602fd904c55f4e11e09ec272b72924619",
+      "source": "pic.zip",
+      "reason": "素材の受領・整理のみ。認識用の分類・照合見本への追加は保留。"
+    }
+  ]
+}
