@@ -771,11 +771,19 @@ test('08: monster text tooltip follows difficulty and also works on roster cards
 });
 
 test('08: monster text tooltip retains readable long text and viewport bounds',async({page})=>{
+ await page.addInitScript(()=>{
+  const descriptor=Object.getOwnPropertyDescriptor(HTMLElement.prototype,'hidden');
+  Object.defineProperty(HTMLElement.prototype,'hidden',{...descriptor,set(value){
+   if(this.id==='monster-tooltip'&&value)console.log('MONSTER_HIDE',new Error().stack,document.querySelector('#monster-tooltip')?.matches(':hover'));
+   descriptor.set.call(this,value);
+  }});
+ });
+ page.on('console',message=>{if(message.text().includes('MONSTER_HIDE'))console.log(message.text());});
  await openMonsterText(page,'MAP0104');const tile=page.locator('.mp-monster[data-id="M0116"]'),tip=page.locator('#monster-tooltip');
  for(const viewport of [{width:1280,height:800},{width:760,height:560}]){
   await page.setViewportSize(viewport);await tile.scrollIntoViewIfNeeded();await tile.hover();await expect(tip).toContainText('証拠の否認［CT 3］');
   const box=await tip.boundingBox();expect(box.x).toBeGreaterThanOrEqual(7);expect(box.y).toBeGreaterThanOrEqual(7);expect(box.x+box.width).toBeLessThanOrEqual(viewport.width-7);expect(box.y+box.height).toBeLessThanOrEqual(viewport.height-7);
-  await tip.hover();await page.screenshot({path:test.info().outputPath('monster-before-scroll-'+viewport.width+'.png')});await page.mouse.wheel(0,2400);await expect.poll(()=>tip.evaluate(el=>el.scrollTop)).toBeGreaterThan(0);await expect(tip).toBeVisible();
+  await tip.hover();await page.screenshot({path:test.info().outputPath('monster-before-scroll-'+viewport.width+'.png')});console.log('MONSTER_STATE',await tip.evaluate(el=>({height:el.clientHeight,scrollHeight:el.scrollHeight,pointer:getComputedStyle(el).pointerEvents,overflow:getComputedStyle(el).overflow,hover:el.matches(':hover')})));await page.mouse.wheel(0,2400);await expect.poll(()=>tip.evaluate(el=>el.scrollTop)).toBeGreaterThan(0);await expect(tip).toBeVisible();
   await tip.evaluate(el=>el.scrollTop=0);await page.screenshot({path:test.info().outputPath('monster-text-'+viewport.width+'.png')});
   await page.keyboard.press('Escape');await expect(tip).toBeHidden();
  }
