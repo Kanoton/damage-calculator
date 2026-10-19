@@ -818,7 +818,10 @@ for(const protocol of ['http','file'])test('08 autumn icon stacks: derived attac
  await attention.click();await expect(defense).toHaveValue(String(Math.max(0,def0-1)));
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#turn-end').click();await page.locator('.role-tab[data-role="character"]').click();await expect(attention).toContainText('1T');
  await attention.click({button:'right'});await expect(defense).toHaveValue(String(def0));await expect(move).toHaveText(String(move0));
+ await page.screenshot({path:'artifacts/autumn-attention-'+protocol+'-'+test.info().project.name+'.png'});
  await page.locator('#selected-party-tab').click();await expect(page.locator('#selected-party-grid .autumn-attention')).toHaveCount(0);
  await page.locator('.role-tab[data-role="map"]').click();await expect.poll(()=>gao.locator('.roster-autumn-controls img').evaluateAll(imgs=>imgs.every(im=>im.complete&&im.naturalWidth>0))).toBe(true);
+ expect(await energy.locator('img').evaluate(im=>{const r=im.getBoundingClientRect();return r.width<=25&&r.height<=25;})).toBe(true);
+ await hp.fill('59');await hp.dispatchEvent('change');await owlHp.fill('4');await owlHp.dispatchEvent('change');
  await page.screenshot({path:'artifacts/autumn-icons-'+protocol+'-'+test.info().project.name+'.png',fullPage:true});expect(errors).toEqual([]);
 });

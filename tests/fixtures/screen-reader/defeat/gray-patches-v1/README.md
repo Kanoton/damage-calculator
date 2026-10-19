@@ -5,3 +5,5 @@
 manifestは元の保存動画SHA256、fps=4の0始まり出力番号、縮小後の矩形、種類、手動確認を記録する。画像は全画面ではなく、キャラと重なったままの可視パッチ。プレイヤー名等は含まない。元動画内の全フレームの対応は隣のautumn-reviewed-20261019/manifest.jsonを参照。
 
 生成JSは `python3 scripts/build-screen-reader-defeat-references.py`。CIでは同コマンド`--check`でパッチ画素・元動画ハッシュと生成一致を確認する。これは開発用の既知見本であり、未知動画の正答率の評価ではない。
+
+Chromiumの別成分への分割は隣の`gray-renderer-patches.json`に実ブラウザの部分形状を保存。ブラウザ診断は`node scripts/inspect-defeat-browser.cjs`（PlaywrightのChromium/WebKitが必要）。原画SHA・版・位置を持ち、元のグレーの上側の部分だけでも照合する。

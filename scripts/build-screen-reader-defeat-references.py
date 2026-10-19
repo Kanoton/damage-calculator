@@ -55,6 +55,10 @@ def build():
    for x in range(w):counts[min(19,y*20//h)*20+min(19,x*20//w)]+=1
   for x,y in group:shape[min(19,y*20//h)*20+min(19,x*20//w)]+=1
   patches.append(dict(sample=row['sample'],monsterId=row['monsterId'],source_patch=row['image'],source_sha256=hashlib.sha256(path.read_bytes()).hexdigest(),ratio=w/h,shape=[round(v/counts[i],4) if counts[i] else 0 for i,v in enumerate(shape)]))
+ for row in json.loads((ROOT/'tests/fixtures/screen-reader/defeat/gray-renderer-patches.json').read_text())['patches']:
+  if hashlib.sha256((FOLDER/row['image']).read_bytes()).hexdigest()!=row['source_sha256']:raise ValueError('Changed renderer source image')
+  if len(row['shape'])!=400 or not all(0<=v<=1 for v in row['shape']):raise ValueError('Invalid renderer patch')
+  patches.append({key:row[key] for key in ['sample','monsterId','renderer','renderer_version','image','source_sha256','ratio','shape']})
  return '// Generated visible patches; no full-body requirement or serial inference.\nwindow.ScreenReaderDefeatReferences='+json.dumps(dict(version=1,fullBodyRequired=False,patches=patches),separators=(',',':'))+';\n'
 if __name__=='__main__':
  args=argparse.ArgumentParser();args.add_argument('--check',action='store_true');a=args.parse_args();text=build()
