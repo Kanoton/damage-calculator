@@ -143,9 +143,11 @@
    for(const stat of ['atk','def','move'])result[stat]+=stacks*(Number(rule[stat])||0);
    result.damageReduce+=stacks*(Number(rule.damage_reduce)||0);
   }
-  if(mapPicker.value==='MAP0105'&&number(state(),'ガオーの注目')>0){result.def-=1;result.move-=1;}
+  if(mapPicker.value==='MAP0105'&&number(state(),'ガオーの注目')>0)result.def-=1;
   for(const stat of ['atk','def','move'])result[stat]+=state().manual?.[stat]||0;
   result.atk=Math.max(0,result.atk);result.def=Math.max(0,result.def);result.move=Math.max(0,result.move);
+  // Movement is a dice modifier: attention must still show -1 at zero bonus.
+  if(mapPicker.value==='MAP0105'&&number(state(),'ガオーの注目')>0)result.move-=1;
   return result;
  }
  function makeIcon(key){
@@ -490,7 +492,7 @@
  }
  function editPartyMember(id){partyEditId=String(id);renderParty();updateChipListSelection();const row=characters.find(item=>String(item.id)===partyEditId);chipStatus.textContent='チップ編集対象：'+(row?.name||'自キャラ');}
  function changePartyStat(row,isSelf,key,delta){
-  if(isSelf){if(key==='hp'){changeHp(delta);return;}const current=calculate()[key];state().manual[key]=(state().manual[key]||0)+Math.max(0,current+delta)-current;updateStats();return;}
+  if(isSelf){if(key==='hp'){changeHp(delta);return;}const current=calculate()[key],minimum=key==='move'&&mapPicker.value==='MAP0105'&&number(state(),'ガオーの注目')>0?-1:0;state().manual[key]=(state().manual[key]||0)+Math.max(minimum,current+delta)-current;updateStats();return;}
   const member=getPartyState(row.id),totals=calculatePartyMember(row);if(key==='hp')member.currentHp=Math.max(0,Math.min(totals.hp,member.currentHp+delta));else member.manual[key]+=Math.max(0,totals[key]+delta)-totals[key];renderParty();
  }
  function renderParty(){
