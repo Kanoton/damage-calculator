@@ -1708,7 +1708,7 @@ dialog[data-inline-pad] .skill-entry-row>[data-cancel]{min-width:72px;align-self
 .roster-autumn-controls{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:0 10px 8px}
 .roster-autumn-controls .roster-mark{height:27px;margin-left:0}
 .roster-autumn-controls .roster-mark-button img{display:block;width:25px;height:25px;max-width:25px;object-fit:contain}
-#map-draft .roster-autumn-controls .roster-mark-button{width:27px;height:27px;padding:1px}
+.roster-autumn-controls .roster-mark-button{width:27px;height:27px;padding:1px}
 .autumn-attention{display:inline-flex;gap:4px;align-items:center}
 
 .autumn-attention button{white-space:nowrap}
