@@ -15,6 +15,11 @@ MAPPING = ROOT / 'csv/self_portrait_mapping.csv'
 # existing Hanna, Sherry and Kaisei screenshots; other assets are not real-screen QA.
 CROPS = [(80,80,220),(160,0,220),(120,40,260),(80,40,260),
          (120,0,220),(80,0,260),(40,40,260),(120,80,220),(90,90,230)]
+# These narrower faces do not fill the generic crop. Keep the same alpha rule.
+NARROW = {'UT_Hero_Card2_106.png','UT_Hero_Card2_106_02.png',
+          'UT_Hero_Card2_106_02_sfw.png','UT_Hero_Card2_110.png',
+          'UT_Hero_Card2_123.png','UT_Hero_Card2_123_sfw.png',
+          'UT_Hero_Card2_123_sfw_3.png','UT_Hero_Card2_301.png'}
 
 
 def build():
@@ -42,7 +47,8 @@ def build():
             if source.size not in [(420,684),(400,680)]:
                 raise ValueError(f'Uncalibrated Card2 geometry: {name}')
             source = source.resize((420,684),Image.Resampling.BILINEAR)
-            for x,y,width in CROPS:
+            crops = CROPS + ([(100,100,180),(140,80,180),(160,80,180),(120,120,180)] if name in NARROW else [])
+            for x,y,width in crops:
                 im = source.crop((x,y,x+width,y+width*116/139)).resize((16,16),Image.Resampling.BILINEAR)
                 pixels = list(im.get_flattened_data())
                 mask = [p[3] > 240 for p in pixels]
@@ -56,6 +62,8 @@ def build():
     expected = {r['character_id'] for r in profiles.values() if r['entity_type']=='キャラクター'}
     if ids != expected:
         raise ValueError(f'Self portrait coverage mismatch: {expected-ids}')
+    if {r['image'] for r in refs} != seen:
+        raise ValueError('Some mapped self portraits have no opaque descriptor')
     result = {'version':1,'side':16,'sourceHash':digest.hexdigest(),'characters':refs}
     text = '// Generated from csv/self_portrait_mapping.csv and Card2 assets; do not edit.\nwindow.ScreenReaderSelfReferences='+json.dumps(result,separators=(',',':'))+';\n'
     return text, result, len(rows)

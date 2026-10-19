@@ -35,6 +35,8 @@ for(const protocol of ['http','file'])for(const [width,height] of [[1000,1400],[
  expect(observed.hidden.members.map(m=>m.id)).toEqual(['105','106','3','18']);
  expect(observed.hidden.selfId).toBeNull();expect(observed.absentFromParty.selfId).toBeNull();
  await page.locator('#reader-file').setInputFiles({name:'kaisei.png',mimeType:'image/png',buffer:Buffer.from(record.image.split(',')[1],'base64')});
+ await expect(page.locator('#reader-file')).toHaveValue('');
+ await expect(page.locator('#reader-status')).toContainText('画面読取：');
  await expect(page.locator('#reader-read')).toBeEnabled();
  expect((await snapshot(page)).selfId).toBe('13');
 });
