@@ -1,0 +1,598 @@
+{
+  "engine": "Current ScreenReaderWorldVision using native Canvas; not browser accuracy or a defeat detector",
+  "source_files_sha256": {
+    "screen-reader-chip-shape-references.js": "5776346397803c7b83e787213942aa080d550f238fb9f1819eee43faf0fd8c8d",
+    "screen-reader-layout-references.js": "a25d5ed2217d02d9a821cdaa629fdfffc11612f58b02ae66ed25161b4d9fa2e4",
+    "screen-reader-live-status-references.js": "f6192fe1f7faba31c1675d5f1ff323695a8198f3272223b3f04e84aff793a0d9",
+    "screen-reader-name-references.js": "8340fd2b5868b783343d7ab54a59d582a4df964116962160d5a1ab3f34d27084",
+    "screen-reader-popup-references.js": "c0aabe24b0965e7c987da86dc112657e868b2375bbef37b9d92ec228b1801d54",
+    "screen-reader-profile-references.js": "f5dd73eb6005a045da0a6b56e9c0aadbe0fe9e3af16d8bce489f03ef0bc0254a",
+    "screen-reader-references.js": "07bb53600ab210275eb3daa88a54ba3257845f01ac50b3d3ca4c4cc55abc6caa",
+    "screen-reader-start-references.js": "60416985f1980121f301218e514ce6dc5db5996458b4c51a73fd15e98a1001b9",
+    "screen-reader-status-references.js": "ceba7fa650b5afb873bc21f22d1af9141aa26fa9355c4e1f4b5535c68b4483ba",
+    "screen-reader-view-references.js": "5af3690f8e448b34672a1a0a4473ed139cd6f136482635b19a0dc14a9bb5a334",
+    "screen-reader-world-references.js": "b4beca691f4e3026e6d630c2adcf6bfd6c92782095b3118bd5f03d1bc90f806c",
+    "screen-reader-vision.js": "7212d60eac057e72eeeed635dfe9de51738d0914840bbf1626bb0e522b2ef9a3",
+    "screen-reader-start.js": "e81db1690641c99dcebc8ffc6a282d85f81b818a01783c98f5549cf3b8dfd5ac",
+    "screen-reader-world.js": "e49d7e88fa1f6c9670d44c23634ed913cfd468f7882330fbb74976e621b2e247"
+  },
+  "input": "Cropped source pixels restored at their original coordinates on a masked 2560x1440 canvas; hidden HUD/clock intentionally absent",
+  "runtime_auto_defeat_disabled": true,
+  "samples": [
+    {
+      "sample_id": "bear-1",
+      "phase": "before",
+      "source_pts_s": 15.851001,
+      "human_event": "defeat",
+      "human_monster_id": "M0121",
+      "human_serial": 1,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "bear-1",
+      "phase": "gray",
+      "source_pts_s": 16.289332,
+      "human_event": "defeat",
+      "human_monster_id": "M0121",
+      "human_serial": 1,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "bear-1",
+      "phase": "beam",
+      "source_pts_s": 17.165959,
+      "human_event": "defeat",
+      "human_monster_id": "M0121",
+      "human_serial": 1,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "bear-1",
+      "phase": "after",
+      "source_pts_s": 17.503102,
+      "human_event": "defeat",
+      "human_monster_id": "M0121",
+      "human_serial": 1,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "bear-2",
+      "phase": "before",
+      "source_pts_s": 1.796677,
+      "human_event": "defeat",
+      "human_monster_id": "M0121",
+      "human_serial": 2,
+      "observation": {
+        "clock": null,
+        "monsters": [
+          {
+            "monsterId": "M0121",
+            "serial": 2,
+            "currentHp": 2,
+            "maxHp": 14
+          },
+          {
+            "monsterId": "M0120",
+            "serial": null,
+            "currentHp": 116,
+            "maxHp": 120
+          }
+        ]
+      }
+    },
+    {
+      "sample_id": "bear-2",
+      "phase": "gray",
+      "source_pts_s": 2.562425,
+      "human_event": "defeat",
+      "human_monster_id": "M0121",
+      "human_serial": 2,
+      "observation": {
+        "clock": null,
+        "monsters": [
+          {
+            "monsterId": "M0120",
+            "serial": null,
+            "currentHp": 116,
+            "maxHp": 120
+          }
+        ]
+      }
+    },
+    {
+      "sample_id": "bear-2",
+      "phase": "beam",
+      "source_pts_s": 3.061793,
+      "human_event": "defeat",
+      "human_monster_id": "M0121",
+      "human_serial": 2,
+      "observation": {
+        "clock": null,
+        "monsters": [
+          {
+            "monsterId": "M0120",
+            "serial": null,
+            "currentHp": 116,
+            "maxHp": 120
+          }
+        ]
+      }
+    },
+    {
+      "sample_id": "bear-2",
+      "phase": "after",
+      "source_pts_s": 3.361433,
+      "human_event": "defeat",
+      "human_monster_id": "M0121",
+      "human_serial": 2,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "bear-3",
+      "phase": "before",
+      "source_pts_s": 3.014667,
+      "human_event": "defeat",
+      "human_monster_id": "M0121",
+      "human_serial": 3,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "bear-3",
+      "phase": "gray",
+      "source_pts_s": 3.703278,
+      "human_event": "defeat",
+      "human_monster_id": "M0121",
+      "human_serial": 3,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "bear-3",
+      "phase": "beam",
+      "source_pts_s": 4.254132,
+      "human_event": "defeat",
+      "human_monster_id": "M0121",
+      "human_serial": 3,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "bear-3",
+      "phase": "after",
+      "source_pts_s": 4.564006,
+      "human_event": "defeat",
+      "human_monster_id": "M0121",
+      "human_serial": 3,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "owl-1",
+      "phase": "before",
+      "source_pts_s": 13.007605,
+      "human_event": "defeat",
+      "human_monster_id": "M0123",
+      "human_serial": 1,
+      "observation": {
+        "clock": null,
+        "monsters": [
+          {
+            "monsterId": "M0123",
+            "serial": 1,
+            "currentHp": 8,
+            "maxHp": 8
+          }
+        ]
+      }
+    },
+    {
+      "sample_id": "owl-1",
+      "phase": "gray",
+      "source_pts_s": 13.589956,
+      "human_event": "defeat",
+      "human_monster_id": "M0123",
+      "human_serial": 1,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "owl-1",
+      "phase": "beam",
+      "source_pts_s": 14.343587,
+      "human_event": "defeat",
+      "human_monster_id": "M0123",
+      "human_serial": 1,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "owl-1",
+      "phase": "after",
+      "source_pts_s": 14.651891,
+      "human_event": "defeat",
+      "human_monster_id": "M0123",
+      "human_serial": 1,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "owl-2",
+      "phase": "before",
+      "source_pts_s": 12.690767,
+      "human_event": "defeat",
+      "human_monster_id": "M0123",
+      "human_serial": 3,
+      "observation": {
+        "clock": null,
+        "monsters": [
+          {
+            "monsterId": "M0123",
+            "serial": 3,
+            "currentHp": 3,
+            "maxHp": 8
+          }
+        ]
+      }
+    },
+    {
+      "sample_id": "owl-2",
+      "phase": "gray",
+      "source_pts_s": 13.490387,
+      "human_event": "defeat",
+      "human_monster_id": "M0123",
+      "human_serial": 3,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "owl-2",
+      "phase": "beam",
+      "source_pts_s": 13.956852,
+      "human_event": "defeat",
+      "human_monster_id": "M0123",
+      "human_serial": 3,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "owl-2",
+      "phase": "after",
+      "source_pts_s": 14.256722,
+      "human_event": "defeat",
+      "human_monster_id": "M0123",
+      "human_serial": 3,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "dinosaur-1",
+      "phase": "before",
+      "source_pts_s": 11.754918,
+      "human_event": "defeat",
+      "human_monster_id": "M0122",
+      "human_serial": 2,
+      "observation": {
+        "clock": null,
+        "monsters": [
+          {
+            "monsterId": "M0122",
+            "serial": 2,
+            "currentHp": 8,
+            "maxHp": 19
+          }
+        ]
+      }
+    },
+    {
+      "sample_id": "dinosaur-1",
+      "phase": "gray",
+      "source_pts_s": 12.384949,
+      "human_event": "defeat",
+      "human_monster_id": "M0122",
+      "human_serial": 2,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "dinosaur-1",
+      "phase": "beam",
+      "source_pts_s": 12.839972,
+      "human_event": "defeat",
+      "human_monster_id": "M0122",
+      "human_serial": 2,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "dinosaur-1",
+      "phase": "after",
+      "source_pts_s": 13.084949,
+      "human_event": "defeat",
+      "human_monster_id": "M0122",
+      "human_serial": 2,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "dinosaur-2",
+      "phase": "before",
+      "source_pts_s": 11.858017,
+      "human_event": "defeat",
+      "human_monster_id": "M0122",
+      "human_serial": 1,
+      "observation": {
+        "clock": null,
+        "monsters": [
+          {
+            "monsterId": "M0122",
+            "serial": 1,
+            "currentHp": 9,
+            "maxHp": 19
+          }
+        ]
+      }
+    },
+    {
+      "sample_id": "dinosaur-2",
+      "phase": "gray",
+      "source_pts_s": 12.263683,
+      "human_event": "defeat",
+      "human_monster_id": "M0122",
+      "human_serial": 1,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "dinosaur-2",
+      "phase": "beam",
+      "source_pts_s": 12.939759,
+      "human_event": "defeat",
+      "human_monster_id": "M0122",
+      "human_serial": 1,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "dinosaur-2",
+      "phase": "after",
+      "source_pts_s": 13.210202,
+      "human_event": "defeat",
+      "human_monster_id": "M0122",
+      "human_serial": 1,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "thief-1",
+      "phase": "before",
+      "source_pts_s": 13.084834,
+      "human_event": "defeat",
+      "human_monster_id": "M0005",
+      "human_serial": 1,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "thief-1",
+      "phase": "gray",
+      "source_pts_s": 13.588765,
+      "human_event": "defeat",
+      "human_monster_id": "M0005",
+      "human_serial": 1,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "thief-1",
+      "phase": "beam",
+      "source_pts_s": 14.059132,
+      "human_event": "defeat",
+      "human_monster_id": "M0005",
+      "human_serial": 1,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "thief-1",
+      "phase": "after",
+      "source_pts_s": 14.395108,
+      "human_event": "defeat",
+      "human_monster_id": "M0005",
+      "human_serial": 1,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "thief-2",
+      "phase": "before",
+      "source_pts_s": 2.604312,
+      "human_event": "defeat",
+      "human_monster_id": "M0005",
+      "human_serial": 2,
+      "observation": {
+        "clock": null,
+        "monsters": [
+          {
+            "monsterId": "M0005",
+            "serial": 2,
+            "currentHp": 5,
+            "maxHp": 6
+          }
+        ]
+      }
+    },
+    {
+      "sample_id": "thief-2",
+      "phase": "gray",
+      "source_pts_s": 3.237434,
+      "human_event": "defeat",
+      "human_monster_id": "M0005",
+      "human_serial": 2,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "thief-2",
+      "phase": "beam",
+      "source_pts_s": 3.589187,
+      "human_event": "defeat",
+      "human_monster_id": "M0005",
+      "human_serial": 2,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "thief-2",
+      "phase": "after",
+      "source_pts_s": 3.905765,
+      "human_event": "defeat",
+      "human_monster_id": "M0005",
+      "human_serial": 2,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "event-1",
+      "phase": "before_spawn",
+      "source_pts_s": 6.9999,
+      "human_event": "not_defeat",
+      "human_monster_id": null,
+      "human_serial": null,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "event-1",
+      "phase": "spawn_appearing",
+      "source_pts_s": 7.5999,
+      "human_event": "not_defeat",
+      "human_monster_id": null,
+      "human_serial": null,
+      "observation": {
+        "clock": null,
+        "monsters": [
+          {
+            "monsterId": "M0123",
+            "serial": 1,
+            "currentHp": 8,
+            "maxHp": 8
+          }
+        ]
+      }
+    },
+    {
+      "sample_id": "event-1",
+      "phase": "camera_pan",
+      "source_pts_s": 8.099867,
+      "human_event": "not_defeat",
+      "human_monster_id": null,
+      "human_serial": null,
+      "observation": {
+        "clock": null,
+        "monsters": []
+      }
+    },
+    {
+      "sample_id": "event-1",
+      "phase": "second_spawn_beam",
+      "source_pts_s": 8.999867,
+      "human_event": "not_defeat",
+      "human_monster_id": null,
+      "human_serial": null,
+      "observation": {
+        "clock": null,
+        "monsters": [
+          {
+            "monsterId": "M0123",
+            "serial": 3,
+            "currentHp": 8,
+            "maxHp": 8
+          }
+        ]
+      }
+    },
+    {
+      "sample_id": "event-1",
+      "phase": "dinosaur_spawned",
+      "source_pts_s": 10.4165,
+      "human_event": "not_defeat",
+      "human_monster_id": null,
+      "human_serial": null,
+      "observation": {
+        "clock": null,
+        "monsters": [
+          {
+            "monsterId": "M0122",
+            "serial": 1,
+            "currentHp": 19,
+            "maxHp": 19
+          }
+        ]
+      }
+    }
+  ]
+}

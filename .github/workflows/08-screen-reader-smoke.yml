@@ -12,6 +12,7 @@ on:
       - 'playwright.reader-sync.config.js'
       - 'scripts/check-08-hover-text.js'
       - 'scripts/build-08-monster-text.py'
+      - 'scripts/build-autumn-defeat-samples.py'
       - 'tests/fixtures/screen-reader/**'
       - 'scripts/check-07-syntax.js'
       - 'scripts/build-screen-reader-references.py'
@@ -72,6 +73,7 @@ on:
       - 'playwright.reader-sync.config.js'
       - 'scripts/check-08-hover-text.js'
       - 'scripts/build-08-monster-text.py'
+      - 'scripts/build-autumn-defeat-samples.py'
       - 'tests/fixtures/screen-reader/**'
       - 'package.json'
       - '.github/workflows/08-screen-reader-smoke.yml'
@@ -89,6 +91,7 @@ jobs:
       - run: npm run check:08
       - run: python3 scripts/build-mini-character-mapping.py --check
       - run: python3 -m pip install Pillow==12.3.0
+      - run: python3 scripts/build-autumn-defeat-samples.py --check
       - run: python3 scripts/build-screen-reader-profile-references.py --check
       - run: python3 scripts/build-screen-reader-left-hud-fixture.py --check
       - run: python3 scripts/build-screen-reader-star-fixture.py --check
