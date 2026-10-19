@@ -1,0 +1,286 @@
+[
+  {
+    "id": "bear-1",
+    "source": "秋幻_クマ撃破.mp4",
+    "monster_id": "M0121",
+    "serial": 1,
+    "route": "battle",
+    "occlusion": "複数キャラと重なる。グレー化後も周辺のキャラが残る。",
+    "snapshots": [
+      [
+        "before",
+        15.85
+      ],
+      [
+        "gray",
+        16.3
+      ],
+      [
+        "beam",
+        17.17
+      ],
+      [
+        "after",
+        17.5
+      ]
+    ],
+    "start_s": 15.8,
+    "end_s": 17.7
+  },
+  {
+    "id": "bear-2",
+    "source": "秋幻_クマ撃破2.mp4",
+    "monster_id": "M0121",
+    "serial": 2,
+    "route": "field_damage",
+    "occlusion": "ボス名・HPラベルと重なり、カメラも移動する。",
+    "snapshots": [
+      [
+        "before",
+        1.8
+      ],
+      [
+        "gray",
+        2.55
+      ],
+      [
+        "beam",
+        3.05
+      ],
+      [
+        "after",
+        3.35
+      ]
+    ],
+    "start_s": 1.6,
+    "end_s": 3.6
+  },
+  {
+    "id": "bear-3",
+    "source": "秋幻_クマ撃破3.mp4",
+    "monster_id": "M0121",
+    "serial": 3,
+    "route": "battle_skipped",
+    "occlusion": "キャラクターと同じマスで重なる。",
+    "snapshots": [
+      [
+        "before",
+        3.0
+      ],
+      [
+        "gray",
+        3.7
+      ],
+      [
+        "beam",
+        4.25
+      ],
+      [
+        "after",
+        4.55
+      ]
+    ],
+    "start_s": 2.9,
+    "end_s": 5.0
+  },
+  {
+    "id": "owl-1",
+    "source": "秋幻_フクロウ撃破.mp4",
+    "monster_id": "M0123",
+    "serial": 1,
+    "route": "battle",
+    "occlusion": "キャラが手前に立ち、フクロウの左側を隠す。",
+    "snapshots": [
+      [
+        "before",
+        13.0
+      ],
+      [
+        "gray",
+        13.6
+      ],
+      [
+        "beam",
+        14.35
+      ],
+      [
+        "after",
+        14.65
+      ]
+    ],
+    "start_s": 12.9,
+    "end_s": 15.0
+  },
+  {
+    "id": "owl-2",
+    "source": "秋幻_フクロウ撃破2.mp4",
+    "monster_id": "M0123",
+    "serial": 3,
+    "route": "battle",
+    "occlusion": "2人のキャラが前に重なる。頭・右側の見える部分と動きを残す。",
+    "snapshots": [
+      [
+        "before",
+        12.7
+      ],
+      [
+        "gray",
+        13.5
+      ],
+      [
+        "beam",
+        13.95
+      ],
+      [
+        "after",
+        14.25
+      ]
+    ],
+    "start_s": 12.65,
+    "end_s": 15.0
+  },
+  {
+    "id": "dinosaur-1",
+    "source": "秋幻_恐竜撃破.mp4",
+    "monster_id": "M0122",
+    "serial": 2,
+    "route": "battle",
+    "occlusion": "頭・胴の一部をキャラが隠す。右側と尻尾の倒れる動きが残る。",
+    "snapshots": [
+      [
+        "before",
+        11.75
+      ],
+      [
+        "gray",
+        12.4
+      ],
+      [
+        "beam",
+        12.85
+      ],
+      [
+        "after",
+        13.1
+      ]
+    ],
+    "start_s": 11.65,
+    "end_s": 14.3
+  },
+  {
+    "id": "dinosaur-2",
+    "source": "秋幻_恐竜撃破2.mp4",
+    "monster_id": "M0122",
+    "serial": 1,
+    "route": "battle",
+    "occlusion": "キャラと重なる。グレーの立ち姿から横倒しへ変化する。",
+    "snapshots": [
+      [
+        "before",
+        11.85
+      ],
+      [
+        "gray",
+        12.25
+      ],
+      [
+        "beam",
+        12.95
+      ],
+      [
+        "after",
+        13.2
+      ]
+    ],
+    "start_s": 11.75,
+    "end_s": 13.35
+  },
+  {
+    "id": "thief-1",
+    "source": "秋幻_泥棒撃破.mp4",
+    "monster_id": "M0005",
+    "serial": 1,
+    "route": "battle",
+    "occlusion": "キャラが前面にいて体の一部を隠す。袋・輪郭と傾く動きが見える。",
+    "snapshots": [
+      [
+        "before",
+        13.1
+      ],
+      [
+        "gray",
+        13.6
+      ],
+      [
+        "beam",
+        14.05
+      ],
+      [
+        "after",
+        14.4
+      ]
+    ],
+    "start_s": 13.0,
+    "end_s": 15.2
+  },
+  {
+    "id": "thief-2",
+    "source": "秋幻_泥棒撃破2.mp4",
+    "monster_id": "M0005",
+    "serial": 2,
+    "route": "field_damage",
+    "occlusion": "カード表示とダメージ表示が入り、カメラが移動する。",
+    "snapshots": [
+      [
+        "before",
+        2.6
+      ],
+      [
+        "gray",
+        3.25
+      ],
+      [
+        "beam",
+        3.6
+      ],
+      [
+        "after",
+        3.9
+      ]
+    ],
+    "start_s": 2.3,
+    "end_s": 4.4
+  },
+  {
+    "id": "event-1",
+    "source": "秋幻_イベント1.mp4",
+    "monster_id": null,
+    "serial": null,
+    "route": "spawn_negative",
+    "occlusion": "出現の光柱とカメラ移動。撃破の正例にはしない。",
+    "start_s": 6.9,
+    "end_s": 10.8,
+    "snapshots": [
+      [
+        "before_spawn",
+        7.0
+      ],
+      [
+        "spawn_appearing",
+        7.6
+      ],
+      [
+        "camera_pan",
+        8.1
+      ],
+      [
+        "second_spawn_beam",
+        9.0
+      ],
+      [
+        "dinosaur_spawned",
+        10.4
+      ]
+    ]
+  }
+]
