@@ -794,3 +794,31 @@ test('08: monster text tooltip safely renders CSV text and states missing descri
  });
  expect(values.missing.text).toContain('説明は未登録です。');expect(values.literal.text).toContain('<script>alert(1)</script>');expect(values.literal.scripts).toBe(0);expect(values.literal.headings).toBe(1);
 });
+
+for(const protocol of ['http','file'])test('08 autumn icon stacks: derived attack, strict counter boundary, low-HP owl and self-only attention '+protocol,async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href:'/08_screen_reader/');
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');
+ await page.getByRole('button',{name:'3 のイベントを実行',exact:true}).click();
+ const gao=page.locator('#map-roster-list .roster-card[data-id="M0120"]'),energy=gao.locator('.roster-status-energyStacks button'),attack=gao.getByLabel('キッズガオーの攻撃力',{exact:true}),hp=gao.getByLabel('キッズガオーの残りHP',{exact:true});
+ await expect(gao.locator('.roster-gao-start,.roster-gao-battle')).toHaveCount(0);await expect(energy.locator('img')).toHaveAttribute('src',/UT_Buff_1071_01.png$/);
+ await energy.click();await expect(attack).toHaveValue('2');await energy.click();await expect(attack).toHaveValue('4');await energy.click({button:'right'});await expect(attack).toHaveValue('2');
+ await attack.fill('10');await attack.dispatchEvent('change');await energy.click();await expect(attack).toHaveValue('12');await page.locator('#roster-undo').click();await expect(attack).toHaveValue('10');
+ for(const [value,counter] of [[61,false],[60,false],[59,true],[60,false]]){await hp.fill(String(value));await hp.dispatchEvent('change');await expect(gao.getByAltText('反撃可能')).toHaveCount(counter?1:0);}
+ await page.locator('#mp-tab-monsters').click();await page.locator('.mp-monster[data-id="M0122"]').click();await page.locator('.mp-monster[data-id="M0122"]').click();await page.locator('.mp-monster[data-id="M0123"]').click();
+ const dinos=page.locator('#map-roster-list .roster-card[data-id="M0122"]'),dino=dinos.last(),anger=dino.locator('.roster-status-angerStacks button'),dinoAttack=dino.locator('input[aria-label$="の攻撃力"]'),base=Number(await dinoAttack.inputValue());
+ const other=await dinos.first().locator('input[aria-label$="の攻撃力"]').inputValue();await expect(anger.locator('img')).toHaveAttribute('src',/UT_Buff_1072.png$/);
+ await anger.click();await anger.click();await expect(dinoAttack).toHaveValue(String(base+2));await expect(dinos.first().locator('input[aria-label$="の攻撃力"]')).toHaveValue(other);
+ await dinoAttack.fill('20');await dinoAttack.dispatchEvent('change');await anger.click({button:'right'});await expect(dinoAttack).toHaveValue('19');await page.locator('#roster-undo').click();await expect(dinoAttack).toHaveValue('20');
+ const owl=page.locator('#map-roster-list .roster-card[data-id="M0123"]').last(),owlHp=owl.locator('input[aria-label$="の残りHP"]');
+ for(const [value,active] of [[5,false],[4,true],[3,true],[5,false]]){await owlHp.fill(String(value));await owlHp.dispatchEvent('change');await expect(owl.locator('.roster-owl-low-hp')).toHaveCount(active?1:0);}
+ await page.locator('.role-tab[data-role="character"]').click();await page.locator('#selected-self-tab').click();
+ const attention=page.locator('#selected-character-conditions').getByRole('button',{name:'ミミにガオーの注目を付与',exact:true}),defense=page.locator('#selected-character-def'),move=page.locator('#selected-character-move'),def0=Number(await defense.inputValue()),move0=Number(await move.inputValue());
+ await expect(attention.locator('img')).toHaveAttribute('src',/UT_Buff_1071_02.png$/);await attention.click();await expect(attention).toContainText('2T');await expect(defense).toHaveValue(String(Math.max(0,def0-1)));await expect(move).toHaveValue(String(Math.max(0,move0-1)));
+ await attention.click();await expect(defense).toHaveValue(String(Math.max(0,def0-1)));
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#turn-end').click();await page.locator('.role-tab[data-role="character"]').click();await expect(attention).toContainText('1T');
+ await attention.click({button:'right'});await expect(defense).toHaveValue(String(def0));await expect(move).toHaveValue(String(move0));
+ await page.locator('#selected-party-tab').click();await expect(page.locator('#selected-party-grid .autumn-attention')).toHaveCount(0);
+ await page.locator('.role-tab[data-role="map"]').click();await expect.poll(()=>gao.locator('.roster-autumn-controls img').evaluateAll(imgs=>imgs.every(im=>im.complete&&im.naturalWidth>0))).toBe(true);
+ await page.screenshot({path:'artifacts/autumn-icons-'+protocol+'-'+test.info().project.name+'.png',fullPage:true});expect(errors).toEqual([]);
+});

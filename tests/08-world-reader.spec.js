@@ -431,3 +431,25 @@ test('08 world: short autumn replay confirms three owls and one dinosaur at quar
  const fast=await run(1);expect(fast).toMatchObject({round:1,progress:1});
  expect(fast.monsters.map(m=>[m.monsterId,m.serial,m.hp])).toEqual([['M0123',1,9],['M0123',2,9],['M0123',3,9],['M0122',1,22]]);
 });
+
+const defeatFolder='tests/fixtures/screen-reader/defeat/autumn-reviewed-20261019';
+const defeatManifest=require('./fixtures/screen-reader/defeat/autumn-reviewed-20261019/manifest.json');
+async function defeatFrame(page,snap,time){
+ const image='data:image/webp;base64,'+require('fs').readFileSync(require('path').join(defeatFolder,snap.image)).toString('base64');
+ return page.evaluate(async({image,time})=>{const im=new Image();im.src=image;await im.decode();const c=document.createElement('canvas');c.width=2560;c.height=1440;const ctx=c.getContext('2d');ctx.fillStyle='#141414';ctx.fillRect(0,0,c.width,c.height);ctx.drawImage(im,640,360);const frame=ScreenReaderVision.normalize(c);return window.defeatTestTracker.step(frame,time);},{image,time});
+}
+test('08 autumn defeat cues: partial gray patches then beam; spawn, absence and unknown serial never defeat a roster individual',async({page})=>{
+ await open(page);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');await page.getByRole('button',{name:'3 のイベントを実行',exact:true}).click();
+ const initial=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());
+ for(const sample of defeatManifest.samples){
+  await page.evaluate(()=>window.defeatTestTracker=ScreenReaderDefeatVision.createTracker());const output=[];
+  for(const snap of sample.snapshots){const cues=await defeatFrame(page,snap,snap.source_pts_s*1000);if(snap.phase==='before'||snap.phase==='gray')expect(cues,sample.id+' '+snap.phase).toEqual([]);output.push(...cues);}
+  // Moving camera/overlaid boss text remains an abstention, never a guessed boss kill.
+  expect(output.map(c=>[c.monsterId,c.serial]),sample.id).toEqual(sample.expected_event==='defeat'&&sample.id!=='bear-2'?[[sample.monster_id,null]]:[]);
+ }
+ expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(initial);
+ // Gray by itself, stale frames and a beam in a new independent capture are insufficient.
+ const sample=defeatManifest.samples[0],gray=sample.snapshots.find(s=>s.phase==='gray'),beam=sample.snapshots.find(s=>s.phase==='beam');
+ for(const gap of [0,2000]){await page.evaluate(()=>window.defeatTestTracker=ScreenReaderDefeatVision.createTracker());await defeatFrame(page,gray,100);expect(await defeatFrame(page,beam,100+gap)).toEqual([]);}
+ await page.evaluate(()=>window.defeatTestTracker=ScreenReaderDefeatVision.createTracker());expect(await defeatFrame(page,beam,100)).toEqual([]);
+});

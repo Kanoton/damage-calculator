@@ -187,7 +187,7 @@ function registerEnemy(enemy, switchTab=true){
  if(switchTab)document.querySelector('.role-tab[data-role="attack"]').click();
 }
 function clearRoster(){characterSkillTargetRequest=null;renderCharacterSkillTargetUi();rosterError.textContent='';rosterState.round=readerMapMode?0:1;rosterState.progress=readerMapMode?0:1;renderRoundProgress();defeatTotals.clear();executedEvents.clear();rosterState.monsters.length=0;rosterState.serials.clear();rosterState.selectedId=null;window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:null}));skillChoiceId=null;rosterBuff.attack=0;rosterBuff.defense=0;rosterCounts.clear();rosterEvidenceConsider=false;rosterNotice.textContent='';}
-function updateEnemy(enemy){updateRosterEnemy(enemy,rosterStat);if(enemy.monsterId==='M0120'){enemy.reflect=enemy.hp<=rosterStat(enemy.base,'HP')*.6;}enemy.defense=Math.max(0,enemy.defense+(Number(enemy.skillDefenseModifier)||0));}
+function updateEnemy(enemy){updateRosterEnemy(enemy,rosterStat);if(enemy.monsterId==='M0120'){enemy.reflect=enemy.hp<rosterStat(enemy.base,'HP')*.5;}enemy.defense=Math.max(0,enemy.defense+(Number(enemy.skillDefenseModifier)||0));}
 function spawnGimmickMonsters(trigger){
  const matching=mapGimmicks().filter(r=>r.gimmick_id===trigger.gimmick_id&&(!r['難易度']||r['難易度']===difficulty.value));
  const configurations=new Map();matching.forEach(r=>{const ids=String(r['出現monster_id']||'').trim();if(ids)configurations.set(JSON.stringify([ids,String(r['出現数']||'').trim()]),r);});
@@ -321,7 +321,7 @@ function renderRoster(){
   card.dataset.instanceId=enemy.instanceId;card.dataset.id=enemy.monsterId;
   card.addEventListener('mouseenter',()=>showMonsterTip(card));card.addEventListener('mouseleave',scheduleMonsterTipHide);card.addEventListener('focusin',()=>showMonsterTip(card));card.addEventListener('focusout',scheduleMonsterTipHide);
   if(characterSkillTargetRequest?.multipleTargets&&!enemy.defeated){const selected=characterSkillTargetRequest.selectedIds.has(enemy.instanceId);card.classList.toggle('is-skill-target-selected',selected);select.dataset.skillTargetId=enemy.instanceId;select.setAttribute('aria-pressed',String(selected));select.setAttribute('aria-label',displayName+(selected?'をスキル対象から解除':'をスキル対象に選択'));}
-  const stats=createRosterStats(enemy,displayName,assignMapImage,data.icons,({key,field,label,input,value})=>{const next=Number(value);if(String(value).trim()===''||!Number.isSafeInteger(next)||next<0){input.value=enemy[field];return;}if(next===enemy[field])return;rememberRoster();if(key==='HP'){if(next===0){removeEnemy(enemy);rosterNotice.textContent=displayName+'を撃破しました。';}else{enemy.manualHp=next;enemy.hp=next;enemy.damageTaken=Math.max(0,rosterStat(enemy.base,'HP')-next);}}else{const manualKey=key==='攻撃'?'manualAttack':'manualDefense';enemy[manualKey]=next-rosterStat(enemy.base,key)-(key==='攻撃'?(enemy.eventAttack||0)-(enemy.fanSkillAttackReduction?1:0)+(enemy.monsterId==='M0120'?2*(enemy.energyStacks||0):0):(enemy.eventDefense||0)+(enemy.skillDefenseModifier||0));rosterNotice.textContent=displayName+'の'+label+'を'+next+'に変更しました。';}if(next===0&&key==='HP'){renderRoster();return;}updateEnemy(enemy);input.value=enemy[field];rosterUndo.disabled=false;if(rosterState.selectedId===enemy.instanceId)registerEnemy(enemy,false);if(enemy.monsterId==='M0120'&&key==='HP')renderRoster();});
+  const stats=createRosterStats(enemy,displayName,assignMapImage,data.icons,({key,field,label,input,value})=>{const next=Number(value);if(String(value).trim()===''||!Number.isSafeInteger(next)||next<0){input.value=enemy[field];return;}if(next===enemy[field])return;rememberRoster();if(key==='HP'){if(next===0){removeEnemy(enemy);rosterNotice.textContent=displayName+'を撃破しました。';}else{enemy.manualHp=next;enemy.hp=next;enemy.damageTaken=Math.max(0,rosterStat(enemy.base,'HP')-next);}}else{const manualKey=key==='攻撃'?'manualAttack':'manualDefense';enemy[manualKey]=next-rosterStat(enemy.base,key)-(key==='攻撃'?(enemy.eventAttack||0)-(enemy.fanSkillAttackReduction?1:0)+autumnMonsterAttackBonus(enemy):(enemy.eventDefense||0)+(enemy.skillDefenseModifier||0));rosterNotice.textContent=displayName+'の'+label+'を'+next+'に変更しました。';}if(next===0&&key==='HP'){renderRoster();return;}updateEnemy(enemy);input.value=enemy[field];rosterUndo.disabled=false;if(rosterState.selectedId===enemy.instanceId)registerEnemy(enemy,false);if(['M0120','M0123'].includes(enemy.monsterId)&&key==='HP')renderRoster();});
   select.addEventListener('click',()=>{if(resolveCharacterSkillTarget(enemy))return;rosterState.selectedId=enemy.instanceId;registerEnemy(enemy);renderRoster();rosterNotice.textContent=monsterDisplayName(enemy)+'を計算機に登録しました。';});
   const remove=createRosterActionButton('roster-remove',enemy.defeated?'撃破済':'撃破',displayName+'を撃破',!!enemy.defeated);remove.addEventListener('click',()=>{rememberRoster();removeEnemy(enemy);renderRoster();rosterNotice.textContent=monsterDisplayName(enemy)+'を撃破しました。';document.querySelector('.role-tab[data-role="map"]').click();});
   const deleteButton=createRosterActionButton('roster-delete','削除',displayName+'を削除');deleteButton.addEventListener('click',()=>{rememberRoster();const i=rosterState.monsters.indexOf(enemy);if(i>=0)rosterState.monsters.splice(i,1);if(rosterState.selectedId===enemy.instanceId){rosterState.selectedId=null;window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:null}));}renderRoster();});
@@ -343,17 +343,16 @@ function renderRoster(){
    button.addEventListener('click',event=>{event.stopPropagation();change(1);});button.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();change(-1);});nameText.append(field);
   }
   let autumnControls=null;
-  if(enemy.monsterId==='M0120'){
+  if(['M0120','M0122'].includes(enemy.monsterId)){
    autumnControls=document.createElement('div');autumnControls.className='roster-autumn-controls';
-   const energy=createRosterCharacterStatusControl(enemy,displayName,{key:'energyStacks',label:'みなぎる元気',stack:true});
-   const change=delta=>{if(enemy.defeated)return;const next=Math.max(0,(enemy.energyStacks||0)+delta);if(next===(enemy.energyStacks||0))return;rememberRoster();enemy.energyStacks=next;renderRoster();};
-   energy.button.addEventListener('click',()=>change(1));energy.button.addEventListener('contextmenu',event=>{event.preventDefault();change(-1);});autumnControls.append(energy.field);
-   const start=createRosterActionButton('roster-gao-start','ガオー行動開始',displayName+'の行動開始',enemy.defeated);
-   start.title=getSkillHoverText('autumn.energy.start');
-   start.addEventListener('click',()=>{rememberRoster();enemy.energyStacks=(enemy.energyStacks||0)+(enemy.hp<=rosterStat(enemy.base,'HP')*.6?2:1);renderRoster();});autumnControls.append(start);
-   const battle=createRosterActionButton('roster-gao-battle','戦闘後：元気−1',displayName+'が戦闘を仕掛けられた後',enemy.defeated);
-   battle.title=getSkillHoverText('autumn.energy.battle');
-   battle.addEventListener('click',()=>change(-1));autumnControls.append(battle);
+   const config=enemy.monsterId==='M0120'?{key:'energyStacks',label:'みなぎる元気',icon:'UT_Buff_1071_01.png',stack:true}:{key:'angerStacks',label:'怒りの蓄積',icon:'UT_Buff_1072.png',stack:true};
+   const energy=createRosterCharacterStatusControl(enemy,displayName,config);
+   energy.button.title=config.label+'：1スタックごとに攻撃力+'+(enemy.monsterId==='M0120'?2:1)+'。左クリックで+1、右クリックで−1。';
+   const change=delta=>{if(enemy.defeated)return;const next=Math.max(0,(enemy[config.key]||0)+delta);if(next===(enemy[config.key]||0))return;rememberRoster();enemy[config.key]=next;renderRoster();};
+   energy.button.addEventListener('click',event=>{event.stopPropagation();change(1);});energy.button.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();change(-1);});autumnControls.append(energy.field);
+  }
+  if(enemy.monsterId==='M0123'&&!enemy.defeated&&enemy.hp<=rosterStat(enemy.base,'HP')/2){
+   const icon=document.createElement('img');icon.className='roster-icon roster-owl-low-hp';icon.src='../images/UT_Buff/UT_Buff_AttackUp.png';icon.alt='低HP：攻撃力上昇条件';icon.title='HPが半分以下：フクロウのターン開始時に攻撃力が永続+1。上昇済みの攻撃力は攻撃欄で調整してください。';nameText.append(icon);
   }
   const skill=summonSkills[enemy.monsterId],skillOpen=skillChoiceId===enemy.instanceId;
   const skillTargets=skill?.targets.map(id=>{const target=data.stats.find(row=>row.monster_id===id&&row['難易度']===difficulty.value);return target?{id,name:target['モンスター名'],image:data.images[target.image]}:null;})||[];
