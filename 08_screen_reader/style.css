@@ -1393,8 +1393,6 @@ tbody th {
 #map-draft .has-route-switches #mp-map-image{height:100%;max-height:100%;object-fit:contain}
 @media(max-width:680px){#map-draft .has-route-switches .mp-map{flex:auto;height:330px}#map-draft .mp-route-group+.mp-route-group{padding-left:0;border-left:0}}
 
-/* Monster detail images retain their aspect ratio and fit within the viewport. */
-
 /* キャラクター：外枠の高さは既存のmain-containerと共通。画像一覧だけスクロール。 */
 .main-container.character-mode{display:block;height:845px;min-height:0;overflow:hidden;padding:0;border-color:#d4ac37}
 .character-tab{background:#fff7d9;color:#856615}

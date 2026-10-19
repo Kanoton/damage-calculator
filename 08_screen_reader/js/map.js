@@ -448,7 +448,6 @@ function renderMapInformation(){
 
 function render(){
  hideMonsterTip();
- hideMonsterTip();
  if(!data.maps[pick.value]){routeControls.hidden=true;root.querySelector('.mp-map-only').classList.remove('has-route-switches');selected=null;list.replaceChildren();difficulty.replaceChildren();if(readerMapMode)difficulty.append(unknownOption());difficulty.disabled=true;const img=document.getElementById('mp-map-image');img.hidden=true;img.removeAttribute('src');img.alt='';renderMapInformation();status.textContent=Object.keys(data.maps).length?'マップを選択してください。':'表示対象のマップがありません。CSVの「表示」列を確認してください。';renderRoster();return;}
  difficulty.disabled=false;
 
