@@ -1705,12 +1705,17 @@ dialog[data-inline-pad] .skill-entry-row>[data-cancel]{min-width:72px;align-self
 /* Overlay in existing whitespace; never changes the map or grid dimensions. */
 #mp-building-legend{position:absolute;left:0;bottom:0;font-size:12px;line-height:1.4;color:#333;pointer-events:none}
 
-.roster-autumn-controls{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px}
-#map-draft .roster-status-energyStacks .roster-mark-button{width:auto;height:auto;white-space:nowrap;font-size:11px}
+.roster-autumn-controls{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:0 10px 8px}
+.roster-autumn-controls .roster-mark{height:27px;margin-left:0}
+.roster-autumn-controls .roster-mark-button img{display:block;width:25px;height:25px;max-width:25px;object-fit:contain}
+.roster-autumn-controls .roster-mark-button{width:27px;height:27px;padding:1px}
 .autumn-attention{display:inline-flex;gap:4px;align-items:center}
 
 .autumn-attention button{white-space:nowrap}
-.selected-character-conditions .autumn-attention .condition-toggle{width:auto;min-width:64px;padding:1px 6px;white-space:nowrap}
+.selected-character-conditions .autumn-attention .condition-toggle{display:inline-flex;align-items:center;gap:4px;width:auto;min-width:54px;padding:1px 4px;white-space:nowrap}
+.autumn-attention .condition-toggle img{width:25px;height:25px;object-fit:contain}
+.autumn-attention .condition-toggle[aria-pressed="false"] img{opacity:.5}
+.roster-owl-low-hp{width:25px;height:25px;object-fit:contain}
 
 /* モンスター説明もキャラ一覧と同じ文字・枠。長文はポインタ／キーでスクロール。 */
 .monster-skill-tooltip{box-sizing:border-box;max-height:min(70vh,620px,calc(100vh - 16px));pointer-events:auto;user-select:text}

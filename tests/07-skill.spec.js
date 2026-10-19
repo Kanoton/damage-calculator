@@ -4,6 +4,7 @@ const skillFolder=process.env.SKILL_TEST_FOLDER||'07_skill';
 if(!['07_skill','08_screen_reader'].includes(skillFolder))throw Error('Unknown skill test folder');
 
 for(const protocol of ['http','file'])test('07 autumn confirmed rules: energy, HP boundary, attention refresh and undo '+protocol,async({page})=>{
+ test.skip(skillFolder==='08_screen_reader','08 uses icon stacks and the user-confirmed 50% strict counter boundary; covered by 08 autumn icon tests.');
  await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve(skillFolder+'/index.html')).href:`/${skillFolder}/`);
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');
  await page.getByRole('button',{name:'3 のイベントを実行',exact:true}).click();

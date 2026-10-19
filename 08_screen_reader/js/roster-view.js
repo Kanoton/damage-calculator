@@ -57,5 +57,5 @@ function createMonsterSkillTooltipView(row,icons,assignImage){
   }else text.append(document.createTextNode(line));
   if(index<lines.length-1)text.append(document.createTextNode('\n'));
  });
- view.append(heading,meta,stats,text);return view;
+ view.append(heading,meta,stats,text);if(row.monster_id==='M0120'){const note=document.createElement('p');note.className='monster-rule-note';note.textContent='反撃の計算判定：HP50%未満（利用者の実測に基づく。上記は元の能力画像の記載）。';view.append(note);}return view;
 }

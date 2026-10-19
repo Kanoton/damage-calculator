@@ -13,6 +13,8 @@ on:
       - 'scripts/check-08-hover-text.js'
       - 'scripts/build-08-monster-text.py'
       - 'scripts/build-autumn-defeat-samples.py'
+      - 'scripts/build-screen-reader-defeat-references.py'
+      - 'scripts/inspect-defeat-browser.cjs'
       - 'tests/fixtures/screen-reader/**'
       - 'scripts/check-07-syntax.js'
       - 'scripts/build-screen-reader-references.py'
@@ -74,6 +76,8 @@ on:
       - 'scripts/check-08-hover-text.js'
       - 'scripts/build-08-monster-text.py'
       - 'scripts/build-autumn-defeat-samples.py'
+      - 'scripts/build-screen-reader-defeat-references.py'
+      - 'scripts/inspect-defeat-browser.cjs'
       - 'tests/fixtures/screen-reader/**'
       - 'package.json'
       - '.github/workflows/08-screen-reader-smoke.yml'
@@ -92,6 +96,7 @@ jobs:
       - run: python3 scripts/build-mini-character-mapping.py --check
       - run: python3 -m pip install Pillow==12.3.0
       - run: python3 scripts/build-autumn-defeat-samples.py --check
+      - run: python3 scripts/build-screen-reader-defeat-references.py --check
       - run: python3 scripts/build-screen-reader-profile-references.py --check
       - run: python3 scripts/build-screen-reader-left-hud-fixture.py --check
       - run: python3 scripts/build-screen-reader-star-fixture.py --check
@@ -107,14 +112,17 @@ jobs:
       - run: python3 scripts/build-screen-reader-live-status-references.py --check
       - run: python3 scripts/build-screen-reader-chip-shapes.py --check
       - run: npx playwright install --with-deps chromium webkit
-      - run: npx playwright test tests/08-world-reader.spec.js tests/08-screen-reader.spec.js -g "result banner|short autumn replay|monster text tooltip" --workers=1
-      - run: npm run test:08 -- --grep-invert "result banner|short autumn replay|monster text tooltip"
-      - run: npx playwright test tests/08-screen-reader.spec.js --browser=webkit -g "printed status name|status names require|zoomed status|fast-changing|chip artwork|chip grid|party stars|short autumn replay|monster text tooltip"
-      - run: npx playwright test tests/08-world-reader.spec.js --browser=webkit -g "room text|autumn room|replay printed map|result banner|short autumn replay|recorded video labels|video labels abstain"
+      - run: node scripts/inspect-defeat-browser.cjs
+      - run: npx playwright test tests/08-world-reader.spec.js tests/08-screen-reader.spec.js -g "result banner|short autumn replay|monster text tooltip|autumn icon|autumn defeat" --workers=1
+      - run: npm run test:08 -- --grep-invert "result banner|short autumn replay|monster text tooltip|autumn icon|autumn defeat"
+      - run: npx playwright test tests/08-screen-reader.spec.js --browser=webkit -g "printed status name|status names require|zoomed status|fast-changing|chip artwork|chip grid|party stars|short autumn replay|monster text tooltip|autumn icon"
+      - run: npx playwright test tests/08-world-reader.spec.js --browser=webkit -g "room text|autumn room|replay printed map|result banner|short autumn replay|recorded video labels|video labels abstain|autumn defeat"
       - run: npm run test:08:sync -- --workers=2
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: 08-screen-reader-test-results
-          path: test-results/
+          path: |
+            test-results/
+            artifacts/
           retention-days: 7

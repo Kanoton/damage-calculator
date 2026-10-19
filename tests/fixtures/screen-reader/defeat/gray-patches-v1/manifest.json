@@ -1,0 +1,326 @@
+{
+  "schema_version": 1,
+  "full_body_required": false,
+  "patches": [
+    {
+      "sample": "bear-1",
+      "monsterId": "M0121",
+      "image": "bear-1-1.png",
+      "source_video": "videos/bear-1.mp4",
+      "video_sha256": "492c11bafefaf7a6a14a53c6011c4119da5163437649fc6fcda2f1138dd40357",
+      "extraction": "FFmpeg fps=4 from reviewed cropped video, normalized with ScreenReaderVision, largest achromatic component bounding box; manually reviewed",
+      "clip_fps4_index": 1,
+      "normalized_box": [
+        303,
+        140,
+        60,
+        73
+      ],
+      "review": "Target gray visible portion confirmed; full body not required"
+    },
+    {
+      "sample": "bear-1",
+      "monsterId": "M0121",
+      "image": "bear-1-2.png",
+      "source_video": "videos/bear-1.mp4",
+      "video_sha256": "492c11bafefaf7a6a14a53c6011c4119da5163437649fc6fcda2f1138dd40357",
+      "extraction": "FFmpeg fps=4 from reviewed cropped video, normalized with ScreenReaderVision, largest achromatic component bounding box; manually reviewed",
+      "clip_fps4_index": 2,
+      "normalized_box": [
+        290,
+        149,
+        63,
+        63
+      ],
+      "review": "Target gray visible portion confirmed; full body not required"
+    },
+    {
+      "sample": "bear-2",
+      "monsterId": "M0121",
+      "image": "bear-2-3.png",
+      "source_video": "videos/bear-2.mp4",
+      "video_sha256": "7098bb4c74e051a9d1b1caebda1ac4e93a0ecdc9723dd95d6b1c86bea97fb082",
+      "extraction": "FFmpeg fps=4 from reviewed cropped video, normalized with ScreenReaderVision, largest achromatic component bounding box; manually reviewed",
+      "clip_fps4_index": 3,
+      "normalized_box": [
+        299,
+        139,
+        60,
+        61
+      ],
+      "review": "Target gray visible portion confirmed; full body not required"
+    },
+    {
+      "sample": "bear-2",
+      "monsterId": "M0121",
+      "image": "bear-2-4.png",
+      "source_video": "videos/bear-2.mp4",
+      "video_sha256": "7098bb4c74e051a9d1b1caebda1ac4e93a0ecdc9723dd95d6b1c86bea97fb082",
+      "extraction": "FFmpeg fps=4 from reviewed cropped video, normalized with ScreenReaderVision, largest achromatic component bounding box; manually reviewed",
+      "clip_fps4_index": 4,
+      "normalized_box": [
+        310,
+        150,
+        64,
+        52
+      ],
+      "review": "Target gray visible portion confirmed; full body not required"
+    },
+    {
+      "sample": "bear-3",
+      "monsterId": "M0121",
+      "image": "bear-3-2.png",
+      "source_video": "videos/bear-3.mp4",
+      "video_sha256": "e0fa20e3aa46f771550139bdcedca58bc09a9b538cd9b2d6807569d416519eb8",
+      "extraction": "FFmpeg fps=4 from reviewed cropped video, normalized with ScreenReaderVision, largest achromatic component bounding box; manually reviewed",
+      "clip_fps4_index": 2,
+      "normalized_box": [
+        269,
+        138,
+        67,
+        72
+      ],
+      "review": "Target gray visible portion confirmed; full body not required"
+    },
+    {
+      "sample": "bear-3",
+      "monsterId": "M0121",
+      "image": "bear-3-3.png",
+      "source_video": "videos/bear-3.mp4",
+      "video_sha256": "e0fa20e3aa46f771550139bdcedca58bc09a9b538cd9b2d6807569d416519eb8",
+      "extraction": "FFmpeg fps=4 from reviewed cropped video, normalized with ScreenReaderVision, largest achromatic component bounding box; manually reviewed",
+      "clip_fps4_index": 3,
+      "normalized_box": [
+        258,
+        148,
+        63,
+        65
+      ],
+      "review": "Target gray visible portion confirmed; full body not required"
+    },
+    {
+      "sample": "owl-1",
+      "monsterId": "M0123",
+      "image": "owl-1-1.png",
+      "source_video": "videos/owl-1.mp4",
+      "video_sha256": "57c1b943eb3ed1662bc941fcb58d473721b84bd6074d6267cb4ec89c91e22c65",
+      "extraction": "FFmpeg fps=4 from reviewed cropped video, normalized with ScreenReaderVision, largest achromatic component bounding box; manually reviewed",
+      "clip_fps4_index": 1,
+      "normalized_box": [
+        327,
+        150,
+        44,
+        51
+      ],
+      "review": "Target gray visible portion confirmed; full body not required"
+    },
+    {
+      "sample": "owl-1",
+      "monsterId": "M0123",
+      "image": "owl-1-2.png",
+      "source_video": "videos/owl-1.mp4",
+      "video_sha256": "57c1b943eb3ed1662bc941fcb58d473721b84bd6074d6267cb4ec89c91e22c65",
+      "extraction": "FFmpeg fps=4 from reviewed cropped video, normalized with ScreenReaderVision, largest achromatic component bounding box; manually reviewed",
+      "clip_fps4_index": 2,
+      "normalized_box": [
+        323,
+        135,
+        49,
+        57
+      ],
+      "review": "Target gray visible portion confirmed; full body not required"
+    },
+    {
+      "sample": "owl-1",
+      "monsterId": "M0123",
+      "image": "owl-1-3.png",
+      "source_video": "videos/owl-1.mp4",
+      "video_sha256": "57c1b943eb3ed1662bc941fcb58d473721b84bd6074d6267cb4ec89c91e22c65",
+      "extraction": "FFmpeg fps=4 from reviewed cropped video, normalized with ScreenReaderVision, largest achromatic component bounding box; manually reviewed",
+      "clip_fps4_index": 3,
+      "normalized_box": [
+        325,
+        163,
+        44,
+        44
+      ],
+      "review": "Target gray visible portion confirmed; full body not required"
+    },
+    {
+      "sample": "owl-2",
+      "monsterId": "M0123",
+      "image": "owl-2-2.png",
+      "source_video": "videos/owl-2.mp4",
+      "video_sha256": "a401c6ce66e15a0774196946d9bc8d411528145408dbe40912a080f53ae74240",
+      "extraction": "FFmpeg fps=4 from reviewed cropped video, normalized with ScreenReaderVision, largest achromatic component bounding box; manually reviewed",
+      "clip_fps4_index": 2,
+      "normalized_box": [
+        337,
+        127,
+        36,
+        64
+      ],
+      "review": "Target gray visible portion confirmed; full body not required"
+    },
+    {
+      "sample": "owl-2",
+      "monsterId": "M0123",
+      "image": "owl-2-3.png",
+      "source_video": "videos/owl-2.mp4",
+      "video_sha256": "a401c6ce66e15a0774196946d9bc8d411528145408dbe40912a080f53ae74240",
+      "extraction": "FFmpeg fps=4 from reviewed cropped video, normalized with ScreenReaderVision, largest achromatic component bounding box; manually reviewed",
+      "clip_fps4_index": 3,
+      "normalized_box": [
+        336,
+        162,
+        33,
+        46
+      ],
+      "review": "Target gray visible portion confirmed; full body not required"
+    },
+    {
+      "sample": "owl-2",
+      "monsterId": "M0123",
+      "image": "owl-2-4.png",
+      "source_video": "videos/owl-2.mp4",
+      "video_sha256": "a401c6ce66e15a0774196946d9bc8d411528145408dbe40912a080f53ae74240",
+      "extraction": "FFmpeg fps=4 from reviewed cropped video, normalized with ScreenReaderVision, largest achromatic component bounding box; manually reviewed",
+      "clip_fps4_index": 4,
+      "normalized_box": [
+        338,
+        162,
+        31,
+        49
+      ],
+      "review": "Target gray visible portion confirmed; full body not required"
+    },
+    {
+      "sample": "dinosaur-1",
+      "monsterId": "M0122",
+      "image": "dinosaur-1-1.png",
+      "source_video": "videos/dinosaur-1.mp4",
+      "video_sha256": "dbcf4e0ab7dec3a08cf9b88d2183cddfccfabb0a222067464097db200b28097b",
+      "extraction": "FFmpeg fps=4 from reviewed cropped video, normalized with ScreenReaderVision, largest achromatic component bounding box; manually reviewed",
+      "clip_fps4_index": 1,
+      "normalized_box": [
+        308,
+        114,
+        50,
+        69
+      ],
+      "review": "Target gray visible portion confirmed; full body not required"
+    },
+    {
+      "sample": "dinosaur-1",
+      "monsterId": "M0122",
+      "image": "dinosaur-1-2.png",
+      "source_video": "videos/dinosaur-1.mp4",
+      "video_sha256": "dbcf4e0ab7dec3a08cf9b88d2183cddfccfabb0a222067464097db200b28097b",
+      "extraction": "FFmpeg fps=4 from reviewed cropped video, normalized with ScreenReaderVision, largest achromatic component bounding box; manually reviewed",
+      "clip_fps4_index": 2,
+      "normalized_box": [
+        321,
+        169,
+        71,
+        46
+      ],
+      "review": "Target gray visible portion confirmed; full body not required"
+    },
+    {
+      "sample": "dinosaur-1",
+      "monsterId": "M0122",
+      "image": "dinosaur-1-3.png",
+      "source_video": "videos/dinosaur-1.mp4",
+      "video_sha256": "dbcf4e0ab7dec3a08cf9b88d2183cddfccfabb0a222067464097db200b28097b",
+      "extraction": "FFmpeg fps=4 from reviewed cropped video, normalized with ScreenReaderVision, largest achromatic component bounding box; manually reviewed",
+      "clip_fps4_index": 3,
+      "normalized_box": [
+        321,
+        169,
+        71,
+        46
+      ],
+      "review": "Target gray visible portion confirmed; full body not required"
+    },
+    {
+      "sample": "dinosaur-2",
+      "monsterId": "M0122",
+      "image": "dinosaur-2-2.png",
+      "source_video": "videos/dinosaur-2.mp4",
+      "video_sha256": "76ab0a01725ab2d3d43822ae7e1b89fffd2cd3f590e175fda9db5512a39d8184",
+      "extraction": "FFmpeg fps=4 from reviewed cropped video, normalized with ScreenReaderVision, largest achromatic component bounding box; manually reviewed",
+      "clip_fps4_index": 2,
+      "normalized_box": [
+        336,
+        169,
+        79,
+        48
+      ],
+      "review": "Target gray visible portion confirmed; full body not required"
+    },
+    {
+      "sample": "thief-1",
+      "monsterId": "M0005",
+      "image": "thief-1-1.png",
+      "source_video": "videos/thief-1.mp4",
+      "video_sha256": "cab34c47b301970c43e4a8809acdf81574638dc446a9b82dd6ca58d47ab37917",
+      "extraction": "FFmpeg fps=4 from reviewed cropped video, normalized with ScreenReaderVision, largest achromatic component bounding box; manually reviewed",
+      "clip_fps4_index": 1,
+      "normalized_box": [
+        322,
+        167,
+        56,
+        43
+      ],
+      "review": "Target gray visible portion confirmed; full body not required"
+    },
+    {
+      "sample": "thief-1",
+      "monsterId": "M0005",
+      "image": "thief-1-2.png",
+      "source_video": "videos/thief-1.mp4",
+      "video_sha256": "cab34c47b301970c43e4a8809acdf81574638dc446a9b82dd6ca58d47ab37917",
+      "extraction": "FFmpeg fps=4 from reviewed cropped video, normalized with ScreenReaderVision, largest achromatic component bounding box; manually reviewed",
+      "clip_fps4_index": 2,
+      "normalized_box": [
+        323,
+        163,
+        50,
+        48
+      ],
+      "review": "Target gray visible portion confirmed; full body not required"
+    },
+    {
+      "sample": "thief-2",
+      "monsterId": "M0005",
+      "image": "thief-2-2.png",
+      "source_video": "videos/thief-2.mp4",
+      "video_sha256": "2666cb50e31f5de3914dabc6c01c548fff250d0bf053756b4ea560c8487e27e8",
+      "extraction": "FFmpeg fps=4 from reviewed cropped video, normalized with ScreenReaderVision, largest achromatic component bounding box; manually reviewed",
+      "clip_fps4_index": 2,
+      "normalized_box": [
+        281,
+        150,
+        18,
+        35
+      ],
+      "review": "Target gray visible portion confirmed; full body not required"
+    },
+    {
+      "sample": "thief-2",
+      "monsterId": "M0005",
+      "image": "thief-2-3.png",
+      "source_video": "videos/thief-2.mp4",
+      "video_sha256": "2666cb50e31f5de3914dabc6c01c548fff250d0bf053756b4ea560c8487e27e8",
+      "extraction": "FFmpeg fps=4 from reviewed cropped video, normalized with ScreenReaderVision, largest achromatic component bounding box; manually reviewed",
+      "clip_fps4_index": 3,
+      "normalized_box": [
+        282,
+        172,
+        75,
+        34
+      ],
+      "review": "Target gray visible portion confirmed; full body not required"
+    }
+  ]
+}

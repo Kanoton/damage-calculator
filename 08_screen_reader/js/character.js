@@ -68,7 +68,7 @@
  window.restoreAutumnAttention=snapshot=>{if(!snapshot)return;for(const s of states.values())s.numbers['ガオーの注目']=0;for(const s of partyStates.values())s.attentionTurns=0;for(const [id,n] of snapshot.self)getState(id).numbers['ガオーの注目']=n;for(const [id,n] of snapshot.party)getPartyState(id).attentionTurns=n;if(selectedCharacter){renderConditions();updateStats();}};
  function attentionControl(id,name,isSelf){
   const field=document.createElement('span');field.className='autumn-attention';const turns=attentionTurns(id);
-  const apply=document.createElement('button');apply.type='button';apply.className='condition-toggle';apply.setAttribute('aria-label',name+'にガオーの注目を付与');apply.textContent='注目 '+turns+'T';apply.title=getSkillHoverText('autumn.attention');
+  const apply=document.createElement('button');apply.type='button';apply.className='condition-toggle';apply.setAttribute('aria-label',name+'にガオーの注目を付与');const icon=document.createElement('img');icon.src='../images/UT_Buff/UT_Buff_1071_02.png';icon.alt='ガオーの注目';const count=document.createElement('strong');count.textContent=turns+'T';apply.append(icon,count);apply.setAttribute('aria-pressed',String(turns>0));apply.title=getSkillHoverText('autumn.attention');
   const commit=next=>{window.rememberCharacterSkillActivation?.();setAttention(id,next);renderConditions();updateStats();};
   apply.addEventListener('click',event=>{event.stopPropagation();commit(2);});apply.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();commit(0);});field.append(apply);
   if(!isSelf&&turns){const tick=document.createElement('button');tick.type='button';tick.textContent='残り−1';tick.setAttribute('aria-label',name+'の注目の残りターンを減らす');tick.addEventListener('click',event=>{event.stopPropagation();commit(Math.max(0,turns-1));});field.append(tick);}
@@ -143,9 +143,11 @@
    for(const stat of ['atk','def','move'])result[stat]+=stacks*(Number(rule[stat])||0);
    result.damageReduce+=stacks*(Number(rule.damage_reduce)||0);
   }
-  if(mapPicker.value==='MAP0105'&&number(state(),'ガオーの注目')>0){result.def-=1;result.move-=1;}
+  if(mapPicker.value==='MAP0105'&&number(state(),'ガオーの注目')>0)result.def-=1;
   for(const stat of ['atk','def','move'])result[stat]+=state().manual?.[stat]||0;
   result.atk=Math.max(0,result.atk);result.def=Math.max(0,result.def);result.move=Math.max(0,result.move);
+  // Movement is a dice modifier: attention must still show -1 at zero bonus.
+  if(mapPicker.value==='MAP0105'&&number(state(),'ガオーの注目')>0)result.move-=1;
   return result;
  }
  function makeIcon(key){
@@ -486,12 +488,11 @@
   if(member.currentHp===null)member.currentHp=maxHp;member.currentHp=Math.max(0,Math.min(maxHp,member.currentHp));
   const result={level:member.level,hp:maxHp,currentHp:member.currentHp};
   for(const stat of ['atk','def','move'])result[stat]=Math.max(0,baseValue(stat)+(member.manual[stat]||0)+active.filter(rule=>rule.target===stat&&matches(rule,maxHp)).reduce((sum,rule)=>sum+value(rule,maxBonus),0));
-  if(mapPicker.value==='MAP0105'&&member.attentionTurns>0){result.def=Math.max(0,result.def-1);result.move=Math.max(0,result.move-1);}
   return result;
  }
  function editPartyMember(id){partyEditId=String(id);renderParty();updateChipListSelection();const row=characters.find(item=>String(item.id)===partyEditId);chipStatus.textContent='チップ編集対象：'+(row?.name||'自キャラ');}
  function changePartyStat(row,isSelf,key,delta){
-  if(isSelf){if(key==='hp'){changeHp(delta);return;}const current=calculate()[key];state().manual[key]=(state().manual[key]||0)+Math.max(0,current+delta)-current;updateStats();return;}
+  if(isSelf){if(key==='hp'){changeHp(delta);return;}const current=calculate()[key],minimum=key==='move'&&mapPicker.value==='MAP0105'&&number(state(),'ガオーの注目')>0?-1:0;state().manual[key]=(state().manual[key]||0)+Math.max(minimum,current+delta)-current;updateStats();return;}
   const member=getPartyState(row.id),totals=calculatePartyMember(row);if(key==='hp')member.currentHp=Math.max(0,Math.min(totals.hp,member.currentHp+delta));else member.manual[key]+=Math.max(0,totals[key]+delta)-totals[key];renderParty();
  }
  function renderParty(){
@@ -515,7 +516,6 @@
    slot.addEventListener('dragleave',()=>slot.classList.remove('is-drop-target'));
    slot.addEventListener('drop',event=>{if(draggedPartyIndex===null)return;event.preventDefault();const from=draggedPartyIndex;draggedPartyIndex=null;[partySlots[from],partySlots[index]]=[partySlots[index],partySlots[from]];renderParty();listStatus.textContent='PTの順番を変更しました。';});
    slot.addEventListener('dragend',()=>{draggedPartyIndex=null;partyGrid.querySelectorAll('.is-dragging,.is-drop-target').forEach(item=>item.classList.remove('is-dragging','is-drop-target'));});
-   if(row&&mapPicker.value==='MAP0105')slot.append(attentionControl(id,row.name,isSelf));
    partyGrid.append(slot);
   });
   const registered=new Set(slots.filter(Boolean).map(String));
