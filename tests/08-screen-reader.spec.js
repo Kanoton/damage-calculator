@@ -11,6 +11,41 @@ async function readFixture(page,n){
 }
 const snapshot=page=>page.evaluate(()=>window.ScreenReaderCharacterBridge.snapshot());
 
+for(const protocol of ['http','file'])for(const [width,height] of [[1000,1400],[1920,1080]])test(`08: self portrait assets recover real Kaisei independently of PT at ${width}x${height} ${protocol}`,async({page})=>{
+ await page.setViewportSize({width,height});
+ await page.goto(protocol==='file'?'file://'+require('path').resolve(__dirname,'../08_screen_reader/index.html'):'/08_screen_reader/');
+ await page.locator('#reader-toggle').click();await page.waitForFunction(()=>window.ScreenReaderCharacterBridge?.catalog().characters.length===35);
+ const record=require('./fixtures/screen-reader/self-kaisei-20261019.json');
+ const observed=await page.evaluate(async({image,left})=>{
+  const im=new Image(),pt=new Image();im.src=image;pt.src=left;await Promise.all([im.decode(),pt.decode()]);
+  // Remove the existing screen-specific self seeds: this regression must exercise Card2.
+  for(const name of ['ScreenReaderReferences','ScreenReaderLayoutReferences','ScreenReaderStatusReferences','ScreenReaderViewReferences']){
+   if(window[name]?.characters)window[name].characters=window[name].characters.filter(r=>r.kind!=='self');
+  }
+  const src=ScreenReaderVision.normalize(im),actual=ScreenReaderVision.analyze(src);
+  const c=document.createElement('canvas');c.width=1536;c.height=709;const ctx=c.getContext('2d');ctx.drawImage(pt,0,0);
+  ctx.fillStyle='#141414';ctx.fillRect(116,445,139,116);
+  const hidden=ScreenReaderVision.analyze(c);
+  ctx.drawImage(src,116,445,139,116,116,445,139,116);
+  const absentFromParty=ScreenReaderVision.analyze(c);
+  return {actual,hidden,absentFromParty};
+ },{image:record.image,left:fixture('left-hud')});
+ expect(observed.actual.selfId).toBe(record.expected.selfId);
+ expect(observed.actual.members.map(m=>m.id)).toEqual(record.expected.partyIds);
+ expect(observed.hidden.members.map(m=>m.id)).toEqual(['105','106','3','18']);
+ expect(observed.hidden.selfId).toBeNull();expect(observed.absentFromParty.selfId).toBeNull();
+ await page.locator('#reader-file').setInputFiles({name:'kaisei.png',mimeType:'image/png',buffer:Buffer.from(record.image.split(',')[1],'base64')});
+ await expect(page.locator('#reader-read')).toBeEnabled();
+ expect((await snapshot(page)).selfId).toBe('13');
+});
+
+test('08: self portrait assets inventory covers all 35 canonical characters and keeps flat frames unknown',async({page})=>{
+ await open(page);
+ const result=await page.evaluate(()=>({ids:[...new Set(ScreenReaderSelfReferences.characters.map(r=>r.id))].sort(),images:new Set(ScreenReaderSelfReferences.characters.map(r=>r.image)).size,blank:ScreenReaderVision.selfPortraitMatch(new Uint8Array(768))}));
+ const ids=require('fs').readFileSync(require('path').resolve(__dirname,'../csv/self_portrait_mapping.csv'),'utf8').trim().split(/\r?\n/).slice(1).map(row=>row.split(',')[1]);
+ expect(result.ids).toEqual([...new Set(ids)].sort());expect(result.ids).toHaveLength(35);expect(result.images).toBe(205);expect(result.blank).toBeNull();
+});
+
 for(const [name,owner,chips]of [['sherry-late','106',['52','58','9','45','43','55']],['yume-late','20',['23','102','48']]])test('08: chip artwork reads reviewed late '+name+' without missing chips or inventing a whetstone',async({page})=>{
  await open(page);await page.locator('#reader-new-game').click();await page.evaluate(()=>ScreenReaderCharacterBridge.apply({members:[{id:'2',slot:0},{id:'20',slot:1},{id:'106',slot:2},{id:'17',slot:3}]}));
  await readFixture(page,'chip-grid-'+name);const s=await snapshot(page);expect(s.members.find(m=>m.id===owner).chips).toEqual(chips);

@@ -20,6 +20,8 @@ on:
       - 'scripts/build-screen-reader-references.py'
       - 'scripts/build-mini-character-mapping.py'
       - 'scripts/build-screen-reader-profile-references.py'
+      - 'scripts/build-screen-reader-self-references.py'
+      - 'csv/self_portrait_mapping.csv'
       - 'scripts/build-screen-reader-left-hud-fixture.py'
       - 'scripts/build-screen-reader-star-fixture.py'
       - 'scripts/build-screen-reader-status-fixtures.py'
@@ -52,6 +54,8 @@ on:
       - 'images/UT_Hero_ProfilePhoto/**'
       - 'scripts/build-mini-character-mapping.py'
       - 'scripts/build-screen-reader-profile-references.py'
+      - 'scripts/build-screen-reader-self-references.py'
+      - 'csv/self_portrait_mapping.csv'
       - 'scripts/build-screen-reader-left-hud-fixture.py'
       - 'scripts/build-screen-reader-star-fixture.py'
       - 'scripts/build-screen-reader-status-fixtures.py'
@@ -98,6 +102,7 @@ jobs:
       - run: python3 scripts/build-autumn-defeat-samples.py --check
       - run: python3 scripts/build-screen-reader-defeat-references.py --check
       - run: python3 scripts/build-screen-reader-profile-references.py --check
+      - run: python3 scripts/build-screen-reader-self-references.py --check
       - run: python3 scripts/build-screen-reader-left-hud-fixture.py --check
       - run: python3 scripts/build-screen-reader-star-fixture.py --check
       - run: python3 scripts/build-screen-reader-status-fixtures.py --check
@@ -114,8 +119,8 @@ jobs:
       - run: npx playwright install --with-deps chromium webkit
       - run: node scripts/inspect-defeat-browser.cjs
       - run: npx playwright test tests/08-world-reader.spec.js tests/08-screen-reader.spec.js -g "result banner|short autumn replay|monster text tooltip|autumn icon|autumn defeat" --workers=1
-      - run: npm run test:08 -- --grep-invert "result banner|short autumn replay|monster text tooltip|autumn icon|autumn defeat"
-      - run: npx playwright test tests/08-screen-reader.spec.js --browser=webkit -g "printed status name|status names require|zoomed status|fast-changing|chip artwork|chip grid|party stars|short autumn replay|monster text tooltip|autumn icon"
+      - run: npm run test:08 -- --grep-invert "result banner|short autumn replay|monster text tooltip|autumn icon|autumn defeat|08 touch display transitions"
+      - run: npx playwright test tests/08-screen-reader.spec.js --browser=webkit -g "printed status name|status names require|zoomed status|fast-changing|chip artwork|chip grid|party stars|short autumn replay|monster text tooltip|autumn icon|self portrait assets"
       - run: npx playwright test tests/08-world-reader.spec.js --browser=webkit -g "room text|autumn room|replay printed map|result banner|short autumn replay|recorded video labels|video labels abstain|autumn defeat"
       - run: npx playwright test tests/07-skill.spec.js --browser=webkit -g "07 autumn data"
       - run: npm run test:08:sync -- --workers=2
