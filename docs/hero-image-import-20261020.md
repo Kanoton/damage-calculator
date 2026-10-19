@@ -37,4 +37,4 @@
 - 旧4画像から新しい参照先までのバイト一致、削除後の旧参照検索、全モンスター画像のファイル存在確認。
 - CSV全295行のimage以外の列・能力本文・並びが変更前と一致。
 - `python3 scripts/build-mini-character-mapping.py --check` と `python3 scripts/build-screen-reader-profile-references.py --check` で保留在庫と従来の照合データの一致を確認。
-- `npm run check:07`／`npm run check:08` で同梱データと実読み込み順の構文を確認。HTTP/file://の秋4難易度の画像読み込みは既存の両ブラウザ回帰で確認する。最終CI結果は同PRを参照。
+- `npm run check:07`／`npm run check:08` で同梱データと実読み込み順の構文を確認。HTTP/file://の秋4難易度の画像読み込みは既存の両ブラウザ回帰で確認する。08 CIへ07の秋データテストのWebKit実行も追加し、実際の07/08の両方で共有画像を確認する。最終CI結果は同PRを参照。
