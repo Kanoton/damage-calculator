@@ -36,10 +36,10 @@
   }
   return out;
  }
- function profileMatch(data){
+ function maskedPortraitMatch(data,refs){
   if(!hasFaceTexture(data))return null;
   data=smoothProfile(data);
-  const refs=window.ScreenReaderProfileReferences?.characters||[],scores=new Map();
+  const scores=new Map();
   for(const ref of refs){
    let sample=profileCache.get(ref);
    if(!sample){
@@ -59,6 +59,8 @@
   if(!ranks[0]?.[0]||ranks[0][1]>.13||(ranks[1]&&ranks[1][1]-ranks[0][1]<.025))return null;
   return {id:ranks[0][0],confidence:Math.round((1-ranks[0][1])*100)};
  }
+ function profileMatch(data){return maskedPortraitMatch(data,window.ScreenReaderProfileReferences?.characters||[]);}
+ function selfPortraitMatch(data){return maskedPortraitMatch(data,window.ScreenReaderSelfReferences?.characters||[]);}
  function isInk(r,g,b,kind){
   if(kind==='red')return r>165&&r>g*1.45&&r>b*1.35;
   if(kind==='green')return g>170&&g>r*1.3&&g>b*1.25;
@@ -237,7 +239,14 @@
   // The small popup covers the self portrait. Never identify self from its
   // chip contents or selected tab; keep the previous self or explicit choice.
   const selfRefs=charRefs.filter(r=>r.kind==='self');
-  const own=(!locked||!party.selfId)&&(header||tab===null)?match(feature(hudSource,layout.regions.self),selfRefs)||(source.statusFrame&&hudSource!==source.popupFrame?match(feature(source.popupFrame,layouts[1].regions.self),selfRefs):null):null;
+  function identifySelf(image,box){
+   const data=feature(image,box),reviewed=match(data,selfRefs);
+   if(reviewed)return reviewed;
+   const asset=selfPortraitMatch(data);
+   // A portrait supplies independent evidence; PT membership only corroborates it.
+   return asset&&members.some(m=>m.id===asset.id)?asset:null;
+  }
+  const own=(!locked||!party.selfId)&&(header||tab===null)?identifySelf(hudSource,layout.regions.self)||(source.statusFrame&&hudSource!==source.popupFrame?identifySelf(source.popupFrame,layouts[1].regions.self):null):null;
   const selfId=locked?(party.selfId||(party.ids.includes(own?.id)?own.id:null)):own?.id??null;
   const observation={members,selfId,hud:{layout:layout.id,source:hudSource===source?'primary':'popup'},view:'通常画面',chipOwnerId:null,chipIds:[],chipRead:{stage:'screen',matchedRims:Math.max(lowerScore,smallScore,largeScore),ownerSource:printedName.visible?'name':header?'portrait':null,aligned:panel.aligned}};
   if(largeScore>=7&&!header)observation.view='ステータス画面';
@@ -259,5 +268,5 @@
   const popup=document.createElement('canvas');popup.width=WIDTH;popup.height=HEIGHT;popup.getContext('2d').drawImage(source,a.x*w,a.y*h,a.w*w,a.h*h,0,0,statusWidth,HEIGHT);c.popupFrame=popup;
   return c;}
  function learn(source,kind,id,index=0){const refs=window.ScreenReaderReferences,extra=window.ScreenReaderLayoutReferences||{},selected=selectLayout(source,[...refs.characters,...(extra.characters||[]),...(window.ScreenReaderStatusReferences?.characters||[])],[...refs.digits,...(extra.digits||[])]),layout=selected.layout;const lower=source.popupFrame&&source.statusFrame&&lowerTab(source.popupFrame)!==null;const box=kind==='chip-small'?(lower?lowerCenters:smallCenters)[index]:kind==='chip-large'?largeCenters[index]:kind==='avatar'?layout.regions.avatar[index]:layout.regions[kind];if(!box)throw Error('見本の位置が不正です。');const region=kind.startsWith('chip-')?[box[0]-18,box[1]-18,36,36]:box;return {id:String(id),kind:kind.startsWith('chip-')?'chip':kind,data:encode(feature(kind==='chip-small'&&lower?source.popupFrame:(kind==='header'||kind==='chip-large')?statusPanel(source).source:selected.source,region))};}
- window.ScreenReaderVision={analyze,normalize,learn,numberAt,statusName,statusPanel,feature,profileMatch,readSelfStats,regions,WIDTH,HEIGHT};
+ window.ScreenReaderVision={analyze,normalize,learn,numberAt,statusName,statusPanel,feature,profileMatch,selfPortraitMatch,readSelfStats,regions,WIDTH,HEIGHT};
 })();
