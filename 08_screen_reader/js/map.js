@@ -490,7 +490,13 @@ function hideMonsterTip(){
  clearTimeout(monsterTipHideTimer);monsterTipAnchor?.removeAttribute('aria-describedby');monsterTipAnchor=null;
  const tip=document.getElementById('monster-tooltip');if(tip){tip.hidden=true;tip.replaceChildren();}
 }
-function scheduleMonsterTipHide(){clearTimeout(monsterTipHideTimer);monsterTipHideTimer=setTimeout(hideMonsterTip,180);}
+function scheduleMonsterTipHide(){
+ clearTimeout(monsterTipHideTimer);monsterTipHideTimer=setTimeout(()=>{
+  const tip=document.getElementById('monster-tooltip');
+  if(monsterTipAnchor?.matches(':hover')||tip?.matches(':hover')||tip?.contains(document.activeElement))return;
+  hideMonsterTip();
+ },180);
+}
 function showMonsterTip(tile){
  hideMonsterTip();const tip=document.getElementById('monster-tooltip');if(!tip)return;
  const stats=data.stats.find(row=>row.monster_id===tile.dataset.id&&row['難易度']===difficulty.value);if(!stats)return;
@@ -507,7 +513,10 @@ monsterTooltip?.addEventListener('mouseleave',scheduleMonsterTipHide);
 monsterTooltip?.addEventListener('focusin',()=>clearTimeout(monsterTipHideTimer));
 monsterTooltip?.addEventListener('focusout',scheduleMonsterTipHide);
 window.addEventListener('resize',hideMonsterTip);
-document.addEventListener('scroll',event=>{if(!monsterTooltip?.contains(event.target))hideMonsterTip();},true);
+document.addEventListener('scroll',event=>{
+ if(monsterTooltip?.contains(event.target)||monsterTooltip?.matches(':hover'))return;
+ if(monsterTipAnchor?.matches(':hover'))showMonsterTip(monsterTipAnchor);else hideMonsterTip();
+},true);
 document.addEventListener('keydown',event=>{if(event.key==='Escape')hideMonsterTip();});
 pick.addEventListener('change',hideMonsterTip);difficulty.addEventListener('change',hideMonsterTip);
 document.querySelectorAll('.role-tab,.mp-subtabs [role="tab"]').forEach(button=>button.addEventListener('click',hideMonsterTip));

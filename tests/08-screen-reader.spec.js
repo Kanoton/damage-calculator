@@ -745,6 +745,10 @@ test('08: short autumn replay preserves four identities without reading a clippe
  await expect(page.locator('#reader-party-status')).toContainText('PT確定');
 });
 
+test.afterEach(async({page},info)=>{
+ if(info.title.includes('monster text tooltip')&&info.status!==info.expectedStatus)await page.screenshot({path:info.outputPath('monster-failure.png')});
+});
+
 async function openMonsterText(page,map='MAP0105',offline=false){
  if(offline){const {pathToFileURL}=require('url');const path=require('path');await page.goto(pathToFileURL(path.resolve(__dirname,'../08_screen_reader/index.html')).href);}
  else await page.goto('/08_screen_reader/');
@@ -771,7 +775,7 @@ test('08: monster text tooltip retains readable long text and viewport bounds',a
  for(const viewport of [{width:1280,height:800},{width:760,height:560}]){
   await page.setViewportSize(viewport);await tile.scrollIntoViewIfNeeded();await tile.hover();await expect(tip).toContainText('証拠の否認［CT 3］');
   const box=await tip.boundingBox();expect(box.x).toBeGreaterThanOrEqual(7);expect(box.y).toBeGreaterThanOrEqual(7);expect(box.x+box.width).toBeLessThanOrEqual(viewport.width-7);expect(box.y+box.height).toBeLessThanOrEqual(viewport.height-7);
-  await tip.hover();await page.mouse.wheel(0,2400);await expect.poll(()=>tip.evaluate(el=>el.scrollTop)).toBeGreaterThan(0);await expect(tip).toBeVisible();
+  await tip.hover();await page.screenshot({path:test.info().outputPath('monster-before-scroll-'+viewport.width+'.png')});await page.mouse.wheel(0,2400);await expect.poll(()=>tip.evaluate(el=>el.scrollTop)).toBeGreaterThan(0);await expect(tip).toBeVisible();
   await tip.evaluate(el=>el.scrollTop=0);await page.screenshot({path:test.info().outputPath('monster-text-'+viewport.width+'.png')});
   await page.keyboard.press('Escape');await expect(tip).toBeHidden();
  }
