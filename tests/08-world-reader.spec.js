@@ -478,8 +478,12 @@ test('08 autumn defeat automatic: unchanged-frame waiting keeps observed identit
  for(let i=0;i<8;i++)await page.evaluate(async time=>{readerTestNow=time;await ScreenReaderController.read(true);},1000+i*500);
  await expect(page.locator('#reader-monitor-info')).toContainText('画面変化待ち');
  const held=await page.evaluate(()=>heldWorldReads);expect(held.at(-1).monsters.find(m=>m.monsterId==='M0122'),JSON.stringify(held)).toMatchObject({serial:2,marker:expect.any(Array)});
- const gray=await defeatFrame(page,identitySample.snapshots[1],5000,{identity:true,controller:true});expect(gray.cues).toEqual([]);
- const beam=await defeatFrame(page,identitySample.snapshots[2],5500,{identity:true,controller:true});expect(beam.cues,JSON.stringify(held)).toEqual([expect.objectContaining({serial:2})]);
+ for(const [snap,time] of [[identitySample.snapshots[1],5000],[identitySample.snapshots[2],5500]]){
+  const image=await defeatFrame(page,snap,0,{capture:true});
+  await page.evaluate(async({image,time})=>{const im=new Image();im.src=image;await im.decode();window.readerOriginalNormalize??=ScreenReaderVision.normalize;ScreenReaderVision.normalize=(_source,area)=>readerOriginalNormalize(im,area);readerTestNow=time;await ScreenReaderController.read(true);},{image,time});
+  if(time===5000)expect((await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).monsters.find(m=>m.monsterId==='M0122'&&m.serial===2)?.defeated).toBe(false);
+ }
+ await expect(page.locator('#reader-defeat-result')).toContainText('自動撃破：おもちゃの恐竜 2');
  expect((await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).monsters.find(m=>m.monsterId==='M0122'&&m.serial===2)?.defeated).toBe(true);
  // Failed analysis of a different hash must not reuse the old frame's labels.
  await page.evaluate(()=>{window.failedMapReads=0;ScreenReaderWorldVision.analyze=()=>{failedMapReads++;throw Error('test unread frame');};const normalize=ScreenReaderVision.normalize;ScreenReaderVision.normalize=(...args)=>{const c=normalize(...args);c.popupFrame.getContext('2d').fillStyle='#f00';c.popupFrame.getContext('2d').fillRect(1000,100,2,2);return c;};});
