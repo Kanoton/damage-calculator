@@ -468,6 +468,8 @@ const identitySample=defeatManifest.samples.find(s=>s.id==='dinosaur-1');
 // actual gray/beam/after frames. Not a claim of full-video or 4fps accuracy.
 const identitySequence=[{...identitySample.snapshots[0],source_pts_s:identitySample.snapshots[0].source_pts_s-.2},...identitySample.snapshots];
 test('08 autumn defeat automatic: unchanged-frame waiting keeps observed identities fresh',async({page})=>{
+ const diagnostics=[];page.on('console',message=>{if(message.text().startsWith('DEFEAT_'))diagnostics.push(message.text());});
+ await page.route('**/screen-reader-defeat.js',route=>route.fulfill({contentType:'application/javascript',body:require('fs').readFileSync('08_screen_reader/js/screen-reader-defeat.js','utf8').replace('const excluded=[...identities.values()',"console.log('DEFEAT_STATE',JSON.stringify({time,visible,identities:[...identities.values()]}));const excluded=[...identities.values()").replace('return total>=20&&same/total>=.8;',"console.log('DEFEAT_SCENE',total,same);return total>=20&&same/total>=.8;")}));
  await open(page);await page.locator('#reader-toggle').click();
  const image=await defeatFrame(page,identitySequence[0],0,{capture:true});
  await page.locator('#reader-file').setInputFiles({name:'held-map.png',mimeType:'image/png',buffer:Buffer.from(image.split(',')[1],'base64')});await expect(page.locator('#reader-file')).toHaveValue('');
@@ -477,7 +479,7 @@ test('08 autumn defeat automatic: unchanged-frame waiting keeps observed identit
  for(let i=0;i<8;i++)await page.evaluate(async time=>{readerTestNow=time;await ScreenReaderController.read(true);},1000+i*500);
  await expect(page.locator('#reader-monitor-info')).toContainText('画面変化待ち');
  const gray=await defeatFrame(page,identitySample.snapshots[1],5000,{identity:true,controller:true});expect(gray.cues).toEqual([]);
- const beam=await defeatFrame(page,identitySample.snapshots[2],5500,{identity:true,controller:true});expect(beam.cues).toEqual([expect.objectContaining({serial:2})]);
+ const beam=await defeatFrame(page,identitySample.snapshots[2],5500,{identity:true,controller:true});expect(beam.cues,diagnostics.join('\n')).toEqual([expect.objectContaining({serial:2})]);
  expect((await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).monsters.find(m=>m.monsterId==='M0122'&&m.serial===2)?.defeated).toBe(true);
  // Failed analysis of a different hash must not reuse the old frame's labels.
  await page.evaluate(()=>{window.failedMapReads=0;ScreenReaderWorldVision.analyze=()=>{failedMapReads++;throw Error('test unread frame');};const normalize=ScreenReaderVision.normalize;ScreenReaderVision.normalize=(...args)=>{const c=normalize(...args);c.popupFrame.getContext('2d').fillStyle='#f00';c.popupFrame.getContext('2d').fillRect(1000,100,2,2);return c;};});
