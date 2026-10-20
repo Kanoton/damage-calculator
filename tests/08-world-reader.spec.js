@@ -479,6 +479,10 @@ test('08 autumn defeat automatic: unchanged-frame waiting keeps observed identit
  const gray=await defeatFrame(page,identitySample.snapshots[1],5000,{identity:true,controller:true});expect(gray.cues).toEqual([]);
  const beam=await defeatFrame(page,identitySample.snapshots[2],5500,{identity:true,controller:true});expect(beam.cues).toEqual([expect.objectContaining({serial:2})]);
  expect((await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).monsters.find(m=>m.monsterId==='M0122'&&m.serial===2)?.defeated).toBe(true);
+ // Failed analysis of a different hash must not reuse the old frame's labels.
+ await page.evaluate(()=>{window.failedMapReads=0;ScreenReaderWorldVision.analyze=()=>{failedMapReads++;throw Error('test unread frame');};const normalize=ScreenReaderVision.normalize;ScreenReaderVision.normalize=(...args)=>{const c=normalize(...args);c.popupFrame.getContext('2d').fillStyle='#f00';c.popupFrame.getContext('2d').fillRect(1000,100,2,2);return c;};});
+ for(let i=0;i<4;i++)await page.evaluate(async time=>{readerTestNow=time;await ScreenReaderController.read(true);},6000+i*500);
+ expect(await page.evaluate(()=>failedMapReads)).toBe(4);
 });
 for(const protocol of ['http','file'])for(const size of [{width:1440,height:900},{width:950,height:1200}])test(`08 autumn defeat automatic: real numbered leader and partial animation; undo (${protocol} ${size.width})`,async({page})=>{
  await page.setViewportSize(size);

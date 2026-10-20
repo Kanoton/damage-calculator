@@ -32,7 +32,7 @@
   }).join(' ／ ');
   return cues;
  }
- const stable=new Map();let lastHash=null,sameFrames=0,stableTick=0;
+ const stable=new Map();let lastHash=null,lastObservedHash=null,sameFrames=0,stableTick=0;
  function status(text){$('status').textContent=text;}
  function monitorInfo(text=''){
   const count=new Set((window.ScreenReaderWorldReferences?.names||[]).map(r=>r.id)).size;
@@ -169,7 +169,7 @@
    showFrame(rawSource);const hash=frameHash();sameFrames=hash===lastHash?sameFrames+1:0;lastHash=hash;
    // Exact map pixels are included in the hash while world sync is ON. An
    // unchanged capture still proves the last visible labels are present.
-   if(automatic&&sameFrames>2){updateDefeat(frame,started,lastObservation?.world);monitorInfo('画面変化待ち ／ '+timing());return;}
+   if(automatic&&sameFrames>2&&lastObservedHash===hash){updateDefeat(frame,started,lastObservation?.world);monitorInfo('画面変化待ち ／ '+timing());return;}
    // Yield to paint without overlapping jobs. Stop/reset invalidates this frame.
    await new Promise(resolve=>requestAnimationFrame(resolve));if(token!==generation)return;
    const observation=vision.analyze(frame,custom,partyLock);observation.setup=window.ScreenReaderStartVision.analyze(frame);if($('world-sync').checked)observation.world=window.ScreenReaderWorldVision.analyze(frame,{positions:true});else $('world-result').textContent='マップ読取はOFFです。マップ・難易度を選び、反映をONにしてください。';if(!partyLock&&$('self').value)observation.selfId=$('self').value;
@@ -182,6 +182,7 @@
    if(partyLock){if($('apply').checked&&!partyLock.selfId&&partyLock.ids.includes(accepted.selfId)){partyLock.selfId=accepted.selfId;$('self').value=accepted.selfId;$('party-status').textContent='PT確定：編成は再設定まで固定。自キャラも判定済みです。';}accepted.selfId=partyLock.selfId;accepted.partyIds=[...partyLock.ids];accepted.members=accepted.members.filter(m=>partyLock.ids.includes(m.id)&&(m.slot===undefined||partyLock.ids[m.slot]===m.id));}
    const result=$('apply').checked?bridge.apply(accepted):{updated:0,added:0};
    drawResults(observation,accepted,automatic);
+   lastObservedHash=hash;
    let worldSkipped=0;
    if($('apply').checked&&$('world-sync').checked){const applied=window.ScreenReaderMapBridge.apply(accepted.world,{allowDefeat:false});worldSkipped=applied.skipped||0;if(applied.skipped)$('world-result').textContent+=' ／ 反映保留 '+applied.skipped+'件'+(accepted.world?.monsters?.some(m=>m.currentHp===0)?'（HP0候補は撃破未確認のため保持）':'（マップ・難易度・既存個体との一致を確認してください）');}
    updateDefeat(frame,started,observation.world);
