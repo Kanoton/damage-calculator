@@ -66,7 +66,7 @@
    function rememberedIdentity(blob){
     if(inBattle)return null;
     const id=blob.match.monsterId,choices=[...memory.values()].filter(o=>o.monsterId===id&&o.confirmed&&complete(id)&&!completed.has(key(o)+':'+o.instanceId));
-    if(battle?.exit!==null&&battle?.exit!==undefined&&battle.identity.monsterId===id&&complete(id)&&valid(battle.identity))return {...battle.identity,remembered:true};
+    if(battle?.exit!==null&&battle?.exit!==undefined&&battle.identity.monsterId===id&&complete(id)&&valid(battle.identity)&&!completed.has(key(battle.identity)+':'+battle.identity.instanceId))return {...battle.identity,remembered:true};
     const recent=choices.filter(o=>time-o.time<=1200&&o.run>=2);
     // The printed target must be unique and near the partial animation. Its
     // label can be displaced; this path requires the complete confirmed spawn.
