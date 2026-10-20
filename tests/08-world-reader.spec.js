@@ -436,7 +436,7 @@ const defeatFolder='tests/fixtures/screen-reader/defeat/autumn-reviewed-20261019
 const defeatManifest=require('./fixtures/screen-reader/defeat/autumn-reviewed-20261019/manifest.json');
 async function defeatFrame(page,snap,time,options={}){
  const image='data:image/webp;base64,'+require('fs').readFileSync(require('path').join(defeatFolder,snap.image)).toString('base64');
- return page.evaluate(async({image,time,options})=>{const im=new Image();im.src=image;await im.decode();const c=document.createElement('canvas');c.width=2560;c.height=1440;const ctx=c.getContext('2d');ctx.fillStyle='#141414';ctx.fillRect(0,0,c.width,c.height);ctx.drawImage(im,640+(options.shift||0),360);const frame=ScreenReaderVision.normalize(c);
+ return page.evaluate(async({image,time,options})=>{const im=new Image();im.src=image;await im.decode();const c=document.createElement('canvas');c.width=2560;c.height=1440;const ctx=c.getContext('2d');ctx.fillStyle='#141414';ctx.fillRect(0,0,c.width,c.height);ctx.drawImage(im,640+(options.shift||0),360);if(options.capture)return c.toDataURL('image/png');const frame=ScreenReaderVision.normalize(c);
   if(!options.identity)return window.defeatTestTracker.step(frame,time);
   const world=ScreenReaderWorldVision.analyze(frame,{positions:true});
   if(options.alive)world.monsters=options.alive;
@@ -467,6 +467,19 @@ const identitySample=defeatManifest.samples.find(s=>s.id==='dinosaur-1');
 // Temporal contract: hold the real before image for two captures, then replay
 // actual gray/beam/after frames. Not a claim of full-video or 4fps accuracy.
 const identitySequence=[{...identitySample.snapshots[0],source_pts_s:identitySample.snapshots[0].source_pts_s-.2},...identitySample.snapshots];
+test('08 autumn defeat automatic: unchanged-frame waiting keeps observed identities fresh',async({page})=>{
+ await open(page);await page.locator('#reader-toggle').click();
+ const image=await defeatFrame(page,identitySequence[0],0,{capture:true});
+ await page.locator('#reader-file').setInputFiles({name:'held-map.png',mimeType:'image/png',buffer:Buffer.from(image.split(',')[1],'base64')});await expect(page.locator('#reader-file')).toHaveValue('');
+ await page.locator('#mp-map-select').evaluate(e=>{e.value='MAP0105';e.dispatchEvent(new Event('change',{bubbles:true}));});
+ await page.locator('#mp-difficulty').evaluate(e=>{e.value='普通';e.dispatchEvent(new Event('change',{bubbles:true}));});
+ await page.evaluate(()=>{window.readerTestNow=1000;Object.defineProperty(performance,'now',{configurable:true,value:()=>readerTestNow});});
+ for(let i=0;i<8;i++)await page.evaluate(async time=>{readerTestNow=time;await ScreenReaderController.read(true);},1000+i*500);
+ await expect(page.locator('#reader-monitor-info')).toContainText('画面変化待ち');
+ const gray=await defeatFrame(page,identitySample.snapshots[1],5000,{identity:true,controller:true});expect(gray.cues).toEqual([]);
+ const beam=await defeatFrame(page,identitySample.snapshots[2],5500,{identity:true,controller:true});expect(beam.cues).toEqual([expect.objectContaining({serial:2})]);
+ expect((await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).monsters.find(m=>m.monsterId==='M0122'&&m.serial===2)?.defeated).toBe(true);
+});
 for(const protocol of ['http','file'])for(const size of [{width:1440,height:900},{width:950,height:1200}])test(`08 autumn defeat automatic: real numbered leader and partial animation; undo (${protocol} ${size.width})`,async({page})=>{
  await page.setViewportSize(size);
  if(protocol==='file')await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);else await open(page);

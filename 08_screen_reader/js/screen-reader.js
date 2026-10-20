@@ -167,7 +167,9 @@
    if(stream){if(!video.videoWidth)throw Error('共有映像を待っています。');rawSource=video;}
    const context=window.ScreenReaderMapBridge?.context();if(context!==worldContext){worldContext=context;resetDefeat();stable.clear();lastHash=null;sameFrames=0;}
    showFrame(rawSource);const hash=frameHash();sameFrames=hash===lastHash?sameFrames+1:0;lastHash=hash;
-   if(automatic&&sameFrames>2){monitorInfo('画面変化待ち ／ '+timing());return;}
+   // Exact map pixels are included in the hash while world sync is ON. An
+   // unchanged capture still proves the last visible labels are present.
+   if(automatic&&sameFrames>2){updateDefeat(frame,started,lastObservation?.world);monitorInfo('画面変化待ち ／ '+timing());return;}
    // Yield to paint without overlapping jobs. Stop/reset invalidates this frame.
    await new Promise(resolve=>requestAnimationFrame(resolve));if(token!==generation)return;
    const observation=vision.analyze(frame,custom,partyLock);observation.setup=window.ScreenReaderStartVision.analyze(frame);if($('world-sync').checked)observation.world=window.ScreenReaderWorldVision.analyze(frame,{positions:true});else $('world-result').textContent='マップ読取はOFFです。マップ・難易度を選び、反映をONにしてください。';if(!partyLock&&$('self').value)observation.selfId=$('self').value;
