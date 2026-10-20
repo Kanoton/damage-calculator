@@ -441,6 +441,7 @@ async function defeatFrame(page,snap,time,options={}){
   const world=ScreenReaderWorldVision.analyze(frame,{positions:true});
   if(options.alive)world.monsters=options.alive;
   if(options.ambiguous&&world.monsters[0])world.monsters.push({...world.monsters[0],serial:99});
+  if(options.unlocated&&world.monsters[0])world.monsters.push({...world.monsters[0],serial:99,marker:null});
   if(options.controller){ScreenReaderMapBridge.apply(world,{allowDefeat:false});return {world,cues:ScreenReaderController.updateDefeat(frame,time,world)};}
   return {world,cues:window.defeatTestTracker.step(frame,time,world.monsters)};
  },{image,time,options});
@@ -491,10 +492,10 @@ test('08 autumn defeat automatic: missing, ambiguous, stale or moving identity a
  test.setTimeout(60000);
  await open(page);
  const before=identitySequence[0],second=identitySequence[1],gray=identitySample.snapshots[1],beam=identitySample.snapshots[2];
- for(const mode of ['one','ambiguous','stale','camera','reset','alive']){
+ for(const mode of ['one','ambiguous','unlocated','stale','camera','reset','alive']){
   await page.evaluate(()=>window.defeatTestTracker=ScreenReaderDefeatVision.createTracker());
-  await defeatFrame(page,before,100,{identity:true,ambiguous:mode==='ambiguous'});
-  let alive=[];if(mode!=='one')alive=(await defeatFrame(page,second,300,{identity:true,ambiguous:mode==='ambiguous'})).world.monsters;
+  await defeatFrame(page,before,100,{identity:true,ambiguous:mode==='ambiguous',unlocated:mode==='unlocated'});
+  let alive=[];if(mode!=='one')alive=(await defeatFrame(page,second,300,{identity:true,ambiguous:mode==='ambiguous',unlocated:mode==='unlocated'})).world.monsters;
   if(mode==='reset')await page.evaluate(()=>defeatTestTracker.reset());
   const offset=mode==='stale'?3000:0;
   await defeatFrame(page,gray,800+offset,{identity:true,shift:mode==='camera'?180:0});

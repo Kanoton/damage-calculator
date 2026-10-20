@@ -35,8 +35,8 @@
   return total>=20&&same/total>=.8;
  }
  function createTracker(){
-  let pending=[],lastTime=null,previous=null,identities=new Map(),tick=0,completed=new Set();
-  const reset=()=>{pending=[];lastTime=null;previous=null;identities.clear();completed.clear();tick=0;};
+  let pending=[],lastTime=null,previous=null,identities=new Map(),unlocated=new Map(),tick=0,completed=new Set();
+  const reset=()=>{pending=[];lastTime=null;previous=null;identities.clear();unlocated.clear();completed.clear();tick=0;};
   return {reset,step(source,time,observations=[]){
    if(!Number.isFinite(time)||lastTime!==null&&(time<=lastTime||time-lastTime>1800)){reset();if(!Number.isFinite(time))return [];}
    lastTime=time;tick++;const p=pixels(source),found=blobs(p).map(blob=>({...blob,match:classify(blob)})).filter(b=>b.match),emitted=[];
@@ -46,10 +46,15 @@
    if(!sceneStable(previous,p,excluded)){identities.clear();for(const item of pending)item.identity=null;}
    previous=p;
    for(const [id,o] of identities)if(time-o.time>1200)identities.delete(id);
-   for(const o of visible){const old=identities.get(key(o)),close=old&&Math.hypot(old.marker[0]-o.marker[0],old.marker[1]-o.marker[1])<24;
+   for(const [id,o] of unlocated)if(time-o.time>1200)unlocated.delete(id);
+   for(const o of observations)if(Number.isInteger(o.serial)&&o.serial>0&&o.currentHp>0){
+    if(!visible.includes(o)){identities.delete(key(o));unlocated.set(key(o),{monsterId:o.monsterId,time});}else unlocated.delete(key(o));
+   }
+   for(const o of visible){const old=identities.get(key(o)),close=old&&old.maxHp===o.maxHp&&(old.instanceId===undefined||old.instanceId===o.instanceId)&&Math.hypot(old.marker[0]-o.marker[0],old.marker[1]-o.marker[1])<24;
     identities.set(key(o),{...o,time,tick,count:close&&old.tick===tick-1?old.count+1:1});
    }
    for(const item of pending){if(time-item.time>1800)continue;const [x,y,w,h]=item.box;
+    if(item.identity&&(observations.some(o=>key(o)===key(item.identity)&&o.currentHp>0)||[...unlocated.values()].some(o=>o.monsterId===item.monsterId)||[...identities.values()].some(o=>o.monsterId===item.monsterId&&key(o)!==key(item.identity)&&o.marker[0]>=x*2-40&&o.marker[0]<=(x+w)*2+40&&o.marker[1]>=y*2-40&&o.marker[1]<=(y+h)*2+40)))item.identity=null;
     const remains=found.some(b=>b.match.monsterId===item.monsterId&&Math.hypot(b.box[0]+b.box[2]/2-x-w/2,b.box[1]+b.box[3]/2-y-h/2)<18);
     if(beamAt(p,item.box)>item.beam+100&&(!remains||beamAt(p,item.box)>item.beam+220)){
      const identity=item.identity&&!observations.some(o=>key(o)===key(item.identity)&&o.currentHp>0)?item.identity:null;
@@ -59,7 +64,7 @@
    pending=pending.filter(item=>time-item.time<=1800&&!emitted.some(e=>e.monsterId===item.monsterId));
    for(const blob of found)if(!pending.some(item=>item.monsterId===blob.match.monsterId&&Math.hypot(item.box[0]-blob.box[0],item.box[1]-blob.box[1])<18)){
     const [x,y,w,h]=blob.box.map(v=>v*2),candidates=[...identities.values()].filter(o=>o.monsterId===blob.match.monsterId&&o.marker[0]>=x-40&&o.marker[0]<=x+w+40&&o.marker[1]>=y-40&&o.marker[1]<=y+h+40);
-    const identity=candidates.length===1&&candidates[0].count>=2&&!completed.has(key(candidates[0])+':'+candidates[0].instanceId)?candidates[0]:null;
+    const identity=candidates.length===1&&candidates[0].count>=2&&![...unlocated.values()].some(o=>o.monsterId===blob.match.monsterId)&&!completed.has(key(candidates[0])+':'+candidates[0].instanceId)?candidates[0]:null;
     pending.push({monsterId:blob.match.monsterId,box:blob.box,time,beam:beamAt(p,blob.box),identity});
    }
    for(const cue of emitted)if(cue.serial!==null)completed.add(key(cue)+':'+cue.instanceId);
