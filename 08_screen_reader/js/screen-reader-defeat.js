@@ -137,9 +137,10 @@
      emitted.push(cue);
      if(!identity&&complete(item.monsterId)){
       const choices=[...memory.values()].filter(o=>o.monsterId===item.monsterId&&valid(o)&&!completed.has(key(o)+':'+o.instanceId));
+      const remaining=roster.filter(o=>o.monsterId===item.monsterId&&!o.defeated&&!completed.has(key(o)+':'+o.instanceId));
       // Two unresolved kills of the same kind cannot consume each other's IDs.
       if(unresolved.some(u=>u.cue.monsterId===item.monsterId)){for(const u of unresolved)if(u.cue.monsterId===item.monsterId){u.blocked=true;u.time=time;}}
-      else if(choices.length>1)unresolved.push({cue,time,choices,excluded:new Set()});
+      else if(choices.length>1&&choices.length===remaining.length)unresolved.push({cue,time,choices,excluded:new Set()});
      }
     }
    }

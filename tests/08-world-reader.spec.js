@@ -549,20 +549,20 @@ test('08 autumn defeat memory: missing names, registered camera motion, later su
   const loaded=[];for(const image of images){const im=new Image();im.src=image;await im.decode();loaded.push(im);}
   const frame=(i,mask=null,shift=0)=>{const c=document.createElement('canvas');c.width=2560;c.height=1440;const x=c.getContext('2d');x.fillStyle='#141414';x.fillRect(0,0,c.width,c.height);x.drawImage(loaded[i],shift,0);const f=ScreenReaderVision.normalize(c);if(mask){const p=f.popupFrame.getContext('2d');p.fillStyle='#141414';p.fillRect(...mask);}return f;};
   const before=frame(0),known=ScreenReaderWorldVision.analyze(before,{positions:true}).monsters[0];known.instanceId=2;
-  const results={};for(const mode of ['held','shift','camera-cut','ambiguous','reset','later','alive','expired','two-kills']){
+  const results={};for(const mode of ['held','shift','camera-cut','ambiguous','reset','later','alive','expired','two-kills','incomplete-memory']){
    const tracker=ScreenReaderDefeatVision.createTracker(),roster=[1,2,3].map(serial=>({monsterId:known.monsterId,serial,maxHp:known.maxHp,instanceId:serial,seen:true,defeated:false}));
    const context={counts:{[known.monsterId]:3},monsters:roster},seed=[{...known,serial:1,instanceId:1,labelBox:null,marker:null},known,{...known,serial:3,instanceId:3,labelBox:null,marker:null}];
-   if(['ambiguous','later','alive','expired','two-kills'].includes(mode))seed[0]={...known,serial:1,instanceId:1};
-   tracker.step(before,100,seed,context); // already confirmed in the roster
+   if(['ambiguous','later','alive','expired','two-kills','incomplete-memory'].includes(mode))seed[0]={...known,serial:1,instanceId:1};
+   tracker.step(before,100,mode==='incomplete-memory'?seed.slice(0,2):seed,context); // already confirmed in the roster
    const cues=[];const shift=mode==='shift'?30:mode==='camera-cut'?400:0;
    for(let t=350;t<=3100;t+=250)cues.push(...tracker.step(frame(0,known.labelBox,shift),t,[],context));
    if(mode==='reset')tracker.reset();
    cues.push(...tracker.step(frame(1,null,shift),3600,[],context),...tracker.step(frame(2,null,shift),4100,[],context));
    if(mode==='two-kills')cues.push(...tracker.step(frame(1),4350,[],context),...tracker.step(frame(2),4600,[],context));
-   if(['later','alive','expired','two-kills'].includes(mode)){
+   if(['later','alive','expired','two-kills','incomplete-memory'].includes(mode)){
     if(mode==='expired')for(let t=4350;t<=9600;t+=250)tracker.step(before,t,[],context);
     const start=mode==='expired'?9850:mode==='two-kills'?4850:4350;
-    const survivors=mode==='alive'?[known]:[seed[0],seed[2]];
+    const survivors=mode==='alive'?[known]:mode==='incomplete-memory'?[seed[0]]:[seed[0],seed[2]];
     for(const t of [start,start+250])cues.push(...tracker.step(before,t,survivors,context));
    }
    results[mode]=cues;
@@ -576,7 +576,7 @@ test('08 autumn defeat memory: missing names, registered camera motion, later su
  for(const mode of ['held','shift'])expect(results[mode],mode).toEqual([expect.objectContaining({serial:2,instanceId:2,association:'tracked'})]);
  expect(results.later.filter(c=>c.serial!==null)).toEqual([expect.objectContaining({serial:2,association:'later-survivors'})]);
  expect(results.singletonGap).toEqual([expect.objectContaining({serial:1,instanceId:1,association:'singleton'})]);
- for(const mode of ['camera-cut','ambiguous','reset','alive','expired','two-kills'])expect(results[mode].every(c=>c.serial===null),mode).toBe(true);
+ for(const mode of ['camera-cut','ambiguous','reset','alive','expired','two-kills','incomplete-memory'])expect(results[mode].every(c=>c.serial===null),mode).toBe(true);
 });
 
 let turnFrameDirectory;
