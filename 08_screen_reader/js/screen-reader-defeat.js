@@ -36,16 +36,50 @@
  }
  function createTracker(){
   let pending=[],lastTime=null,previous=null,identities=new Map(),unlocated=new Map(),tick=0,completed=new Set();
-  const reset=()=>{pending=[];lastTime=null;previous=null;identities.clear();unlocated.clear();completed.clear();tick=0;};
-  return {reset,step(source,time,observations=[]){
+  let memory=new Map(),battle=null,wasBattle=false;
+  const reset=()=>{pending=[];lastTime=null;previous=null;identities.clear();unlocated.clear();completed.clear();memory.clear();battle=null;wasBattle=false;tick=0;};
+  function battleView(p){
+   let dark=0,orange=0,n=0,m=0;
+   for(let y=70;y<150;y+=8)for(let x=190;x<640;x+=8){const k=(y*W+x)*4;n++;if(Math.max(p[k],p[k+1],p[k+2])<125&&Math.max(p[k],p[k+1],p[k+2])-Math.min(p[k],p[k+1],p[k+2])<45)dark++;}
+   for(let y=190;y<240;y+=5)for(let x=190;x<640;x+=8){const k=(y*W+x)*4;m++;if(p[k]>170&&p[k+1]>65&&p[k+1]<215&&p[k+2]<100)orange++;}
+   return dark/n>.65&&orange/m>.3;
+  }
+  return {reset,step(source,time,observations=[],context=null){
    if(!Number.isFinite(time)||lastTime!==null&&(time<=lastTime||time-lastTime>1800)){reset();if(!Number.isFinite(time))return [];}
    lastTime=time;tick++;const p=pixels(source),found=blobs(p).map(blob=>({...blob,match:classify(blob)})).filter(b=>b.match),emitted=[];
    const key=o=>o.monsterId+':'+o.serial;
+   const roster=context?.monsters||[],valid=o=>Number.isSafeInteger(o.instanceId)&&o.instanceId>0&&roster.some(e=>!e.defeated&&e.seen&&key(e)===key(o)&&e.instanceId===o.instanceId&&e.maxHp===o.maxHp);
+   const complete=id=>{const all=roster.filter(e=>e.monsterId===id);return Number.isSafeInteger(context?.counts?.[id])&&all.length===context.counts[id]&&all.every(e=>e.seen&&Number.isSafeInteger(e.serial)&&e.serial>=1&&e.serial<=context.counts[id])&&new Set(all.map(key)).size===all.length;};
+   for(const [id,o] of memory)if(!valid(o)||time-o.time>60000)memory.delete(id);
+   for(const o of observations)if(o.currentHp>0&&o.currentHp<=o.maxHp&&Number.isSafeInteger(o.serial)&&o.serial>0&&valid(o)&&observations.filter(b=>key(b)===key(o)).length===1){
+    const old=memory.get(key(o)),run=old?.tick===tick-1?old.run+1:1;
+    memory.set(key(o),{...o,time,tick,run,confirmed:!!old?.confirmed||run>=2});
+   }
+   const inBattle=battleView(p);
+   if(inBattle&&!wasBattle&&!battle&&!context?.mapVisible){const choices=[...memory.values()].filter(o=>o.confirmed&&complete(o.monsterId)&&time-o.time<=2000&&!completed.has(key(o)+':'+o.instanceId));battle=choices.length===1?{identity:choices[0],start:time,exit:null}:null;}
+   if(battle&&time-battle.start>45000)battle=null;
+   // Attacks cover the stage and can hide its colors. Only the independently
+   // read map clock establishes a return to the map, not a missing stage.
+   if(context?.mapVisible&&battle&&battle.exit===null)battle.exit=time;
+   if(battle?.exit!==null&&battle?.exit!==undefined&&time-battle.exit>2500)battle=null;
+   wasBattle=inBattle;
+   function rememberedIdentity(blob){
+    if(inBattle)return null;
+    const id=blob.match.monsterId,choices=[...memory.values()].filter(o=>o.monsterId===id&&o.confirmed&&complete(id)&&!completed.has(key(o)+':'+o.instanceId));
+    if(battle?.exit!==null&&battle?.exit!==undefined&&battle.identity.monsterId===id&&complete(id)&&valid(battle.identity)&&!completed.has(key(battle.identity)+':'+battle.identity.instanceId))return {...battle.identity,remembered:true};
+    const recent=choices.filter(o=>time-o.time<=1200&&o.run>=2);
+    // The printed target must be unique and near the partial animation. Its
+    // label can be displaced; this path requires the complete confirmed spawn.
+    const [x,y,w,h]=blob.box.map(v=>v*2);
+    if(recent.length===1&&recent[0].labelBox){const [lx,ly,lw]=recent[0].labelBox;if(x+w>=lx-220&&x<=lx+lw+350&&y+h>=ly+10&&y<=ly+300)return {...recent[0],remembered:true};}
+    if(context?.counts?.[id]===1&&choices.length===1&&time-choices[0].time<=1200)return {...choices[0],remembered:true};
+    return null;
+   }
    const visible=observations.filter(o=>Number.isInteger(o.serial)&&o.serial>0&&o.currentHp>0&&o.currentHp<=o.maxHp&&o.marker?.length===2&&o.marker.every(Number.isFinite)&&observations.filter(b=>key(o)===key(b)).length===1);
    // Ignore the search-sized foreground footprint (up to 240px wide), including
    // overlapping actors/attack cards, not just the small visible gray patch.
    const excluded=[...identities.values(),...visible].flatMap(o=>o.marker?[[o.marker[0]-120,o.marker[1]-60,240,260],...(o.labelBox?[o.labelBox]:[])]:[]).concat(found.map(b=>b.box.map(v=>v*2)));
-   if(!sceneStable(previous,p,excluded)){identities.clear();for(const item of pending)item.identity=null;}
+   if(!sceneStable(previous,p,excluded)){identities.clear();for(const item of pending)if(!item.identity?.remembered)item.identity=null;}
    previous=p;
    for(const [id,o] of identities)if(time-o.time>1200)identities.delete(id);
    for(const [id,o] of unlocated)if(time-o.time>1200)unlocated.delete(id);
@@ -56,7 +90,8 @@
     identities.set(key(o),{...o,time,tick,count:close&&old.tick===tick-1?old.count+1:1});
    }
    for(const item of pending){if(time-item.time>1800)continue;const [x,y,w,h]=item.box;
-    if(item.identity&&(observations.some(o=>key(o)===key(item.identity)&&o.currentHp>0)||[...unlocated.values()].some(o=>o.monsterId===item.monsterId)||[...identities.values()].some(o=>o.monsterId===item.monsterId&&key(o)!==key(item.identity)&&o.marker[0]>=x*2-40&&o.marker[0]<=(x+w)*2+40&&o.marker[1]>=y*2-40&&o.marker[1]<=(y+h)*2+40)))item.identity=null;
+    if(item.identity?.remembered&&(!valid(item.identity)||!complete(item.monsterId)))item.identity=null;
+    if(item.identity&&(observations.some(o=>key(o)===key(item.identity)&&o.currentHp>0)||!item.identity.remembered&&([...unlocated.values()].some(o=>o.monsterId===item.monsterId)||[...identities.values()].some(o=>o.monsterId===item.monsterId&&key(o)!==key(item.identity)&&o.marker[0]>=x*2-40&&o.marker[0]<=(x+w)*2+40&&o.marker[1]>=y*2-40&&o.marker[1]<=(y+h)*2+40))))item.identity=null;
     const remains=found.some(b=>b.match.monsterId===item.monsterId&&Math.hypot(b.box[0]+b.box[2]/2-x-w/2,b.box[1]+b.box[3]/2-y-h/2)<18);
     if(beamAt(p,item.box)>item.beam+100&&(!remains||beamAt(p,item.box)>item.beam+220)){
      const identity=item.identity&&!observations.some(o=>key(o)===key(item.identity)&&o.currentHp>0)?item.identity:null;
@@ -64,9 +99,9 @@
     }
    }
    pending=pending.filter(item=>time-item.time<=1800&&!emitted.some(e=>e.monsterId===item.monsterId));
-   for(const blob of found)if(!pending.some(item=>item.monsterId===blob.match.monsterId&&Math.hypot(item.box[0]-blob.box[0],item.box[1]-blob.box[1])<18)){
+   for(const blob of found)if(!emitted.some(e=>e.monsterId===blob.match.monsterId)&&!pending.some(item=>item.monsterId===blob.match.monsterId&&Math.hypot(item.box[0]-blob.box[0],item.box[1]-blob.box[1])<18)){
     const [x,y,w,h]=blob.box.map(v=>v*2),candidates=[...identities.values()].filter(o=>o.monsterId===blob.match.monsterId&&o.marker[0]>=x-40&&o.marker[0]<=x+w+40&&o.marker[1]>=y-40&&o.marker[1]<=y+h+40);
-    const identity=candidates.length===1&&candidates[0].count>=2&&![...unlocated.values()].some(o=>o.monsterId===blob.match.monsterId)&&!completed.has(key(candidates[0])+':'+candidates[0].instanceId)?candidates[0]:null;
+    const identity=(context&&rememberedIdentity(blob))||(candidates.length===1&&candidates[0].count>=2&&![...unlocated.values()].some(o=>o.monsterId===blob.match.monsterId)&&!completed.has(key(candidates[0])+':'+candidates[0].instanceId)?candidates[0]:null);
     pending.push({monsterId:blob.match.monsterId,box:blob.box,time,beam:beamAt(p,blob.box),identity});
    }
    for(const cue of emitted)if(cue.serial!==null)completed.add(key(cue)+':'+cue.instanceId);

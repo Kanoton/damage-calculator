@@ -1,0 +1,59 @@
+{
+  "source_name": "AstralParty_INT 2026-10-20 18-05-07.mp4",
+  "source_sha256": "1f0572cb72c47e1f19c19a819ed7099b3388fe99a3209b0029a3716c0a535dda",
+  "video": "full-replay.mp4",
+  "sha256": "b51b710b80ffc4ed89e06b08c06b76a34e5e9a81a372c19cb0a190618f531095",
+  "size": [
+    2560,
+    1440
+  ],
+  "fps": 4,
+  "retained_rectangles_xywh": [
+    [
+      400,
+      240,
+      1280,
+      760
+    ],
+    [
+      0,
+      0,
+      2560,
+      120
+    ]
+  ],
+  "audio": false,
+  "metadata_removed": true,
+  "full_body_required": false,
+  "expected_defeats": [
+    {
+      "monster_id": "M0123",
+      "serial": 1,
+      "approx_s": 37
+    },
+    {
+      "monster_id": "M0123",
+      "serial": 3,
+      "approx_s": 65
+    },
+    {
+      "monster_id": "M0122",
+      "serial": 1,
+      "approx_s": 68
+    },
+    {
+      "monster_id": "M0123",
+      "serial": 2,
+      "approx_s": 91
+    }
+  ],
+  "negative": "owl serial 2 survives an earlier battle at 6/8, before its final defeat",
+  "before_dinosaur_defeat_hp": [
+    19,
+    12,
+    5
+  ],
+  "ffmpeg_filter": "[0:v]fps=4,split=2[m][t];[m]crop=1280:760:400:240,pad=2560:1440:400:240:color=0x141414[b];[t]crop=2560:120:0:0[c];[b][c]overlay=0:0[out]",
+  "encoder": "libx264 crf25 preset fast; derived regression video, not lossless source pixels",
+  "trim_end_s": 92.5
+}
