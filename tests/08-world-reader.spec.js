@@ -574,5 +574,6 @@ for(const [protocol,size] of [['http',{width:1440,height:900}],['file',{width:95
  expect(result.checkpoints[268].monsters.find(m=>m.monsterId==='M0122'&&m.serial===1)).toMatchObject({hp:5,defeated:false});
  expect(result.state.monsters.filter(m=>m.defeated).map(m=>[m.monsterId,m.serial]).sort()).toEqual([['M0122',1],['M0123',1],['M0123',2],['M0123',3]]);
  expect(result.defeats).toHaveLength(4);
+ await page.locator('#reader-close').click();
  await page.locator('#roster-undo').click();expect((await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).monsters.find(m=>m.monsterId==='M0123'&&m.serial===2)?.defeated).toBe(false);
 });
