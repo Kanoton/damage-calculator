@@ -434,9 +434,16 @@ test('08 world: short autumn replay confirms three owls and one dinosaur at quar
 
 const defeatFolder='tests/fixtures/screen-reader/defeat/autumn-reviewed-20261019';
 const defeatManifest=require('./fixtures/screen-reader/defeat/autumn-reviewed-20261019/manifest.json');
-async function defeatFrame(page,snap,time){
+async function defeatFrame(page,snap,time,options={}){
  const image='data:image/webp;base64,'+require('fs').readFileSync(require('path').join(defeatFolder,snap.image)).toString('base64');
- return page.evaluate(async({image,time})=>{const im=new Image();im.src=image;await im.decode();const c=document.createElement('canvas');c.width=2560;c.height=1440;const ctx=c.getContext('2d');ctx.fillStyle='#141414';ctx.fillRect(0,0,c.width,c.height);ctx.drawImage(im,640,360);const frame=ScreenReaderVision.normalize(c);return window.defeatTestTracker.step(frame,time);},{image,time});
+ return page.evaluate(async({image,time,options})=>{const im=new Image();im.src=image;await im.decode();const c=document.createElement('canvas');c.width=2560;c.height=1440;const ctx=c.getContext('2d');ctx.fillStyle='#141414';ctx.fillRect(0,0,c.width,c.height);ctx.drawImage(im,640+(options.shift||0),360);const frame=ScreenReaderVision.normalize(c);
+  if(!options.identity)return window.defeatTestTracker.step(frame,time);
+  const world=ScreenReaderWorldVision.analyze(frame,{positions:true});
+  if(options.alive)world.monsters=options.alive;
+  if(options.ambiguous&&world.monsters[0])world.monsters.push({...world.monsters[0],serial:99});
+  if(options.controller){ScreenReaderMapBridge.apply(world,{allowDefeat:false});return {world,cues:ScreenReaderController.updateDefeat(frame,time,world)};}
+  return {world,cues:window.defeatTestTracker.step(frame,time,world.monsters)};
+ },{image,time,options});
 }
 test('08 autumn defeat cues: partial gray patches then beam; spawn, absence and unknown serial never defeat a roster individual',async({page})=>{
  await open(page);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');await page.getByRole('button',{name:'3 のイベントを実行',exact:true}).click();
@@ -453,4 +460,59 @@ test('08 autumn defeat cues: partial gray patches then beam; spawn, absence and 
  const sample=defeatManifest.samples[0],gray=sample.snapshots.find(s=>s.phase==='gray'),beam=sample.snapshots.find(s=>s.phase==='beam');
  for(const gap of [0,2000]){await page.evaluate(()=>window.defeatTestTracker=ScreenReaderDefeatVision.createTracker());await defeatFrame(page,gray,100);expect(await defeatFrame(page,beam,100+gap)).toEqual([]);}
  await page.evaluate(()=>window.defeatTestTracker=ScreenReaderDefeatVision.createTracker());expect(await defeatFrame(page,beam,100)).toEqual([]);
+});
+
+const identitySample=defeatManifest.samples.find(s=>s.id==='dinosaur-1');
+// Temporal contract: hold the real before image for two captures, then replay
+// actual gray/beam/after frames. Not a claim of full-video or 4fps accuracy.
+const identitySequence=[{...identitySample.snapshots[0],source_pts_s:identitySample.snapshots[0].source_pts_s-.2},...identitySample.snapshots];
+for(const protocol of ['http','file'])for(const size of [{width:1440,height:900},{width:950,height:1200}])test(`08 autumn defeat automatic: real numbered leader and partial animation; undo (${protocol} ${size.width})`,async({page})=>{
+ await page.setViewportSize(size);
+ if(protocol==='file')await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);else await open(page);
+ await page.waitForFunction(()=>window.ScreenReaderCharacterBridge?.catalog().characters.length===35);
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');await page.locator('#mp-difficulty').selectOption('普通');
+ await page.locator('#reader-world-sync').evaluate(e=>{e.checked=true;e.dispatchEvent(new Event('change'));});
+ // Other numbered dinosaurs, including equal HP, must not be selected by roster count or HP alone.
+ await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[{monsterId:'M0122',serial:1,currentHp:19,maxHp:19},{monsterId:'M0122',serial:3,currentHp:8,maxHp:19}]}));
+ for(const snap of identitySequence.slice(0,2)){
+  const r=await defeatFrame(page,snap,snap.source_pts_s*1000,{identity:true,controller:true});
+  expect(r.world.monsters.find(m=>m.monsterId==='M0122')).toMatchObject({serial:2,currentHp:8,maxHp:19,marker:expect.any(Array)});expect(r.cues).toEqual([]);
+ }
+ const alive=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());const output=[];
+ for(const snap of identitySequence.slice(2))output.push(...(await defeatFrame(page,snap,snap.source_pts_s*1000,{identity:true,controller:true})).cues);
+ expect(output).toEqual([expect.objectContaining({monsterId:'M0122',serial:2,reason:'gray_then_beam'})]);
+ const after=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(after.monsters.filter(m=>m.defeated).map(m=>m.serial)).toEqual([2]);
+ expect(after.monsters.filter(m=>m.serial!==2)).toEqual(alive.monsters.filter(m=>m.serial!==2));
+ await expect(page.locator('#reader-defeat-result')).toContainText('自動撃破：おもちゃの恐竜 2');
+ await page.locator('#roster-undo').click();expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(alive);
+});
+
+test('08 autumn defeat automatic: missing, ambiguous, stale or moving identity abstains; no HP-zero shortcut',async({page})=>{
+ test.setTimeout(60000);
+ await open(page);
+ const before=identitySequence[0],second=identitySequence[1],gray=identitySample.snapshots[1],beam=identitySample.snapshots[2];
+ for(const mode of ['one','ambiguous','stale','camera','reset','alive']){
+  await page.evaluate(()=>window.defeatTestTracker=ScreenReaderDefeatVision.createTracker());
+  await defeatFrame(page,before,100,{identity:true,ambiguous:mode==='ambiguous'});
+  let alive=[];if(mode!=='one')alive=(await defeatFrame(page,second,300,{identity:true,ambiguous:mode==='ambiguous'})).world.monsters;
+  if(mode==='reset')await page.evaluate(()=>defeatTestTracker.reset());
+  const offset=mode==='stale'?3000:0;
+  await defeatFrame(page,gray,800+offset,{identity:true,shift:mode==='camera'?180:0});
+  const r=await defeatFrame(page,beam,1250+offset,{identity:true,shift:mode==='camera'?180:0,alive:mode==='alive'?alive:null});
+  expect(r.cues.every(c=>c.serial===null),mode).toBe(true);
+ }
+});
+
+test('08 autumn defeat automatic: preview, wrong instance and max HP never mutate; duplicate cues are idempotent',async({page})=>{
+ await open(page);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');
+ await page.locator('#reader-world-sync').evaluate(e=>{e.checked=true;e.dispatchEvent(new Event('change'));});
+ await page.locator('#reader-apply').evaluate(e=>{e.checked=false;e.dispatchEvent(new Event('change'));});
+ for(const snap of identitySequence)await defeatFrame(page,snap,snap.source_pts_s*1000,{identity:true,controller:true});
+ const before=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(before.monsters.find(m=>m.monsterId==='M0122'&&m.serial===2)?.defeated).toBe(false);
+ const actual=before.monsters.find(m=>m.monsterId==='M0122'&&m.serial===2),cue={monsterId:'M0122',serial:2,instanceId:actual.instanceId,maxHp:19,reason:'gray_then_beam'};
+ for(const invalid of [{...cue,instanceId:99999},{...cue,maxHp:22},{...cue,serial:null},{...cue,reason:'absent'}]){
+  expect(await page.evaluate(c=>ScreenReaderMapBridge.applyDefeats([c]),invalid)).toEqual([]);expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(before);
+ }
+ expect(await page.evaluate(c=>ScreenReaderMapBridge.applyDefeats([c,c]).length,cue)).toBe(1);
+ expect(await page.evaluate(c=>ScreenReaderMapBridge.applyDefeats([c]),cue)).toEqual([]);
 });

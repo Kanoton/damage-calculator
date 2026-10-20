@@ -21,7 +21,7 @@ const hashes={};for(const name of sources){const source=fs.readFileSync(path.joi
  }
  const result={engine:'Current ScreenReaderWorldVision using native Canvas; not browser accuracy or a defeat detector',source_files_sha256:hashes,
   input:'Cropped source pixels restored at their original coordinates on a masked 2560x1440 canvas; hidden HUD/clock intentionally absent',
-  runtime_auto_defeat_disabled:/allowDefeat:false/.test(fs.readFileSync(path.join(js,'screen-reader.js'),'utf8')),samples:rows};
+  image_hp_zero_auto_defeat_disabled:/allowDefeat:false/.test(fs.readFileSync(path.join(js,'screen-reader.js'),'utf8')),samples:rows};
  const output=process.argv[2]||path.join(folder,'text-reader-baseline.json');fs.writeFileSync(output,JSON.stringify(result,null,2)+'\n');
- console.log('Inspected '+rows.length+' reviewed snapshots; automatic defeat remains disabled; wrote '+output);
+ console.log('Inspected '+rows.length+' text observations only; defeat cues/identity are not evaluated here; wrote '+output);
 })().catch(error=>{console.error(error);process.exitCode=1;});

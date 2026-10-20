@@ -20,10 +20,16 @@
  let worldContext=null,readStarted=null,partyLock=null,lastObservation=null,partyEdited=false,readerSession=false;
  const defeatTracker=window.ScreenReaderDefeatVision.createTracker();
  function resetDefeat(){defeatTracker.reset();$('defeat-result').textContent='';}
- function updateDefeat(source,time){
+ function updateDefeat(source,time,world){
   if(!$('world-sync').checked||window.ScreenReaderMapBridge.snapshot().map!=='MAP0105'){resetDefeat();return [];}
-  const cues=defeatTracker.step(source,time);
-  if(cues.length)$('defeat-result').textContent='撃破演出の候補：'+cues.map(c=>window.ScreenReaderMapBridge.monsterName(c.monsterId)).join('、')+'（番号未確認）。マップ一覧で対象の番号を確認し、撃破を確定してください。';
+  const context=window.ScreenReaderMapBridge.context();if(context!==worldContext){worldContext=context;resetDefeat();}
+  const roster=window.ScreenReaderMapBridge.snapshot().monsters;
+  const observations=(world?.monsters||[]).map(o=>({...o,instanceId:roster.find(e=>!e.defeated&&e.monsterId===o.monsterId&&e.serial===o.serial)?.instanceId}));
+  const cues=defeatTracker.step(source,time,observations),applied=$('apply').checked?window.ScreenReaderMapBridge.applyDefeats(cues):[];
+  if(cues.length)$('defeat-result').textContent=cues.map(c=>{
+   const name=window.ScreenReaderMapBridge.monsterName(c.monsterId);
+   return applied.includes(c)?'自動撃破：'+name+' '+c.serial+'（「１つもどす」で取消可能）':'撃破演出の候補：'+name+'（'+(c.serial===null?'番号未確認':'番号 '+c.serial+'・反映保留')+'）。一覧で確認してください。';
+  }).join(' ／ ');
   return cues;
  }
  const stable=new Map();let lastHash=null,sameFrames=0,stableTick=0;
@@ -31,7 +37,7 @@
  function monitorInfo(text=''){
   const count=new Set((window.ScreenReaderWorldReferences?.names||[]).map(r=>r.id)).size;
   const map=window.ScreenReaderMapBridge?.snapshot(),pending=readerSession&&(!map?.map||!map?.difficulty);
-  $('monitor-info').textContent=(pending?'マップ名・難易度：未判定（ルーム設定または結果画面から読み取ります。手動指定もできます） ／ ':'')+'モンスター読取：'+($('world-sync').checked?'ON':'OFF（反映をONにすると読取開始）')+' ／ 照合見本 '+count+'種類 ／ 自動撃破：未対応（番号は手動確認） ／ 撃破演出：秋幻の森の候補検出'+(text?' ／ '+text:'');
+  $('monitor-info').textContent=(pending?'マップ名・難易度：未判定（ルーム設定または結果画面から読み取ります。手動指定もできます） ／ ':'')+'モンスター読取：'+($('world-sync').checked?'ON':'OFF（反映をONにすると読取開始）')+' ／ 照合見本 '+count+'種類 ／ 自動撃破：秋幻の森・番号と位置を確認できた演出のみ（不明時は候補）'+(text?' ／ '+text:'');
  }
  const interval=()=>[250,500,1200].includes(Number($('interval').value))?Number($('interval').value):250;
  function isArea(a){return a&&['x','y','w','h'].every(k=>Number.isFinite(a[k]))&&a.x>=0&&a.y>=0&&a.w>=.05&&a.h>=.05&&a.x+a.w<=1.00001&&a.y+a.h<=1.00001;}
@@ -164,7 +170,7 @@
    if(automatic&&sameFrames>2){monitorInfo('画面変化待ち ／ '+timing());return;}
    // Yield to paint without overlapping jobs. Stop/reset invalidates this frame.
    await new Promise(resolve=>requestAnimationFrame(resolve));if(token!==generation)return;
-   const observation=vision.analyze(frame,custom,partyLock);observation.setup=window.ScreenReaderStartVision.analyze(frame);if($('world-sync').checked)observation.world=window.ScreenReaderWorldVision.analyze(frame);else $('world-result').textContent='マップ読取はOFFです。マップ・難易度を選び、反映をONにしてください。';if(!partyLock&&$('self').value)observation.selfId=$('self').value;
+   const observation=vision.analyze(frame,custom,partyLock);observation.setup=window.ScreenReaderStartVision.analyze(frame);if($('world-sync').checked)observation.world=window.ScreenReaderWorldVision.analyze(frame,{positions:true});else $('world-result').textContent='マップ読取はOFFです。マップ・難易度を選び、反映をONにしてください。';if(!partyLock&&$('self').value)observation.selfId=$('self').value;
    const accepted=automatic?stabilize(observation):{...observation,members:[...observation.members]};
    if($('apply').checked&&$('world-sync').checked&&accepted.setup)window.ScreenReaderMapBridge.configure(accepted.setup);
    if(automatic&&!partyLock&&!partyEdited&&$('apply').checked){
@@ -174,9 +180,9 @@
    if(partyLock){if($('apply').checked&&!partyLock.selfId&&partyLock.ids.includes(accepted.selfId)){partyLock.selfId=accepted.selfId;$('self').value=accepted.selfId;$('party-status').textContent='PT確定：編成は再設定まで固定。自キャラも判定済みです。';}accepted.selfId=partyLock.selfId;accepted.partyIds=[...partyLock.ids];accepted.members=accepted.members.filter(m=>partyLock.ids.includes(m.id)&&(m.slot===undefined||partyLock.ids[m.slot]===m.id));}
    const result=$('apply').checked?bridge.apply(accepted):{updated:0,added:0};
    drawResults(observation,accepted,automatic);
-   updateDefeat(frame,performance.now());
    let worldSkipped=0;
    if($('apply').checked&&$('world-sync').checked){const applied=window.ScreenReaderMapBridge.apply(accepted.world,{allowDefeat:false});worldSkipped=applied.skipped||0;if(applied.skipped)$('world-result').textContent+=' ／ 反映保留 '+applied.skipped+'件'+(accepted.world?.monsters?.some(m=>m.currentHp===0)?'（HP0候補は撃破未確認のため保持）':'（マップ・難易度・既存個体との一致を確認してください）');}
+   updateDefeat(frame,started,observation.world);
    monitorInfo((observation.world?'今回 '+observation.world.monsters.length+'体 ／ '+(automatic?'連続一致 '+accepted.world.monsters.length+'体':'手動読取')+' ／ '+(!$('apply').checked?'確認のみ ／ ':worldSkipped?'反映保留 '+worldSkipped+'件 ／ ':''):'')+timing());
    const names=observation.members.filter(m=>m.id).length;
    status((automatic?'自動読取':'画面読取')+'：'+names+'人を判定／チップ '+result.added+'件追加。'+(!observation.selfId?' 自キャラが未判定の場合は「自キャラ」を指定してください。':''));
@@ -220,7 +226,7 @@
  $('self').addEventListener('change',()=>{if(partyLock){if(partyLock.ids.includes($('self').value))partyLock.selfId=$('self').value;else{$('self').value=partyLock.selfId||'';$('party-status').textContent='PTは固定中です。自キャラはPT内の人を指定してください。';}}generation++;stable.clear();sameFrames=0;lastHash=null;});
  $('world-sync').addEventListener('change',()=>{resetDefeat();stable.clear();sameFrames=0;lastHash=null;monitorInfo();});
  $('interval').addEventListener('change',()=>{if(!busy)schedule();});
- $('apply').addEventListener('change',()=>{stable.clear();sameFrames=0;lastHash=null;});
+ $('apply').addEventListener('change',()=>{resetDefeat();stable.clear();sameFrames=0;lastHash=null;});
  $('area').addEventListener('click',()=>{selecting=true;preview.classList.add('is-selecting');status('プレビュー上でゲーム画面の範囲をドラッグしてください。');});
  const point=event=>{const b=preview.getBoundingClientRect();return {x:Math.max(0,Math.min(1,(event.clientX-b.left)/b.width)),y:Math.max(0,Math.min(1,(event.clientY-b.top)/b.height))};};
  preview.addEventListener('pointerdown',event=>{if(!selecting)return;selectionStart=point(event);preview.setPointerCapture(event.pointerId);});
@@ -236,5 +242,5 @@
  window.addEventListener('mobile-ui-change',()=>{if(document.body.classList.contains('mobile-ui'))stop();});
  window.addEventListener('pagehide',stop);
  $('learn-id').addEventListener('change',updateMappingPreview);
- window.ScreenReaderController={read,stop,stabilize,validateProfile};ready();
+ window.ScreenReaderController={read,stop,stabilize,validateProfile,updateDefeat};ready();
 })();

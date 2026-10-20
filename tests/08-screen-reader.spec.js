@@ -615,7 +615,7 @@ test('08: bottom reader launcher opens a draggable panel, clamps after resize, c
 });
 
 test('08: chip diagnostics distinguish a missing list from an empty or unreadable inventory and retain registered chips',async({page})=>{
- await open(page);await readFixture(page,'left-hud');await expect(page.locator('#reader-chip-result')).toContainText('一覧画面・選択タブを未判定');await expect(page.locator('#reader-monitor-info')).toContainText('自動撃破：未対応');
+ await open(page);await readFixture(page,'left-hud');await expect(page.locator('#reader-chip-result')).toContainText('一覧画面・選択タブを未判定');await expect(page.locator('#reader-monitor-info')).toContainText('自動撃破：秋幻の森・番号と位置を確認できた演出のみ');
  await readFixture(page,'6248');await expect(page.locator('#reader-chip-result')).toContainText('取得済み 1件を保持');expect((await snapshot(page)).members.find(m=>m.id==='105').chips).toEqual(['30']);
  await readFixture(page,'popup-11');await expect(page.locator('#reader-chip-result')).toContainText('一覧と持ち主は確認済み');await expect(page.locator('#reader-chip-result')).toContainText('アイコンは未判定または空欄');expect((await snapshot(page)).members.find(m=>m.id==='105').chips).toEqual(['30']);
 });
