@@ -540,3 +540,36 @@ test('08 autumn defeat automatic: preview, wrong instance and max HP never mutat
  expect(await page.evaluate(c=>ScreenReaderMapBridge.applyDefeats([c,c]).length,cue)).toBe(1);
  expect(await page.evaluate(c=>ScreenReaderMapBridge.applyDefeats([c]),cue)).toEqual([]);
 });
+
+for(const [protocol,size] of [['http',{width:1440,height:900}],['file',{width:950,height:1200}]])test(`08 autumn defeat full turn: real controller keeps HP, four identities and the surviving owl (${protocol})`,async({page})=>{
+ test.setTimeout(240000);await page.setViewportSize(size);
+ if(protocol==='file')await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);else await open(page);
+ await page.waitForFunction(()=>window.ScreenReaderCharacterBridge?.catalog().characters.length===35);
+ const first=await page.evaluate(async()=>{
+  const video=document.createElement('video');video.muted=true;video.preload='auto';video.src=new URL('../tests/fixtures/screen-reader/defeat/autumn-turn-20261020/full-replay.mp4',location.href).href;
+  await new Promise((resolve,reject)=>{video.onloadeddata=resolve;video.onerror=()=>reject(Error('Fixture video could not decode'));});window.turnVideo=video;
+  await new Promise(resolve=>{video.onseeked=resolve;video.currentTime=9.01;});
+  const c=document.createElement('canvas');c.width=2560;c.height=1440;c.getContext('2d').drawImage(video,0,0);return c.toDataURL('image/png');
+ });
+ await page.locator('#reader-toggle').click();await page.locator('#reader-file').setInputFiles({name:'turn-start.png',mimeType:'image/png',buffer:Buffer.from(first.split(',')[1],'base64')});await expect(page.locator('#reader-file')).toHaveValue('');
+ await page.locator('#mp-map-select').evaluate(e=>{e.value='MAP0105';e.dispatchEvent(new Event('change',{bubbles:true}));});
+ await page.locator('#mp-difficulty').evaluate(e=>{e.value='普通';e.dispatchEvent(new Event('change',{bubbles:true}));});
+ const result=await page.evaluate(async()=>{
+  let now=1000;Object.defineProperty(performance,'now',{configurable:true,value:()=>now});const normalize=ScreenReaderVision.normalize;ScreenReaderVision.normalize=(_source,area)=>normalize(turnVideo,area);
+  const checkpoints={},defeats=[];let last='';
+  for(let index=37;index<=370;index++){
+   const time=(index-1)*.25+.01;if(Math.abs(turnVideo.currentTime-time)>.001)await new Promise(resolve=>{turnVideo.onseeked=resolve;turnVideo.currentTime=time;});
+   now=1000+index*250;await ScreenReaderController.read(true);
+   const state=ScreenReaderMapBridge.snapshot(),text=document.getElementById('reader-defeat-result').textContent;
+   if(text!==last&&text.startsWith('自動撃破'))defeats.push({index,text});last=text;
+   if(index===224||index===268)checkpoints[index]=state;
+  }
+  return {checkpoints,defeats,state:ScreenReaderMapBridge.snapshot()};
+ });
+ require('fs').mkdirSync('artifacts',{recursive:true});require('fs').writeFileSync(`artifacts/full-turn-${test.info().project.name}-${protocol}.json`,JSON.stringify(result,null,2));
+ expect(result.checkpoints[224].monsters.find(m=>m.monsterId==='M0123'&&m.serial===2)).toMatchObject({hp:6,defeated:false});
+ expect(result.checkpoints[268].monsters.find(m=>m.monsterId==='M0122'&&m.serial===1)).toMatchObject({hp:5,defeated:false});
+ expect(result.state.monsters.filter(m=>m.defeated).map(m=>[m.monsterId,m.serial]).sort()).toEqual([['M0122',1],['M0123',1],['M0123',2],['M0123',3]]);
+ expect(result.defeats).toHaveLength(4);
+ await page.locator('#roster-undo').click();expect((await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).monsters.find(m=>m.monsterId==='M0123'&&m.serial===2)?.defeated).toBe(false);
+});

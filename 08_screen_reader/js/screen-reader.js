@@ -25,7 +25,8 @@
   const context=window.ScreenReaderMapBridge.context();if(context!==worldContext){worldContext=context;resetDefeat();}
   const roster=window.ScreenReaderMapBridge.snapshot().monsters;
   const observations=(world?.monsters||[]).map(o=>({...o,instanceId:roster.find(e=>!e.defeated&&e.monsterId===o.monsterId&&e.serial===o.serial)?.instanceId}));
-  const cues=defeatTracker.step(source,time,observations),applied=$('apply').checked?window.ScreenReaderMapBridge.applyDefeats(cues):[];
+  const evidence=window.ScreenReaderMapBridge.defeatContext();if(evidence)evidence.mapVisible=!!world?.clock;
+  const cues=defeatTracker.step(source,time,observations,evidence),applied=$('apply').checked?window.ScreenReaderMapBridge.applyDefeats(cues):[];
   if(cues.length)$('defeat-result').textContent=cues.map(c=>{
    const name=window.ScreenReaderMapBridge.monsterName(c.monsterId);
    return applied.includes(c)?'自動撃破：'+name+' '+c.serial+'（「１つもどす」で取消可能）':'撃破演出の候補：'+name+'（'+(c.serial===null?'番号未確認':'番号 '+c.serial+'・反映保留')+'）。一覧で確認してください。';

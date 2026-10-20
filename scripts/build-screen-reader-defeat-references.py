@@ -59,6 +59,10 @@ def build():
   if hashlib.sha256((FOLDER/row['image']).read_bytes()).hexdigest()!=row['source_sha256']:raise ValueError('Changed renderer source image')
   if len(row['shape'])!=400 or not all(0<=v<=1 for v in row['shape']):raise ValueError('Invalid renderer patch')
   patches.append({key:row[key] for key in ['sample','monsterId','renderer','renderer_version','image','source_sha256','ratio','shape']})
+ for row in json.loads((ROOT/'tests/fixtures/screen-reader/defeat/autumn-turn-20261020/patches.json').read_text())['patches']:
+  if hashlib.sha256((ROOT/row['image']).read_bytes()).hexdigest()!=row['source_sha256']:raise ValueError('Changed full-turn patch')
+  if len(row['shape'])!=400 or not all(0<=v<=1 for v in row['shape']):raise ValueError('Invalid full-turn patch')
+  patches.append(row)
  return '// Generated visible patches; no full-body requirement or serial inference.\nwindow.ScreenReaderDefeatReferences='+json.dumps(dict(version=1,fullBodyRequired=False,patches=patches),separators=(',',':'))+';\n'
 if __name__=='__main__':
  args=argparse.ArgumentParser();args.add_argument('--check',action='store_true');a=args.parse_args();text=build()
