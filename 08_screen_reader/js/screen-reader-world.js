@@ -64,6 +64,17 @@
     if(!points.length||points.length>8)break;
     x=points.reduce((a,b)=>a+b,0)/points.length;last=[x,y];length++;
    }
+   // A leader can touch a thick character/monster outline after only a few
+   // rows. Keep following its measured straight ray through that junction,
+   // rather than demanding the entire leader remain a separate thin blob.
+   if(length>=3&&length<12){
+    const slope=(last[0]-start)/length;
+    if(Math.abs(slope)>=.5&&Math.abs(slope)<=4)for(let y=last[1]+1;y<Math.min(h,line.y+140);y++){
+     const predicted=start+slope*(y-line.y),xx=Math.round(predicted);
+     if(![xx-1,xx,xx+1].some(px=>dark(px,y)))break;
+     last=[predicted,y];length++;
+    }
+   }
    if(length>=12&&Math.abs(last[0]-start)>=10)ends.push(last);
   }
   return ends.length===1?ends[0]:null;

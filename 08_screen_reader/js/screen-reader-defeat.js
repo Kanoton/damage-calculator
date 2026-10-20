@@ -42,7 +42,9 @@
    lastTime=time;tick++;const p=pixels(source),found=blobs(p).map(blob=>({...blob,match:classify(blob)})).filter(b=>b.match),emitted=[];
    const key=o=>o.monsterId+':'+o.serial;
    const visible=observations.filter(o=>Number.isInteger(o.serial)&&o.serial>0&&o.currentHp>0&&o.currentHp<=o.maxHp&&o.marker?.length===2&&o.marker.every(Number.isFinite)&&observations.filter(b=>key(o)===key(b)).length===1);
-   const excluded=[...identities.values(),...visible].flatMap(o=>o.marker?[[o.marker[0]-100,o.marker[1]-60,200,200],...(o.labelBox?[o.labelBox]:[])]:[]).concat(found.map(b=>b.box.map(v=>v*2)));
+   // Ignore the search-sized foreground footprint (up to 240px wide), including
+   // overlapping actors/attack cards, not just the small visible gray patch.
+   const excluded=[...identities.values(),...visible].flatMap(o=>o.marker?[[o.marker[0]-120,o.marker[1]-60,240,260],...(o.labelBox?[o.labelBox]:[])]:[]).concat(found.map(b=>b.box.map(v=>v*2)));
    if(!sceneStable(previous,p,excluded)){identities.clear();for(const item of pending)item.identity=null;}
    previous=p;
    for(const [id,o] of identities)if(time-o.time>1200)identities.delete(id);
