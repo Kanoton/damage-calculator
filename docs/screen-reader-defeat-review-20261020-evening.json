@@ -1,0 +1,418 @@
+{
+  "source_video_name": "AstralParty_INT 2026-10-20 18-05-07.mp4",
+  "source_sha256": "1f0572cb72c47e1f19c19a819ed7099b3388fe99a3209b0029a3716c0a535dda",
+  "base_main": "00380224d93fa77de4dd1edec42f0529620000eb",
+  "engine": "Native Canvas, world reader + tracker + extracted production stabilize; not actual browser persistence or Controller video test",
+  "sampling": "original resolution, ffmpeg fps=4, image sequence 37..384; nominal bin centers in milliseconds, not exact source PTS",
+  "source_js_sha256": {
+    "screen-reader-vision.js": "f6b6e9826fcb880a77f39203881b3a3904deef81d7f20c329bdc787d774d01f7",
+    "screen-reader-world.js": "de4f7bb32e4aeed5f16f81e7654f9f0774576592104e1b7d01401b00e6a97ef6",
+    "screen-reader-defeat.js": "f96bb4d763dcdb7f3ba3e8b68034d08395fe0ca34c34a32443ac41a27e7ee648",
+    "screen-reader-defeat-references.js": "45a07b2860c9d4f52edd1d90dcec38fceba7ab595265332e4835f94102564601",
+    "screen-reader.js": "9adb5d5a585057537f5ab85af9cd040e301e4fab30ccc117340d6d2f1316f978",
+    "map.js": "bb595d9db41de040ee019e8e8409ce90c390225e5474367cb3087661572c9d0c"
+  },
+  "frames": 348,
+  "last_time": 95875,
+  "cues": [],
+  "pending_frames": 0,
+  "accepted": [
+    {
+      "time": 14125,
+      "monsterId": "M0123",
+      "serial": 1,
+      "currentHp": 8,
+      "maxHp": 8
+    },
+    {
+      "time": 14375,
+      "monsterId": "M0123",
+      "serial": 1,
+      "currentHp": 8,
+      "maxHp": 8
+    },
+    {
+      "time": 15125,
+      "monsterId": "M0123",
+      "serial": 2,
+      "currentHp": 8,
+      "maxHp": 8
+    },
+    {
+      "time": 15375,
+      "monsterId": "M0123",
+      "serial": 2,
+      "currentHp": 8,
+      "maxHp": 8
+    },
+    {
+      "time": 15875,
+      "monsterId": "M0123",
+      "serial": 3,
+      "currentHp": 8,
+      "maxHp": 8
+    },
+    {
+      "time": 16125,
+      "monsterId": "M0123",
+      "serial": 3,
+      "currentHp": 8,
+      "maxHp": 8
+    },
+    {
+      "time": 16625,
+      "monsterId": "M0122",
+      "serial": 1,
+      "currentHp": 19,
+      "maxHp": 19
+    },
+    {
+      "time": 16875,
+      "monsterId": "M0122",
+      "serial": 1,
+      "currentHp": 19,
+      "maxHp": 19
+    },
+    {
+      "time": 19375,
+      "monsterId": "M0123",
+      "serial": 3,
+      "currentHp": 8,
+      "maxHp": 8
+    },
+    {
+      "time": 55125,
+      "monsterId": "M0123",
+      "serial": 2,
+      "currentHp": 6,
+      "maxHp": 8
+    },
+    {
+      "time": 55375,
+      "monsterId": "M0123",
+      "serial": 2,
+      "currentHp": 6,
+      "maxHp": 8
+    },
+    {
+      "time": 55625,
+      "monsterId": "M0123",
+      "serial": 2,
+      "currentHp": 6,
+      "maxHp": 8
+    },
+    {
+      "time": 55875,
+      "monsterId": "M0123",
+      "serial": 2,
+      "currentHp": 6,
+      "maxHp": 8
+    },
+    {
+      "time": 63375,
+      "monsterId": "M0123",
+      "serial": 3,
+      "currentHp": 8,
+      "maxHp": 8
+    },
+    {
+      "time": 63625,
+      "monsterId": "M0123",
+      "serial": 3,
+      "currentHp": 8,
+      "maxHp": 8
+    },
+    {
+      "time": 63875,
+      "monsterId": "M0123",
+      "serial": 3,
+      "currentHp": 8,
+      "maxHp": 8
+    },
+    {
+      "time": 64125,
+      "monsterId": "M0123",
+      "serial": 3,
+      "currentHp": 8,
+      "maxHp": 8
+    },
+    {
+      "time": 64375,
+      "monsterId": "M0123",
+      "serial": 3,
+      "currentHp": 8,
+      "maxHp": 8
+    },
+    {
+      "time": 66375,
+      "monsterId": "M0122",
+      "serial": 1,
+      "currentHp": 12,
+      "maxHp": 19
+    },
+    {
+      "time": 66625,
+      "monsterId": "M0122",
+      "serial": 1,
+      "currentHp": 5,
+      "maxHp": 19
+    },
+    {
+      "time": 66875,
+      "monsterId": "M0122",
+      "serial": 1,
+      "currentHp": 5,
+      "maxHp": 19
+    },
+    {
+      "time": 78125,
+      "monsterId": "M0123",
+      "serial": 2,
+      "currentHp": 6,
+      "maxHp": 8
+    },
+    {
+      "time": 78375,
+      "monsterId": "M0123",
+      "serial": 2,
+      "currentHp": 6,
+      "maxHp": 8
+    }
+  ],
+  "last_accepted_positive_hp": {
+    "M0123:1": 8,
+    "M0123:2": 6,
+    "M0123:3": 8,
+    "M0122:1": 5
+  },
+  "dinosaur_death": [
+    {
+      "time": 66125,
+      "monsters": [
+        {
+          "monsterId": "M0122",
+          "serial": 1,
+          "currentHp": 19,
+          "maxHp": 19,
+          "labelBox": [
+            350,
+            263,
+            182,
+            56
+          ],
+          "marker": [
+            631.5,
+            339
+          ]
+        }
+      ],
+      "sceneOK": false,
+      "identities": [
+        {
+          "monsterId": "M0122",
+          "serial": 1,
+          "currentHp": 19,
+          "maxHp": 19,
+          "labelBox": [
+            350,
+            263,
+            182,
+            56
+          ],
+          "marker": [
+            631.5,
+            339
+          ],
+          "time": 66125,
+          "tick": 229,
+          "count": 1
+        }
+      ],
+      "pending": [],
+      "cues": []
+    },
+    {
+      "time": 66375,
+      "monsters": [
+        {
+          "monsterId": "M0122",
+          "serial": 1,
+          "currentHp": 12,
+          "maxHp": 19,
+          "labelBox": [
+            350,
+            263,
+            182,
+            57
+          ],
+          "marker": [
+            570,
+            302
+          ]
+        }
+      ],
+      "sceneOK": false,
+      "identities": [
+        {
+          "monsterId": "M0122",
+          "serial": 1,
+          "currentHp": 12,
+          "maxHp": 19,
+          "labelBox": [
+            350,
+            263,
+            182,
+            57
+          ],
+          "marker": [
+            570,
+            302
+          ],
+          "time": 66375,
+          "tick": 230,
+          "count": 1
+        }
+      ],
+      "pending": [],
+      "cues": []
+    },
+    {
+      "time": 66625,
+      "monsters": [
+        {
+          "monsterId": "M0122",
+          "serial": 1,
+          "currentHp": 5,
+          "maxHp": 19,
+          "labelBox": [
+            347,
+            263,
+            182,
+            57
+          ],
+          "marker": [
+            625,
+            339
+          ]
+        }
+      ],
+      "sceneOK": false,
+      "identities": [
+        {
+          "monsterId": "M0122",
+          "serial": 1,
+          "currentHp": 5,
+          "maxHp": 19,
+          "labelBox": [
+            347,
+            263,
+            182,
+            57
+          ],
+          "marker": [
+            625,
+            339
+          ],
+          "time": 66625,
+          "tick": 231,
+          "count": 1
+        }
+      ],
+      "pending": [],
+      "cues": []
+    },
+    {
+      "time": 66875,
+      "monsters": [
+        {
+          "monsterId": "M0122",
+          "serial": 1,
+          "currentHp": 5,
+          "maxHp": 19,
+          "labelBox": [
+            348,
+            263,
+            182,
+            57
+          ],
+          "marker": [
+            600,
+            320
+          ]
+        }
+      ],
+      "sceneOK": false,
+      "identities": [
+        {
+          "monsterId": "M0122",
+          "serial": 1,
+          "currentHp": 5,
+          "maxHp": 19,
+          "labelBox": [
+            348,
+            263,
+            182,
+            57
+          ],
+          "marker": [
+            600,
+            320
+          ],
+          "time": 66875,
+          "tick": 232,
+          "count": 1
+        }
+      ],
+      "pending": [],
+      "cues": []
+    },
+    {
+      "time": 67125,
+      "monsters": [],
+      "sceneOK": false,
+      "identities": [],
+      "pending": [],
+      "cues": []
+    },
+    {
+      "time": 67375,
+      "monsters": [],
+      "sceneOK": false,
+      "identities": [],
+      "pending": [],
+      "cues": []
+    },
+    {
+      "time": 67625,
+      "monsters": [],
+      "sceneOK": false,
+      "identities": [],
+      "pending": [],
+      "cues": []
+    },
+    {
+      "time": 67875,
+      "monsters": [],
+      "sceneOK": false,
+      "identities": [],
+      "pending": [],
+      "cues": []
+    },
+    {
+      "time": 68125,
+      "monsters": [],
+      "sceneOK": false,
+      "identities": [],
+      "pending": [],
+      "cues": []
+    },
+    {
+      "time": 68375,
+      "monsters": [],
+      "sceneOK": false,
+      "identities": [],
+      "pending": [],
+      "cues": []
+    }
+  ]
+}
