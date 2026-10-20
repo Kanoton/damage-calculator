@@ -475,9 +475,11 @@ test('08 autumn defeat automatic: unchanged-frame waiting keeps observed identit
  await page.locator('#reader-file').setInputFiles({name:'held-map.png',mimeType:'image/png',buffer:Buffer.from(image.split(',')[1],'base64')});await expect(page.locator('#reader-file')).toHaveValue('');
  await page.locator('#mp-map-select').evaluate(e=>{e.value='MAP0105';e.dispatchEvent(new Event('change',{bubbles:true}));});
  await page.locator('#mp-difficulty').evaluate(e=>{e.value='普通';e.dispatchEvent(new Event('change',{bubbles:true}));});
+ await page.evaluate(()=>{window.heldWorldReads=[];const analyze=ScreenReaderWorldVision.analyze;ScreenReaderWorldVision.analyze=(frame,...options)=>{const world=analyze(frame,...options);heldWorldReads.push(world);window.heldMapPlane=frame.popupFrame.toDataURL('image/png');return world;};});
  await page.evaluate(()=>{window.readerTestNow=1000;Object.defineProperty(performance,'now',{configurable:true,value:()=>readerTestNow});});
  for(let i=0;i<8;i++)await page.evaluate(async time=>{readerTestNow=time;await ScreenReaderController.read(true);},1000+i*500);
  await expect(page.locator('#reader-monitor-info')).toContainText('画面変化待ち');
+ const held=await page.evaluate(()=>({worlds:heldWorldReads,image:heldMapPlane}));require('fs').mkdirSync('artifacts',{recursive:true});require('fs').writeFileSync('artifacts/held-map-plane.png',Buffer.from(held.image.split(',')[1],'base64'));diagnostics.push('HELD_WORLD '+JSON.stringify(held.worlds));
  const gray=await defeatFrame(page,identitySample.snapshots[1],5000,{identity:true,controller:true});expect(gray.cues).toEqual([]);
  const beam=await defeatFrame(page,identitySample.snapshots[2],5500,{identity:true,controller:true});expect(beam.cues,diagnostics.join('\n')).toEqual([expect.objectContaining({serial:2})]);
  expect((await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).monsters.find(m=>m.monsterId==='M0122'&&m.serial===2)?.defeated).toBe(true);
