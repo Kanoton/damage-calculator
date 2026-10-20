@@ -64,14 +64,16 @@
    return dark/n>.65&&orange/m>.3;
   }
   return {reset,step(source,time,observations=[],context=null){
-   if(!Number.isFinite(time)||lastTime!==null&&(time<=lastTime||time-lastTime>1800)){reset();if(!Number.isFinite(time))return [];}
+   if(!Number.isFinite(time)||lastTime!==null&&time<=lastTime){reset();if(!Number.isFinite(time))return [];}
+   if(lastTime!==null&&time-lastTime>1800){pending=[];unresolved=[];previous=null;identities.clear();unlocated.clear();battle=null;focus=null;wasBattle=false;for(const o of memory.values())o.tracked=false;}
    lastTime=time;tick++;const p=pixels(source),found=blobs(p).map(blob=>({...blob,match:classify(blob)})).filter(b=>b.match),emitted=[];
    const key=o=>o.monsterId+':'+o.serial;
    const roster=context?.monsters||[],valid=o=>Number.isSafeInteger(o.instanceId)&&o.instanceId>0&&roster.some(e=>!e.defeated&&e.seen&&key(e)===key(o)&&e.instanceId===o.instanceId&&e.maxHp===o.maxHp);
    const complete=id=>{const all=roster.filter(e=>e.monsterId===id);return Number.isSafeInteger(context?.counts?.[id])&&all.length===context.counts[id]&&all.every(e=>e.seen&&Number.isSafeInteger(e.serial)&&e.serial>=1&&e.serial<=context.counts[id])&&new Set(all.map(key)).size===all.length;};
    for(const [id,o] of memory)if(!valid(o)||time-o.time>60000)memory.delete(id);
    const masks=[...memory.values()].flatMap(o=>[...(o.marker?[[o.marker[0]-90,o.marker[1]-90,180,200]]:[]),...(o.labelBox?[o.labelBox]:[])]).concat(found.map(b=>b.box.map(v=>v*2)));
-   const motion=context?mapMotion(previous,p,masks):null;
+   const inBattle=battleView(p);
+   const motion=context&&!inBattle&&(!battle||battle.exit!==null)?mapMotion(previous,p,masks):null;
    for(const o of memory.values()){
     if(!motion){o.tracked=false;continue;}
     if(!o.tracked)continue;
@@ -81,12 +83,11 @@
    }
    for(const o of observations)if(o.currentHp>0&&o.currentHp<=o.maxHp&&Number.isSafeInteger(o.serial)&&o.serial>0&&valid(o)&&observations.filter(b=>key(b)===key(o)).length===1){
     const old=memory.get(key(o)),run=old?.tick===tick-1?old.run+1:1;
-    // seen is set by the bridge only after its own consecutive validation.
+    // Automatic reads have already passed the bridge's consecutive validation.
     memory.set(key(o),{...o,time,tick,run,confirmed:true,tracked:!!o.labelBox,positionTime:time});
    }
-   const current=observations.filter(o=>valid(o)&&o.currentHp>0);
+   const current=observations.filter(o=>valid(o)&&o.currentHp>0&&o.currentHp<=o.maxHp&&memory.has(key(o)));
    if(current.length===1)focus={...memory.get(key(current[0])),time};else if(current.length>1)focus=null;
-   const inBattle=battleView(p);
    if(inBattle&&!wasBattle&&!battle&&!context?.mapVisible){const target=focus&&time-focus.time<=2000&&valid(focus)&&complete(focus.monsterId)&&!completed.has(key(focus)+':'+focus.instanceId)?focus:null;battle=target?{identity:target,start:time,exit:null}:null;}
    if(battle&&time-battle.start>45000)battle=null;
    // Attacks cover the stage and can hide its colors. Only the independently
@@ -102,7 +103,7 @@
     const near=o=>{if(!o.labelBox)return false;const [lx,ly,lw]=o.labelBox;return x+w>=lx-220&&x<=lx+lw+350&&y+h>=ly+10&&y<=ly+300;};
     const tracked=choices.filter(o=>o.tracked&&time-o.positionTime<=750&&near(o));
     if(tracked.length===1)return {...tracked[0],remembered:true,association:'tracked'};
-    if(tracked.length>1)return null;
+    if(tracked.length>1)return false;
     const recent=choices.filter(o=>time-o.time<=1200);
     // The printed target must be unique and near the partial animation. Its
     // label can be displaced; this path requires the complete confirmed spawn.
@@ -155,7 +156,8 @@
    pending=pending.filter(item=>time-item.time<=1800&&!emitted.some(e=>e.monsterId===item.monsterId));
    for(const blob of found)if(!emitted.some(e=>e.monsterId===blob.match.monsterId)&&!pending.some(item=>item.monsterId===blob.match.monsterId&&Math.hypot(item.box[0]-blob.box[0],item.box[1]-blob.box[1])<18)){
     const [x,y,w,h]=blob.box.map(v=>v*2),candidates=[...identities.values()].filter(o=>o.monsterId===blob.match.monsterId&&o.marker[0]>=x-40&&o.marker[0]<=x+w+40&&o.marker[1]>=y-40&&o.marker[1]<=y+h+40);
-    const identity=(context&&rememberedIdentity(blob))||(candidates.length===1&&candidates[0].count>=2&&![...unlocated.values()].some(o=>o.monsterId===blob.match.monsterId)&&!completed.has(key(candidates[0])+':'+candidates[0].instanceId)?candidates[0]:null);
+    const remembered=context?rememberedIdentity(blob):null;
+    const identity=remembered===false?null:remembered||(candidates.length===1&&candidates[0].count>=2&&![...unlocated.values()].some(o=>o.monsterId===blob.match.monsterId)&&!completed.has(key(candidates[0])+':'+candidates[0].instanceId)?candidates[0]:null);
     pending.push({monsterId:blob.match.monsterId,box:blob.box,time,beam:beamAt(p,blob.box),identity});
    }
    for(const cue of emitted)if(cue.serial!==null)completed.add(key(cue)+':'+cue.instanceId);

@@ -566,10 +566,16 @@ test('08 autumn defeat memory: missing names, registered camera motion, later su
     for(const t of [start,start+250])cues.push(...tracker.step(before,t,survivors,context));
    }
    results[mode]=cues;
-  }return results;
+  }
+  const single=ScreenReaderDefeatVision.createTracker(),one={...known,serial:1,instanceId:1};
+  const singleton={counts:{[one.monsterId]:1},monsters:[{...one,seen:true,defeated:false}]};
+  single.step(before,100,[one],singleton);single.step(before,2500,[],singleton);
+  single.step(frame(1),3000,[],singleton);results.singletonGap=single.step(frame(2),3500,[],singleton);
+  return results;
  },images);
  for(const mode of ['held','shift'])expect(results[mode],mode).toEqual([expect.objectContaining({serial:2,instanceId:2,association:'tracked'})]);
  expect(results.later.filter(c=>c.serial!==null)).toEqual([expect.objectContaining({serial:2,association:'later-survivors'})]);
+ expect(results.singletonGap).toEqual([expect.objectContaining({serial:1,instanceId:1,association:'singleton'})]);
  for(const mode of ['camera-cut','ambiguous','reset','alive','expired','two-kills'])expect(results[mode].every(c=>c.serial===null),mode).toBe(true);
 });
 
