@@ -36,8 +36,27 @@
  }
  function createTracker(){
   let pending=[],lastTime=null,previous=null,identities=new Map(),unlocated=new Map(),tick=0,completed=new Set();
-  let memory=new Map(),battle=null,wasBattle=false;
-  const reset=()=>{pending=[];lastTime=null;previous=null;identities.clear();unlocated.clear();completed.clear();memory.clear();battle=null;wasBattle=false;tick=0;};
+  let memory=new Map(),battle=null,wasBattle=false,focus=null,unresolved=[];
+  const reset=()=>{pending=[];lastTime=null;previous=null;identities.clear();unlocated.clear();completed.clear();memory.clear();battle=null;wasBattle=false;focus=null;unresolved=[];tick=0;};
+  // Register textured map background, not labels or moving actors. A position
+  // survives a missing name only while independently registered map pixels do.
+  function mapMotion(a,b,excluded){
+   if(!a)return null;
+   const points=[];
+   for(let y=80;y<260;y+=12)for(let x=170;x<630;x+=12){
+    if(excluded.some(([bx,by,bw,bh])=>x*2>bx-12&&x*2<bx+bw+12&&y*2>by-12&&y*2<by+bh+12))continue;
+    const k=(y*W+x)*4,j=((y+3)*W+x+3)*4;
+    if(Math.max(...[0,1,2].map(c=>Math.abs(a[k+c]-a[j+c])))>=50)points.push([x,y]);
+   }
+   if(points.length<24)return null;
+   const score=(dx,dy)=>{let hits=0;for(const [x,y] of points){if(x+dx<150||x+dx>=650||y+dy<60||y+dy>=280)continue;const k=(y*W+x)*4,j=((y+dy)*W+x+dx)*4,k2=((y+3)*W+x+3)*4,j2=((y+dy+3)*W+x+dx+3)*4;if([0,1,2].every(c=>Math.abs(a[k+c]-b[j+c])<35&&Math.abs(a[k2+c]-b[j2+c])<35))hits++;}return hits/points.length;};
+   if(score(0,0)>.78)return [0,0];
+   let best={score:0,dx:0,dy:0};const ranks=[];
+   for(let dy=-48;dy<=48;dy+=6)for(let dx=-72;dx<=72;dx+=6){const s=score(dx,dy);ranks.push({score:s,dx,dy});if(s>best.score)best={score:s,dx,dy};}
+   const coarse=best;for(let dy=coarse.dy-5;dy<=coarse.dy+5;dy++)for(let dx=coarse.dx-5;dx<=coarse.dx+5;dx++){const s=score(dx,dy);if(s>best.score)best={score:s,dx,dy};}
+   const other=Math.max(0,...ranks.filter(r=>Math.hypot(r.dx-best.dx,r.dy-best.dy)>12).map(r=>r.score));
+   return best.score>.62&&best.score-other>.12?[best.dx*2,best.dy*2]:null;
+  }
   function battleView(p){
    let dark=0,orange=0,n=0,m=0;
    for(let y=70;y<150;y+=8)for(let x=190;x<640;x+=8){const k=(y*W+x)*4;n++;if(Math.max(p[k],p[k+1],p[k+2])<125&&Math.max(p[k],p[k+1],p[k+2])-Math.min(p[k],p[k+1],p[k+2])<45)dark++;}
@@ -51,12 +70,24 @@
    const roster=context?.monsters||[],valid=o=>Number.isSafeInteger(o.instanceId)&&o.instanceId>0&&roster.some(e=>!e.defeated&&e.seen&&key(e)===key(o)&&e.instanceId===o.instanceId&&e.maxHp===o.maxHp);
    const complete=id=>{const all=roster.filter(e=>e.monsterId===id);return Number.isSafeInteger(context?.counts?.[id])&&all.length===context.counts[id]&&all.every(e=>e.seen&&Number.isSafeInteger(e.serial)&&e.serial>=1&&e.serial<=context.counts[id])&&new Set(all.map(key)).size===all.length;};
    for(const [id,o] of memory)if(!valid(o)||time-o.time>60000)memory.delete(id);
+   const masks=[...memory.values()].flatMap(o=>[...(o.marker?[[o.marker[0]-90,o.marker[1]-90,180,200]]:[]),...(o.labelBox?[o.labelBox]:[])]).concat(found.map(b=>b.box.map(v=>v*2)));
+   const motion=context?mapMotion(previous,p,masks):null;
+   for(const o of memory.values()){
+    if(!motion){o.tracked=false;continue;}
+    if(!o.tracked)continue;
+    if(o.marker)o.marker=[o.marker[0]+motion[0],o.marker[1]+motion[1]];
+    if(o.labelBox)o.labelBox=[o.labelBox[0]+motion[0],o.labelBox[1]+motion[1],...o.labelBox.slice(2)];
+    o.positionTime=time;
+   }
    for(const o of observations)if(o.currentHp>0&&o.currentHp<=o.maxHp&&Number.isSafeInteger(o.serial)&&o.serial>0&&valid(o)&&observations.filter(b=>key(b)===key(o)).length===1){
     const old=memory.get(key(o)),run=old?.tick===tick-1?old.run+1:1;
-    memory.set(key(o),{...o,time,tick,run,confirmed:!!old?.confirmed||run>=2});
+    // seen is set by the bridge only after its own consecutive validation.
+    memory.set(key(o),{...o,time,tick,run,confirmed:true,tracked:!!o.labelBox,positionTime:time});
    }
+   const current=observations.filter(o=>valid(o)&&o.currentHp>0);
+   if(current.length===1)focus={...memory.get(key(current[0])),time};else if(current.length>1)focus=null;
    const inBattle=battleView(p);
-   if(inBattle&&!wasBattle&&!battle&&!context?.mapVisible){const choices=[...memory.values()].filter(o=>o.confirmed&&complete(o.monsterId)&&time-o.time<=2000&&!completed.has(key(o)+':'+o.instanceId));battle=choices.length===1?{identity:choices[0],start:time,exit:null}:null;}
+   if(inBattle&&!wasBattle&&!battle&&!context?.mapVisible){const target=focus&&time-focus.time<=2000&&valid(focus)&&complete(focus.monsterId)&&!completed.has(key(focus)+':'+focus.instanceId)?focus:null;battle=target?{identity:target,start:time,exit:null}:null;}
    if(battle&&time-battle.start>45000)battle=null;
    // Attacks cover the stage and can hide its colors. Only the independently
    // read map clock establishes a return to the map, not a missing stage.
@@ -66,13 +97,18 @@
    function rememberedIdentity(blob){
     if(inBattle)return null;
     const id=blob.match.monsterId,choices=[...memory.values()].filter(o=>o.monsterId===id&&o.confirmed&&complete(id)&&!completed.has(key(o)+':'+o.instanceId));
-    if(battle?.exit!==null&&battle?.exit!==undefined&&battle.identity.monsterId===id&&complete(id)&&valid(battle.identity)&&!completed.has(key(battle.identity)+':'+battle.identity.instanceId))return {...battle.identity,remembered:true};
-    const recent=choices.filter(o=>time-o.time<=1200&&o.run>=2);
+    if(battle?.exit!==null&&battle?.exit!==undefined&&battle.identity.monsterId===id&&complete(id)&&valid(battle.identity)&&!completed.has(key(battle.identity)+':'+battle.identity.instanceId))return {...battle.identity,remembered:true,association:'battle'};
+    const [x,y,w,h]=blob.box.map(v=>v*2);
+    const near=o=>{if(!o.labelBox)return false;const [lx,ly,lw]=o.labelBox;return x+w>=lx-220&&x<=lx+lw+350&&y+h>=ly+10&&y<=ly+300;};
+    const tracked=choices.filter(o=>o.tracked&&time-o.positionTime<=750&&near(o));
+    if(tracked.length===1)return {...tracked[0],remembered:true,association:'tracked'};
+    if(tracked.length>1)return null;
+    const recent=choices.filter(o=>time-o.time<=1200);
     // The printed target must be unique and near the partial animation. Its
     // label can be displaced; this path requires the complete confirmed spawn.
-    const [x,y,w,h]=blob.box.map(v=>v*2);
-    if(recent.length===1&&recent[0].labelBox){const [lx,ly,lw]=recent[0].labelBox;if(x+w>=lx-220&&x<=lx+lw+350&&y+h>=ly+10&&y<=ly+300)return {...recent[0],remembered:true};}
-    if(context?.counts?.[id]===1&&choices.length===1&&time-choices[0].time<=1200)return {...choices[0],remembered:true};
+    if(recent.length===1&&near(recent[0]))return {...recent[0],remembered:true,association:'recent'};
+    // An initial spawn singleton remains unique even after its label vanished.
+    if(context?.counts?.[id]===1&&choices.length===1)return {...choices[0],remembered:true,association:'singleton'};
     return null;
    }
    const visible=observations.filter(o=>Number.isInteger(o.serial)&&o.serial>0&&o.currentHp>0&&o.currentHp<=o.maxHp&&o.marker?.length===2&&o.marker.every(Number.isFinite)&&observations.filter(b=>key(o)===key(b)).length===1);
@@ -90,14 +126,32 @@
     identities.set(key(o),{...o,time,tick,count:close&&old.tick===tick-1?old.count+1:1});
    }
    for(const item of pending){if(time-item.time>1800)continue;const [x,y,w,h]=item.box;
+    if(!item.identity&&context)item.identity=rememberedIdentity({box:item.box,match:{monsterId:item.monsterId}});
     if(item.identity?.remembered&&(!valid(item.identity)||!complete(item.monsterId)))item.identity=null;
     if(item.identity&&(observations.some(o=>key(o)===key(item.identity)&&o.currentHp>0)||!item.identity.remembered&&([...unlocated.values()].some(o=>o.monsterId===item.monsterId)||[...identities.values()].some(o=>o.monsterId===item.monsterId&&key(o)!==key(item.identity)&&o.marker[0]>=x*2-40&&o.marker[0]<=(x+w)*2+40&&o.marker[1]>=y*2-40&&o.marker[1]<=(y+h)*2+40))))item.identity=null;
     const remains=found.some(b=>b.match.monsterId===item.monsterId&&Math.hypot(b.box[0]+b.box[2]/2-x-w/2,b.box[1]+b.box[3]/2-y-h/2)<18);
     if(beamAt(p,item.box)>item.beam+100&&(!remains||beamAt(p,item.box)>item.beam+220)){
      const identity=item.identity&&!observations.some(o=>key(o)===key(item.identity)&&o.currentHp>0)?item.identity:null;
-     emitted.push({monsterId:item.monsterId,serial:identity?.serial??null,reason:'gray_then_beam',box:item.box.map(v=>v*2),...(identity?{maxHp:identity.maxHp,instanceId:identity.instanceId}:{} )});
+     const cue={monsterId:item.monsterId,serial:identity?.serial??null,reason:'gray_then_beam',box:item.box.map(v=>v*2),...(identity?{maxHp:identity.maxHp,instanceId:identity.instanceId,association:identity.association||'leader'}:{} )};
+     emitted.push(cue);
+     if(!identity&&complete(item.monsterId)){
+      const choices=[...memory.values()].filter(o=>o.monsterId===item.monsterId&&valid(o)&&!completed.has(key(o)+':'+o.instanceId));
+      // Two unresolved kills of the same kind cannot consume each other's IDs.
+      if(unresolved.some(u=>u.cue.monsterId===item.monsterId)){for(const u of unresolved)if(u.cue.monsterId===item.monsterId){u.blocked=true;u.time=time;}}
+      else if(choices.length>1)unresolved.push({cue,time,choices,excluded:new Set()});
+     }
     }
    }
+   unresolved=unresolved.filter(u=>time-u.time<=5000&&complete(u.cue.monsterId)&&u.choices.every(valid));
+   for(const u of unresolved){
+    if(u.blocked)continue;
+    for(const o of observations){const m=memory.get(key(o));if(u.choices.some(c=>key(c)===key(o))&&o.currentHp>0&&m?.run>=2&&m.tick===tick)u.excluded.add(key(o));}
+    const candidates=u.choices.filter(o=>valid(o)&&!u.excluded.has(key(o))&&!completed.has(key(o)+':'+o.instanceId));
+    if(candidates.length===1&&u.excluded.size&&!observations.some(o=>key(o)===key(candidates[0])&&o.currentHp>0)&&!emitted.some(c=>c.monsterId===u.cue.monsterId)){
+     const o=candidates[0];emitted.push({...u.cue,serial:o.serial,instanceId:o.instanceId,maxHp:o.maxHp,association:'later-survivors'});u.done=true;
+    }
+   }
+   unresolved=unresolved.filter(u=>!u.done);
    pending=pending.filter(item=>time-item.time<=1800&&!emitted.some(e=>e.monsterId===item.monsterId));
    for(const blob of found)if(!emitted.some(e=>e.monsterId===blob.match.monsterId)&&!pending.some(item=>item.monsterId===blob.match.monsterId&&Math.hypot(item.box[0]-blob.box[0],item.box[1]-blob.box[1])<18)){
     const [x,y,w,h]=blob.box.map(v=>v*2),candidates=[...identities.values()].filter(o=>o.monsterId===blob.match.monsterId&&o.marker[0]>=x-40&&o.marker[0]<=x+w+40&&o.marker[1]>=y-40&&o.marker[1]<=y+h+40);
