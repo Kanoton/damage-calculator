@@ -26,7 +26,7 @@
   }
   candidates.sort((a,b)=>a.score-b.score);const best=candidates[0];if(!best||candidates.some(c=>c.ref.id!==best.ref.id&&c.score-best.score<.06))return null;return best;
  }
- function readMonsters(source,refs){
+ function readMonsters(source,refs,{positions=false}={}){
   const {w,h,red,white}=masks(source),parts=components(red,w,h),rows=[];
   for(const p of parts){let row=rows.find(r=>Math.abs(r.cy-(p.y+p.h/2))<4);if(!row){row={cy:p.y+p.h/2,parts:[]};rows.push(row);}row.parts.push(p);}
   const observations=[];
@@ -34,11 +34,50 @@
    for(const group of groups){if(group.length<3||group.length>7||group.some(p=>p.x===0||p.x+p.w>=w||p.y===0||p.y+p.h>=h))continue;const chars=group.map(p=>glyph(red,w,[p.x,p.y,p.w,p.h],refs.digits));if(chars.some(c=>c===null))continue;const text=chars.join('');if(!/^\d{1,3}\/\d{1,3}$/.test(text))continue;const [currentHp,maxHp]=text.split('/').map(Number);if(maxHp<1||currentHp>maxHp)continue;
     const hp={x:group[0].x,y:Math.min(...group.map(p=>p.y)),w:group.at(-1).x+group.at(-1).w-group[0].x,maxHp};const name=nameAt(white,w,h,hp,refs.names);if(!name)continue;
     let serial=null;if(!(name.ref.boss||name.ref.noSerial||name.ref.id==='M0014')){serial=ScreenReaderVision.numberAt(source,[name.x+name.ref.width+3,name.y-2,30,name.ref.height+6],'white',refs.digits,true,name.ref.serialMinHeightRatio??.38);if(!Number.isInteger(serial)||serial<1||serial>999)continue;}
-    observations.push({monsterId:name.ref.id,serial,currentHp,maxHp});
+    const observation={monsterId:name.ref.id,serial,currentHp,maxHp};
+    // Optional map-local geometry, in the same 1536px popup plane as defeat cues.
+    if(positions){observation.labelBox=[name.x,name.y,name.ref.width+33,hp.y+Math.max(...group.map(p=>p.h))-name.y];observation.marker=leaderEndpoint(source,name);}
+    observations.push(observation);
    }
   }
   // Conflicting labels for one individual must not overwrite each other.
   return observations.filter(o=>observations.filter(p=>p.monsterId===o.monsterId&&p.serial===o.serial).length===1);
+ }
+ // Follow the thin black leader below a name, not the text's screen position:
+ // labels are displaced sideways and can sit above a different overlapping enemy.
+ function leaderEndpoint(source,name){
+  const {width:w,height:h}=source,p=source.getContext('2d').getImageData(0,0,w,h).data;
+  const dark=(x,y)=>x>=0&&x<w&&y>=0&&y<h&&Math.max(p[(y*w+x)*4],p[(y*w+x)*4+1],p[(y*w+x)*4+2])<100;
+  const lines=[];
+  for(let y=name.y+name.ref.height;y<Math.min(h,name.y+name.ref.height+14);y++){
+   let left=null;for(let x=Math.max(0,name.x-50);x<=Math.min(w-1,name.x+name.ref.width+100);x++){
+    if(dark(x,y)&&left===null)left=x;
+    if((!dark(x,y)||x===w-1)&&left!==null){if(x-left>name.ref.width*.8&&left<=name.x+10&&x>=name.x+name.ref.width)lines.push({left,right:x-1,y});left=null;}
+   }
+  }
+  if(!lines.length)return null;
+  const line=lines.at(-1),ends=[];
+  for(const start of [line.left,line.right]){
+   let x=start,last=[x,line.y],length=0;
+   for(let y=line.y+1;y<Math.min(h,line.y+140);y++){
+    const points=[];for(let xx=Math.max(0,Math.round(x)-5);xx<=Math.min(w-1,Math.round(x)+5);xx++)if(dark(xx,y))points.push(xx);
+    if(!points.length||points.length>8)break;
+    x=points.reduce((a,b)=>a+b,0)/points.length;last=[x,y];length++;
+   }
+   // A leader can touch a thick character/monster outline after only a few
+   // rows. Keep following its measured straight ray through that junction,
+   // rather than demanding the entire leader remain a separate thin blob.
+   if(length>=3&&length<12){
+    const slope=(last[0]-start)/length;
+    if(Math.abs(slope)>=.5&&Math.abs(slope)<=4)for(let y=last[1]+1;y<Math.min(h,line.y+140);y++){
+     const predicted=start+slope*(y-line.y),xx=Math.round(predicted);
+     if(![xx-1,xx,xx+1].some(px=>dark(px,y)))break;
+     last=[predicted,y];length++;
+    }
+   }
+   if(length>=12&&Math.abs(last[0]-start)>=10)ends.push(last);
+  }
+  return ends.length===1?ends[0]:null;
  }
  function clockAt(source,refs,shift){
   const left=canvas(source),center=source.statusFrame||source,vision=ScreenReaderVision,round=window.ScreenReaderStartVision?.readRound(left)??vision.numberAt(left,[54,7,43,30],'white',refs.digits),ctx=center.getContext('2d'),digits=refs.digits.filter(r=>r.digit!=='/'),cells=[];
@@ -50,6 +89,6 @@
   const candidates=[0,-18].map(shift=>clockAt(source,refs,shift)).filter(Boolean);
   return candidates.length&&candidates.every(c=>c.round===candidates[0].round&&c.progress===candidates[0].progress)?candidates[0]:null;
  }
- function analyze(source){const base=window.ScreenReaderWorldReferences;if(!base)return {clock:null,monsters:[]};const refs={...base,digits:[...base.digits,...ScreenReaderReferences.digits,...(window.ScreenReaderStartReferences?.digits||[])]};return {clock:readClock(source,refs),monsters:readMonsters(canvas(source),refs)};}
+ function analyze(source,options){const base=window.ScreenReaderWorldReferences;if(!base)return {clock:null,monsters:[]};const refs={...base,digits:[...base.digits,...ScreenReaderReferences.digits,...(window.ScreenReaderStartReferences?.digits||[])]};return {clock:readClock(source,refs),monsters:readMonsters(canvas(source),refs,options)};}
  window.ScreenReaderWorldVision={analyze,readClock,readMonsters};
 })();

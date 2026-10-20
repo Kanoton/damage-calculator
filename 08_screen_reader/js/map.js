@@ -101,6 +101,16 @@ window.ScreenReaderMapBridge={
  monsterName:id=>data.stats.find(r=>r.monster_id===id)?.['モンスター名']||id,
  context:()=>JSON.stringify([pick.value,difficulty.value,routeState.route]),
  snapshot:()=>({map:pick.value,difficulty:difficulty.value,round:readerMapMode&&!rosterState.round?null:rosterState.round,progress:readerMapMode&&!rosterState.progress?null:rosterState.progress,events:[...executedEvents],monsters:rosterState.monsters.map(e=>({monsterId:e.monsterId,serial:(e.boss||e.monsterId==='M0116')?null:e.serial,hp:e.hp,defeated:!!e.defeated,attack:e.attack,defense:e.defense,instanceId:e.instanceId}))}),
+ applyDefeats:cues=>{
+  const defeated=[];if(pick.value!=='MAP0105'||!roundProgressReady())return defeated;
+  for(const cue of cues){
+   if(cue.reason!=='gray_then_beam'||!['M0121','M0122','M0123','M0005'].includes(cue.monsterId)||!Number.isSafeInteger(cue.serial)||cue.serial<1)continue;
+   const matches=rosterState.monsters.filter(e=>e.monsterId===cue.monsterId&&e.serial===cue.serial&&e.instanceId===cue.instanceId&&e.mapId===pick.value&&e.difficulty===difficulty.value&&!e.boss&&!e.defeated&&e.screenSeenAlive&&e.hp>0&&Number(rosterStat(e.base,'HP'))===cue.maxHp);
+   if(matches.length!==1)continue;
+   if(!defeated.length)rememberRoster();const enemy=matches[0];enemy.manualHp=0;enemy.hp=0;enemy.damageTaken=cue.maxHp;removeEnemy(enemy);defeated.push(cue);
+  }
+  if(defeated.length)renderRoster();return defeated;
+ },
  apply:(observation,{allowDefeat=true}={})=>{
   const result={updated:0,added:0,events:0,skipped:0};if(!observation)return result;if(!roundProgressReady()){result.skipped=(observation.monsters?.length||0)+(observation.clock?1:0);return result;}
   const valid=(n,min,max)=>Number.isSafeInteger(n)&&n>=min&&n<=max,clock=observation.clock;

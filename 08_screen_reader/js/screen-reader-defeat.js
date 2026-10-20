@@ -1,4 +1,4 @@
-// Experimental autumn defeat cues. A cue never identifies an individual number.
+// Partial autumn defeat cues; numbered identity needs a recent stable map leader.
 (()=>{
  'use strict';
  const W=768,H=355,S=20;
@@ -22,17 +22,54 @@
   const ranked=[...scores].sort((a,b)=>a[1]-b[1]);return ranked[0]?.[1]<.14&&(!ranked[1]||ranked[1][1]-ranked[0][1]>.025)?{monsterId:ranked[0][0],score:ranked[0][1]}:null;
  }
  function beamAt(p,box){const [x,y,w,h]=box;let count=0;for(let yy=Math.max(60,y-30);yy<Math.min(280,y+h+8);yy++)for(let xx=Math.max(150,x-10);xx<Math.min(650,x+w+10);xx++){const k=(yy*W+xx)*4,r=p[k],g=p[k+1],b=p[k+2];if(g>190&&b>210&&g-r>15&&b-r>25)count++;}return count;}
+ function sceneStable(previous,p,excluded){
+  if(!previous)return true;
+  let total=0,same=0;
+  for(let y=65;y<265;y+=8)for(let x=160;x<640;x+=8){
+   if(excluded.some(([bx,by,bw,bh])=>x*2>bx-35&&x*2<bx+bw+35&&y*2>by-35&&y*2<by+bh+35))continue;
+   const k=(y*W+x)*4,j=((y+3)*W+x+3)*4;
+   // Flat ground and the stationary HUD cannot prove camera continuity.
+   if(Math.max(...[0,1,2].map(c=>Math.abs(previous[k+c]-previous[j+c])))<45)continue;
+   total++;if([0,1,2].every(c=>Math.abs(previous[k+c]-p[k+c])<32&&Math.abs(previous[j+c]-p[j+c])<32))same++;
+  }
+  return total>=20&&same/total>=.8;
+ }
  function createTracker(){
-  let pending=[],lastTime=null;
-  return {reset(){pending=[];lastTime=null;},step(source,time){
-   if(!Number.isFinite(time)||lastTime!==null&&(time<=lastTime||time-lastTime>1800)){pending=[];lastTime=time;return [];}
-   lastTime=time;const p=pixels(source),found=blobs(p).map(blob=>({...blob,match:classify(blob)})).filter(b=>b.match),emitted=[];
+  let pending=[],lastTime=null,previous=null,identities=new Map(),unlocated=new Map(),tick=0,completed=new Set();
+  const reset=()=>{pending=[];lastTime=null;previous=null;identities.clear();unlocated.clear();completed.clear();tick=0;};
+  return {reset,step(source,time,observations=[]){
+   if(!Number.isFinite(time)||lastTime!==null&&(time<=lastTime||time-lastTime>1800)){reset();if(!Number.isFinite(time))return [];}
+   lastTime=time;tick++;const p=pixels(source),found=blobs(p).map(blob=>({...blob,match:classify(blob)})).filter(b=>b.match),emitted=[];
+   const key=o=>o.monsterId+':'+o.serial;
+   const visible=observations.filter(o=>Number.isInteger(o.serial)&&o.serial>0&&o.currentHp>0&&o.currentHp<=o.maxHp&&o.marker?.length===2&&o.marker.every(Number.isFinite)&&observations.filter(b=>key(o)===key(b)).length===1);
+   // Ignore the search-sized foreground footprint (up to 240px wide), including
+   // overlapping actors/attack cards, not just the small visible gray patch.
+   const excluded=[...identities.values(),...visible].flatMap(o=>o.marker?[[o.marker[0]-120,o.marker[1]-60,240,260],...(o.labelBox?[o.labelBox]:[])]:[]).concat(found.map(b=>b.box.map(v=>v*2)));
+   if(!sceneStable(previous,p,excluded)){identities.clear();for(const item of pending)item.identity=null;}
+   previous=p;
+   for(const [id,o] of identities)if(time-o.time>1200)identities.delete(id);
+   for(const [id,o] of unlocated)if(time-o.time>1200)unlocated.delete(id);
+   for(const o of observations)if(Number.isInteger(o.serial)&&o.serial>0&&o.currentHp>0){
+    if(!visible.includes(o)){identities.delete(key(o));unlocated.set(key(o),{monsterId:o.monsterId,time});}else unlocated.delete(key(o));
+   }
+   for(const o of visible){const old=identities.get(key(o)),close=old&&old.maxHp===o.maxHp&&(old.instanceId===undefined||old.instanceId===o.instanceId)&&Math.hypot(old.marker[0]-o.marker[0],old.marker[1]-o.marker[1])<24;
+    identities.set(key(o),{...o,time,tick,count:close&&old.tick===tick-1?old.count+1:1});
+   }
    for(const item of pending){if(time-item.time>1800)continue;const [x,y,w,h]=item.box;
+    if(item.identity&&(observations.some(o=>key(o)===key(item.identity)&&o.currentHp>0)||[...unlocated.values()].some(o=>o.monsterId===item.monsterId)||[...identities.values()].some(o=>o.monsterId===item.monsterId&&key(o)!==key(item.identity)&&o.marker[0]>=x*2-40&&o.marker[0]<=(x+w)*2+40&&o.marker[1]>=y*2-40&&o.marker[1]<=(y+h)*2+40)))item.identity=null;
     const remains=found.some(b=>b.match.monsterId===item.monsterId&&Math.hypot(b.box[0]+b.box[2]/2-x-w/2,b.box[1]+b.box[3]/2-y-h/2)<18);
-    if(beamAt(p,item.box)>item.beam+100&&(!remains||beamAt(p,item.box)>item.beam+220))emitted.push({monsterId:item.monsterId,serial:null,reason:'gray_then_beam',box:item.box.map(v=>v*2)});
+    if(beamAt(p,item.box)>item.beam+100&&(!remains||beamAt(p,item.box)>item.beam+220)){
+     const identity=item.identity&&!observations.some(o=>key(o)===key(item.identity)&&o.currentHp>0)?item.identity:null;
+     emitted.push({monsterId:item.monsterId,serial:identity?.serial??null,reason:'gray_then_beam',box:item.box.map(v=>v*2),...(identity?{maxHp:identity.maxHp,instanceId:identity.instanceId}:{} )});
+    }
    }
    pending=pending.filter(item=>time-item.time<=1800&&!emitted.some(e=>e.monsterId===item.monsterId));
-   for(const blob of found)if(!pending.some(item=>item.monsterId===blob.match.monsterId&&Math.hypot(item.box[0]-blob.box[0],item.box[1]-blob.box[1])<18))pending.push({monsterId:blob.match.monsterId,box:blob.box,time,beam:beamAt(p,blob.box)});
+   for(const blob of found)if(!pending.some(item=>item.monsterId===blob.match.monsterId&&Math.hypot(item.box[0]-blob.box[0],item.box[1]-blob.box[1])<18)){
+    const [x,y,w,h]=blob.box.map(v=>v*2),candidates=[...identities.values()].filter(o=>o.monsterId===blob.match.monsterId&&o.marker[0]>=x-40&&o.marker[0]<=x+w+40&&o.marker[1]>=y-40&&o.marker[1]<=y+h+40);
+    const identity=candidates.length===1&&candidates[0].count>=2&&![...unlocated.values()].some(o=>o.monsterId===blob.match.monsterId)&&!completed.has(key(candidates[0])+':'+candidates[0].instanceId)?candidates[0]:null;
+    pending.push({monsterId:blob.match.monsterId,box:blob.box,time,beam:beamAt(p,blob.box),identity});
+   }
+   for(const cue of emitted)if(cue.serial!==null)completed.add(key(cue)+':'+cue.instanceId);
    return emitted.filter((v,i,a)=>a.findIndex(b=>b.monsterId===v.monsterId)===i);
   }};
  }
