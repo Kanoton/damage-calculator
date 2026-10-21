@@ -14,6 +14,7 @@ on:
       - 'scripts/build-08-monster-text.py'
       - 'scripts/build-autumn-defeat-samples.py'
       - 'scripts/build-screen-reader-defeat-references.py'
+      - 'scripts/build-screen-reader-cut-references.py'
       - 'scripts/inspect-defeat-browser.cjs'
       - 'tests/fixtures/screen-reader/**'
       - 'scripts/check-07-syntax.js'
@@ -81,6 +82,7 @@ on:
       - 'scripts/build-08-monster-text.py'
       - 'scripts/build-autumn-defeat-samples.py'
       - 'scripts/build-screen-reader-defeat-references.py'
+      - 'scripts/build-screen-reader-cut-references.py'
       - 'scripts/inspect-defeat-browser.cjs'
       - 'tests/fixtures/screen-reader/**'
       - 'package.json'
@@ -89,7 +91,7 @@ on:
 jobs:
   smoke:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -102,6 +104,7 @@ jobs:
       - run: python3 -m pip install Pillow==12.3.0
       - run: python3 scripts/build-autumn-defeat-samples.py --check
       - run: python3 scripts/build-screen-reader-defeat-references.py --check
+      - run: python3 scripts/build-screen-reader-cut-references.py --check
       - run: python3 scripts/build-screen-reader-profile-references.py --check
       - run: python3 scripts/build-screen-reader-self-references.py --check
       - run: python3 scripts/build-screen-reader-left-hud-fixture.py --check

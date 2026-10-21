@@ -9,6 +9,8 @@
 
 ### 08の標準確認範囲（2026-10-20・利用者指定）
 
+2026-10-21：戦闘・撃破の診断履歴は読取結果内で表示・JSON保存できる。trackerとControllerの `diagnostics()` は読取専用コピーを返す。フクロウの開始カット見本は保存回帰動画から `scripts/build-screen-reader-cut-references.py` で生成し、`--check` とブラウザCIで同期を検証する。種類の補助情報であり個体番号・攻防・戦闘能力値を自動確定する機能ではない。詳細は引き継ぎ書の同日追記を参照。
+
 08の左下自キャラ用Card2対応表は `csv/self_portrait_mapping.csv`、生成は `scripts/build-screen-reader-self-references.py`（`--check`で一致確認）。PT用ProfilePhoto辞書と分離し、Card2の登録数を実画面の認識成功数と混同しない。詳細は `08_screen_reader/README.md` を参照。
 
 戦闘対象の段階的特定、攻防タブ切替、戦闘外の撃破追跡についての相談・目視確認・今後の素材一覧は [戦闘読取の確認記録](docs/screen-reader-combat-review-20261020.md) を参照。実装済みの仕様と設計案を区別する。2026-10-20、秋幻の森の直前の番号・本体への線と部分グレー化→光を一意に対応できる場合だけ、自動撃破を限定導入した。長時間の戦闘対象保持・攻防切替は未対応。現在の条件と検証範囲は [撃破素材と開発状況](docs/screen-reader-defeat-samples.md) の最新追記を参照。
