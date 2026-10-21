@@ -161,7 +161,7 @@
  }
  function neededInputs(){
   const numeric=new Set();
-  if(state().chips.some(id=>chips.find(chip=>chip.id===id)?.category==='エナジー'))numeric.add('エナジー');
+  if(number(state(),'エナジー')>0||state().chips.some(id=>chips.find(chip=>chip.id===id)?.category==='エナジー'))numeric.add('エナジー');
   if(String(selectedCharacter.id)==='11'||partySlots.some(id=>String(id)==='11')||number(state(),'ヒール')>0)numeric.add('ヒール');
   for(const rule of activeRules()){
    if(rule.kind==='counter_delta')numeric.add(rule.target);
@@ -599,6 +599,15 @@
  // Dedicated bridge for the isolated screen-reader edition. Values are absolute
  // observations; chip pages are additive, and missing fields never clear state.
  window.ScreenReaderCharacterBridge={
+  applyStatusIcons:(owner,icons)=>{
+   if(!selectedCharacter||String(owner)!==String(selectedCharacter.id)||!Array.isArray(icons))return 0;
+   const keys={heal:'ヒール',charge:'エナジー',firewall:'ファイアウォール',attention:'ガオーの注目'};let updated=0;
+   for(const icon of icons){const key=keys[icon.key],n=icon.value;if(!key||icons.filter(i=>i.key===icon.key).length!==1||!Number.isSafeInteger(n)||n<1||n>(icon.key==='charge'?15:icon.key==='attention'?2:icon.key==='firewall'?1:99))continue;
+    if(icon.key==='firewall'&&!abilityRules()?.controls?.some(c=>c.key===key))continue;
+    if(icon.key==='attention'&&mapPicker.value!=='MAP0105')continue;
+    if(number(state(),key)!==n){if(!updated)window.rememberCharacterSkillActivation?.();state().numbers[key]=n;updated++;}
+   }if(updated){renderConditions();updateStats();}return updated;
+  },
   catalog:()=>({characters:characters.map(row=>({id:String(row.id),name:row.name})),chips:chips.map(row=>({id:String(row.id),name:row.name}))}),
   snapshot:()=>({selfId:String(selectedCharacter?.id||''),members:partySlots.map((id,slot)=>{const row=characters.find(r=>String(r.id)===String(id));if(!row)return {slot};const own=String(id)===String(selectedCharacter?.id),s=own?state():getPartyState(id),totals=own?calculate():calculatePartyMember(row);return {slot,id:String(id),name:row.name,level:s.level,currentHp:s.currentHp,maxHp:totals.hp,atk:totals.atk,def:totals.def,move:totals.move,coin:s.screenCoin,chips:[...s.chips]};})}),
   reset:resetCharacterForNewGame,

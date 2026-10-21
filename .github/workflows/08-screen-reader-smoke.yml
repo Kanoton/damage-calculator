@@ -15,6 +15,7 @@ on:
       - 'scripts/build-autumn-defeat-samples.py'
       - 'scripts/build-screen-reader-defeat-references.py'
       - 'scripts/build-screen-reader-cut-references.py'
+      - 'scripts/build-screen-reader-status-icons.py'
       - 'scripts/inspect-defeat-browser.cjs'
       - 'tests/fixtures/screen-reader/**'
       - 'scripts/check-07-syntax.js'
@@ -83,6 +84,7 @@ on:
       - 'scripts/build-autumn-defeat-samples.py'
       - 'scripts/build-screen-reader-defeat-references.py'
       - 'scripts/build-screen-reader-cut-references.py'
+      - 'scripts/build-screen-reader-status-icons.py'
       - 'scripts/inspect-defeat-browser.cjs'
       - 'tests/fixtures/screen-reader/**'
       - 'package.json'
@@ -105,6 +107,7 @@ jobs:
       - run: python3 scripts/build-autumn-defeat-samples.py --check
       - run: python3 scripts/build-screen-reader-defeat-references.py --check
       - run: python3 scripts/build-screen-reader-cut-references.py --check
+      - run: python3 scripts/build-screen-reader-status-icons.py --check
       - run: python3 scripts/build-screen-reader-profile-references.py --check
       - run: python3 scripts/build-screen-reader-self-references.py --check
       - run: python3 scripts/build-screen-reader-left-hud-fixture.py --check
