@@ -167,7 +167,7 @@
  }
  function frameHash(){
   let hash=0;
-  const statusPixels=(frame.popupFrame||frame).getContext('2d').getImageData(0,430,110,210).data;for(let i=0;i<statusPixels.length;i+=4)for(let c=0;c<3;c++)hash=(hash*31+statusPixels[i+c])|0;
+  const statusPixels=(frame.popupFrame||frame).getContext('2d').getImageData(0,300,160,340).data;for(let i=0;i<statusPixels.length;i+=4)for(let c=0;c<3;c++)hash=(hash*31+statusPixels[i+c])|0;
   // The coarse full-frame hash keeps world/popup changes visible. Exact HUD
   // pixels additionally catch HP/coin/star changes that 16x16 sampling loses.
   for(const box of [[0,0,1536,709],[165,498,288,187],[465,324,286,184],[125,430,435,40]])for(const v of vision.feature(frame,box))hash=(hash*31+v)|0;

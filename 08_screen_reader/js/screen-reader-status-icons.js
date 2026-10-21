@@ -17,11 +17,11 @@
  function find(source,region,scope){
   const w=source.width,h=source.height,p=source.getContext('2d').getImageData(0,0,w,h).data,out=[];
   for(const ref of ScreenReaderStatusIconReferences.filter(r=>r.scope===scope)){
-   const hits=[],score=(x,y,size)=>{
+   const stride=scope==='self'?3:2,hits=[],score=(x,y,size)=>{
     let sum=0,n=0;for(let j=0;j<ref.points.length;j++){const [xx,yy]=ref.points[j],k=((y+Math.floor((yy+.5)*size/8))*w+x+Math.floor((xx+.5)*size/8))*4;for(let c=0;c<3;c++){sum+=Math.abs(p[k+c]-ref.rgb[j*3+c]);n++;}if(j===7&&sum/n>35)return Infinity;}return sum/n;
    };
-   for(const size of [32,33,34,35,36])for(let y=Math.max(0,Math.floor(region[1]));y<Math.min(h-size,region[1]+region[3]);y+=2)for(let x=Math.max(0,Math.floor(region[0]));x<Math.min(w-size,region[0]+region[2]);x+=2){const error=score(x,y,size);if(error<35)hits.push({x,y,size,score:error});}
-   const fine=[];for(const hit of hits){for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const x=hit.x+dx,y=hit.y+dy;if(x<0||y<0||x+hit.size>=w||y+hit.size>=h)continue;const error=score(x,y,hit.size);if(error<19)fine.push({x,y,size:hit.size,score:error});}}
+   for(const size of [32,33,34,35,36])for(let y=Math.max(0,Math.floor(region[1]));y<Math.min(h-size,region[1]+region[3]);y+=stride)for(let x=Math.max(0,Math.floor(region[0]));x<Math.min(w-size,region[0]+region[2]);x+=stride){const error=score(x,y,size);if(error<35)hits.push({x,y,size,score:error});}
+   const fine=[];for(const hit of hits){for(let dy=1-stride;dy<stride;dy++)for(let dx=1-stride;dx<stride;dx++){const x=hit.x+dx,y=hit.y+dy;if(x<0||y<0||x+hit.size>=w||y+hit.size>=h)continue;const error=score(x,y,hit.size);if(error<19)fine.push({x,y,size:hit.size,score:error});}}
    fine.sort((a,b)=>a.score-b.score);const best=fine[0];if(!best||fine.some(b=>Math.hypot(b.x-best.x,b.y-best.y)>best.size*.65))continue;
    const {x,y,size:s}=best,box=ref.corner==='top'?[Math.round(x+s*.72),y-9,17,23]:[Math.max(0,x-9),Math.round(y+s*.65),20,23];
    const value=countAt(source,box);if(Number.isInteger(value)&&value>0&&value<=99)out.push({key:ref.key,value,box:[x,y,s,s]});
@@ -29,7 +29,7 @@
  }
  function analyze(source,monsters=[]){
   const c=source.popupFrame||source;
-  const own=find(c,[0,430,110,200],'self'),targets=[];
+  const own=find(c,[0,300,160,340],'self'),targets=[];
   for(const m of monsters){if(!m.labelBox)continue;const [x,y,w,h]=m.labelBox,region=[x-42,y+h+1,Math.min(140,w),65],icons=find(c,region,'monster');
    const unique=icons.filter(i=>!monsters.some(o=>o!==m&&o.labelBox&&i.box[0]>=o.labelBox[0]-42&&i.box[0]<=o.labelBox[0]+Math.min(140,o.labelBox[2])&&i.box[1]>=o.labelBox[1]+o.labelBox[3]+1&&i.box[1]<=o.labelBox[1]+o.labelBox[3]+66));
    if(unique.length)targets.push({...m,icons:unique});
