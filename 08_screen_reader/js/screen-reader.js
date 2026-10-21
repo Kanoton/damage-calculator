@@ -25,12 +25,13 @@
  function recordDiagnostic(event,time){
   if(!Number.isFinite(time))return;
   if(diagnosticStart===null||time<diagnosticStart)diagnosticStart=time;
-  const key=JSON.stringify({...event,candidates:event.candidates?.map(({ageMs,...c})=>c)});if(key===diagnosticLastKey&&time-diagnosticLastTime<2000)return;
+  const value=window.ScreenReaderMapBridge?.snapshot().round,round=Number.isSafeInteger(value)&&value>0?value:null;
+  const key=JSON.stringify({...event,round,candidates:event.candidates?.map(({ageMs,...c})=>c)});if(key===diagnosticLastKey&&time-diagnosticLastTime<2000)return;
   diagnosticLastKey=key;diagnosticLastTime=time;
-  const row={...event,at:new Date().toISOString(),elapsedMs:Math.round(time-diagnosticStart)};diagnosticRecords.push(row);if(diagnosticRecords.length>100)diagnosticRecords.shift();
+  const row={...event,round,at:new Date().toISOString(),elapsedMs:Math.round(time-diagnosticStart)};diagnosticRecords.push(row);if(diagnosticRecords.length>100)diagnosticRecords.shift();
   const list=$('defeat-log');if(!list)return;list.replaceChildren(...diagnosticRecords.slice(-20).reverse().map(r=>{
    const li=document.createElement('li'),candidates=(r.candidates||[]).map(c=>window.ScreenReaderMapBridge.monsterName(c.monsterId)+(c.serial===undefined?'':' '+c.serial)+(c.currentHp===undefined?'':' HP '+c.currentHp+'/'+c.maxHp));
-   li.textContent=new Date(r.at).toLocaleTimeString('ja-JP',{hour12:false})+'（+'+(r.elapsedMs/1000).toFixed(2)+'秒） '+(diagnosticLabels[r.code]||r.code)+(r.message?'：'+r.message:'')+(r.monsterId?' ／ '+window.ScreenReaderMapBridge.monsterName(r.monsterId):'')+(candidates.length?' ／ 候補：'+candidates.join('、'):'')+(r.gapMs?' ／ 実間隔 '+Math.round(r.gapMs)+'ms':'');return li;
+   li.textContent=new Date(r.at).toLocaleTimeString('ja-JP',{hour12:false})+'（+'+(r.elapsedMs/1000).toFixed(2)+'秒） '+(r.round===null?'ラウンド未判定':'ラウンド '+r.round)+' ／ '+(diagnosticLabels[r.code]||r.code)+(r.message?'：'+r.message:'')+(r.monsterId?' ／ '+window.ScreenReaderMapBridge.monsterName(r.monsterId):'')+(candidates.length?' ／ 候補：'+candidates.join('、'):'')+(r.gapMs?' ／ 実間隔 '+Math.round(r.gapMs)+'ms':'');return li;
   }));
  }
  function resetDefeat(message='読取条件が変わりました'){
