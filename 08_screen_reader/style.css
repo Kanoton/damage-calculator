@@ -1722,3 +1722,5 @@ dialog[data-inline-pad] .skill-entry-row>[data-cancel]{min-width:72px;align-self
 .monster-skill-name{display:block;font-size:16px;overflow-wrap:anywhere}
 .monster-skill-meta{margin:2px 0 10px;color:#6b6049;font-size:12px}
 .monster-skill-tooltip:focus-visible{outline:2px solid #b89224;outline-offset:2px}
+#reader-defeat-log{max-height:190px;overflow:auto;overflow-wrap:anywhere;padding-left:1.6em;font-size:12px}
+#reader-defeat-log li{margin:.4em 0}

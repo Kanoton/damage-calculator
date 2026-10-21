@@ -585,6 +585,48 @@ function turnFramePath(index){
  if(!turnFrameDirectory){turnFrameDirectory=fs.mkdtempSync(path.join(require('os').tmpdir(),'autumn-turn-'));require('child_process').execFileSync('ffmpeg',['-v','error','-i',path.resolve('tests/fixtures/screen-reader/defeat/autumn-turn-20261020/full-replay.mp4'),'-vf','fps=4',path.join(turnFrameDirectory,'f%04d.png')]);}
  return path.join(turnFrameDirectory,'f'+String(index).padStart(4,'0')+'.png');
 }
+
+for(const [protocol,size] of [['http',{width:1440,height:900}],['file',{width:950,height:1200}]])test(`08 autumn defeat diagnostics: real owl cuts, unknown face, bounded export and reset (${protocol})`,async({page})=>{
+ await page.setViewportSize(size);if(protocol==='file')await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);else await open(page);
+ await page.waitForFunction(()=>window.ScreenReaderCombatVision&&window.ScreenReaderMapBridge);
+ await page.locator('#mp-map-select').evaluate(e=>{e.value='MAP0105';e.dispatchEvent(new Event('change',{bubbles:true}));});
+ await page.locator('#reader-world-sync').evaluate(e=>e.checked=true);
+ const cuts=[];for(const index of [93,189,317])cuts.push(require('fs').readFileSync(turnFramePath(index)).toString('base64'));
+ const result=await page.evaluate(async images=>{
+  const frames=[];for(const image of images){const im=new Image();im.src='data:image/png;base64,'+image;await im.decode();frames.push(ScreenReaderVision.normalize(im));}
+  const kinds=frames.map(f=>ScreenReaderCombatVision.analyze(f));
+  ScreenReaderController.updateDefeat(frames[0],1000,{clock:null,monsters:[]});const first=ScreenReaderController.diagnostics();
+  const x=frames[0].popupFrame.getContext('2d');x.fillStyle='#9c20ef';x.fillRect(420,150,400,330);
+  const unknown=ScreenReaderCombatVision.analyze(frames[0]);
+  for(let i=0;i<110;i++)ScreenReaderController.updateDefeat(frames[0],4000+i*2100,{clock:null,monsters:[]});
+  return {kinds,unknown,first,count:ScreenReaderController.diagnostics().records.length};
+ },cuts);
+ for(const kind of result.kinds)expect(kind).toMatchObject({monsterId:'M0123',source:'start-cut'});
+ expect(result.unknown).toBeNull();expect(result.first.records.some(r=>r.code==='start_cut'&&r.monsterId==='M0123')).toBe(true);expect(result.first.records.some(r=>r.code==='applied')).toBe(false);expect(result.count).toBe(100);
+ await page.locator('#reader-toggle').click();await page.locator('#reader-details').evaluate(e=>e.open=true);await page.locator('#reader-defeat-diagnostics').evaluate(e=>e.open=true);
+ const download=page.waitForEvent('download');await page.locator('#reader-save-diagnostics').click();const file=await download;const path=test.info().outputPath('combat-diagnostics.json');await file.saveAs(path);
+ const saved=JSON.parse(require('fs').readFileSync(path));expect(saved).toMatchObject({version:1,limit:100});expect(saved.records).toHaveLength(100);expect(JSON.stringify(saved)).not.toContain('data:image');expect(saved.records.every(r=>typeof r.at==='string'&&Number.isFinite(r.elapsedMs))).toBe(true);
+ await page.locator('#reader-world-sync').uncheck();await expect(page.locator('#reader-defeat-stage')).toContainText('追跡をリセット');
+ expect((await page.evaluate(()=>ScreenReaderController.diagnostics())).records.at(-1)).toMatchObject({code:'reset',message:'モンスター読取のON／OFF変更'});
+});
+
+test('08 autumn defeat timing: phase matrix with every individual already known',async({page})=>{
+ test.setTimeout(90000);await open(page);const rows=[];for(let index=253;index<=273;index++)rows.push({index,image:require('fs').readFileSync(turnFramePath(index)).toString('base64')});
+ const matrix=await page.evaluate(async rows=>{
+  const frames=[];for(const row of rows){const im=new Image();im.src='data:image/png;base64,'+row.image;await im.decode();frames.push({index:row.index,frame:ScreenReaderVision.normalize(im)});}
+  const observed=frames.map(({frame})=>ScreenReaderWorldVision.analyze(frame,{positions:true}));
+  const roster=[1,2,3].map(serial=>({monsterId:'M0123',serial,instanceId:serial,maxHp:8,seen:true,defeated:serial===1})).concat([{monsterId:'M0122',serial:1,instanceId:4,maxHp:19,seen:true,defeated:false}]);
+  const seed=[{monsterId:'M0123',serial:2,instanceId:2,currentHp:6,maxHp:8},{...observed[0].monsters.find(m=>m.monsterId==='M0123'),instanceId:3},{monsterId:'M0122',serial:1,instanceId:4,currentHp:19,maxHp:19}];
+  const output=[];for(const [stride,phase] of [[1,0],[2,0],[2,1],[5,0]]){
+   const tracker=ScreenReaderDefeatVision.createTracker(),monsters=structuredClone(roster),cues=[],events=[];tracker.step(frames[0].frame,63000,seed,{counts:{M0123:3,M0122:1},monsters});
+   for(let i=phase;i<frames.length;i+=stride){const {index,frame}=frames[i],world=observed[i],context={counts:{M0123:3,M0122:1},monsters,mapVisible:!!world.clock};const obs=world.monsters.map(o=>({...o,instanceId:monsters.find(m=>m.monsterId===o.monsterId&&m.serial===o.serial)?.instanceId}));const result=tracker.step(frame,index*250,obs,context);cues.push(...result);events.push(...tracker.diagnostics().events.map(e=>({index,...e})));for(const c of result)if(c.serial!==null){const m=monsters.find(m=>m.monsterId===c.monsterId&&m.serial===c.serial);if(m)m.defeated=true;}}
+   output.push({intervalMs:stride*250,phaseMs:phase*250,cues,events});
+  }return output;
+ },rows);
+ require('fs').mkdirSync('artifacts',{recursive:true});require('fs').writeFileSync(`artifacts/defeat-timing-${test.info().project.name||'chromium'}.json`,JSON.stringify(matrix,null,2));
+ expect(matrix[0].cues.filter(c=>c.serial!==null).map(c=>[c.monsterId,c.serial])).toEqual([['M0123',3],['M0122',1]]);
+ for(const row of matrix){expect(row.cues.filter(c=>c.serial!==null).every(c=>c.monsterId==='M0123'&&c.serial===3||c.monsterId==='M0122'&&c.serial===1)).toBe(true);expect(row.events.every(e=>Number.isInteger(e.index)&&typeof e.code==='string')).toBe(true);}
+});
 for(const [protocol,size] of [['http',{width:1440,height:900}],['file',{width:950,height:1200}]])test(`08 autumn defeat full turn: real controller keeps HP, four identities and the surviving owl (${protocol})`,async({page})=>{
  test.setTimeout(240000);await page.setViewportSize(size);
  if(protocol==='file')await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);else await open(page);

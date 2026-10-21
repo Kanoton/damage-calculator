@@ -60,6 +60,12 @@
   <p class="reader-help">ルーム設定または結果画面のマップ名・難易度を読み取り、両方が登録情報と一致した場合に反映します。未判定の場合は手動指定もできます。未判定の間はマップへの反映を保留し、読めない項目と画面外のモンスターは保持します。</p>
   <p id="reader-world-result" role="status"></p>
   <p id="reader-defeat-result" role="status"></p>
+  <details id="reader-defeat-diagnostics"><summary>戦闘・撃破の判定記録</summary>
+   <p id="reader-defeat-stage" role="status">まだ記録がありません。</p>
+   <button id="reader-save-diagnostics" type="button">判定記録を保存</button>
+   <p class="reader-help">直近100件を端末内で保持します。時刻・候補番号・保留理由を保存でき、画像やプレイヤー名は含みません。</p>
+   <ol id="reader-defeat-log" aria-label="直近の戦闘・撃破判定"></ol>
+  </details>
   <p class="reader-help">チップは見えているページから追加します。未判定の情報は保持します。自動読取は2回続けて一致した情報を反映します。</p>
   <div class="reader-content">
    <canvas id="reader-preview" width="1536" height="709" aria-label="取得したゲーム画面"></canvas>
@@ -598,6 +604,8 @@
 <script src="js/screen-reader-world-references.js"></script>
 <script src="js/screen-reader-world.js"></script>
 <script src="js/screen-reader-defeat-references.js"></script>
+<script src="js/screen-reader-cut-references.js"></script>
+<script src="js/screen-reader-cut.js"></script>
 <script src="js/screen-reader-defeat.js"></script>
 <script src="js/screen-reader-start-references.js"></script>
 <script src="js/screen-reader-start.js"></script>
