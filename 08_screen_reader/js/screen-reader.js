@@ -160,10 +160,10 @@
  function updateStatusIcons(source,world,selfId,automatic){
   const observed=window.ScreenReaderStatusIcons.analyze(source,$('world-sync').checked?(world?.monsters||[]):[]),ready=(key,icons)=>icons.filter(i=>!automatic||accept('status:'+key+':'+i.key,i.value));
   const own=selfId&&selfId===bridge.snapshot().selfId?ready('self:'+selfId,observed.self):[],monsters=observed.monsters.map(m=>({...m,icons:ready(m.monsterId+':'+m.serial,m.icons)}));
-  if($('apply').checked){bridge.applyStatusIcons(selfId,own);if($('world-sync').checked)window.ScreenReaderMapBridge.applyStatusIcons(monsters);}
+  let updatedSelf=0;if($('apply').checked){updatedSelf=bridge.applyStatusIcons(selfId,own);if($('world-sync').checked)window.ScreenReaderMapBridge.applyStatusIcons(monsters);}
   const names={fate:'フェイトエコー',energy:'みなぎる元気',mark:'マーク',heal:'ヒール',charge:'エナジー',firewall:'ファイアウォール',attention:'ガオーの注目'},text=icons=>icons.map(i=>names[i.key]+' '+i.value+(['fate','firewall','attention'].includes(i.key)?'T':'')).join('、');
   $('status-icons-result').textContent='状態アイコン：'+[observed.self.length?'自キャラ '+text(observed.self)+(selfId?'':'（対象未確定・保持）'):'',...observed.monsters.map(m=>window.ScreenReaderMapBridge.monsterName(m.monsterId)+(m.serial===null?'':' '+m.serial)+' '+text(m.icons))].filter(Boolean).join(' ／ ')+(automatic?'（連続一致した値を反映）':'')+(!$('apply').checked?'（確認のみ）':'');
-  return {observed,self:own,monsters};
+  return {observed,self:own,monsters,updatedSelf};
  }
  function frameHash(){
   let hash=0;
@@ -220,7 +220,9 @@
    lastObservedHash=hash;
    let worldSkipped=0;
    if($('apply').checked&&$('world-sync').checked){const applied=window.ScreenReaderMapBridge.apply(accepted.world,{allowDefeat:false});worldSkipped=applied.skipped||0;if(applied.skipped)$('world-result').textContent+=' ／ 反映保留 '+applied.skipped+'件'+(accepted.world?.monsters?.some(m=>m.currentHp===0)?'（HP0候補は撃破未確認のため保持）':'（マップ・難易度・既存個体との一致を確認してください）');}
-   updateStatusIcons(frame,observation.world,accepted.selfId,automatic);
+   const statusUpdate=updateStatusIcons(frame,observation.world,accepted.selfId,automatic);
+   // Printed totals already include buffs: reconcile them after changing counts.
+   if(statusUpdate.updatedSelf)bridge.apply({members:accepted.members.filter(m=>m.id===accepted.selfId)});
    updateDefeat(frame,started,observation.world);
    monitorInfo((observation.world?'今回 '+observation.world.monsters.length+'体 ／ '+(automatic?'連続一致 '+accepted.world.monsters.length+'体':'手動読取')+' ／ '+(!$('apply').checked?'確認のみ ／ ':worldSkipped?'反映保留 '+worldSkipped+'件 ／ ':''):'')+timing());
    const names=observation.members.filter(m=>m.id).length;
