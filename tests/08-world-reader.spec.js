@@ -599,15 +599,25 @@ for(const [protocol,size] of [['http',{width:1440,height:900}],['file',{width:95
   const x=frames[0].popupFrame.getContext('2d');x.fillStyle='#9c20ef';x.fillRect(420,150,400,330);
   const unknown=ScreenReaderCombatVision.analyze(frames[0]);
   for(let i=0;i<110;i++)ScreenReaderController.updateDefeat(frames[0],4000+i*2100,{clock:null,monsters:[]});
+  ScreenReaderMapBridge.apply({clock:{round:4,progress:1},monsters:[]});
+  ScreenReaderController.updateDefeat(frames[0],260000,{clock:null,monsters:[]});
+  ScreenReaderController.updateDefeat(frames[0],260250,{clock:null,monsters:[]});
+  ScreenReaderMapBridge.apply({clock:{round:5,progress:1},monsters:[]});
+  ScreenReaderController.updateDefeat(frames[0],260500,{clock:null,monsters:[]});
   return {kinds,unknown,first,count:ScreenReaderController.diagnostics().records.length};
  },cuts);
  for(const kind of result.kinds)expect(kind).toMatchObject({monsterId:'M0123',source:'start-cut'});
  expect(result.unknown).toBeNull();expect(result.first.records.some(r=>r.code==='start_cut'&&r.monsterId==='M0123')).toBe(true);expect(result.first.records.some(r=>r.code==='applied')).toBe(false);expect(result.count).toBe(100);
  await page.locator('#reader-toggle').click();await page.locator('#reader-details').evaluate(e=>e.open=true);await page.locator('#reader-defeat-diagnostics').evaluate(e=>e.open=true);
+ await expect(page.locator('#reader-defeat-log')).toContainText('ラウンド 5');
  const download=page.waitForEvent('download');await page.locator('#reader-save-diagnostics').click();const file=await download;const path=test.info().outputPath('combat-diagnostics.json');await file.saveAs(path);
  const saved=JSON.parse(require('fs').readFileSync(path));expect(saved).toMatchObject({version:1,limit:100});expect(saved.records).toHaveLength(100);expect(JSON.stringify(saved)).not.toContain('data:image');expect(saved.records.every(r=>typeof r.at==='string'&&Number.isFinite(r.elapsedMs))).toBe(true);
+ expect(saved.records.some(r=>r.round===4)).toBe(true);expect(saved.records.at(-1).round).toBe(5);expect(saved.records.every(r=>r.round===null||Number.isSafeInteger(r.round)&&r.round>0)).toBe(true);
  await page.locator('#reader-world-sync').uncheck();await expect(page.locator('#reader-defeat-stage')).toContainText('追跡をリセット');
- expect((await page.evaluate(()=>ScreenReaderController.diagnostics())).records.at(-1)).toMatchObject({code:'reset',message:'モンスター読取のON／OFF変更'});
+ expect((await page.evaluate(()=>ScreenReaderController.diagnostics())).records.at(-1)).toMatchObject({code:'reset',message:'モンスター読取のON／OFF変更',round:5});
+ await page.evaluate(()=>ScreenReaderMapBridge.resetForReader());
+ expect((await page.evaluate(()=>ScreenReaderController.diagnostics())).records.at(-1).round).toBeNull();
+ await expect(page.locator('#reader-defeat-log')).toContainText('ラウンド未判定');
 });
 
 test('08 autumn defeat timing: phase matrix with every individual already known',async({page})=>{
