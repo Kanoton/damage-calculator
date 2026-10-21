@@ -157,8 +157,17 @@
   if(observation.world){const w=observation.world;out.world={clock:null,monsters:[]};if(w.clock&&accept('world-clock',JSON.stringify(w.clock)))out.world.clock=w.clock;for(const m of w.monsters||[])if(accept('world-monster:'+m.monsterId+':'+m.serial,m.monsterId+':'+m.serial))out.world.monsters.push(m);}
   return out;
  }
+ function updateStatusIcons(source,world,selfId,automatic){
+  const observed=window.ScreenReaderStatusIcons.analyze(source,$('world-sync').checked?(world?.monsters||[]):[]),ready=(key,icons)=>icons.filter(i=>!automatic||accept('status:'+key+':'+i.key,i.value));
+  const own=selfId&&selfId===bridge.snapshot().selfId?ready('self:'+selfId,observed.self):[],monsters=observed.monsters.map(m=>({...m,icons:ready(m.monsterId+':'+m.serial,m.icons)}));
+  let updatedSelf=0;if($('apply').checked){updatedSelf=bridge.applyStatusIcons(selfId,own);if($('world-sync').checked)window.ScreenReaderMapBridge.applyStatusIcons(monsters);}
+  const names={fate:'フェイトエコー',energy:'みなぎる元気',mark:'マーク',heal:'ヒール',charge:'エナジー',firewall:'ファイアウォール',attention:'ガオーの注目'},text=icons=>icons.map(i=>names[i.key]+' '+i.value+(['fate','firewall','attention'].includes(i.key)?'T':'')).join('、');
+  $('status-icons-result').textContent='状態アイコン：'+[observed.self.length?'自キャラ '+text(observed.self)+(selfId?'':'（対象未確定・保持）'):'',...observed.monsters.map(m=>window.ScreenReaderMapBridge.monsterName(m.monsterId)+(m.serial===null?'':' '+m.serial)+' '+text(m.icons))].filter(Boolean).join(' ／ ')+(automatic?'（連続一致した値を反映）':'')+(!$('apply').checked?'（確認のみ）':'');
+  return {observed,self:own,monsters,updatedSelf};
+ }
  function frameHash(){
   let hash=0;
+  const statusPixels=(frame.popupFrame||frame).getContext('2d').getImageData(0,300,160,340).data;for(let i=0;i<statusPixels.length;i+=4)for(let c=0;c<3;c++)hash=(hash*31+statusPixels[i+c])|0;
   // The coarse full-frame hash keeps world/popup changes visible. Exact HUD
   // pixels additionally catch HP/coin/star changes that 16x16 sampling loses.
   for(const box of [[0,0,1536,709],[165,498,288,187],[465,324,286,184],[125,430,435,40]])for(const v of vision.feature(frame,box))hash=(hash*31+v)|0;
@@ -211,6 +220,9 @@
    lastObservedHash=hash;
    let worldSkipped=0;
    if($('apply').checked&&$('world-sync').checked){const applied=window.ScreenReaderMapBridge.apply(accepted.world,{allowDefeat:false});worldSkipped=applied.skipped||0;if(applied.skipped)$('world-result').textContent+=' ／ 反映保留 '+applied.skipped+'件'+(accepted.world?.monsters?.some(m=>m.currentHp===0)?'（HP0候補は撃破未確認のため保持）':'（マップ・難易度・既存個体との一致を確認してください）');}
+   const statusUpdate=updateStatusIcons(frame,observation.world,accepted.selfId,automatic);
+   // Printed totals already include buffs: reconcile them after changing counts.
+   if(statusUpdate.updatedSelf)bridge.apply({members:accepted.members.filter(m=>m.id===accepted.selfId)});
    updateDefeat(frame,started,observation.world);
    monitorInfo((observation.world?'今回 '+observation.world.monsters.length+'体 ／ '+(automatic?'連続一致 '+accepted.world.monsters.length+'体':'手動読取')+' ／ '+(!$('apply').checked?'確認のみ ／ ':worldSkipped?'反映保留 '+worldSkipped+'件 ／ ':''):'')+timing());
    const names=observation.members.filter(m=>m.id).length;
@@ -267,9 +279,9 @@
  $('learn').addEventListener('click',()=>{if(!frame||!catalog)return;const [kind,index]=$('learn-kind').value.split(':'),id=$('learn-id').value,ref=vision.learn(frame,kind,id,kind.startsWith('chip-')?Number($('learn-slot').value):Number(index)),list=kind.startsWith('chip-')?custom.chips:custom.characters;if(custom.characters.length+custom.chips.length>=500){status('見本は最大500件です。');return;}if(!list.some(r=>r.id===ref.id&&r.kind===ref.kind&&r.data===ref.data))list.push(ref);generation++;stable.clear();sameFrames=0;lastHash=null;save();read();});
  $('export').addEventListener('click',()=>{const url=URL.createObjectURL(new Blob([JSON.stringify({version:1,...custom,area},null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='screen-reader-profile.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
  $('import').addEventListener('change',async()=>{try{const file=$('import').files[0];if(!file)return;if(file.size>1000000)throw Error('ファイルが大きすぎます。');const p=validateProfile(JSON.parse(await file.text()));resetDefeat();custom={characters:p.characters,chips:p.chips};area=p.area||null;generation++;stable.clear();sameFrames=0;lastHash=null;save();if(rawSource)read();status('見本を読み込みました。');}catch(error){status(error.message);}finally{$('import').value='';}});
- window.addEventListener('new-game-reset',()=>{diagnosticRecords=[];diagnosticStart=null;diagnosticLastKey='';diagnosticLastTime=-Infinity;diagnosticActive=false;resetDefeat('新しいゲーム');recordDiagnostic({code:'reset',message:'新しいゲーム',round:null},performance.now());readerSession=false;releaseParty();generation++;clearTimeout(timer);timer=null;stable.clear();lastHash=null;sameFrames=0;$('auto').checked=false;$('self').value='';$('world-sync').checked=false;monitorInfo();$('world-result').textContent='';$('result-body').replaceChildren();$('chip-result').textContent='';$('view').textContent='リセット後の読取を待っています。';status('ゲーム状態をリセットしました。次のゲーム画面を読み取ってください。');});
+ window.addEventListener('new-game-reset',()=>{diagnosticRecords=[];diagnosticStart=null;diagnosticLastKey='';diagnosticLastTime=-Infinity;diagnosticActive=false;resetDefeat('新しいゲーム');recordDiagnostic({code:'reset',message:'新しいゲーム',round:null},performance.now());readerSession=false;releaseParty();generation++;clearTimeout(timer);timer=null;stable.clear();lastHash=null;sameFrames=0;$('auto').checked=false;$('self').value='';$('world-sync').checked=false;monitorInfo();$('world-result').textContent='';$('status-icons-result').textContent='';$('result-body').replaceChildren();$('chip-result').textContent='';$('view').textContent='リセット後の読取を待っています。';status('ゲーム状態をリセットしました。次のゲーム画面を読み取ってください。');});
  window.addEventListener('mobile-ui-change',()=>{if(document.body.classList.contains('mobile-ui'))stop();});
  window.addEventListener('pagehide',stop);
  $('learn-id').addEventListener('change',updateMappingPreview);
- window.ScreenReaderController={read,stop,stabilize,validateProfile,updateDefeat,diagnostics:diagnosticSnapshot};ready();
+ window.ScreenReaderController={read,stop,stabilize,validateProfile,updateDefeat,updateStatusIcons,diagnostics:diagnosticSnapshot};ready();
 })();

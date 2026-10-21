@@ -667,3 +667,23 @@ for(const [protocol,size] of [['http',{width:1440,height:900}],['file',{width:95
  await page.locator('#reader-close').click();
  await page.locator('#roster-undo').click();expect((await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).monsters.find(m=>m.monsterId==='M0123'&&m.serial===2)?.defeated).toBe(false);
 });
+
+for(const protocol of ['http','file'])test(`08 autumn icon status: real stacks, turn counters and moved self icons (${protocol})`,async({page})=>{
+ test.setTimeout(90000);await page.setViewportSize(protocol==='http'?{width:1440,height:900}:{width:950,height:1200});
+ if(protocol==='file')await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);else await open(page);
+ await page.waitForFunction(()=>window.ScreenReaderCharacterBridge?.catalog().characters.length===35);
+ await page.locator('#mp-map-select').selectOption('MAP0105');await page.locator('#mp-difficulty').selectOption('普通');
+ await page.evaluate(()=>{ScreenReaderCharacterBridge.apply({selfId:'18',members:[]});document.getElementById('reader-world-sync').checked=true;});
+ const scenes=[1,2,3,4].map(i=>require('fs').readFileSync(`tests/fixtures/screen-reader/status-icons/scene-${i}.png`).toString('base64'));
+ const rows=await page.evaluate(async scenes=>{
+  const rows=[];for(const image of scenes){const im=new Image();im.src='data:image/png;base64,'+image;await im.decode();const frame=ScreenReaderVision.normalize(im),world=ScreenReaderWorldVision.analyze(frame,{positions:true});ScreenReaderMapBridge.apply(world,{allowDefeat:false});if(rows.length===3){const moved=document.createElement('canvas');moved.width=1536;moved.height=709;const mx=moved.getContext('2d'),patch=frame.popupFrame.getContext('2d').getImageData(0,470,100,150);mx.putImageData(patch,25,340);const shifted=ScreenReaderStatusIcons.analyze(moved).self.map(i=>[i.key,i.value]);if(JSON.stringify(shifted)!==JSON.stringify([['heal',6],['charge',3],['firewall',1],['attention',1]]))throw Error('Moved status icons were not read');const empty={members:[],chipIds:[],selfId:'18'};ScreenReaderController.stabilize(empty);const first=ScreenReaderController.updateStatusIcons(frame,world,'18',true);if(first.self.length)throw Error('Status accepted before two consecutive reads');ScreenReaderController.stabilize(empty);const second=ScreenReaderController.updateStatusIcons(frame,world,'18',true);if(second.self.length!==4)throw Error('Consecutive status confirmation failed');}
+   const found=ScreenReaderController.updateStatusIcons(frame,world,'18',false);rows.push({self:found.self.map(i=>[i.key,i.value]),monsters:found.monsters.map(m=>[m.monsterId,m.serial,m.icons.map(i=>[i.key,i.value])]),readback:found.monsters.flatMap(m=>{const saved=ScreenReaderMapBridge.snapshot().monsters.find(e=>e.monsterId===m.monsterId&&e.serial===m.serial),card=saved&&document.querySelector('[data-instance-id="'+saved.instanceId+'"]');return m.icons.map(i=>card?.querySelector(({fate:'.roster-status-fateEchoStacks strong',energy:'.roster-status-energyStacks strong',mark:'.roster-name .roster-mark strong'})[i.key])?.textContent);}),idempotent:ScreenReaderMapBridge.applyStatusIcons(found.monsters)});}
+  const last=ScreenReaderCharacterBridge.applyStatusIcons('18',[{key:'heal',value:6},{key:'charge',value:3},{key:'firewall',value:1},{key:'attention',value:1}]);
+  const wrongOwner=ScreenReaderCharacterBridge.applyStatusIcons('11',[{key:'heal',value:99}]);
+  const blank=document.createElement('canvas');blank.width=1536;blank.height=709;const absent=ScreenReaderController.updateStatusIcons(blank,{monsters:[]},'18',false);
+  return {rows,last,wrongOwner,absent:absent.observed};
+ },scenes);
+ expect(rows.rows[0].monsters).toEqual([['M0123',3,[['fate',2]]]]);expect(rows.rows[1].monsters).toEqual([['M0120',null,[['energy',1]]]]);expect(rows.rows[2].monsters).toEqual([['M0122',2,[['mark',1]]]]);
+ expect(rows.rows.slice(0,3).map(r=>r.readback)).toEqual([['2'],['1'],['1']]);
+ expect(rows.rows[3].self).toEqual([['heal',6],['charge',3],['firewall',1],['attention',1]]);expect(rows.rows.every(r=>r.idempotent===0)).toBe(true);expect(rows.last).toBe(0);expect(rows.wrongOwner).toBe(0);expect(rows.absent).toEqual({self:[],monsters:[]});
+});
