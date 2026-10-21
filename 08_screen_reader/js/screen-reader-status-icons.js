@@ -17,12 +17,12 @@
  function find(source,region,scope){
   const w=source.width,h=source.height,p=source.getContext('2d').getImageData(0,0,w,h).data,out=[];
   for(const ref of ScreenReaderStatusIconReferences.filter(r=>r.scope===scope)){
-   const hits=[];
-   for(const size of [32,33,34,35,36])for(let y=Math.max(0,Math.floor(region[1]));y<Math.min(h-size,region[1]+region[3]);y++)for(let x=Math.max(0,Math.floor(region[0]));x<Math.min(w-size,region[0]+region[2]);x++){
-    let sum=0,n=0;for(let j=0;j<ref.points.length;j++){const [xx,yy]=ref.points[j],k=((y+Math.floor((yy+.5)*size/8))*w+x+Math.floor((xx+.5)*size/8))*4;for(let c=0;c<3;c++){sum+=Math.abs(p[k+c]-ref.rgb[j*3+c]);n++;}if(j===7&&sum/n>35)break;}
-    if(n===ref.points.length*3&&sum/n<19)hits.push({x,y,size,score:sum/n});
-   }
-   hits.sort((a,b)=>a.score-b.score);const best=hits[0];if(!best||hits.some(b=>Math.hypot(b.x-best.x,b.y-best.y)>best.size*.65))continue;
+   const hits=[],score=(x,y,size)=>{
+    let sum=0,n=0;for(let j=0;j<ref.points.length;j++){const [xx,yy]=ref.points[j],k=((y+Math.floor((yy+.5)*size/8))*w+x+Math.floor((xx+.5)*size/8))*4;for(let c=0;c<3;c++){sum+=Math.abs(p[k+c]-ref.rgb[j*3+c]);n++;}if(j===7&&sum/n>35)return Infinity;}return sum/n;
+   };
+   for(const size of [32,33,34,35,36])for(let y=Math.max(0,Math.floor(region[1]));y<Math.min(h-size,region[1]+region[3]);y+=2)for(let x=Math.max(0,Math.floor(region[0]));x<Math.min(w-size,region[0]+region[2]);x+=2){const error=score(x,y,size);if(error<35)hits.push({x,y,size,score:error});}
+   const fine=[];for(const hit of hits){for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const x=hit.x+dx,y=hit.y+dy;if(x<0||y<0||x+hit.size>=w||y+hit.size>=h)continue;const error=score(x,y,hit.size);if(error<19)fine.push({x,y,size:hit.size,score:error});}}
+   fine.sort((a,b)=>a.score-b.score);const best=fine[0];if(!best||fine.some(b=>Math.hypot(b.x-best.x,b.y-best.y)>best.size*.65))continue;
    const {x,y,size:s}=best,box=ref.corner==='top'?[Math.round(x+s*.72),y-9,17,23]:[Math.max(0,x-9),Math.round(y+s*.65),20,23];
    const value=countAt(source,box);if(Number.isInteger(value)&&value>0&&value<=99)out.push({key:ref.key,value,box:[x,y,s,s]});
   }return out;
