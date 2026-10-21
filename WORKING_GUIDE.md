@@ -9,6 +9,8 @@
 
 ### 08の標準確認範囲（2026-10-20・利用者指定）
 
+2026-10-21：状態アイコンの認識は `screen-reader-status-icons.js`、辞書生成は `scripts/build-screen-reader-status-icons.py --check`。素材は `tests/fixtures/screen-reader/status-icons/`。自キャラは広い左下領域、モンスターは番号付き名前・HP欄を基準に探索し、左下スタック数と右上残りターンを区別する。反映は各Bridgeの `applyStatusIcons` を通し、自動は対象と値の2回連続一致、欠落・不在は保持する。UIの印字ステータスと同時更新した場合は効果を反映後に表示合計を再照合する。読取だけの候補と実反映を混同せず、関係範囲を残した実画像テストと位置を移した派生試験を区別する。最終CI／対応範囲は同日引き継ぎ書とPR #250を参照。
+
 2026-10-21：戦闘・撃破の診断履歴は読取結果内で表示・JSON保存できる。trackerとControllerの `diagnostics()` は読取専用コピーを返す。フクロウの開始カット見本は保存回帰動画から `scripts/build-screen-reader-cut-references.py` で生成し、`--check` とブラウザCIで同期を検証する。種類の補助情報であり個体番号・攻防・戦闘能力値を自動確定する機能ではない。詳細は引き継ぎ書の同日追記を参照。
 
 08の左下自キャラ用Card2対応表は `csv/self_portrait_mapping.csv`、生成は `scripts/build-screen-reader-self-references.py`（`--check`で一致確認）。PT用ProfilePhoto辞書と分離し、Card2の登録数を実画面の認識成功数と混同しない。詳細は `08_screen_reader/README.md` を参照。
