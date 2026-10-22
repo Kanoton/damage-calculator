@@ -601,10 +601,10 @@
  window.ScreenReaderCharacterBridge={
   applyStatusIcons:(owner,icons)=>{
    if(!selectedCharacter||String(owner)!==String(selectedCharacter.id)||!Array.isArray(icons))return 0;
-   const abilityIcons={precision:'精確無比',energySave:'エネルギー保存',sword:'剣気',starlight:'スターライト',warmth:'温もり',reasoning:'推理タイム',defeatCount:'モンスター撃破数',lifeBook:'ライフ・ブック'};
+   const abilityIcons={precision:'精確無比',energySave:'エネルギー保存',sword:'剣気',starlight:'スターライト',warmth:'温もり',reasoning:'推理タイム',defeatCount:'モンスター撃破数',lifeBook:'ライフ・ブック',foxLight:'狐光',dollMaking:'人形制作'};
    const abilityFlags={stealth:["潜伏","toggle",1],shield:["ジュジュシールド","toggle",1],realSelf:["本当の私","toggle",1],trueDragon:["覚醒","number",8],finishedDoll:["人形制作","number",7]};
    const keys={...abilityIcons,heal:'ヒール',charge:'エナジー',firewall:'ファイアウォール',attention:'ガオーの注目',crime:'罪証',culprit:'真犯人'};let updated=0;
-   for(const icon of icons){const flag=abilityFlags[icon.key],key=flag?.[0]||keys[icon.key],n=flag?flag[2]:icon.value;if(flag&&icon.value!==1)continue;if(!key||icons.filter(i=>i.key===icon.key).length!==1||!Number.isSafeInteger(n)||n<1||n>(icon.key==='charge'?15:icon.key==='attention'?2:icon.key==='firewall'?1:99))continue;
+   for(const icon of icons){const flag=abilityFlags[icon.key],key=flag?.[0]||keys[icon.key],n=flag?flag[2]:icon.value;if(flag&&icon.value!==1)continue;if(!key||icons.filter(i=>(abilityFlags[i.key]?.[0]||keys[i.key])===key).length!==1||!Number.isSafeInteger(n)||n<1||n>(icon.key==='charge'?15:icon.key==='attention'?2:icon.key==='firewall'?1:99))continue;
     if(abilityIcons[icon.key]||flag){const control=abilityRules()?.controls?.find(c=>c.key===key&&c.type===(flag?.[1]||'number'));if(!control||n>Math.min(99,control.max??99))continue;}
     if(icon.key==='firewall'&&!abilityRules()?.controls?.some(c=>c.key===key))continue;
     if(icon.key==='attention'&&mapPicker.value!=='MAP0105')continue;
