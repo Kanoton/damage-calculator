@@ -587,7 +587,7 @@ function turnFramePath(index){
 }
 
 for(const [protocol,size] of [['http',{width:1440,height:900}],['file',{width:950,height:1200}]])test(`08 autumn defeat diagnostics: real owl cuts, unknown face, bounded export and reset (${protocol})`,async({page})=>{
- await page.setViewportSize(size);if(protocol==='file')await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);else await open(page);
+ test.setTimeout(90000);await page.setViewportSize(size);if(protocol==='file')await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);else await open(page);
  await page.waitForFunction(()=>window.ScreenReaderCombatVision&&window.ScreenReaderMapBridge);
  await page.locator('#mp-map-select').evaluate(e=>{e.value='MAP0105';e.dispatchEvent(new Event('change',{bubbles:true}));});
  await page.locator('#reader-world-sync').evaluate(e=>e.checked=true);
@@ -686,4 +686,28 @@ for(const protocol of ['http','file'])test(`08 autumn icon status: real stacks, 
  expect(rows.rows[0].monsters).toEqual([['M0123',3,[['fate',2]]]]);expect(rows.rows[1].monsters).toEqual([['M0120',null,[['energy',1]]]]);expect(rows.rows[2].monsters).toEqual([['M0122',2,[['mark',1]]]]);
  expect(rows.rows.slice(0,3).map(r=>r.readback)).toEqual([['2'],['1'],['1']]);
  expect(rows.rows[3].self).toEqual([['heal',6],['charge',3],['firewall',1],['attention',1]]);expect(rows.rows.every(r=>r.idempotent===0)).toBe(true);expect(rows.last).toBe(0);expect(rows.wrongOwner).toBe(0);expect(rows.absent).toEqual({self:[],monsters:[]});
+});
+
+for(const protocol of ['http','file'])test(`08 autumn icon status assets: anger and weakness from real pixels, library from source assets (${protocol})`,async({page})=>{
+ test.setTimeout(90000);await page.setViewportSize(protocol==='http'?{width:1440,height:900}:{width:950,height:1200});
+ if(protocol==='file')await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);else await open(page);
+ await page.waitForFunction(()=>ScreenReaderCharacterBridge.catalog().characters.length===35);
+ await page.locator('#mp-map-select').selectOption('MAP0105');await page.locator('#mp-difficulty').selectOption('狂気');
+ await page.evaluate(()=>{ScreenReaderCharacterBridge.apply({selfId:'24',members:[]});document.getElementById('reader-world-sync').checked=true;});
+ const images=['anger-weakness-real','library-asset-derived'].map(n=>require('fs').readFileSync('tests/fixtures/screen-reader/status-icons/'+n+'.png').toString('base64'));
+ const actual=await page.evaluate(async images=>{
+  window.assetStatusFrames=[];for(const image of images){const im=new Image();im.src='data:image/png;base64,'+image;await im.decode();assetStatusFrames.push(ScreenReaderVision.normalize(im));}
+  // Existing identities and label regions are inputs; this does not claim new name OCR.
+  const monsters=[{monsterId:'M0122',serial:1,currentHp:14,maxHp:28,labelBox:[554,180,182,56]},{monsterId:'M0120',serial:null,currentHp:150,maxHp:150,labelBox:[991,178,163,58]}];
+  ScreenReaderMapBridge.apply({monsters},{allowDefeat:false});const before=ScreenReaderMapBridge.snapshot().monsters.find(m=>m.monsterId==='M0122'&&m.serial===1).attack;
+  const read=ScreenReaderController.updateStatusIcons(assetStatusFrames[0],{monsters},'24',false),after=ScreenReaderMapBridge.snapshot().monsters.find(m=>m.monsterId==='M0122'&&m.serial===1).attack;
+  const weak=[...document.querySelectorAll('.roster-status-weakness button')].filter(b=>b.getAttribute('aria-pressed')==='true').length;
+  const library=ScreenReaderStatusIcons.analyze(assetStatusFrames[1]);
+  const bare=document.createElement('canvas');bare.width=1536;bare.height=709;const bx=bare.getContext('2d');bx.drawImage(assetStatusFrames[1].popupFrame,0,0);bx.fillStyle='#232323';for(const box of [[70,480,34,2],[70,512,34,2],[70,480,2,34],[102,480,2,34]])bx.fillRect(...box);const unframed=ScreenReaderStatusIcons.analyze(bare).self.some(i=>i.key==='culprit');
+  return {monsters:read.monsters.map(m=>[m.monsterId,m.icons.map(i=>[i.key,i.value])]),bonus:after-before,weak,repeated:ScreenReaderMapBridge.applyStatusIcons(read.monsters),library:library.self.map(i=>[i.key,i.value]),wrongMap:ScreenReaderCharacterBridge.applyStatusIcons('24',library.self),unframed};
+ },images);
+ expect(actual.monsters).toEqual([['M0122',[['anger',1],['weakness',1]]],['M0120',[['energy',1],['weakness',1]]]]);expect(actual.bonus).toBe(1);expect(actual.weak).toBe(2);expect(actual.repeated).toBe(0);expect(actual.library).toEqual([['crime',6],['culprit',1]]);expect(actual.wrongMap).toBe(0);expect(actual.unframed).toBe(false);
+ await page.locator('#mp-map-select').selectOption('MAP0104');
+ const library=await page.evaluate(()=>{const before=ScreenReaderCharacterBridge.snapshot().members.find(m=>m.id==='24').atk;const applied=ScreenReaderController.updateStatusIcons(assetStatusFrames[1],{monsters:[]},'24',false);return {updated:applied.updatedSelf,bonus:ScreenReaderCharacterBridge.snapshot().members.find(m=>m.id==='24').atk-before,repeated:ScreenReaderCharacterBridge.applyStatusIcons('24',applied.self)};});
+ expect(library).toEqual({updated:2,bonus:2,repeated:0});await expect(page.getByRole('spinbutton',{name:'罪証の数',exact:true})).toHaveValue('6');await expect(page.getByRole('button',{name:/^真犯人：オン/})).toHaveAttribute('aria-pressed','true');
 });
