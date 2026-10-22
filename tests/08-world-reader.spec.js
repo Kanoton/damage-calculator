@@ -730,3 +730,25 @@ for(const protocol of ['http','file'])test(`08 autumn icon status abilities: ass
  expect(result.rows).toEqual([{"id":"24","key":"precision","value":1,"updated":1,"atk":2,"def":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"12","key":"energySave","value":1,"updated":1,"atk":2,"def":2,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"14","key":"sword","value":1,"updated":1,"atk":0,"def":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"21","key":"starlight","value":6,"updated":1,"atk":1,"def":1,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"104","key":"warmth","value":1,"updated":1,"atk":0,"def":1,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"106","key":"reasoning","value":1,"updated":1,"atk":1,"def":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]}]);
  expect(result.wrongCharacter).toBe(0);expect(result.absent).toBe(0);expect(result.retained).toBe(1);
 });
+
+for(const protocol of ['http','file'])test(`08 autumn icon status flags: presence and completed stacks from source assets (${protocol})`,async({page})=>{
+ test.setTimeout(120000);await page.setViewportSize(protocol==='http'?{width:1440,height:900}:{width:950,height:1200});
+ if(protocol==='file')await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);else await open(page);
+ await page.waitForFunction(()=>ScreenReaderCharacterBridge.catalog().characters.length===35);
+ const png=require('fs').readFileSync('tests/fixtures/screen-reader/status-icons/flag-asset-derived.png').toString('base64');
+ const result=await page.evaluate(async({png,cases})=>{
+  const im=new Image();im.src='data:image/png;base64,'+png;await im.decode();const frame=ScreenReaderVision.normalize(im),observed=ScreenReaderStatusIcons.analyze(frame),rows=[];
+  for(const [id,key,label,value,atk,reduce] of cases){
+   ScreenReaderCharacterBridge.apply({selfId:id,members:[]});
+   window.dispatchEvent(new CustomEvent('character-opponent-change',{detail:{name:'test target',markStacks:2}}));
+   const before=ScreenReaderCharacterBridge.snapshot().members.find(m=>m.id===id),beforeReduce=Number(document.getElementById('damageReduce2').value);
+   const applied=ScreenReaderController.updateStatusIcons(frame,{monsters:[]},id,false),saved=window.captureCharacterAbilityState(),after=ScreenReaderCharacterBridge.snapshot().members.find(m=>m.id===id);
+   rows.push({id,key,value:saved.numbers[label],updated:applied.updatedSelf,atk:after.atk-before.atk,reduce:Number(document.getElementById('damageReduce2').value)-beforeReduce,repeated:ScreenReaderCharacterBridge.applyStatusIcons(id,observed.self),invalid:ScreenReaderCharacterBridge.applyStatusIcons(id,[{key,value:2}]),foreign:ScreenReaderCharacterBridge.applyStatusIcons('999',observed.self),otherKeys:cases.filter(c=>c[0]!==id&&Number(saved.numbers[c[2]])>0).map(c=>c[1])});
+  }
+  const bare=document.createElement('canvas');bare.width=1536;bare.height=709;const bx=bare.getContext('2d');bx.drawImage(frame.popupFrame,0,0);bx.fillStyle='#232323';for(let i=0;i<5;i++){const x=10+i%3*50,y=400+Math.floor(i/3)*80;for(const box of [[x,y,34,2],[x,y+32,34,2],[x,y,2,34],[x+32,y,2,34]])bx.fillRect(...box);}
+  return {icons:observed.self.map(i=>[i.key,i.value]),rows,unframed:ScreenReaderStatusIcons.analyze(bare).self.filter(i=>cases.some(c=>c[1]===i.key)).map(i=>i.key),wrongCharacter:ScreenReaderCharacterBridge.applyStatusIcons('105',[{key:'trueDragon',value:1}]),absent:ScreenReaderCharacterBridge.applyStatusIcons('105',[]),retained:window.captureCharacterAbilityState().numbers['人形制作']};
+ },{png,cases:[["27","stealth","潜伏",1,2,0],["8","shield","ジュジュシールド",1,0,99],["104","realSelf","本当の私",1,1,0],["25","trueDragon","覚醒",8,4,0],["105","finishedDoll","人形制作",7,0,0]]});
+ expect(result.icons).toEqual([["stealth",1],["shield",1],["realSelf",1],["trueDragon",1],["finishedDoll",1]]);
+ expect(result.rows).toEqual([{"id":"27","key":"stealth","value":1,"updated":1,"atk":2,"reduce":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"8","key":"shield","value":1,"updated":1,"atk":0,"reduce":99,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"104","key":"realSelf","value":1,"updated":1,"atk":1,"reduce":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"25","key":"trueDragon","value":8,"updated":1,"atk":4,"reduce":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"105","key":"finishedDoll","value":7,"updated":1,"atk":0,"reduce":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]}]);
+ expect(result.unframed).toEqual([]);expect(result.wrongCharacter).toBe(0);expect(result.absent).toBe(0);expect(result.retained).toBe(7);
+});
