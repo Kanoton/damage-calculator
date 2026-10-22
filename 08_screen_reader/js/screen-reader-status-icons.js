@@ -10,9 +10,13 @@
    if(x0===0||y0===0||x1===w-1||y1===h-1||y1-y0<14||q.length<20)continue;
    const glyph=document.createElement('canvas');glyph.width=x1-x0+5;glyph.height=y1-y0+5;const gc=glyph.getContext('2d');gc.fillStyle='black';gc.fillRect(0,0,glyph.width,glyph.height);gc.fillStyle='white';for(const k of q)gc.fillRect(k%w-x0+2,Math.floor(k/w)-y0+2,1,1);
    const value=ScreenReaderVision.numberAt(glyph,[0,0,glyph.width,glyph.height],'white',[...ScreenReaderReferences.digits,...ScreenReaderStatusIconDigits],false,.3);
-   if(!Number.isInteger(value)||value<0||value>9)return null;parts.push({x:x0,value});
+   parts.push({x:x0,height:y1-y0+1,value});
   }
-  parts.sort((a,b)=>a.x-b.x);return parts.length&&parts.length<=2?Number(parts.map(p=>p.value).join('')):null;
+  // Nearby artwork can leave a short isolated white fragment after scaling.
+  // Digits in one counter share a font height; unreadable full-height ink still rejects it.
+  const height=Math.max(0,...parts.map(p=>p.height)),digits=parts.filter(p=>p.height>=height*.75);
+  if(digits.some(p=>!Number.isInteger(p.value)||p.value<0||p.value>9))return null;
+  digits.sort((a,b)=>a.x-b.x);return digits.length&&digits.length<=2?Number(digits.map(p=>p.value).join('')):null;
  }
  function find(source,region,scope){
   const w=source.width,h=source.height,p=source.getContext('2d').getImageData(0,0,w,h).data,out=[];
