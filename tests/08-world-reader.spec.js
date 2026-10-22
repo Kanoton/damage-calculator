@@ -711,3 +711,22 @@ for(const protocol of ['http','file'])test(`08 autumn icon status assets: anger 
  const library=await page.evaluate(()=>{const before=ScreenReaderCharacterBridge.snapshot().members.find(m=>m.id==='24').atk;const applied=ScreenReaderController.updateStatusIcons(assetStatusFrames[1],{monsters:[]},'24',false);return {updated:applied.updatedSelf,bonus:ScreenReaderCharacterBridge.snapshot().members.find(m=>m.id==='24').atk-before,repeated:ScreenReaderCharacterBridge.applyStatusIcons('24',applied.self)};});
  expect(library).toEqual({updated:2,bonus:2,repeated:0});await expect(page.getByRole('spinbutton',{name:'罪証の数',exact:true})).toHaveValue('6');await expect(page.getByRole('button',{name:/^真犯人：オン/})).toHaveAttribute('aria-pressed','true');
 });
+
+for(const protocol of ['http','file'])test(`08 autumn icon status abilities: asset-derived counters respect character limits (${protocol})`,async({page})=>{
+ test.setTimeout(120000);await page.setViewportSize(protocol==='http'?{width:1440,height:900}:{width:950,height:1200});
+ if(protocol==='file')await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);else await open(page);
+ await page.waitForFunction(()=>ScreenReaderCharacterBridge.catalog().characters.length===35);
+ const png=require('fs').readFileSync('tests/fixtures/screen-reader/status-icons/ability-asset-derived.png').toString('base64');
+ const result=await page.evaluate(async({png,cases})=>{
+  const im=new Image();im.src='data:image/png;base64,'+png;await im.decode();const frame=ScreenReaderVision.normalize(im),observed=ScreenReaderStatusIcons.analyze(frame);
+  const rows=[];for(const [id,key,label,value,invalid,atk,def] of cases){
+   ScreenReaderCharacterBridge.apply({selfId:id,members:[]});const before=ScreenReaderCharacterBridge.snapshot().members.find(m=>m.id===id);
+   const applied=ScreenReaderController.updateStatusIcons(frame,{monsters:[]},id,false),saved=window.captureCharacterAbilityState(),after=ScreenReaderCharacterBridge.snapshot().members.find(m=>m.id===id);
+   rows.push({id,key,value:saved.numbers[label],updated:applied.updatedSelf,atk:after.atk-before.atk,def:after.def-before.def,repeated:ScreenReaderCharacterBridge.applyStatusIcons(id,observed.self),invalid:ScreenReaderCharacterBridge.applyStatusIcons(id,[{key,value:invalid}]),foreign:ScreenReaderCharacterBridge.applyStatusIcons('999',observed.self),otherKeys:cases.filter(c=>c[0]!==id&&Number(saved.numbers[c[2]])>0).map(c=>c[1])});
+  }
+  return {icons:observed.self.map(i=>[i.key,i.value]),rows,wrongCharacter:ScreenReaderCharacterBridge.applyStatusIcons('106',[{key:'precision',value:1}]),absent:ScreenReaderCharacterBridge.applyStatusIcons('106',[]),retained:window.captureCharacterAbilityState().numbers['推理タイム']};
+ },{png,cases:[["24","precision","精確無比",1,4,2,0],["12","energySave","エネルギー保存",1,6,2,2],["14","sword","剣気",1,4,0,0],["21","starlight","スターライト",6,100,1,1],["104","warmth","温もり",1,6,0,1],["106","reasoning","推理タイム",1,5,1,0]]});
+ expect(result.icons).toEqual([["precision",1],["energySave",1],["sword",1],["starlight",6],["warmth",1],["reasoning",1]]);
+ expect(result.rows).toEqual([{"id":"24","key":"precision","value":1,"updated":1,"atk":2,"def":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"12","key":"energySave","value":1,"updated":1,"atk":2,"def":2,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"14","key":"sword","value":1,"updated":1,"atk":0,"def":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"21","key":"starlight","value":6,"updated":1,"atk":1,"def":1,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"104","key":"warmth","value":1,"updated":1,"atk":0,"def":1,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"106","key":"reasoning","value":1,"updated":1,"atk":1,"def":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]}]);
+ expect(result.wrongCharacter).toBe(0);expect(result.absent).toBe(0);expect(result.retained).toBe(1);
+});

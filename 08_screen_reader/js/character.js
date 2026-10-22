@@ -601,8 +601,10 @@
  window.ScreenReaderCharacterBridge={
   applyStatusIcons:(owner,icons)=>{
    if(!selectedCharacter||String(owner)!==String(selectedCharacter.id)||!Array.isArray(icons))return 0;
-   const keys={heal:'ヒール',charge:'エナジー',firewall:'ファイアウォール',attention:'ガオーの注目',crime:'罪証',culprit:'真犯人'};let updated=0;
+   const abilityIcons={precision:'精確無比',energySave:'エネルギー保存',sword:'剣気',starlight:'スターライト',warmth:'温もり',reasoning:'推理タイム'};
+   const keys={...abilityIcons,heal:'ヒール',charge:'エナジー',firewall:'ファイアウォール',attention:'ガオーの注目',crime:'罪証',culprit:'真犯人'};let updated=0;
    for(const icon of icons){const key=keys[icon.key],n=icon.value;if(!key||icons.filter(i=>i.key===icon.key).length!==1||!Number.isSafeInteger(n)||n<1||n>(icon.key==='charge'?15:icon.key==='attention'?2:icon.key==='firewall'?1:99))continue;
+    if(abilityIcons[icon.key]){const control=abilityRules()?.controls?.find(c=>c.key===key&&c.type==='number');if(!control||n>Math.min(99,control.max??99))continue;}
     if(icon.key==='firewall'&&!abilityRules()?.controls?.some(c=>c.key===key))continue;
     if(icon.key==='attention'&&mapPicker.value!=='MAP0105')continue;
     if(['crime','culprit'].includes(icon.key)&&mapPicker.value!=='MAP0104')continue;
