@@ -6,6 +6,8 @@ from io import BytesIO
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'08_screen_reader/js/screen-reader-status-icons-references.js'
 ABILITY_ICONS=[["precision","精確無比"],["energySave","エネルギー保存"],["sword","剣気"],["starlight","スターライト"],["warmth","温もり"],["reasoning","推理タイム"]]
+FLAG_ICONS=[["stealth","潜伏"],["shield","ジュジュシールド"],["realSelf","本当の私"],["trueDragon","真龍"],["finishedDoll","人形完成"]]
+FLAG_FIXTURE=ROOT/'tests/fixtures/screen-reader/status-icons/flag-asset-derived.png'
 FIXTURE=ROOT/'tests/fixtures/screen-reader/status-icons/ability-asset-derived.png'
 def build():
  refs=[]
@@ -16,12 +18,13 @@ def build():
   refs.append(dict(key=name,scope=scope,corner=corner,points=points,rgb=rgb))
  # Asset references use opaque inner artwork, independent of captured counters.
  icons={r['effect_key']:r['icon_file'] for r in csv.DictReader((ROOT/'csv/status_icon_map_all.csv').open(encoding='utf-8-sig'))}
- for name,scope,corner,file in [('energy','monster','bottom','UT_Buff/UT_Buff_1071_01.png'),('anger','monster','bottom','UT_Buff/UT_Buff_1072.png'),('weakness','monster',None,'UT_Buff/UT_Buff_125_Skill.png'),('crime','self','bottom',icons['罪証']),('culprit','self',None,icons['真犯人'])]+[(key,'self','bottom',icons[name]) for key,name in ABILITY_ICONS]:
+ for name,scope,corner,file in [('energy','monster','bottom','UT_Buff/UT_Buff_1071_01.png'),('anger','monster','bottom','UT_Buff/UT_Buff_1072.png'),('weakness','monster',None,'UT_Buff/UT_Buff_125_Skill.png'),('crime','self','bottom',icons['罪証']),('culprit','self',None,icons['真犯人'])]+[(key,'self','bottom',icons[name]) for key,name in ABILITY_ICONS]+[(key,'self',None,icons[name]) for key,name in FLAG_ICONS]:
   asset=Image.open(ROOT/'images'/file).convert('RGBA');asset=asset.crop(asset.getbbox()).resize((30,30),Image.Resampling.BILINEAR)
   im=Image.new('RGBA',(34,34),'white');im.alpha_composite(asset,(2,2));im=im.convert('RGB')
   points=[(x,y) for y in range(1,7) for x in range(1,7) if not (x<2 and y>5 or x>5 and y<2)]
   rgb=[v for x,y in points for v in im.getpixel((int((x+.5)*34/8),int((y+.5)*34/8)))]
   refs.append(dict(key=name,scope=scope,corner=corner,points=points,rgb=rgb,source='images/'+file))
+  if name=='realSelf':refs[-1]['strictFrame']=True
  digits=[]
  for number in ['1','6']:
   im=Image.open(ROOT/('tests/fixtures/screen-reader/status-icons/digit-'+number+'.png')).convert('L');im=im.crop(im.getbbox())
@@ -44,9 +47,19 @@ def ability_fixture():
    out.paste(source.crop((965,263,974,278)),(x-5,y+23))
  data=BytesIO();out.save(data,format='PNG');return data.getvalue()
 
+def flag_fixture():
+ icons={r['effect_key']:r['icon_file'] for r in csv.DictReader((ROOT/'csv/status_icon_map_all.csv').open(encoding='utf-8-sig'))}
+ out=Image.new('RGB',(1536,709),(35,35,35))
+ for i,(key,name) in enumerate(FLAG_ICONS):
+  x,y=10+(i%3)*50,400+(i//3)*80
+  art=Image.open(ROOT/'images'/icons[name]).convert('RGBA');art=art.crop(art.getbbox()).resize((30,30),Image.Resampling.BILINEAR)
+  tile=Image.new('RGBA',(34,34),'white');tile.alpha_composite(art,(2,2));out.paste(tile.convert('RGB'),(x,y))
+ data=BytesIO();out.save(data,format='PNG');return data.getvalue()
+
 if __name__=='__main__':
- p=argparse.ArgumentParser();p.add_argument('--check',action='store_true');args=p.parse_args();s=build();fixture=ability_fixture()
+ p=argparse.ArgumentParser();p.add_argument('--check',action='store_true');args=p.parse_args();s=build();fixture=ability_fixture();flags=flag_fixture()
  if args.check:
   if OUT.read_text()!=s:raise SystemExit('Status icon references differ')
   if FIXTURE.read_bytes()!=fixture:raise SystemExit('Ability status fixture differs')
- else:OUT.write_text(s);FIXTURE.write_bytes(fixture)
+  if FLAG_FIXTURE.read_bytes()!=flags:raise SystemExit('Flag status fixture differs')
+ else:OUT.write_text(s);FIXTURE.write_bytes(fixture);FLAG_FIXTURE.write_bytes(flags)
