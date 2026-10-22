@@ -687,3 +687,26 @@ for(const protocol of ['http','file'])test(`08 autumn icon status: real stacks, 
  expect(rows.rows.slice(0,3).map(r=>r.readback)).toEqual([['2'],['1'],['1']]);
  expect(rows.rows[3].self).toEqual([['heal',6],['charge',3],['firewall',1],['attention',1]]);expect(rows.rows.every(r=>r.idempotent===0)).toBe(true);expect(rows.last).toBe(0);expect(rows.wrongOwner).toBe(0);expect(rows.absent).toEqual({self:[],monsters:[]});
 });
+
+for(const protocol of ['http','file'])test(`08 autumn icon status assets: anger and weakness from real pixels, library from source assets (${protocol})`,async({page})=>{
+ test.setTimeout(90000);await page.setViewportSize(protocol==='http'?{width:1440,height:900}:{width:950,height:1200});
+ if(protocol==='file')await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);else await open(page);
+ await page.waitForFunction(()=>ScreenReaderCharacterBridge.catalog().characters.length===35);
+ await page.locator('#mp-map-select').selectOption('MAP0105');await page.locator('#mp-difficulty').selectOption('狂気');
+ await page.evaluate(()=>{ScreenReaderCharacterBridge.apply({selfId:'24',members:[]});document.getElementById('reader-world-sync').checked=true;});
+ const images=['anger-weakness-real','library-asset-derived'].map(n=>require('fs').readFileSync('tests/fixtures/screen-reader/status-icons/'+n+'.png').toString('base64'));
+ const actual=await page.evaluate(async images=>{
+  window.assetStatusFrames=[];for(const image of images){const im=new Image();im.src='data:image/png;base64,'+image;await im.decode();assetStatusFrames.push(ScreenReaderVision.normalize(im));}
+  // Existing identities and label regions are inputs; this does not claim new name OCR.
+  const monsters=[{monsterId:'M0122',serial:1,currentHp:14,maxHp:28,labelBox:[554,180,182,56]},{monsterId:'M0120',serial:null,currentHp:150,maxHp:150,labelBox:[991,178,163,58]}];
+  ScreenReaderMapBridge.apply({monsters},{allowDefeat:false});const before=ScreenReaderMapBridge.snapshot().monsters.find(m=>m.monsterId==='M0122'&&m.serial===1).attack;
+  const read=ScreenReaderController.updateStatusIcons(assetStatusFrames[0],{monsters},'24',false),after=ScreenReaderMapBridge.snapshot().monsters.find(m=>m.monsterId==='M0122'&&m.serial===1).attack;
+  const weak=[...document.querySelectorAll('.roster-status-weakness button')].filter(b=>b.getAttribute('aria-pressed')==='true').length;
+  const library=ScreenReaderStatusIcons.analyze(assetStatusFrames[1]);
+  return {monsters:read.monsters.map(m=>[m.monsterId,m.icons.map(i=>[i.key,i.value])]),bonus:after-before,weak,repeated:ScreenReaderMapBridge.applyStatusIcons(read.monsters),library:library.self.map(i=>[i.key,i.value]),wrongMap:ScreenReaderCharacterBridge.applyStatusIcons('24',library.self)};
+ },images);
+ expect(actual.monsters).toEqual([['M0122',[['anger',1],['weakness',1]]],['M0120',[['energy',1],['weakness',1]]]]);expect(actual.bonus).toBe(1);expect(actual.weak).toBe(2);expect(actual.repeated).toBe(0);expect(actual.library).toEqual([['crime',6],['culprit',1]]);expect(actual.wrongMap).toBe(0);
+ await page.locator('#mp-map-select').selectOption('MAP0104');
+ const library=await page.evaluate(()=>{const before=ScreenReaderCharacterBridge.snapshot().members.find(m=>m.id==='24').atk;const applied=ScreenReaderController.updateStatusIcons(assetStatusFrames[1],{monsters:[]},'24',false);return {updated:applied.updatedSelf,bonus:ScreenReaderCharacterBridge.snapshot().members.find(m=>m.id==='24').atk-before,repeated:ScreenReaderCharacterBridge.applyStatusIcons('24',applied.self)};});
+ expect(library).toEqual({updated:2,bonus:2,repeated:0});await expect(page.getByRole('spinbutton',{name:'罪証の数',exact:true})).toHaveValue('6');await expect(page.getByRole('button',{name:/^真犯人：オン/})).toHaveAttribute('aria-pressed','true');
+});

@@ -96,8 +96,8 @@ window.ScreenReaderMapBridge={
   for(const o of observations){
    const matches=rosterState.monsters.filter(e=>!e.defeated&&e.screenSeenAlive&&e.monsterId===o.monsterId&&(e.boss?o.serial===null:e.serial===o.serial)&&e.mapId===pick.value&&e.difficulty===difficulty.value&&Number(rosterStat(e.base,'HP'))===o.maxHp);
    if(matches.length!==1||observations.filter(m=>m.monsterId===o.monsterId&&m.serial===o.serial).length!==1)continue;
-   const enemy=matches[0];for(const icon of o.icons||[]){const field=({mark:'markStacks',fate:'fateEchoStacks',energy:'energyStacks'})[icon.key];if(!field||!Number.isSafeInteger(icon.value)||icon.value<1||icon.value>99||(icon.key==='energy'&&enemy.monsterId!=='M0120')||o.icons.filter(i=>i.key===icon.key).length!==1)continue;
-    if((enemy[field]||0)!==icon.value){if(!updated)rememberRoster();enemy[field]=icon.value;updated++;updateEnemy(enemy);if(rosterState.selectedId===enemy.instanceId)registerEnemy(enemy,false);}
+   const enemy=matches[0];for(const icon of o.icons||[]){const field=({mark:'markStacks',fate:'fateEchoStacks',energy:'energyStacks',anger:'angerStacks',weakness:'weakness'})[icon.key];if(!field||!Number.isSafeInteger(icon.value)||icon.value<1||icon.value>99||(icon.key==='energy'&&enemy.monsterId!=='M0120')||(icon.key==='anger'&&enemy.monsterId!=='M0122')||(icon.key==='weakness'&&icon.value!==1)||o.icons.filter(i=>i.key===icon.key).length!==1)continue;
+    if((icon.key==='weakness'?Number(!!enemy[field]):enemy[field]||0)!==icon.value){if(!updated)rememberRoster();enemy[field]=icon.key==='weakness'?true:icon.value;updated++;updateEnemy(enemy);if(rosterState.selectedId===enemy.instanceId)registerEnemy(enemy,false);}
    }
   }if(updated)renderRoster();return updated;
  },
