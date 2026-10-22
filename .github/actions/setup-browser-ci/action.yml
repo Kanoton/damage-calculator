@@ -1,0 +1,51 @@
+name: Prepare browser CI
+description: Reuse the official browser image; install only the additional test tools.
+inputs:
+  media:
+    description: Install FFmpeg for recorded video tests
+    default: 'false'
+  pillow:
+    description: Install the pinned Pillow generator dependency
+    default: 'false'
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 22
+        cache: npm
+    - run: npm ci
+      shell: bash
+    - name: Install small additional tools
+      shell: bash
+      env:
+        CI_MEDIA: ${{ inputs.media }}
+        CI_PILLOW: ${{ inputs.pillow }}
+      run: |
+        set -euo pipefail
+        packages=()
+        command -v python3 >/dev/null || packages+=(python3)
+        if [[ "$CI_MEDIA" == true ]] && ! command -v ffmpeg >/dev/null; then packages+=(ffmpeg); fi
+        if [[ "$CI_PILLOW" == true ]]; then packages+=(python3-venv); fi
+        if (( ${#packages[@]} )); then
+          # Browser dependencies are baked into the container. Avoid the slow
+          # Azure HTTP mirror for the few extra tools, and bound network waits.
+          find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) -exec sed -i -E 's|https?://(azure\.)?archive\.ubuntu\.com|https://archive.ubuntu.com|g; s|https?://security\.ubuntu\.com|https://security.ubuntu.com|g' {} +
+          apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 update
+          apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 install -y --no-install-recommends "${packages[@]}"
+        fi
+        if [[ "$CI_PILLOW" == true ]]; then
+          mkdir -p /tmp/reader-ci-pip-cache
+          python3 -m venv /tmp/reader-ci-python
+          echo /tmp/reader-ci-python/bin >> "$GITHUB_PATH"
+        fi
+    - uses: actions/cache@v4
+      if: inputs.pillow == 'true'
+      with:
+        path: /tmp/reader-ci-pip-cache
+        key: reader-pillow-12.3.0-linux-py312
+    - if: inputs.pillow == 'true'
+      run: python3 -m pip install Pillow==12.3.0
+      shell: bash
+      env:
+        PIP_CACHE_DIR: /tmp/reader-ci-pip-cache
