@@ -4,7 +4,7 @@ from pathlib import Path
 from PIL import Image
 ROOT=Path(__file__).resolve().parents[1]
 CENTERS=[(535,352),(609,352),(682,352),(495,416),(570,416),(644,416),(719,416),(535,481),(609,481),(682,481)]
-CASES=[('luka','スクリーンショット 2026-10-18 044604.png','17',[(0,'1'),(1,'41'),(2,'6'),(3,'42'),(4,'43')]),('parunan','スクリーンショット 2026-10-18 044744.png','2',[(0,'29'),(1,'30'),(2,'44')]),('sherry-late','image(20261017-214935).png','106',[(0,'52'),(1,'58'),(2,'9'),(3,'45'),(4,'43'),(5,'55')]),('yume-late','image(20261017-215034).png','20',[(0,'23'),(1,'102'),(2,'48')]),('parunan-20261022','20261022204228_1.jpg','2',[(0,'16'),(1,'50')])]
+CASES=[('luka','スクリーンショット 2026-10-18 044604.png','17',[(0,'1'),(1,'41'),(2,'6'),(3,'42'),(4,'43')]),('parunan','スクリーンショット 2026-10-18 044744.png','2',[(0,'29'),(1,'30'),(2,'44')]),('sherry-late','image(20261017-214935).png','106',[(0,'52'),(1,'58'),(2,'9'),(3,'45'),(4,'43'),(5,'55')]),('yume-late','image(20261017-215034).png','20',[(0,'23'),(1,'102'),(2,'48')]),('parunan-20261022','20261022204228_1.jpg','2',[(0,'16'),(1,'50')]),('kaisei-20261022','20261022204226_1.jpg','13',[(0,'49'),(1,'15')])]
 def shape(im):
  pixels=list(im.convert('RGB').resize((32,32),Image.Resampling.BILINEAR).getdata());mask=[];votes=[0,0,0]
  for i,(r,g,b) in enumerate(pixels):
@@ -30,12 +30,13 @@ def main():
    refs['shapes'].append({'id':row['chip_id'],**descriptor})
  for name,filename,owner,slots in CASES:
   path=ROOT/f'tests/fixtures/screen-reader/chip-grid-{name}.json'
+  recent=name in ('parunan-20261022','kaisei-20261022')
   if a.screens and (not a.cases or name in a.cases):
    im=Image.open(Path(a.screens)/filename).convert('RGB');safe=Image.new('RGB',im.size,(20,20,20));scale=im.height/709;offset=(1536-im.width/scale)/2
    # Preserve the panel controls, printed canonical name, all slots and divider.
-   grid=(450,310,320,220) if name=='parunan-20261022' else (460,318,300,200) if name.endswith('-late') else (465,324,286,184)
-   header=(410,75,150,55) if name=='parunan-20261022' else (410,75,245,55)
-   for x,y,w,hh in [header,(593,178,235,44),grid,((417,296,823,10) if name=='parunan-20261022' else (420,298,818,5))]:
+   grid=(450,310,320,220) if recent else (460,318,300,200) if name.endswith('-late') else (465,324,286,184)
+   header=(410,75,150,55) if recent else (410,75,245,55)
+   for x,y,w,hh in [header,(593,178,235,44),grid,((417,296,823,10) if recent else (420,298,818,5))]:
     box=(round((x-offset)*scale),round(y*scale),round((x+w-offset)*scale),round((y+hh)*scale));safe.paste(im.crop(box),box[:2])
    b=io.BytesIO();safe.save(b,format='PNG');path.write_text(json.dumps({'image':'data:image/png;base64,'+base64.b64encode(b.getvalue()).decode()}))
   im=Image.open(io.BytesIO(base64.b64decode(json.loads(path.read_text())['image'].split(',')[1]))).convert('RGB');width=round(im.width*709/im.height);frame=Image.new('RGB',(1536,709));frame.paste(im.resize((width,709),Image.Resampling.BILINEAR),((1536-width)//2,0))
@@ -51,7 +52,7 @@ def main():
    refs.setdefault('names',[]).append({'id':owner,'ratio':round(glyph.width/glyph.height,5),'data':base64.b64encode(packed).decode()})
   for slot,ident in slots:
    x,y=CENTERS[slot];refs['reviewed'].append({'id':ident,'data':h['feature'](h['crop'](frame,(x-18,y-18,36,36)))})
-   if name=='parunan-20261022':
+   if recent:
     for dx,dy in [(-2,-1),(-1,0),(0,1),(1,1),(2,2)]:
      refs['reviewed'].append({'id':ident,'data':h['feature'](h['crop'](frame,(x-18+dx,y-18+dy,36,36)))})
    if name.endswith('-late'):
