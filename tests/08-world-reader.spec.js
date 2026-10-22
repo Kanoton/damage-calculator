@@ -580,9 +580,18 @@ test('08 autumn defeat memory: missing names, registered camera motion, later su
 });
 
 let turnFrameDirectory;
+function clearTurnFrames(){
+ if(turnFrameDirectory)require('fs').rmSync(turnFrameDirectory,{recursive:true,force:true});
+ turnFrameDirectory=undefined;
+}
+test.afterAll(clearTurnFrames);
 function turnFramePath(index){
  const fs=require('fs'),path=require('path');
- if(!turnFrameDirectory){turnFrameDirectory=fs.mkdtempSync(path.join(require('os').tmpdir(),'autumn-turn-'));require('child_process').execFileSync('ffmpeg',['-v','error','-i',path.resolve('tests/fixtures/screen-reader/defeat/autumn-turn-20261020/full-replay.mp4'),'-vf','fps=4',path.join(turnFrameDirectory,'f%04d.png')]);}
+ if(!turnFrameDirectory){
+  turnFrameDirectory=fs.mkdtempSync(path.join(require('os').tmpdir(),'autumn-turn-'));
+  try{require('child_process').execFileSync('ffmpeg',['-v','error','-i',path.resolve('tests/fixtures/screen-reader/defeat/autumn-turn-20261020/full-replay.mp4'),'-vf','fps=4',path.join(turnFrameDirectory,'f%04d.png')]);}
+  catch(error){clearTurnFrames();throw error;}
+ }
  return path.join(turnFrameDirectory,'f'+String(index).padStart(4,'0')+'.png');
 }
 
@@ -725,10 +734,12 @@ for(const protocol of ['http','file'])test(`08 autumn icon status abilities: ass
    rows.push({id,key,value:saved.numbers[label],updated:applied.updatedSelf,atk:after.atk-before.atk,def:after.def-before.def,repeated:ScreenReaderCharacterBridge.applyStatusIcons(id,observed.self),invalid:ScreenReaderCharacterBridge.applyStatusIcons(id,[{key,value:invalid}]),foreign:ScreenReaderCharacterBridge.applyStatusIcons('999',observed.self),otherKeys:cases.filter(c=>c[0]!==id&&Number(saved.numbers[c[2]])>0).map(c=>c[1])});
   }
   return {icons:observed.self.map(i=>[i.key,i.value]),rows,wrongCharacter:ScreenReaderCharacterBridge.applyStatusIcons('106',[{key:'precision',value:1}]),absent:ScreenReaderCharacterBridge.applyStatusIcons('106',[]),retained:window.captureCharacterAbilityState().numbers['推理タイム']};
- },{png,cases:[["24","precision","精確無比",1,4,2,0],["12","energySave","エネルギー保存",1,6,2,2],["14","sword","剣気",1,4,0,0],["21","starlight","スターライト",6,100,1,1],["104","warmth","温もり",1,6,0,1],["106","reasoning","推理タイム",1,5,1,0]]});
- expect(result.icons).toEqual([["precision",1],["energySave",1],["sword",1],["starlight",6],["warmth",1],["reasoning",1]]);
- expect(result.rows).toEqual([{"id":"24","key":"precision","value":1,"updated":1,"atk":2,"def":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"12","key":"energySave","value":1,"updated":1,"atk":2,"def":2,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"14","key":"sword","value":1,"updated":1,"atk":0,"def":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"21","key":"starlight","value":6,"updated":1,"atk":1,"def":1,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"104","key":"warmth","value":1,"updated":1,"atk":0,"def":1,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"106","key":"reasoning","value":1,"updated":1,"atk":1,"def":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]}]);
+ },{png,cases:[["9","defeatCount","モンスター撃破数",1,100,0,0],["22","lifeBook","ライフ・ブック",1,100,0,0],["24","precision","精確無比",1,4,2,0],["12","energySave","エネルギー保存",1,6,2,2],["14","sword","剣気",1,4,0,0],["21","starlight","スターライト",6,100,1,1],["104","warmth","温もり",1,6,0,1],["106","reasoning","推理タイム",1,5,1,0]]});
+ expect(result.icons).toEqual([["precision",1],["energySave",1],["sword",1],["starlight",6],["warmth",1],["reasoning",1],["defeatCount",1],["lifeBook",1]]);
+ expect(result.rows).toEqual([{"id":"9","key":"defeatCount","value":1,"updated":1,"atk":0,"def":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"22","key":"lifeBook","value":1,"updated":1,"atk":0,"def":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"24","key":"precision","value":1,"updated":1,"atk":2,"def":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"12","key":"energySave","value":1,"updated":1,"atk":2,"def":2,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"14","key":"sword","value":1,"updated":1,"atk":0,"def":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"21","key":"starlight","value":6,"updated":1,"atk":1,"def":1,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"104","key":"warmth","value":1,"updated":1,"atk":0,"def":1,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"106","key":"reasoning","value":1,"updated":1,"atk":1,"def":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]}]);
  expect(result.wrongCharacter).toBe(0);expect(result.absent).toBe(0);expect(result.retained).toBe(1);
+ const count=await page.evaluate(()=>{ScreenReaderCharacterBridge.apply({selfId:'9',members:[]});const before=ScreenReaderCharacterBridge.snapshot().members.find(m=>m.id==='9').atk;const updated=ScreenReaderCharacterBridge.applyStatusIcons('9',[{key:'defeatCount',value:6}]);return {updated,atk:ScreenReaderCharacterBridge.snapshot().members.find(m=>m.id==='9').atk-before,repeat:ScreenReaderCharacterBridge.applyStatusIcons('9',[{key:'defeatCount',value:6}]),duplicate:ScreenReaderCharacterBridge.applyStatusIcons('9',[{key:'defeatCount',value:7},{key:'defeatCount',value:8}]),retained:window.captureCharacterAbilityState().numbers['モンスター撃破数']};});
+ expect(count).toEqual({updated:1,atk:3,repeat:0,duplicate:0,retained:6});
 });
 
 for(const protocol of ['http','file'])test(`08 autumn icon status flags: presence and completed stacks from source assets (${protocol})`,async({page})=>{
@@ -752,3 +763,4 @@ for(const protocol of ['http','file'])test(`08 autumn icon status flags: presenc
  expect(result.rows).toEqual([{"id":"27","key":"stealth","value":1,"updated":1,"atk":2,"reduce":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"8","key":"shield","value":1,"updated":1,"atk":0,"reduce":99,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"104","key":"realSelf","value":1,"updated":1,"atk":1,"reduce":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"25","key":"trueDragon","value":8,"updated":1,"atk":4,"reduce":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"105","key":"finishedDoll","value":7,"updated":1,"atk":0,"reduce":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]}]);
  expect(result.unframed).toEqual([]);expect(result.wrongCharacter).toBe(0);expect(result.absent).toBe(0);expect(result.retained).toBe(7);
 });
+

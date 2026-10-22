@@ -815,6 +815,12 @@ test('08: monster text tooltip retains readable long text and viewport bounds',a
   await tip.hover();await page.screenshot({path:test.info().outputPath('monster-before-scroll-'+viewport.width+'.png')});await page.mouse.wheel(0,2400);await expect.poll(()=>tip.evaluate(el=>el.scrollTop)).toBeGreaterThan(0);await expect(tip).toBeVisible();
   await tip.evaluate(el=>el.scrollTop=0);await page.screenshot({path:test.info().outputPath('monster-text-'+viewport.width+'.png')});
   await page.keyboard.press('Escape');await expect(tip).toBeHidden();
+  // Closing an overlay can cause a new mouseenter without any physical pointer motion.
+  await tile.dispatchEvent('mouseenter');await expect(tip).toBeHidden();
+  await tile.dispatchEvent('pointermove',{pointerType:'mouse'});await expect(tip).toBeVisible();
+  await page.keyboard.press('Escape');await expect(tip).toBeHidden();
+  await tile.evaluate(el=>el.blur());await tile.focus();await expect(tip).toBeVisible();
+  await page.keyboard.press('Escape');await expect(tip).toBeHidden();
  }
 });
 

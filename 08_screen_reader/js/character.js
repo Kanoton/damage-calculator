@@ -601,7 +601,7 @@
  window.ScreenReaderCharacterBridge={
   applyStatusIcons:(owner,icons)=>{
    if(!selectedCharacter||String(owner)!==String(selectedCharacter.id)||!Array.isArray(icons))return 0;
-   const abilityIcons={precision:'精確無比',energySave:'エネルギー保存',sword:'剣気',starlight:'スターライト',warmth:'温もり',reasoning:'推理タイム'};
+   const abilityIcons={precision:'精確無比',energySave:'エネルギー保存',sword:'剣気',starlight:'スターライト',warmth:'温もり',reasoning:'推理タイム',defeatCount:'モンスター撃破数',lifeBook:'ライフ・ブック'};
    const abilityFlags={stealth:["潜伏","toggle",1],shield:["ジュジュシールド","toggle",1],realSelf:["本当の私","toggle",1],trueDragon:["覚醒","number",8],finishedDoll:["人形制作","number",7]};
    const keys={...abilityIcons,heal:'ヒール',charge:'エナジー',firewall:'ファイアウォール',attention:'ガオーの注目',crime:'罪証',culprit:'真犯人'};let updated=0;
    for(const icon of icons){const flag=abilityFlags[icon.key],key=flag?.[0]||keys[icon.key],n=flag?flag[2]:icon.value;if(flag&&icon.value!==1)continue;if(!key||icons.filter(i=>i.key===icon.key).length!==1||!Number.isSafeInteger(n)||n<1||n>(icon.key==='charge'?15:icon.key==='attention'?2:icon.key==='firewall'?1:99))continue;
@@ -846,3 +846,4 @@
   const defaultCharacter=characters.find(row=>row.name==='ミミ');if(defaultCharacter&&!gameResetRequested)selectCharacter(defaultCharacter,false,false);
  });
 })();
+
