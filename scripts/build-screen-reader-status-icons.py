@@ -5,7 +5,7 @@ from PIL import Image
 from io import BytesIO
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'08_screen_reader/js/screen-reader-status-icons-references.js'
-ABILITY_ICONS=[["precision","精確無比"],["energySave","エネルギー保存"],["sword","剣気"],["starlight","スターライト"],["warmth","温もり"],["reasoning","推理タイム"]]
+ABILITY_ICONS=[["precision","精確無比"],["energySave","エネルギー保存"],["sword","剣気"],["starlight","スターライト"],["warmth","温もり"],["reasoning","推理タイム"],["defeatCount","モンスター撃破数"],["lifeBook","ライフ・ブック"]]
 FLAG_ICONS=[["stealth","潜伏"],["shield","ジュジュシールド"],["realSelf","本当の私"],["trueDragon","真龍"],["finishedDoll","人形完成"]]
 FLAG_FIXTURE=ROOT/'tests/fixtures/screen-reader/status-icons/flag-asset-derived.png'
 FIXTURE=ROOT/'tests/fixtures/screen-reader/status-icons/ability-asset-derived.png'
@@ -63,3 +63,4 @@ if __name__=='__main__':
   if FIXTURE.read_bytes()!=fixture:raise SystemExit('Ability status fixture differs')
   if FLAG_FIXTURE.read_bytes()!=flags:raise SystemExit('Flag status fixture differs')
  else:OUT.write_text(s);FIXTURE.write_bytes(fixture);FLAG_FIXTURE.write_bytes(flags)
+
