@@ -28,7 +28,7 @@
     let sides=0;for(let side=0;side<4;side++){let white=0;for(let i=2;i<=6;i++){const xx=Math.round(x+(side<2?(side?s-1:0):i*s/8)),yy=Math.round(y+(side>=2?(side===3?s-1:0):i*s/8));let found=false;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const k=((yy+dy)*w+xx+dx)*4;if(Math.min(p[k],p[k+1],p[k+2])>210&&Math.max(p[k],p[k+1],p[k+2])-Math.min(p[k],p[k+1],p[k+2])<40)found=true;}if(found)white++;}if(white>=3)sides++;}if(sides<3)continue;
     out.push({key:ref.key,value:1,box:[x,y,s,s]});continue;}const box=ref.corner==='top'?[Math.round(x+s*.72),y-9,17,23]:[Math.max(0,x-9),Math.round(y+s*.65),20,23];
    const value=countAt(source,box);if(Number.isInteger(value)&&value>0&&value<=99)out.push({key:ref.key,value,box:[x,y,s,s]});
-  }return out;
+  }return out.filter((icon,index)=>out.findIndex(i=>i.key===icon.key)===index&&!out.some(i=>i.key===icon.key&&(i.value!==icon.value||Math.hypot(i.box[0]-icon.box[0],i.box[1]-icon.box[1])>Math.max(i.box[2],icon.box[2])*.65)));
  }
  function analyze(source,monsters=[]){
   const c=source.popupFrame||source;
