@@ -33,7 +33,7 @@ def main():
   if a.screens and (not a.cases or name in a.cases):
    im=Image.open(Path(a.screens)/filename).convert('RGB');safe=Image.new('RGB',im.size,(20,20,20));scale=im.height/709;offset=(1536-im.width/scale)/2
    # Preserve the panel controls, printed canonical name, all slots and divider.
-   grid=(450,310,320,220) if name.endswith('-late') or name=='parunan-20261022' else (465,324,286,184)
+   grid=(450,310,320,220) if name=='parunan-20261022' else (460,318,300,200) if name.endswith('-late') else (465,324,286,184)
    header=(410,75,150,55) if name=='parunan-20261022' else (410,75,245,55)
    for x,y,w,hh in [header,(593,178,235,44),grid,((417,296,823,10) if name=='parunan-20261022' else (420,298,818,5))]:
     box=(round((x-offset)*scale),round(y*scale),round((x+w-offset)*scale),round((y+hh)*scale));safe.paste(im.crop(box),box[:2])
