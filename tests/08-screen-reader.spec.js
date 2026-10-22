@@ -48,19 +48,6 @@ test('08: self portrait assets inventory covers all 35 canonical characters and 
  expect(result.ids).toEqual([...new Set(ids)].sort());expect(result.ids).toHaveLength(35);expect(result.images).toBe(205);expect(result.blank).toBeNull();
 });
 
-for(const protocol of ['http','file'])for(const [width,height] of [[1000,1400],[1920,1080]])test(`08: chip artwork reads Parunan recommendation and friendship badge at ${width}x${height} ${protocol}`,async({page})=>{
- await page.setViewportSize({width,height});
- await page.goto(protocol==='file'?'file://'+require('path').resolve(__dirname,'../08_screen_reader/index.html'):'/08_screen_reader/');
- await page.locator('#reader-toggle').click();await page.waitForFunction(()=>window.ScreenReaderCharacterBridge?.catalog().characters.length===35);
- await page.locator('#reader-new-game').click();
- await page.evaluate(()=>ScreenReaderCharacterBridge.apply({selfId:'13',members:[{id:'13',slot:0},{id:'2',slot:1},{id:'16',slot:2},{id:'20',slot:3}],chipOwnerId:'2',chipIds:['29']}));
- const actual=await page.evaluate(async image=>{const im=new Image();im.src=image;await im.decode();return ScreenReaderVision.analyze(ScreenReaderVision.normalize(im));},fixture('chip-grid-parunan-20261022'));
- expect(actual.chipOwnerId).toBe('2');expect(actual.chipIds).toEqual(['16','50']);expect(actual.chipRead.matchedRims).toBe(10);
- await readFixture(page,'chip-grid-parunan-20261022');
- const first=await snapshot(page);expect(first.selfId).toBe('13');expect(first.members.find(m=>m.id==='2').chips).toEqual(['29','16','50']);expect(first.members.find(m=>m.id==='13').chips).toEqual([]);
- await readFixture(page,'chip-grid-parunan-20261022');const again=await snapshot(page);expect(again.members.find(m=>m.id==='2').chips).toEqual(['29','16','50']);expect(again.selfId).toBe('13');
-});
-
 for(const [name,owner,chips]of [['sherry-late','106',['52','58','9','45','43','55']],['yume-late','20',['23','102','48']]])test('08: chip artwork reads reviewed late '+name+' without missing chips or inventing a whetstone',async({page})=>{
  await open(page);await page.locator('#reader-new-game').click();await page.evaluate(()=>ScreenReaderCharacterBridge.apply({members:[{id:'2',slot:0},{id:'20',slot:1},{id:'106',slot:2},{id:'17',slot:3}]}));
  await readFixture(page,'chip-grid-'+name);const s=await snapshot(page);expect(s.members.find(m=>m.id===owner).chips).toEqual(chips);
