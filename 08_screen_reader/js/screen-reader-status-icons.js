@@ -23,7 +23,10 @@
    for(const size of [32,33,34,35,36])for(let y=Math.max(0,Math.floor(region[1]));y<Math.min(h-size,region[1]+region[3]);y+=stride)for(let x=Math.max(0,Math.floor(region[0]));x<Math.min(w-size,region[0]+region[2]);x+=stride){const error=score(x,y,size);if(error<35)hits.push({x,y,size,score:error});}
    const fine=[];for(const hit of hits){for(let dy=1-stride;dy<stride;dy++)for(let dx=1-stride;dx<stride;dx++){const x=hit.x+dx,y=hit.y+dy;if(x<0||y<0||x+hit.size>=w||y+hit.size>=h)continue;const error=score(x,y,hit.size);if(error<19)fine.push({x,y,size:hit.size,score:error});}}
    fine.sort((a,b)=>a.score-b.score);const best=fine[0];if(!best||fine.some(b=>Math.hypot(b.x-best.x,b.y-best.y)>best.size*.65))continue;
-   const {x,y,size:s}=best;if(ref.corner===null){out.push({key:ref.key,value:1,box:[x,y,s,s]});continue;}const box=ref.corner==='top'?[Math.round(x+s*.72),y-9,17,23]:[Math.max(0,x-9),Math.round(y+s*.65),20,23];
+   const {x,y,size:s}=best;if(ref.corner===null){
+    // A flag has no count as a second cue: also require the visible icon frame.
+    let sides=0;for(let side=0;side<4;side++){let white=0;for(let i=2;i<=6;i++){const xx=Math.round(x+(side<2?(side?s-1:0):i*s/8)),yy=Math.round(y+(side>=2?(side===3?s-1:0):i*s/8));let found=false;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const k=((yy+dy)*w+xx+dx)*4;if(Math.min(p[k],p[k+1],p[k+2])>210&&Math.max(p[k],p[k+1],p[k+2])-Math.min(p[k],p[k+1],p[k+2])<40)found=true;}if(found)white++;}if(white>=3)sides++;}if(sides<3)continue;
+    out.push({key:ref.key,value:1,box:[x,y,s,s]});continue;}const box=ref.corner==='top'?[Math.round(x+s*.72),y-9,17,23]:[Math.max(0,x-9),Math.round(y+s*.65),20,23];
    const value=countAt(source,box);if(Number.isInteger(value)&&value>0&&value<=99)out.push({key:ref.key,value,box:[x,y,s,s]});
   }return out;
  }
