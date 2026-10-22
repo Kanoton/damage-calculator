@@ -110,7 +110,7 @@
   if(bottom-top<14||left===0||right===c.width||top===0||bottom===c.height)return {visible:true,id:null};
   for(let i=0;i<mask.length;i++){p.data[i*4]=p.data[i*4+1]=p.data[i*4+2]=mask[i]*255;p.data[i*4+3]=255;}ctx.putImageData(p,0,0);
   const a=crop(c,[left,top,right-left,bottom-top],128,32).getContext('2d').getImageData(0,0,128,32).data,ratio=(right-left)/(bottom-top),scores=new Map();
-  for(const ref of [...(window.ScreenReaderNameReferences||[]),...(window.ScreenReaderLiveStatusReferences?.names||[])]){
+  for(const ref of [...(window.ScreenReaderNameReferences||[]),...(window.ScreenReaderLiveStatusReferences?.names||[]),...(window.ScreenReaderChipShapeReferences?.names||[])]){
    let b=nameCache.get(ref);if(!b){b=decode(ref.data);nameCache.set(ref,b);}let error=0;
    for(let i=0;i<4096;i++)error+=Number(a[i*4]>110)!==((b[i>>3]>>(i&7))&1);
    const score=error/4096+Math.min(.3,Math.abs(ratio-ref.ratio)*.045);scores.set(ref.id,Math.min(scores.get(ref.id)??Infinity,score));
