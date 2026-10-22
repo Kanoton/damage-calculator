@@ -580,9 +580,18 @@ test('08 autumn defeat memory: missing names, registered camera motion, later su
 });
 
 let turnFrameDirectory;
+function clearTurnFrames(){
+ if(turnFrameDirectory)require('fs').rmSync(turnFrameDirectory,{recursive:true,force:true});
+ turnFrameDirectory=undefined;
+}
+test.afterAll(clearTurnFrames);
 function turnFramePath(index){
  const fs=require('fs'),path=require('path');
- if(!turnFrameDirectory){turnFrameDirectory=fs.mkdtempSync(path.join(require('os').tmpdir(),'autumn-turn-'));require('child_process').execFileSync('ffmpeg',['-v','error','-i',path.resolve('tests/fixtures/screen-reader/defeat/autumn-turn-20261020/full-replay.mp4'),'-vf','fps=4',path.join(turnFrameDirectory,'f%04d.png')]);}
+ if(!turnFrameDirectory){
+  turnFrameDirectory=fs.mkdtempSync(path.join(require('os').tmpdir(),'autumn-turn-'));
+  try{require('child_process').execFileSync('ffmpeg',['-v','error','-i',path.resolve('tests/fixtures/screen-reader/defeat/autumn-turn-20261020/full-replay.mp4'),'-vf','fps=4',path.join(turnFrameDirectory,'f%04d.png')]);}
+  catch(error){clearTurnFrames();throw error;}
+ }
  return path.join(turnFrameDirectory,'f'+String(index).padStart(4,'0')+'.png');
 }
 
