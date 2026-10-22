@@ -30,9 +30,9 @@ runs:
         if (( ${#packages[@]} )); then
           # Browser dependencies are baked into the container. Avoid the slow
           # Azure HTTP mirror for the few extra tools, and bound network waits.
-          find /etc/apt/sources.list.d -name '*.sources' -exec sed -i 's|http://archive.ubuntu.com|https://archive.ubuntu.com|g; s|http://security.ubuntu.com|https://security.ubuntu.com|g' {} +
-          apt-get -o Acquire::Retries=1 -o Acquire::https::Timeout=20 update
-          apt-get -o Acquire::Retries=1 -o Acquire::https::Timeout=20 install -y --no-install-recommends "${packages[@]}"
+          find /etc/apt -type f \( -name '*.list' -o -name '*.sources' \) -exec sed -i -E 's|https?://(azure\.)?archive\.ubuntu\.com|https://archive.ubuntu.com|g; s|https?://security\.ubuntu\.com|https://security.ubuntu.com|g' {} +
+          apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 update
+          apt-get -o Acquire::Retries=1 -o Acquire::http::Timeout=20 -o Acquire::https::Timeout=20 install -y --no-install-recommends "${packages[@]}"
         fi
         if [[ "$CI_PILLOW" == true ]]; then
           mkdir -p /tmp/reader-ci-pip-cache
