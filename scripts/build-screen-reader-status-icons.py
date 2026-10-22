@@ -5,7 +5,7 @@ from PIL import Image
 from io import BytesIO
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'08_screen_reader/js/screen-reader-status-icons-references.js'
-ABILITY_ICONS=[["precision","精確無比"],["energySave","エネルギー保存"],["sword","剣気"],["starlight","スターライト"],["warmth","温もり"],["reasoning","推理タイム"],["defeatCount","モンスター撃破数"],["lifeBook","ライフ・ブック"]]
+ABILITY_ICONS=[["precision","精確無比"],["energySave","エネルギー保存"],["sword","剣気"],["starlight","スターライト"],["warmth","温もり"],["reasoning","推理タイム"],["defeatCount","モンスター撃破数"],["lifeBook","ライフ・ブック"],["foxLight","狐光"],["dollMaking","人形制作"]]
 FLAG_ICONS=[["stealth","潜伏"],["shield","ジュジュシールド"],["realSelf","本当の私"],["trueDragon","真龍"],["finishedDoll","人形完成"]]
 FLAG_FIXTURE=ROOT/'tests/fixtures/screen-reader/status-icons/flag-asset-derived.png'
 FIXTURE=ROOT/'tests/fixtures/screen-reader/status-icons/ability-asset-derived.png'
@@ -25,6 +25,7 @@ def build():
   rgb=[v for x,y in points for v in im.getpixel((int((x+.5)*34/8),int((y+.5)*34/8)))]
   refs.append(dict(key=name,scope=scope,corner=corner,points=points,rgb=rgb,source='images/'+file))
   if name=='realSelf':refs[-1]['strictFrame']=True
+  if name in ('dollMaking','finishedDoll'):refs[-1]['competesWith']='finishedDoll' if name=='dollMaking' else 'dollMaking'
  digits=[]
  for number in ['1','6']:
   im=Image.open(ROOT/('tests/fixtures/screen-reader/status-icons/digit-'+number+'.png')).convert('L');im=im.crop(im.getbbox())
@@ -34,7 +35,7 @@ def ability_fixture():
  icons={r['effect_key']:r['icon_file'] for r in csv.DictReader((ROOT/'csv/status_icon_map_all.csv').open(encoding='utf-8-sig'))}
  out=Image.new('RGB',(1536,709),(35,35,35))
  for i,(key,name) in enumerate(ABILITY_ICONS):
-  x,y=10+(i%3)*50,400+(i//3)*80
+  x,y=10+(i%3)*50,350+(i//3)*70
   art=Image.open(ROOT/'images'/icons[name]).convert('RGBA');art=art.crop(art.getbbox()).resize((30,30),Image.Resampling.BILINEAR)
   tile=Image.new('RGBA',(34,34),'white');tile.alpha_composite(art,(2,2));out.paste(tile.convert('RGB'),(x,y))
   # Real captured counter glyphs, not a browser/system font. This sheet is derived, not gameplay.

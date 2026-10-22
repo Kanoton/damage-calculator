@@ -21,12 +21,15 @@
  function find(source,region,scope){
   const w=source.width,h=source.height,p=source.getContext('2d').getImageData(0,0,w,h).data,out=[];
   for(const ref of ScreenReaderStatusIconReferences.filter(r=>r.scope===scope)){
-   const stride=scope==='self'?3:2,hits=[],score=(x,y,size)=>{
-    let sum=0,n=0;for(let j=0;j<ref.points.length;j++){const [xx,yy]=ref.points[j],k=((y+Math.floor((yy+.5)*size/8))*w+x+Math.floor((xx+.5)*size/8))*4;for(let c=0;c<3;c++){sum+=Math.abs(p[k+c]-ref.rgb[j*3+c]);n++;}if(j===7&&sum/n>35)return Infinity;}return sum/n;
+   const stride=scope==='self'?3:2,hits=[],score=(x,y,size,reference=ref)=>{
+    let sum=0,n=0;for(let j=0;j<reference.points.length;j++){const [xx,yy]=reference.points[j],k=((y+Math.floor((yy+.5)*size/8))*w+x+Math.floor((xx+.5)*size/8))*4;for(let c=0;c<3;c++){sum+=Math.abs(p[k+c]-reference.rgb[j*3+c]);n++;}if(j===7&&sum/n>35&&reference===ref)return Infinity;}return sum/n;
    };
    for(const size of [32,33,34,35,36])for(let y=Math.max(0,Math.floor(region[1]));y<Math.min(h-size,region[1]+region[3]);y+=stride)for(let x=Math.max(0,Math.floor(region[0]));x<Math.min(w-size,region[0]+region[2]);x+=stride){const error=score(x,y,size);if(error<35)hits.push({x,y,size,score:error});}
    const fine=[];for(const hit of hits){for(let dy=1-stride;dy<stride;dy++)for(let dx=1-stride;dx<stride;dx++){const x=hit.x+dx,y=hit.y+dy;if(x<0||y<0||x+hit.size>=w||y+hit.size>=h)continue;const error=score(x,y,hit.size);if(error<19)fine.push({x,y,size:hit.size,score:error});}}
    fine.sort((a,b)=>a.score-b.score);const best=fine[0];if(!best||fine.some(b=>Math.hypot(b.x-best.x,b.y-best.y)>best.size*.65))continue;
+   const rival=ref.competesWith&&ScreenReaderStatusIconReferences.find(r=>r.key===ref.competesWith&&r.scope===scope);
+   // Resolve similar doll artwork before reading a count; an unreadable count must not become a completed flag.
+   if(rival){let rivalScore=Infinity;for(const size of [32,33,34,35,36])for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const xx=best.x+dx,yy=best.y+dy;if(xx>=0&&yy>=0&&xx+size<w&&yy+size<h)rivalScore=Math.min(rivalScore,score(xx,yy,size,rival));}if(rivalScore<=best.score+4)continue;}
    const {x,y,size:s}=best;if(ref.corner===null){
     // A flag has no count as a second cue: also require the visible icon frame.
     let sides=0,exactSides=0;for(let side=0;side<4;side++){let white=0,exact=0;for(let i=2;i<=6;i++){const xx=Math.round(x+(side<2?(side?s-1:0):i*s/8)),yy=Math.round(y+(side>=2?(side===3?s-1:0):i*s/8));const center=(yy*w+xx)*4;if(Math.min(p[center],p[center+1],p[center+2])>210&&Math.max(p[center],p[center+1],p[center+2])-Math.min(p[center],p[center+1],p[center+2])<40)exact++;let found=false;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const k=((yy+dy)*w+xx+dx)*4;if(Math.min(p[k],p[k+1],p[k+2])>210&&Math.max(p[k],p[k+1],p[k+2])-Math.min(p[k],p[k+1],p[k+2])<40)found=true;}if(found)white++;}if(white>=3)sides++;if(exact>=3)exactSides++;}if(sides<3||ref.strictFrame&&exactSides<2)continue;
