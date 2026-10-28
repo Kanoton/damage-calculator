@@ -71,7 +71,7 @@
    if(lastTime!==null&&time-lastTime>1800){report('capture_gap',{gapMs:time-lastTime});pending=[];unresolved=[];previous=null;identities.clear();unlocated.clear();battle=null;focus=null;cut=null;wasBattle=false;for(const o of memory.values())o.tracked=false;}
    lastTime=time;tick++;const p=pixels(source),found=blobs(p).map(blob=>({...blob,match:classify(blob)})).filter(b=>b.match),emitted=[];
    const key=o=>o.monsterId+':'+o.serial;
-   const lastSeenHp=o=>{const latest=memory.get(key(o));return latest?.instanceId===o.instanceId&&latest.maxHp===o.maxHp?latest.currentHp:o.currentHp;};
+   const lastSeenHp=o=>{const latest=memory.get(key(o));return latest&&latest.instanceId===o.instanceId&&latest.maxHp===o.maxHp?latest.currentHp:o.currentHp;};
    const roster=context?.monsters||[],valid=o=>Number.isSafeInteger(o.instanceId)&&o.instanceId>0&&roster.some(e=>!e.defeated&&e.seen&&key(e)===key(o)&&e.instanceId===o.instanceId&&e.maxHp===o.maxHp);
    const complete=id=>{const all=roster.filter(e=>e.monsterId===id);return Number.isSafeInteger(context?.counts?.[id])&&all.length===context.counts[id]&&all.every(e=>e.seen&&Number.isSafeInteger(e.serial)&&e.serial>=1&&e.serial<=context.counts[id])&&new Set(all.map(key)).size===all.length;};
    for(const [id,o] of memory)if(!valid(o)||time-o.time>60000){report(valid(o)?'memory_expired':'roster_changed',{candidates:[describe(o)]});memory.delete(id);}
