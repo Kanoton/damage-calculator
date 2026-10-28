@@ -463,6 +463,20 @@ test('08 autumn defeat cues: partial gray patches then beam; spawn, absence and 
  await page.evaluate(()=>window.defeatTestTracker=ScreenReaderDefeatVision.createTracker());expect(await defeatFrame(page,beam,100)).toEqual([]);
 });
 
+test('08 autumn defeat replay: three reviewed overlapping owl deaths pass unchanged gray and beam thresholds',async({page})=>{
+ await open(page);
+ const folder='tests/fixtures/screen-reader/defeat/autumn-replay-20261029',manifest=require('./fixtures/screen-reader/defeat/autumn-replay-20261029/scenes.json');
+ for(const scene of manifest.scenes){
+  const images=scene.snapshots.map(s=>({...s,image:'data:image/png;base64,'+require('fs').readFileSync(require('path').join(folder,s.image)).toString('base64')}));
+  const cues=await page.evaluate(async({images,box,speed})=>{
+   const tracker=ScreenReaderDefeatVision.createTracker(),output=[];
+   for(const snap of images){const im=new Image();im.src=snap.image;await im.decode();const plane=document.createElement('canvas');plane.width=1536;plane.height=710;const x=plane.getContext('2d');x.fillStyle='#141414';x.fillRect(0,0,1536,710);x.imageSmoothingEnabled=false;x.drawImage(im,box[0]*2,box[1]*2,box[2]*2,box[3]*2);const result=tracker.step({popupFrame:plane},snap.pts_s*1000*speed);if(snap.phase!=='beam'&&result.length)throw Error('Defeat before the beam');output.push(...result);}
+   return output;
+  },{images,box:scene.normalized_box,speed:manifest.speed});
+  expect(cues,'owl '+scene.serial).toEqual([expect.objectContaining({monsterId:'M0123',serial:null,reason:'gray_then_beam'})]);
+ }
+});
+
 const identitySample=defeatManifest.samples.find(s=>s.id==='dinosaur-1');
 // Temporal contract: hold the real before image for two captures, then replay
 // actual gray/beam/after frames. Not a claim of full-video or 4fps accuracy.
