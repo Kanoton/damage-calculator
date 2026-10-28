@@ -38,7 +38,7 @@
   let pending=[],lastTime=null,previous=null,identities=new Map(),unlocated=new Map(),tick=0,completed=new Set();
   let memory=new Map(),battle=null,wasBattle=false,focus=null,unresolved=[],cut=null,events=[],diagnostic={code:'reset',events:[]};
   const report=(code,detail={})=>events.push({code,...detail});
-  const describe=o=>({monsterId:o.monsterId,serial:o.serial,instanceId:o.instanceId,currentHp:o.currentHp,maxHp:o.maxHp});
+  const describe=o=>({monsterId:o.monsterId,serial:o.serial,instanceId:o.instanceId,currentHp:o.currentHp,maxHp:o.maxHp,...(o.lastSeenHp===undefined?{}:{lastSeenHp:o.lastSeenHp})});
   const reset=()=>{pending=[];lastTime=null;previous=null;identities.clear();unlocated.clear();completed.clear();memory.clear();battle=null;wasBattle=false;focus=null;unresolved=[];cut=null;events=[];diagnostic={code:'reset',events:[]};tick=0;};
   // Register textured map background, not labels or moving actors. A position
   // survives a missing name only while independently registered map pixels do.
@@ -71,6 +71,7 @@
    if(lastTime!==null&&time-lastTime>1800){report('capture_gap',{gapMs:time-lastTime});pending=[];unresolved=[];previous=null;identities.clear();unlocated.clear();battle=null;focus=null;cut=null;wasBattle=false;for(const o of memory.values())o.tracked=false;}
    lastTime=time;tick++;const p=pixels(source),found=blobs(p).map(blob=>({...blob,match:classify(blob)})).filter(b=>b.match),emitted=[];
    const key=o=>o.monsterId+':'+o.serial;
+   const lastSeenHp=o=>{const latest=memory.get(key(o));return latest&&latest.instanceId===o.instanceId&&latest.maxHp===o.maxHp?latest.currentHp:o.currentHp;};
    const roster=context?.monsters||[],valid=o=>Number.isSafeInteger(o.instanceId)&&o.instanceId>0&&roster.some(e=>!e.defeated&&e.seen&&key(e)===key(o)&&e.instanceId===o.instanceId&&e.maxHp===o.maxHp);
    const complete=id=>{const all=roster.filter(e=>e.monsterId===id);return Number.isSafeInteger(context?.counts?.[id])&&all.length===context.counts[id]&&all.every(e=>e.seen&&Number.isSafeInteger(e.serial)&&e.serial>=1&&e.serial<=context.counts[id])&&new Set(all.map(key)).size===all.length;};
    for(const [id,o] of memory)if(!valid(o)||time-o.time>60000){report(valid(o)?'memory_expired':'roster_changed',{candidates:[describe(o)]});memory.delete(id);}
@@ -89,6 +90,7 @@
    }
    for(const o of observations)if(o.currentHp>0&&o.currentHp<=o.maxHp&&Number.isSafeInteger(o.serial)&&o.serial>0&&valid(o)&&observations.filter(b=>key(b)===key(o)).length===1){
     const old=memory.get(key(o)),run=old?.tick===tick-1?old.run+1:1;
+    if(!old||old.currentHp!==o.currentHp||old.maxHp!==o.maxHp||old.instanceId!==o.instanceId)report('memory_updated',{candidates:[describe(o)],previousHp:old?.instanceId===o.instanceId?old.currentHp:null});
     // Automatic reads have already passed the bridge's consecutive validation.
     memory.set(key(o),{...o,time,tick,run,confirmed:true,tracked:!!o.labelBox,positionTime:time});
    }
@@ -145,7 +147,7 @@
     const remains=found.some(b=>b.match.monsterId===item.monsterId&&Math.hypot(b.box[0]+b.box[2]/2-x-w/2,b.box[1]+b.box[3]/2-y-h/2)<18);
     if(beamAt(p,item.box)>item.beam+100&&(!remains||beamAt(p,item.box)>item.beam+220)){
      const identity=item.identity&&!observations.some(o=>key(o)===key(item.identity)&&o.currentHp>0)?item.identity:null;
-     const cue={monsterId:item.monsterId,serial:identity?.serial??null,reason:'gray_then_beam',box:item.box.map(v=>v*2),...(identity?{maxHp:identity.maxHp,instanceId:identity.instanceId,association:identity.association||'leader'}:{} )};
+     const cue={monsterId:item.monsterId,serial:identity?.serial??null,reason:'gray_then_beam',box:item.box.map(v=>v*2),...(identity?{maxHp:identity.maxHp,lastSeenHp:lastSeenHp(identity),instanceId:identity.instanceId,association:identity.association||'leader'}:{} )};
      emitted.push(cue);
      if(!identity&&complete(item.monsterId)){
       const choices=[...memory.values()].filter(o=>o.monsterId===item.monsterId&&valid(o)&&!completed.has(key(o)+':'+o.instanceId));
@@ -163,7 +165,7 @@
     for(const o of observations){const m=memory.get(key(o));if(u.choices.some(c=>key(c)===key(o))&&o.currentHp>0&&m?.run>=2&&m.tick===tick)u.excluded.add(key(o));}
     const candidates=u.choices.filter(o=>valid(o)&&!u.excluded.has(key(o))&&!completed.has(key(o)+':'+o.instanceId));
     if(candidates.length===1&&u.excluded.size&&!observations.some(o=>key(o)===key(candidates[0])&&o.currentHp>0)&&!emitted.some(c=>c.monsterId===u.cue.monsterId)){
-     const o=candidates[0];emitted.push({...u.cue,serial:o.serial,instanceId:o.instanceId,maxHp:o.maxHp,association:'later-survivors'});u.done=true;
+     const o=candidates[0];emitted.push({...u.cue,serial:o.serial,instanceId:o.instanceId,maxHp:o.maxHp,lastSeenHp:lastSeenHp(o),association:'later-survivors'});u.done=true;
     }
    }
    unresolved=unresolved.filter(u=>!u.done);
@@ -177,7 +179,7 @@
    }
    for(const cue of emitted)if(cue.serial!==null)completed.add(key(cue)+':'+cue.instanceId);
    for(const cue of emitted)report(cue.serial===null?'identity_pending':'identity_confirmed',{monsterId:cue.monsterId,association:cue.association,candidates:cue.serial===null?[...memory.values()].filter(o=>o.monsterId===cue.monsterId&&valid(o)).map(describe):[describe(cue)]});
-   diagnostic={time,code:emitted.length?(emitted.some(c=>c.serial!==null)?'identity_confirmed':'identity_pending'):pending.length?'beam_pending':unresolved.length?'identity_pending':detectedCut?'start_cut':inBattle?'battle_view':'no_gray',events,cut:detectedCut||null,battle:battle?{monsterId:battle.monsterId,candidates:battle.identity?[describe(battle.identity)]:[]}:null,memory:[...memory.values()].map(o=>({...describe(o),ageMs:time-o.time,tracked:o.tracked})),grayCount:found.length};
+   diagnostic={time,code:emitted.length?(emitted.some(c=>c.serial!==null)?'identity_confirmed':'identity_pending'):pending.length?'beam_pending':unresolved.length?'identity_pending':detectedCut?'start_cut':inBattle?'battle_view':'no_gray',events,cut:detectedCut||null,battle:battle?{monsterId:battle.monsterId,candidates:battle.identity?[describe(battle.identity)]:[]}:null,memory:[...memory.values()].map(o=>({...describe(o),ageMs:time-o.time,tracked:o.tracked})),pending:pending.map(o=>({monsterId:o.monsterId,ageMs:time-o.time,candidates:o.identity?[describe(o.identity)]:[]})),unresolved:unresolved.map(o=>({monsterId:o.cue.monsterId,ageMs:time-o.time,blocked:!!o.blocked,candidates:o.choices.filter(c=>!o.excluded.has(key(c))).map(describe)})),grayCount:found.length};
    return emitted.filter((v,i,a)=>a.findIndex(b=>b.monsterId===v.monsterId)===i);
   }};
  }

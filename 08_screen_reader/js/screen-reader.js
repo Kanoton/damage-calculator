@@ -19,9 +19,9 @@
  let stream=null,rawSource=null,frame=null,busy=false,timer=null,generation=0,selecting=false,selectionStart=null,area=null,catalog=null,custom={characters:[],chips:[]};
  let worldContext=null,readStarted=null,partyLock=null,lastObservation=null,partyEdited=false,readerSession=false;
  const defeatTracker=window.ScreenReaderDefeatVision.createTracker();
- const diagnosticLabels={reset:'追跡をリセット',no_gray:'今回の画面では撃破演出未検出',gray_detected:'グレー形状を検出',beam_pending:'グレー化を検出・消滅光待ち',beam_timeout:'消滅光を確認できず期限切れ',identity_pending:'撃破演出を確認・個体との対応を保留',identity_confirmed:'撃破演出と個体が一致',position_lost:'背景との対応が途切れ位置追跡を保留',memory_expired:'個体情報の保持期限切れ',roster_changed:'一覧との対応状態が変化',candidate_timeout:'個体候補の絞り込みが期限切れ',capture_gap:'取得間隔が空いたため位置・演出の連続性を破棄',start_cut:'戦闘開始カット：種類を識別（番号は別途確認）',battle_view:'戦闘画面を検出',battle_target:'戦闘前の対象個体を保持',battle_unknown:'戦闘画面を検出・対象個体は未確定',battle_expired:'戦闘対象の保持期限切れ',map_return:'マップへの復帰を確認',return_expired:'戦闘復帰後の対応期限切れ',applied:'一覧へ撃破を反映',apply_off:'確認のみ・一覧への反映OFF',apply_rejected:'番号候補はあるが一覧への反映条件が不一致',unsupported:'自動撃破の対象外、またはモンスター読取OFF'};
- let diagnosticRecords=[],diagnosticStart=null,diagnosticLastKey='',diagnosticLastTime=-Infinity,diagnosticActive=false;
- const diagnosticSnapshot=()=>({version:1,limit:100,records:JSON.parse(JSON.stringify(diagnosticRecords))});
+ const diagnosticLabels={reset:'追跡をリセット',memory_updated:'番号と生存HPを記憶',no_gray:'今回の画面では撃破演出未検出',gray_detected:'グレー形状を検出',beam_pending:'グレー化を検出・消滅光待ち',beam_timeout:'消滅光を確認できず期限切れ',identity_pending:'撃破演出を確認・個体との対応を保留',identity_confirmed:'撃破演出と個体が一致',position_lost:'背景との対応が途切れ位置追跡を保留',memory_expired:'個体情報の保持期限切れ',roster_changed:'一覧との対応状態が変化',candidate_timeout:'個体候補の絞り込みが期限切れ',capture_gap:'取得間隔が空いたため位置・演出の連続性を破棄',start_cut:'戦闘開始カット：種類を識別（番号は別途確認）',battle_view:'戦闘画面を検出',battle_target:'戦闘前の対象個体を保持',battle_unknown:'戦闘画面を検出・対象個体は未確定',battle_expired:'戦闘対象の保持期限切れ',map_return:'マップへの復帰を確認',return_expired:'戦闘復帰後の対応期限切れ',applied:'一覧へ撃破を反映',apply_off:'確認のみ・一覧への反映OFF',apply_rejected:'番号候補はあるが一覧への反映条件が不一致',unsupported:'自動撃破の対象外、またはモンスター読取OFF'};
+ let diagnosticRecords=[],diagnosticStart=null,diagnosticLastKey='',diagnosticLastTime=-Infinity,diagnosticActive=false,diagnosticCurrent=null;
+ const diagnosticSnapshot=()=>JSON.parse(JSON.stringify({version:1,limit:100,current:diagnosticCurrent,records:diagnosticRecords}));
  function recordDiagnostic(event,time){
   if(!Number.isFinite(time))return;
   if(diagnosticStart===null||time<diagnosticStart)diagnosticStart=time;
@@ -30,12 +30,12 @@
   diagnosticLastKey=key;diagnosticLastTime=time;
   const row={...event,round,at:new Date().toISOString(),elapsedMs:Math.round(time-diagnosticStart)};diagnosticRecords.push(row);if(diagnosticRecords.length>100)diagnosticRecords.shift();
   const list=$('defeat-log');if(!list)return;list.replaceChildren(...diagnosticRecords.slice(-20).reverse().map(r=>{
-   const li=document.createElement('li'),candidates=(r.candidates||[]).map(c=>window.ScreenReaderMapBridge.monsterName(c.monsterId)+(c.serial===undefined?'':' '+c.serial)+(c.currentHp===undefined?'':' HP '+c.currentHp+'/'+c.maxHp));
+   const li=document.createElement('li'),candidates=(r.candidates||[]).map(c=>window.ScreenReaderMapBridge.monsterName(c.monsterId)+(c.serial===undefined?'':' '+c.serial)+(c.lastSeenHp!==undefined?' 直前HP '+c.lastSeenHp+'/'+c.maxHp:c.currentHp===undefined?'':' HP '+c.currentHp+'/'+c.maxHp));
    li.textContent=new Date(r.at).toLocaleTimeString('ja-JP',{hour12:false})+'（+'+(r.elapsedMs/1000).toFixed(2)+'秒） '+(r.round===null?'ラウンド未判定':'ラウンド '+r.round)+' ／ '+(diagnosticLabels[r.code]||r.code)+(r.message?'：'+r.message:'')+(r.monsterId?' ／ '+window.ScreenReaderMapBridge.monsterName(r.monsterId):'')+(candidates.length?' ／ 候補：'+candidates.join('、'):'')+(r.gapMs?' ／ 実間隔 '+Math.round(r.gapMs)+'ms':'');return li;
   }));
  }
  function resetDefeat(message='読取条件が変わりました'){
-  defeatTracker.reset();$('defeat-result').textContent='';
+  defeatTracker.reset();diagnosticCurrent=null;$('defeat-result').textContent='';
   if($('defeat-stage'))$('defeat-stage').textContent=diagnosticLabels.reset+'：'+message;
   if(diagnosticActive)recordDiagnostic({code:'reset',message},performance.now());diagnosticActive=false;
  }
@@ -51,7 +51,9 @@
   if($('defeat-stage'))$('defeat-stage').textContent=(diagnosticLabels[detail.code]||detail.code)+(detail.cut?' ／ '+window.ScreenReaderMapBridge.monsterName(detail.cut.monsterId):'');
   for(const event of detail.events||[])recordDiagnostic(event,time);
   if(!detail.events?.length)recordDiagnostic({code:detail.code,candidates:detail.memory||[]},time);
-  for(const cue of cues)if(cue.serial!==null)recordDiagnostic({code:applied.includes(cue)?'applied':$('apply').checked?'apply_rejected':'apply_off',candidates:[{monsterId:cue.monsterId,serial:cue.serial,instanceId:cue.instanceId,maxHp:cue.maxHp}],association:cue.association},time);
+  const snapshot=window.ScreenReaderMapBridge.snapshot(),round=snapshot.round;
+  diagnosticCurrent={...detail,map:snapshot.map,difficulty:snapshot.difficulty,round:Number.isSafeInteger(round)&&round>0?round:null,elapsedMs:diagnosticStart===null?0:Math.round(time-diagnosticStart)};
+  for(const cue of cues)if(cue.serial!==null)recordDiagnostic({code:applied.includes(cue)?'applied':$('apply').checked?'apply_rejected':'apply_off',candidates:[{monsterId:cue.monsterId,serial:cue.serial,instanceId:cue.instanceId,maxHp:cue.maxHp,lastSeenHp:cue.lastSeenHp}],association:cue.association},time);
   if(cues.length)$('defeat-result').textContent=cues.map(c=>{
    const name=window.ScreenReaderMapBridge.monsterName(c.monsterId);
    return applied.includes(c)?'自動撃破：'+name+' '+c.serial+'（「１つもどす」で取消可能）':'撃破演出の候補：'+name+'（'+(c.serial===null?'番号未確認':'番号 '+c.serial+'・反映保留')+'）。一覧で確認してください。';
@@ -285,4 +287,3 @@
  $('learn-id').addEventListener('change',updateMappingPreview);
  window.ScreenReaderController={read,stop,stabilize,validateProfile,updateDefeat,updateStatusIcons,diagnostics:diagnosticSnapshot};ready();
 })();
-
