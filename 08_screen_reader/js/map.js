@@ -111,12 +111,16 @@ window.ScreenReaderMapBridge={
  monsterName:id=>data.stats.find(r=>r.monster_id===id)?.['モンスター名']||id,
  context:()=>JSON.stringify([pick.value,difficulty.value,routeState.route]),
  defeatContext:()=>{
-  // A complete, observed initial spawn is evidence; a singleton OCR result is not.
-  if(pick.value!=='MAP0105'||rosterState.round!==1||rosterState.progress!==1)return null;
-  const group=groupMapEvents(routeRows(data.events)).find(g=>String(g['進捗'])==='1');
-  if(!group||!executedEvents.has(eventKey(group)))return null;
-  const {pending}=collectEventChanges(group,data.stats,difficulty.value,rosterStat);
-  return {counts:Object.fromEntries(pending.map(({stats,count})=>[stats.monster_id,count])),monsters:rosterState.monsters.map(e=>({monsterId:e.monsterId,serial:e.serial,instanceId:e.instanceId,maxHp:Number(rosterStat(e.base,'HP')),defeated:!!e.defeated,seen:!!e.screenSeenAlive}))};
+  // Count every executed spawn, including reinforcements; never infer a
+  // singleton from the currently visible labels or reset counts each round.
+  if(pick.value!=='MAP0105'||!roundProgressReady())return null;
+  const counts={};
+  for(const group of groupMapEvents(routeRows(data.events))){
+   if(!executedEvents.has(eventKey(group)))continue;
+   const {pending}=collectEventChanges(group,data.stats,difficulty.value,rosterStat);
+   for(const {stats,count} of pending)counts[stats.monster_id]=(counts[stats.monster_id]||0)+count;
+  }
+  return {counts,monsters:rosterState.monsters.map(e=>({monsterId:e.monsterId,serial:e.serial,instanceId:e.instanceId,maxHp:Number(rosterStat(e.base,'HP')),defeated:!!e.defeated,seen:!!e.screenSeenAlive}))};
  },
  snapshot:()=>({map:pick.value,difficulty:difficulty.value,round:readerMapMode&&!rosterState.round?null:rosterState.round,progress:readerMapMode&&!rosterState.progress?null:rosterState.progress,events:[...executedEvents],monsters:rosterState.monsters.map(e=>({monsterId:e.monsterId,serial:(e.boss||e.monsterId==='M0116')?null:e.serial,hp:e.hp,defeated:!!e.defeated,attack:e.attack,defense:e.defense,instanceId:e.instanceId}))}),
  applyDefeats:cues=>{
