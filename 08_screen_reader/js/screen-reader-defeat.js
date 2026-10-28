@@ -2,6 +2,17 @@
 (()=>{
  'use strict';
  const W=768,H=355,S=20;
+ function createHistory({limit=10000,byteLimit=8*1024*1024}={}){
+  if(!Number.isSafeInteger(limit)||limit<1||!Number.isSafeInteger(byteLimit)||byteLimit<1)throw new TypeError('Invalid diagnostic history limits');
+  let records=[],sizes=[],estimatedBytes=0,droppedRecords=0;
+  const metadata=()=>({limit,byteLimit,estimatedBytes,droppedRecords});
+  return {
+   append(row){const json=JSON.stringify(row);records.push(JSON.parse(json));sizes.push(json.length*2);estimatedBytes+=sizes.at(-1);while(records.length>limit||estimatedBytes>byteLimit){records.shift();estimatedBytes-=sizes.shift();droppedRecords++;}},
+   recent(count=20){return JSON.parse(JSON.stringify(records.slice(-count)));},
+   snapshot(){return {...metadata(),records:JSON.parse(JSON.stringify(records))};},
+   clear(){records=[];sizes=[];estimatedBytes=0;droppedRecords=0;}
+  };
+ }
  function pixels(source){const c=document.createElement('canvas');c.width=W;c.height=H;c.getContext('2d').drawImage(source.popupFrame||source,0,0,W,H);return c.getContext('2d').getImageData(0,0,W,H).data;}
  function blobs(p){
   const mask=new Uint8Array(W*H),seen=new Uint8Array(W*H),out=[];
@@ -183,5 +194,5 @@
    return emitted.filter((v,i,a)=>a.findIndex(b=>b.monsterId===v.monsterId)===i);
   }};
  }
- window.ScreenReaderDefeatVision={createTracker,blobs,pixels};
+ window.ScreenReaderDefeatVision={createTracker,createHistory,blobs,pixels};
 })();

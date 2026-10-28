@@ -549,17 +549,18 @@ test('08 autumn defeat memory: missing names, registered camera motion, later su
   const loaded=[];for(const image of images){const im=new Image();im.src=image;await im.decode();loaded.push(im);}
   const frame=(i,mask=null,shift=0)=>{const c=document.createElement('canvas');c.width=2560;c.height=1440;const x=c.getContext('2d');x.fillStyle='#141414';x.fillRect(0,0,c.width,c.height);x.drawImage(loaded[i],shift,0);const f=ScreenReaderVision.normalize(c);if(mask){const p=f.popupFrame.getContext('2d');p.fillStyle='#141414';p.fillRect(...mask);}return f;};
   const before=frame(0),known=ScreenReaderWorldVision.analyze(before,{positions:true}).monsters[0];known.instanceId=2;
-  const results={};for(const mode of ['held','shift','camera-cut','ambiguous','reset','later','alive','expired','two-kills','incomplete-memory']){
+  const results={};for(const mode of ['held','shift','camera-cut','ambiguous','reset','later','alive','expired','two-kills','incomplete-memory','reinforced-unseen']){
    const tracker=ScreenReaderDefeatVision.createTracker(),roster=[1,2,3].map(serial=>({monsterId:known.monsterId,serial,maxHp:known.maxHp,instanceId:serial,seen:true,defeated:false}));
    const context={counts:{[known.monsterId]:3},monsters:roster},seed=[{...known,serial:1,instanceId:1,labelBox:null,marker:null},known,{...known,serial:3,instanceId:3,labelBox:null,marker:null}];
-   if(['ambiguous','later','alive','expired','two-kills','incomplete-memory'].includes(mode))seed[0]={...known,serial:1,instanceId:1};
+   if(['ambiguous','later','alive','expired','two-kills','incomplete-memory','reinforced-unseen'].includes(mode))seed[0]={...known,serial:1,instanceId:1};
    tracker.step(before,100,mode==='incomplete-memory'?seed.slice(0,2):seed,context); // already confirmed in the roster
+   if(mode==='reinforced-unseen')context.counts[known.monsterId]=4;
    const cues=[];const shift=mode==='shift'?30:mode==='camera-cut'?400:0;
    for(let t=350;t<=3100;t+=250)cues.push(...tracker.step(frame(0,known.labelBox,shift),t,[],context));
    if(mode==='reset')tracker.reset();
    cues.push(...tracker.step(frame(1,null,shift),3600,[],context),...tracker.step(frame(2,null,shift),4100,[],context));
    if(mode==='two-kills')cues.push(...tracker.step(frame(1),4350,[],context),...tracker.step(frame(2),4600,[],context));
-   if(['later','alive','expired','two-kills','incomplete-memory'].includes(mode)){
+   if(['later','alive','expired','two-kills','incomplete-memory','reinforced-unseen'].includes(mode)){
     if(mode==='expired')for(let t=4350;t<=9600;t+=250)tracker.step(before,t,[],context);
     const start=mode==='expired'?9850:mode==='two-kills'?4850:4350;
     const survivors=mode==='alive'?[known]:mode==='incomplete-memory'?[seed[0]]:[seed[0],seed[2]];
@@ -576,7 +577,50 @@ test('08 autumn defeat memory: missing names, registered camera motion, later su
  for(const mode of ['held','shift'])expect(results[mode],mode).toEqual([expect.objectContaining({serial:2,instanceId:2,association:'tracked'})]);
  expect(results.later.filter(c=>c.serial!==null)).toEqual([expect.objectContaining({serial:2,association:'later-survivors'})]);
  expect(results.singletonGap).toEqual([expect.objectContaining({serial:1,instanceId:1,association:'singleton'})]);
- for(const mode of ['camera-cut','ambiguous','reset','alive','expired','two-kills','incomplete-memory'])expect(results[mode].every(c=>c.serial===null),mode).toBe(true);
+ for(const mode of ['camera-cut','ambiguous','reset','alive','expired','two-kills','incomplete-memory','reinforced-unseen'])expect(results[mode].every(c=>c.serial===null),mode).toBe(true);
+});
+
+for(const [protocol,size] of [['http',{width:1440,height:900}],['file',{width:950,height:1200}]])test(`08 autumn defeat later rounds: retained identities and cumulative reinforcement counts (${protocol})`,async({page})=>{
+ test.setTimeout(90000);await page.setViewportSize(size);
+ if(protocol==='file')await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);else await open(page);
+ await page.waitForFunction(()=>window.ScreenReaderCharacterBridge?.catalog().characters.length===35);
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');await page.locator('#mp-difficulty').selectOption('普通');
+ await page.locator('#reader-world-sync').evaluate(e=>{e.checked=true;e.dispatchEvent(new Event('change'));});
+ const images=[];for(const snap of identitySample.snapshots.slice(0,3))images.push(await defeatFrame(page,snap,0,{capture:true}));
+ const result=await page.evaluate(async images=>{
+  const frames=[];for(const image of images){const im=new Image();im.src=image;await im.decode();frames.push(ScreenReaderVision.normalize(im));}
+  const known=ScreenReaderWorldVision.analyze(frames[0],{positions:true}).monsters[0];
+  const observation=serial=>({...known,serial,labelBox:serial===2?known.labelBox:null,marker:serial===2?known.marker:null});
+  ScreenReaderMapBridge.apply({clock:{round:4,progress:7},monsters:[observation(1),observation(2)]},{allowDefeat:false});
+  const initial=ScreenReaderMapBridge.defeatContext().counts;
+  ScreenReaderController.updateDefeat(frames[0],100,{monsters:[observation(1),observation(2)]});
+  ScreenReaderMapBridge.apply({clock:{round:5,progress:10},monsters:[observation(3),observation(4)]},{allowDefeat:false});
+  const reinforced=ScreenReaderMapBridge.defeatContext().counts;
+  ScreenReaderController.updateDefeat(frames[0],350,{monsters:[observation(3),observation(4)]});
+  const x=frames[0].popupFrame.getContext('2d');x.fillStyle='#141414';x.fillRect(...known.labelBox);
+  for(let t=600;t<=3100;t+=250)ScreenReaderController.updateDefeat(frames[0],t,{monsters:[]});
+  ScreenReaderController.updateDefeat(frames[1],3600,{monsters:[]});
+  const cues=ScreenReaderController.updateDefeat(frames[2],4100,{monsters:[]}),state=ScreenReaderMapBridge.snapshot();
+  return {initial,reinforced,cues,state,log:ScreenReaderController.diagnostics()};
+ },images);
+ expect(result.initial).toMatchObject({M0122:2,M0123:4,M0121:3});expect(result.reinforced).toMatchObject({M0122:4,M0123:4,M0121:5});
+ expect(result.cues).toEqual([expect.objectContaining({monsterId:'M0122',serial:2,association:'tracked'})]);
+ expect(result.state).toMatchObject({round:5,progress:10});expect(result.state.monsters.filter(m=>m.defeated).map(m=>m.serial)).toEqual([2]);
+ expect(result.log.records.some(r=>r.code==='applied'&&r.round===5)).toBe(true);
+});
+
+test('08 autumn defeat diagnostics: long history is bounded by count and size, independent and cleared',async({page})=>{
+ await open(page);
+ const result=await page.evaluate(()=>{
+  const h=ScreenReaderDefeatVision.createHistory();for(let i=0;i<=10000;i++)h.append({code:'no_gray',index:i});const full=h.snapshot();
+  const external={code:'memory_updated',candidates:[{currentHp:5}]};h.append(external);external.candidates[0].currentHp=99;
+  const copy=h.snapshot();copy.records.at(-1).candidates[0].currentHp=100;const retained=h.recent(1)[0];
+  const small=ScreenReaderDefeatVision.createHistory({limit:10000,byteLimit:1000});for(let i=0;i<100;i++)small.append({index:i,message:'x'.repeat(100)});const bounded=small.snapshot();
+  h.clear();return {limit:full.limit,count:full.records.length,first:full.records[0].index,last:full.records.at(-1).index,dropped:full.droppedRecords,retained,bounded,cleared:h.snapshot()};
+ });
+ expect(result).toMatchObject({limit:10000,count:10000,first:1,last:10000,dropped:1,retained:{candidates:[{currentHp:5}]}});
+ expect(result.bounded.estimatedBytes).toBeLessThanOrEqual(1000);expect(result.bounded.records.at(-1).index).toBe(99);expect(result.bounded.droppedRecords).toBeGreaterThan(0);
+ expect(result.cleared).toMatchObject({records:[],estimatedBytes:0,droppedRecords:0});
 });
 
 let turnFrameDirectory;
@@ -616,11 +660,11 @@ for(const [protocol,size] of [['http',{width:1440,height:900}],['file',{width:95
   return {kinds,unknown,first,count:ScreenReaderController.diagnostics().records.length};
  },cuts);
  for(const kind of result.kinds)expect(kind).toMatchObject({monsterId:'M0123',source:'start-cut'});
- expect(result.unknown).toBeNull();expect(result.first.records.some(r=>r.code==='start_cut'&&r.monsterId==='M0123')).toBe(true);expect(result.first.records.some(r=>r.code==='applied')).toBe(false);expect(result.count).toBe(100);
+ expect(result.unknown).toBeNull();expect(result.first.records.some(r=>r.code==='start_cut'&&r.monsterId==='M0123')).toBe(true);expect(result.first.records.some(r=>r.code==='applied')).toBe(false);expect(result.count).toBeGreaterThan(100);
  await page.locator('#reader-toggle').click();await page.locator('#reader-details').evaluate(e=>e.open=true);await page.locator('#reader-defeat-diagnostics').evaluate(e=>e.open=true);
  await expect(page.locator('#reader-defeat-log')).toContainText('ラウンド 5');
  const download=page.waitForEvent('download');await page.locator('#reader-save-diagnostics').click();const file=await download;const path=test.info().outputPath('combat-diagnostics.json');await file.saveAs(path);
- const saved=JSON.parse(require('fs').readFileSync(path));expect(saved).toMatchObject({version:1,limit:100});expect(saved.records).toHaveLength(100);expect(JSON.stringify(saved)).not.toContain('data:image');expect(saved.records.every(r=>typeof r.at==='string'&&Number.isFinite(r.elapsedMs))).toBe(true);
+ const saved=JSON.parse(require('fs').readFileSync(path));expect(saved).toMatchObject({version:1,limit:10000,byteLimit:8388608,droppedRecords:0});expect(saved.records).toHaveLength(result.count);expect(JSON.stringify(saved)).not.toContain('data:image');expect(saved.records.every(r=>typeof r.at==='string'&&Number.isFinite(r.elapsedMs))).toBe(true);
  expect(saved.records.some(r=>r.round===4)).toBe(true);expect(saved.records.at(-1).round).toBe(5);expect(saved.records.every(r=>r.round===null||Number.isSafeInteger(r.round)&&r.round>0)).toBe(true);
  expect(saved.current).toMatchObject({map:'MAP0105',round:5,memory:[],pending:[],unresolved:[]});
  expect(await page.evaluate(()=>{const copy=ScreenReaderController.diagnostics();copy.current.memory.push({monsterId:'fake'});copy.records[0].code='fake';const next=ScreenReaderController.diagnostics();return next.current.memory.length===0&&next.records[0].code!=='fake';})).toBe(true);
