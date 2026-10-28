@@ -622,8 +622,11 @@ for(const [protocol,size] of [['http',{width:1440,height:900}],['file',{width:95
  const download=page.waitForEvent('download');await page.locator('#reader-save-diagnostics').click();const file=await download;const path=test.info().outputPath('combat-diagnostics.json');await file.saveAs(path);
  const saved=JSON.parse(require('fs').readFileSync(path));expect(saved).toMatchObject({version:1,limit:100});expect(saved.records).toHaveLength(100);expect(JSON.stringify(saved)).not.toContain('data:image');expect(saved.records.every(r=>typeof r.at==='string'&&Number.isFinite(r.elapsedMs))).toBe(true);
  expect(saved.records.some(r=>r.round===4)).toBe(true);expect(saved.records.at(-1).round).toBe(5);expect(saved.records.every(r=>r.round===null||Number.isSafeInteger(r.round)&&r.round>0)).toBe(true);
+ expect(saved.current).toMatchObject({map:'MAP0105',round:5,memory:[],pending:[],unresolved:[]});
+ expect(await page.evaluate(()=>{const copy=ScreenReaderController.diagnostics();copy.current.memory.push({monsterId:'fake'});copy.records[0].code='fake';const next=ScreenReaderController.diagnostics();return next.current.memory.length===0&&next.records[0].code!=='fake';})).toBe(true);
  await page.locator('#reader-world-sync').uncheck();await expect(page.locator('#reader-defeat-stage')).toContainText('追跡をリセット');
  expect((await page.evaluate(()=>ScreenReaderController.diagnostics())).records.at(-1)).toMatchObject({code:'reset',message:'モンスター読取のON／OFF変更',round:5});
+ expect((await page.evaluate(()=>ScreenReaderController.diagnostics())).current).toBeNull();
  await page.evaluate(()=>ScreenReaderMapBridge.resetForReader());
  expect((await page.evaluate(()=>ScreenReaderController.diagnostics())).records.at(-1).round).toBeNull();
  await expect(page.locator('#reader-defeat-log')).toContainText('ラウンド未判定');
@@ -663,16 +666,20 @@ for(const [protocol,size] of [['http',{width:1440,height:900}],['file',{width:95
    turnNow=1000+index*250;await ScreenReaderController.read(true);
    const {checkpoints,defeats,diagnostics}=turnResult;
    const state=ScreenReaderMapBridge.snapshot(),text=document.getElementById('reader-defeat-result').textContent;
-   if(text!==turnResult.last&&text.startsWith('自動撃破'))defeats.push({index,text});turnResult.last=text;
-   if(index===224||index===268)checkpoints[index]=state;
+   if(text!==turnResult.last&&text.startsWith('自動撃破'))defeats.push({index,text,record:ScreenReaderController.diagnostics().records.findLast(r=>r.code==='applied')});turnResult.last=text;
+   if(index===224||index===268)checkpoints[index]={...state,diagnostic:ScreenReaderController.diagnostics()};
    if([58,68,224,268].includes(index))diagnostics.push({index,world:ScreenReaderWorldVision.analyze(turnOriginalNormalize(turnInput),{positions:true}),status:document.getElementById('reader-status').textContent,monitor:document.getElementById('reader-monitor-info').textContent});
  },{index,image:require('fs').readFileSync(turnFramePath(index)).toString('base64')});
  const result=await page.evaluate(()=>({...turnResult,state:ScreenReaderMapBridge.snapshot()}));
  require('fs').mkdirSync('artifacts',{recursive:true});require('fs').writeFileSync(`artifacts/full-turn-${test.info().project.name}-${protocol}.json`,JSON.stringify(result,null,2));
  expect(result.checkpoints[224].monsters.find(m=>m.monsterId==='M0123'&&m.serial===2)).toMatchObject({hp:6,defeated:false});
  expect(result.checkpoints[268].monsters.find(m=>m.monsterId==='M0122'&&m.serial===1)).toMatchObject({hp:5,defeated:false});
+ const hpLog=result.checkpoints[268].diagnostic;
+ expect(hpLog.current.memory.find(m=>m.monsterId==='M0122'&&m.serial===1)).toMatchObject({currentHp:5,maxHp:19,ageMs:expect.any(Number)});
+ expect(hpLog.records.some(r=>r.code==='memory_updated'&&r.candidates.some(c=>c.monsterId==='M0122'&&c.serial===1&&c.currentHp===5))).toBe(true);
  expect(result.state.monsters.filter(m=>m.defeated).map(m=>[m.monsterId,m.serial]).sort()).toEqual([['M0122',1],['M0123',1],['M0123',2],['M0123',3]]);
  expect(result.defeats).toHaveLength(4);
+ expect(result.defeats.find(d=>d.text.includes('おもちゃの恐竜')).record.candidates[0]).toMatchObject({monsterId:'M0122',serial:1,lastSeenHp:5,maxHp:19});
  await page.locator('#reader-close').click();
  await page.locator('#roster-undo').click();expect((await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).monsters.find(m=>m.monsterId==='M0123'&&m.serial===2)?.defeated).toBe(false);
 });
@@ -772,4 +779,5 @@ for(const protocol of ['http','file'])test(`08 autumn icon status flags: presenc
  expect(result.rows).toEqual([{"id":"27","key":"stealth","value":1,"updated":1,"atk":2,"reduce":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"8","key":"shield","value":1,"updated":1,"atk":0,"reduce":99,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"104","key":"realSelf","value":1,"updated":1,"atk":1,"reduce":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"25","key":"trueDragon","value":8,"updated":1,"atk":4,"reduce":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"105","key":"finishedDoll","value":7,"updated":1,"atk":0,"reduce":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]}]);
  expect(result.unframed).toEqual([]);expect(result.wrongCharacter).toBe(0);expect(result.absent).toBe(0);expect(result.retained).toBe(7);
 });
+
 
