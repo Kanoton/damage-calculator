@@ -87,13 +87,21 @@
 
 大きな変更より、小さな責務単位の変更を優先してください。既存動作と無関係なリファクタリングを機能追加と同時に大量に行わないでください。
 
+## 2026-10-23：CI待ち時間と確認範囲（利用者承認）
+
+- 通常の08のチップ見本追加PRは `scripts/ci-test-scope.cjs` の許可リストで判定する。生成chip辞書・chip生成script・chip-grid fixture・専用 `tests/08-chip-reader.spec.js` と付随Markdownだけなら、全JS単体／連結構文・関連生成一致・印字名／所有者／空枠／未知絵柄／位置補正／取得保持をChromiumとWebKitで確認する。PC縦横・HTTP/fileを保つ。新規チップ回帰は専用specへ追加する。
+- 認識／計算の実装、CSV、共有画像、従来の広いspec、CI自身、未知のファイル、削除／移動を含む場合は全体確認へ戻す。分類エラーを短縮扱いにしない。PRのファイル一覧はGitHub APIでページ送りし、3000件以上なら全体確認とする。
+- mainへのpushと手動 `workflow_dispatch` は全体回帰を実行する。全体経路の08・両ブラウザ・同期218件・共有データ・共通回帰のassertionは維持する。PRとpushの同一実行を無理に重複させず、更新された同じPRの古いCIだけをconcurrencyで停止する。
+- 自動のブラウザCIは公式Playwright 1.64.1 Noble image（digest固定）と同じnpm版を使う。npmはlockfile＋npm ci＋取得キャッシュ、Pillowは12.3.0＋pipキャッシュ。ブラウザとOS依存の毎回の再インストールを省き、Python／必要時FFmpegだけを追加する。image pull／初回キャッシュ・追加ツールの取得時間は残る。版更新時はpackage.json／lockfileと各workflowのimageを同時更新する。
+- 既存の全キャラCT／PT総当たりは引き続き明示指定時のみ。07スマホの既存確認範囲と08のPC標準は変更しない。
+
 ## 5. 必須チェック
 
 JavaScriptを変更したら、PR/マージ前に必ず次を確認します。
 
 - 変更ファイルだけでなく、`index.html` が読み込む全JSを個別に構文チェックする。
 - `index.html` の実読み込み順に全JSを連結した状態でも構文チェックする。これはファイル間のトップレベル宣言衝突を検出するために重要です。
-- Playwright smoke testを通す。
+- 上記の変更範囲に応じたPlaywright smoke testを通す（短縮対象外は従来どおり全体確認）。
 - CIが失敗した場合、期待される画像フォールバック404を原因と決めつけず、`pageerror` と失敗したassertionを確認する。
 - 最終diffを確認し、目的外のファイル変更がないことを確認してからマージする。
 
