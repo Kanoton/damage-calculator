@@ -41,9 +41,15 @@ on:
       - 'scripts/assets/status-name/**'
       - 'scripts/assets/map-text/**'
       - 'scripts/build-autumn-second-fixtures.py'
+      - 'scripts/ci-test-scope.cjs'
+      - 'scripts/test-ci-test-scope.cjs'
+      - '.github/actions/setup-browser-ci/**'
+      - 'tests/08-chip-reader.spec.js'
+      - 'package-lock.json'
       - 'package.json'
       - 'playwright.config.js'
       - '.github/workflows/08-screen-reader-smoke.yml'
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
@@ -87,23 +93,65 @@ on:
       - 'scripts/build-screen-reader-status-icons.py'
       - 'scripts/inspect-defeat-browser.cjs'
       - 'tests/fixtures/screen-reader/**'
+      - 'scripts/ci-test-scope.cjs'
+      - 'scripts/test-ci-test-scope.cjs'
+      - '.github/actions/setup-browser-ci/**'
+      - 'tests/08-chip-reader.spec.js'
+      - 'package-lock.json'
       - 'package.json'
       - '.github/workflows/08-screen-reader-smoke.yml'
 
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: reader-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  smoke:
+  scope:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      mode: ${{ steps.scope.outputs.mode }}
+      verify_focus: ${{ steps.scope.outputs.verify_focus }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: node --test scripts/test-ci-test-scope.cjs
+      - uses: actions/github-script@v7
+        id: scope
+        with:
+          script: |
+            const {classify}=require(process.env.GITHUB_WORKSPACE+'/scripts/ci-test-scope.cjs');
+            let mode='full',verifyFocus=false;
+            if(context.eventName==='pull_request') {
+              const files=await github.paginate(github.rest.pulls.listFiles,{...context.repo,pull_number:context.issue.number,per_page:100});
+              verifyFocus=files.some(f=>['.github/workflows/08-screen-reader-smoke.yml','.github/actions/setup-browser-ci/action.yml','scripts/ci-test-scope.cjs'].includes(f.filename));
+              const changes=files.map(f=>({status:({added:'A',modified:'M'})[f.status]||f.status,path:f.filename}));
+              mode=files.length>=3000?'full':classify(changes,context.eventName);
+            }
+            core.info('CI test scope: '+mode);
+            core.setOutput('mode',mode);
+            core.setOutput('verify_focus',String(verifyFocus));
+  smoke:
+    needs: scope
+    if: needs.scope.outputs.mode == 'full'
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:7852dc5a7d72f5fe458a597d690f6c42fbc8e9e26ddfa95f8e6ef552558d9bbf
+      options: --ipc=host
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: ./.github/actions/setup-browser-ci
         with:
-          node-version: 22
-      - run: npm install
-      - run: sudo apt-get update && sudo apt-get install -y ffmpeg
+          media: 'true'
+          pillow: 'true'
       - run: npm run check:08
       - run: python3 scripts/build-mini-character-mapping.py --check
-      - run: python3 -m pip install Pillow==12.3.0
       - run: python3 scripts/build-autumn-defeat-samples.py --check
       - run: python3 scripts/build-screen-reader-defeat-references.py --check
       - run: python3 scripts/build-screen-reader-cut-references.py --check
@@ -123,11 +171,13 @@ jobs:
       - run: python3 scripts/build-screen-reader-name-references.py --check
       - run: python3 scripts/build-screen-reader-live-status-references.py --check
       - run: python3 scripts/build-screen-reader-chip-shapes.py --check
-      - run: npx playwright install --with-deps chromium webkit
       - run: node scripts/inspect-defeat-browser.cjs
       - run: npx playwright test tests/08-world-reader.spec.js tests/08-screen-reader.spec.js -g "result banner|short autumn replay|monster text tooltip|autumn icon|autumn defeat" --workers=1
       - run: npm run test:08 -- --grep-invert "result banner|short autumn replay|monster text tooltip|autumn icon|autumn defeat|08 touch display transitions"
-      - run: npx playwright test tests/08-screen-reader.spec.js --browser=webkit -g "printed status name|status names require|zoomed status|fast-changing|chip artwork|chip grid|party stars|short autumn replay|monster text tooltip|autumn icon|self portrait assets"
+      - name: WebKit display and dedicated chip regressions
+        run: |
+          npx playwright test tests/08-screen-reader.spec.js --browser=webkit -g "printed status name|status names require|zoomed status|fast-changing|chip artwork|chip grid|party stars|short autumn replay|monster text tooltip|autumn icon|self portrait assets"
+          npx playwright test tests/08-chip-reader.spec.js --browser=webkit
       - run: npx playwright test tests/08-world-reader.spec.js --browser=webkit -g "room text|autumn room|replay printed map|result banner|short autumn replay|recorded video labels|video labels abstain|autumn defeat|autumn icon status"
       - run: npx playwright test tests/07-skill.spec.js --browser=webkit -g "07 autumn data"
       - uses: actions/upload-artifact@v4
@@ -141,19 +191,48 @@ jobs:
 
 
   sync:
+    needs: scope
+    if: needs.scope.outputs.mode == 'full'
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:7852dc5a7d72f5fe458a597d690f6c42fbc8e9e26ddfa95f8e6ef552558d9bbf
+      options: --ipc=host
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - run: npm install
-      - run: npx playwright install --with-deps chromium webkit
+      - uses: ./.github/actions/setup-browser-ci
       - run: npm run test:08:sync -- --workers=2
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: 08-screen-reader-sync-test-results
+          path: test-results/
+          retention-days: 7
+
+  chips:
+    needs: scope
+    if: needs.scope.outputs.mode == 'chips' || needs.scope.outputs.verify_focus == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:7852dc5a7d72f5fe458a597d690f6c42fbc8e9e26ddfa95f8e6ef552558d9bbf
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-browser-ci
+        with:
+          pillow: 'true'
+      - run: npm run check:08
+      - run: python3 scripts/build-screen-reader-chip-shapes.py --check
+      - name: Read chips, ownership, unknown names and empty slots in both browsers
+        run: |
+          npx playwright test tests/08-screen-reader.spec.js --browser=chromium -g "printed status name|status names require|zoomed status|chip artwork|chip grid"
+          npx playwright test tests/08-chip-reader.spec.js --browser=chromium
+          npx playwright test tests/08-screen-reader.spec.js --browser=webkit -g "printed status name|status names require|zoomed status|chip artwork|chip grid"
+          npx playwright test tests/08-chip-reader.spec.js --browser=webkit
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 08-chip-reader-test-results
           path: test-results/
           retention-days: 7

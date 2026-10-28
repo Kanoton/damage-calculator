@@ -9,6 +9,7 @@ on:
       - 'tests/07-skill.spec.js'
       - 'playwright.config.js'
       - 'package.json'
+      - '.github/actions/setup-browser-ci/**'
       - 'package-lock.json'
       - '.github/workflows/07-skill-smoke.yml'
   push:
@@ -20,18 +21,18 @@ on:
       - 'tests/07-skill.spec.js'
       - 'playwright.config.js'
       - 'package.json'
+      - '.github/actions/setup-browser-ci/**'
       - 'package-lock.json'
       - '.github/workflows/07-skill-smoke.yml'
 
 jobs:
   smoke:
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:7852dc5a7d72f5fe458a597d690f6c42fbc8e9e26ddfa95f8e6ef552558d9bbf
+      options: --ipc=host
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - run: npm install
+      - uses: ./.github/actions/setup-browser-ci
       - run: npm run check:07
-      - run: npx playwright install --with-deps chromium
       - run: npm run test:07

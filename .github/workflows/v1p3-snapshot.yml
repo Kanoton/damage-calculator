@@ -1,24 +1,23 @@
 name: v1p3 snapshot verification
 on:
   pull_request:
-    paths: ['v1p3/**', 'docs/releases/v1p3.json', 'scripts/check-v1p3-snapshot.js', 'snapshot-tests/**', 'test-helpers/**', 'playwright.snapshot.config.js', '.github/workflows/v1p3-snapshot.yml']
+    paths: ['v1p3/**', 'docs/releases/v1p3.json', 'scripts/check-v1p3-snapshot.js', 'snapshot-tests/**', 'test-helpers/**', 'playwright.snapshot.config.js', '.github/actions/setup-browser-ci/**', 'package-lock.json', '.github/workflows/v1p3-snapshot.yml']
   push:
     branches: [main]
-    paths: ['v1p3/**', 'docs/releases/v1p3.json', 'scripts/check-v1p3-snapshot.js', 'snapshot-tests/**', 'test-helpers/**', 'playwright.snapshot.config.js', '.github/workflows/v1p3-snapshot.yml']
+    paths: ['v1p3/**', 'docs/releases/v1p3.json', 'scripts/check-v1p3-snapshot.js', 'snapshot-tests/**', 'test-helpers/**', 'playwright.snapshot.config.js', '.github/actions/setup-browser-ci/**', 'package-lock.json', '.github/workflows/v1p3-snapshot.yml']
 permissions:
   contents: read
 jobs:
   verify:
     runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble@sha256:7852dc5a7d72f5fe458a597d690f6c42fbc8e9e26ddfa95f8e6ef552558d9bbf
+      options: --ipc=host
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - run: npm install
+      - uses: ./.github/actions/setup-browser-ci
       - run: node scripts/check-v1p3-snapshot.js
-      - run: npx playwright install --with-deps chromium webkit
       - run: npx playwright test --config=playwright.snapshot.config.js
       - uses: actions/upload-artifact@v4
         if: always()
