@@ -779,5 +779,3 @@ for(const protocol of ['http','file'])test(`08 autumn icon status flags: presenc
  expect(result.rows).toEqual([{"id":"27","key":"stealth","value":1,"updated":1,"atk":2,"reduce":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"8","key":"shield","value":1,"updated":1,"atk":0,"reduce":99,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"104","key":"realSelf","value":1,"updated":1,"atk":1,"reduce":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"25","key":"trueDragon","value":8,"updated":1,"atk":4,"reduce":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"105","key":"finishedDoll","value":7,"updated":1,"atk":0,"reduce":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]}]);
  expect(result.unframed).toEqual([]);expect(result.wrongCharacter).toBe(0);expect(result.absent).toBe(0);expect(result.retained).toBe(7);
 });
-
-

@@ -287,5 +287,3 @@
  $('learn-id').addEventListener('change',updateMappingPreview);
  window.ScreenReaderController={read,stop,stabilize,validateProfile,updateDefeat,updateStatusIcons,diagnostics:diagnosticSnapshot};ready();
 })();
-
-

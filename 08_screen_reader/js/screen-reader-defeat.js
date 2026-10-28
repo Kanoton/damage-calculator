@@ -71,6 +71,7 @@
    if(lastTime!==null&&time-lastTime>1800){report('capture_gap',{gapMs:time-lastTime});pending=[];unresolved=[];previous=null;identities.clear();unlocated.clear();battle=null;focus=null;cut=null;wasBattle=false;for(const o of memory.values())o.tracked=false;}
    lastTime=time;tick++;const p=pixels(source),found=blobs(p).map(blob=>({...blob,match:classify(blob)})).filter(b=>b.match),emitted=[];
    const key=o=>o.monsterId+':'+o.serial;
+   const lastSeenHp=o=>{const latest=memory.get(key(o));return latest?.instanceId===o.instanceId&&latest.maxHp===o.maxHp?latest.currentHp:o.currentHp;};
    const roster=context?.monsters||[],valid=o=>Number.isSafeInteger(o.instanceId)&&o.instanceId>0&&roster.some(e=>!e.defeated&&e.seen&&key(e)===key(o)&&e.instanceId===o.instanceId&&e.maxHp===o.maxHp);
    const complete=id=>{const all=roster.filter(e=>e.monsterId===id);return Number.isSafeInteger(context?.counts?.[id])&&all.length===context.counts[id]&&all.every(e=>e.seen&&Number.isSafeInteger(e.serial)&&e.serial>=1&&e.serial<=context.counts[id])&&new Set(all.map(key)).size===all.length;};
    for(const [id,o] of memory)if(!valid(o)||time-o.time>60000){report(valid(o)?'memory_expired':'roster_changed',{candidates:[describe(o)]});memory.delete(id);}
@@ -146,7 +147,7 @@
     const remains=found.some(b=>b.match.monsterId===item.monsterId&&Math.hypot(b.box[0]+b.box[2]/2-x-w/2,b.box[1]+b.box[3]/2-y-h/2)<18);
     if(beamAt(p,item.box)>item.beam+100&&(!remains||beamAt(p,item.box)>item.beam+220)){
      const identity=item.identity&&!observations.some(o=>key(o)===key(item.identity)&&o.currentHp>0)?item.identity:null;
-     const cue={monsterId:item.monsterId,serial:identity?.serial??null,reason:'gray_then_beam',box:item.box.map(v=>v*2),...(identity?{maxHp:identity.maxHp,lastSeenHp:identity.currentHp,instanceId:identity.instanceId,association:identity.association||'leader'}:{} )};
+     const cue={monsterId:item.monsterId,serial:identity?.serial??null,reason:'gray_then_beam',box:item.box.map(v=>v*2),...(identity?{maxHp:identity.maxHp,lastSeenHp:lastSeenHp(identity),instanceId:identity.instanceId,association:identity.association||'leader'}:{} )};
      emitted.push(cue);
      if(!identity&&complete(item.monsterId)){
       const choices=[...memory.values()].filter(o=>o.monsterId===item.monsterId&&valid(o)&&!completed.has(key(o)+':'+o.instanceId));
@@ -164,7 +165,7 @@
     for(const o of observations){const m=memory.get(key(o));if(u.choices.some(c=>key(c)===key(o))&&o.currentHp>0&&m?.run>=2&&m.tick===tick)u.excluded.add(key(o));}
     const candidates=u.choices.filter(o=>valid(o)&&!u.excluded.has(key(o))&&!completed.has(key(o)+':'+o.instanceId));
     if(candidates.length===1&&u.excluded.size&&!observations.some(o=>key(o)===key(candidates[0])&&o.currentHp>0)&&!emitted.some(c=>c.monsterId===u.cue.monsterId)){
-     const o=candidates[0];emitted.push({...u.cue,serial:o.serial,instanceId:o.instanceId,maxHp:o.maxHp,lastSeenHp:o.currentHp,association:'later-survivors'});u.done=true;
+     const o=candidates[0];emitted.push({...u.cue,serial:o.serial,instanceId:o.instanceId,maxHp:o.maxHp,lastSeenHp:lastSeenHp(o),association:'later-survivors'});u.done=true;
     }
    }
    unresolved=unresolved.filter(u=>!u.done);
@@ -184,4 +185,3 @@
  }
  window.ScreenReaderDefeatVision={createTracker,blobs,pixels};
 })();
-
