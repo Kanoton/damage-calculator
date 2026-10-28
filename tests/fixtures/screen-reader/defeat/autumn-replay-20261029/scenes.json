@@ -1,0 +1,125 @@
+{
+  "source_sha256": "355e053d18928915b59a099a4e850475e2856ec260086d84b7dfdbbee6bbf6c1",
+  "source_size": [
+    2560,
+    1440
+  ],
+  "fps": 30,
+  "speed": 10,
+  "frame_count": 569,
+  "normalized_size": [
+    768,
+    355
+  ],
+  "scenes": [
+    {
+      "monsterId": "M0123",
+      "serial": 2,
+      "normalized_box": [
+        290,
+        100,
+        130,
+        150
+      ],
+      "snapshots": [
+        {
+          "phase": "before",
+          "frame": 141,
+          "pts_s": 4.7,
+          "image": "owl-2-before.png",
+          "image_sha256": "68468c88cea376caa2280dd5ba3afd4b388cf7b5212de9b6cca00215003f49b9",
+          "source_frame_sha256": "a987cdeb15b320f3925672cf1c5df5aa3c520d32fe68326f871ea703b5cdaf27"
+        },
+        {
+          "phase": "gray",
+          "frame": 143,
+          "pts_s": 4.766666666666667,
+          "image": "owl-2-gray.png",
+          "image_sha256": "29cb3fddd3b673273a3557096bf467b26c6ffacdcdde820d814d32e9c07abd29",
+          "source_frame_sha256": "177a6f7dbeb1038172f14581c9226c6a67ed153a4fa3593cdd3ffcf9fca28a19"
+        },
+        {
+          "phase": "beam",
+          "frame": 145,
+          "pts_s": 4.833333333333333,
+          "image": "owl-2-beam.png",
+          "image_sha256": "15ec021603f9887417cb82a965bc675cf9c500ba63bd3984511566254884da73",
+          "source_frame_sha256": "d3ca2690996457bd72593c24ad6e4a8848d697842710c3f12baaa7fa0cfc5f17"
+        }
+      ]
+    },
+    {
+      "monsterId": "M0123",
+      "serial": 3,
+      "normalized_box": [
+        290,
+        100,
+        130,
+        150
+      ],
+      "snapshots": [
+        {
+          "phase": "before",
+          "frame": 378,
+          "pts_s": 12.6,
+          "image": "owl-3-before.png",
+          "image_sha256": "ac25142588a078f8657852f042a83176cadcda1c3619989d9ccb5bec97817c05",
+          "source_frame_sha256": "f25ec42f0fa797951da8570c4e742ea9707efdca9ccbea1a1c046c746f9292f3"
+        },
+        {
+          "phase": "gray",
+          "frame": 381,
+          "pts_s": 12.7,
+          "image": "owl-3-gray.png",
+          "image_sha256": "9b8b825fe5d6df8e604324d15ca22e7397cc601f2b4e55a1e4a667dd55a845f3",
+          "source_frame_sha256": "45428c612681e49e0f562cfd57e2b47533f7f906f6e4df306b46d2b282331ac9"
+        },
+        {
+          "phase": "beam",
+          "frame": 382,
+          "pts_s": 12.733333333333333,
+          "image": "owl-3-beam.png",
+          "image_sha256": "3ecdc19a812ed7f9b1d748ab062494a69b5288678c764f0c4dbf3eb6b449ce99",
+          "source_frame_sha256": "662b9151c9ec03567f9b7cd780e70c34fa4c66027afa3e8fa7bae80125f03def"
+        }
+      ]
+    },
+    {
+      "monsterId": "M0123",
+      "serial": 1,
+      "normalized_box": [
+        290,
+        100,
+        130,
+        150
+      ],
+      "snapshots": [
+        {
+          "phase": "before",
+          "frame": 543,
+          "pts_s": 18.1,
+          "image": "owl-1-before.png",
+          "image_sha256": "25d25911d44a138dd4dfe5abe1b46cb686f4b88337b7925de6602a4f79ef63cb",
+          "source_frame_sha256": "ab52c80b9450a5d0201f02507ba38455c094512356ef51c21829840177a81461"
+        },
+        {
+          "phase": "gray",
+          "frame": 548,
+          "pts_s": 18.266666666666666,
+          "image": "owl-1-gray.png",
+          "image_sha256": "477b891c272f0bc1e5c371ba965d02267d0bccd4977e22d9a38d2a77e75ef016",
+          "source_frame_sha256": "5a2da34ca345e1c31a3ba02fd0226bec38086861dbb924897796e8821e0fed05"
+        },
+        {
+          "phase": "beam",
+          "frame": 549,
+          "pts_s": 18.3,
+          "image": "owl-1-beam.png",
+          "image_sha256": "fa2d4c74b9c872df85487fa17c8a96e080dedf7809cabf08132ef1bb0d563e17",
+          "source_frame_sha256": "138c0dc96051e5bb8c1b0909b83bbab76463cc44efff6d8972ac816021b25501"
+        }
+      ]
+    }
+  ],
+  "serial_source": "Paired diagnostic battle_target and replay order; these cropped fixtures test species cues, not serial recognition."
+}

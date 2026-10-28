@@ -63,6 +63,19 @@ def build():
   if hashlib.sha256((ROOT/row['image']).read_bytes()).hexdigest()!=row['source_sha256']:raise ValueError('Changed full-turn patch')
   if len(row['shape'])!=400 or not all(0<=v<=1 for v in row['shape']):raise ValueError('Invalid full-turn patch')
   patches.append(row)
+ replay=ROOT/'tests/fixtures/screen-reader/defeat/autumn-replay-20261029'
+ for row in json.loads((replay/'patches.json').read_text())['patches']:
+  path=replay/row['image']
+  if hashlib.sha256(path.read_bytes()).hexdigest()!=row['source_sha256']:raise ValueError('Changed replay patch')
+  if Image.open(path).size!=tuple(row['box'][2:]):raise ValueError('Replay patch size mismatch')
+  if len(row['shape'])!=400 or not all(0<=v<=1 for v in row['shape']):raise ValueError('Invalid replay patch')
+  patches.append(row)
+ scenes=json.loads((replay/'scenes.json').read_text())
+ for scene in scenes['scenes']:
+  for snap in scene['snapshots']:
+   path=replay/snap['image']
+   if hashlib.sha256(path.read_bytes()).hexdigest()!=snap['image_sha256']:raise ValueError('Changed replay scene')
+   if Image.open(path).size!=tuple(scene['normalized_box'][2:]):raise ValueError('Replay scene size mismatch')
  return '// Generated visible patches; no full-body requirement or serial inference.\nwindow.ScreenReaderDefeatReferences='+json.dumps(dict(version=1,fullBodyRequired=False,patches=patches),separators=(',',':'))+';\n'
 if __name__=='__main__':
  args=argparse.ArgumentParser();args.add_argument('--check',action='store_true');a=args.parse_args();text=build()
