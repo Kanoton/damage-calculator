@@ -24,3 +24,15 @@ for(const protocol of ['http','file'])for(const [width,height] of [[1000,1400],[
  await readFixture(page,'chip-grid-parunan-20261022');const again=await snapshot(page);expect(again.members.find(m=>m.id==='2').chips).toEqual(['29','16','50']);expect(again.selfId).toBe('13');
 });
 
+for(const protocol of ['http','file'])for(const [width,height] of [[1000,1400],[1920,1080]])test(`08: chip artwork reads Kaisei buffer shield and extra battery at ${width}x${height} ${protocol}`,async({page})=>{
+ await page.setViewportSize({width,height});
+ await page.goto(protocol==='file'?'file://'+require('path').resolve(__dirname,'../08_screen_reader/index.html'):'/08_screen_reader/');
+ await page.locator('#reader-toggle').click();await page.waitForFunction(()=>window.ScreenReaderCharacterBridge?.catalog().characters.length===35);
+ await page.locator('#reader-new-game').click();
+ await page.evaluate(()=>ScreenReaderCharacterBridge.apply({selfId:'13',members:[{id:'13',slot:0},{id:'2',slot:1},{id:'16',slot:2},{id:'20',slot:3}],chipOwnerId:'13',chipIds:['26']}));
+ const actual=await page.evaluate(async image=>{const im=new Image();im.src=image;await im.decode();return ScreenReaderVision.analyze(ScreenReaderVision.normalize(im));},fixture('chip-grid-kaisei-20261022'));
+ expect(actual.chipOwnerId).toBe('13');expect(actual.chipIds).toEqual(['49','15']);expect(actual.chipRead.matchedRims).toBe(10);
+ await readFixture(page,'chip-grid-kaisei-20261022');
+ const first=await snapshot(page);expect(first.selfId).toBe('13');expect(first.members.find(m=>m.id==='13').chips).toEqual(['26','49','15']);expect(first.members.find(m=>m.id==='2').chips).toEqual([]);
+ await readFixture(page,'chip-grid-kaisei-20261022');const again=await snapshot(page);expect(again.members.find(m=>m.id==='13').chips).toEqual(['26','49','15']);expect(again.selfId).toBe('13');
+});
