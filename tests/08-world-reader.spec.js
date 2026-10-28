@@ -552,7 +552,7 @@ test('08 autumn defeat memory: missing names, registered camera motion, later su
   const results={};for(const mode of ['held','shift','camera-cut','ambiguous','reset','later','alive','expired','two-kills','incomplete-memory','reinforced-unseen']){
    const tracker=ScreenReaderDefeatVision.createTracker(),roster=[1,2,3].map(serial=>({monsterId:known.monsterId,serial,maxHp:known.maxHp,instanceId:serial,seen:true,defeated:false}));
    const context={counts:{[known.monsterId]:3},monsters:roster},seed=[{...known,serial:1,instanceId:1,labelBox:null,marker:null},known,{...known,serial:3,instanceId:3,labelBox:null,marker:null}];
-   if(['ambiguous','later','alive','expired','two-kills','incomplete-memory','reinforced-unseen'].includes(mode))seed[0]={...known,serial:1,instanceId:1};
+   if(['ambiguous','later','alive','expired','two-kills','incomplete-memory'].includes(mode))seed[0]={...known,serial:1,instanceId:1};
    tracker.step(before,100,mode==='incomplete-memory'?seed.slice(0,2):seed,context); // already confirmed in the roster
    if(mode==='reinforced-unseen')context.counts[known.monsterId]=4;
    const cues=[];const shift=mode==='shift'?30:mode==='camera-cut'?400:0;
@@ -560,7 +560,7 @@ test('08 autumn defeat memory: missing names, registered camera motion, later su
    if(mode==='reset')tracker.reset();
    cues.push(...tracker.step(frame(1,null,shift),3600,[],context),...tracker.step(frame(2,null,shift),4100,[],context));
    if(mode==='two-kills')cues.push(...tracker.step(frame(1),4350,[],context),...tracker.step(frame(2),4600,[],context));
-   if(['later','alive','expired','two-kills','incomplete-memory','reinforced-unseen'].includes(mode)){
+   if(['later','alive','expired','two-kills','incomplete-memory'].includes(mode)){
     if(mode==='expired')for(let t=4350;t<=9600;t+=250)tracker.step(before,t,[],context);
     const start=mode==='expired'?9850:mode==='two-kills'?4850:4350;
     const survivors=mode==='alive'?[known]:mode==='incomplete-memory'?[seed[0]]:[seed[0],seed[2]];
