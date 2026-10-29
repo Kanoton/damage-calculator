@@ -76,6 +76,24 @@ def build():
    path=replay/snap['image']
    if hashlib.sha256(path.read_bytes()).hexdigest()!=snap['image_sha256']:raise ValueError('Changed replay scene')
    if Image.open(path).size!=tuple(scene['normalized_box'][2:]):raise ValueError('Replay scene size mismatch')
+ reviewed=ROOT/'tests/fixtures/screen-reader/defeat/autumn-owls-45-20261029'
+ manifest=json.loads((reviewed/'manifest.json').read_text())
+ video=reviewed/manifest['review_video']['image']
+ if hashlib.sha256(video.read_bytes()).hexdigest()!=manifest['review_video']['sha256']:raise ValueError('Changed owl review video')
+ path=reviewed/manifest['battle']['image']
+ if hashlib.sha256(path.read_bytes()).hexdigest()!=manifest['battle']['image_sha256']:raise ValueError('Changed battle fixture')
+ if Image.open(path).size!=(480,220):raise ValueError('Battle fixture size mismatch')
+ for row in manifest['patches']:
+  path=reviewed/row['image']
+  if hashlib.sha256(path.read_bytes()).hexdigest()!=row['source_sha256']:raise ValueError('Changed owl patch')
+  if Image.open(path).size!=tuple(row['box'][2:]):raise ValueError('Owl patch size mismatch')
+  if len(row['shape'])!=400 or not all(0<=v<=1 for v in row['shape']):raise ValueError('Invalid owl patch')
+  patches.append(row)
+ for scene in manifest['scenes']:
+  path=reviewed/scene['image'];box=scene['normalized_box'];columns=scene['columns']
+  if hashlib.sha256(path.read_bytes()).hexdigest()!=scene['image_sha256']:raise ValueError('Changed owl sequence')
+  rows=(len(scene['snapshots'])+columns-1)//columns
+  if Image.open(path).size!=(box[2]*columns,box[3]*rows):raise ValueError('Owl sequence size mismatch')
  return '// Generated visible patches; no full-body requirement or serial inference.\nwindow.ScreenReaderDefeatReferences='+json.dumps(dict(version=1,fullBodyRequired=False,patches=patches),separators=(',',':'))+';\n'
 if __name__=='__main__':
  args=argparse.ArgumentParser();args.add_argument('--check',action='store_true');a=args.parse_args();text=build()
@@ -83,3 +101,4 @@ if __name__=='__main__':
   if OUT.read_text()!=text:raise ValueError('Stale defeat references; rebuild')
  else:OUT.write_text(text)
  print('Validated original and compressed partial gray patches / 4 species; individual number remains unknown')
+

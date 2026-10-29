@@ -84,7 +84,9 @@
    const key=o=>o.monsterId+':'+o.serial;
    const lastSeenHp=o=>{const latest=memory.get(key(o));return latest&&latest.instanceId===o.instanceId&&latest.maxHp===o.maxHp?latest.currentHp:o.currentHp;};
    const roster=context?.monsters||[],valid=o=>Number.isSafeInteger(o.instanceId)&&o.instanceId>0&&roster.some(e=>!e.defeated&&e.seen&&key(e)===key(o)&&e.instanceId===o.instanceId&&e.maxHp===o.maxHp);
-   const complete=id=>{const all=roster.filter(e=>e.monsterId===id);return Number.isSafeInteger(context?.counts?.[id])&&all.length===context.counts[id]&&all.every(e=>e.seen&&Number.isSafeInteger(e.serial)&&e.serial>=1&&e.serial<=context.counts[id])&&new Set(all.map(key)).size===all.length;};
+   // Event counts are a lower bound: explicitly observed extra contiguous IDs
+   // must not disable every identity. Missing/unseen/gapped IDs still abstain.
+   const complete=id=>{const all=roster.filter(e=>e.monsterId===id);return Number.isSafeInteger(context?.counts?.[id])&&context.counts[id]>0&&all.length>=context.counts[id]&&all.every(e=>e.seen&&Number.isSafeInteger(e.serial)&&e.serial>=1&&e.serial<=all.length)&&new Set(all.map(key)).size===all.length;};
    for(const [id,o] of memory)if(!valid(o)||time-o.time>60000){report(valid(o)?'memory_expired':'roster_changed',{candidates:[describe(o)]});memory.delete(id);}
    const detectedCut=window.ScreenReaderCombatVision?.analyzePixels(p);
    if(detectedCut){if(!cut||cut.monsterId!==detectedCut.monsterId||time-cut.time>1500)report('start_cut',{monsterId:detectedCut.monsterId});cut={...detectedCut,time};}
@@ -134,7 +136,7 @@
     // label can be displaced; this path requires the complete confirmed spawn.
     if(recent.length===1&&near(recent[0]))return {...recent[0],remembered:true,association:'recent'};
     // An initial spawn singleton remains unique even after its label vanished.
-    if(context?.counts?.[id]===1&&choices.length===1)return {...choices[0],remembered:true,association:'singleton'};
+    if(context?.counts?.[id]===1&&roster.filter(o=>o.monsterId===id).length===1&&choices.length===1)return {...choices[0],remembered:true,association:'singleton'};
     return null;
    }
    const visible=observations.filter(o=>Number.isInteger(o.serial)&&o.serial>0&&o.currentHp>0&&o.currentHp<=o.maxHp&&o.marker?.length===2&&o.marker.every(Number.isFinite)&&observations.filter(b=>key(o)===key(b)).length===1);
@@ -196,3 +198,4 @@
  }
  window.ScreenReaderDefeatVision={createTracker,createHistory,blobs,pixels};
 })();
+
