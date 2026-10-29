@@ -505,6 +505,45 @@ test('08 autumn defeat replay: owls 4 and 5 tolerate capture phase and explicitl
  for(const row of results)expect(row.cues,JSON.stringify({serial:row.serial,mode:row.mode,phase:row.phase})).toEqual(row.mode==='valid'?[expect.objectContaining({monsterId:'M0123',serial:row.serial,association:'battle',lastSeenHp:row.serial===5?1:2})]:[]);
 });
 
+
+test('08 autumn defeat archived identities: expiry waits for independent survivors and never guesses from old HP',async({page})=>{
+ test.setTimeout(120000);await open(page);
+ const sample=defeatManifest.samples.find(s=>s.id==='owl-1'),images=[];
+ for(const snap of sample.snapshots.slice(1,3))images.push(await defeatFrame(page,snap,0,{capture:true}));
+ const results=await page.evaluate(async images=>{
+  const frames=[];for(const src of images){const im=new Image();im.src=src;await im.decode();frames.push(ScreenReaderVision.normalize(im));}
+  const blank=document.createElement('canvas');blank.width=768;blank.height=355;const x=blank.getContext('2d');x.fillStyle='#141414';x.fillRect(0,0,768,355);
+  const results={};for(const mode of ['valid','none','one','missing','reset','gap','timeout','replaced','max-hp','two-kills','alive','no-gray','incomplete-roster','duplicate']){
+   const tracker=ScreenReaderDefeatVision.createTracker(),roster=[1,2,3,4,5].map(serial=>({monsterId:'M0123',serial,instanceId:serial,maxHp:10,seen:true,defeated:serial<4}));
+   const context={counts:{M0123:mode==='incomplete-roster'?6:4},monsters:roster,mapVisible:true};
+   const four={monsterId:'M0123',serial:4,instanceId:4,currentHp:6,maxHp:10},five={monsterId:'M0123',serial:5,instanceId:5,currentHp:1,maxHp:10};
+   // Species pixels are real; serials/HP and delayed survivor observations are
+   // an explicit tracking contract, not OCR of a complete original replay.
+   tracker.step(blank,100,mode==='missing'?[four]:[four,five],context);tracker.step(blank,65000,[],context);
+   const expired=tracker.diagnostics(),cues=[];
+   if(mode!=='no-gray')cues.push(...tracker.step(frames[0],65250,[],context),...tracker.step(frames[1],65750,[],context));
+   const waiting=tracker.diagnostics();
+   if(mode==='reset')tracker.reset();if(mode==='replaced')roster[4].instanceId=55;if(mode==='max-hp')roster[4].maxHp=11;
+   if(mode==='two-kills')cues.push(...tracker.step(frames[0],66000,[],context),...tracker.step(frames[1],66250,[],context));
+   let now=mode==='two-kills'?66500:66000;const until=mode==='timeout'?96500:84000;
+   for(;now<=until;now+=250)tracker.step(blank,now,[],context);
+   if(mode==='gap')now+=2000;
+   const survivors=mode==='none'?[]:mode==='alive'?[four,five]:mode==='duplicate'?[four,four]:[four];
+   cues.push(...tracker.step(blank,now,survivors,context));if(mode!=='one')cues.push(...tracker.step(blank,now+250,survivors,context));
+   const copy=tracker.diagnostics();if(copy.knownIndividuals.length)copy.knownIndividuals[0].serial=999;
+   const independent=tracker.diagnostics().knownIndividuals.every(o=>o.serial!==999);
+   tracker.reset();results[mode]={expired,waiting,numbered:cues.filter(c=>c.serial!==null),independent,cleared:tracker.diagnostics()};
+  }
+  return results;
+ },images);
+ expect(results.valid.numbered).toEqual([expect.objectContaining({monsterId:'M0123',serial:5,instanceId:5,maxHp:10,lastSeenHp:1,association:'archived-survivors'})]);
+ expect(results.valid.expired.memory).toEqual([]);
+ expect(results.valid.expired.knownIndividuals).toEqual([expect.objectContaining({serial:4,lastSeenHp:6,ageMs:64900}),expect.objectContaining({serial:5,lastSeenHp:1,ageMs:64900})]);
+ expect(results.valid.expired.knownIndividuals.every(o=>o.currentHp===undefined)).toBe(true);
+ expect(results.valid.waiting.unresolved).toEqual([expect.objectContaining({archived:true,timeoutMs:30000,blocked:false})]);
+ for(const [mode,row] of Object.entries(results)){if(mode!=='valid')expect(row.numbered,mode).toEqual([]);expect(row.independent,mode).toBe(true);expect(row.cleared).toEqual({code:'reset',events:[]});}
+});
+
 const identitySample=defeatManifest.samples.find(s=>s.id==='dinosaur-1');
 // Temporal contract: hold the real before image for two captures, then replay
 // actual gray/beam/after frames. Not a claim of full-video or 4fps accuracy.
@@ -865,4 +904,5 @@ for(const protocol of ['http','file'])test(`08 autumn icon status flags: presenc
  expect(result.rows).toEqual([{"id":"27","key":"stealth","value":1,"updated":1,"atk":2,"reduce":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"8","key":"shield","value":1,"updated":1,"atk":0,"reduce":99,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"104","key":"realSelf","value":1,"updated":1,"atk":1,"reduce":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"25","key":"trueDragon","value":8,"updated":1,"atk":4,"reduce":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"105","key":"finishedDoll","value":7,"updated":1,"atk":0,"reduce":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]}]);
  expect(result.unframed).toEqual([]);expect(result.wrongCharacter).toBe(0);expect(result.absent).toBe(0);expect(result.retained).toBe(7);
 });
+
 
