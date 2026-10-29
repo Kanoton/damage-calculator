@@ -477,6 +477,34 @@ test('08 autumn defeat replay: three reviewed overlapping owl deaths pass unchan
  }
 });
 
+test('08 autumn defeat replay: owls 4 and 5 tolerate capture phase and explicitly observed extra serials',async({page})=>{
+ test.setTimeout(120000);await open(page);
+ const folder='tests/fixtures/screen-reader/defeat/autumn-owls-45-20261029',manifest=require('./fixtures/screen-reader/defeat/autumn-owls-45-20261029/manifest.json');
+ const encode=name=>'data:image/png;base64,'+require('fs').readFileSync(require('path').join(folder,name)).toString('base64');
+ const results=await page.evaluate(async({manifest,images,battleImage})=>{
+  const load=async src=>{const im=new Image();im.src=src;await im.decode();return im;};
+  const plane=(im,sourceBox,targetBox)=>{const c=document.createElement('canvas');c.width=1536;c.height=710;const x=c.getContext('2d');x.fillStyle='#141414';x.fillRect(0,0,c.width,c.height);x.imageSmoothingEnabled=false;x.drawImage(im,...sourceBox,...targetBox.map(v=>v*2));return {popupFrame:c};};
+  const battle=plane(await load(battleImage),[0,0,480,220],[150,60,480,220]),output=[];
+  for(const [index,scene] of manifest.scenes.entries()){
+   const sheet=await load(images[index]),box=scene.normalized_box,cols=scene.columns;
+   const frames=scene.snapshots.map(s=>plane(sheet,[(s.cell%cols)*box[2],Math.floor(s.cell/cols)*box[3],box[2],box[3]],box));
+   for(const mode of ['valid','short','unseen','gap','wrong-hp','singleton-extra','expired'])for(let phase=0;phase<250;phase+=25){
+    const tracker=ScreenReaderDefeatVision.createTracker(),roster=[1,2,3,4,5].map(serial=>({monsterId:'M0123',serial,instanceId:serial,maxHp:10,seen:true,defeated:serial<4}));
+    const context={counts:{M0123:mode==='short'?6:mode==='singleton-extra'?1:4},monsters:roster,mapVisible:true};
+    if(mode==='unseen')roster[0].seen=false;if(mode==='gap')roster[0].serial=6;
+    const known={monsterId:'M0123',serial:scene.serial,instanceId:scene.serial,currentHp:scene.serial===5?1:2,maxHp:mode==='wrong-hp'?11:10};
+    // Explicit observation contract, not OCR success of the cropped fixtures.
+    tracker.step(frames[0],100,[known],context);if(mode!=='singleton-extra'){context.mapVisible=false;tracker.step(battle,mode==='expired'?65000:350,[],context);context.mapVisible=true;}
+    const start=scene.snapshots[0].pts_s,end=scene.snapshots.at(-1).pts_s,cues=[];
+    for(let target=start+phase/1000;target<=end;target+=.25){const i=scene.snapshots.findIndex(s=>s.pts_s>=target);if(i<0)break;cues.push(...tracker.step(frames[i],(mode==='expired'?66000:mode==='singleton-extra'?10000:1000)+(target-start)*1000,[],context));}
+    output.push({serial:scene.serial,mode,phase,cues:cues.filter(c=>c.serial!==null)});
+   }
+  }
+  return output;
+ },{manifest,images:manifest.scenes.map(s=>encode(s.image)),battleImage:encode('battle.png')});
+ for(const row of results)expect(row.cues,JSON.stringify({serial:row.serial,mode:row.mode,phase:row.phase})).toEqual(row.mode==='valid'?[expect.objectContaining({monsterId:'M0123',serial:row.serial,association:'battle',lastSeenHp:row.serial===5?1:2})]:[]);
+});
+
 const identitySample=defeatManifest.samples.find(s=>s.id==='dinosaur-1');
 // Temporal contract: hold the real before image for two captures, then replay
 // actual gray/beam/after frames. Not a claim of full-video or 4fps accuracy.
@@ -837,3 +865,4 @@ for(const protocol of ['http','file'])test(`08 autumn icon status flags: presenc
  expect(result.rows).toEqual([{"id":"27","key":"stealth","value":1,"updated":1,"atk":2,"reduce":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"8","key":"shield","value":1,"updated":1,"atk":0,"reduce":99,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"104","key":"realSelf","value":1,"updated":1,"atk":1,"reduce":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"25","key":"trueDragon","value":8,"updated":1,"atk":4,"reduce":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"105","key":"finishedDoll","value":7,"updated":1,"atk":0,"reduce":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]}]);
  expect(result.unframed).toEqual([]);expect(result.wrongCharacter).toBe(0);expect(result.absent).toBe(0);expect(result.retained).toBe(7);
 });
+
