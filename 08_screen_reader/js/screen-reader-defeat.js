@@ -84,6 +84,7 @@
    const key=o=>o.monsterId+':'+o.serial;
    const lastSeenHp=o=>{const latest=memory.get(key(o));return latest&&latest.instanceId===o.instanceId&&latest.maxHp===o.maxHp?latest.currentHp:(o.lastSeenHp??o.currentHp);};
    const roster=context?.monsters||[],valid=o=>Number.isSafeInteger(o.instanceId)&&o.instanceId>0&&roster.some(e=>!e.defeated&&e.seen&&key(e)===key(o)&&e.instanceId===o.instanceId&&e.maxHp===o.maxHp);
+   const rosterSignature=id=>JSON.stringify(roster.filter(e=>e.monsterId===id).map(e=>[e.serial,e.instanceId,e.maxHp,!!e.defeated,!!e.seen]).sort((a,b)=>a[0]-b[0]));
    // Event counts are a lower bound: explicitly observed extra contiguous IDs
    // must not disable every identity. Missing/unseen/gapped IDs still abstain.
    const complete=id=>{const all=roster.filter(e=>e.monsterId===id);return Number.isSafeInteger(context?.counts?.[id])&&context.counts[id]>0&&all.length>=context.counts[id]&&all.every(e=>e.seen&&Number.isSafeInteger(e.serial)&&e.serial>=1&&e.serial<=all.length)&&new Set(all.map(key)).size===all.length;};
@@ -173,14 +174,14 @@
       if(unresolved.some(u=>u.cue.monsterId===item.monsterId)){for(const u of unresolved)if(u.cue.monsterId===item.monsterId){u.blocked=true;u.time=time;}}
       else if(choices.length>1&&choices.length===remaining.length){
        const archived=choices.some(o=>!memory.has(key(o)));
-       unresolved.push({cue,time,choices,excluded:new Set(),timeoutMs:archived?30000:5000,archived});
+       unresolved.push({cue,time,choices,rosterSignature:rosterSignature(item.monsterId),excluded:new Set(),timeoutMs:archived?30000:5000,archived});
        if(archived)report('archived_candidates',{monsterId:item.monsterId,candidates:choices.map(describe),timeoutMs:30000});
       }
      }
     }
    }
    for(const u of unresolved)if(time-u.time>u.timeoutMs)report('candidate_timeout',{monsterId:u.cue.monsterId,candidates:u.choices.map(describe)});
-   unresolved=unresolved.filter(u=>time-u.time<=u.timeoutMs&&complete(u.cue.monsterId)&&u.choices.every(valid));
+   unresolved=unresolved.filter(u=>time-u.time<=u.timeoutMs&&complete(u.cue.monsterId)&&u.rosterSignature===rosterSignature(u.cue.monsterId)&&u.choices.every(valid));
    for(const u of unresolved){
     if(u.blocked)continue;
     for(const o of observations){const m=memory.get(key(o));if(u.choices.some(c=>key(c)===key(o))&&o.currentHp>0&&m?.run>=2&&m.tick===tick)u.excluded.add(key(o));}

@@ -513,7 +513,7 @@ test('08 autumn defeat archived identities: expiry waits for independent survivo
  const results=await page.evaluate(async images=>{
   const frames=[];for(const src of images){const im=new Image();im.src=src;await im.decode();frames.push(ScreenReaderVision.normalize(im));}
   const blank=document.createElement('canvas');blank.width=768;blank.height=355;const x=blank.getContext('2d');x.fillStyle='#141414';x.fillRect(0,0,768,355);
-  const results={};for(const mode of ['valid','none','one','missing','reset','gap','timeout','replaced','max-hp','two-kills','alive','no-gray','incomplete-roster','duplicate']){
+  const results={};for(const mode of ['valid','none','one','missing','reset','gap','timeout','replaced','max-hp','two-kills','alive','no-gray','incomplete-roster','duplicate','reinforcement']){
    const tracker=ScreenReaderDefeatVision.createTracker(),roster=[1,2,3,4,5].map(serial=>({monsterId:'M0123',serial,instanceId:serial,maxHp:10,seen:true,defeated:serial<4}));
    const context={counts:{M0123:mode==='incomplete-roster'?6:4},monsters:roster,mapVisible:true};
    const four={monsterId:'M0123',serial:4,instanceId:4,currentHp:6,maxHp:10},five={monsterId:'M0123',serial:5,instanceId:5,currentHp:1,maxHp:10};
@@ -523,7 +523,7 @@ test('08 autumn defeat archived identities: expiry waits for independent survivo
    const expired=tracker.diagnostics(),cues=[];
    if(mode!=='no-gray')cues.push(...tracker.step(frames[0],65250,[],context),...tracker.step(frames[1],65750,[],context));
    const waiting=tracker.diagnostics();
-   if(mode==='reset')tracker.reset();if(mode==='replaced')roster[4].instanceId=55;if(mode==='max-hp')roster[4].maxHp=11;
+   if(mode==='reset')tracker.reset();if(mode==='replaced')roster[4].instanceId=55;if(mode==='max-hp')roster[4].maxHp=11;if(mode==='reinforcement')roster.push({monsterId:'M0123',serial:6,instanceId:6,maxHp:10,seen:true,defeated:false});
    if(mode==='two-kills')cues.push(...tracker.step(frames[0],66000,[],context),...tracker.step(frames[1],66250,[],context));
    let now=mode==='two-kills'?66500:66000;const until=mode==='timeout'?96500:84000;
    for(;now<=until;now+=250)tracker.step(blank,now,[],context);
