@@ -488,15 +488,15 @@ test('08 autumn defeat replay: owls 4 and 5 tolerate capture phase and explicitl
   for(const [index,scene] of manifest.scenes.entries()){
    const sheet=await load(images[index]),box=scene.normalized_box,cols=scene.columns;
    const frames=scene.snapshots.map(s=>plane(sheet,[(s.cell%cols)*box[2],Math.floor(s.cell/cols)*box[3],box[2],box[3]],box));
-   for(const mode of ['valid','short','unseen','gap','wrong-hp','singleton-extra'])for(let phase=0;phase<250;phase+=25){
+   for(const mode of ['valid','short','unseen','gap','wrong-hp','singleton-extra','expired'])for(let phase=0;phase<250;phase+=25){
     const tracker=ScreenReaderDefeatVision.createTracker(),roster=[1,2,3,4,5].map(serial=>({monsterId:'M0123',serial,instanceId:serial,maxHp:10,seen:true,defeated:serial<4}));
     const context={counts:{M0123:mode==='short'?6:mode==='singleton-extra'?1:4},monsters:roster,mapVisible:true};
     if(mode==='unseen')roster[0].seen=false;if(mode==='gap')roster[0].serial=6;
     const known={monsterId:'M0123',serial:scene.serial,instanceId:scene.serial,currentHp:scene.serial===5?1:2,maxHp:mode==='wrong-hp'?11:10};
     // Explicit observation contract, not OCR success of the cropped fixtures.
-    tracker.step(frames[0],100,[known],context);if(mode!=='singleton-extra'){context.mapVisible=false;tracker.step(battle,350,[],context);context.mapVisible=true;}
+    tracker.step(frames[0],100,[known],context);if(mode!=='singleton-extra'){context.mapVisible=false;tracker.step(battle,mode==='expired'?65000:350,[],context);context.mapVisible=true;}
     const start=scene.snapshots[0].pts_s,end=scene.snapshots.at(-1).pts_s,cues=[];
-    for(let target=start+phase/1000;target<=end;target+=.25){const i=scene.snapshots.findIndex(s=>s.pts_s>=target);if(i<0)break;cues.push(...tracker.step(frames[i],(mode==='singleton-extra'?10000:1000)+(target-start)*1000,[],context));}
+    for(let target=start+phase/1000;target<=end;target+=.25){const i=scene.snapshots.findIndex(s=>s.pts_s>=target);if(i<0)break;cues.push(...tracker.step(frames[i],(mode==='expired'?66000:mode==='singleton-extra'?10000:1000)+(target-start)*1000,[],context));}
     output.push({serial:scene.serial,mode,phase,cues:cues.filter(c=>c.serial!==null)});
    }
   }
