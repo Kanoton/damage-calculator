@@ -525,14 +525,15 @@ test('08 autumn defeat archived identities: expiry waits for independent survivo
    const waiting=tracker.diagnostics();
    if(mode==='reset')tracker.reset();if(mode==='replaced')roster[4].instanceId=55;if(mode==='max-hp')roster[4].maxHp=11;if(mode==='reinforcement')roster.push({monsterId:'M0123',serial:6,instanceId:6,maxHp:10,seen:true,defeated:false});
    if(mode==='two-kills')cues.push(...tracker.step(frames[0],66000,[],context),...tracker.step(frames[1],66250,[],context));
+   const collision=tracker.diagnostics();
    let now=mode==='two-kills'?66500:66000;const until=mode==='timeout'?96500:84000;
    for(;now<=until;now+=250)tracker.step(blank,now,[],context);
    if(mode==='gap')now+=2000;
    const survivors=mode==='none'?[]:mode==='alive'?[four,five]:mode==='duplicate'?[four,four]:[four];
    cues.push(...tracker.step(blank,now,survivors,context));if(mode!=='one')cues.push(...tracker.step(blank,now+250,survivors,context));
-   const copy=tracker.diagnostics();if(copy.knownIndividuals.length)copy.knownIndividuals[0].serial=999;
+   const after=tracker.diagnostics(),copy=tracker.diagnostics();if(copy.knownIndividuals.length)copy.knownIndividuals[0].serial=999;
    const independent=tracker.diagnostics().knownIndividuals.every(o=>o.serial!==999);
-   tracker.reset();results[mode]={expired,waiting,numbered:cues.filter(c=>c.serial!==null),independent,cleared:tracker.diagnostics()};
+   tracker.reset();results[mode]={expired,waiting,collision,after,numbered:cues.filter(c=>c.serial!==null),independent,cleared:tracker.diagnostics()};
   }
   return results;
  },images);
@@ -541,7 +542,27 @@ test('08 autumn defeat archived identities: expiry waits for independent survivo
  expect(results.valid.expired.knownIndividuals).toEqual([expect.objectContaining({serial:4,lastSeenHp:6,ageMs:64900}),expect.objectContaining({serial:5,lastSeenHp:1,ageMs:64900})]);
  expect(results.valid.expired.knownIndividuals.every(o=>o.currentHp===undefined)).toBe(true);
  expect(results.valid.waiting.unresolved).toEqual([expect.objectContaining({archived:true,timeoutMs:30000,blocked:false})]);
+ expect(results.valid.after.events).toEqual(expect.arrayContaining([expect.objectContaining({code:'survivor_confirmed',candidates:[expect.objectContaining({serial:4})]})]));
+ expect(results['two-kills'].collision.events).toEqual(expect.arrayContaining([expect.objectContaining({code:'multiple_defeat_candidates',cueCount:2,possibleRepeat:true,firstEvidence:expect.objectContaining({grayTimeMs:65250,beamTimeMs:65750}),latestEvidence:expect.objectContaining({grayTimeMs:66000,beamTimeMs:66250})})]));
+ expect(results['two-kills'].after.unresolved).toEqual([expect.objectContaining({holdReason:'multiple_defeat_candidates',cueCount:2,blocked:true})]);
  for(const [mode,row] of Object.entries(results)){if(mode!=='valid')expect(row.numbered,mode).toEqual([]);expect(row.independent,mode).toBe(true);expect(row.cleared).toEqual({code:'reset',events:[]});}
+});
+
+
+test('08 autumn defeat duplicate review: saved owl frames retain species cues with source times',async({page})=>{
+ await open(page);
+ const folder='tests/fixtures/screen-reader/defeat/autumn-owls-45-20261029',manifest=require('./fixtures/screen-reader/defeat/autumn-owls-45-20261029/manifest.json'),report=[];
+ for(const scene of manifest.scenes){
+  const image='data:image/png;base64,'+require('fs').readFileSync(require('path').join(folder,scene.image)).toString('base64');
+  const cues=await page.evaluate(async({image,scene})=>{
+   const im=new Image();im.src=image;await im.decode();const tracker=ScreenReaderDefeatVision.createTracker(),output=[],box=scene.normalized_box;
+   for(const snap of scene.snapshots){const c=document.createElement('canvas');c.width=1536;c.height=710;const x=c.getContext('2d');x.fillStyle='#141414';x.fillRect(0,0,c.width,c.height);x.imageSmoothingEnabled=false;x.drawImage(im,(snap.cell%scene.columns)*box[2],Math.floor(snap.cell/scene.columns)*box[3],box[2],box[3],...box.map(v=>v*2));for(const cue of tracker.step({popupFrame:c},snap.pts_s*1000))output.push({sourceFrame:snap.frame,pts_s:snap.pts_s,...cue});}
+   return output;
+  },{image,scene});
+  expect(cues.length,'owl '+scene.serial).toBeGreaterThan(0);expect(cues.every(c=>c.monsterId==='M0123'&&c.serial===null)).toBe(true);report.push({reviewedSerial:scene.serial,cues});
+ }
+ require('fs').mkdirSync('artifacts',{recursive:true});require('fs').writeFileSync('artifacts/owl-duplicate-review-'+test.info().project.name+'.json',JSON.stringify(report,null,2));
+ console.log('OWL_DUPLICATE_REVIEW '+JSON.stringify(report));
 });
 
 const identitySample=defeatManifest.samples.find(s=>s.id==='dinosaur-1');
@@ -904,5 +925,6 @@ for(const protocol of ['http','file'])test(`08 autumn icon status flags: presenc
  expect(result.rows).toEqual([{"id":"27","key":"stealth","value":1,"updated":1,"atk":2,"reduce":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"8","key":"shield","value":1,"updated":1,"atk":0,"reduce":99,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"104","key":"realSelf","value":1,"updated":1,"atk":1,"reduce":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"25","key":"trueDragon","value":8,"updated":1,"atk":4,"reduce":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]},{"id":"105","key":"finishedDoll","value":7,"updated":1,"atk":0,"reduce":0,"repeated":0,"invalid":0,"foreign":0,"otherKeys":[]}]);
  expect(result.unframed).toEqual([]);expect(result.wrongCharacter).toBe(0);expect(result.absent).toBe(0);expect(result.retained).toBe(7);
 });
+
 
 
