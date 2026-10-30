@@ -174,7 +174,7 @@
       if(unresolved.some(u=>u.cue.monsterId===item.monsterId)){for(const u of unresolved)if(u.cue.monsterId===item.monsterId){
        const previous=u.evidence,overlap=previous.box[0]<cue.box[0]+cue.box[2]&&cue.box[0]<previous.box[0]+previous.box[2]&&previous.box[1]<cue.box[1]+cue.box[3]&&cue.box[1]<previous.box[1]+previous.box[3];
        const collision={grayTimeMs:item.time,beamTimeMs:time,box:[...cue.box]};
-       u.blocked=true;u.time=time;u.cueCount++;u.lastCollision=collision;
+       u.blocked=true;u.time=time;u.collisionTick=tick;u.excluded.clear();u.cueCount++;u.lastCollision=collision;
        // Similar time/position is diagnostic evidence, never permission to merge kills.
        report('multiple_defeat_candidates',{monsterId:item.monsterId,candidates:u.choices.map(describe),cueCount:u.cueCount,firstEvidence:previous,latestEvidence:collision,possibleRepeat:overlap&&time-previous.beamTimeMs<=1800});
       }}
@@ -190,11 +190,10 @@
    for(const u of unresolved)if(time-u.time>u.timeoutMs)report('candidate_timeout',{monsterId:u.cue.monsterId,candidates:u.choices.map(describe)});
    unresolved=unresolved.filter(u=>time-u.time<=u.timeoutMs&&complete(u.cue.monsterId)&&u.rosterSignature===rosterSignature(u.cue.monsterId)&&u.choices.every(valid));
    for(const u of unresolved){
-    if(u.blocked)continue;
-    for(const o of observations){const m=memory.get(key(o));if(u.choices.some(c=>key(c)===key(o))&&o.currentHp>0&&m?.run>=2&&m.tick===tick){if(!u.excluded.has(key(o)))report('survivor_confirmed',{monsterId:u.cue.monsterId,candidates:[describe(o)]});u.excluded.add(key(o));}}
+    for(const o of observations){const m=memory.get(key(o));if(u.choices.some(c=>key(c)===key(o))&&o.currentHp>0&&m?.run>=2&&m.tick===tick&&(!u.blocked||tick-u.collisionTick>=2)){if(!u.excluded.has(key(o)))report('survivor_confirmed',{monsterId:u.cue.monsterId,candidates:[describe(o)]});u.excluded.add(key(o));}}
     const candidates=u.choices.filter(o=>valid(o)&&!u.excluded.has(key(o))&&!completed.has(key(o)+':'+o.instanceId));
     if(candidates.length===1&&u.excluded.size&&!observations.some(o=>key(o)===key(candidates[0])&&o.currentHp>0)&&!emitted.some(c=>c.monsterId===u.cue.monsterId)){
-     const o=candidates[0];emitted.push({...u.cue,serial:o.serial,instanceId:o.instanceId,maxHp:o.maxHp,lastSeenHp:lastSeenHp(o),association:u.archived?'archived-survivors':'later-survivors'});u.done=true;
+     const o=candidates[0];emitted.push({...u.cue,serial:o.serial,instanceId:o.instanceId,maxHp:o.maxHp,lastSeenHp:lastSeenHp(o),association:u.blocked?'survivors-after-collision':u.archived?'archived-survivors':'later-survivors'});if(u.blocked)report('collision_resolved',{monsterId:u.cue.monsterId,candidates:[describe(o)],cueCount:u.cueCount});u.done=true;
     }
    }
    unresolved=unresolved.filter(u=>!u.done);

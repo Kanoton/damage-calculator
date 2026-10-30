@@ -513,23 +513,25 @@ test('08 autumn defeat archived identities: expiry waits for independent survivo
  const results=await page.evaluate(async images=>{
   const frames=[];for(const src of images){const im=new Image();im.src=src;await im.decode();frames.push(ScreenReaderVision.normalize(im));}
   const blank=document.createElement('canvas');blank.width=768;blank.height=355;const x=blank.getContext('2d');x.fillStyle='#141414';x.fillRect(0,0,768,355);
-  const results={};for(const mode of ['valid','none','one','missing','reset','gap','timeout','replaced','max-hp','two-kills','alive','no-gray','incomplete-roster','duplicate','reinforcement']){
+  const results={};for(const mode of ['valid','none','one','missing','reset','gap','timeout','replaced','max-hp','repeated-cue','two-kills','alive','no-gray','incomplete-roster','duplicate','reinforcement','precollision-only']){
    const tracker=ScreenReaderDefeatVision.createTracker(),roster=[1,2,3,4,5].map(serial=>({monsterId:'M0123',serial,instanceId:serial,maxHp:10,seen:true,defeated:serial<4}));
    const context={counts:{M0123:mode==='incomplete-roster'?6:4},monsters:roster,mapVisible:true};
    const four={monsterId:'M0123',serial:4,instanceId:4,currentHp:6,maxHp:10},five={monsterId:'M0123',serial:5,instanceId:5,currentHp:1,maxHp:10};
    // Species pixels are real; serials/HP and delayed survivor observations are
    // an explicit tracking contract, not OCR of a complete original replay.
-   tracker.step(blank,100,mode==='missing'?[four]:[four,five],context);tracker.step(blank,65000,[],context);
+   if(['two-kills','precollision-only'].includes(mode))roster.push({monsterId:'M0123',serial:6,instanceId:6,maxHp:10,seen:true,defeated:false});
+   tracker.step(blank,100,mode==='missing'?[four]:['two-kills','precollision-only'].includes(mode)?[four,five,{...five,serial:6,instanceId:6,currentHp:4}]:[four,five],context);tracker.step(blank,65000,[],context);
    const expired=tracker.diagnostics(),cues=[];
    if(mode!=='no-gray')cues.push(...tracker.step(frames[0],65250,[],context),...tracker.step(frames[1],65750,[],context));
    const waiting=tracker.diagnostics();
    if(mode==='reset')tracker.reset();if(mode==='replaced')roster[4].instanceId=55;if(mode==='max-hp')roster[4].maxHp=11;if(mode==='reinforcement')roster.push({monsterId:'M0123',serial:6,instanceId:6,maxHp:10,seen:true,defeated:false});
-   if(mode==='two-kills')cues.push(...tracker.step(frames[0],66000,[],context),...tracker.step(frames[1],66250,[],context));
+   if(mode==='precollision-only'){tracker.step(blank,65800,[four],context);tracker.step(blank,65900,[four],context);}
+   if(['repeated-cue','two-kills','precollision-only'].includes(mode))cues.push(...tracker.step(frames[0],66000,[],context),...tracker.step(frames[1],66250,[],context));
    const collision=tracker.diagnostics();
-   let now=mode==='two-kills'?66500:66000;const until=mode==='timeout'?96500:84000;
+   let now=['repeated-cue','two-kills','precollision-only'].includes(mode)?66500:66000;const until=mode==='timeout'?96500:84000;
    for(;now<=until;now+=250)tracker.step(blank,now,[],context);
    if(mode==='gap')now+=2000;
-   const survivors=mode==='none'?[]:mode==='alive'?[four,five]:mode==='duplicate'?[four,four]:[four];
+   const survivors=mode==='precollision-only'?[five]:mode==='none'?[]:mode==='alive'?[four,five]:mode==='duplicate'?[four,four]:[four];
    cues.push(...tracker.step(blank,now,survivors,context));if(mode!=='one')cues.push(...tracker.step(blank,now+250,survivors,context));
    const after=tracker.diagnostics(),copy=tracker.diagnostics();if(copy.knownIndividuals.length)copy.knownIndividuals[0].serial=999;
    const independent=tracker.diagnostics().knownIndividuals.every(o=>o.serial!==999);
@@ -543,9 +545,12 @@ test('08 autumn defeat archived identities: expiry waits for independent survivo
  expect(results.valid.expired.knownIndividuals.every(o=>o.currentHp===undefined)).toBe(true);
  expect(results.valid.waiting.unresolved).toEqual([expect.objectContaining({archived:true,timeoutMs:30000,blocked:false})]);
  expect(results.valid.after.events).toEqual(expect.arrayContaining([expect.objectContaining({code:'survivor_confirmed',candidates:[expect.objectContaining({serial:4})]})]));
+ expect(results['repeated-cue'].numbered).toEqual([expect.objectContaining({serial:5,association:'survivors-after-collision'})]);
  expect(results['two-kills'].collision.events).toEqual(expect.arrayContaining([expect.objectContaining({code:'multiple_defeat_candidates',cueCount:2,possibleRepeat:true,firstEvidence:expect.objectContaining({grayTimeMs:65250,beamTimeMs:65750}),latestEvidence:expect.objectContaining({grayTimeMs:66000,beamTimeMs:66250})})]));
+ expect(results['precollision-only'].collision.unresolved[0].candidates).toHaveLength(3);
+ expect(results['precollision-only'].after.unresolved[0].candidates.map(c=>c.serial)).toEqual([4,6]);
  expect(results['two-kills'].after.unresolved).toEqual([expect.objectContaining({holdReason:'multiple_defeat_candidates',cueCount:2,blocked:true})]);
- for(const [mode,row] of Object.entries(results)){if(mode!=='valid')expect(row.numbered,mode).toEqual([]);expect(row.independent,mode).toBe(true);expect(row.cleared).toEqual({code:'reset',events:[]});}
+ for(const [mode,row] of Object.entries(results)){if(!['valid','repeated-cue'].includes(mode))expect(row.numbered,mode).toEqual([]);expect(row.independent,mode).toBe(true);expect(row.cleared).toEqual({code:'reset',events:[]});}
 });
 
 
@@ -651,20 +656,20 @@ test('08 autumn defeat memory: missing names, registered camera motion, later su
   const loaded=[];for(const image of images){const im=new Image();im.src=image;await im.decode();loaded.push(im);}
   const frame=(i,mask=null,shift=0)=>{const c=document.createElement('canvas');c.width=2560;c.height=1440;const x=c.getContext('2d');x.fillStyle='#141414';x.fillRect(0,0,c.width,c.height);x.drawImage(loaded[i],shift,0);const f=ScreenReaderVision.normalize(c);if(mask){const p=f.popupFrame.getContext('2d');p.fillStyle='#141414';p.fillRect(...mask);}return f;};
   const before=frame(0),known=ScreenReaderWorldVision.analyze(before,{positions:true}).monsters[0];known.instanceId=2;
-  const results={};for(const mode of ['held','shift','camera-cut','ambiguous','reset','later','alive','expired','two-kills','incomplete-memory','reinforced-unseen']){
+  const results={};for(const mode of ['held','shift','camera-cut','ambiguous','reset','later','alive','expired','repeated-cue','incomplete-memory','reinforced-unseen']){
    const tracker=ScreenReaderDefeatVision.createTracker(),roster=[1,2,3].map(serial=>({monsterId:known.monsterId,serial,maxHp:known.maxHp,instanceId:serial,seen:true,defeated:false}));
    const context={counts:{[known.monsterId]:3},monsters:roster},seed=[{...known,serial:1,instanceId:1,labelBox:null,marker:null},known,{...known,serial:3,instanceId:3,labelBox:null,marker:null}];
-   if(['ambiguous','later','alive','expired','two-kills','incomplete-memory'].includes(mode))seed[0]={...known,serial:1,instanceId:1};
+   if(['ambiguous','later','alive','expired','repeated-cue','incomplete-memory'].includes(mode))seed[0]={...known,serial:1,instanceId:1};
    tracker.step(before,100,mode==='incomplete-memory'?seed.slice(0,2):seed,context); // already confirmed in the roster
    if(mode==='reinforced-unseen')context.counts[known.monsterId]=4;
    const cues=[];const shift=mode==='shift'?30:mode==='camera-cut'?400:0;
    for(let t=350;t<=3100;t+=250)cues.push(...tracker.step(frame(0,known.labelBox,shift),t,[],context));
    if(mode==='reset')tracker.reset();
    cues.push(...tracker.step(frame(1,null,shift),3600,[],context),...tracker.step(frame(2,null,shift),4100,[],context));
-   if(mode==='two-kills')cues.push(...tracker.step(frame(1),4350,[],context),...tracker.step(frame(2),4600,[],context));
-   if(['later','alive','expired','two-kills','incomplete-memory'].includes(mode)){
+   if(mode==='repeated-cue')cues.push(...tracker.step(frame(1),4350,[],context),...tracker.step(frame(2),4600,[],context));
+   if(['later','alive','expired','repeated-cue','incomplete-memory'].includes(mode)){
     if(mode==='expired')for(let t=4350;t<=9600;t+=250)tracker.step(before,t,[],context);
-    const start=mode==='expired'?9850:mode==='two-kills'?4850:4350;
+    const start=mode==='expired'?9850:mode==='repeated-cue'?4850:4350;
     const survivors=mode==='alive'?[known]:mode==='incomplete-memory'?[seed[0]]:[seed[0],seed[2]];
     for(const t of [start,start+250])cues.push(...tracker.step(before,t,survivors,context));
    }
@@ -678,8 +683,9 @@ test('08 autumn defeat memory: missing names, registered camera motion, later su
  },images);
  for(const mode of ['held','shift'])expect(results[mode],mode).toEqual([expect.objectContaining({serial:2,instanceId:2,association:'tracked'})]);
  expect(results.later.filter(c=>c.serial!==null)).toEqual([expect.objectContaining({serial:2,association:'later-survivors'})]);
+ expect(results['repeated-cue'].filter(c=>c.serial!==null)).toEqual([expect.objectContaining({serial:2,association:'survivors-after-collision'})]);
  expect(results.singletonGap).toEqual([expect.objectContaining({serial:1,instanceId:1,association:'singleton'})]);
- for(const mode of ['camera-cut','ambiguous','reset','alive','expired','two-kills','incomplete-memory','reinforced-unseen'])expect(results[mode].every(c=>c.serial===null),mode).toBe(true);
+ for(const mode of ['camera-cut','ambiguous','reset','alive','expired','incomplete-memory','reinforced-unseen'])expect(results[mode].every(c=>c.serial===null),mode).toBe(true);
 });
 
 for(const [protocol,size] of [['http',{width:1440,height:900}],['file',{width:950,height:1200}]])test(`08 autumn defeat later rounds: retained identities and cumulative reinforcement counts (${protocol})`,async({page})=>{
