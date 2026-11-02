@@ -938,7 +938,7 @@ for(const protocol of ['http','file'])test(`08 autumn icon status flags: presenc
 
 
 
-for(const protocol of ['http','file'])test(`08 autumn battle HP: real READY pixels, unique ledger match and transition guards (${protocol})`,async({page})=>{
+for(const protocol of ['http','file'])test(`08 autumn defeat battle HP: real READY pixels, unique ledger match and transition guards (${protocol})`,async({page})=>{
  test.setTimeout(90000);if(protocol==='file')await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);else await open(page);
  const images={cut:require('fs').readFileSync(turnFramePath(93)).toString('base64'),battle:require('fs').readFileSync('tests/fixtures/screen-reader/defeat/autumn-owls-45-20261029/battle.png').toString('base64')};
  const result=await page.evaluate(async images=>{
