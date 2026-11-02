@@ -948,6 +948,7 @@ for(const protocol of ['http','file'])test(`08 autumn battle HP: real READY pixe
   const stage=blank(),bx=stage.popupFrame.getContext('2d');bx.imageSmoothingEnabled=false;bx.drawImage(await load(images.battle),300,120,960,440);
   const mask=(box)=>{const c=blank();c.popupFrame.getContext('2d').drawImage(stage.popupFrame,0,0);c.popupFrame.getContext('2d').fillRect(...box.map(v=>v*2));return c;};
   const noReady=mask([150,243,500,35]),oneHp=mask([424,220,44,20]),noHeart=mask([425,221,19,18]);
+  noReady.popupFrame.getContext('2d').fillStyle='#c77828';noReady.popupFrame.getContext('2d').fillRect(300,486,1000,70);
   const p=ScreenReaderDefeatVision.pixels(stage),rows=ScreenReaderCombatVision.readHpPixels(p);
   const output={rows,ready:ScreenReaderCombatVision.readyPixels(p),noReady:ScreenReaderCombatVision.readyPixels(ScreenReaderDefeatVision.pixels(noReady)),heartMasked:ScreenReaderCombatVision.readHpPixels(ScreenReaderDefeatVision.pixels(noHeart)),modes:{}};
   for(const mode of ['unique','duplicate','missing-ledger','no-cut','no-ready','one-hp','late-ready','transition','roster-change','capture-gap','conflict']){
