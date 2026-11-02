@@ -831,6 +831,7 @@ for(const [protocol,size] of [['http',{width:1440,height:900}],['file',{width:95
  expect(hpLog.records.some(r=>r.code==='memory_updated'&&r.candidates.some(c=>c.monsterId==='M0122'&&c.serial===1&&c.currentHp===5))).toBe(true);
  expect(result.state.monsters.filter(m=>m.defeated).map(m=>[m.monsterId,m.serial]).sort()).toEqual([['M0122',1],['M0123',1],['M0123',2],['M0123',3]]);
  expect(result.defeats).toHaveLength(4);
+ const worldRecords=result.checkpoints[268].diagnostic.records.filter(r=>r.code==='world_observation');expect(worldRecords.length).toBeGreaterThan(0);expect(worldRecords.some(r=>r.candidates.length>0)).toBe(true);expect(worldRecords.some(r=>Array.isArray(r.acceptedMonsters)&&r.applyResult!==null)).toBe(true);expect(worldRecords.every(r=>Number.isFinite(r.processingMs)&&r.processingMs>=0&&(r.intervalMs===null||Number.isFinite(r.intervalMs)))).toBe(true);
  expect(result.defeats.find(d=>d.text.includes('おもちゃの恐竜')).record.candidates[0]).toMatchObject({monsterId:'M0122',serial:1,lastSeenHp:5,maxHp:19});
  await page.locator('#reader-close').click();
  await page.locator('#roster-undo').click();expect((await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).monsters.find(m=>m.monsterId==='M0123'&&m.serial===2)?.defeated).toBe(false);
@@ -934,3 +935,43 @@ for(const protocol of ['http','file'])test(`08 autumn icon status flags: presenc
 
 
 
+
+
+
+for(const protocol of ['http','file'])test(`08 autumn battle HP: real READY pixels, unique ledger match and transition guards (${protocol})`,async({page})=>{
+ test.setTimeout(90000);if(protocol==='file')await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);else await open(page);
+ const images={cut:require('fs').readFileSync(turnFramePath(93)).toString('base64'),battle:require('fs').readFileSync('tests/fixtures/screen-reader/defeat/autumn-owls-45-20261029/battle.png').toString('base64')};
+ const result=await page.evaluate(async images=>{
+  const load=async src=>{const im=new Image();im.src='data:image/png;base64,'+src;await im.decode();return im;};
+  const cut=ScreenReaderVision.normalize(await load(images.cut));
+  const blank=()=>{const c=document.createElement('canvas');c.width=1536;c.height=710;c.getContext('2d').fillRect(0,0,1536,710);return {popupFrame:c};};
+  const stage=blank(),bx=stage.popupFrame.getContext('2d');bx.imageSmoothingEnabled=false;bx.drawImage(await load(images.battle),300,120,960,440);
+  const mask=(box)=>{const c=blank();c.popupFrame.getContext('2d').drawImage(stage.popupFrame,0,0);c.popupFrame.getContext('2d').fillRect(...box.map(v=>v*2));return c;};
+  const noReady=mask([150,243,500,35]),oneHp=mask([424,220,44,20]),noHeart=mask([425,221,19,18]);
+  const p=ScreenReaderDefeatVision.pixels(stage),rows=ScreenReaderCombatVision.readHpPixels(p);
+  const output={rows,ready:ScreenReaderCombatVision.readyPixels(p),noReady:ScreenReaderCombatVision.readyPixels(ScreenReaderDefeatVision.pixels(noReady)),heartMasked:ScreenReaderCombatVision.readHpPixels(ScreenReaderDefeatVision.pixels(noHeart)),modes:{}};
+  for(const mode of ['unique','duplicate','missing-ledger','no-cut','no-ready','one-hp','late-ready','transition','roster-change','capture-gap','conflict']){
+   const tracker=ScreenReaderDefeatVision.createTracker(),roster=[1,2].map(serial=>({monsterId:'M0123',serial,instanceId:serial,maxHp:10,seen:true,defeated:false})),ctx={counts:{M0123:2},monsters:roster,mapVisible:true},events=[];
+   const known=roster.map((o,i)=>({...o,currentHp:i===0||mode==='duplicate'?1:6}));
+   if(mode==='missing-ledger')roster.push({...roster[1],serial:3,instanceId:3});
+   const step=(frame,time,obs=[])=>{tracker.step(frame,time,obs,ctx);events.push(...tracker.diagnostics().events);};
+   step(blank(),100,mode==='transition'||mode==='roster-change'||mode==='capture-gap'?[known[0]]:known);
+   if(mode==='conflict')step(blank(),200,[known[1]]);
+   ctx.mapVisible=false;step(blank(),350);
+   if(mode==='conflict'){step(cut,600);step(stage,850);step(stage,1100);}
+   else {
+    step(blank(),1350);step(mode==='no-cut'?blank():cut,2350);
+    if(mode==='roster-change')roster[1].instanceId=20;
+    const start=mode==='capture-gap'?5000:3350,frame=mode==='no-ready'||mode==='late-ready'?noReady:mode==='one-hp'?oneHp:stage;
+    step(frame,start);step(frame,start+250);
+    if(mode==='late-ready'){step(noReady,start+1250);step(stage,start+1750);step(stage,start+2000);}
+   }
+   output.modes[mode]={events,battle:tracker.diagnostics().battle};
+  }return output;
+ },images);
+ expect(result.rows.map(r=>r.hp)).toEqual([12,1]);expect(result.ready).toBe(true);expect(result.noReady).toBe(false);expect(result.heartMasked.map(r=>r.hp)).toEqual([12]);
+ for(const mode of ['unique','conflict']){expect(result.modes[mode].events.some(e=>e.code==='battle_target_hp'),mode).toBe(true);expect(result.modes[mode].battle.candidates).toEqual([expect.objectContaining({serial:1,currentHp:1})]);}
+ expect(result.modes.transition.events.some(e=>e.code==='cut_target')).toBe(true);expect(result.modes.transition.battle.candidates).toEqual([expect.objectContaining({serial:1})]);
+ for(const mode of ['duplicate','missing-ledger','no-cut','no-ready','one-hp','late-ready','roster-change','capture-gap'])expect(result.modes[mode].battle?.candidates||[],mode).toEqual([]);
+ expect(result.modes.conflict.events.some(e=>e.code==='battle_hp_conflict')).toBe(true);
+});

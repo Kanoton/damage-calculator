@@ -19,8 +19,9 @@
  let stream=null,rawSource=null,frame=null,busy=false,timer=null,generation=0,selecting=false,selectionStart=null,area=null,catalog=null,custom={characters:[],chips:[]};
  let worldContext=null,readStarted=null,partyLock=null,lastObservation=null,partyEdited=false,readerSession=false;
  const defeatTracker=window.ScreenReaderDefeatVision.createTracker();
- const diagnosticLabels={reset:'追跡をリセット',collision_resolved:'衝突後の他個体の生存確認で撃破番号を特定',multiple_defeat_candidates:'同種の撃破候補が複数あり対応付けを保留',survivor_wait:'他候補の生存を連続確認して絞り込み待ち',survivor_confirmed:'別候補の生存を連続確認',memory_updated:'番号と生存HPを記憶',archived_candidates:'保持した個体番号と照合・他候補の生存確認待ち',no_gray:'今回の画面では撃破演出未検出',gray_detected:'グレー形状を検出',beam_pending:'グレー化を検出・消滅光待ち',beam_timeout:'消滅光を確認できず期限切れ',identity_pending:'撃破演出を確認・個体との対応を保留',identity_confirmed:'撃破演出と個体が一致',position_lost:'背景との対応が途切れ位置追跡を保留',memory_expired:'個体情報の保持期限切れ',roster_changed:'一覧との対応状態が変化',candidate_timeout:'個体候補の絞り込みが期限切れ',capture_gap:'取得間隔が空いたため位置・演出の連続性を破棄',start_cut:'戦闘開始カット：種類を識別（番号は別途確認）',battle_view:'戦闘画面を検出',battle_target:'戦闘前の対象個体を保持',battle_unknown:'戦闘画面を検出・対象個体は未確定',battle_expired:'戦闘対象の保持期限切れ',map_return:'マップへの復帰を確認',return_expired:'戦闘復帰後の対応期限切れ',applied:'一覧へ撃破を反映',apply_off:'確認のみ・一覧への反映OFF',apply_rejected:'番号候補はあるが一覧への反映条件が不一致',unsupported:'自動撃破の対象外、またはモンスター読取OFF'};
+ const diagnosticLabels={world_observation:'マップ情報の読取・連続一致・登録段階',map_transition_target:'画面移行前の対象候補を保持',cut_target:'開始カットへ対象候補を引き継ぎ',battle_hp:'戦闘開始HPを読取',battle_hp_conflict:'戦闘HPと直前候補が不一致',battle_target_hp:'戦闘HPが一意の個体と一致',battle_hp_ambiguous:'戦闘HPの一致候補が複数または不足',reset:'追跡をリセット',collision_resolved:'衝突後の他個体の生存確認で撃破番号を特定',multiple_defeat_candidates:'同種の撃破候補が複数あり対応付けを保留',survivor_wait:'他候補の生存を連続確認して絞り込み待ち',survivor_confirmed:'別候補の生存を連続確認',memory_updated:'番号と生存HPを記憶',archived_candidates:'保持した個体番号と照合・他候補の生存確認待ち',no_gray:'今回の画面では撃破演出未検出',gray_detected:'グレー形状を検出',beam_pending:'グレー化を検出・消滅光待ち',beam_timeout:'消滅光を確認できず期限切れ',identity_pending:'撃破演出を確認・個体との対応を保留',identity_confirmed:'撃破演出と個体が一致',position_lost:'背景との対応が途切れ位置追跡を保留',memory_expired:'個体情報の保持期限切れ',roster_changed:'一覧との対応状態が変化',candidate_timeout:'個体候補の絞り込みが期限切れ',capture_gap:'取得間隔が空いたため位置・演出の連続性を破棄',start_cut:'戦闘開始カット：種類を識別（番号は別途確認）',battle_view:'戦闘画面を検出',battle_target:'戦闘前の対象個体を保持',battle_unknown:'戦闘画面を検出・対象個体は未確定',battle_expired:'戦闘対象の保持期限切れ',map_return:'マップへの復帰を確認',return_expired:'戦闘復帰後の対応期限切れ',applied:'一覧へ撃破を反映',apply_off:'確認のみ・一覧への反映OFF',apply_rejected:'番号候補はあるが一覧への反映条件が不一致',unsupported:'自動撃破の対象外、またはモンスター読取OFF'};
  const diagnosticHistory=window.ScreenReaderDefeatVision.createHistory();
+ let lastWorldFingerprint='',lastWorldTime=-Infinity;
  let diagnosticStart=null,diagnosticLastKey='',diagnosticLastTime=-Infinity,diagnosticActive=false,diagnosticCurrent=null;
  const diagnosticSnapshot=()=>({...diagnosticHistory.snapshot(),version:1,current:JSON.parse(JSON.stringify(diagnosticCurrent))});
  function recordDiagnostic(event,time){
@@ -36,11 +37,19 @@
   }));
  }
  function resetDefeat(message='読取条件が変わりました'){
-  defeatTracker.reset();diagnosticCurrent=null;$('defeat-result').textContent='';
+  defeatTracker.reset();lastWorldFingerprint='';lastWorldTime=-Infinity;diagnosticCurrent=null;$('defeat-result').textContent='';
   if($('defeat-stage'))$('defeat-stage').textContent=diagnosticLabels.reset+'：'+message;
   if(diagnosticActive)recordDiagnostic({code:'reset',message},performance.now());diagnosticActive=false;
  }
  $('save-diagnostics')?.addEventListener('click',()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(diagnosticSnapshot(),null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='screen-reader-combat-diagnostics.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
+ function recordWorldObservation(raw,accepted,result,time,automatic,processingMs,intervalMs,reused=false){
+  if(!$('world-sync').checked)return;
+  const summarize=w=>(w?.monsters||[]).map(({monsterId,serial,currentHp,maxHp})=>({monsterId,serial,currentHp,maxHp}));
+  const detail={code:'world_observation',candidates:summarize(raw),acceptedMonsters:accepted?summarize(accepted):null,applyResult:result,automatic,reused};
+  const fingerprint=JSON.stringify(detail),metrics={processingMs:Math.round(processingMs),intervalMs:intervalMs===null?null:Math.round(intervalMs)};
+  if(diagnosticCurrent)diagnosticCurrent.worldRead={...detail,...metrics};
+  if(fingerprint!==lastWorldFingerprint||time-lastWorldTime>=2000){recordDiagnostic({...detail,...metrics},time);lastWorldFingerprint=fingerprint;lastWorldTime=time;}
+ }
  function updateDefeat(source,time,world){
   if(!$('world-sync').checked||window.ScreenReaderMapBridge.snapshot().map!=='MAP0105'){resetDefeat('モンスター読取OFF、または対象マップ外');if($('defeat-stage'))$('defeat-stage').textContent=diagnosticLabels.unsupported;return [];}
   const context=window.ScreenReaderMapBridge.context();if(context!==worldContext){worldContext=context;resetDefeat('マップ・難易度・ルートの変更');}
@@ -207,7 +216,7 @@
    showFrame(rawSource);const hash=frameHash();sameFrames=hash===lastHash?sameFrames+1:0;lastHash=hash;
    // Exact map pixels are included in the hash while world sync is ON. An
    // unchanged capture still proves the last visible labels are present.
-   if(automatic&&sameFrames>2&&lastObservedHash===hash){updateDefeat(frame,started,lastObservation?.world);monitorInfo('画面変化待ち ／ '+timing());return;}
+   if(automatic&&sameFrames>2&&lastObservedHash===hash){updateDefeat(frame,started,lastObservation?.world);recordWorldObservation(lastObservation?.world,null,null,started,automatic,performance.now()-started,gap,true);monitorInfo('画面変化待ち ／ '+timing());return;}
    // Yield to paint without overlapping jobs. Stop/reset invalidates this frame.
    await new Promise(resolve=>requestAnimationFrame(resolve));if(token!==generation)return;
    const observation=vision.analyze(frame,custom,partyLock);observation.setup=window.ScreenReaderStartVision.analyze(frame);if($('world-sync').checked)observation.world=window.ScreenReaderWorldVision.analyze(frame,{positions:true});else $('world-result').textContent='マップ読取はOFFです。マップ・難易度を選び、反映をONにしてください。';if(!partyLock&&$('self').value)observation.selfId=$('self').value;
@@ -221,12 +230,13 @@
    const result=$('apply').checked?bridge.apply(accepted):{updated:0,added:0};
    drawResults(observation,accepted,automatic);
    lastObservedHash=hash;
-   let worldSkipped=0;
-   if($('apply').checked&&$('world-sync').checked){const applied=window.ScreenReaderMapBridge.apply(accepted.world,{allowDefeat:false});worldSkipped=applied.skipped||0;if(applied.skipped)$('world-result').textContent+=' ／ 反映保留 '+applied.skipped+'件'+(accepted.world?.monsters?.some(m=>m.currentHp===0)?'（HP0候補は撃破未確認のため保持）':'（マップ・難易度・既存個体との一致を確認してください）');}
+   let worldSkipped=0,worldApplied=null;
+   if($('apply').checked&&$('world-sync').checked){const applied=window.ScreenReaderMapBridge.apply(accepted.world,{allowDefeat:false});worldApplied={...applied};worldSkipped=applied.skipped||0;if(applied.skipped)$('world-result').textContent+=' ／ 反映保留 '+applied.skipped+'件'+(accepted.world?.monsters?.some(m=>m.currentHp===0)?'（HP0候補は撃破未確認のため保持）':'（マップ・難易度・既存個体との一致を確認してください）');}
    const statusUpdate=updateStatusIcons(frame,observation.world,accepted.selfId,automatic);
    // Printed totals already include buffs: reconcile them after changing counts.
    if(statusUpdate.updatedSelf)bridge.apply({members:accepted.members.filter(m=>m.id===accepted.selfId)});
    updateDefeat(frame,started,observation.world);
+   recordWorldObservation(observation.world,accepted.world,worldApplied,started,automatic,performance.now()-started,gap);
    monitorInfo((observation.world?'今回 '+observation.world.monsters.length+'体 ／ '+(automatic?'連続一致 '+accepted.world.monsters.length+'体':'手動読取')+' ／ '+(!$('apply').checked?'確認のみ ／ ':worldSkipped?'反映保留 '+worldSkipped+'件 ／ ':''):'')+timing());
    const names=observation.members.filter(m=>m.id).length;
    status((automatic?'自動読取':'画面読取')+'：'+names+'人を判定／チップ '+result.added+'件追加。'+(!observation.selfId?' 自キャラが未判定の場合は「自キャラ」を指定してください。':''));
@@ -288,5 +298,6 @@
  $('learn-id').addEventListener('change',updateMappingPreview);
  window.ScreenReaderController={read,stop,stabilize,validateProfile,updateDefeat,updateStatusIcons,diagnostics:diagnosticSnapshot};ready();
 })();
+
 
 
