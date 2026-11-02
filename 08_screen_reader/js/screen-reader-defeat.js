@@ -47,10 +47,11 @@
  }
  function createTracker(){
   let pending=[],lastTime=null,previous=null,identities=new Map(),unlocated=new Map(),tick=0,completed=new Set();
+  let transition=null,mapWasVisible=false;
   let memory=new Map(),knownIndividuals=new Map(),battle=null,wasBattle=false,focus=null,unresolved=[],cut=null,events=[],diagnostic={code:'reset',events:[]};
   const report=(code,detail={})=>events.push({code,...detail});
   const describe=o=>({monsterId:o.monsterId,serial:o.serial,instanceId:o.instanceId,currentHp:o.currentHp,maxHp:o.maxHp,...(o.lastSeenHp===undefined?{}:{lastSeenHp:o.lastSeenHp})});
-  const reset=()=>{pending=[];lastTime=null;previous=null;identities.clear();unlocated.clear();completed.clear();memory.clear();knownIndividuals.clear();battle=null;wasBattle=false;focus=null;unresolved=[];cut=null;events=[];diagnostic={code:'reset',events:[]};tick=0;};
+  const reset=()=>{pending=[];lastTime=null;previous=null;identities.clear();unlocated.clear();completed.clear();transition=null;mapWasVisible=false;memory.clear();knownIndividuals.clear();battle=null;wasBattle=false;focus=null;unresolved=[];cut=null;events=[];diagnostic={code:'reset',events:[]};tick=0;};
   // Register textured map background, not labels or moving actors. A position
   // survives a missing name only while independently registered map pixels do.
   function mapMotion(a,b,excluded){
@@ -79,7 +80,7 @@
   return {reset,diagnostics:()=>JSON.parse(JSON.stringify(diagnostic)),step(source,time,observations=[],context=null){
    events=[];
    if(!Number.isFinite(time)||lastTime!==null&&time<=lastTime){reset();if(!Number.isFinite(time))return [];}
-   if(lastTime!==null&&time-lastTime>1800){report('capture_gap',{gapMs:time-lastTime});pending=[];unresolved=[];previous=null;identities.clear();unlocated.clear();battle=null;focus=null;cut=null;wasBattle=false;for(const o of memory.values())o.tracked=false;}
+   if(lastTime!==null&&time-lastTime>1800){report('capture_gap',{gapMs:time-lastTime});transition=null;mapWasVisible=false;pending=[];unresolved=[];previous=null;identities.clear();unlocated.clear();battle=null;focus=null;cut=null;wasBattle=false;for(const o of memory.values())o.tracked=false;}
    lastTime=time;tick++;const p=pixels(source),found=blobs(p).map(blob=>({...blob,match:classify(blob)})).filter(b=>b.match),emitted=[];
    const key=o=>o.monsterId+':'+o.serial;
    const lastSeenHp=o=>{const latest=memory.get(key(o));return latest&&latest.instanceId===o.instanceId&&latest.maxHp===o.maxHp?latest.currentHp:(o.lastSeenHp??o.currentHp);};
@@ -93,7 +94,7 @@
    // Its size is bounded by the current roster; reset and instance changes clear it.
    for(const [id,o] of knownIndividuals)if(!valid(o))knownIndividuals.delete(id);
    const detectedCut=window.ScreenReaderCombatVision?.analyzePixels(p);
-   if(detectedCut){if(!cut||cut.monsterId!==detectedCut.monsterId||time-cut.time>1500)report('start_cut',{monsterId:detectedCut.monsterId});cut={...detectedCut,time};}
+   if(detectedCut){const same=cut&&cut.monsterId===detectedCut.monsterId&&time-cut.time<=1500;if(!same)report('start_cut',{monsterId:detectedCut.monsterId});cut={...detectedCut,time,anchor:same?cut.anchor:null,anchorChecked:same&&cut.anchorChecked,anchorSignature:same?cut.anchorSignature:null,anchorTime:same?cut.anchorTime:null};}
    if(cut&&time-cut.time>3000)cut=null;
    const masks=[...memory.values()].flatMap(o=>[...(o.marker?[[o.marker[0]-90,o.marker[1]-90,180,200]]:[]),...(o.labelBox?[o.labelBox]:[])]).concat(found.map(b=>b.box.map(v=>v*2)));
    const inBattle=battleView(p);
@@ -114,13 +115,46 @@
    }
    const current=observations.filter(o=>valid(o)&&o.currentHp>0&&o.currentHp<=o.maxHp&&memory.has(key(o)));
    if(current.length===1)focus={...memory.get(key(current[0])),time};else if(current.length>1)focus=null;
+   if(context?.mapVisible){transition=null;mapWasVisible=true;}
+   else if(mapWasVisible){
+    const identity=focus&&time-focus.time<=2000&&valid(focus)&&complete(focus.monsterId)?{...focus}:null;
+    transition=identity?{identity,time,signature:rosterSignature(identity.monsterId)}:null;mapWasVisible=false;
+    if(identity)report('map_transition_target',{candidates:[describe(identity)]});
+   }
+   if(transition&&(time-transition.time>5000||!valid(transition.identity)||transition.signature!==rosterSignature(transition.identity.monsterId)||current.some(o=>key(o)!==key(transition.identity))))transition=null;
+   if(cut&&!cut.anchorChecked){
+    const recent=focus&&time-focus.time<=2000?focus:null,held=transition&&time-transition.time<=5000?transition.identity:null;
+    const anchor=[recent,held].find(o=>o&&o.monsterId===cut.monsterId&&valid(o)&&complete(o.monsterId));
+    cut.anchor=anchor?{...anchor}:null;cut.anchorChecked=true;cut.anchorSignature=anchor?rosterSignature(anchor.monsterId):null;cut.anchorTime=time;
+    if(anchor)report('cut_target',{monsterId:cut.monsterId,candidates:[describe(anchor)]});
+   }
+   if(cut?.anchor&&(context?.mapVisible||current.some(o=>key(o)!==key(cut.anchor))))cut.anchor=null;
    if(inBattle&&!wasBattle&&!battle&&!context?.mapVisible){
     const choices=[...memory.values()].filter(o=>o.confirmed&&complete(o.monsterId)&&valid(o)&&time-o.time<=2000&&(!cut||cut.monsterId===o.monsterId)&&!completed.has(key(o)+':'+o.instanceId));
     const focused=focus&&time-focus.time<=2000&&valid(focus)&&complete(focus.monsterId)&&(!cut||cut.monsterId===focus.monsterId)&&!completed.has(key(focus)+':'+focus.instanceId)?focus:null;
-    const target=focused||(cut&&choices.length===1?choices[0]:null);
-    battle={identity:target,monsterId:cut?.monsterId||target?.monsterId||null,start:time,exit:null};
+    const anchor=cut?.anchor&&time-cut.anchorTime<=5000&&cut.anchorSignature===rosterSignature(cut.anchor.monsterId)&&valid(cut.anchor)&&complete(cut.anchor.monsterId)&&!completed.has(key(cut.anchor)+':'+cut.anchor.instanceId)?cut.anchor:null;
+    const target=focused||(cut&&choices.length===1?choices[0]:null)||anchor;
+    battle={identity:target,monsterId:cut?.monsterId||target?.monsterId||null,start:time,exit:null,hpRun:0,hpValue:null,hpIdentity:null};
     report(target?'battle_target':'battle_unknown',{monsterId:battle.monsterId,candidates:target?[describe(target)]:choices.map(describe)});
    }
+   // Only the initial READY stage with a recently identified defender cut.
+   // Later damage/role swaps must never re-identify a battle from the reduced HP.
+   if(battle&&battle.exit===null&&inBattle&&time-battle.start<=1500&&cut&&time-cut.time<=3000&&window.ScreenReaderCombatVision?.readyPixels?.(p)){
+    const hpRows=window.ScreenReaderCombatVision.readHpPixels?.(p)||[];
+    const value=hpRows.length===2&&hpRows[1].box[0]-hpRows[0].box[0]>100?hpRows[1].hp:null;
+    battle.hpRun=value!==null&&value===battle.hpValue?battle.hpRun+1:1;battle.hpValue=value;
+    if(value!==null){
+     report('battle_hp',{monsterId:cut.monsterId,hp:value,consecutive:battle.hpRun});
+     if(battle.identity&&battle.identity.currentHp!==value){battle.identity=null;report('battle_hp_conflict',{monsterId:cut.monsterId,hp:value});}
+     if(battle.hpRun>=2&&!battle.identity&&complete(cut.monsterId)){
+      const alive=roster.filter(o=>o.monsterId===cut.monsterId&&!o.defeated&&!completed.has(key(o)+':'+o.instanceId));
+      const known=alive.map(o=>knownIndividuals.get(key(o))).filter(o=>o&&valid(o));
+      const matches=known.filter(o=>o.lastSeenHp===value);
+      if(known.length===alive.length&&matches.length===1){battle.identity={...matches[0],currentHp:value};battle.hpIdentity=true;battle.monsterId=cut.monsterId;report('battle_target_hp',{monsterId:cut.monsterId,hp:value,candidates:[describe(battle.identity)]});}
+      else report('battle_hp_ambiguous',{monsterId:cut.monsterId,hp:value,candidates:matches.map(describe)});
+     }
+    }
+   }else if(battle){battle.hpRun=0;battle.hpValue=null;}
    if(battle&&time-battle.start>45000){report('battle_expired');battle=null;}
    // Attacks cover the stage and can hide its colors. Only the independently
    // read map clock establishes a return to the map, not a missing stage.
@@ -130,7 +164,7 @@
    function rememberedIdentity(blob){
     if(inBattle)return null;
     const id=blob.match.monsterId,choices=[...memory.values()].filter(o=>o.monsterId===id&&o.confirmed&&complete(id)&&!completed.has(key(o)+':'+o.instanceId));
-    if(battle?.exit!==null&&battle?.exit!==undefined&&battle.identity?.monsterId===id&&complete(id)&&valid(battle.identity)&&!completed.has(key(battle.identity)+':'+battle.identity.instanceId))return {...battle.identity,remembered:true,association:'battle'};
+    if(battle?.exit!==null&&battle?.exit!==undefined&&battle.identity?.monsterId===id&&complete(id)&&valid(battle.identity)&&!completed.has(key(battle.identity)+':'+battle.identity.instanceId))return {...battle.identity,remembered:true,association:battle.hpIdentity?'battle-hp':'battle'};
     const [x,y,w,h]=blob.box.map(v=>v*2);
     const near=o=>{if(!o.labelBox)return false;const [lx,ly,lw]=o.labelBox;return x+w>=lx-220&&x<=lx+lw+350&&y+h>=ly+10&&y<=ly+300;};
     const tracked=choices.filter(o=>o.tracked&&time-o.positionTime<=750&&near(o));
@@ -207,12 +241,13 @@
    }
    for(const cue of emitted)if(cue.serial!==null)completed.add(key(cue)+':'+cue.instanceId);
    for(const cue of emitted)report(cue.serial===null?'identity_pending':'identity_confirmed',{monsterId:cue.monsterId,association:cue.association,candidates:cue.serial===null?[...memory.values()].filter(o=>o.monsterId===cue.monsterId&&valid(o)).map(describe):[describe(cue)]});
-   diagnostic={time,code:emitted.length?(emitted.some(c=>c.serial!==null)?'identity_confirmed':'identity_pending'):pending.length?'beam_pending':unresolved.some(u=>u.blocked)?'multiple_defeat_candidates':unresolved.length?'survivor_wait':detectedCut?'start_cut':inBattle?'battle_view':'no_gray',events,cut:detectedCut||null,battle:battle?{monsterId:battle.monsterId,candidates:battle.identity?[describe(battle.identity)]:[]}:null,knownIndividuals:[...knownIndividuals.values()].map(o=>({...describe(o),ageMs:time-o.time})),memory:[...memory.values()].map(o=>({...describe(o),ageMs:time-o.time,tracked:o.tracked})),pending:pending.map(o=>({monsterId:o.monsterId,ageMs:time-o.time,candidates:o.identity?[describe(o.identity)]:[]})),unresolved:unresolved.map(o=>({monsterId:o.cue.monsterId,ageMs:time-o.time,timeoutMs:o.timeoutMs,archived:o.archived,blocked:!!o.blocked,holdReason:o.blocked?'multiple_defeat_candidates':'survivor_wait',cueCount:o.cueCount,evidence:{...o.evidence,box:[...o.evidence.box]},lastCollision:o.lastCollision?{...o.lastCollision,box:[...o.lastCollision.box]}:null,candidates:o.choices.filter(c=>!o.excluded.has(key(c))).map(describe)})),grayCount:found.length};
+   diagnostic={time,code:emitted.length?(emitted.some(c=>c.serial!==null)?'identity_confirmed':'identity_pending'):pending.length?'beam_pending':unresolved.some(u=>u.blocked)?'multiple_defeat_candidates':unresolved.length?'survivor_wait':detectedCut?'start_cut':inBattle?'battle_view':'no_gray',events,cut:detectedCut||null,battle:battle?{monsterId:battle.monsterId,hp:battle.hpValue,hpConsecutive:battle.hpRun,candidates:battle.identity?[describe(battle.identity)]:[]}:null,knownIndividuals:[...knownIndividuals.values()].map(o=>({...describe(o),ageMs:time-o.time})),memory:[...memory.values()].map(o=>({...describe(o),ageMs:time-o.time,tracked:o.tracked})),pending:pending.map(o=>({monsterId:o.monsterId,ageMs:time-o.time,candidates:o.identity?[describe(o.identity)]:[]})),unresolved:unresolved.map(o=>({monsterId:o.cue.monsterId,ageMs:time-o.time,timeoutMs:o.timeoutMs,archived:o.archived,blocked:!!o.blocked,holdReason:o.blocked?'multiple_defeat_candidates':'survivor_wait',cueCount:o.cueCount,evidence:{...o.evidence,box:[...o.evidence.box]},lastCollision:o.lastCollision?{...o.lastCollision,box:[...o.lastCollision.box]}:null,candidates:o.choices.filter(c=>!o.excluded.has(key(c))).map(describe)})),grayCount:found.length};
    return emitted.filter((v,i,a)=>a.findIndex(b=>b.monsterId===v.monsterId)===i);
   }};
  }
  window.ScreenReaderDefeatVision={createTracker,createHistory,blobs,pixels};
 })();
+
 
 
 
