@@ -423,7 +423,7 @@ test('08 world: short autumn replay confirms three owls and one dinosaur at quar
  for(let i=0;i<results.length;i++)expect(results[i].monsters,'sample '+(i+1)).toEqual(autumnLive.samples[i].expected?[autumnLive.samples[i].expected]:[]);
  const run=async step=>page.evaluate(({observations,step})=>{
   document.getElementById('reader-new-game').click();ScreenReaderMapBridge.configure({map:'MAP0105',difficulty:'困難'});
-  for(let i=0;i<observations.length;i+=step){const accepted=ScreenReaderController.stabilize({members:[],selfId:null,chipOwnerId:null,chipIds:[],world:observations[i]});ScreenReaderMapBridge.apply(accepted.world,{allowDefeat:false});}
+  for(let i=0;i<observations.length;i+=step){const accepted=ScreenReaderController.stabilize({members:[],selfId:null,chipOwnerId:null,chipIds:[],world:observations[i]},1000+i*250);ScreenReaderMapBridge.apply(accepted.world,{allowDefeat:false});}
   return ScreenReaderMapBridge.snapshot();
  },{observations:results,step});
  // This observed phase at 500ms reproduces the user's owl-3-only result.
@@ -941,6 +941,8 @@ for(const protocol of ['http','file'])test(`08 autumn icon status flags: presenc
 for(const protocol of ['http','file'])test(`08 autumn defeat battle HP: real READY pixels, unique ledger match and transition guards (${protocol})`,async({page})=>{
  test.setTimeout(90000);if(protocol==='file')await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);else await open(page);
  const images={cut:require('fs').readFileSync(turnFramePath(93)).toString('base64'),battle:require('fs').readFileSync('tests/fixtures/screen-reader/defeat/autumn-owls-45-20261029/battle.png').toString('base64'),battle2:require('fs').readFileSync('tests/fixtures/screen-reader/defeat/autumn-owls-45-20261029/battle-hp2.png').toString('base64')};
+ const sample=defeatManifest.samples.find(s=>s.id==='owl-1');
+ for(const [i,name] of ['gray','beam'].entries())images[name]=(await defeatFrame(page,sample.snapshots[i+1],0,{capture:true})).split(',')[1];
  const result=await page.evaluate(async images=>{
   const load=async src=>{const im=new Image();im.src='data:image/png;base64,'+src;await im.decode();return im;};
   const cut=ScreenReaderVision.normalize(await load(images.cut));
@@ -952,9 +954,9 @@ for(const protocol of ['http','file'])test(`08 autumn defeat battle HP: real REA
   const hp2=blank();hp2.popupFrame.getContext('2d').imageSmoothingEnabled=false;hp2.popupFrame.getContext('2d').drawImage(await load(images.battle2),300,120,960,440);
   const p=ScreenReaderDefeatVision.pixels(stage),rows=ScreenReaderCombatVision.readHpPixels(p);
   const output={rows,rows2:ScreenReaderCombatVision.readHpPixels(ScreenReaderDefeatVision.pixels(hp2)),ready:ScreenReaderCombatVision.readyPixels(p),noReady:ScreenReaderCombatVision.readyPixels(ScreenReaderDefeatVision.pixels(noReady)),heartMasked:ScreenReaderCombatVision.readHpPixels(ScreenReaderDefeatVision.pixels(noHeart)),modes:{}};
-  for(const mode of ['unique','unique-two','duplicate','missing-ledger','no-cut','no-ready','one-hp','late-ready','transition','roster-change','capture-gap','conflict']){
-   const tracker=ScreenReaderDefeatVision.createTracker(),roster=[1,2].map(serial=>({monsterId:'M0123',serial,instanceId:serial,maxHp:10,seen:true,defeated:false})),ctx={counts:{M0123:2},monsters:roster,mapVisible:true},events=[];
-   const known=roster.map((o,i)=>({...o,currentHp:i===0||mode==='duplicate'?(mode==='unique-two'?2:1):6}));
+  for(const mode of ['unique','unique-two','duplicate','missing-ledger','incomplete-roster','no-match','no-cut','no-ready','one-hp','late-ready','transition','roster-change','capture-gap','conflict']){
+   const tracker=ScreenReaderDefeatVision.createTracker(),roster=[1,2].map(serial=>({monsterId:'M0123',serial,instanceId:serial,maxHp:10,seen:true,defeated:false})),ctx={counts:{M0123:mode==='incomplete-roster'?3:2},monsters:roster,mapVisible:true},events=[];
+   const known=roster.map((o,i)=>({...o,currentHp:i===0||mode==='duplicate'?(mode==='unique-two'?2:mode==='no-match'?3:1):6}));
    if(mode==='missing-ledger')roster.push({...roster[1],serial:3,instanceId:3});
    const step=(frame,time,obs=[])=>{tracker.step(frame,time,obs,ctx);events.push(...tracker.diagnostics().events);};
    step(blank(),100,mode==='transition'||mode==='roster-change'||mode==='capture-gap'?[known[0]]:known);
@@ -969,11 +971,49 @@ for(const protocol of ['http','file'])test(`08 autumn defeat battle HP: real REA
     if(mode==='late-ready'){step(noReady,start+1250);step(stage,start+1750);step(stage,start+2000);}
    }
    output.modes[mode]={events,battle:tracker.diagnostics().battle};
-  }return output;
+  }
+  // Rebuild the registration-to-defeat path with the 3.151s gap from the
+  // diagnostic. Map observations are explicit; battle and gray/beam pixels are real.
+  const setup=()=>{ScreenReaderMapBridge.resetForReader();ScreenReaderMapBridge.configure({map:'MAP0105',difficulty:'狂気'});};
+  const clock={round:1,progress:1},owl=(serial,currentHp=10)=>({monsterId:'M0123',serial,currentHp,maxHp:10});
+  const read=(time,monsters)=>ScreenReaderController.stabilize({members:[],chipIds:[],world:{clock,monsters}},time).world;
+  const check=series=>{setup();return series.map(([time,monsters])=>read(time,monsters).monsters.length);};
+  const three=owl(3),zero={...three,currentHp:0};
+  output.guards={
+   expired:check([[1000,[three]],[2000,[]],[3000,[]],[4000,[]],[5001,[three]]]),
+   gap:check([[1000,[three]],[3000,[three]]]),
+   conflict:check([[1000,[three]],[1500,[{...three,maxHp:11}]],[2000,[three]]]),
+   duplicate:check([[1000,[three]],[1500,[three,three]],[2000,[three]]]),
+   zero:check([[1000,[three]],[1500,[zero]],[2000,[three]]])
+  };
+  setup();document.getElementById('reader-world-sync').checked=true;
+  const samples=[[1000,[owl(1,2)]],[1250,[owl(1,2)]],[1450,[three]],[1700,[owl(2,5)]],[1950,[owl(2,5)]],[2600,[]],[3400,[]],[4200,[]],[4601,[three]]];
+  const accepted=samples.map(([time,monsters])=>{
+   const accepted=read(time,monsters);ScreenReaderMapBridge.apply(accepted,{allowDefeat:false});
+   ScreenReaderController.updateDefeat(blank(),time,{clock,monsters});return accepted.monsters.map(o=>o.serial);
+  });
+  const roster=ScreenReaderMapBridge.defeatContext(),empty={clock:null,monsters:[]};
+  ScreenReaderController.updateDefeat(blank(),6000,empty);
+  ScreenReaderController.updateDefeat(cut,6800,empty);
+  ScreenReaderController.updateDefeat(hp2,7500,empty);ScreenReaderController.updateDefeat(hp2,7750,empty);
+  const battle=ScreenReaderController.diagnostics().current.battle;
+  const gray=ScreenReaderVision.normalize(await load(images.gray)),beam=ScreenReaderVision.normalize(await load(images.beam));
+  ScreenReaderController.updateDefeat(gray,8000,{clock,monsters:[]});ScreenReaderController.updateDefeat(beam,8500,{clock,monsters:[]});
+  const diag=ScreenReaderController.diagnostics();
+  output.integration={accepted,roster,battle,applied:diag.records.filter(r=>r.code==='applied'),defeated:ScreenReaderMapBridge.snapshot().monsters.filter(o=>o.defeated).map(o=>o.serial)};
+  return output;
  },images);
  expect(result.rows.map(r=>r.hp)).toEqual([12,1]);expect(result.rows2.map(r=>r.hp)).toEqual([12,2]);expect(result.ready).toBe(true);expect(result.noReady).toBe(false);expect(result.heartMasked.map(r=>r.hp)).toEqual([12]);
  for(const mode of ['unique','unique-two','conflict']){expect(result.modes[mode].events.some(e=>e.code==='battle_target_hp'),mode).toBe(true);expect(result.modes[mode].battle.candidates).toEqual([expect.objectContaining({serial:1,currentHp:mode==='unique-two'?2:1})]);}
  expect(result.modes.transition.events.some(e=>e.code==='cut_target')).toBe(true);expect(result.modes.transition.battle.candidates).toEqual([expect.objectContaining({serial:1})]);
- for(const mode of ['duplicate','missing-ledger','no-cut','no-ready','one-hp','late-ready','roster-change','capture-gap'])expect(result.modes[mode].battle?.candidates||[],mode).toEqual([]);
+ for(const mode of ['duplicate','missing-ledger','incomplete-roster','no-match','no-cut','no-ready','one-hp','late-ready','roster-change','capture-gap'])expect(result.modes[mode].battle?.candidates||[],mode).toEqual([]);
  expect(result.modes.conflict.events.some(e=>e.code==='battle_hp_conflict')).toBe(true);
+ for(const [mode,reason] of [['duplicate','multiple-matches'],['missing-ledger','missing-hp'],['incomplete-roster','incomplete-roster'],['no-match','no-match']])expect(result.modes[mode].events).toContainEqual(expect.objectContaining({code:'battle_hp_ambiguous',reason}));
+ expect(result.modes['incomplete-roster'].events).toContainEqual(expect.objectContaining({code:'battle_hp_ambiguous',expectedCount:3,rosterSerials:[1,2]}));
+ for(const [mode,counts] of Object.entries(result.guards))expect(counts.every(n=>n===0),mode).toBe(true);
+ expect(result.integration.accepted).toEqual([[],[1],[],[],[2],[],[],[],[3]]);
+ expect(result.integration.roster).toMatchObject({counts:{M0123:3},monsters:[{serial:1,seen:true},{serial:2,seen:true},{serial:3,seen:true}]});
+ expect(result.integration.battle).toMatchObject({hp:2,candidates:[{serial:1,currentHp:2}]});
+ expect(result.integration.applied).toEqual([expect.objectContaining({association:'battle-hp',candidates:[expect.objectContaining({serial:1,lastSeenHp:2})]})]);
+ expect(result.integration.defeated).toEqual([1]);
 });

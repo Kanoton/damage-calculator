@@ -146,12 +146,14 @@
     if(value!==null){
      report('battle_hp',{monsterId:cut.monsterId,hp:value,consecutive:battle.hpRun});
      if(battle.identity&&battle.identity.currentHp!==value){battle.identity=null;report('battle_hp_conflict',{monsterId:cut.monsterId,hp:value});}
-     if(battle.hpRun>=2&&!battle.identity&&complete(cut.monsterId)){
-      const alive=roster.filter(o=>o.monsterId===cut.monsterId&&!o.defeated&&!completed.has(key(o)+':'+o.instanceId));
+     if(battle.hpRun>=2&&!battle.identity){
+      const same=roster.filter(o=>o.monsterId===cut.monsterId);
+      const alive=same.filter(o=>!o.defeated&&!completed.has(key(o)+':'+o.instanceId));
       const known=alive.map(o=>knownIndividuals.get(key(o))).filter(o=>o&&valid(o));
       const matches=known.filter(o=>o.lastSeenHp===value);
-      if(known.length===alive.length&&matches.length===1){battle.identity={...matches[0],currentHp:value};battle.hpIdentity=true;battle.monsterId=cut.monsterId;report('battle_target_hp',{monsterId:cut.monsterId,hp:value,candidates:[describe(battle.identity)]});}
-      else report('battle_hp_ambiguous',{monsterId:cut.monsterId,hp:value,candidates:matches.map(describe)});
+      const reason=!complete(cut.monsterId)?'incomplete-roster':known.length!==alive.length?'missing-hp':matches.length>1?'multiple-matches':!matches.length?'no-match':null;
+      if(!reason){battle.identity={...matches[0],currentHp:value};battle.hpIdentity=true;battle.monsterId=cut.monsterId;report('battle_target_hp',{monsterId:cut.monsterId,hp:value,candidates:[describe(battle.identity)]});}
+      else report('battle_hp_ambiguous',{monsterId:cut.monsterId,hp:value,reason,expectedCount:context?.counts?.[cut.monsterId]??null,rosterSerials:same.map(o=>o.serial),unconfirmedSerials:same.filter(o=>!o.seen).map(o=>o.serial),missingHpSerials:alive.filter(o=>!known.some(k=>key(k)===key(o))).map(o=>o.serial),candidates:matches.map(describe)});
      }
     }
    }else if(battle){battle.hpRun=0;battle.hpValue=null;}
