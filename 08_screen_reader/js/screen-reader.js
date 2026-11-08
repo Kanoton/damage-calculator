@@ -19,7 +19,7 @@
  let stream=null,rawSource=null,frame=null,busy=false,timer=null,generation=0,selecting=false,selectionStart=null,area=null,catalog=null,custom={characters:[],chips:[]};
  let worldContext=null,readStarted=null,partyLock=null,lastObservation=null,partyEdited=false,readerSession=false;
  const defeatTracker=window.ScreenReaderDefeatVision.createTracker();
- const diagnosticLabels={world_observation:'マップ情報の読取・連続一致・登録段階',map_transition_target:'画面移行前の対象候補を保持',cut_target:'開始カットへ対象候補を引き継ぎ',battle_hp:'戦闘開始HPを読取',battle_hp_conflict:'戦闘HPと直前候補が不一致',battle_target_hp:'戦闘HPが一意の個体と一致',battle_hp_ambiguous:'戦闘HPの一致候補が複数または不足',reset:'追跡をリセット',collision_resolved:'衝突後の他個体の生存確認で撃破番号を特定',multiple_defeat_candidates:'同種の撃破候補が複数あり対応付けを保留',survivor_wait:'他候補の生存を連続確認して絞り込み待ち',survivor_confirmed:'別候補の生存を連続確認',memory_updated:'番号と生存HPを記憶',archived_candidates:'保持した個体番号と照合・他候補の生存確認待ち',no_gray:'今回の画面では撃破演出未検出',gray_detected:'グレー形状を検出',beam_pending:'グレー化を検出・消滅光待ち',beam_timeout:'消滅光を確認できず期限切れ',identity_pending:'撃破演出を確認・個体との対応を保留',identity_confirmed:'撃破演出と個体が一致',position_lost:'背景との対応が途切れ位置追跡を保留',memory_expired:'個体情報の保持期限切れ',roster_changed:'一覧との対応状態が変化',candidate_timeout:'個体候補の絞り込みが期限切れ',capture_gap:'取得間隔が空いたため位置・演出の連続性を破棄',start_cut:'戦闘開始カット：種類を識別（番号は別途確認）',battle_view:'戦闘画面を検出',battle_target:'戦闘前の対象個体を保持',battle_unknown:'戦闘画面を検出・対象個体は未確定',battle_expired:'戦闘対象の保持期限切れ',map_return:'マップへの復帰を確認',return_expired:'戦闘復帰後の対応期限切れ',applied:'一覧へ撃破を反映',apply_off:'確認のみ・一覧への反映OFF',apply_rejected:'番号候補はあるが一覧への反映条件が不一致',unsupported:'自動撃破の対象外、またはモンスター読取OFF'};
+ const diagnosticLabels={world_observation:'マップ情報の読取・確認・登録段階',map_transition_target:'画面移行前の対象候補を保持',cut_target:'開始カットへ対象候補を引き継ぎ',battle_hp:'戦闘開始HPを読取',battle_hp_conflict:'戦闘HPと直前候補が不一致',battle_target_hp:'戦闘HPが一意の個体と一致',battle_hp_ambiguous:'戦闘HPから個体を特定できず保留',reset:'追跡をリセット',collision_resolved:'衝突後の他個体の生存確認で撃破番号を特定',multiple_defeat_candidates:'同種の撃破候補が複数あり対応付けを保留',survivor_wait:'他候補の生存を連続確認して絞り込み待ち',survivor_confirmed:'別候補の生存を連続確認',memory_updated:'番号と生存HPを記憶',archived_candidates:'保持した個体番号と照合・他候補の生存確認待ち',no_gray:'今回の画面では撃破演出未検出',gray_detected:'グレー形状を検出',beam_pending:'グレー化を検出・消滅光待ち',beam_timeout:'消滅光を確認できず期限切れ',identity_pending:'撃破演出を確認・個体との対応を保留',identity_confirmed:'撃破演出と個体が一致',position_lost:'背景との対応が途切れ位置追跡を保留',memory_expired:'個体情報の保持期限切れ',roster_changed:'一覧との対応状態が変化',candidate_timeout:'個体候補の絞り込みが期限切れ',capture_gap:'取得間隔が空いたため位置・演出の連続性を破棄',start_cut:'戦闘開始カット：種類を識別（番号は別途確認）',battle_view:'戦闘画面を検出',battle_target:'戦闘前の対象個体を保持',battle_unknown:'戦闘画面を検出・対象個体は未確定',battle_expired:'戦闘対象の保持期限切れ',map_return:'マップへの復帰を確認',return_expired:'戦闘復帰後の対応期限切れ',applied:'一覧へ撃破を反映',apply_off:'確認のみ・一覧への反映OFF',apply_rejected:'番号候補はあるが一覧への反映条件が不一致',unsupported:'自動撃破の対象外、またはモンスター読取OFF'};
  const diagnosticHistory=window.ScreenReaderDefeatVision.createHistory();
  let lastWorldFingerprint='',lastWorldTime=-Infinity;
  let diagnosticStart=null,diagnosticLastKey='',diagnosticLastTime=-Infinity,diagnosticActive=false,diagnosticCurrent=null;
@@ -161,12 +161,34 @@
   $('chip-result').textContent=reason?'チップ読取：'+reason:observation.chipOwnerId?(owner+'のチップ'+(chipRead?.ownerSource==='name'?'（名前で判定）':'')+'：'+(chipNames.join('、')||(chipRead?.stage==='icons'?'一覧と持ち主は確認済み。アイコンは未判定または空欄です。':'今回判定できたチップなし'))+' ／ 取得済み '+owned.length+'件を保持'+(apply&&!current.members.some(m=>m.id===observation.chipOwnerId)?' ／ 持ち主のPT登録待ち':'')):'チップの対象キャラは未判定です。取得済みチップは保持しています。';
  }
  function accept(key,value){const prior=stable.get(key);const count=prior&&prior.value===value&&prior.tick===stableTick-1?prior.count+1:1;stable.set(key,{value,count,tick:stableTick});return count>=2;}
- function stabilize(observation){
+ // A moving map can hide a numbered label between two genuine reads.
+ const worldMonsterWindowMs=4000;
+ let lastStabilizedTime=null;
+ function stabilize(observation,time=performance.now()){
+  if(lastStabilizedTime!==null&&(time<lastStabilizedTime||time-lastStabilizedTime>1800)){
+   for(const key of stable.keys())if(key.startsWith('world-monster:'))stable.delete(key);
+  }
+  lastStabilizedTime=time;
   stableTick++;
   const out={...observation,members:[],selfId:null,chipIds:[],setup:null};if(observation.setup&&accept('start-context',JSON.stringify(observation.setup)))out.setup=observation.setup;if(observation.selfId&&accept('self',observation.selfId))out.selfId=observation.selfId;
   for(const m of observation.members){if(!m.id)continue;const identityReady=accept('slot:'+m.slot,m.id),item={id:m.id,slot:m.slot};for(const key of ['level','currentHp','maxHp','coin','atk','def'])if(m[key]!==undefined)item[key]=m[key];if(identityReady)out.members.push(item);}
   const ownerReady=observation.chipOwnerId&&accept('chipOwner',observation.chipOwnerId),chipIds=observation.chipIds.filter(id=>accept(observation.chipOwnerId+':chip:'+id,id));if(ownerReady)out.chipIds=chipIds;else out.chipOwnerId=null;
-  if(observation.world){const w=observation.world;out.world={clock:null,monsters:[]};if(w.clock&&accept('world-clock',JSON.stringify(w.clock)))out.world.clock=w.clock;for(const m of w.monsters||[])if(accept('world-monster:'+m.monsterId+':'+m.serial,m.monsterId+':'+m.serial))out.world.monsters.push(m);}
+  if(observation.world){
+   const w=observation.world,monsters=w.monsters||[],context=window.ScreenReaderMapBridge.context(),[map]=JSON.parse(context);
+   out.world={clock:null,monsters:[]};
+   if(w.clock&&accept('world-clock',JSON.stringify(w.clock)))out.world.clock=w.clock;
+   for(const m of monsters){
+    const key='world-monster:'+m.monsterId+':'+m.serial;
+    if(monsters.filter(o=>o.monsterId===m.monsterId&&o.serial===m.serial).length!==1){stable.delete(key);continue;}
+    const live=Number.isSafeInteger(m.currentHp)&&Number.isSafeInteger(m.maxHp)&&m.currentHp>0&&m.currentHp<=m.maxHp;
+    const value=JSON.stringify([context,m.maxHp,live]);
+    if(map==='MAP0105'&&Number.isSafeInteger(m.serial)&&m.serial>0&&live){
+     const prior=stable.get(key);
+     stable.set(key,{value,time,tick:stableTick});
+     if(prior?.value===value&&prior.tick<stableTick&&time>=prior.time&&time-prior.time<=worldMonsterWindowMs)out.world.monsters.push(m);
+    }else if(accept(key,value))out.world.monsters.push(m);
+   }
+  }
   return out;
  }
  function updateStatusIcons(source,world,selfId,automatic){
@@ -220,7 +242,7 @@
    // Yield to paint without overlapping jobs. Stop/reset invalidates this frame.
    await new Promise(resolve=>requestAnimationFrame(resolve));if(token!==generation)return;
    const observation=vision.analyze(frame,custom,partyLock);observation.setup=window.ScreenReaderStartVision.analyze(frame);if($('world-sync').checked)observation.world=window.ScreenReaderWorldVision.analyze(frame,{positions:true});else $('world-result').textContent='マップ読取はOFFです。マップ・難易度を選び、反映をONにしてください。';if(!partyLock&&$('self').value)observation.selfId=$('self').value;
-   const accepted=automatic?stabilize(observation):{...observation,members:[...observation.members]};
+   const accepted=automatic?stabilize(observation,started):{...observation,members:[...observation.members]};
    if($('apply').checked&&$('world-sync').checked&&accepted.setup)window.ScreenReaderMapBridge.configure(accepted.setup);
    if(automatic&&!partyLock&&!partyEdited&&$('apply').checked){
     const slots=[0,1,2,3].map(slot=>accepted.members.find(m=>m.slot===slot));
@@ -237,7 +259,7 @@
    if(statusUpdate.updatedSelf)bridge.apply({members:accepted.members.filter(m=>m.id===accepted.selfId)});
    updateDefeat(frame,started,observation.world);
    recordWorldObservation(observation.world,accepted.world,worldApplied,started,automatic,performance.now()-started,gap);
-   monitorInfo((observation.world?'今回 '+observation.world.monsters.length+'体 ／ '+(automatic?'連続一致 '+accepted.world.monsters.length+'体':'手動読取')+' ／ '+(!$('apply').checked?'確認のみ ／ ':worldSkipped?'反映保留 '+worldSkipped+'件 ／ ':''):'')+timing());
+   monitorInfo((observation.world?'今回 '+observation.world.monsters.length+'体 ／ '+(automatic?'確認済み '+accepted.world.monsters.length+'体':'手動読取')+' ／ '+(!$('apply').checked?'確認のみ ／ ':worldSkipped?'反映保留 '+worldSkipped+'件 ／ ':''):'')+timing());
    const names=observation.members.filter(m=>m.id).length;
    status((automatic?'自動読取':'画面読取')+'：'+names+'人を判定／チップ '+result.added+'件追加。'+(!observation.selfId?' 自キャラが未判定の場合は「自キャラ」を指定してください。':''));
   }catch(error){status('読み取れませんでした：'+error.message);}finally{busy=false;$('read').disabled=!rawSource;}
@@ -259,7 +281,7 @@
  $('stop').addEventListener('click',stop);$('read').addEventListener('click',()=>{$('details').open=true;read();});
  $('auto').addEventListener('change',()=>{stable.clear();sameFrames=0;lastHash=null;if($('auto').checked){status('自動読取を開始しました。安定して判定できた情報を更新します。');read(true).then(schedule);}else{clearTimeout(timer);status('自動読取を停止しました。画面共有は継続中です。');}});
  async function loadImage(file){
-  if(!file?.type.startsWith('image/'))return;resetDefeat('独立した画像へ切替');if(stream)stop();generation++;const token=generation,url=URL.createObjectURL(file);
+  if(!file?.type.startsWith('image/'))return;resetDefeat('独立した画像へ切替');stable.clear();if(stream)stop();generation++;const token=generation,url=URL.createObjectURL(file);
   try{const im=new Image();im.src=url;await im.decode();if(token!==generation)return;rawSource=im;$('read').disabled=false;$('details').open=true;await read();}catch(error){status('画像を開けませんでした：'+error.message);}finally{URL.revokeObjectURL(url);$('file').value='';}
  }
  $('file').addEventListener('change',()=>loadImage($('file').files[0]));
