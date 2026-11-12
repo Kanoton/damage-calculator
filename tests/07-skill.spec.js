@@ -16,9 +16,9 @@ for(const protocol of ['http','file'])for(const [width,height] of [[1000,1400],[
  }
  await expect.poll(()=>bunny.locator('img').evaluateAll(images=>images.every(image=>image.complete&&image.naturalWidth>0))).toBe(true);
  if(skillFolder==='08_screen_reader'){
-  await bunny.hover();await expect(page.locator('.monster-skill-text')).toContainText('緊急救援［CT 2］');await expect(page.locator('.monster-skill-text')).toContainText('自身のHPが最大の場合、ボスを対象');
-  await page.locator('.mp-monster[data-id="M0120"]').hover();await expect(page.locator('.monster-skill-text')).toContainText('条件に関係なく5マス以内の全キャラクター');
-  await page.locator('#mp-difficulty').selectOption('普通');await page.locator('.mp-monster[data-id="M0120"]').hover();await expect(page.locator('.monster-skill-text')).not.toContainText('条件に関係なく');
+  await bunny.hover();await expect(page.locator('#monster-tooltip .character-skill-text')).toContainText('緊急救援［CT 2］');await expect(page.locator('#monster-tooltip .character-skill-text')).toContainText('自身のHPが最大の場合、ボスを対象');
+  await page.locator('.mp-monster[data-id="M0120"]').hover();await expect(page.locator('#monster-tooltip .character-skill-text')).toContainText('条件に関係なく5マス以内の全キャラクター');
+  await page.locator('#mp-difficulty').selectOption('普通');await page.locator('.mp-monster[data-id="M0120"]').hover();await expect(page.locator('#monster-tooltip .character-skill-text')).not.toContainText('条件に関係なく');
  }
  await page.locator('#mp-tab-map').click();const features=page.locator('#mp-map-features');
  await expect(features.locator('[data-feature-name="花咲くサボテン"]')).toContainText('防御ダイスの出目は通常どおり有効');
