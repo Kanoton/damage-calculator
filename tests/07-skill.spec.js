@@ -3,6 +3,30 @@ const { test, expect } = require('@playwright/test');
 const skillFolder=process.env.SKILL_TEST_FOLDER||'07_skill';
 if(!['07_skill','08_screen_reader'].includes(skillFolder))throw Error('Unknown skill test folder');
 
+for(const protocol of ['http','file'])for(const [width,height] of [[1000,1400],[1920,1080]])test(`autumn November text update ${skillFolder} ${protocol} ${width}x${height}`,async({page})=>{
+ await page.setViewportSize({width,height});
+ const errors=[];page.on('pageerror',error=>errors.push(error.message));
+ await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve(skillFolder+'/index.html')).href:`/${skillFolder}/`);
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');await page.locator('#mp-tab-monsters').click();
+ const bunny=page.locator('.mp-monster[data-id="M0124"]');
+ for(const [level,atk,defense,hp] of [['普通',3,2,15],['困難',4,2,20],['悪夢',5,3,25],['狂気',6,4,25]]){
+  await page.locator('#mp-difficulty').selectOption(level);await expect(bunny).toBeVisible();
+  for(const [key,value] of [['攻撃',atk],['防御',defense],['HP',hp],['コイン',8]])await expect(bunny.locator(`.mp-stat[data-kind="${key}"] strong`)).toHaveText(String(value));
+  await expect(bunny.getByAltText('反撃可能')).toBeVisible();
+ }
+ await expect.poll(()=>bunny.locator('img').evaluateAll(images=>images.every(image=>image.complete&&image.naturalWidth>0))).toBe(true);
+ if(skillFolder==='08_screen_reader'){
+  await bunny.hover();await expect(page.locator('.monster-skill-text')).toContainText('緊急救援［CT 2］');await expect(page.locator('.monster-skill-text')).toContainText('自身のHPが最大の場合、ボスを対象');
+  await page.locator('.mp-monster[data-id="M0120"]').hover();await expect(page.locator('.monster-skill-text')).toContainText('条件に関係なく5マス以内の全キャラクター');
+  await page.locator('#mp-difficulty').selectOption('普通');await page.locator('.mp-monster[data-id="M0120"]').hover();await expect(page.locator('.monster-skill-text')).not.toContainText('条件に関係なく');
+ }
+ await page.locator('#mp-tab-map').click();const features=page.locator('#mp-map-features');
+ await expect(features.locator('[data-feature-name="花咲くサボテン"]')).toContainText('防御ダイスの出目は通常どおり有効');
+ await expect(features.locator('[data-feature-name="電流タンポポ"]')).toContainText('クールタイム-1');
+ await expect(features.locator('[data-feature-name="植物建築ショップ"]')).toContainText('通過時または止まった時');
+ expect(errors).toEqual([]);
+});
+
 for(const protocol of ['http','file'])test('07 autumn confirmed rules: energy, HP boundary, attention refresh and undo '+protocol,async({page})=>{
  test.skip(skillFolder==='08_screen_reader','08 uses icon stacks and the user-confirmed 50% strict counter boundary; covered by 08 autumn icon tests.');
  await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve(skillFolder+'/index.html')).href:`/${skillFolder}/`);
@@ -47,7 +71,7 @@ for(const protocol of ['http','file'])test('07 autumn data: map, four difficulti
  await expect(page.locator('#mp-event-body')).toContainText('ゲームオーバー');await expect(page.locator('#mp-mission-body')).toContainText('建物を8個建てる');
  await page.locator('#mp-tab-monsters').click();
  for(const [difficulty,hp] of [['普通','120'],['困難','130'],['悪夢','140'],['狂気','150']]){
-  await page.locator('#mp-difficulty').selectOption(difficulty);await expect(page.locator('#mp-monster-list .mp-monster')).toHaveCount(5);
+  await page.locator('#mp-difficulty').selectOption(difficulty);await expect(page.locator('#mp-monster-list .mp-monster')).toHaveCount(6);
   await expect(page.locator('#mp-monster-list .mp-monster').filter({hasText:'キッズガオー'})).toContainText(hp);
  }
  await expect.poll(()=>page.locator('#mp-monster-list .mp-monster img').evaluateAll(imgs=>imgs.every(img=>img.complete&&img.naturalWidth>0))).toBe(true);
@@ -68,7 +92,7 @@ for(const protocol of ['http','file'])test('07 autumn data: map, four difficulti
 for(const protocol of ['http','file'])test('07 autumn completion: all events, building cards and status descriptions on '+protocol,async({page})=>{
  await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve(skillFolder+'/index.html')).href:`/${skillFolder}/`);
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');await page.locator('#mp-tab-map').click();
- const features=page.locator('#mp-map-features');await expect(features).toBeVisible();await expect(features.locator('article')).toHaveCount(6);
+ const features=page.locator('#mp-map-features');await expect(features).toBeVisible();await expect(features.locator('article')).toHaveCount(9);
  for(const name of ['疾走キノコ','仙果スターフルーツ','芳香ピーチ','金運の木'])await expect(features.getByRole('img',{name,exact:true})).toBeVisible();
  await expect.poll(()=>features.locator('img').evaluateAll(images=>images.length===4&&images.every(image=>image.complete&&image.naturalWidth>0))).toBe(true);
  await expect(features).toContainText('次の移動力+3');await expect(features).toContainText('HP上限+1');await expect(features).toContainText('HPを2回復');await expect(features).toContainText('スターコインを3');await expect(features).toContainText('1スタックごとにキッズガオーの攻撃力+2');await expect(features).toContainText('防御力-1、移動力-1');
