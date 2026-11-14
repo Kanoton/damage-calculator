@@ -14,12 +14,16 @@ const snapshot=page=>page.evaluate(()=>window.ScreenReaderCharacterBridge.snapsh
 for(const protocol of ['http','file'])test('08: self portrait assets November Souri and outfit originals remain identifiable '+protocol,async({page})=>{
  await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href:'/08_screen_reader/');
  await page.waitForFunction(()=>ScreenReaderCharacterBridge?.catalog().characters.length===36);
- const results=await page.evaluate(async()=>{
+ const sources=protocol==='file'?Object.fromEntries([
+  ...['104_03','123_03','124_03','130','130_Max','1075'].map(n=>'UT_Hero_ProfilePhoto/UT_Hero_ProfilePhoto_'+n+'.png'),
+  ...['104_03','123_03','123_03_sfw','124_03','130','130_sfw','130_Max','130_Max_sfw'].map(n=>'UT_Hero_Card2/UT_Hero_Card2_'+n+'.png')
+ ].map(file=>[file,'data:image/png;base64,'+require('fs').readFileSync(require('path').resolve('images',file)).toString('base64')])):null;
+ const results=await page.evaluate(async sources=>{
   const c=document.createElement('canvas');c.width=1536;c.height=709;const ctx=c.getContext('2d'),rows=[];
   const cases=[['profile','104_03','5'],['profile','123_03','20'],['profile','124_03','23'],['profile','130','30'],['profile','130_Max','30'],['profile','1075',null],
    ...['104_03','123_03','123_03_sfw','124_03','130','130_sfw','130_Max','130_Max_sfw'].map(file=>['self',file,file.startsWith('104')?'5':file.startsWith('123')?'20':file.startsWith('124')?'23':'30'])];
   for(const [kind,file,expected] of cases){
-   const im=new Image();im.src='../images/'+(kind==='profile'?'UT_Hero_ProfilePhoto/UT_Hero_ProfilePhoto_':'UT_Hero_Card2/UT_Hero_Card2_')+file+'.png';await im.decode();
+   const im=new Image(),asset=(kind==='profile'?'UT_Hero_ProfilePhoto/UT_Hero_ProfilePhoto_':'UT_Hero_Card2/UT_Hero_Card2_')+file+'.png';im.src=sources?.[asset]||'../images/'+asset;await im.decode();
    const box=kind==='profile'?ScreenReaderVision.regions.avatar[0]:ScreenReaderVision.regions.self;
    const crop=kind==='profile'?[40,65,115,115*42/73]:file.startsWith('130')?[80,80,220,220*116/139]:[120,40,260,260*116/139];
    for(const color of ['#173647','#8b274e']){
@@ -29,7 +33,7 @@ for(const protocol of ['http','file'])test('08: self portrait assets November So
    }
   }
   return rows;
- });
+ },sources);
  for(const row of results)expect(row.actual,JSON.stringify(row)).toBe(row.expected);
 });
 
