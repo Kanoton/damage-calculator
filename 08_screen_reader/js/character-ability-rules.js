@@ -1,5 +1,6 @@
 // ===== キャラクター固有能力ルール =====
 const CHARACTER_ABILITY_RULES={
+ '30':{activeSkills:[{key:'active',label:'酒を酌み交わして',cooldown:3,effects:[]}]},
  '10':{
   activeSkills:[{key:'active',label:"食べ放題",cooldown:3,effects:[]}],
   controls:[{key:'反撃',type:'toggle'},{key:'このターンに受けたダメージ',type:'number',min:0}],

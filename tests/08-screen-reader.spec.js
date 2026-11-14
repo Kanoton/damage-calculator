@@ -1,7 +1,7 @@
 const {test,expect}=require('@playwright/test');
 const fixture=n=>require('./fixtures/screen-reader/'+n+'.json').image;
 
-async function open(page){await page.goto('/08_screen_reader/');await page.locator('#reader-toggle').click();await page.waitForFunction(()=>window.ScreenReaderCharacterBridge?.catalog().characters.length===35);await expect(page.locator('#reader-self option')).toHaveCount(36);}
+async function open(page){await page.goto('/08_screen_reader/');await page.locator('#reader-toggle').click();await page.waitForFunction(()=>window.ScreenReaderCharacterBridge?.catalog().characters.length===36);await expect(page.locator('#reader-self option')).toHaveCount(37);}
 async function readFixture(page,n){
  const image=fixture(n),data=Buffer.from(image.split(',')[1],'base64');
  await page.locator('#reader-file').setInputFiles({name:n+'.png',mimeType:'image/png',buffer:data});
@@ -11,10 +11,32 @@ async function readFixture(page,n){
 }
 const snapshot=page=>page.evaluate(()=>window.ScreenReaderCharacterBridge.snapshot());
 
+for(const protocol of ['http','file'])test('08: self portrait assets November Souri and outfit originals remain identifiable '+protocol,async({page})=>{
+ await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href:'/08_screen_reader/');
+ await page.waitForFunction(()=>ScreenReaderCharacterBridge?.catalog().characters.length===36);
+ const results=await page.evaluate(async()=>{
+  const c=document.createElement('canvas');c.width=1536;c.height=709;const ctx=c.getContext('2d'),rows=[];
+  const cases=[['profile','104_03','5'],['profile','123_03','20'],['profile','124_03','23'],['profile','130','30'],['profile','130_Max','30'],['profile','1075',null],
+   ...['104_03','123_03','123_03_sfw','124_03','130','130_sfw','130_Max','130_Max_sfw'].map(file=>['self',file,file.startsWith('104')?'5':file.startsWith('123')?'20':file.startsWith('124')?'23':'30'])];
+  for(const [kind,file,expected] of cases){
+   const im=new Image();im.src='../images/'+(kind==='profile'?'UT_Hero_ProfilePhoto/UT_Hero_ProfilePhoto_':'UT_Hero_Card2/UT_Hero_Card2_')+file+'.png';await im.decode();
+   const box=kind==='profile'?ScreenReaderVision.regions.avatar[0]:ScreenReaderVision.regions.self;
+   const crop=kind==='profile'?[40,65,115,115*42/73]:file.startsWith('130')?[80,80,220,220*116/139]:[120,40,260,260*116/139];
+   for(const color of ['#173647','#8b274e']){
+    ctx.fillStyle=color;ctx.fillRect(0,0,c.width,c.height);ctx.drawImage(im,...crop,...box);
+    const data=ScreenReaderVision.feature(c,box),actual=(kind==='profile'?ScreenReaderVision.profileMatch(data):ScreenReaderVision.selfPortraitMatch(data))?.id||null;
+    rows.push({kind,file,color,expected,actual});
+   }
+  }
+  return rows;
+ });
+ for(const row of results)expect(row.actual,JSON.stringify(row)).toBe(row.expected);
+});
+
 for(const protocol of ['http','file'])for(const [width,height] of [[1000,1400],[1920,1080]])test(`08: self portrait assets recover real Kaisei independently of PT at ${width}x${height} ${protocol}`,async({page})=>{
  await page.setViewportSize({width,height});
  await page.goto(protocol==='file'?'file://'+require('path').resolve(__dirname,'../08_screen_reader/index.html'):'/08_screen_reader/');
- await page.locator('#reader-toggle').click();await page.waitForFunction(()=>window.ScreenReaderCharacterBridge?.catalog().characters.length===35);
+ await page.locator('#reader-toggle').click();await page.waitForFunction(()=>window.ScreenReaderCharacterBridge?.catalog().characters.length===36);
  const record=require('./fixtures/screen-reader/self-kaisei-20261019.json');
  const observed=await page.evaluate(async({image,left})=>{
   const im=new Image(),pt=new Image();im.src=image;pt.src=left;await Promise.all([im.decode(),pt.decode()]);
@@ -41,11 +63,11 @@ for(const protocol of ['http','file'])for(const [width,height] of [[1000,1400],[
  expect((await snapshot(page)).selfId).toBe('13');
 });
 
-test('08: self portrait assets inventory covers all 35 canonical characters and keeps flat frames unknown',async({page})=>{
+test('08: self portrait assets inventory covers all 36 canonical characters and keeps flat frames unknown',async({page})=>{
  await open(page);
  const result=await page.evaluate(()=>({ids:[...new Set(ScreenReaderSelfReferences.characters.map(r=>r.id))].sort(),images:new Set(ScreenReaderSelfReferences.characters.map(r=>r.image)).size,blank:ScreenReaderVision.selfPortraitMatch(new Uint8Array(768))}));
  const ids=require('fs').readFileSync(require('path').resolve(__dirname,'../csv/self_portrait_mapping.csv'),'utf8').trim().split(/\r?\n/).slice(1).map(row=>row.split(',')[1]);
- expect(result.ids).toEqual([...new Set(ids)].sort());expect(result.ids).toHaveLength(35);expect(result.images).toBe(205);expect(result.blank).toBeNull();
+ expect(result.ids).toEqual([...new Set(ids)].sort());expect(result.ids).toHaveLength(36);expect(result.images).toBe(213);expect(result.blank).toBeNull();
 });
 
 for(const [name,owner,chips]of [['sherry-late','106',['52','58','9','45','43','55']],['yume-late','20',['23','102','48']]])test('08: chip artwork reads reviewed late '+name+' without missing chips or inventing a whetstone',async({page})=>{
@@ -104,7 +126,7 @@ test('08: profile assets expand real normal-screen PT identity without declaring
  expect(identities).toEqual(['105','19','106','27']);
 });
 
-test('08: masked profile matching covers 35 base portraits and rejects all included monster identities',async({page})=>{
+test('08: masked profile matching covers 36 base portraits and rejects all included monster identities',async({page})=>{
  await open(page);
  const result=await page.evaluate(()=>{
   const refs=ScreenReaderProfileReferences.characters,base=new Map(),monsters=new Map();
@@ -115,7 +137,7 @@ test('08: masked profile matching covers 35 base portraits and rejects all inclu
   const blank=ScreenReaderVision.profileMatch(new Uint8Array(768));
   return {count:base.size,wrong,monsterCount:monsters.size,falseMonsters,blank};
  });
- expect(result).toEqual({count:35,wrong:[],monsterCount:56,falseMonsters:[],blank:null});
+ expect(result).toEqual({count:36,wrong:[],monsterCount:57,falseMonsters:[],blank:null});
 });
 
 test('08: profiles recognize an unseen outfit with transparency and preserve duplicate-slot rejection',async({page})=>{
@@ -136,14 +158,14 @@ test('08: profiles recognize an unseen outfit with transparency and preserve dup
 test('08: CSV maps all variants to canonical characters and excludes monsters from training',async({page})=>{
  await open(page);
  await expect(page.locator('#reader-mapping-status')).toContainText('CSV対応表');
- expect(await page.evaluate(()=>ScreenReaderMiniCharacterMapping.summary())).toEqual({source:'CSV対応表',total:194,characters:130,excluded:64});
+ expect(await page.evaluate(()=>ScreenReaderMiniCharacterMapping.summary())).toEqual({source:'CSV対応表',total:200,characters:135,excluded:65});
  await page.locator('#reader-details').evaluate(el=>el.open=true);
  await page.locator('.reader-training summary').click();
  await page.locator('#reader-learn-id').selectOption('2');
  await expect(page.locator('#reader-mapping-preview img')).toHaveCount(4);
  await expect(page.locator('#reader-mapping-preview img').first()).toHaveAttribute('alt',/^パルナン /);
  expect(await page.locator('#reader-mapping-preview img').evaluateAll(imgs=>Promise.all(imgs.map(async im=>{await im.decode();return im.naturalWidth>0;})))).toEqual([true,true,true,true]);
- expect(await page.locator('#reader-learn-id option').count()).toBe(35);
+ expect(await page.locator('#reader-learn-id option').count()).toBe(36);
  expect(await page.evaluate(()=>ScreenReaderMiniCharacterMapping.forCharacter('M0005'))).toEqual([]);
  await page.locator('#reader-learn-kind').selectOption('chip-small:0');
  await expect(page.locator('#reader-mapping-preview img')).toHaveCount(0);
@@ -334,7 +356,7 @@ async function closeReader(page){
 async function commonChips(page){await page.locator('.role-tab[data-role="character"]').click();await page.locator('#character-chip-tab').click();await page.locator('.chip-category-tabs button[data-category="共通"]').click();}
 
 for(const protocol of ['http','file'])test('08: observed maximum permits manual HP, chip and level changes and re-anchors on '+protocol,async({page})=>{
- if(protocol==='http')await open(page);else {await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);await page.waitForFunction(()=>ScreenReaderCharacterBridge?.catalog().characters.length===35);}
+ if(protocol==='http')await open(page);else {await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);await page.waitForFunction(()=>ScreenReaderCharacterBridge?.catalog().characters.length===36);}
  await page.evaluate(()=>ScreenReaderCharacterBridge.apply({selfId:'7',members:[{id:'7',slot:0,level:0,maxHp:14,currentHp:6,coin:12}]}));
  if(protocol==='http')await closeReader(page);await commonChips(page);
  const hp=page.locator('#selected-character-current-hp'),atk=page.locator('#selected-character-atk'),cookie=page.locator('.chip-select[data-id="7"]');

@@ -2133,5 +2133,71 @@ window.ScreenReaderMiniCharacterMappingData = [
     "status": "確認済み",
     "reference_images": "images/character/Sherry_Main.png|images/UT_Hero_Card2/UT_Hero_Card2_306.png",
     "notes": ""
+  },
+  {
+    "image_file": "UT_Hero_ProfilePhoto_104_03.png",
+    "entity_type": "キャラクター",
+    "character_id": "5",
+    "monster_ids": "",
+    "name": "コマチ",
+    "reader_target": "対象",
+    "status": "確認済み",
+    "reference_images": "images/UT_Hero_Card2/UT_Hero_Card2_104_03.png",
+    "notes": "2026-11-14提供。既存の基本画像と同一人物・新衣装/形態。"
+  },
+  {
+    "image_file": "UT_Hero_ProfilePhoto_123_03.png",
+    "entity_type": "キャラクター",
+    "character_id": "20",
+    "monster_ids": "",
+    "name": "ユメ",
+    "reader_target": "対象",
+    "status": "確認済み",
+    "reference_images": "images/UT_Hero_Card2/UT_Hero_Card2_123_03.png",
+    "notes": "2026-11-14提供。既存の基本画像と同一人物・新衣装/形態。"
+  },
+  {
+    "image_file": "UT_Hero_ProfilePhoto_124_03.png",
+    "entity_type": "キャラクター",
+    "character_id": "23",
+    "monster_ids": "",
+    "name": "テル",
+    "reader_target": "対象",
+    "status": "確認済み",
+    "reference_images": "images/UT_Hero_Card2/UT_Hero_Card2_124_03.png",
+    "notes": "2026-11-14提供。既存の基本画像と同一人物・新衣装/形態。"
+  },
+  {
+    "image_file": "UT_Hero_ProfilePhoto_130.png",
+    "entity_type": "キャラクター",
+    "character_id": "30",
+    "monster_ids": "",
+    "name": "蒼鯉",
+    "reader_target": "対象",
+    "status": "確認済み",
+    "reference_images": "images/UT_Hero_Card2/UT_Hero_Card2_130.png",
+    "notes": "2026-11-14提供。既存の基本画像と同一人物・新衣装/形態。"
+  },
+  {
+    "image_file": "UT_Hero_ProfilePhoto_130_Max.png",
+    "entity_type": "キャラクター",
+    "character_id": "30",
+    "monster_ids": "",
+    "name": "蒼鯉",
+    "reader_target": "対象",
+    "status": "確認済み",
+    "reference_images": "images/UT_Hero_Card2/UT_Hero_Card2_130_Max.png",
+    "notes": "2026-11-14提供。既存の基本画像と同一人物・新衣装/形態。"
+  },
+  {
+    "image_file": "UT_Hero_ProfilePhoto_1075.png",
+    "entity_type": "モンスター",
+    "character_id": "",
+    "monster_ids": "M0124",
+    "name": "救急うさちゃん",
+    "reader_target": "対象外",
+    "status": "確認済み",
+    "reference_images": "images/Monster/Rescue_Bunny_20261112.png",
+    "notes": "提供画像を既存のゲーム内サムネイルと目視照合。PTキャラとして誤認しないための除外辞書。"
   }
 ];

@@ -3,6 +3,22 @@ const { test, expect } = require('@playwright/test');
 const skillFolder=process.env.SKILL_TEST_FOLDER||'07_skill';
 if(!['07_skill','08_screen_reader'].includes(skillFolder))throw Error('Unknown skill test folder');
 
+for(const protocol of ['http','file'])for(const [width,height] of [[1000,1400],[1920,1080]])test(`Souri registered stats and Card2 ${skillFolder} ${protocol} ${width}x${height}`,async({page})=>{
+ await page.setViewportSize({width,height});
+ await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve(skillFolder+'/index.html')).href:`/${skillFolder}/`);
+ await page.locator('.role-tab[data-role="character"]').click();const card=page.locator('.character-select[data-id="30"]');
+ await expect(card.locator('.character-list-image')).toHaveAttribute('src','../images/UT_Hero_Card2/UT_Hero_Card2_130.png');
+ await expect(card.locator('[data-stat="initial_coin"]')).toHaveText('12');await expect.poll(()=>card.locator('img').first().evaluate(im=>im.complete&&im.naturalWidth>0)).toBe(true);
+ await selectCharacter(page,'30');await expect(page.locator('#selected-character-name')).toHaveText('蒼鯉');
+ for(const [level,hp,atk,defense] of [[0,9,1,1],[1,11,2,1],[2,11,2,1],[3,11,3,2]]){
+  if(level)await page.locator('#selected-character-portrait').click();
+  await expect(page.locator('#selected-character-level')).toHaveText('Lv.'+level);await expect(page.locator('#selected-character-hp')).toHaveText(String(hp));
+  await expect(page.locator('#selected-character-atk')).toHaveValue(String(atk));await expect(page.locator('#selected-character-def')).toHaveValue(String(defense));await expect(page.locator('#selected-character-move')).toHaveText(String(level===3?1:0));
+ }
+ await expect(page.locator('#selected-character-skill')).toHaveAttribute('aria-label','酒を酌み交わしてを発動');
+ await expect.poll(()=>page.locator('#selected-character-image').evaluate(im=>im.complete&&im.naturalWidth>0)).toBe(true);
+});
+
 for(const protocol of ['http','file'])for(const [width,height] of [[1000,1400],[1920,1080]])test(`autumn November text update ${skillFolder} ${protocol} ${width}x${height}`,async({page})=>{
  await page.setViewportSize({width,height});
  const errors=[];page.on('pageerror',error=>errors.push(error.message));
@@ -907,7 +923,7 @@ test('07 skill: character cards use Hero Card2 artwork and live stats while pres
   await route.fulfill({response,body:csv.replace('12,10,9,1,1,0,11','12,10,19,7,6,0,11')});
  });
  await page.goto(`/${skillFolder}/`);await page.locator('.role-tab.character-tab').click();
- await expect(page.locator('.character-select')).toHaveCount(35);
+ await expect(page.locator('.character-select')).toHaveCount(36);
  const mimi=page.locator('.character-select[data-id="1"]');
  await expect(mimi.locator('.character-list-image')).toHaveAttribute('src','../images/UT_Hero_Card2/UT_Hero_Card2_108.png');
  await expect.poll(()=>mimi.locator('.character-list-image').evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);
@@ -935,7 +951,7 @@ test('07 skill: file protocol keeps character cards, tooltip and selection', asy
  const path=require('path'),{pathToFileURL}=require('url');
  await page.goto(pathToFileURL(path.resolve(__dirname,'..',skillFolder,'index.html')).href);
  await page.locator('.role-tab.character-tab').click();
- await expect(page.locator('.character-select')).toHaveCount(35);
+ await expect(page.locator('.character-select')).toHaveCount(36);
  const mimi=page.locator('.character-select[data-id="1"]');
  await expect(mimi.locator('.character-list-image')).toHaveAttribute('src','../images/UT_Hero_Card2/UT_Hero_Card2_108.png');
  await expect(mimi.locator('[data-stat="lv0_hp"]')).toHaveText('9');

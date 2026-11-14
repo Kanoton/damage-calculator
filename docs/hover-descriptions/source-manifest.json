@@ -1,8 +1,8 @@
 {
-  "rows": 419,
+  "rows": 422,
   "categories": {
-    "スキル": 70,
-    "能力全文": 35,
+    "スキル": 72,
+    "能力全文": 36,
     "自キャラ": 44,
     "PT受領": 26,
     "スキル入力": 4,
@@ -12,18 +12,18 @@
     "共通・チップ": 17,
     "共通パラメータ": 10
   },
-  "characters": 35,
+  "characters": 36,
   "sourceHashes": {
-    "07_skill/data/hover-descriptions.csv": "39576450fa218dc3587fef99f4d3642346d149cd28e174655377609996fd483c",
-    "07_skill/js/hover-text.js": "6af0b2f2003851bba915121045936f821aed6d2fcb3f8ce89b118000563bbb00",
+    "07_skill/data/hover-descriptions.csv": "0b24cc9bf3a77a91af37f6f94547a9a4f9bcf522c6e235aa21a40e4dbdfaafd3",
+    "07_skill/js/hover-text.js": "dabc727b55de0072052481d3988e35cd716c283ce5964fe68557c775414cd6ce",
     "07_skill/js/character.js": "55d849bab1832c69b4e95f174530700236dada7e9f817a427feabb5a0cbdf071",
     "07_skill/js/character-view.js": "e3c4120339952c154f011fbaf47c46f8f05e671ce2d4b402050fb868a00a5ac9",
-    "07_skill/js/character-ability-rules.js": "dccd14da29050e97a4bec1f9efa3543e7cbf45ffa21448d180a615c896abe8df",
+    "07_skill/js/character-ability-rules.js": "606389d68fc445e54011f2f781d6287eaedf63bb04a3c9e293b7fbd049a806ab",
     "07_skill/js/roster-view.js": "9ec9f103a18237541ce3fc5f862dd31afeca4e9db91770d3d95ea770504f43a9",
     "07_skill/js/map.js": "15ced5c6dff4b857fc94942eae363eeeb68efcb961c94bc85682d49948d9f69f",
     "07_skill/js/map-utils.js": "d54dfba151d1a8bc867bc7191f67e21aea36735ac36e38e9196fa398cb3550c7",
     "07_skill/index.html": "217f155b76465b165de182753c006279e77c6b7c5ea89bb8bbf5796d4cf4dda5",
-    "csv/character_stats.csv": "b3f8d1a60d5163adcf57302e5de86976721492362bcf1247233e57d750193f3d",
+    "csv/character_stats.csv": "4fbf48fdb18375ae063eb5805fb04ad4c87e9f86d8786fd4a865459a0372789f",
     "csv/status_icon_map_all.csv": "504724e74276441ad6f0694912efa37a8ad3bf3d9be636272cf00183c9c08383",
     "csv/chip_list.csv": "5fe5cc3b99b66bbffb3ba70b8c15ca06c88c16bcc73855ea3d0cb9b0b6e171b5",
     "csv/chip_stat_rules.csv": "5a91d37f44710f7a94da604d3bfcef98737965daeb4c7a77bc96455ae046ef80"

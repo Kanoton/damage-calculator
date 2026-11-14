@@ -1,6 +1,6 @@
 const {test,expect}=require('@playwright/test');
 const fixture=n=>require('./fixtures/screen-reader/world-'+n+'.json').image;
-async function open(page){await page.goto('/08_screen_reader/');await page.waitForFunction(()=>window.ScreenReaderCharacterBridge?.catalog().characters.length===35);}
+async function open(page){await page.goto('/08_screen_reader/');await page.waitForFunction(()=>window.ScreenReaderCharacterBridge?.catalog().characters.length===36);}
 async function read(page,n,scale=1){return page.evaluate(async({image,scale})=>{const im=new Image();im.src=image;await im.decode();const c=document.createElement('canvas');c.width=im.width*scale;c.height=im.height*scale;c.getContext('2d').drawImage(im,0,0,c.width,c.height);return ScreenReaderWorldVision.analyze(ScreenReaderVision.normalize(c));},{image:fixture(n),scale});}
 async function map(page){await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0003');await page.locator('#mp-difficulty').selectOption('普通');}
 
@@ -600,7 +600,7 @@ test('08 autumn defeat automatic: unchanged-frame waiting keeps observed identit
 for(const protocol of ['http','file'])for(const size of [{width:1440,height:900},{width:950,height:1200}])test(`08 autumn defeat automatic: real numbered leader and partial animation; undo (${protocol} ${size.width})`,async({page})=>{
  await page.setViewportSize(size);
  if(protocol==='file')await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);else await open(page);
- await page.waitForFunction(()=>window.ScreenReaderCharacterBridge?.catalog().characters.length===35);
+ await page.waitForFunction(()=>window.ScreenReaderCharacterBridge?.catalog().characters.length===36);
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');await page.locator('#mp-difficulty').selectOption('普通');
  await page.locator('#reader-world-sync').evaluate(e=>{e.checked=true;e.dispatchEvent(new Event('change'));});
  // Other numbered dinosaurs, including equal HP, must not be selected by roster count or HP alone.
@@ -691,7 +691,7 @@ test('08 autumn defeat memory: missing names, registered camera motion, later su
 for(const [protocol,size] of [['http',{width:1440,height:900}],['file',{width:950,height:1200}]])test(`08 autumn defeat later rounds: retained identities and cumulative reinforcement counts (${protocol})`,async({page})=>{
  test.setTimeout(90000);await page.setViewportSize(size);
  if(protocol==='file')await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);else await open(page);
- await page.waitForFunction(()=>window.ScreenReaderCharacterBridge?.catalog().characters.length===35);
+ await page.waitForFunction(()=>window.ScreenReaderCharacterBridge?.catalog().characters.length===36);
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');await page.locator('#mp-difficulty').selectOption('普通');
  await page.locator('#reader-world-sync').evaluate(e=>{e.checked=true;e.dispatchEvent(new Event('change'));});
  const images=[];for(const snap of identitySample.snapshots.slice(0,3))images.push(await defeatFrame(page,snap,0,{capture:true}));
@@ -804,7 +804,7 @@ test('08 autumn defeat timing: phase matrix with every individual already known'
 for(const [protocol,size] of [['http',{width:1440,height:900}],['file',{width:950,height:1200}]])test(`08 autumn defeat full turn: real controller keeps HP, four identities and the surviving owl (${protocol})`,async({page})=>{
  test.setTimeout(240000);await page.setViewportSize(size);
  if(protocol==='file')await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);else await open(page);
- await page.waitForFunction(()=>window.ScreenReaderCharacterBridge?.catalog().characters.length===35);
+ await page.waitForFunction(()=>window.ScreenReaderCharacterBridge?.catalog().characters.length===36);
  await page.locator('#reader-toggle').click();await page.locator('#reader-file').setInputFiles({name:'turn-start.png',mimeType:'image/png',buffer:require('fs').readFileSync(turnFramePath(37))});await expect(page.locator('#reader-file')).toHaveValue('');
  await page.locator('#mp-map-select').evaluate(e=>{e.value='MAP0105';e.dispatchEvent(new Event('change',{bubbles:true}));});
  await page.locator('#mp-difficulty').evaluate(e=>{e.value='普通';e.dispatchEvent(new Event('change',{bubbles:true}));});
@@ -840,7 +840,7 @@ for(const [protocol,size] of [['http',{width:1440,height:900}],['file',{width:95
 for(const protocol of ['http','file'])test(`08 autumn icon status: real stacks, turn counters and moved self icons (${protocol})`,async({page})=>{
  test.setTimeout(90000);await page.setViewportSize(protocol==='http'?{width:1440,height:900}:{width:950,height:1200});
  if(protocol==='file')await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);else await open(page);
- await page.waitForFunction(()=>window.ScreenReaderCharacterBridge?.catalog().characters.length===35);
+ await page.waitForFunction(()=>window.ScreenReaderCharacterBridge?.catalog().characters.length===36);
  await page.locator('#mp-map-select').selectOption('MAP0105');await page.locator('#mp-difficulty').selectOption('普通');
  await page.evaluate(()=>{ScreenReaderCharacterBridge.apply({selfId:'18',members:[]});document.getElementById('reader-world-sync').checked=true;});
  const scenes=[1,2,3,4].map(i=>require('fs').readFileSync(`tests/fixtures/screen-reader/status-icons/scene-${i}.png`).toString('base64'));
@@ -860,7 +860,7 @@ for(const protocol of ['http','file'])test(`08 autumn icon status: real stacks, 
 for(const protocol of ['http','file'])test(`08 autumn icon status assets: anger and weakness from real pixels, library from source assets (${protocol})`,async({page})=>{
  test.setTimeout(90000);await page.setViewportSize(protocol==='http'?{width:1440,height:900}:{width:950,height:1200});
  if(protocol==='file')await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);else await open(page);
- await page.waitForFunction(()=>ScreenReaderCharacterBridge.catalog().characters.length===35);
+ await page.waitForFunction(()=>ScreenReaderCharacterBridge.catalog().characters.length===36);
  await page.locator('#mp-map-select').selectOption('MAP0105');await page.locator('#mp-difficulty').selectOption('狂気');
  await page.evaluate(()=>{ScreenReaderCharacterBridge.apply({selfId:'24',members:[]});document.getElementById('reader-world-sync').checked=true;});
  const images=['anger-weakness-real','library-asset-derived'].map(n=>require('fs').readFileSync('tests/fixtures/screen-reader/status-icons/'+n+'.png').toString('base64'));
@@ -884,7 +884,7 @@ for(const protocol of ['http','file'])test(`08 autumn icon status assets: anger 
 for(const protocol of ['http','file'])test(`08 autumn icon status abilities: asset-derived counters respect character limits (${protocol})`,async({page})=>{
  test.setTimeout(120000);await page.setViewportSize(protocol==='http'?{width:1440,height:900}:{width:950,height:1200});
  if(protocol==='file')await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);else await open(page);
- await page.waitForFunction(()=>ScreenReaderCharacterBridge.catalog().characters.length===35);
+ await page.waitForFunction(()=>ScreenReaderCharacterBridge.catalog().characters.length===36);
  const png=require('fs').readFileSync('tests/fixtures/screen-reader/status-icons/ability-asset-derived.png').toString('base64');
  const result=await page.evaluate(async({png,cases})=>{
   const im=new Image();im.src='data:image/png;base64,'+png;await im.decode();const frame=ScreenReaderVision.normalize(im),observed=ScreenReaderStatusIcons.analyze(frame);
@@ -914,7 +914,7 @@ for(const protocol of ['http','file'])test(`08 autumn icon status abilities: ass
 for(const protocol of ['http','file'])test(`08 autumn icon status flags: presence and completed stacks from source assets (${protocol})`,async({page})=>{
  test.setTimeout(120000);await page.setViewportSize(protocol==='http'?{width:1440,height:900}:{width:950,height:1200});
  if(protocol==='file')await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);else await open(page);
- await page.waitForFunction(()=>ScreenReaderCharacterBridge.catalog().characters.length===35);
+ await page.waitForFunction(()=>ScreenReaderCharacterBridge.catalog().characters.length===36);
  const png=require('fs').readFileSync('tests/fixtures/screen-reader/status-icons/flag-asset-derived.png').toString('base64');
  const result=await page.evaluate(async({png,cases})=>{
   const im=new Image();im.src='data:image/png;base64,'+png;await im.decode();const frame=ScreenReaderVision.normalize(im),observed=ScreenReaderStatusIcons.analyze(frame),rows=[];
