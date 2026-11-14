@@ -610,10 +610,10 @@
     },
     {
       "id": "I18",
-      "type": "Heal",
+      "type": "PlantBuildingShop",
       "x": 254,
       "y": 974,
-      "status": "screenshot_reading",
+      "status": "confirmed_by_2026-11-14_replay_and_user_icon",
       "minimap_xy": [
         859,
         414

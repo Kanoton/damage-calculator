@@ -5,7 +5,7 @@ R=Path(__file__).resolve().parents[1]
 D=R/'docs/map-event-output/autumn-forest';A=D/'assets'
 with (R/'csv/monster_stats.csv').open(encoding='utf-8-sig',newline='') as source:
     MONSTER_IMAGES={row['monster_id']:R/'images/Monster'/row['image'] for row in csv.DictReader(source)}
-data=json.loads((D/'topology.json').read_text());nodes=data['nodes'];lookup={n['id']:n for n in nodes}
+P=D/'production';data=json.loads((P/'data/topology.json').read_text());nodes=data['nodes'];lookup={n['id']:n for n in nodes}
 W=max(n['x']for n in nodes)+110;H=max(n['y']for n in nodes)+110
 def save_png(im,path):
     data=io.BytesIO();im.save(data,format='PNG');path.write_bytes(data.getvalue())
@@ -25,7 +25,10 @@ def render(review=False):
         if review:d.text((x,y+48),n['id'],font=small,anchor='mt',fill='#303340',stroke_width=2,stroke_fill='white')
     return im
 base=render();save_png(base,R/'images/Map/Layout_Autumn_Forest.png');save_png(render(True),D/'Layout_Autumn_Forest_review.png')
-spawns={1:[('O12','M0123'),('O22','M0123'),('O36','M0123'),('O26','M0122')],3:[('O24','M0120'),('I08','M0121'),('I15','M0123')],7:[('O32','M0121'),('O16','M0121'),('O16','M0122')],10:[('O38','M0122'),('O10','M0121'),('O20','M0122'),('O26','M0121')]}
+spawns={}
+with (P/'event_spawn_locations.csv').open(encoding='utf-8-sig',newline='') as source:
+    for row in csv.DictReader(source):
+        step=int(row['進捗']);spawns.setdefault(step,[]).append((row['node_id'],row['monster_id']))
 frame=Image.open(R/'images/MapEvent/assets/green_frame.png').convert('RGBA')
 ICON_SIZE=round(72*1.2)
 CORNER_OVERLAP=18
@@ -112,5 +115,5 @@ for step,entries in spawns.items():
         im.alpha_composite(icon,position['xy'])
         layout[str(step)].append({'node':node,'monster_id':mid,'corner':position['corner'],'box':position['box'],'size':icon.size})
     save_png(im,R/f'images/MapEvent/Autumn_Normal_{step:02}.png')
-(D/'event-icon-layout.json').write_text(json.dumps({'tile_size':72,'icon_max_size':ICON_SIZE,'corner_overlap':CORNER_OVERLAP,'line_clearance':LINE_CLEARANCE,'events':layout},ensure_ascii=False,indent=2)+'\n')
+(P/'event-icon-layout.json').write_text(json.dumps({'tile_size':72,'icon_max_size':ICON_SIZE,'corner_overlap':CORNER_OVERLAP,'line_clearance':LINE_CLEARANCE,'events':layout},ensure_ascii=False,indent=2)+'\n')
 print('Placed',sum(map(len,layout.values())),'icons at inward corners; maximum size',ICON_SIZE,'px; no line or icon overlaps')

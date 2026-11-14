@@ -83,8 +83,8 @@
   "7": [
     {
       "node_id": "O32",
-      "monster_id": "M0121",
-      "name": "採集クマちゃん",
+      "monster_id": "M0124",
+      "name": "救急うさちゃん",
       "label_box": [
         656,
         156,
@@ -129,8 +129,8 @@
     },
     {
       "node_id": "O10",
-      "monster_id": "M0121",
-      "name": "採集クマちゃん",
+      "monster_id": "M0124",
+      "name": "救急うさちゃん",
       "label_box": [
         1304,
         1442,
