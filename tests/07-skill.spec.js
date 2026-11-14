@@ -39,7 +39,7 @@ for(const protocol of ['http','file'])for(const [width,height] of [[1000,1400],[
  await page.locator('#mp-tab-map').click();const features=page.locator('#mp-map-features');
  await expect(features.locator('[data-feature-name="花咲くサボテン"]')).toContainText('防御ダイスの出目は通常どおり有効');
  await expect(features.locator('[data-feature-name="電流タンポポ"]')).toContainText('クールタイム-1');
- await expect(features.locator('[data-feature-name="植物建築ショップ"]')).toContainText('通過時または止まった時');
+ await expect(features.locator('[data-feature-name="植物建築ショップ"]')).toHaveCount(0);
  expect(errors).toEqual([]);
 });
 
@@ -108,9 +108,17 @@ for(const protocol of ['http','file'])test('07 autumn data: map, four difficulti
 for(const protocol of ['http','file'])test('07 autumn completion: all events, building cards and status descriptions on '+protocol,async({page})=>{
  await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve(skillFolder+'/index.html')).href:`/${skillFolder}/`);
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');await page.locator('#mp-tab-map').click();
- const features=page.locator('#mp-map-features');await expect(features).toBeVisible();await expect(features.locator('article')).toHaveCount(9);
- for(const name of ['疾走キノコ','仙果スターフルーツ','芳香ピーチ','金運の木'])await expect(features.getByRole('img',{name,exact:true})).toBeVisible();
- await expect.poll(()=>features.locator('img').evaluateAll(images=>images.length===4&&images.every(image=>image.complete&&image.naturalWidth>0))).toBe(true);
+ const features=page.locator('#mp-map-features');await expect(features).toBeVisible();await expect(features.locator('article')).toHaveCount(8);
+ for(const name of ['疾走キノコ','仙果スターフルーツ','芳香ピーチ','金運の木','花咲くサボテン','電流タンポポ','みなぎる元気','ガオーの注目'])await expect(features.getByRole('img',{name,exact:true})).toBeVisible();
+ await expect.poll(()=>features.locator('img').evaluateAll(images=>images.length===8&&images.every(image=>image.complete&&image.naturalWidth>0))).toBe(true);
+ await expect(features.locator('[data-feature-name="植物建築ショップ"]')).toHaveCount(0);
+ for(const [index,name] of ['疾走キノコ','仙果スターフルーツ','芳香ピーチ','金運の木','花咲くサボテン','電流タンポポ'].entries())await expect(features.locator(`[data-feature-name="${name}"] img`)).toHaveAttribute('src',new RegExp(`UT_HandCard_${21026+index}\\.png$`));
+ for(const [name,file] of [['みなぎる元気','1071_01'],['ガオーの注目','1071_02']]){
+  const heading=features.locator(`[data-feature-name="${name}"] h3`),icon=heading.locator('img');
+  await expect(icon).toHaveAttribute('src',new RegExp(`UT_Buff_${file}\\.png$`));
+  const layout=await heading.evaluate(el=>{const image=el.querySelector('img'),r=image.getBoundingClientRect(),range=document.createRange();range.selectNodeContents(el.firstChild);const text=range.getBoundingClientRect();return {width:r.width,height:r.height,after:r.left>=text.right,centered:Math.abs((r.top+r.height/2)-(text.top+text.height/2))<3};});
+  expect(layout).toEqual({width:24,height:24,after:true,centered:true});
+ }
  await expect(features).toContainText('次の移動力+3');await expect(features).toContainText('HP上限+1');await expect(features).toContainText('HPを2回復');await expect(features).toContainText('スターコインを3');await expect(features).toContainText('1スタックごとにキッズガオーの攻撃力+2');await expect(features).toContainText('防御力-1、移動力-1');
  for(const [level,end]of [['普通','18'],['困難','18'],['悪夢','17'],['狂気','17']]){
   await page.locator('#mp-difficulty').selectOption(level);
