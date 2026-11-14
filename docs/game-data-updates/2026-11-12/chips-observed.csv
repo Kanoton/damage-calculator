@@ -1,4 +1,4 @@
 name,map_id,rarity,effect,status,image,artwork_file
-採集かご,MAP0105,blue,建築カード使用後、ランダムなカードを1枚、スターコインを3獲得する。,説明採録済み。画像をトリミングして登録。チップ名と提供UT_Relic素材の絵柄は照合済み。正式チップID・計算/ターン処理・読取辞書は未対応。,"images/MapChip/UT_MapChip_Harvest_Basket.png","images/UT_Relic/UT_Relic_50095.png"
-妖精の翼,MAP0105,purple,マップ上の植物建築2個につき、移動力+1（最大+4）。,説明採録済み。画像をトリミングして登録。チップ名と提供UT_Relic素材の絵柄は照合済み。正式チップID・植物建築数入力と移動補正・読取辞書は未対応。,"images/MapChip/UT_MapChip_Fairy_Wings.png","images/UT_Relic/UT_Relic_50096.png"
-至高の木の枝,MAP0105,gold,ターン開始時、【みなぎる元気】を1スタック獲得する（1スタックごとに自身の攻撃力+2、戦闘を仕掛けられた後、1スタック失う）。,説明採録済み。画像をトリミングして登録。チップ名と提供UT_Relic素材の絵柄は照合済み。正式チップID・自キャラ元気スタック/ターン処理・読取辞書は未対応。,"images/MapChip/UT_MapChip_Branch_of_Highest_Tree.png","images/UT_Relic/UT_Relic_50094.png"
+採集かご,MAP0105,blue,建築カード使用後、ランダムなカードを1枚、スターコインを3獲得する。,説明採録済み。画像をトリミングして登録。チップ名と提供UT_Relic素材の絵柄は照合済み。ID171登録済み。絵柄対応をchip_artwork_mappingへ登録。計算/ターン処理・読取辞書は未対応。,"images/MapChip/UT_MapChip_Harvest_Basket.png","images/UT_Relic/UT_Relic_50095.png"
+妖精の翼,MAP0105,purple,マップ上の植物建築2個につき、移動力+1（最大+4）。,説明採録済み。画像をトリミングして登録。チップ名と提供UT_Relic素材の絵柄は照合済み。ID172登録済み。絵柄対応をchip_artwork_mappingへ登録。植物建築数入力と移動補正・読取辞書は未対応。,"images/MapChip/UT_MapChip_Fairy_Wings.png","images/UT_Relic/UT_Relic_50096.png"
+至高の木の枝,MAP0105,gold,ターン開始時、【みなぎる元気】を1スタック獲得する（1スタックごとに自身の攻撃力+2、戦闘を仕掛けられた後、1スタック失う）。,説明採録済み。画像をトリミングして登録。チップ名と提供UT_Relic素材の絵柄は照合済み。ID173登録済み。絵柄対応をchip_artwork_mappingへ登録。自キャラ元気スタック/ターン処理・読取辞書は未対応。,"images/MapChip/UT_MapChip_Branch_of_Highest_Tree.png","images/UT_Relic/UT_Relic_50094.png"
