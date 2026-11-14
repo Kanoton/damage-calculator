@@ -133,7 +133,7 @@ npm run test:06b
 
 ## 6. データ変更の考え方
 
-マップ固有カード・建物効果・状態効果の参照説明は `csv/map_features.csv`（map_id / kind / name / image / description / building_effect）を正本とする。kindはcardまたはkeyword、imageはimages/からの相対パス。07/08のマップ詳細欄で表示し、両方の `INITIAL_MAP_DATA.features` を同期する。説明表示は効果の自動実行を意味しない。秋幻の森のカード画像は承認済み縦長まとめから `scripts/extract-autumn-cards.py` で切り出したものを使う。
+マップ固有カード・建物効果・状態効果の参照説明は `csv/map_features.csv`（map_id / kind / name / image / description / building_effect）を正本とする。kindはcardまたはkeyword、imageはimages/からの相対パス。07/08のマップ詳細欄で表示し、両方の `INITIAL_MAP_DATA.features` を同期する。説明表示は効果の自動実行を意味しない。秋幻の森のカード画像は提供済み正式素材 `images/UT_HandCard/UT_HandCard_21026.png`〜`21031.png` を使う。旧まとめからの切り出し画像は過去資料として保持する。状態効果のimageは見出しの名前の横に小さく表示する。みなぎる元気／ガオーの注目は既存対応の `UT_Buff_1071_01.png`／`UT_Buff_1071_02.png`。植物建築ショップの説明枠は利用者指定で表示対象から除外した。
 
 現行07/08のチャージスタックはゲーム更新後の表示名「エナジー」、上限15。共有CSVのカテゴリ・条件・アイコンの識別キー `チャージ` は旧版との互換のため保持し、現行 `character-data-loader.js` と説明文一覧のexport時に `エナジー` へ正規化する。キャラのパッシブ名「チャージステップ」は別物なので変更しない。HTTPとfile://のチップ／ルールsnapshotも同期し、保存版のJSを無断更新しない。
 
