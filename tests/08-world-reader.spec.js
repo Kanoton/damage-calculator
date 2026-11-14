@@ -711,7 +711,7 @@ for(const [protocol,size] of [['http',{width:1440,height:900}],['file',{width:95
   const cues=ScreenReaderController.updateDefeat(frames[2],4100,{monsters:[]}),state=ScreenReaderMapBridge.snapshot();
   return {initial,reinforced,cues,state,log:ScreenReaderController.diagnostics()};
  },images);
- expect(result.initial).toMatchObject({M0122:2,M0123:4,M0121:3});expect(result.reinforced).toMatchObject({M0122:4,M0123:4,M0121:5});
+ expect(result.initial).toMatchObject({M0122:2,M0123:4,M0121:2,M0124:1});expect(result.reinforced).toMatchObject({M0122:4,M0123:4,M0121:3,M0124:2});
  expect(result.cues).toEqual([expect.objectContaining({monsterId:'M0122',serial:2,association:'tracked'})]);
  expect(result.state).toMatchObject({round:5,progress:10});expect(result.state.monsters.filter(m=>m.defeated).map(m=>m.serial)).toEqual([2]);
  expect(result.log.records.some(r=>r.code==='applied'&&r.round===5)).toBe(true);
