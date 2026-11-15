@@ -6,8 +6,12 @@ function createMapFeatureSections(rows){
   const section=document.createElement('section'),heading=document.createElement('h2'),grid=document.createElement('div');section.className='mp-feature-section';heading.textContent=title;grid.className='mp-feature-grid';
   for(const row of entries){
    const article=document.createElement('article');article.className='mp-feature';article.dataset.featureName=row.name;
-   const source=safeAssetUrl('../images/',row.image);if(source){const link=document.createElement('a'),image=document.createElement('img');link.href=source;link.target='_blank';link.rel='noopener';link.setAttribute('aria-label',row.name+'のカード画像を開く');image.src=source;image.alt=row.name;image.loading='lazy';link.append(image);article.append(link);}
-   const name=document.createElement('h3'),description=document.createElement('p');name.textContent=row.name;description.textContent=row.description;article.append(name,description);
+   const name=document.createElement('h3'),description=document.createElement('p');name.textContent=row.name;description.textContent=row.description;
+   const source=safeAssetUrl('../images/',row.image);if(source){const image=document.createElement('img');image.src=source;image.alt=row.name;image.loading='lazy';
+    if(kind==='keyword'){image.className='mp-feature-status-icon';name.append(image);}
+    else{const link=document.createElement('a');link.href=source;link.target='_blank';link.rel='noopener';link.setAttribute('aria-label',row.name+'のカード画像を開く');link.append(image);article.append(link);}
+   }
+   article.append(name,description);
    if(row.building_effect){const effect=document.createElement('p'),label=document.createElement('strong');label.textContent='設置後：';effect.append(label,document.createTextNode(row.building_effect));article.append(effect);}
    grid.append(article);
   }
