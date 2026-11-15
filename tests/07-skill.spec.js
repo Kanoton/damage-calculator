@@ -1636,7 +1636,7 @@ for(const protocol of ['http','file'])test(`map reference chips and roster toolt
   await pick.selectOption(id);await page.locator('#mp-tab-map').click();const features=page.locator('#mp-map-features'),expected=rows.filter(row=>row.category.split('|').includes(id));
   await expect(features.locator('[data-feature-kind="chip"]')).toHaveCount(0);
   await page.locator('.role-tab[data-role="character"]').click();await selectChipCategory(page,'マップ固有');const chips=page.locator('#chip-image-list .chip-select');await expect(chips).toHaveCount(expected.length);
-  for(const row of expected){const chip=page.locator(`#chip-image-list .chip-select[data-id="${row.id}"]`);await expect(chip).toHaveAttribute('data-name',row.name);await expect(chip).toHaveAttribute('aria-label',row.name+'：'+row.effect+'。取得する');await expect.poll(()=>chip.locator('img').evaluate(im=>im.complete&&im.naturalWidth>0)).toBe(true);}
+  for(const row of expected){const chip=page.locator(`#chip-image-list .chip-select[data-id="${row.id}"]`);await expect(chip).toHaveAttribute('data-name',row.name);await expect(chip).toHaveAttribute('aria-label','取得する：'+row.name);await expect.poll(()=>chip.locator('img').evaluate(im=>im.complete&&im.naturalWidth>0)).toBe(true);}
   await page.locator('.role-tab[data-role="map"]').click();
   await page.locator('#mp-tab-monsters').click();const source=page.locator('#mp-monster-list .mp-monster').first();await source.click();const card=page.locator('#map-roster-list .roster-card').first(),tip=page.locator('#monster-tooltip');
   await card.hover();await expect(tip).toBeHidden();await card.locator('.roster-select').focus();await expect(tip).toBeHidden();await expect(card).not.toHaveAttribute('aria-describedby','monster-tooltip');
