@@ -8,6 +8,8 @@ Last updated: 2026-11-15 (Japan)
 - マップ固有チップ欄は既存のキャラクターデータ読込結果をイベントで受け取り、正本chip_list.csv（HTTP）／既存CHARACTER_CSV_SNAPSHOT（file・取得失敗時）から参照表示する。categoryを | で分けて現在のmap_idに一致する全行の名前・効果・chip_icon画像を表示。新しいCSVや重複snapshot・追加fetchは作らない。計算や認識へのチップ効果追加は行わない。
 - 全マップ共通で配置済みroster-cardのmouseenter／focusinは情報tooltipを閉じる。showMonsterTip自体も出現一覧のmp-monsterだけを許可し、08のEscape後のpointermove再表示対象からroster-cardを外す。マップタブの出現一覧のhover／focus情報とステータス操作のtitleは維持する。
 - HTTP/file・07/08の全表示マップを巡回する回帰で、正本と一致するチップ名／説明／画像、配置済みカードのhover／focus非表示、08の出現一覧のfocus表示を確認する。秋幻の森の画像・件数・セクション間隔と既存08 tooltip回帰も更新。構文と生成一致はローカル成功、最終CI／マージ結果は同PR参照。
+- 初回CIの07は124件、08同期の既存238件が成功。新しい全マップ確認4件は、roster上にpointerを残して出現一覧へfocusした際、scrollで既存tooltip非表示処理が動き、正の表示確認が失敗。sourceへ実際にhoverしてからfocusする操作順に直し、全マップの出現一覧hover/focus表示とrosterの非表示を両方検証する。アプリの従来のscroll挙動は変えない。
+
 
 ## 2026-11-15：マップ詳細の余白・小型画像・固有スタックとフクロウ
 

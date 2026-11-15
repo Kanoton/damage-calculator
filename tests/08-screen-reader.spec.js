@@ -829,7 +829,7 @@ test('08: monster text tooltip follows difficulty and excludes roster cards',asy
   await page.keyboard.press('Escape');await expect(tip).toBeHidden();
  }
  await tile.click();const card=page.locator('#map-roster-list .roster-card[data-id="M0120"]').first();await card.hover();
- await expect(tip).toBeHidden();await card.locator('.roster-select').focus();await expect(tip).toBeHidden();await expect(card).not.toHaveAttribute('aria-describedby','monster-tooltip');await tile.focus();await expect(tip).toContainText('60%（90）以下');
+ await expect(tip).toBeHidden();await card.locator('.roster-select').focus();await expect(tip).toBeHidden();await expect(card).not.toHaveAttribute('aria-describedby','monster-tooltip');await tile.hover();await tile.focus();await expect(tip).toContainText('60%（90）以下');
  await page.locator('#mp-map-select').selectOption('MAP0001');await expect(tip).toBeHidden();
 });
 

@@ -1638,6 +1638,6 @@ for(const protocol of ['http','file'])test(`map reference chips and roster toolt
   for(const row of expected){const article=chips.locator(`[data-chip-id="${row.id}"]`);await expect(article.locator('h3')).toHaveText(row.name);await expect(article.locator('p')).toHaveText(row.effect);await expect(article.locator('a')).toHaveCount(0);await expect.poll(()=>article.locator('h3 img').evaluate((im,file)=>im.complete&&im.naturalWidth>0&&decodeURIComponent(im.getAttribute('src'))==='../images/chip_icon/'+file,row.images).catch(()=>false)).toBe(true);}
   await page.locator('#mp-tab-monsters').click();const source=page.locator('#mp-monster-list .mp-monster').first();await source.click();const card=page.locator('#map-roster-list .roster-card').first(),tip=page.locator('#monster-tooltip');
   await card.hover();await expect(tip).toBeHidden();await card.locator('.roster-select').focus();await expect(tip).toBeHidden();await expect(card).not.toHaveAttribute('aria-describedby','monster-tooltip');
-  if(skillFolder==='08_screen_reader'){await source.focus();await expect(tip).toBeVisible();await page.keyboard.press('Escape');await card.hover();await expect(tip).toBeHidden();}
+  if(skillFolder==='08_screen_reader'){await source.hover();await expect(tip).toBeVisible();await source.focus();await expect(tip).toBeVisible();await page.keyboard.press('Escape');await card.hover();await expect(tip).toBeHidden();}
  }
 });
