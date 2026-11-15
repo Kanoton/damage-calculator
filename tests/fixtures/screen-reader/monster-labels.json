@@ -1825,5 +1825,75 @@
     "training": false,
     "learnHpDigits": false,
     "learnSerialDigits": false
+  },
+  {
+    "fixture": "labels-autumn-bunny-full",
+    "id": "M0124",
+    "boss": false,
+    "nameBox": [
+      730,
+      450,
+      244,
+      46
+    ],
+    "serialBox": [
+      980,
+      450,
+      29,
+      49
+    ],
+    "hpBox": [
+      799,
+      506,
+      109,
+      47
+    ],
+    "expected": {
+      "monsterId": "M0124",
+      "serial": 1,
+      "currentHp": 15,
+      "maxHp": 15
+    },
+    "source": "autumn-bunny-user-20261115",
+    "sourceFile": "20261115132543_1.jpg",
+    "sourceSha256": "fa5260a851981d56d8d25281e73b46ef5eafde6b120e5e2e946c590dc2b6fe1c",
+    "training": true,
+    "learnHpDigits": false,
+    "learnSerialDigits": false
+  },
+  {
+    "fixture": "labels-autumn-bunny-damaged",
+    "id": "M0124",
+    "boss": false,
+    "nameBox": [
+      850,
+      210,
+      245,
+      44
+    ],
+    "serialBox": [
+      1101,
+      210,
+      30,
+      46
+    ],
+    "hpBox": [
+      919,
+      267,
+      86,
+      45
+    ],
+    "expected": {
+      "monsterId": "M0124",
+      "serial": 1,
+      "currentHp": 5,
+      "maxHp": 15
+    },
+    "source": "autumn-bunny-user-20261115",
+    "sourceFile": "20261115132607_1.jpg",
+    "sourceSha256": "3209cca1ad4ca89d21784e5ad3811851e0da9c657d0aa277307edf53bc60bee1",
+    "training": false,
+    "learnHpDigits": false,
+    "learnSerialDigits": false
   }
 ]
