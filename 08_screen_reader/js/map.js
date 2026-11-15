@@ -13,6 +13,11 @@ const eventPreview=createEventMapPreview(document.getElementById('mp-map-image')
 }));
 root.addEventListener('keydown',event=>{if(event.key==='Escape')eventPreview.reset();});
 const buildingEditor=createAutumnBuildingEditor({root,beforeChange:()=>window.rememberCharacterSkillActivation?.(),onInteraction:()=>eventPreview.reset(),onChange:()=>document.querySelectorAll('#mp-mission-body tr').forEach(updateMissionRow)});
+window.ScreenReaderBuildingBridge={
+ context:()=>({mapId:pick.value,difficulty:difficulty.value}),
+ apply:result=>buildingEditor.applyRecognized(result),
+ snapshot:()=>buildingEditor.snapshot()
+};
 window.captureAutumnBuildings=()=>buildingEditor.snapshot();
 window.restoreAutumnBuildings=value=>buildingEditor.restore(value);
 window.addEventListener('new-game-reset',()=>buildingEditor.reset());
