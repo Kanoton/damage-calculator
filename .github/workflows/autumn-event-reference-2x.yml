@@ -1,0 +1,93 @@
+name: Build autumn document event maps
+
+on:
+  push:
+    branches:
+      - docs/autumn-event-reference-2x-20261115
+    paths:
+      - 'scripts/render-autumn-event-reference.py'
+      - 'scripts/render-autumn-summary.py'
+      - '.github/workflows/autumn-event-reference-2x.yml'
+      - 'docs/map-event-output/autumn-forest/production-guide.md'
+  pull_request:
+    paths:
+      - 'scripts/render-autumn-event-reference.py'
+      - 'scripts/render-autumn-summary.py'
+      - 'docs/map-event-output/autumn-forest/production/event-reference-2x/**'
+      - 'docs/map-event-output/autumn-forest/production/summaries/20261115/**'
+      - '.github/workflows/autumn-event-reference-2x.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  render:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install rendering dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-noto-cjk fonts-dejavu-core
+          python -m pip install Pillow==12.3.0
+      - name: Validate Python source
+        run: |
+          python -m py_compile scripts/render-autumn-event-reference.py scripts/render-autumn-summary.py
+      - name: Generate document event diagrams and summary sheets
+        run: |
+          python scripts/render-autumn-event-reference.py --out docs/map-event-output/autumn-forest/production/event-reference-2x
+          python scripts/render-autumn-summary.py --out docs/map-event-output/autumn-forest/production/summaries/20261115
+      - name: Verify generated dimensions, positions and hashes
+        run: |
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          from PIL import Image
+          root=Path('docs/map-event-output/autumn-forest/production')
+          events=root/'event-reference-2x'
+          sheet=root/'summaries/20261115'
+          meta=json.loads((events/'layout.json').read_text())
+          assert len(meta['events'])==4
+          assert sum(len(v) for v in meta['events'].values())==14
+          for step,placements in meta['events'].items():
+              im=Image.open(events/f'Autumn_Event_{int(step):02}_Reference_2x.png')
+              assert im.size==(1804,1948),im.size
+              for item in placements:
+                  x1,y1,x2,y2=item['box']
+                  assert 0<=x1<x2<=im.width and 0<=y1<y2<=im.height
+                  assert max(item['size'])<=172
+          outputs=[]
+          for f in sorted((sheet/'Landscape').glob('*.png')):
+              assert Image.open(f).size==(2560,1440),f
+              outputs.append(f)
+          for f in sorted((sheet/'Vertical').glob('*.png')):
+              assert Image.open(f).size==(2240,3329),f
+              outputs.append(f)
+          assert len(outputs)==16,len(outputs)
+          sources=json.loads((sheet/'sources.json').read_text())
+          sources['images']=[{'file':str(f.relative_to(sheet)),'sha256':hashlib.sha256(f.read_bytes()).hexdigest()} for f in outputs]
+          (sheet/'sources.json').write_text(json.dumps(sources,ensure_ascii=False,indent=2)+'\n')
+          print('Verified 4 event diagrams and 16 summary PNGs')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: autumn-event-2x-preview
+          path: |
+            docs/map-event-output/autumn-forest/production/event-reference-2x/
+            docs/map-event-output/autumn-forest/production/summaries/20261115/
+          retention-days: 14
+      - name: Commit generated images to pull request branch
+        if: github.event_name == 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/map-event-output/autumn-forest/production/event-reference-2x docs/map-event-output/autumn-forest/production/summaries/20261115
+          if ! git diff --cached --quiet; then
+            git commit -m "Generate checked autumn event reference images and updated sheets"
+            git push
+          fi

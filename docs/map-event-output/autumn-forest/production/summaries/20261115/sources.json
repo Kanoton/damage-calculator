@@ -17,67 +17,67 @@
   "images": [
     {
       "file": "Landscape/Autumn_Forest_Hard_WQHD_01_20261115.png",
-      "sha256": "f262ae0942d40f44f99f6ab83f00dc90eed7b54f55c2da1a63328adbfa390b81"
+      "sha256": "cc4ba91d639e6084330376f69303c4aba709a09d4b751ad10f4d81a638f252ea"
     },
     {
       "file": "Landscape/Autumn_Forest_Hard_WQHD_02_20261115.png",
-      "sha256": "c3f11db1b83f337379f515f37675884e79a9f7e37b11228e6253e02793c928fd"
+      "sha256": "3d423b5a275bcf47d90030e4f24be9ec53a71d316275b4370f5bc7f3476b3e49"
     },
     {
       "file": "Landscape/Autumn_Forest_Insanity_WQHD_01_20261115.png",
-      "sha256": "1f6d1e1879bc659c8e8d23fa3910cf79a76c28336c563eca7369573001d12eb6"
+      "sha256": "af2f222b7d789c6b58a9e867711476a3cfb2c066f55bec2b45038750a30bee78"
     },
     {
       "file": "Landscape/Autumn_Forest_Insanity_WQHD_02_20261115.png",
-      "sha256": "fe328527809b62abadcd1cb855d9f6f1ff4cd4b41e824e0c4986d02b9d59ed83"
+      "sha256": "271e2a73408b6643c97968a5e4d3de471d72b62a00e1f74111a3cfc05c4f7ac4"
     },
     {
       "file": "Landscape/Autumn_Forest_Nightmare_WQHD_01_20261115.png",
-      "sha256": "241b075f73e9a2289bc86e99d4fb7ad176376e48de18087eecc097bb7366138f"
+      "sha256": "1d0cacbb3f274495808c45e17ecc63ae68047888fa25344b21442a173f0d5be7"
     },
     {
       "file": "Landscape/Autumn_Forest_Nightmare_WQHD_02_20261115.png",
-      "sha256": "560e3e2596d2a9d12674fe9c93f8aef72ad1d2ee2754a4f0df1138d39ec43ba9"
+      "sha256": "df93246b1e551a3fefb0cb5cc7a87776cfec798e448ccc6cde427f123db83f1e"
     },
     {
       "file": "Landscape/Autumn_Forest_Normal_WQHD_01_20261115.png",
-      "sha256": "ed8deb14bde0124cf9056778e7ebf268ab222ffec0ad358bb4183f2e4328cc3b"
+      "sha256": "6d4d98e39e96a26d41796ad4452bd3d5fb46842c53c42dcfcb70ecc6297e1078"
     },
     {
       "file": "Landscape/Autumn_Forest_Normal_WQHD_02_20261115.png",
-      "sha256": "396d5fc6f35ee846cf8bd28b849795318b7a0476abd9381212ae03bdb96969ea"
+      "sha256": "8eb4db60c78b8afe92c91b4d23b6cddcf96b9cba8a650f079dd32ee451011622"
     },
     {
       "file": "Vertical/Autumn_Forest_Hard_Summary_01_20261115.png",
-      "sha256": "3c37a433fc7558dd061c8478793071f52586dc2d8f5eac7b23014061d073bb42"
+      "sha256": "e99e8aa95dedfb14fb3efff7605fa318bf000b3961a9687bf5c82f5527bd94ac"
     },
     {
       "file": "Vertical/Autumn_Forest_Hard_Summary_02_20261115.png",
-      "sha256": "9b5a84e253ba4e4b90be85478323edf79f529428d08b71bd11d977a784730648"
+      "sha256": "6218322c9c098f175b4b187741a6b5b2bc2397ab6276ffa2aeceea46bc5c7293"
     },
     {
       "file": "Vertical/Autumn_Forest_Insanity_Summary_01_20261115.png",
-      "sha256": "f6811187a112f7dfeaf37e6dd5d0106fbef4185b81dc2b283ecab4a66b22acc9"
+      "sha256": "5dae5a7d591e02da97da1d18e5e7b9e9c217ba3eb2f29996242bfd9969647fec"
     },
     {
       "file": "Vertical/Autumn_Forest_Insanity_Summary_02_20261115.png",
-      "sha256": "e23b6f230003507d68c2274168b303a99cc4ab74de2c7da78870de964730b3dc"
+      "sha256": "51dee50ff35d3a2a87c0693eae6147ce4a8a7972b13cfb70f5c0c578860c0597"
     },
     {
       "file": "Vertical/Autumn_Forest_Nightmare_Summary_01_20261115.png",
-      "sha256": "19e440c6f79ab7be28e7a94102122e52f4b0e78bb4b70bf4ba69e2fbddae7485"
+      "sha256": "6fa8569b5f60260b072a6202d6f9c46c1798203461ae31c790dc07bc13df285b"
     },
     {
       "file": "Vertical/Autumn_Forest_Nightmare_Summary_02_20261115.png",
-      "sha256": "45e9fd4a751dec8450b025f848cdf74edc038098094ee9dcfc7919f9f0e9d08e"
+      "sha256": "6ecd26a384c42be8e8183ee07f799df7f50e1272bb11edab96caddd05e8aef7d"
     },
     {
       "file": "Vertical/Autumn_Forest_Normal_Summary_01_20261115.png",
-      "sha256": "09589f7f72334430cd9951654f83620c8e7361d738be5971001a6b2ee4be9b8b"
+      "sha256": "8f6f7f7a8e0cdc64d89265352e315e205ca78a5fec1f1130271a5ffd89e46c3f"
     },
     {
       "file": "Vertical/Autumn_Forest_Normal_Summary_02_20261115.png",
-      "sha256": "541424cb0ffacecb9e36a1d64b728fab820bea8629b692afc39e6342f584db19"
+      "sha256": "f940bcc90145ac34c22a8e028a78dedde90c5aeb1e560380161f51d81b9ce444"
     }
   ]
 }
