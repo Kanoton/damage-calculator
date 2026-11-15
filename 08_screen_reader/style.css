@@ -1698,9 +1698,8 @@ dialog[data-inline-pad] .skill-entry-row>[data-cancel]{min-width:72px;align-self
 #map-draft .mp-feature{min-width:0;border:1px solid var(--mp-line);border-radius:8px;padding:10px}
 #map-draft .mp-feature h3{font-size:14px;margin:8px 0}
 #map-draft .mp-feature p{font-size:13px;line-height:1.65;margin:8px 0;overflow-wrap:anywhere}
-#map-draft .mp-feature img{display:block;width:25%;max-width:45px;height:auto;margin:auto}
-#map-draft .mp-feature h3:has(.mp-feature-status-icon){display:flex;align-items:center;gap:6px}
-#map-draft .mp-feature h3 .mp-feature-status-icon{display:inline-block;width:24px;height:24px;object-fit:contain;margin:0;flex:none}
+#map-draft .mp-feature h3{display:flex;align-items:center;gap:6px}
+#map-draft .mp-feature h3 .mp-feature-icon{display:inline-block;width:24px;height:24px;object-fit:contain;margin:0;flex:none}
 #map-draft .mp-feature[data-feature-name="みなぎる元気"] h3{color:#7546a6}
 #map-draft .mp-feature[data-feature-name="ガオーの注目"] h3{color:#246b9b}
 @media(max-width:400px){#map-draft .mp-feature-grid{grid-template-columns:1fr}}

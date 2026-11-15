@@ -14,6 +14,9 @@ const eventPreview=createEventMapPreview(document.getElementById('mp-map-image')
 root.addEventListener('keydown',event=>{if(event.key==='Escape')eventPreview.reset();});
 document.querySelectorAll('.role-tab,.mp-subtabs button').forEach(button=>button.addEventListener('click',()=>eventPreview.reset()));
 
+let mapFeatureChips=[];
+window.addEventListener('map-chip-catalog-change',event=>{mapFeatureChips=event.detail;render();});
+
 // Route choices change the view, never execute events or reset the roster.
 const routeState={context:'',route:'',moved:false};
 const routeControls=document.createElement('div');routeControls.id='mp-route-controls';routeControls.hidden=true;
@@ -273,7 +276,7 @@ function renderRoster(){
  [...rosterState.monsters].sort((a,b)=>Number(!!a.defeated)-Number(!!b.defeated)||Number(data.nativeMapByMonster[b.monsterId]===pick.value)-Number(data.nativeMapByMonster[a.monsterId]===pick.value)||a.monsterId.localeCompare(b.monsterId,'en',{numeric:true})||a.instanceId-b.instanceId).forEach(enemy=>{
    const displayName=monsterDisplayName(enemy),{card,select,nameText,actions,top}=createRosterCardShell(enemy,rosterState.selectedId,displayName,assignMapImage,data.icons);
   card.dataset.instanceId=enemy.instanceId;card.dataset.id=enemy.monsterId;
-  card.addEventListener('mouseenter',()=>showMonsterTip(card));card.addEventListener('mouseleave',hideMonsterTip);
+  card.addEventListener('mouseenter',hideMonsterTip);card.addEventListener('focusin',hideMonsterTip);
   if(characterSkillTargetRequest?.multipleTargets&&!enemy.defeated){const selected=characterSkillTargetRequest.selectedIds.has(enemy.instanceId);card.classList.toggle('is-skill-target-selected',selected);select.dataset.skillTargetId=enemy.instanceId;select.setAttribute('aria-pressed',String(selected));select.setAttribute('aria-label',displayName+(selected?'をスキル対象から解除':'をスキル対象に選択'));}
   const stats=createRosterStats(enemy,displayName,assignMapImage,data.icons,({key,field,label,input,value})=>{const next=Number(value);if(String(value).trim()===''||!Number.isSafeInteger(next)||next<0){input.value=enemy[field];return;}if(next===enemy[field])return;rememberRoster();if(key==='HP'){if(next===0){removeEnemy(enemy);rosterNotice.textContent=displayName+'を撃破しました。';}else{enemy.manualHp=next;enemy.hp=next;enemy.damageTaken=Math.max(0,rosterStat(enemy.base,'HP')-next);}}else{const manualKey=key==='攻撃'?'manualAttack':'manualDefense';enemy[manualKey]=next-rosterStat(enemy.base,key)-(key==='攻撃'?(enemy.eventAttack||0)-(enemy.fanSkillAttackReduction?1:0)+(enemy.monsterId==='M0120'?2*(enemy.energyStacks||0):0):(enemy.eventDefense||0)+(enemy.skillDefenseModifier||0));rosterNotice.textContent=displayName+'の'+label+'を'+next+'に変更しました。';}if(next===0&&key==='HP'){renderRoster();return;}updateEnemy(enemy);input.value=enemy[field];rosterUndo.disabled=false;if(rosterState.selectedId===enemy.instanceId)registerEnemy(enemy,false);if(enemy.monsterId==='M0120'&&key==='HP')renderRoster();});
   select.addEventListener('click',()=>{if(resolveCharacterSkillTarget(enemy))return;rosterState.selectedId=enemy.instanceId;registerEnemy(enemy);renderRoster();rosterNotice.textContent=monsterDisplayName(enemy)+'を計算機に登録しました。';});
@@ -382,7 +385,7 @@ function executeLibraryTruth(){
 }
 function renderMapInformation(){
  eventPreview.reset();
- const features=root.querySelector('#mp-map-features');features.replaceChildren(createMapFeatureSections((data.features||[]).filter(row=>row.map_id===pick.value)));features.hidden=!features.childElementCount;
+ const features=root.querySelector('#mp-map-features');features.replaceChildren(createMapFeatureSections([...(data.features||[]).filter(row=>row.map_id===pick.value),...mapFeatureChips.filter(row=>String(row.category||'').split('|').includes(pick.value)).map(row=>({kind:'chip',id:row.id,name:row.name,image:'chip_icon/'+row.images,description:row.effect}))]));features.hidden=!features.childElementCount;
  // CSV order is the display order; external mission/event IDs are not required.
  const missions=routeRows(data.missions);
  const events=routeRows(data.events);
@@ -442,6 +445,7 @@ render();
 
 function hideMonsterTip(){monsterTipVersion++;const tip=document.getElementById('monster-tooltip');if(tip){tip.hidden=true;tip.replaceChildren();}}
 function showMonsterTip(tile){
+ if(!tile?.matches('.mp-monster')||!list.contains(tile)){hideMonsterTip();return;}
  hideMonsterTip();const tip=document.getElementById('monster-tooltip');if(!tip)return;
  const stats=data.stats.find(row=>row.monster_id===tile.dataset.id&&row['難易度']===difficulty.value);
  const file=String(stats?.info||stats?.['情報画像']||'').trim();if(!file)return;
