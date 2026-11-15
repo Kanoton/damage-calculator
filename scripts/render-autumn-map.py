@@ -1,6 +1,7 @@
 from pathlib import Path
 import json,math,io,csv
 from PIL import Image,ImageDraw,ImageFont
+from autumn_building_frames import add_building_frames
 R=Path(__file__).resolve().parents[1]
 D=R/'docs/map-event-output/autumn-forest';A=D/'assets'
 with (R/'csv/monster_stats.csv').open(encoding='utf-8-sig',newline='') as source:
@@ -23,7 +24,7 @@ def render(review=False):
             idx=outer.index(n['id']);step=-1 if t in ['1st','4th'] else 1;other=lookup[outer[(idx+step)%len(outer)]];dx,dy=other['x']-x,other['y']-y;l=math.hypot(dx,dy);u,v=dx/l,dy/l;pts=[(x+u*32.574-v*13.225,y+v*32.574+u*13.225),(x+u*32.574+v*13.225,y+v*32.574-u*13.225),(x+u*45.799,y+v*45.799)];d.polygon(pts,fill='white');d.line(pts+[pts[0]],fill='#303340',width=2,joint='curve')
         else:im.alpha_composite(Image.open(A/f'UT_Platform_{t}.png').convert('RGBA').resize((72,72),Image.Resampling.LANCZOS),(x-36,y-36))
         if review:d.text((x,y+48),n['id'],font=small,anchor='mt',fill='#303340',stroke_width=2,stroke_fill='white')
-    return im
+    return add_building_frames(im)
 base=render();save_png(base,R/'images/Map/Layout_Autumn_Forest.png');save_png(render(True),D/'Layout_Autumn_Forest_review.png')
 spawns={}
 with (P/'event_spawn_locations.csv').open(encoding='utf-8-sig',newline='') as source:
