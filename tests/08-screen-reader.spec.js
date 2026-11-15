@@ -852,7 +852,7 @@ test('08: monster text tooltip retains readable long text and viewport bounds',a
 
 test('08: monster text tooltip uses the bundled CSV snapshot through file protocol',async({page})=>{
  await openMonsterText(page,'MAP0105',true);await page.locator('#mp-difficulty').selectOption('悪夢');
- await page.locator('.mp-monster[data-id="M0123"]').focus();const tip=page.locator('#monster-tooltip');
+ await page.locator('.mp-monster[data-id="M0123"]').hover();await page.locator('.mp-monster[data-id="M0123"]').focus();const tip=page.locator('#monster-tooltip');
  await expect(tip).toContainText('ファイナルカウント');await expect(tip).toContainText('50%（5）以下');
 });
 
