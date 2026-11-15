@@ -877,6 +877,7 @@ for(const protocol of ['http','file'])test('08 autumn icon stacks: derived attac
  await page.locator('#mp-tab-monsters').click();await page.locator('.mp-monster[data-id="M0122"]').click();await page.locator('.mp-monster[data-id="M0122"]').click();await page.locator('.mp-monster[data-id="M0123"]').click();
  const dinos=page.locator('#map-roster-list .roster-card[data-id="M0122"]'),dino=dinos.last(),anger=dino.locator('.roster-status-angerStacks button'),dinoAttack=dino.locator('input[aria-label$="の攻撃力"]'),base=Number(await dinoAttack.inputValue());
  const other=await dinos.first().locator('input[aria-label$="の攻撃力"]').inputValue();await expect(anger.locator('img')).toHaveAttribute('src',/UT_Buff_1072.png$/);
+ for(const entry of [gao,dino])expect(await entry.evaluate(card=>{const stack=card.querySelector('.roster-status-energyStacks,.roster-status-angerStacks'),mark=card.querySelector('.roster-mark'),a=stack.getBoundingClientRect(),b=mark.getBoundingClientRect();return stack.parentElement===mark.parentElement&&!!(stack.compareDocumentPosition(mark)&Node.DOCUMENT_POSITION_FOLLOWING)&&a.right<=b.left&&Math.abs(a.top-b.top)<3;})).toBe(true);
  await anger.click();await anger.click();await expect(dinoAttack).toHaveValue(String(base+2));await expect(dinos.first().locator('input[aria-label$="の攻撃力"]')).toHaveValue(other);
  await dinoAttack.fill('20');await dinoAttack.dispatchEvent('change');await anger.click({button:'right'});await expect(dinoAttack).toHaveValue('19');await page.locator('#roster-undo').click();await expect(dinoAttack).toHaveValue('20');
  const owl=page.locator('#map-roster-list .roster-card[data-id="M0123"]').last(),owlHp=owl.locator('input[aria-label$="の残りHP"]');
@@ -889,7 +890,7 @@ for(const protocol of ['http','file'])test('08 autumn icon stacks: derived attac
  await attention.click({button:'right'});await expect(defense).toHaveValue(String(def0));await expect(move).toHaveText(String(move0));
  await page.screenshot({path:'artifacts/autumn-attention-'+protocol+'-'+test.info().project.name+'.png'});
  await page.locator('#selected-party-tab').click();await expect(page.locator('#selected-party-grid .autumn-attention')).toHaveCount(0);
- await page.locator('.role-tab[data-role="map"]').click();await expect.poll(()=>gao.locator('.roster-autumn-controls img').evaluateAll(imgs=>imgs.every(im=>im.complete&&im.naturalWidth>0))).toBe(true);
+ await page.locator('.role-tab[data-role="map"]').click();await expect.poll(()=>gao.locator('.roster-status-energyStacks img').evaluateAll(imgs=>imgs.every(im=>im.complete&&im.naturalWidth>0))).toBe(true);
  expect(await energy.locator('img').evaluate(im=>{const r=im.getBoundingClientRect();return r.width<=25&&r.height<=25;})).toBe(true);
  await hp.fill('59');await hp.dispatchEvent('change');await owlHp.fill('4');await owlHp.dispatchEvent('change');
  await page.screenshot({path:'artifacts/autumn-icons-'+protocol+'-'+test.info().project.name+'.png',fullPage:true});expect(errors).toEqual([]);

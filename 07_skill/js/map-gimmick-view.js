@@ -9,7 +9,7 @@ function createMapFeatureSections(rows){
    const name=document.createElement('h3'),description=document.createElement('p');name.textContent=row.name;description.textContent=row.description;
    const source=safeAssetUrl('../images/',row.image);if(source){const image=document.createElement('img');image.src=source;image.alt=row.name;image.loading='lazy';
     if(kind==='keyword'){image.className='mp-feature-status-icon';name.append(image);}
-    else{const link=document.createElement('a');link.href=source;link.target='_blank';link.rel='noopener';link.setAttribute('aria-label',row.name+'のカード画像を開く');link.append(image);article.append(link);}
+    else{article.append(image);}
    }
    article.append(name,description);
    if(row.building_effect){const effect=document.createElement('p'),label=document.createElement('strong');label.textContent='設置後：';effect.append(label,document.createTextNode(row.building_effect));article.append(effect);}

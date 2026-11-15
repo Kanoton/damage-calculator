@@ -112,6 +112,10 @@ for(const protocol of ['http','file'])test('07 autumn completion: all events, bu
  for(const name of ['疾走キノコ','仙果スターフルーツ','芳香ピーチ','金運の木','花咲くサボテン','電流タンポポ','みなぎる元気','ガオーの注目'])await expect(features.getByRole('img',{name,exact:true})).toBeVisible();
  await expect.poll(()=>features.locator('img').evaluateAll(images=>images.length===8&&images.every(image=>image.complete&&image.naturalWidth>0))).toBe(true);
  await expect(features.locator('[data-feature-name="植物建築ショップ"]')).toHaveCount(0);
+ await expect(features.locator('a')).toHaveCount(0);
+ const cards=features.locator('.mp-feature-section').first().locator('img');
+ for(const image of await cards.all())expect(await image.evaluate(im=>Math.abs(im.getBoundingClientRect().width-45)<0.1)).toBe(true);
+ expect(await features.evaluate(el=>{const mission=document.querySelector('.mp-mission-section'),event=document.querySelector('.mp-event-section'),[card,status]=el.querySelectorAll('.mp-feature-section'),gap=(a,b)=>b.getBoundingClientRect().top-a.getBoundingClientRect().bottom;const gaps=[gap(mission,event),gap(event,card),gap(card,status)];return gaps.every(n=>Math.abs(n-26)<0.1);})).toBe(true);
  for(const [index,name] of ['疾走キノコ','仙果スターフルーツ','芳香ピーチ','金運の木','花咲くサボテン','電流タンポポ'].entries())await expect(features.locator(`[data-feature-name="${name}"] img`)).toHaveAttribute('src',new RegExp(`UT_HandCard_${21026+index}\\.png$`));
  for(const [name,file] of [['みなぎる元気','1071_01'],['ガオーの注目','1071_02']]){
   const heading=features.locator(`[data-feature-name="${name}"] h3`),icon=heading.locator('img');
@@ -1607,4 +1611,18 @@ for(const protocol of ['http','file'])test('07 dice chips: own 1/6 dice and atta
  for(const r of results){expect(r.count).toBe(12);expect(r.sum).toBeCloseTo(1);expect(r.cardMean).toBeCloseTo(r.mean);}
  await acquireEffectChip(page,'144','MAP0005');expect(await page.evaluate(()=>getCombatDiceValues(document.querySelector('.mode-content[data-role="attack"]')).attack)).toEqual([6]);
  await page.locator('.chip-select[data-id="142"]').click();const values=await page.evaluate(()=>['attack','defense'].map(role=>getCombatDiceValues(document.querySelector('.mode-content[data-role="'+role+'"]'))));expect(values[0].attack).toEqual([6]);expect(values[1].defense).toEqual([1,2,3,4,5,6]);
+});
+
+for(const protocol of ['http','file'])test(`autumn owl persistent passive on turn end ${skillFolder} ${protocol}`,async({page})=>{
+ await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve(skillFolder+'/index.html')).href:`/${skillFolder}/`);
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');await page.locator('#mp-tab-monsters').click();
+ await page.locator('.mp-monster[data-id="M0123"]').click();await page.locator('.mp-monster[data-id="M0123"]').click();
+ const owls=page.locator('#map-roster-list .roster-card[data-id="M0123"]'),instance=await owls.first().getAttribute('data-instance-id'),owl=page.locator(`#map-roster-list .roster-card[data-instance-id="${instance}"]`),other=owls.nth(1),attack=owl.locator('input[aria-label$="の攻撃力"]'),hp=owl.locator('input[aria-label$="の残りHP"]'),otherAttack=other.locator('input[aria-label$="の攻撃力"]'),base=Number(await attack.inputValue()),otherBase=await otherAttack.inputValue();
+ const endTurn=async()=>{while(Number(await page.locator('#current-progress').textContent())>1)await page.locator('#progress-minus').click();await page.locator('#turn-end').click();};
+ for(const [value,bonus] of [[5,0],[4,1],[4,2],[3,3],[5,3]]){
+  await hp.fill(String(value));await hp.dispatchEvent('change');await endTurn();await expect(attack).toHaveValue(String(base+bonus));await expect(otherAttack).toHaveValue(otherBase);
+ }
+ await attack.fill('20');await attack.dispatchEvent('change');await hp.fill('4');await hp.dispatchEvent('change');await endTurn();await expect(attack).toHaveValue('21');
+ await page.locator('#roster-undo').click();await expect(attack).toHaveValue('20');await endTurn();await expect(attack).toHaveValue('21');
+ await owl.locator('.roster-remove').click();await endTurn();await expect(attack).toHaveValue('21');await expect(attack).toBeDisabled();
 });

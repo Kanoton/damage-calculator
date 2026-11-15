@@ -168,7 +168,7 @@ window.ScreenReaderMapBridge={
 function changeProgress(delta){const next=Math.max(0,rosterState.progress+delta);if(next===rosterState.progress)return;rememberRoster();rosterState.progress=next;renderRoundProgress();executeProgressEvents();}
 document.getElementById('progress-minus').addEventListener('click',()=>changeProgress(-1));
 document.getElementById('progress-plus').addEventListener('click',()=>changeProgress(1));
-document.getElementById('turn-end').addEventListener('click',()=>{rememberRoster();applyCharacterTurnStartEffects();const clueCount=rosterCounts.get('MAP0104:clue')||0;rosterState.monsters.forEach(enemy=>{enemy.erosionStacks=0;enemy.markStacks=Math.max(0,(enemy.markStacks||0)-1);enemy.fateEchoStacks=Math.max(0,(enemy.fateEchoStacks||0)-1);if(enemy.skillDefenseTurns>0){enemy.skillDefenseTurns-=1;if(enemy.skillDefenseTurns<=0)enemy.skillDefenseModifier=0;}});renderRoster();if(rosterState.selectedId){const selectedEnemy=rosterState.monsters.find(enemy=>enemy.instanceId===rosterState.selectedId&&!enemy.defeated);if(selectedEnemy)registerEnemy(selectedEnemy,false);}rosterState.round+=1;rosterState.progress+=1;renderRoundProgress();executeProgressEvents();if(pick.value==='MAP0104'&&(rosterState.round>=8||clueCount>=4))executeLibraryTruth();});
+document.getElementById('turn-end').addEventListener('click',()=>{rememberRoster();applyCharacterTurnStartEffects();const clueCount=rosterCounts.get('MAP0104:clue')||0;rosterState.monsters.forEach(enemy=>{if(enemy.monsterId==='M0123'&&!enemy.defeated&&enemy.hp>0&&enemy.hp<=rosterStat(enemy.base,'HP')/2)enemy.eventAttack=(enemy.eventAttack||0)+1;enemy.erosionStacks=0;enemy.markStacks=Math.max(0,(enemy.markStacks||0)-1);enemy.fateEchoStacks=Math.max(0,(enemy.fateEchoStacks||0)-1);if(enemy.skillDefenseTurns>0){enemy.skillDefenseTurns-=1;if(enemy.skillDefenseTurns<=0)enemy.skillDefenseModifier=0;}});renderRoster();if(rosterState.selectedId){const selectedEnemy=rosterState.monsters.find(enemy=>enemy.instanceId===rosterState.selectedId&&!enemy.defeated);if(selectedEnemy)registerEnemy(selectedEnemy,false);}rosterState.round+=1;rosterState.progress+=1;renderRoundProgress();executeProgressEvents();if(pick.value==='MAP0104'&&(rosterState.round>=8||clueCount>=4))executeLibraryTruth();});
 renderRoundProgress();
 window.addEventListener('character-initialized',renderRoundProgress);
 window.addEventListener('character-selection-change',()=>{if(readerMapMode||!roundProgressReady()){renderRoundProgress();return;}rosterState.round=1;rosterState.progress=1;renderRoundProgress();executeProgressEvents();});
@@ -374,23 +374,21 @@ function renderRoster(){
    const change=delta=>{if(enemy.defeated)return;const current=enemy.fateEchoStacks||0,next=partyKaisei&&delta>0&&current===0?2:Math.max(0,current+delta);if(next===current)return;rememberRoster();enemy.fateEchoStacks=next;renderRoster();};
    button.addEventListener('click',event=>{event.stopPropagation();change(1);});button.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();change(-1);});nameText.append(field);
   }
-  let autumnControls=null;
   if(['M0120','M0122'].includes(enemy.monsterId)){
-   autumnControls=document.createElement('div');autumnControls.className='roster-autumn-controls';
    const config=enemy.monsterId==='M0120'?{key:'energyStacks',label:'みなぎる元気',icon:'UT_Buff_1071_01.png',stack:true}:{key:'angerStacks',label:'怒りの蓄積',icon:'UT_Buff_1072.png',stack:true};
    const energy=createRosterCharacterStatusControl(enemy,displayName,config);
    energy.button.title=config.label+'：1スタックごとに攻撃力+'+(enemy.monsterId==='M0120'?2:1)+'。左クリックで+1、右クリックで−1。';
    const change=delta=>{if(enemy.defeated)return;const next=Math.max(0,(enemy[config.key]||0)+delta);if(next===(enemy[config.key]||0))return;rememberRoster();enemy[config.key]=next;renderRoster();};
-   energy.button.addEventListener('click',event=>{event.stopPropagation();change(1);});energy.button.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();change(-1);});autumnControls.append(energy.field);
+   energy.button.addEventListener('click',event=>{event.stopPropagation();change(1);});energy.button.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();change(-1);});nameText.insertBefore(energy.field,markField);
   }
   if(enemy.monsterId==='M0123'&&!enemy.defeated&&enemy.hp<=rosterStat(enemy.base,'HP')/2){
-   const icon=document.createElement('img');icon.className='roster-icon roster-owl-low-hp';icon.src='../images/UT_Buff/UT_Buff_AttackUp.png';icon.alt='低HP：攻撃力上昇条件';icon.title='HPが半分以下：フクロウのターン開始時に攻撃力が永続+1。上昇済みの攻撃力は攻撃欄で調整してください。';nameText.append(icon);
+   const icon=document.createElement('img');icon.className='roster-icon roster-owl-low-hp';icon.src='../images/UT_Buff/UT_Buff_AttackUp.png';icon.alt='低HP：攻撃力上昇条件';icon.title='HPが半分以下：ターン終了を押すたび、攻撃力が永続+1。';nameText.append(icon);
   }
   const skill=summonSkills[enemy.monsterId],skillOpen=skillChoiceId===enemy.instanceId;
   const skillTargets=skill?.targets.map(id=>{const target=data.stats.find(row=>row.monster_id===id&&row['難易度']===difficulty.value);return target?{id,name:target['モンスター名'],image:data.images[target.image]}:null;})||[];
   const skillView=createRosterSkillView(enemy,displayName,skill,skillOpen,skillTargets,assignMapImage,()=>{skillChoiceId=skillOpen?null:enemy.instanceId;renderRoster();},id=>summonFromSkill(enemy,id));
   if(skillView.button){top.classList.add('has-skill');top.append(skillView.button);}card.append(top);if(skillView.choices)card.append(skillView.choices);
-  card.append(stats);if(autumnControls)card.append(autumnControls);roster.append(card);
+  card.append(stats);roster.append(card);
  });
 }
 function spawnSelectedMonster(){
