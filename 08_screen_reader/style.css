@@ -1734,8 +1734,8 @@ dialog[data-inline-pad] .skill-entry-row>[data-cancel]{min-width:72px;align-self
 #map-draft .mp-building-slot[data-card]:not([data-card=""]){border-style:solid;border-color:#43885a}
 #map-draft .mp-building-slot:focus-visible{outline:3px solid #ba7b12;outline-offset:2px}
 #map-draft .mp-map .mp-building-slot img{max-height:none;pointer-events:none;object-fit:contain}
-#map-draft .mp-map .mp-building-tile{position:absolute;width:56.25%;height:56.25%;left:50%;top:50%;transform:translate(-50%,-50%)}
-#map-draft .mp-map .mp-building-plant{position:absolute;width:50%;height:50%;right:-8%;bottom:-8%;background:white;border:1px solid #43885a;border-radius:4px}
+#map-draft .mp-map-only .mp-map .mp-building-tile{position:absolute;width:calc(56.25% + 1.125px);height:calc(56.25% + 1.125px);left:50%;top:50%;transform:translate(-50%,-50%)}
+#map-draft .mp-map-only .mp-map .mp-building-plant{position:absolute;width:50%;height:50%;right:-8%;bottom:-8%;background:white;border:1px solid #43885a;border-radius:4px}
 .mp-building-plus{position:absolute;right:-8%;bottom:-8%;border-radius:50%;background:white;color:#476450;font-size:clamp(9px,1vw,13px);line-height:1;padding:1px}
 #mp-caliburn{margin-top:26px}#mp-caliburn progress{width:100%;accent-color:#43885a}
 #mp-caliburn h3{font-size:14px;display:flex;align-items:center;gap:6px}#mp-caliburn .mp-feature-icon{width:24px;height:24px;object-fit:contain;flex:none}.mp-caliburn-effect[data-unlocked="true"]{border-left:3px solid #43885a;padding-left:8px}.mp-building-hint{font-size:12px}
