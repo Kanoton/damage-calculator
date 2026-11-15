@@ -301,7 +301,7 @@ function renderRoster(){
    autumnControls=document.createElement('div');autumnControls.className='roster-autumn-controls';
    const energy=createRosterCharacterStatusControl(enemy,displayName,{key:'energyStacks',label:'みなぎる元気',stack:true});
    const change=delta=>{if(enemy.defeated)return;const next=Math.max(0,(enemy.energyStacks||0)+delta);if(next===(enemy.energyStacks||0))return;rememberRoster();enemy.energyStacks=next;renderRoster();};
-   energy.button.addEventListener('click',()=>change(1));energy.button.addEventListener('contextmenu',event=>{event.preventDefault();change(-1);});nameText.insertBefore(energy.field,markField);
+   energy.button.addEventListener('click',event=>{event.stopPropagation();change(1);});energy.button.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();change(-1);});nameText.insertBefore(energy.field,markField);
    const start=createRosterActionButton('roster-gao-start','ガオー行動開始',displayName+'の行動開始',enemy.defeated);
    start.title=getSkillHoverText('autumn.energy.start');
    start.addEventListener('click',()=>{rememberRoster();enemy.energyStacks=(enemy.energyStacks||0)+(enemy.hp<=rosterStat(enemy.base,'HP')*.6?2:1);renderRoster();});autumnControls.append(start);
