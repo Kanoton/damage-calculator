@@ -65,19 +65,37 @@ def predict(vector, references, exclude=None, max_distance=MAX_DISTANCE, margin=
             'distance': round(best, 4), 'margin': round(gap, 4)}
 
 
+
+def evaluate_by_game(references):
+    """Hold out every crop from the same game to prevent frame leakage."""
+    groups = {sample.get('game') for sample in references}
+    if len(groups) < 2 or any(not isinstance(g, str) or not g.strip() for g in groups):
+        raise ValueError('At least two named independent games are required')
+    results = []
+    for i, sample in enumerate(references):
+        training = [ref for ref in references if ref['game'] != sample['game']]
+        decision = predict(sample['vector'], training)
+        results.append({'sample': i, 'expected': sample['plant'], **decision,
+                        'correct': decision['plant'] == sample['plant'] if decision['plant'] else None})
+    return summarize(results, 'Leave-one-game-out; game IDs must identify independent plays.')
+
+
+def summarize(results, note):
+    return {'samples': len(results),
+            'accepted': sum(x['plant'] is not None for x in results),
+            'correct_accepted': sum(x['correct'] is True for x in results),
+            'false_accepted': sum(x['correct'] is False for x in results),
+            'reasons': dict(Counter(x['reason'] for x in results)),
+            'results': results, 'note': note}
+
+
 def evaluate(references):
     results = []
     for i, sample in enumerate(references):
         decision = predict(sample['vector'], references, exclude=i)
         results.append({'sample': i, 'expected': sample['plant'], **decision,
                         'correct': decision['plant'] == sample['plant'] if decision['plant'] else None})
-    return {'samples': len(results),
-            'accepted': sum(x['plant'] is not None for x in results),
-            'correct_accepted': sum(x['correct'] is True for x in results),
-            'false_accepted': sum(x['correct'] is False for x in results),
-            'reasons': dict(Counter(x['reason'] for x in results)),
-            'results': results,
-            'note': 'Leave-one-crop-out on a small selected set; not a generalization guarantee.'}
+    return summarize(results, 'Leave-one-crop-out; nearby frames may leak between samples.')
 
 
 def main():
@@ -85,6 +103,7 @@ def main():
     parser.add_argument('--manifest', type=Path, required=True)
     parser.add_argument('--images-dir', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--evaluation', choices=['crop', 'game'], default='game')
     args = parser.parse_args()
     rows = json.loads(args.manifest.read_text(encoding='utf-8'))['samples']
     references = []
@@ -94,8 +113,8 @@ def main():
         if Path(row['file']).name != row['file']:
             raise ValueError('Only filenames in images-dir are allowed')
         image = crop(args.images_dir / row['file'], row['cx'], row['cy'])
-        references.append({'plant': row['plant'], 'vector': descriptor(image)})
-    audit = evaluate(references)
+        references.append({'plant': row['plant'], 'game': row.get('game'), 'vector': descriptor(image)})
+    audit = evaluate_by_game(references) if args.evaluation == 'game' else evaluate(references)
     args.output.write_text(json.dumps(audit, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
     print(json.dumps({key: audit[key] for key in ('samples','accepted','correct_accepted','false_accepted','reasons')}, ensure_ascii=False))
     if audit['false_accepted']:
