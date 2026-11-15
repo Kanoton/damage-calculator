@@ -553,3 +553,14 @@ for(const protocol of ['http','file'])test(`08 spawn HP only: no combat processi
  const before=state;await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[{monsterId:'M0123',serial:1,currentHp:0,maxHp:8}]}));expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(before);
  await page.locator('#map-roster-list .roster-card[data-id="M0124"] .roster-remove').click();expect((await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).monsters.find(m=>m.monsterId==='M0124').defeated).toBe(true);
 });
+
+test('08 world: recorded video labels emergency bunny spawn and damaged HP keep the same individual',async({page})=>{
+ await open(page);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');await page.locator('#mp-difficulty').selectOption('普通');
+ const rows=videoLabels.filter(r=>r.source==='autumn-bunny-user-20261115');expect(rows).toHaveLength(2);
+ for(const row of rows){
+  const observation=await readVideoLabel(page,row);expect(observation.monsters,row.fixture).toEqual([row.expected]);
+  const applied=await page.evaluate(world=>{const input={members:[],selfId:null,chipOwnerId:null,chipIds:[],world};ScreenReaderController.stabilize(input);const stable=ScreenReaderController.stabilize(input);ScreenReaderMapBridge.apply(stable.world);return ScreenReaderMapBridge.snapshot();},observation);
+  const bunnies=applied.monsters.filter(m=>m.monsterId==='M0124');expect(bunnies).toHaveLength(1);expect(bunnies[0]).toMatchObject({serial:1,hp:row.expected.currentHp,defeated:false});
+ }
+ const before=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[]}));expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(before);
+});
