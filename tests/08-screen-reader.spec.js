@@ -818,7 +818,7 @@ async function openMonsterText(page,map='MAP0105',offline=false){
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption(map);await page.locator('#mp-tab-monsters').click();
 }
 
-test('08: monster text tooltip follows difficulty and also works on roster cards',async({page})=>{
+test('08: monster text tooltip follows difficulty and excludes roster cards',async({page})=>{
  await openMonsterText(page);const tile=page.locator('.mp-monster[data-id="M0120"]'),tip=page.locator('#monster-tooltip');
  for(const [level,threshold] of [['普通',72],['困難',78],['悪夢',84],['狂気',90]]){
   await page.locator('#mp-difficulty').selectOption(level);await tile.focus();await expect(tip).toBeVisible();
@@ -829,7 +829,7 @@ test('08: monster text tooltip follows difficulty and also works on roster cards
   await page.keyboard.press('Escape');await expect(tip).toBeHidden();
  }
  await tile.click();const card=page.locator('#map-roster-list .roster-card[data-id="M0120"]').first();await card.hover();
- await expect(tip).toContainText('60%（90）以下');await expect(card).toHaveAttribute('aria-describedby','monster-tooltip');
+ await expect(tip).toBeHidden();await card.locator('.roster-select').focus();await expect(tip).toBeHidden();await expect(card).not.toHaveAttribute('aria-describedby','monster-tooltip');await tile.focus();await expect(tip).toContainText('60%（90）以下');
  await page.locator('#mp-map-select').selectOption('MAP0001');await expect(tip).toBeHidden();
 });
 

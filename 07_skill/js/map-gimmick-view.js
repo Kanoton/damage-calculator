@@ -1,15 +1,14 @@
 // DOM builders for map-specific roster gimmicks. State changes are supplied as callbacks.
 function createMapFeatureSections(rows){
  const fragment=document.createDocumentFragment();
- for(const [kind,title]of [['card','マップ固有カード'],['keyword','状態効果']]){
+ for(const [kind,title]of [['card','マップ固有カード'],['chip','マップ固有チップ'],['keyword','状態効果']]){
   const entries=rows.filter(row=>row.kind===kind);if(!entries.length)continue;
-  const section=document.createElement('section'),heading=document.createElement('h2'),grid=document.createElement('div');section.className='mp-feature-section';heading.textContent=title;grid.className='mp-feature-grid';
+  const section=document.createElement('section'),heading=document.createElement('h2'),grid=document.createElement('div');section.className='mp-feature-section';section.dataset.featureKind=kind;heading.textContent=title;grid.className='mp-feature-grid';
   for(const row of entries){
-   const article=document.createElement('article');article.className='mp-feature';article.dataset.featureName=row.name;
+   const article=document.createElement('article');article.className='mp-feature';article.dataset.featureName=row.name;if(kind==='chip')article.dataset.chipId=row.id;
    const name=document.createElement('h3'),description=document.createElement('p');name.textContent=row.name;description.textContent=row.description;
    const source=safeAssetUrl('../images/',row.image);if(source){const image=document.createElement('img');image.src=source;image.alt=row.name;image.loading='lazy';
-    if(kind==='keyword'){image.className='mp-feature-status-icon';name.append(image);}
-    else{article.append(image);}
+    image.className='mp-feature-icon';name.append(image);
    }
    article.append(name,description);
    if(row.building_effect){const effect=document.createElement('p'),label=document.createElement('strong');label.textContent='設置後：';effect.append(label,document.createTextNode(row.building_effect));article.append(effect);}
