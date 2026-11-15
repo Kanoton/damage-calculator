@@ -8,12 +8,15 @@ for(const protocol of ['http','file'])test('08: guarded building vision applicat
  await page.waitForFunction(()=>window.ScreenReaderBuildingBridge?.context().mapId==='MAP0105');
  const result=await page.evaluate(()=>{
   const api=window.ScreenReaderBuildingBridge;
-  const base={mapId:'MAP0105',difficulty:api.context().difficulty,confidence:.98,frameCount:2,viewVerified:true,observationIds:['frame-a','frame-b']};
+  const base={mapId:'MAP0105',difficulty:api.context().difficulty,confidence:.98,frameCount:2,viewVerified:true,viewAmbiguous:false,landmarkClasses:['damage','move','monster'],geometryResidualPx:3,observationIds:['frame-a','frame-b']};
   const p=(slotId,name)=>({slotId,name,locationVerified:true,typeVerified:true,confidence:.99});
   const initial=JSON.stringify(api.snapshot());
   const premature=api.apply({...base,frameCount:1,placements:[p('O04','芳香ピーチ')]});
   const duplicateFrame=api.apply({...base,observationIds:['frame-a','frame-a'],placements:[p('O04','芳香ピーチ')]});
   const absentFrame=api.apply({...base,observationIds:undefined,placements:[p('O04','芳香ピーチ')]});
+  const twoLandmarks=api.apply({...base,landmarkClasses:['damage','move'],placements:[p('O04','芳香ピーチ')]});
+  const ambiguousView=api.apply({...base,viewAmbiguous:true,placements:[p('O04','芳香ピーチ')]});
+  const badGeometry=api.apply({...base,geometryResidualPx:40,placements:[p('O04','芳香ピーチ')]});
   const wrongMap=api.apply({...base,mapId:'MAP0001',placements:[p('O04','芳香ピーチ')]});
   const ambiguous=api.apply({...base,placements:[p('O04','芳香ピーチ'),p('O04','電流タンポポ')]});
   const notVisible=api.apply({...base,placements:[{...p('O04','芳香ピーチ'),locationVerified:false}]});
@@ -24,12 +27,15 @@ for(const protocol of ['http','file'])test('08: guarded building vision applicat
   const conflict=api.apply({...base,placements:[p('O04','花咲くサボテン')]});
   const current=JSON.stringify(api.snapshot());
   const labels=[...document.querySelectorAll('#mp-building-layer .mp-building-slot[data-card]')].filter(e=>e.dataset.card).map(e=>e.dataset.slot+':'+e.dataset.card);
-  return {premature,duplicateFrame,absentFrame,wrongMap,ambiguous,notVisible,initial,afterRejects,success,state,repeated,conflict,current,labels};
+  return {premature,duplicateFrame,absentFrame,twoLandmarks,ambiguousView,badGeometry,wrongMap,ambiguous,notVisible,initial,afterRejects,success,state,repeated,conflict,current,labels};
  });
  expect(result.afterRejects).toBe(result.initial);
  expect(result.premature.added).toBe(0);
  expect(result.duplicateFrame.added).toBe(0);
  expect(result.absentFrame.added).toBe(0);
+ expect(result.twoLandmarks.added).toBe(0);
+ expect(result.ambiguousView.added).toBe(0);
+ expect(result.badGeometry.added).toBe(0);
  expect(result.wrongMap.added).toBe(0);
  expect(result.ambiguous.reason).toBe('ambiguous-placement');
  expect(result.notVisible.added).toBe(0);
