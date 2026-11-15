@@ -1,0 +1,38 @@
+const {test,expect}=require('@playwright/test');
+const {pathToFileURL}=require('url');
+const path=require('path');
+
+for(const protocol of ['http','file'])test('08: guarded building vision application keeps manual data and rejects ambiguity '+protocol,async({page})=>{
+ await page.goto(protocol==='file'?pathToFileURL(path.resolve('08_screen_reader/index.html')).href:'/08_screen_reader/');
+ await page.locator('#mp-map-select').selectOption('MAP0105');
+ await page.waitForFunction(()=>window.ScreenReaderBuildingBridge?.context().mapId==='MAP0105');
+ const result=await page.evaluate(()=>{
+  const api=window.ScreenReaderBuildingBridge;
+  const base={mapId:'MAP0105',difficulty:api.context().difficulty,confidence:.98,frameCount:2,viewVerified:true};
+  const p=(slotId,name)=>({slotId,name,locationVerified:true,typeVerified:true,confidence:.99});
+  const initial=JSON.stringify(api.snapshot());
+  const premature=api.apply({...base,frameCount:1,placements:[p('O04','芳香ピーチ')]});
+  const wrongMap=api.apply({...base,mapId:'MAP0001',placements:[p('O04','芳香ピーチ')]});
+  const ambiguous=api.apply({...base,placements:[p('O04','芳香ピーチ'),p('O04','電流タンポポ')]});
+  const notVisible=api.apply({...base,placements:[{...p('O04','芳香ピーチ'),locationVerified:false}]});
+  const afterRejects=JSON.stringify(api.snapshot());
+  const success=api.apply({...base,placements:[p('O04','芳香ピーチ'),p('I12','金運の木')]});
+  const state=JSON.stringify(api.snapshot());
+  const repeated=api.apply({...base,placements:[p('O04','芳香ピーチ'),p('I12','金運の木')]});
+  const conflict=api.apply({...base,placements:[p('O04','花咲くサボテン')]});
+  const current=JSON.stringify(api.snapshot());
+  const labels=[...document.querySelectorAll('#mp-building-layer .mp-building-slot[data-card]')].filter(e=>e.dataset.card).map(e=>e.dataset.slot+':'+e.dataset.card);
+  return {premature,wrongMap,ambiguous,notVisible,initial,afterRejects,success,state,repeated,conflict,current,labels};
+ });
+ expect(result.afterRejects).toBe(result.initial);
+ expect(result.premature.added).toBe(0);
+ expect(result.wrongMap.added).toBe(0);
+ expect(result.ambiguous.reason).toBe('ambiguous-placement');
+ expect(result.notVisible.added).toBe(0);
+ expect(result.success.added).toBe(2);
+ expect(result.repeated.added).toBe(0);
+ expect(result.conflict.reason).toBe('manual-conflict');
+ expect(result.current).toBe(result.state);
+ expect(result.labels).toContain('O04:芳香ピーチ');
+ expect(result.labels).toContain('I12:金運の木');
+});
