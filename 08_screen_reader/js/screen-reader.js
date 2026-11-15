@@ -18,9 +18,19 @@
  const STORAGE='astral-08-screen-reader-profile-v1';
  let stream=null,rawSource=null,frame=null,busy=false,timer=null,generation=0,selecting=false,selectionStart=null,area=null,catalog=null,custom={characters:[],chips:[]};
  let worldContext=null,readStarted=null,partyLock=null,lastObservation=null,partyEdited=false,readerSession=false;
- const defeatTracker=window.ScreenReaderDefeatVision.createTracker();
- const diagnosticLabels={world_observation:'マップ情報の読取・確認・登録段階',map_transition_target:'画面移行前の対象候補を保持',cut_target:'開始カットへ対象候補を引き継ぎ',battle_hp:'戦闘開始HPを読取',battle_hp_conflict:'戦闘HPと直前候補が不一致',battle_target_hp:'戦闘HPが一意の個体と一致',battle_hp_ambiguous:'戦闘HPから個体を特定できず保留',reset:'追跡をリセット',collision_resolved:'衝突後の他個体の生存確認で撃破番号を特定',multiple_defeat_candidates:'同種の撃破候補が複数あり対応付けを保留',survivor_wait:'他候補の生存を連続確認して絞り込み待ち',survivor_confirmed:'別候補の生存を連続確認',memory_updated:'番号と生存HPを記憶',archived_candidates:'保持した個体番号と照合・他候補の生存確認待ち',no_gray:'今回の画面では撃破演出未検出',gray_detected:'グレー形状を検出',beam_pending:'グレー化を検出・消滅光待ち',beam_timeout:'消滅光を確認できず期限切れ',identity_pending:'撃破演出を確認・個体との対応を保留',identity_confirmed:'撃破演出と個体が一致',position_lost:'背景との対応が途切れ位置追跡を保留',memory_expired:'個体情報の保持期限切れ',roster_changed:'一覧との対応状態が変化',candidate_timeout:'個体候補の絞り込みが期限切れ',capture_gap:'取得間隔が空いたため位置・演出の連続性を破棄',start_cut:'戦闘開始カット：種類を識別（番号は別途確認）',battle_view:'戦闘画面を検出',battle_target:'戦闘前の対象個体を保持',battle_unknown:'戦闘画面を検出・対象個体は未確定',battle_expired:'戦闘対象の保持期限切れ',map_return:'マップへの復帰を確認',return_expired:'戦闘復帰後の対応期限切れ',applied:'一覧へ撃破を反映',apply_off:'確認のみ・一覧への反映OFF',apply_rejected:'番号候補はあるが一覧への反映条件が不一致',unsupported:'自動撃破の対象外、またはモンスター読取OFF'};
- const diagnosticHistory=window.ScreenReaderDefeatVision.createHistory();
+ function createObservationHistory({limit=10000,byteLimit=8*1024*1024}={}){
+  if(!Number.isSafeInteger(limit)||limit<1||!Number.isSafeInteger(byteLimit)||byteLimit<1)throw new TypeError('Invalid diagnostic history limits');
+  let records=[],sizes=[],estimatedBytes=0,droppedRecords=0;
+  const metadata=()=>({limit,byteLimit,estimatedBytes,droppedRecords});
+  return {
+   append(row){const json=JSON.stringify(row);records.push(JSON.parse(json));sizes.push(json.length*2);estimatedBytes+=sizes.at(-1);while(records.length>limit||estimatedBytes>byteLimit){records.shift();estimatedBytes-=sizes.shift();droppedRecords++;}},
+   recent(count=20){return JSON.parse(JSON.stringify(records.slice(-count)));},
+   snapshot(){return {...metadata(),records:JSON.parse(JSON.stringify(records))};},
+   clear(){records=[];sizes=[];estimatedBytes=0;droppedRecords=0;}
+  };
+ }
+ const diagnosticLabels={world_observation:'出現・HPの読取・確認・登録段階',reset:'読取をリセット'};
+ const diagnosticHistory=createObservationHistory();
  let lastWorldFingerprint='',lastWorldTime=-Infinity;
  let diagnosticStart=null,diagnosticLastKey='',diagnosticLastTime=-Infinity,diagnosticActive=false,diagnosticCurrent=null;
  const diagnosticSnapshot=()=>({...diagnosticHistory.snapshot(),version:1,current:JSON.parse(JSON.stringify(diagnosticCurrent))});
@@ -31,51 +41,31 @@
   const key=JSON.stringify({...event,round,candidates:event.candidates?.map(({ageMs,...c})=>c)});if(key===diagnosticLastKey&&time-diagnosticLastTime<2000)return;
   diagnosticLastKey=key;diagnosticLastTime=time;
   const row={...event,round,at:new Date().toISOString(),elapsedMs:Math.round(time-diagnosticStart)};diagnosticHistory.append(row);
-  const list=$('defeat-log');if(!list)return;list.replaceChildren(...diagnosticHistory.recent().reverse().map(r=>{
+  const list=$('observation-log');if(!list)return;list.replaceChildren(...diagnosticHistory.recent().reverse().map(r=>{
    const li=document.createElement('li'),candidates=(r.candidates||[]).map(c=>window.ScreenReaderMapBridge.monsterName(c.monsterId)+(c.serial===undefined?'':' '+c.serial)+(c.lastSeenHp!==undefined?' 直前HP '+c.lastSeenHp+'/'+c.maxHp:c.currentHp===undefined?'':' HP '+c.currentHp+'/'+c.maxHp));
    li.textContent=new Date(r.at).toLocaleTimeString('ja-JP',{hour12:false})+'（+'+(r.elapsedMs/1000).toFixed(2)+'秒） '+(r.round===null?'ラウンド未判定':'ラウンド '+r.round)+' ／ '+(diagnosticLabels[r.code]||r.code)+(r.message?'：'+r.message:'')+(r.monsterId?' ／ '+window.ScreenReaderMapBridge.monsterName(r.monsterId):'')+(candidates.length?' ／ 候補：'+candidates.join('、'):'')+(r.gapMs?' ／ 実間隔 '+Math.round(r.gapMs)+'ms':'');return li;
   }));
  }
- function resetDefeat(message='読取条件が変わりました'){
-  defeatTracker.reset();lastWorldFingerprint='';lastWorldTime=-Infinity;diagnosticCurrent=null;$('defeat-result').textContent='';
-  if($('defeat-stage'))$('defeat-stage').textContent=diagnosticLabels.reset+'：'+message;
+ function resetObservation(message='読取条件が変わりました'){
+  lastWorldFingerprint='';lastWorldTime=-Infinity;diagnosticCurrent=null;
+  if($('observation-stage'))$('observation-stage').textContent=diagnosticLabels.reset+'：'+message;
   if(diagnosticActive)recordDiagnostic({code:'reset',message},performance.now());diagnosticActive=false;
  }
- $('save-diagnostics')?.addEventListener('click',()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(diagnosticSnapshot(),null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='screen-reader-combat-diagnostics.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
+ $('save-diagnostics')?.addEventListener('click',()=>{const url=URL.createObjectURL(new Blob([JSON.stringify(diagnosticSnapshot(),null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='screen-reader-observation-diagnostics.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
  function recordWorldObservation(raw,accepted,result,time,automatic,processingMs,intervalMs,reused=false){
   if(!$('world-sync').checked)return;
   const summarize=w=>(w?.monsters||[]).map(({monsterId,serial,currentHp,maxHp})=>({monsterId,serial,currentHp,maxHp}));
   const detail={code:'world_observation',candidates:summarize(raw),acceptedMonsters:accepted?summarize(accepted):null,applyResult:result,automatic,reused};
   const fingerprint=JSON.stringify(detail),metrics={processingMs:Math.round(processingMs),intervalMs:intervalMs===null?null:Math.round(intervalMs)};
-  if(diagnosticCurrent)diagnosticCurrent.worldRead={...detail,...metrics};
+  diagnosticActive=true;diagnosticCurrent={...detail,...metrics};
   if(fingerprint!==lastWorldFingerprint||time-lastWorldTime>=2000){recordDiagnostic({...detail,...metrics},time);lastWorldFingerprint=fingerprint;lastWorldTime=time;}
- }
- function updateDefeat(source,time,world){
-  if(!$('world-sync').checked||window.ScreenReaderMapBridge.snapshot().map!=='MAP0105'){resetDefeat('モンスター読取OFF、または対象マップ外');if($('defeat-stage'))$('defeat-stage').textContent=diagnosticLabels.unsupported;return [];}
-  const context=window.ScreenReaderMapBridge.context();if(context!==worldContext){worldContext=context;resetDefeat('マップ・難易度・ルートの変更');}
-  const roster=window.ScreenReaderMapBridge.snapshot().monsters;
-  const observations=(world?.monsters||[]).map(o=>({...o,instanceId:roster.find(e=>!e.defeated&&e.monsterId===o.monsterId&&e.serial===o.serial)?.instanceId}));
-  const evidence=window.ScreenReaderMapBridge.defeatContext();if(evidence)evidence.mapVisible=!!world?.clock;
-  const cues=defeatTracker.step(source,time,observations,evidence),applied=$('apply').checked?window.ScreenReaderMapBridge.applyDefeats(cues):[];
-  diagnosticActive=true;const detail=defeatTracker.diagnostics();
-  if($('defeat-stage'))$('defeat-stage').textContent=(diagnosticLabels[detail.code]||detail.code)+(detail.cut?' ／ '+window.ScreenReaderMapBridge.monsterName(detail.cut.monsterId):'');
-  for(const event of detail.events||[])recordDiagnostic(event,time);
-  if(!detail.events?.length)recordDiagnostic({code:detail.code,candidates:detail.memory||[]},time);
-  const snapshot=window.ScreenReaderMapBridge.snapshot(),round=snapshot.round;
-  diagnosticCurrent={...detail,map:snapshot.map,difficulty:snapshot.difficulty,round:Number.isSafeInteger(round)&&round>0?round:null,elapsedMs:diagnosticStart===null?0:Math.round(time-diagnosticStart)};
-  for(const cue of cues)if(cue.serial!==null)recordDiagnostic({code:applied.includes(cue)?'applied':$('apply').checked?'apply_rejected':'apply_off',candidates:[{monsterId:cue.monsterId,serial:cue.serial,instanceId:cue.instanceId,maxHp:cue.maxHp,lastSeenHp:cue.lastSeenHp}],association:cue.association},time);
-  if(cues.length)$('defeat-result').textContent=cues.map(c=>{
-   const name=window.ScreenReaderMapBridge.monsterName(c.monsterId);
-   return applied.includes(c)?'自動撃破：'+name+' '+c.serial+'（「１つもどす」で取消可能）':'撃破演出の候補：'+name+'（'+(c.serial===null?'番号未確認':'番号 '+c.serial+'・反映保留')+'）。一覧で確認してください。';
-  }).join(' ／ ');
-  return cues;
  }
  const stable=new Map();let lastHash=null,lastObservedHash=null,sameFrames=0,stableTick=0;
  function status(text){$('status').textContent=text;}
  function monitorInfo(text=''){
   const count=new Set((window.ScreenReaderWorldReferences?.names||[]).map(r=>r.id)).size;
   const map=window.ScreenReaderMapBridge?.snapshot(),pending=readerSession&&(!map?.map||!map?.difficulty);
-  $('monitor-info').textContent=(pending?'マップ名・難易度：未判定（ルーム設定または結果画面から読み取ります。手動指定もできます） ／ ':'')+'モンスター読取：'+($('world-sync').checked?'ON':'OFF（反映をONにすると読取開始）')+' ／ 照合見本 '+count+'種類 ／ 自動撃破：秋幻の森・番号と位置を確認できた演出のみ（不明時は候補）'+(text?' ／ '+text:'');
+  $('monitor-info').textContent=(pending?'マップ名・難易度：未判定（ルーム設定または結果画面から読み取ります。手動指定もできます） ／ ':'')+'モンスター読取：'+($('world-sync').checked?'ON':'OFF（反映をONにすると読取開始）')+' ／ 照合見本 '+count+'種類 ／ 自動撃破なし（出現・HP更新、撃破は手動）'+(text?' ／ '+text:'');
  }
  const interval=()=>[250,500,1200].includes(Number($('interval').value))?Number($('interval').value):250;
  function isArea(a){return a&&['x','y','w','h'].every(k=>Number.isFinite(a[k]))&&a.x>=0&&a.y>=0&&a.w>=.05&&a.h>=.05&&a.x+a.w<=1.00001&&a.y+a.h<=1.00001;}
@@ -234,11 +224,11 @@
   const timing=()=> '処理 '+Math.round(performance.now()-started)+'ms'+(automatic&&gap!==null?' ／ 実間隔 '+Math.round(gap)+'ms':'')+' ／ 取得 '+(rawSource.videoWidth||rawSource.width)+'×'+(rawSource.videoHeight||rawSource.height);
   try{
    if(stream){if(!video.videoWidth)throw Error('共有映像を待っています。');rawSource=video;}
-   const context=window.ScreenReaderMapBridge?.context();if(context!==worldContext){worldContext=context;resetDefeat('マップ・難易度・ルートの変更');stable.clear();lastHash=null;sameFrames=0;}
+   const context=window.ScreenReaderMapBridge?.context();if(context!==worldContext){worldContext=context;resetObservation('マップ・難易度・ルートの変更');stable.clear();lastHash=null;sameFrames=0;}
    showFrame(rawSource);const hash=frameHash();sameFrames=hash===lastHash?sameFrames+1:0;lastHash=hash;
    // Exact map pixels are included in the hash while world sync is ON. An
    // unchanged capture still proves the last visible labels are present.
-   if(automatic&&sameFrames>2&&lastObservedHash===hash){updateDefeat(frame,started,lastObservation?.world);recordWorldObservation(lastObservation?.world,null,null,started,automatic,performance.now()-started,gap,true);monitorInfo('画面変化待ち ／ '+timing());return;}
+   if(automatic&&sameFrames>2&&lastObservedHash===hash){recordWorldObservation(lastObservation?.world,null,null,started,automatic,performance.now()-started,gap,true);monitorInfo('画面変化待ち ／ '+timing());return;}
    // Yield to paint without overlapping jobs. Stop/reset invalidates this frame.
    await new Promise(resolve=>requestAnimationFrame(resolve));if(token!==generation)return;
    const observation=vision.analyze(frame,custom,partyLock);observation.setup=window.ScreenReaderStartVision.analyze(frame);if($('world-sync').checked)observation.world=window.ScreenReaderWorldVision.analyze(frame,{positions:true});else $('world-result').textContent='マップ読取はOFFです。マップ・難易度を選び、反映をONにしてください。';if(!partyLock&&$('self').value)observation.selfId=$('self').value;
@@ -253,11 +243,10 @@
    drawResults(observation,accepted,automatic);
    lastObservedHash=hash;
    let worldSkipped=0,worldApplied=null;
-   if($('apply').checked&&$('world-sync').checked){const applied=window.ScreenReaderMapBridge.apply(accepted.world,{allowDefeat:false});worldApplied={...applied};worldSkipped=applied.skipped||0;if(applied.skipped)$('world-result').textContent+=' ／ 反映保留 '+applied.skipped+'件'+(accepted.world?.monsters?.some(m=>m.currentHp===0)?'（HP0候補は撃破未確認のため保持）':'（マップ・難易度・既存個体との一致を確認してください）');}
+   if($('apply').checked&&$('world-sync').checked){const applied=window.ScreenReaderMapBridge.apply(accepted.world);worldApplied={...applied};worldSkipped=applied.skipped||0;if(applied.skipped)$('world-result').textContent+=' ／ 反映保留 '+applied.skipped+'件'+(accepted.world?.monsters?.some(m=>m.currentHp===0)?'（HP0候補は自動反映せず保持）':'（マップ・難易度・既存個体との一致を確認してください）');}
    const statusUpdate=updateStatusIcons(frame,observation.world,accepted.selfId,automatic);
    // Printed totals already include buffs: reconcile them after changing counts.
    if(statusUpdate.updatedSelf)bridge.apply({members:accepted.members.filter(m=>m.id===accepted.selfId)});
-   updateDefeat(frame,started,observation.world);
    recordWorldObservation(observation.world,accepted.world,worldApplied,started,automatic,performance.now()-started,gap);
    monitorInfo((observation.world?'今回 '+observation.world.monsters.length+'体 ／ '+(automatic?'確認済み '+accepted.world.monsters.length+'体':'手動読取')+' ／ '+(!$('apply').checked?'確認のみ ／ ':worldSkipped?'反映保留 '+worldSkipped+'件 ／ ':''):'')+timing());
    const names=observation.members.filter(m=>m.id).length;
@@ -265,7 +254,7 @@
   }catch(error){status('読み取れませんでした：'+error.message);}finally{busy=false;$('read').disabled=!rawSource;}
  }
  function schedule(){clearTimeout(timer);if(!$('auto').checked||!stream)return;const elapsed=readStarted===null?0:performance.now()-readStarted;timer=setTimeout(async()=>{await read(true);schedule();},Math.max(16,interval()-elapsed));}
- function stop(){resetDefeat('画面共有を停止');generation++;clearTimeout(timer);timer=null;readStarted=null;stable.clear();lastHash=null;sameFrames=0;$('auto').checked=false;$('auto').disabled=true;$('stop').disabled=true;if(stream){for(const t of stream.getTracks())t.stop();stream=null;}video.srcObject=null;rawSource=null;$('read').disabled=true;status('画面共有を停止しました。反映済みの情報は保持しています。');}
+ function stop(){resetObservation('画面共有を停止');generation++;clearTimeout(timer);timer=null;readStarted=null;stable.clear();lastHash=null;sameFrames=0;$('auto').checked=false;$('auto').disabled=true;$('stop').disabled=true;if(stream){for(const t of stream.getTracks())t.stop();stream=null;}video.srcObject=null;rawSource=null;$('read').disabled=true;status('画面共有を停止しました。反映済みの情報は保持しています。');}
  $('connect').addEventListener('click',async()=>{
   if(!navigator.mediaDevices?.getDisplayMedia){status('このブラウザでは画面共有を開始できません。HTTPSまたはlocalhostで、PC版Chrome／Edgeを使用してください。画像読取も利用できます。');return;}
   let selected;
@@ -281,7 +270,7 @@
  $('stop').addEventListener('click',stop);$('read').addEventListener('click',()=>{$('details').open=true;read();});
  $('auto').addEventListener('change',()=>{stable.clear();sameFrames=0;lastHash=null;if($('auto').checked){status('自動読取を開始しました。安定して判定できた情報を更新します。');read(true).then(schedule);}else{clearTimeout(timer);status('自動読取を停止しました。画面共有は継続中です。');}});
  async function loadImage(file){
-  if(!file?.type.startsWith('image/'))return;resetDefeat('独立した画像へ切替');stable.clear();if(stream)stop();generation++;const token=generation,url=URL.createObjectURL(file);
+  if(!file?.type.startsWith('image/'))return;resetObservation('独立した画像へ切替');stable.clear();if(stream)stop();generation++;const token=generation,url=URL.createObjectURL(file);
   try{const im=new Image();im.src=url;await im.decode();if(token!==generation)return;rawSource=im;$('read').disabled=false;$('details').open=true;await read();}catch(error){status('画像を開けませんでした：'+error.message);}finally{URL.revokeObjectURL(url);$('file').value='';}
  }
  $('file').addEventListener('change',()=>loadImage($('file').files[0]));
@@ -300,25 +289,25 @@
  $('party-unlock').addEventListener('click',()=>{const ids=partyLock?.ids||bridge.snapshot().members.map(m=>m.id);generation++;stable.clear();lastHash=null;sameFrames=0;releaseParty();partyEdited=true;for(let i=0;i<4;i++)$('party-'+i).value=ids[i]||'';if(rawSource&&!busy)read();});
  $('new-game').addEventListener('click',()=>{startReaderSession();status('読取用にゲーム状態をすべてリセットしました。自キャラ・PT・マップ・難易度は未判定です。');});
  $('self').addEventListener('change',()=>{if(partyLock){if(partyLock.ids.includes($('self').value))partyLock.selfId=$('self').value;else{$('self').value=partyLock.selfId||'';$('party-status').textContent='PTは固定中です。自キャラはPT内の人を指定してください。';}}generation++;stable.clear();sameFrames=0;lastHash=null;});
- $('world-sync').addEventListener('change',()=>{resetDefeat('モンスター読取のON／OFF変更');stable.clear();sameFrames=0;lastHash=null;monitorInfo();});
+ $('world-sync').addEventListener('change',()=>{resetObservation('モンスター読取のON／OFF変更');stable.clear();sameFrames=0;lastHash=null;monitorInfo();});
  $('interval').addEventListener('change',()=>{if(!busy)schedule();});
- $('apply').addEventListener('change',()=>{resetDefeat('一覧への反映ON／OFF変更');stable.clear();sameFrames=0;lastHash=null;});
- $('area').addEventListener('click',()=>{resetDefeat('読取範囲を指定');selecting=true;preview.classList.add('is-selecting');status('プレビュー上でゲーム画面の範囲をドラッグしてください。');});
+ $('apply').addEventListener('change',()=>{resetObservation('一覧への反映ON／OFF変更');stable.clear();sameFrames=0;lastHash=null;});
+ $('area').addEventListener('click',()=>{resetObservation('読取範囲を指定');selecting=true;preview.classList.add('is-selecting');status('プレビュー上でゲーム画面の範囲をドラッグしてください。');});
  const point=event=>{const b=preview.getBoundingClientRect();return {x:Math.max(0,Math.min(1,(event.clientX-b.left)/b.width)),y:Math.max(0,Math.min(1,(event.clientY-b.top)/b.height))};};
  preview.addEventListener('pointerdown',event=>{if(!selecting)return;selectionStart=point(event);preview.setPointerCapture(event.pointerId);});
  preview.addEventListener('pointermove',event=>{if(!selectionStart||!frame)return;const p=point(event);ctx.drawImage(frame,0,0);ctx.strokeStyle='#b8ff44';ctx.lineWidth=4;ctx.strokeRect(selectionStart.x*1536,selectionStart.y*709,(p.x-selectionStart.x)*1536,(p.y-selectionStart.y)*709);});
  preview.addEventListener('pointerup',event=>{if(!selectionStart)return;const p=point(event),a=area||{x:0,y:0,w:1,h:1},next={x:a.x+Math.min(p.x,selectionStart.x)*a.w,y:a.y+Math.min(p.y,selectionStart.y)*a.h,w:Math.abs(p.x-selectionStart.x)*a.w,h:Math.abs(p.y-selectionStart.y)*a.h};selectionStart=null;selecting=false;preview.classList.remove('is-selecting');if(isArea(next)){area=next;generation++;stable.clear();lastHash=null;sameFrames=0;save();read();}else{ctx.drawImage(frame,0,0);status('範囲が小さすぎます。もう一度指定してください。');}});
  preview.addEventListener('pointercancel',()=>{selectionStart=null;selecting=false;preview.classList.remove('is-selecting');if(frame)ctx.drawImage(frame,0,0);});
- $('area-reset').addEventListener('click',()=>{area=null;resetDefeat('読取範囲を戻す');generation++;stable.clear();lastHash=null;sameFrames=0;save();if(rawSource)read();});
+ $('area-reset').addEventListener('click',()=>{area=null;resetObservation('読取範囲を戻す');generation++;stable.clear();lastHash=null;sameFrames=0;save();if(rawSource)read();});
  $('learn-kind').addEventListener('change',updateLearningOptions);
  $('learn').addEventListener('click',()=>{if(!frame||!catalog)return;const [kind,index]=$('learn-kind').value.split(':'),id=$('learn-id').value,ref=vision.learn(frame,kind,id,kind.startsWith('chip-')?Number($('learn-slot').value):Number(index)),list=kind.startsWith('chip-')?custom.chips:custom.characters;if(custom.characters.length+custom.chips.length>=500){status('見本は最大500件です。');return;}if(!list.some(r=>r.id===ref.id&&r.kind===ref.kind&&r.data===ref.data))list.push(ref);generation++;stable.clear();sameFrames=0;lastHash=null;save();read();});
  $('export').addEventListener('click',()=>{const url=URL.createObjectURL(new Blob([JSON.stringify({version:1,...custom,area},null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='screen-reader-profile.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
- $('import').addEventListener('change',async()=>{try{const file=$('import').files[0];if(!file)return;if(file.size>1000000)throw Error('ファイルが大きすぎます。');const p=validateProfile(JSON.parse(await file.text()));resetDefeat();custom={characters:p.characters,chips:p.chips};area=p.area||null;generation++;stable.clear();sameFrames=0;lastHash=null;save();if(rawSource)read();status('見本を読み込みました。');}catch(error){status(error.message);}finally{$('import').value='';}});
- window.addEventListener('new-game-reset',()=>{diagnosticHistory.clear();diagnosticStart=null;diagnosticLastKey='';diagnosticLastTime=-Infinity;diagnosticActive=false;resetDefeat('新しいゲーム');recordDiagnostic({code:'reset',message:'新しいゲーム',round:null},performance.now());readerSession=false;releaseParty();generation++;clearTimeout(timer);timer=null;stable.clear();lastHash=null;sameFrames=0;$('auto').checked=false;$('self').value='';$('world-sync').checked=false;monitorInfo();$('world-result').textContent='';$('status-icons-result').textContent='';$('result-body').replaceChildren();$('chip-result').textContent='';$('view').textContent='リセット後の読取を待っています。';status('ゲーム状態をリセットしました。次のゲーム画面を読み取ってください。');});
+ $('import').addEventListener('change',async()=>{try{const file=$('import').files[0];if(!file)return;if(file.size>1000000)throw Error('ファイルが大きすぎます。');const p=validateProfile(JSON.parse(await file.text()));resetObservation();custom={characters:p.characters,chips:p.chips};area=p.area||null;generation++;stable.clear();sameFrames=0;lastHash=null;save();if(rawSource)read();status('見本を読み込みました。');}catch(error){status(error.message);}finally{$('import').value='';}});
+ window.addEventListener('new-game-reset',()=>{diagnosticHistory.clear();diagnosticStart=null;diagnosticLastKey='';diagnosticLastTime=-Infinity;diagnosticActive=false;resetObservation('新しいゲーム');recordDiagnostic({code:'reset',message:'新しいゲーム',round:null},performance.now());readerSession=false;releaseParty();generation++;clearTimeout(timer);timer=null;stable.clear();lastHash=null;sameFrames=0;$('auto').checked=false;$('self').value='';$('world-sync').checked=false;monitorInfo();$('world-result').textContent='';$('status-icons-result').textContent='';$('result-body').replaceChildren();$('chip-result').textContent='';$('view').textContent='リセット後の読取を待っています。';status('ゲーム状態をリセットしました。次のゲーム画面を読み取ってください。');});
  window.addEventListener('mobile-ui-change',()=>{if(document.body.classList.contains('mobile-ui'))stop();});
  window.addEventListener('pagehide',stop);
  $('learn-id').addEventListener('change',updateMappingPreview);
- window.ScreenReaderController={read,stop,stabilize,validateProfile,updateDefeat,updateStatusIcons,diagnostics:diagnosticSnapshot};ready();
+ window.ScreenReaderController={read,stop,stabilize,validateProfile,updateStatusIcons,diagnostics:diagnosticSnapshot};ready();
 })();
 
 

@@ -51,7 +51,8 @@ function createCharacterAssetView(row,folder,key){
  const file=String(row[key]||row.images||'').trim();
  const missing=()=>{const text=document.createElement('figcaption');text.textContent=img.alt+'：画像を読み込めませんでした。';item.replaceChildren(text);};
  img.addEventListener('error',missing,{once:true});item.append(img);
- if(file)img.src='../images/'+folder+'/'+encodeURIComponent(file);else missing();
+ const assetFolder=folder==='chip'&&['171','172','173'].includes(String(row.id))?'chip_icon':folder;
+ if(file)img.src='../images/'+assetFolder+'/'+encodeURIComponent(file);else missing();
  const button=document.createElement('button');button.type='button';button.dataset.id=row.id;
  return {item,button};
 }

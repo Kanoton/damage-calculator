@@ -14,9 +14,6 @@ const eventPreview=createEventMapPreview(document.getElementById('mp-map-image')
 root.addEventListener('keydown',event=>{if(event.key==='Escape')eventPreview.reset();});
 document.querySelectorAll('.role-tab,.mp-subtabs button').forEach(button=>button.addEventListener('click',()=>eventPreview.reset()));
 
-let mapFeatureChips=[];
-window.addEventListener('map-chip-catalog-change',event=>{mapFeatureChips=event.detail;render();});
-
 // Route choices change the view, never execute events or reset the roster.
 const routeState={context:'',route:'',moved:false};
 const routeControls=document.createElement('div');routeControls.id='mp-route-controls';routeControls.hidden=true;
@@ -385,7 +382,7 @@ function executeLibraryTruth(){
 }
 function renderMapInformation(){
  eventPreview.reset();
- const features=root.querySelector('#mp-map-features');features.replaceChildren(createMapFeatureSections([...(data.features||[]).filter(row=>row.map_id===pick.value),...mapFeatureChips.filter(row=>String(row.category||'').split('|').includes(pick.value)).map(row=>({kind:'chip',id:row.id,name:row.name,image:'chip_icon/'+row.images,description:row.effect}))]));features.hidden=!features.childElementCount;
+ const features=root.querySelector('#mp-map-features');features.replaceChildren(createMapFeatureSections((data.features||[]).filter(row=>row.map_id===pick.value)));features.hidden=!features.childElementCount;
  // CSV order is the display order; external mission/event IDs are not required.
  const missions=routeRows(data.missions);
  const events=routeRows(data.events);
@@ -404,6 +401,7 @@ function renderMapInformation(){
 }
 
 function render(){
+ window.dispatchEvent(new Event('map-context-change'));
  hideMonsterTip();
  if(!data.maps[pick.value]){routeControls.hidden=true;root.querySelector('.mp-map-only').classList.remove('has-route-switches');selected=null;list.replaceChildren();difficulty.replaceChildren();difficulty.disabled=true;const img=document.getElementById('mp-map-image');img.hidden=true;img.removeAttribute('src');img.alt='';renderMapInformation();status.textContent=Object.keys(data.maps).length?'マップを選択してください。':'表示対象のマップがありません。CSVの「表示」列を確認してください。';renderRoster();return;}
  difficulty.disabled=false;
