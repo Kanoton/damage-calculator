@@ -1,6 +1,6 @@
 // Manual plant placement. Coordinates and card effects come from the map CSVs.
 function createAutumnBuildingEditor({root,beforeChange,onInteraction,onChange}){
- const stage=root.querySelector('.mp-map-stage'),image=root.querySelector('#mp-map-image'),eventLayer=root.querySelector('#mp-event-image-layer'),section=root.querySelector('#mp-caliburn');
+ const stage=root.querySelector('.mp-map-stage'),image=root.querySelector('#mp-map-image'),eventLayer=root.querySelector('#mp-event-image-layer'),section=root.querySelector('#mp-caliburn'),legend=root.querySelector('#mp-building-legend');
  const layer=document.createElement('div');layer.id='mp-building-layer';layer.hidden=true;stage.append(layer);
  const dialog=document.createElement('dialog');dialog.id='mp-building-picker';dialog.setAttribute('aria-labelledby','mp-building-picker-title');
  const title=document.createElement('h2');title.id='mp-building-picker-title';const choices=document.createElement('div');choices.className='mp-building-choices';
@@ -17,6 +17,8 @@ function createAutumnBuildingEditor({root,beforeChange,onInteraction,onChange}){
   const box=image.getBoundingClientRect(),parent=stage.getBoundingClientRect(),scale=Math.min(box.width/image.naturalWidth,box.height/image.naturalHeight);
   const width=image.naturalWidth*scale,height=image.naturalHeight*scale;
   Object.assign(layer.style,{left:(box.left-parent.left+(box.width-width)/2)+'px',top:(box.top-parent.top+(box.height-height)/2)+'px',width:width+'px',height:height+'px'});
+  // Align the legend with the bottom row of external construction buttons.
+  legend.style.top=(box.top-parent.top+(box.height-height)/2+height*Math.max(...slots.map(slot=>Number(slot.plant_y)/Number(slot.map_height))))+'px';
  }
  function icon(row,alt,cls){const img=document.createElement('img');img.alt=alt;img.className=cls;const source=safeAssetUrl('../images/',row.image);if(source)img.src=source;return img;}
  function renderSummary(){

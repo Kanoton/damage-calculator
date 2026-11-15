@@ -1710,7 +1710,7 @@ dialog[data-inline-pad] .skill-entry-row>[data-cancel]{min-width:72px;align-self
 @media(max-width:400px){#map-draft .mp-feature-grid{grid-template-columns:1fr}}
 
 /* Overlay in existing whitespace; never changes the map or grid dimensions. */
-#mp-building-legend{position:absolute;left:0;bottom:0;font-size:12px;line-height:1.4;color:#333;pointer-events:none}
+#mp-building-legend{position:absolute;left:0;transform:translateY(-50%);font-size:12px;line-height:1.4;color:#333;pointer-events:none}
 
 .roster-autumn-controls{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:6px}
 #map-draft .roster-status-energyStacks .roster-mark-button{width:auto;height:auto;white-space:nowrap;font-size:11px}
