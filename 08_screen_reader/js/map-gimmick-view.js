@@ -1,11 +1,11 @@
 // DOM builders for map-specific roster gimmicks. State changes are supplied as callbacks.
 function createMapFeatureSections(rows){
  const fragment=document.createDocumentFragment();
- for(const [kind,title]of [['card','マップ固有カード'],['chip','マップ固有チップ'],['keyword','状態効果']]){
+ for(const [kind,title]of [['card','マップ固有カード'],['keyword','状態効果']]){
   const entries=rows.filter(row=>row.kind===kind);if(!entries.length)continue;
   const section=document.createElement('section'),heading=document.createElement('h2'),grid=document.createElement('div');section.className='mp-feature-section';section.dataset.featureKind=kind;heading.textContent=title;grid.className='mp-feature-grid';
   for(const row of entries){
-   const article=document.createElement('article');article.className='mp-feature';article.dataset.featureName=row.name;if(kind==='chip')article.dataset.chipId=row.id;
+   const article=document.createElement('article');article.className='mp-feature';article.dataset.featureName=row.name;
    const name=document.createElement('h3'),description=document.createElement('p');name.textContent=row.name;description.textContent=row.description;
    const source=safeAssetUrl('../images/',row.image);if(source){const image=document.createElement('img');image.src=source;image.alt=row.name;image.loading='lazy';
     image.className='mp-feature-icon';name.append(image);

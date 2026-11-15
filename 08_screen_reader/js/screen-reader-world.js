@@ -35,49 +35,13 @@
     const hp={x:group[0].x,y:Math.min(...group.map(p=>p.y)),w:group.at(-1).x+group.at(-1).w-group[0].x,maxHp};const name=nameAt(white,w,h,hp,refs.names);if(!name)continue;
     let serial=null;if(!(name.ref.boss||name.ref.noSerial||name.ref.id==='M0014')){serial=ScreenReaderVision.numberAt(source,[name.x+name.ref.width+3,name.y-2,30,name.ref.height+6],'white',refs.digits,true,name.ref.serialMinHeightRatio??.38);if(!Number.isInteger(serial)||serial<1||serial>999)continue;}
     const observation={monsterId:name.ref.id,serial,currentHp,maxHp};
-    // Optional map-local geometry, in the same 1536px popup plane as defeat cues.
-    if(positions){observation.labelBox=[name.x,name.y,name.ref.width+33,hp.y+Math.max(...group.map(p=>p.h))-name.y];observation.marker=leaderEndpoint(source,name);}
+    // Label rectangles support status-icon reading; no leader or defeat tracking.
+    if(positions){observation.labelBox=[name.x,name.y,name.ref.width+33,hp.y+Math.max(...group.map(p=>p.h))-name.y];}
     observations.push(observation);
    }
   }
   // Conflicting labels for one individual must not overwrite each other.
   return observations.filter(o=>observations.filter(p=>p.monsterId===o.monsterId&&p.serial===o.serial).length===1);
- }
- // Follow the thin black leader below a name, not the text's screen position:
- // labels are displaced sideways and can sit above a different overlapping enemy.
- function leaderEndpoint(source,name){
-  const {width:w,height:h}=source,p=source.getContext('2d').getImageData(0,0,w,h).data;
-  const dark=(x,y)=>x>=0&&x<w&&y>=0&&y<h&&Math.max(p[(y*w+x)*4],p[(y*w+x)*4+1],p[(y*w+x)*4+2])<100;
-  const lines=[];
-  for(let y=name.y+name.ref.height;y<Math.min(h,name.y+name.ref.height+14);y++){
-   let left=null;for(let x=Math.max(0,name.x-50);x<=Math.min(w-1,name.x+name.ref.width+100);x++){
-    if(dark(x,y)&&left===null)left=x;
-    if((!dark(x,y)||x===w-1)&&left!==null){if(x-left>name.ref.width*.8&&left<=name.x+10&&x>=name.x+name.ref.width)lines.push({left,right:x-1,y});left=null;}
-   }
-  }
-  if(!lines.length)return null;
-  const line=lines.at(-1),ends=[];
-  for(const start of [line.left,line.right]){
-   let x=start,last=[x,line.y],length=0;
-   for(let y=line.y+1;y<Math.min(h,line.y+140);y++){
-    const points=[];for(let xx=Math.max(0,Math.round(x)-5);xx<=Math.min(w-1,Math.round(x)+5);xx++)if(dark(xx,y))points.push(xx);
-    if(!points.length||points.length>8)break;
-    x=points.reduce((a,b)=>a+b,0)/points.length;last=[x,y];length++;
-   }
-   // A leader can touch a thick character/monster outline after only a few
-   // rows. Keep following its measured straight ray through that junction,
-   // rather than demanding the entire leader remain a separate thin blob.
-   if(length>=3&&length<12){
-    const slope=(last[0]-start)/length;
-    if(Math.abs(slope)>=.5&&Math.abs(slope)<=4)for(let y=last[1]+1;y<Math.min(h,line.y+140);y++){
-     const predicted=start+slope*(y-line.y),xx=Math.round(predicted);
-     if(![xx-1,xx,xx+1].some(px=>dark(px,y)))break;
-     last=[predicted,y];length++;
-    }
-   }
-   if(length>=12&&Math.abs(last[0]-start)>=10)ends.push(last);
-  }
-  return ends.length===1?ends[0]:null;
  }
  function clockAt(source,refs,shift){
   const left=canvas(source),center=source.statusFrame||source,vision=ScreenReaderVision,round=window.ScreenReaderStartVision?.readRound(left)??vision.numberAt(left,[54,7,43,30],'white',refs.digits),ctx=center.getContext('2d'),digits=refs.digits.filter(r=>r.digit!=='/'),cells=[];

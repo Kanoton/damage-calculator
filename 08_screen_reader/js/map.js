@@ -14,9 +14,6 @@ const eventPreview=createEventMapPreview(document.getElementById('mp-map-image')
 root.addEventListener('keydown',event=>{if(event.key==='Escape')eventPreview.reset();});
 document.querySelectorAll('.role-tab,.mp-subtabs button').forEach(button=>button.addEventListener('click',()=>eventPreview.reset()));
 
-let mapFeatureChips=[];
-window.addEventListener('map-chip-catalog-change',event=>{mapFeatureChips=event.detail;render();});
-
 // Route choices change the view, never execute events or reset the roster.
 const routeState={context:'',route:'',moved:false};
 const routeControls=document.createElement('div');routeControls.id='mp-route-controls';routeControls.hidden=true;
@@ -113,33 +110,12 @@ window.ScreenReaderMapBridge={
  },
  monsterName:id=>data.stats.find(r=>r.monster_id===id)?.['モンスター名']||id,
  context:()=>JSON.stringify([pick.value,difficulty.value,routeState.route]),
- defeatContext:()=>{
-  // Count every executed spawn, including reinforcements; never infer a
-  // singleton from the currently visible labels or reset counts each round.
-  if(pick.value!=='MAP0105'||!roundProgressReady())return null;
-  const counts={};
-  for(const group of groupMapEvents(routeRows(data.events))){
-   if(!executedEvents.has(eventKey(group)))continue;
-   const {pending}=collectEventChanges(group,data.stats,difficulty.value,rosterStat);
-   for(const {stats,count} of pending)counts[stats.monster_id]=(counts[stats.monster_id]||0)+count;
-  }
-  return {counts,monsters:rosterState.monsters.map(e=>({monsterId:e.monsterId,serial:e.serial,instanceId:e.instanceId,maxHp:Number(rosterStat(e.base,'HP')),defeated:!!e.defeated,seen:!!e.screenSeenAlive}))};
- },
  snapshot:()=>({map:pick.value,difficulty:difficulty.value,round:readerMapMode&&!rosterState.round?null:rosterState.round,progress:readerMapMode&&!rosterState.progress?null:rosterState.progress,events:[...executedEvents],monsters:rosterState.monsters.map(e=>({monsterId:e.monsterId,serial:(e.boss||e.monsterId==='M0116')?null:e.serial,hp:e.hp,defeated:!!e.defeated,attack:e.attack,defense:e.defense,instanceId:e.instanceId}))}),
- applyDefeats:cues=>{
-  const defeated=[];if(pick.value!=='MAP0105'||!roundProgressReady())return defeated;
-  for(const cue of cues){
-   if(cue.reason!=='gray_then_beam'||!['M0121','M0122','M0123','M0005'].includes(cue.monsterId)||!Number.isSafeInteger(cue.serial)||cue.serial<1)continue;
-   const matches=rosterState.monsters.filter(e=>e.monsterId===cue.monsterId&&e.serial===cue.serial&&e.instanceId===cue.instanceId&&e.mapId===pick.value&&e.difficulty===difficulty.value&&!e.boss&&!e.defeated&&e.screenSeenAlive&&e.hp>0&&Number(rosterStat(e.base,'HP'))===cue.maxHp);
-   if(matches.length!==1)continue;
-   if(!defeated.length)rememberRoster();const enemy=matches[0];enemy.manualHp=0;enemy.hp=0;enemy.damageTaken=cue.maxHp;removeEnemy(enemy);defeated.push(cue);
-  }
-  if(defeated.length)renderRoster();return defeated;
- },
- apply:(observation,{allowDefeat=true}={})=>{
+ apply:observation=>{
   const result={updated:0,added:0,events:0,skipped:0};if(!observation)return result;if(!roundProgressReady()){result.skipped=(observation.monsters?.length||0)+(observation.clock?1:0);return result;}
   const valid=(n,min,max)=>Number.isSafeInteger(n)&&n>=min&&n<=max,clock=observation.clock;
   if(clock&&(!valid(clock.round,1,99)||!valid(clock.progress,1,99)||clock.round<rosterState.round)){result.skipped++;return result;}
+  const previousProgress=rosterState.progress,existingOwls=new Set(rosterState.monsters.filter(e=>e.monsterId==='M0123'&&!e.defeated).map(e=>e.instanceId));
   let saved=false;const save=()=>{if(!saved){rememberRoster();saved=true;}};
   if(clock){
    if(clock.round!==rosterState.round||clock.progress!==rosterState.progress){save();rosterState.round=clock.round;rosterState.progress=clock.progress;result.updated++;}
@@ -156,22 +132,23 @@ window.ScreenReaderMapBridge={
    if(unnumbered&&executedEvents.has(libraryTruthKey())){result.skipped++;continue;}
    const matches=rosterState.monsters.filter(e=>e.monsterId===o.monsterId&&e.mapId===pick.value&&e.difficulty===difficulty.value&&(boss||unnumbered||e.serial===o.serial)&&(!unnumbered||!e.defeated));
    if(matches.length>1||matches[0]?.defeated||Number(rosterStat(stats,'HP'))!==o.maxHp||(!matches.length&&!data.maps[pick.value]?.ids.includes(o.monsterId))){result.skipped++;continue;}
-   if(o.currentHp===0&&(!allowDefeat||!matches[0]||!matches[0].screenSeenAlive)){result.skipped++;continue;}
-   if(o.monsterId==='M0115'&&!executedEvents.has(libraryTruthKey())){save();executeLibraryTruth(false);}
+   if(o.currentHp===0){result.skipped++;continue;}
    let enemy=matches[0]||((o.monsterId==='M0115')?rosterState.monsters.find(e=>e.monsterId==='M0115'&&!e.defeated):null);if(!enemy){
     save();enemy=addPlacedMonster({instanceId:rosterState.nextId++,monsterId:o.monsterId,name:stats['モンスター名'],mapName:data.maps[pick.value].name,mapId:pick.value,difficulty:difficulty.value,image:data.images[stats.image],base:{...stats},damageTaken:0,attack:rosterStat(stats,'攻撃'),defense:rosterStat(stats,'防御'),hp:o.maxHp,coin:stats['コイン']===''?null:Number(stats['コイン']),boss,reflect:String(stats['反撃']).trim()==='1'},!boss&&!unnumbered?o.serial:null);result.added++;
    }
    if(o.currentHp>0&&!enemy.screenSeenAlive){save();enemy.screenSeenAlive=true;}
-   if(enemy.hp!==o.currentHp){save();enemy.manualHp=o.currentHp;enemy.hp=o.currentHp;enemy.damageTaken=o.maxHp-o.currentHp;if(o.currentHp===0)removeEnemy(enemy);result.updated++;}
+   if(enemy.hp!==o.currentHp){save();enemy.manualHp=o.currentHp;enemy.hp=o.currentHp;enemy.damageTaken=o.maxHp-o.currentHp;result.updated++;}
   }
+  if(clock&&previousProgress>0&&clock.progress>previousProgress&&applyOwlProgressGrowth(existingOwls,save))result.updated++;
   if(saved){renderRoundProgress();updateEventRows();renderRoster();}return result;
  }
 };
 
+function applyOwlProgressGrowth(ids=null,beforeChange=()=>{}){let changed=false;for(const enemy of rosterState.monsters){if(enemy.monsterId==='M0123'&&!enemy.defeated&&enemy.hp>0&&enemy.hp<=rosterStat(enemy.base,'HP')/2&&(!ids||ids.has(enemy.instanceId))){beforeChange();enemy.eventAttack=(enemy.eventAttack||0)+1;changed=true;}}return changed;}
 function changeProgress(delta){const next=Math.max(0,rosterState.progress+delta);if(next===rosterState.progress)return;rememberRoster();rosterState.progress=next;renderRoundProgress();executeProgressEvents();}
 document.getElementById('progress-minus').addEventListener('click',()=>changeProgress(-1));
 document.getElementById('progress-plus').addEventListener('click',()=>changeProgress(1));
-document.getElementById('turn-end').addEventListener('click',()=>{rememberRoster();applyCharacterTurnStartEffects();const clueCount=rosterCounts.get('MAP0104:clue')||0;rosterState.monsters.forEach(enemy=>{if(enemy.monsterId==='M0123'&&!enemy.defeated&&enemy.hp>0&&enemy.hp<=rosterStat(enemy.base,'HP')/2)enemy.eventAttack=(enemy.eventAttack||0)+1;enemy.erosionStacks=0;enemy.markStacks=Math.max(0,(enemy.markStacks||0)-1);enemy.fateEchoStacks=Math.max(0,(enemy.fateEchoStacks||0)-1);if(enemy.skillDefenseTurns>0){enemy.skillDefenseTurns-=1;if(enemy.skillDefenseTurns<=0)enemy.skillDefenseModifier=0;}});renderRoster();if(rosterState.selectedId){const selectedEnemy=rosterState.monsters.find(enemy=>enemy.instanceId===rosterState.selectedId&&!enemy.defeated);if(selectedEnemy)registerEnemy(selectedEnemy,false);}rosterState.round+=1;rosterState.progress+=1;renderRoundProgress();executeProgressEvents();if(pick.value==='MAP0104'&&(rosterState.round>=8||clueCount>=4))executeLibraryTruth();});
+document.getElementById('turn-end').addEventListener('click',()=>{rememberRoster();applyCharacterTurnStartEffects();const clueCount=rosterCounts.get('MAP0104:clue')||0;applyOwlProgressGrowth();rosterState.monsters.forEach(enemy=>{enemy.erosionStacks=0;enemy.markStacks=Math.max(0,(enemy.markStacks||0)-1);enemy.fateEchoStacks=Math.max(0,(enemy.fateEchoStacks||0)-1);if(enemy.skillDefenseTurns>0){enemy.skillDefenseTurns-=1;if(enemy.skillDefenseTurns<=0)enemy.skillDefenseModifier=0;}});renderRoster();if(rosterState.selectedId){const selectedEnemy=rosterState.monsters.find(enemy=>enemy.instanceId===rosterState.selectedId&&!enemy.defeated);if(selectedEnemy)registerEnemy(selectedEnemy,false);}rosterState.round+=1;rosterState.progress+=1;renderRoundProgress();executeProgressEvents();if(pick.value==='MAP0104'&&(rosterState.round>=8||clueCount>=4))executeLibraryTruth();});
 renderRoundProgress();
 window.addEventListener('character-initialized',renderRoundProgress);
 window.addEventListener('character-selection-change',()=>{if(readerMapMode||!roundProgressReady()){renderRoundProgress();return;}rosterState.round=1;rosterState.progress=1;renderRoundProgress();executeProgressEvents();});
@@ -385,7 +362,7 @@ function renderRoster(){
    energy.button.addEventListener('click',event=>{event.stopPropagation();change(1);});energy.button.addEventListener('contextmenu',event=>{event.preventDefault();event.stopPropagation();change(-1);});nameText.insertBefore(energy.field,markField);
   }
   if(enemy.monsterId==='M0123'&&!enemy.defeated&&enemy.hp<=rosterStat(enemy.base,'HP')/2){
-   const icon=document.createElement('img');icon.className='roster-icon roster-owl-low-hp';icon.src='../images/UT_Buff/UT_Buff_AttackUp.png';icon.alt='低HP：攻撃力上昇条件';icon.title='HPが半分以下：ターン終了を押すたび、攻撃力が永続+1。';nameText.append(icon);
+   const icon=document.createElement('img');icon.className='roster-icon roster-owl-low-hp';icon.src='../images/UT_Buff/UT_Buff_AttackUp.png';icon.alt='低HP：攻撃力上昇条件';icon.title='HPが半分以下：ターン終了、または画面認識で進捗の上昇を確認した時に攻撃力が永続+1。';nameText.append(icon);
   }
   const skill=summonSkills[enemy.monsterId],skillOpen=skillChoiceId===enemy.instanceId;
   const skillTargets=skill?.targets.map(id=>{const target=data.stats.find(row=>row.monster_id===id&&row['難易度']===difficulty.value);return target?{id,name:target['モンスター名'],image:data.images[target.image]}:null;})||[];
@@ -423,7 +400,7 @@ function executeEvent(group,options={}){
  let pending,buffDelta;try{({pending,buffDelta}=collectEventChanges(group,data.stats,difficulty.value,rosterStat));}catch(error){eventError.textContent=error.message;return;}
  if(remember)rememberRoster();
  rosterBuff.attack+=buffDelta.attack;rosterBuff.defense+=buffDelta.defense;
- if(pick.value==='MAP0002'&&((difficulty.value==='悪夢'&&group['進捗']==='11')||(difficulty.value==='狂気'&&group['進捗']==='10'))){
+ if(!options.observeOnly&&pick.value==='MAP0002'&&((difficulty.value==='悪夢'&&group['進捗']==='11')||(difficulty.value==='狂気'&&group['進捗']==='10'))){
   absorbSoulSpirits(rosterState.monsters,pick.value,difficulty.value);
   if(rosterState.selectedId!==null&&!rosterState.monsters.some(enemy=>enemy.instanceId===rosterState.selectedId))rosterState.selectedId=null;
  }
@@ -460,7 +437,7 @@ function executeLibraryTruth(remember=true){
 }
 function renderMapInformation(){
  eventPreview.reset();
- const features=root.querySelector('#mp-map-features');features.replaceChildren(createMapFeatureSections([...(data.features||[]).filter(row=>row.map_id===pick.value),...mapFeatureChips.filter(row=>String(row.category||'').split('|').includes(pick.value)).map(row=>({kind:'chip',id:row.id,name:row.name,image:'chip_icon/'+row.images,description:row.effect}))]));features.hidden=!features.childElementCount;
+ const features=root.querySelector('#mp-map-features');features.replaceChildren(createMapFeatureSections((data.features||[]).filter(row=>row.map_id===pick.value)));features.hidden=!features.childElementCount;
  // CSV order is the display order; external mission/event IDs are not required.
  const missions=routeRows(data.missions);
  const events=routeRows(data.events);
@@ -479,6 +456,7 @@ function renderMapInformation(){
 }
 
 function render(){
+ window.dispatchEvent(new Event('map-context-change'));
  hideMonsterTip();
  if(!data.maps[pick.value]){routeControls.hidden=true;root.querySelector('.mp-map-only').classList.remove('has-route-switches');selected=null;list.replaceChildren();difficulty.replaceChildren();if(readerMapMode)difficulty.append(unknownOption());difficulty.disabled=true;const img=document.getElementById('mp-map-image');img.hidden=true;img.removeAttribute('src');img.alt='';renderMapInformation();status.textContent=Object.keys(data.maps).length?'マップを選択してください。':'表示対象のマップがありません。CSVの「表示」列を確認してください。';renderRoster();return;}
  difficulty.disabled=false;

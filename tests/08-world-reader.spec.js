@@ -118,13 +118,13 @@ test('08 world: library native and shared monster labels update individual HP',a
  await page.locator('#reader-file').setInputFiles({name:'library.png',mimeType:'image/png',buffer:Buffer.from(image.split(',')[1],'base64')});await expect(page.locator('#reader-world-result')).toContainText('看守');
 });
 
-test('08 world: warden truth requires matching HP and persists through absence or old ordinary labels; undo restores the form',async({page})=>{
+test('08 world: warden truth requires matching HP but does not automatically remove the ordinary form; undo restores observed state',async({page})=>{
  await open(page);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0104');await page.locator('#mp-difficulty').selectOption('普通');
  await page.evaluate(o=>ScreenReaderMapBridge.apply(o),await readVideoLabel(page,videoLabels.find(r=>r.source==='library'&&r.id==='M0116')));
  const before=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(before.monsters.filter(m=>m.monsterId==='M0116')).toHaveLength(1);expect(before.monsters.find(m=>m.monsterId==='M0116').hp).toBe(8);
  await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[{monsterId:'M0115',serial:null,currentHp:200,maxHp:230}]}));expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(before);
  const truth=await readVideoLabel(page,videoLabels.find(r=>r.source==='library'&&r.id==='M0115'));await page.evaluate(o=>ScreenReaderMapBridge.apply(o),truth);
- const state=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(state.monsters.some(m=>m.monsterId==='M0116')).toBe(false);expect(state.monsters.find(m=>m.monsterId==='M0115').hp).toBe(228);
+ const state=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(state.monsters.some(m=>m.monsterId==='M0116'&&!m.defeated)).toBe(true);expect(state.monsters.find(m=>m.monsterId==='M0115').hp).toBe(228);
  for(const o of [{monsters:[]},{monsters:[{monsterId:'M0116',serial:null,currentHp:8,maxHp:9}]}])await page.evaluate(o=>ScreenReaderMapBridge.apply(o),o);
  expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(state);await page.locator('#roster-undo').click();expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(before);
 });
@@ -139,6 +139,7 @@ test('08 world: visible monitor diagnostics distinguish disabled reading and pre
  await open(page);await page.locator('#reader-toggle').click();
  await expect(page.locator('#reader-monitor-info')).toContainText('OFF');
  await expect(page.locator('#reader-monitor-info')).toContainText('29種類');
+ await expect(page.locator('#reader-monitor-info')).toContainText('出現・HP更新のみ');
  await expect(page.locator('#reader-interval')).toHaveValue('250');
  await expect(page.locator('#reader-world-sync')).toBeVisible();
  const before=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());
@@ -148,6 +149,7 @@ test('08 world: visible monitor diagnostics distinguish disabled reading and pre
  await expect(page.locator('#reader-monitor-info')).toContainText('確認のみ');
  await expect(page.locator('#reader-monitor-info')).toContainText('処理');
  expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(before);
+ const diagnostics=await page.evaluate(()=>ScreenReaderController.diagnostics());expect(diagnostics.records.some(r=>r.code==='world_observation')).toBe(true);expect(diagnostics.records.every(r=>['world_observation','reset'].includes(r.code))).toBe(true);expect(diagnostics.current.processingMs).toEqual(expect.any(Number));
 });
 
 test('08 world: automatic capture resumes for tiny map-only changes after a static screen',async({page})=>{
@@ -174,7 +176,7 @@ test('08 world: automatic capture resumes for tiny map-only changes after a stat
  await page.locator('#reader-stop').click();expect(await page.evaluate(()=>testCapture.getTracks().every(t=>t.readyState==='ended'))).toBe(true);
 });
 
-test('08 world: Dream ship shark label records number and HP; two explicit zero HP observations are applied together with undo',async({page})=>{
+test('08 world: Dream ship shark label records number and HP; explicit zero HP observations preserve living records',async({page})=>{
  await open(page);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0001');await page.locator('#mp-difficulty').selectOption('狂気');
  const shark=await readVideoLabel(page,videoLabels.find(r=>r.id==='M0002'));
  expect(shark.monsters).toEqual([{monsterId:'M0002',serial:1,currentHp:15,maxHp:22}]);
@@ -186,8 +188,7 @@ test('08 world: Dream ship shark label records number and HP; two explicit zero 
  // Explicit zero-HP input is synthetic: the video disappearance itself is not a death signal.
  await page.evaluate(o=>ScreenReaderMapBridge.apply(o),{monsters:[...shark.monsters,pirate].map(m=>({...m,currentHp:0}))});
  const after=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());
- for(const [id,serial] of [['M0002',1],['M0004',9]])expect(after.monsters.find(m=>m.monsterId===id&&m.serial===serial)?.defeated).toBe(true);
- await page.locator('#roster-undo').click();expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(before);
+ expect(after).toEqual(before);
 });
 
 test('08 world: observed serials do not consume phantom numbers and progress events do not duplicate observed spawns',async({page})=>{
@@ -200,7 +201,7 @@ test('08 world: observed serials do not consume phantom numbers and progress eve
  const after=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(after.monsters.filter(m=>m.monsterId==='M0004').map(m=>m.serial)).toEqual([4,2,5]);
 });
 
-test('08 world: first sighting at zero HP is held, while a previously observed alive serial can be defeated and undone',async({page})=>{
+test('08 world: first sighting at zero HP is held, and previously observed living serials also ignore zero HP',async({page})=>{
  await open(page);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0001');await page.locator('#mp-difficulty').selectOption('狂気');
  const zero={monsters:[{monsterId:'M0004',serial:3,currentHp:0,maxHp:10}]};
  const rejected=await page.evaluate(o=>ScreenReaderMapBridge.apply(o),zero);expect(rejected.skipped).toBe(1);expect((await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).monsters).toEqual([]);
@@ -208,8 +209,7 @@ test('08 world: first sighting at zero HP is held, while a previously observed a
  const manualBefore=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());
  await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[{monsterId:'M0004',serial:1,currentHp:0,maxHp:10}]}));expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(manualBefore);
  await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[{monsterId:'M0004',serial:1,currentHp:5,maxHp:10}]}));const alive=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());
- await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[{monsterId:'M0004',serial:1,currentHp:0,maxHp:10}]}));expect((await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).monsters[0].defeated).toBe(true);
- await page.locator('#roster-undo').click();expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(alive);
+ await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[{monsterId:'M0004',serial:1,currentHp:0,maxHp:10}]}));expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(alive);
 });
 
 test('08 world: complete labels below the old scan limit are readable while edge-clipped HP abstains',async({page})=>{
@@ -232,9 +232,9 @@ test('08 world: image HP zero candidates never defeat an observed living shark a
   expect(await page.evaluate(()=>zeroReadCount)).toBe(before+4);
   const shark=await page.evaluate(()=>ScreenReaderMapBridge.snapshot().monsters.find(m=>m.monsterId==='M0004'&&m.serial===3));expect(shark.hp).toBe(10);expect(shark.defeated).toBe(false);
  }
- await expect(page.locator('#reader-world-result')).toContainText('撃破未確認');
- // Explicit non-image updates still support confirmed zero and Undo.
- await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[{monsterId:'M0004',serial:3,currentHp:0,maxHp:10}]}));expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot().monsters.find(m=>m.monsterId==='M0004'&&m.serial===3).defeated)).toBe(true);
+ await expect(page.locator('#reader-world-result')).toContainText('HP0候補');
+ // Direct bridge calls cannot bypass the observation-only policy.
+ await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[{monsterId:'M0004',serial:3,currentHp:0,maxHp:10}]}));expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot().monsters.find(m=>m.monsterId==='M0004'&&m.serial===3))).toMatchObject({hp:10,defeated:false});
 });
 
 const startupFixture=n=>require('./fixtures/screen-reader/'+n+'.json').image;
@@ -255,8 +255,8 @@ test('08 world: replay startup fills unknown context, respects manual choices an
  await open(page);const setup=(await startupRead(page,'start-dream-result')).setup,hud=await startupRead(page,'start-dream-hud');
  await page.evaluate(setup=>{ScreenReaderMapBridge.resetForReader();ScreenReaderMapBridge.configure(setup);},setup);
  let state=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(state.map).toBe('MAP0001');expect(state.difficulty).toBe('狂気');expect(state.round).toBeNull();expect(state.events).toEqual([]);
- await page.evaluate(hud=>ScreenReaderMapBridge.apply(hud,{allowDefeat:false}),hud);state=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(state.round).toBe(1);expect(state.progress).toBe(1);expect(state.events.length).toBeGreaterThan(0);expect(state.monsters).toEqual([]);
- await page.evaluate(hud=>ScreenReaderMapBridge.apply(hud,{allowDefeat:false}),hud);expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(state);
+ await page.evaluate(hud=>ScreenReaderMapBridge.apply(hud),hud);state=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(state.round).toBe(1);expect(state.progress).toBe(1);expect(state.events.length).toBeGreaterThan(0);expect(state.monsters).toEqual([]);
+ await page.evaluate(hud=>ScreenReaderMapBridge.apply(hud),hud);expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(state);
  await page.evaluate(()=>ScreenReaderMapBridge.resetForReader());await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0003');await page.locator('#mp-difficulty').selectOption('普通');
  expect(await page.evaluate(setup=>ScreenReaderMapBridge.configure(setup),setup)).toBe(false);state=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(state.map).toBe('MAP0003');expect(state.difficulty).toBe('普通');
 });
@@ -265,7 +265,7 @@ test('08 world: replay shark 3 retains its complete HP through camera motion',as
  await open(page);await page.evaluate(()=>{ScreenReaderMapBridge.resetForReader();ScreenReaderMapBridge.configure({map:'MAP0001',difficulty:'狂気'});});
  // Real sampled frames: the 1 in 10/10 moves left of the old x=270 scan edge.
  const names=[59,60,61,66,67,82];
- for(const n of names){const raw=await startupRead(page,'replay-shark3-'+n);const expected={monsterId:'M0004',serial:3,currentHp:10,maxHp:10};if(n===60)expect(raw.monsters.every(m=>JSON.stringify(m)===JSON.stringify(expected))).toBe(true);else expect(raw.monsters).toEqual([expected]);await page.evaluate(raw=>{const accepted=ScreenReaderController.stabilize({members:[],chipIds:[],world:raw});ScreenReaderMapBridge.apply(accepted.world,{allowDefeat:false});},raw);}
+ for(const n of names){const raw=await startupRead(page,'replay-shark3-'+n);const expected={monsterId:'M0004',serial:3,currentHp:10,maxHp:10};if(n===60)expect(raw.monsters.every(m=>JSON.stringify(m)===JSON.stringify(expected))).toBe(true);else expect(raw.monsters).toEqual([expected]);await page.evaluate(raw=>{const accepted=ScreenReaderController.stabilize({members:[],chipIds:[],world:raw});ScreenReaderMapBridge.apply(accepted.world);},raw);}
  const state=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(state.monsters).toHaveLength(1);expect(state.monsters[0]).toMatchObject({monsterId:'M0004',serial:3,hp:10,defeated:false});
 });
 
@@ -423,418 +423,13 @@ test('08 world: short autumn replay confirms three owls and one dinosaur at quar
  for(let i=0;i<results.length;i++)expect(results[i].monsters,'sample '+(i+1)).toEqual(autumnLive.samples[i].expected?[autumnLive.samples[i].expected]:[]);
  const run=async step=>page.evaluate(({observations,step})=>{
   document.getElementById('reader-new-game').click();ScreenReaderMapBridge.configure({map:'MAP0105',difficulty:'困難'});
-  for(let i=0;i<observations.length;i+=step){const accepted=ScreenReaderController.stabilize({members:[],selfId:null,chipOwnerId:null,chipIds:[],world:observations[i]},1000+i*250);ScreenReaderMapBridge.apply(accepted.world,{allowDefeat:false});}
+  for(let i=0;i<observations.length;i+=step){const accepted=ScreenReaderController.stabilize({members:[],selfId:null,chipOwnerId:null,chipIds:[],world:observations[i]},1000+i*250);ScreenReaderMapBridge.apply(accepted.world);}
   return ScreenReaderMapBridge.snapshot();
  },{observations:results,step});
  // This observed phase at 500ms reproduces the user's owl-3-only result.
  const slow=await run(2);expect(slow.monsters.map(m=>[m.monsterId,m.serial])).toEqual([['M0123',3]]);
  const fast=await run(1);expect(fast).toMatchObject({round:1,progress:1});
  expect(fast.monsters.map(m=>[m.monsterId,m.serial,m.hp])).toEqual([['M0123',1,9],['M0123',2,9],['M0123',3,9],['M0122',1,22]]);
-});
-
-const defeatFolder='tests/fixtures/screen-reader/defeat/autumn-reviewed-20261019';
-const defeatManifest=require('./fixtures/screen-reader/defeat/autumn-reviewed-20261019/manifest.json');
-async function defeatFrame(page,snap,time,options={}){
- const image='data:image/webp;base64,'+require('fs').readFileSync(require('path').join(defeatFolder,snap.image)).toString('base64');
- return page.evaluate(async({image,time,options})=>{const im=new Image();im.src=image;await im.decode();const c=document.createElement('canvas');c.width=2560;c.height=1440;const ctx=c.getContext('2d');ctx.fillStyle='#141414';ctx.fillRect(0,0,c.width,c.height);ctx.drawImage(im,640+(options.shift||0),360);if(options.capture)return c.toDataURL('image/png');const frame=ScreenReaderVision.normalize(c);
-  if(!options.identity)return window.defeatTestTracker.step(frame,time);
-  const world=ScreenReaderWorldVision.analyze(frame,{positions:true});
-  if(options.alive)world.monsters=options.alive;
-  if(options.ambiguous&&world.monsters[0])world.monsters.push({...world.monsters[0],serial:99});
-  if(options.unlocated&&world.monsters[0])world.monsters.push({...world.monsters[0],serial:99,marker:null});
-  if(options.controller){ScreenReaderMapBridge.apply(world,{allowDefeat:false});return {world,cues:ScreenReaderController.updateDefeat(frame,time,world)};}
-  return {world,cues:window.defeatTestTracker.step(frame,time,world.monsters)};
- },{image,time,options});
-}
-test('08 autumn defeat cues: partial gray patches then beam; spawn, absence and unknown serial never defeat a roster individual',async({page})=>{
- await open(page);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');await page.getByRole('button',{name:'3 のイベントを実行',exact:true}).click();
- const initial=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());
- for(const sample of defeatManifest.samples){
-  await page.evaluate(()=>window.defeatTestTracker=ScreenReaderDefeatVision.createTracker());const output=[];
-  for(const snap of sample.snapshots){const cues=await defeatFrame(page,snap,snap.source_pts_s*1000);if(snap.phase==='before'||snap.phase==='gray')expect(cues,sample.id+' '+snap.phase).toEqual([]);output.push(...cues);}
-  // Including the moving camera/overlaid boss text: identify only a species, never a guessed boss or serial.
-  require('fs').mkdirSync('artifacts',{recursive:true});require('fs').writeFileSync('artifacts/defeat-'+test.info().project.name+'-'+sample.id+'.json',JSON.stringify(output,null,2));
-  expect(output.map(c=>[c.monsterId,c.serial]),sample.id).toEqual(sample.expected_event==='defeat'?[[sample.monster_id,null]]:[]);
- }
- expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(initial);
- // Gray by itself, stale frames and a beam in a new independent capture are insufficient.
- const sample=defeatManifest.samples[0],gray=sample.snapshots.find(s=>s.phase==='gray'),beam=sample.snapshots.find(s=>s.phase==='beam');
- for(const gap of [0,2000]){await page.evaluate(()=>window.defeatTestTracker=ScreenReaderDefeatVision.createTracker());await defeatFrame(page,gray,100);expect(await defeatFrame(page,beam,100+gap)).toEqual([]);}
- await page.evaluate(()=>window.defeatTestTracker=ScreenReaderDefeatVision.createTracker());expect(await defeatFrame(page,beam,100)).toEqual([]);
-});
-
-test('08 autumn defeat replay: three reviewed overlapping owl deaths pass unchanged gray and beam thresholds',async({page})=>{
- await open(page);
- const folder='tests/fixtures/screen-reader/defeat/autumn-replay-20261029',manifest=require('./fixtures/screen-reader/defeat/autumn-replay-20261029/scenes.json');
- for(const scene of manifest.scenes){
-  const images=scene.snapshots.map(s=>({...s,image:'data:image/png;base64,'+require('fs').readFileSync(require('path').join(folder,s.image)).toString('base64')}));
-  const cues=await page.evaluate(async({images,box,speed})=>{
-   const tracker=ScreenReaderDefeatVision.createTracker(),output=[];
-   for(const snap of images){const im=new Image();im.src=snap.image;await im.decode();const plane=document.createElement('canvas');plane.width=1536;plane.height=710;const x=plane.getContext('2d');x.fillStyle='#141414';x.fillRect(0,0,1536,710);x.imageSmoothingEnabled=false;x.drawImage(im,box[0]*2,box[1]*2,box[2]*2,box[3]*2);const result=tracker.step({popupFrame:plane},snap.pts_s*1000*speed);if(snap.phase!=='beam'&&result.length)throw Error('Defeat before the beam');output.push(...result);}
-   return output;
-  },{images,box:scene.normalized_box,speed:manifest.speed});
-  expect(cues,'owl '+scene.serial).toEqual([expect.objectContaining({monsterId:'M0123',serial:null,reason:'gray_then_beam'})]);
- }
-});
-
-test('08 autumn defeat replay: owls 4 and 5 tolerate capture phase and explicitly observed extra serials',async({page})=>{
- test.setTimeout(120000);await open(page);
- const folder='tests/fixtures/screen-reader/defeat/autumn-owls-45-20261029',manifest=require('./fixtures/screen-reader/defeat/autumn-owls-45-20261029/manifest.json');
- const encode=name=>'data:image/png;base64,'+require('fs').readFileSync(require('path').join(folder,name)).toString('base64');
- const results=await page.evaluate(async({manifest,images,battleImage})=>{
-  const load=async src=>{const im=new Image();im.src=src;await im.decode();return im;};
-  const plane=(im,sourceBox,targetBox)=>{const c=document.createElement('canvas');c.width=1536;c.height=710;const x=c.getContext('2d');x.fillStyle='#141414';x.fillRect(0,0,c.width,c.height);x.imageSmoothingEnabled=false;x.drawImage(im,...sourceBox,...targetBox.map(v=>v*2));return {popupFrame:c};};
-  const battle=plane(await load(battleImage),[0,0,480,220],[150,60,480,220]),output=[];
-  for(const [index,scene] of manifest.scenes.entries()){
-   const sheet=await load(images[index]),box=scene.normalized_box,cols=scene.columns;
-   const frames=scene.snapshots.map(s=>plane(sheet,[(s.cell%cols)*box[2],Math.floor(s.cell/cols)*box[3],box[2],box[3]],box));
-   for(const mode of ['valid','short','unseen','gap','wrong-hp','singleton-extra','expired'])for(let phase=0;phase<250;phase+=25){
-    const tracker=ScreenReaderDefeatVision.createTracker(),roster=[1,2,3,4,5].map(serial=>({monsterId:'M0123',serial,instanceId:serial,maxHp:10,seen:true,defeated:serial<4}));
-    const context={counts:{M0123:mode==='short'?6:mode==='singleton-extra'?1:4},monsters:roster,mapVisible:true};
-    if(mode==='unseen')roster[0].seen=false;if(mode==='gap')roster[0].serial=6;
-    const known={monsterId:'M0123',serial:scene.serial,instanceId:scene.serial,currentHp:scene.serial===5?1:2,maxHp:mode==='wrong-hp'?11:10};
-    // Explicit observation contract, not OCR success of the cropped fixtures.
-    tracker.step(frames[0],100,[known],context);if(mode!=='singleton-extra'){context.mapVisible=false;tracker.step(battle,mode==='expired'?65000:350,[],context);context.mapVisible=true;}
-    const start=scene.snapshots[0].pts_s,end=scene.snapshots.at(-1).pts_s,cues=[];
-    for(let target=start+phase/1000;target<=end;target+=.25){const i=scene.snapshots.findIndex(s=>s.pts_s>=target);if(i<0)break;cues.push(...tracker.step(frames[i],(mode==='expired'?66000:mode==='singleton-extra'?10000:1000)+(target-start)*1000,[],context));}
-    output.push({serial:scene.serial,mode,phase,cues:cues.filter(c=>c.serial!==null)});
-   }
-  }
-  return output;
- },{manifest,images:manifest.scenes.map(s=>encode(s.image)),battleImage:encode('battle.png')});
- for(const row of results)expect(row.cues,JSON.stringify({serial:row.serial,mode:row.mode,phase:row.phase})).toEqual(row.mode==='valid'?[expect.objectContaining({monsterId:'M0123',serial:row.serial,association:'battle',lastSeenHp:row.serial===5?1:2})]:[]);
-});
-
-
-test('08 autumn defeat archived identities: expiry waits for independent survivors and never guesses from old HP',async({page})=>{
- test.setTimeout(120000);await open(page);
- const sample=defeatManifest.samples.find(s=>s.id==='owl-1'),images=[];
- for(const snap of sample.snapshots.slice(1,3))images.push(await defeatFrame(page,snap,0,{capture:true}));
- const results=await page.evaluate(async images=>{
-  const frames=[];for(const src of images){const im=new Image();im.src=src;await im.decode();frames.push(ScreenReaderVision.normalize(im));}
-  const blank=document.createElement('canvas');blank.width=768;blank.height=355;const x=blank.getContext('2d');x.fillStyle='#141414';x.fillRect(0,0,768,355);
-  const results={};for(const mode of ['valid','none','one','missing','reset','gap','timeout','replaced','max-hp','repeated-cue','two-kills','alive','no-gray','incomplete-roster','duplicate','reinforcement','precollision-only']){
-   const tracker=ScreenReaderDefeatVision.createTracker(),roster=[1,2,3,4,5].map(serial=>({monsterId:'M0123',serial,instanceId:serial,maxHp:10,seen:true,defeated:serial<4}));
-   const context={counts:{M0123:mode==='incomplete-roster'?6:4},monsters:roster,mapVisible:true};
-   const four={monsterId:'M0123',serial:4,instanceId:4,currentHp:6,maxHp:10},five={monsterId:'M0123',serial:5,instanceId:5,currentHp:1,maxHp:10};
-   // Species pixels are real; serials/HP and delayed survivor observations are
-   // an explicit tracking contract, not OCR of a complete original replay.
-   if(['two-kills','precollision-only'].includes(mode))roster.push({monsterId:'M0123',serial:6,instanceId:6,maxHp:10,seen:true,defeated:false});
-   tracker.step(blank,100,mode==='missing'?[four]:['two-kills','precollision-only'].includes(mode)?[four,five,{...five,serial:6,instanceId:6,currentHp:4}]:[four,five],context);tracker.step(blank,65000,[],context);
-   const expired=tracker.diagnostics(),cues=[];
-   if(mode!=='no-gray')cues.push(...tracker.step(frames[0],65250,[],context),...tracker.step(frames[1],65750,[],context));
-   const waiting=tracker.diagnostics();
-   if(mode==='reset')tracker.reset();if(mode==='replaced')roster[4].instanceId=55;if(mode==='max-hp')roster[4].maxHp=11;if(mode==='reinforcement')roster.push({monsterId:'M0123',serial:6,instanceId:6,maxHp:10,seen:true,defeated:false});
-   if(mode==='precollision-only'){tracker.step(blank,65800,[four],context);tracker.step(blank,65900,[four],context);}
-   if(['repeated-cue','two-kills','precollision-only'].includes(mode))cues.push(...tracker.step(frames[0],66000,[],context),...tracker.step(frames[1],66250,[],context));
-   const collision=tracker.diagnostics();
-   let now=['repeated-cue','two-kills','precollision-only'].includes(mode)?66500:66000;const until=mode==='timeout'?96500:84000;
-   for(;now<=until;now+=250)tracker.step(blank,now,[],context);
-   if(mode==='gap')now+=2000;
-   const survivors=mode==='precollision-only'?[five]:mode==='none'?[]:mode==='alive'?[four,five]:mode==='duplicate'?[four,four]:[four];
-   cues.push(...tracker.step(blank,now,survivors,context));if(mode!=='one')cues.push(...tracker.step(blank,now+250,survivors,context));
-   const after=tracker.diagnostics(),copy=tracker.diagnostics();if(copy.knownIndividuals.length)copy.knownIndividuals[0].serial=999;
-   const independent=tracker.diagnostics().knownIndividuals.every(o=>o.serial!==999);
-   tracker.reset();results[mode]={expired,waiting,collision,after,numbered:cues.filter(c=>c.serial!==null),independent,cleared:tracker.diagnostics()};
-  }
-  return results;
- },images);
- expect(results.valid.numbered).toEqual([expect.objectContaining({monsterId:'M0123',serial:5,instanceId:5,maxHp:10,lastSeenHp:1,association:'archived-survivors'})]);
- expect(results.valid.expired.memory).toEqual([]);
- expect(results.valid.expired.knownIndividuals).toEqual([expect.objectContaining({serial:4,lastSeenHp:6,ageMs:64900}),expect.objectContaining({serial:5,lastSeenHp:1,ageMs:64900})]);
- expect(results.valid.expired.knownIndividuals.every(o=>o.currentHp===undefined)).toBe(true);
- expect(results.valid.waiting.unresolved).toEqual([expect.objectContaining({archived:true,timeoutMs:30000,blocked:false})]);
- expect(results.valid.after.events).toEqual(expect.arrayContaining([expect.objectContaining({code:'survivor_confirmed',candidates:[expect.objectContaining({serial:4})]})]));
- expect(results['repeated-cue'].numbered).toEqual([expect.objectContaining({serial:5,association:'survivors-after-collision'})]);
- expect(results['two-kills'].collision.events).toEqual(expect.arrayContaining([expect.objectContaining({code:'multiple_defeat_candidates',cueCount:2,possibleRepeat:true,firstEvidence:expect.objectContaining({grayTimeMs:65250,beamTimeMs:65750}),latestEvidence:expect.objectContaining({grayTimeMs:66000,beamTimeMs:66250})})]));
- expect(results['precollision-only'].collision.unresolved[0].candidates).toHaveLength(3);
- expect(results['precollision-only'].after.unresolved[0].candidates.map(c=>c.serial)).toEqual([4,6]);
- expect(results['two-kills'].after.unresolved).toEqual([expect.objectContaining({holdReason:'multiple_defeat_candidates',cueCount:2,blocked:true})]);
- for(const [mode,row] of Object.entries(results)){if(!['valid','repeated-cue'].includes(mode))expect(row.numbered,mode).toEqual([]);expect(row.independent,mode).toBe(true);expect(row.cleared).toEqual({code:'reset',events:[]});}
-});
-
-
-test('08 autumn defeat duplicate review: saved owl frames retain species cues with source times',async({page})=>{
- await open(page);
- const folder='tests/fixtures/screen-reader/defeat/autumn-owls-45-20261029',manifest=require('./fixtures/screen-reader/defeat/autumn-owls-45-20261029/manifest.json'),report=[];
- for(const scene of manifest.scenes){
-  const image='data:image/png;base64,'+require('fs').readFileSync(require('path').join(folder,scene.image)).toString('base64');
-  const cues=await page.evaluate(async({image,scene})=>{
-   const im=new Image();im.src=image;await im.decode();const tracker=ScreenReaderDefeatVision.createTracker(),output=[],box=scene.normalized_box;
-   for(const snap of scene.snapshots){const c=document.createElement('canvas');c.width=1536;c.height=710;const x=c.getContext('2d');x.fillStyle='#141414';x.fillRect(0,0,c.width,c.height);x.imageSmoothingEnabled=false;x.drawImage(im,(snap.cell%scene.columns)*box[2],Math.floor(snap.cell/scene.columns)*box[3],box[2],box[3],...box.map(v=>v*2));for(const cue of tracker.step({popupFrame:c},snap.pts_s*1000))output.push({sourceFrame:snap.frame,pts_s:snap.pts_s,...cue});}
-   return output;
-  },{image,scene});
-  expect(cues.length,'owl '+scene.serial).toBeGreaterThan(0);expect(cues.every(c=>c.monsterId==='M0123'&&c.serial===null)).toBe(true);report.push({reviewedSerial:scene.serial,cues});
- }
- require('fs').mkdirSync('artifacts',{recursive:true});require('fs').writeFileSync('artifacts/owl-duplicate-review-'+test.info().project.name+'.json',JSON.stringify(report,null,2));
- console.log('OWL_DUPLICATE_REVIEW '+JSON.stringify(report));
-});
-
-const identitySample=defeatManifest.samples.find(s=>s.id==='dinosaur-1');
-// Temporal contract: hold the real before image for two captures, then replay
-// actual gray/beam/after frames. Not a claim of full-video or 4fps accuracy.
-const identitySequence=[{...identitySample.snapshots[0],source_pts_s:identitySample.snapshots[0].source_pts_s-.2},...identitySample.snapshots];
-test('08 autumn defeat automatic: unchanged-frame waiting keeps observed identities fresh',async({page})=>{
- await open(page);await page.locator('#reader-toggle').click();
- const image=await defeatFrame(page,identitySequence[0],0,{capture:true});
- await page.locator('#reader-file').setInputFiles({name:'held-map.png',mimeType:'image/png',buffer:Buffer.from(image.split(',')[1],'base64')});await expect(page.locator('#reader-file')).toHaveValue('');
- await page.locator('#mp-map-select').evaluate(e=>{e.value='MAP0105';e.dispatchEvent(new Event('change',{bubbles:true}));});
- await page.locator('#mp-difficulty').evaluate(e=>{e.value='普通';e.dispatchEvent(new Event('change',{bubbles:true}));});
- await page.evaluate(()=>{window.heldWorldReads=[];const analyze=ScreenReaderWorldVision.analyze;ScreenReaderWorldVision.analyze=(frame,...options)=>{const world=analyze(frame,...options);heldWorldReads.push(world);return world;};});
- await page.evaluate(()=>{window.readerTestNow=1000;Object.defineProperty(performance,'now',{configurable:true,value:()=>readerTestNow});});
- for(let i=0;i<8;i++)await page.evaluate(async time=>{readerTestNow=time;await ScreenReaderController.read(true);},1000+i*500);
- await expect(page.locator('#reader-monitor-info')).toContainText('画面変化待ち');
- const held=await page.evaluate(()=>heldWorldReads);expect(held.at(-1).monsters.find(m=>m.monsterId==='M0122'),JSON.stringify(held)).toMatchObject({serial:2,marker:expect.any(Array)});
- for(const [snap,time] of [[identitySample.snapshots[1],5000],[identitySample.snapshots[2],5500]]){
-  const image=await defeatFrame(page,snap,0,{capture:true});
-  await page.evaluate(async({image,time})=>{const im=new Image();im.src=image;await im.decode();window.readerOriginalNormalize??=ScreenReaderVision.normalize;ScreenReaderVision.normalize=(_source,area)=>readerOriginalNormalize(im,area);readerTestNow=time;await ScreenReaderController.read(true);},{image,time});
-  if(time===5000)expect((await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).monsters.find(m=>m.monsterId==='M0122'&&m.serial===2)?.defeated).toBe(false);
- }
- await expect(page.locator('#reader-defeat-result')).toContainText('自動撃破：おもちゃの恐竜 2');
- expect((await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).monsters.find(m=>m.monsterId==='M0122'&&m.serial===2)?.defeated).toBe(true);
- // Failed analysis of a different hash must not reuse the old frame's labels.
- await page.evaluate(()=>{window.failedMapReads=0;ScreenReaderWorldVision.analyze=()=>{failedMapReads++;throw Error('test unread frame');};const normalize=ScreenReaderVision.normalize;ScreenReaderVision.normalize=(...args)=>{const c=normalize(...args);c.popupFrame.getContext('2d').fillStyle='#f00';c.popupFrame.getContext('2d').fillRect(1000,100,2,2);return c;};});
- for(let i=0;i<4;i++)await page.evaluate(async time=>{readerTestNow=time;await ScreenReaderController.read(true);},6000+i*500);
- expect(await page.evaluate(()=>failedMapReads)).toBe(4);
-});
-for(const protocol of ['http','file'])for(const size of [{width:1440,height:900},{width:950,height:1200}])test(`08 autumn defeat automatic: real numbered leader and partial animation; undo (${protocol} ${size.width})`,async({page})=>{
- await page.setViewportSize(size);
- if(protocol==='file')await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);else await open(page);
- await page.waitForFunction(()=>window.ScreenReaderCharacterBridge?.catalog().characters.length===36);
- await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');await page.locator('#mp-difficulty').selectOption('普通');
- await page.locator('#reader-world-sync').evaluate(e=>{e.checked=true;e.dispatchEvent(new Event('change'));});
- // Other numbered dinosaurs, including equal HP, must not be selected by roster count or HP alone.
- await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[{monsterId:'M0122',serial:1,currentHp:19,maxHp:19},{monsterId:'M0122',serial:3,currentHp:8,maxHp:19}]}));
- for(const snap of identitySequence.slice(0,2)){
-  const r=await defeatFrame(page,snap,snap.source_pts_s*1000,{identity:true,controller:true});
-  expect(r.world.monsters.find(m=>m.monsterId==='M0122')).toMatchObject({serial:2,currentHp:8,maxHp:19,marker:expect.any(Array)});expect(r.cues).toEqual([]);
- }
- const alive=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());const output=[];
- for(const snap of identitySequence.slice(2))output.push(...(await defeatFrame(page,snap,snap.source_pts_s*1000,{identity:true,controller:true})).cues);
- expect(output).toEqual([expect.objectContaining({monsterId:'M0122',serial:2,reason:'gray_then_beam'})]);
- const after=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(after.monsters.filter(m=>m.defeated).map(m=>m.serial)).toEqual([2]);
- expect(after.monsters.filter(m=>m.serial!==2)).toEqual(alive.monsters.filter(m=>m.serial!==2));
- await expect(page.locator('#reader-defeat-result')).toContainText('自動撃破：おもちゃの恐竜 2');
- await page.locator('#roster-undo').click();expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(alive);
-});
-
-test('08 autumn defeat automatic: missing, ambiguous, stale or moving identity abstains; no HP-zero shortcut',async({page})=>{
- test.setTimeout(60000);
- await open(page);
- const before=identitySequence[0],second=identitySequence[1],gray=identitySample.snapshots[1],beam=identitySample.snapshots[2];
- for(const mode of ['one','ambiguous','unlocated','stale','camera','reset','alive']){
-  await page.evaluate(()=>window.defeatTestTracker=ScreenReaderDefeatVision.createTracker());
-  await defeatFrame(page,before,100,{identity:true,ambiguous:mode==='ambiguous',unlocated:mode==='unlocated'});
-  let alive=[];if(mode!=='one')alive=(await defeatFrame(page,second,300,{identity:true,ambiguous:mode==='ambiguous',unlocated:mode==='unlocated'})).world.monsters;
-  if(mode==='reset')await page.evaluate(()=>defeatTestTracker.reset());
-  const offset=mode==='stale'?3000:0;
-  await defeatFrame(page,gray,800+offset,{identity:true,shift:mode==='camera'?180:0});
-  const r=await defeatFrame(page,beam,1250+offset,{identity:true,shift:mode==='camera'?180:0,alive:mode==='alive'?alive:null});
-  expect(r.cues.every(c=>c.serial===null),mode).toBe(true);
- }
-});
-
-test('08 autumn defeat automatic: preview, wrong instance and max HP never mutate; duplicate cues are idempotent',async({page})=>{
- await open(page);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');
- await page.locator('#reader-world-sync').evaluate(e=>{e.checked=true;e.dispatchEvent(new Event('change'));});
- await page.locator('#reader-apply').evaluate(e=>{e.checked=false;e.dispatchEvent(new Event('change'));});
- for(const snap of identitySequence)await defeatFrame(page,snap,snap.source_pts_s*1000,{identity:true,controller:true});
- const before=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());expect(before.monsters.find(m=>m.monsterId==='M0122'&&m.serial===2)?.defeated).toBe(false);
- const actual=before.monsters.find(m=>m.monsterId==='M0122'&&m.serial===2),cue={monsterId:'M0122',serial:2,instanceId:actual.instanceId,maxHp:19,reason:'gray_then_beam'};
- for(const invalid of [{...cue,instanceId:99999},{...cue,maxHp:22},{...cue,serial:null},{...cue,reason:'absent'}]){
-  expect(await page.evaluate(c=>ScreenReaderMapBridge.applyDefeats([c]),invalid)).toEqual([]);expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(before);
- }
- expect(await page.evaluate(c=>ScreenReaderMapBridge.applyDefeats([c,c]).length,cue)).toBe(1);
- expect(await page.evaluate(c=>ScreenReaderMapBridge.applyDefeats([c]),cue)).toEqual([]);
-});
-
-test('08 autumn defeat memory: missing names, registered camera motion, later survivors and ambiguous tracks',async({page})=>{
- test.setTimeout(90000);await open(page);
- // Held real snapshots exercise the memory contract, not continuous-video accuracy.
- const images=[];for(const snap of identitySample.snapshots.slice(0,3))images.push(await defeatFrame(page,snap,0,{capture:true}));
- const results=await page.evaluate(async images=>{
-  const loaded=[];for(const image of images){const im=new Image();im.src=image;await im.decode();loaded.push(im);}
-  const frame=(i,mask=null,shift=0)=>{const c=document.createElement('canvas');c.width=2560;c.height=1440;const x=c.getContext('2d');x.fillStyle='#141414';x.fillRect(0,0,c.width,c.height);x.drawImage(loaded[i],shift,0);const f=ScreenReaderVision.normalize(c);if(mask){const p=f.popupFrame.getContext('2d');p.fillStyle='#141414';p.fillRect(...mask);}return f;};
-  const before=frame(0),known=ScreenReaderWorldVision.analyze(before,{positions:true}).monsters[0];known.instanceId=2;
-  const results={};for(const mode of ['held','shift','camera-cut','ambiguous','reset','later','alive','expired','repeated-cue','incomplete-memory','reinforced-unseen']){
-   const tracker=ScreenReaderDefeatVision.createTracker(),roster=[1,2,3].map(serial=>({monsterId:known.monsterId,serial,maxHp:known.maxHp,instanceId:serial,seen:true,defeated:false}));
-   const context={counts:{[known.monsterId]:3},monsters:roster},seed=[{...known,serial:1,instanceId:1,labelBox:null,marker:null},known,{...known,serial:3,instanceId:3,labelBox:null,marker:null}];
-   if(['ambiguous','later','alive','expired','repeated-cue','incomplete-memory'].includes(mode))seed[0]={...known,serial:1,instanceId:1};
-   tracker.step(before,100,mode==='incomplete-memory'?seed.slice(0,2):seed,context); // already confirmed in the roster
-   if(mode==='reinforced-unseen')context.counts[known.monsterId]=4;
-   const cues=[];const shift=mode==='shift'?30:mode==='camera-cut'?400:0;
-   for(let t=350;t<=3100;t+=250)cues.push(...tracker.step(frame(0,known.labelBox,shift),t,[],context));
-   if(mode==='reset')tracker.reset();
-   cues.push(...tracker.step(frame(1,null,shift),3600,[],context),...tracker.step(frame(2,null,shift),4100,[],context));
-   if(mode==='repeated-cue')cues.push(...tracker.step(frame(1),4350,[],context),...tracker.step(frame(2),4600,[],context));
-   if(['later','alive','expired','repeated-cue','incomplete-memory'].includes(mode)){
-    if(mode==='expired')for(let t=4350;t<=9600;t+=250)tracker.step(before,t,[],context);
-    const start=mode==='expired'?9850:mode==='repeated-cue'?4850:4350;
-    const survivors=mode==='alive'?[known]:mode==='incomplete-memory'?[seed[0]]:[seed[0],seed[2]];
-    for(const t of [start,start+250])cues.push(...tracker.step(before,t,survivors,context));
-   }
-   results[mode]=cues;
-  }
-  const single=ScreenReaderDefeatVision.createTracker(),one={...known,serial:1,instanceId:1};
-  const singleton={counts:{[one.monsterId]:1},monsters:[{...one,seen:true,defeated:false}]};
-  single.step(before,100,[one],singleton);single.step(before,2500,[],singleton);
-  single.step(frame(1),3000,[],singleton);results.singletonGap=single.step(frame(2),3500,[],singleton);
-  return results;
- },images);
- for(const mode of ['held','shift'])expect(results[mode],mode).toEqual([expect.objectContaining({serial:2,instanceId:2,association:'tracked'})]);
- expect(results.later.filter(c=>c.serial!==null)).toEqual([expect.objectContaining({serial:2,association:'later-survivors'})]);
- expect(results['repeated-cue'].filter(c=>c.serial!==null)).toEqual([expect.objectContaining({serial:2,association:'survivors-after-collision'})]);
- expect(results.singletonGap).toEqual([expect.objectContaining({serial:1,instanceId:1,association:'singleton'})]);
- for(const mode of ['camera-cut','ambiguous','reset','alive','expired','incomplete-memory','reinforced-unseen'])expect(results[mode].every(c=>c.serial===null),mode).toBe(true);
-});
-
-for(const [protocol,size] of [['http',{width:1440,height:900}],['file',{width:950,height:1200}]])test(`08 autumn defeat later rounds: retained identities and cumulative reinforcement counts (${protocol})`,async({page})=>{
- test.setTimeout(90000);await page.setViewportSize(size);
- if(protocol==='file')await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);else await open(page);
- await page.waitForFunction(()=>window.ScreenReaderCharacterBridge?.catalog().characters.length===36);
- await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');await page.locator('#mp-difficulty').selectOption('普通');
- await page.locator('#reader-world-sync').evaluate(e=>{e.checked=true;e.dispatchEvent(new Event('change'));});
- const images=[];for(const snap of identitySample.snapshots.slice(0,3))images.push(await defeatFrame(page,snap,0,{capture:true}));
- const result=await page.evaluate(async images=>{
-  const frames=[];for(const image of images){const im=new Image();im.src=image;await im.decode();frames.push(ScreenReaderVision.normalize(im));}
-  const known=ScreenReaderWorldVision.analyze(frames[0],{positions:true}).monsters[0];
-  const observation=serial=>({...known,serial,labelBox:serial===2?known.labelBox:null,marker:serial===2?known.marker:null});
-  ScreenReaderMapBridge.apply({clock:{round:4,progress:7},monsters:[observation(1),observation(2)]},{allowDefeat:false});
-  const initial=ScreenReaderMapBridge.defeatContext().counts;
-  ScreenReaderController.updateDefeat(frames[0],100,{monsters:[observation(1),observation(2)]});
-  ScreenReaderMapBridge.apply({clock:{round:5,progress:10},monsters:[observation(3),observation(4)]},{allowDefeat:false});
-  const reinforced=ScreenReaderMapBridge.defeatContext().counts;
-  ScreenReaderController.updateDefeat(frames[0],350,{monsters:[observation(3),observation(4)]});
-  const x=frames[0].popupFrame.getContext('2d');x.fillStyle='#141414';x.fillRect(...known.labelBox);
-  for(let t=600;t<=3100;t+=250)ScreenReaderController.updateDefeat(frames[0],t,{monsters:[]});
-  ScreenReaderController.updateDefeat(frames[1],3600,{monsters:[]});
-  const cues=ScreenReaderController.updateDefeat(frames[2],4100,{monsters:[]}),state=ScreenReaderMapBridge.snapshot();
-  return {initial,reinforced,cues,state,log:ScreenReaderController.diagnostics()};
- },images);
- expect(result.initial).toMatchObject({M0122:2,M0123:4,M0121:2,M0124:1});expect(result.reinforced).toMatchObject({M0122:4,M0123:4,M0121:3,M0124:2});
- expect(result.cues).toEqual([expect.objectContaining({monsterId:'M0122',serial:2,association:'tracked'})]);
- expect(result.state).toMatchObject({round:5,progress:10});expect(result.state.monsters.filter(m=>m.defeated).map(m=>m.serial)).toEqual([2]);
- expect(result.log.records.some(r=>r.code==='applied'&&r.round===5)).toBe(true);
-});
-
-test('08 autumn defeat diagnostics: long history is bounded by count and size, independent and cleared',async({page})=>{
- await open(page);
- const result=await page.evaluate(()=>{
-  const h=ScreenReaderDefeatVision.createHistory();for(let i=0;i<=10000;i++)h.append({code:'no_gray',index:i});const full=h.snapshot();
-  const external={code:'memory_updated',candidates:[{currentHp:5}]};h.append(external);external.candidates[0].currentHp=99;
-  const copy=h.snapshot();copy.records.at(-1).candidates[0].currentHp=100;const retained=h.recent(1)[0];
-  const small=ScreenReaderDefeatVision.createHistory({limit:10000,byteLimit:1000});for(let i=0;i<100;i++)small.append({index:i,message:'x'.repeat(100)});const bounded=small.snapshot();
-  h.clear();return {limit:full.limit,count:full.records.length,first:full.records[0].index,last:full.records.at(-1).index,dropped:full.droppedRecords,retained,bounded,cleared:h.snapshot()};
- });
- expect(result).toMatchObject({limit:10000,count:10000,first:1,last:10000,dropped:1,retained:{candidates:[{currentHp:5}]}});
- expect(result.bounded.estimatedBytes).toBeLessThanOrEqual(1000);expect(result.bounded.records.at(-1).index).toBe(99);expect(result.bounded.droppedRecords).toBeGreaterThan(0);
- expect(result.cleared).toMatchObject({records:[],estimatedBytes:0,droppedRecords:0});
-});
-
-let turnFrameDirectory;
-function clearTurnFrames(){
- if(turnFrameDirectory)require('fs').rmSync(turnFrameDirectory,{recursive:true,force:true});
- turnFrameDirectory=undefined;
-}
-test.afterAll(clearTurnFrames);
-function turnFramePath(index){
- const fs=require('fs'),path=require('path');
- if(!turnFrameDirectory){
-  turnFrameDirectory=fs.mkdtempSync(path.join(require('os').tmpdir(),'autumn-turn-'));
-  try{require('child_process').execFileSync('ffmpeg',['-v','error','-i',path.resolve('tests/fixtures/screen-reader/defeat/autumn-turn-20261020/full-replay.mp4'),'-vf','fps=4',path.join(turnFrameDirectory,'f%04d.png')]);}
-  catch(error){clearTurnFrames();throw error;}
- }
- return path.join(turnFrameDirectory,'f'+String(index).padStart(4,'0')+'.png');
-}
-
-for(const [protocol,size] of [['http',{width:1440,height:900}],['file',{width:950,height:1200}]])test(`08 autumn defeat diagnostics: real owl cuts, unknown face, bounded export and reset (${protocol})`,async({page})=>{
- test.setTimeout(90000);await page.setViewportSize(size);if(protocol==='file')await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);else await open(page);
- await page.waitForFunction(()=>window.ScreenReaderCombatVision&&window.ScreenReaderMapBridge);
- await page.locator('#mp-map-select').evaluate(e=>{e.value='MAP0105';e.dispatchEvent(new Event('change',{bubbles:true}));});
- await page.locator('#reader-world-sync').evaluate(e=>e.checked=true);
- const cuts=[];for(const index of [93,189,317])cuts.push(require('fs').readFileSync(turnFramePath(index)).toString('base64'));
- const result=await page.evaluate(async images=>{
-  const frames=[];for(const image of images){const im=new Image();im.src='data:image/png;base64,'+image;await im.decode();frames.push(ScreenReaderVision.normalize(im));}
-  const kinds=frames.map(f=>ScreenReaderCombatVision.analyze(f));
-  ScreenReaderController.updateDefeat(frames[0],1000,{clock:null,monsters:[]});const first=ScreenReaderController.diagnostics();
-  const x=frames[0].popupFrame.getContext('2d');x.fillStyle='#9c20ef';x.fillRect(420,150,400,330);
-  const unknown=ScreenReaderCombatVision.analyze(frames[0]);
-  for(let i=0;i<110;i++)ScreenReaderController.updateDefeat(frames[0],4000+i*2100,{clock:null,monsters:[]});
-  ScreenReaderMapBridge.apply({clock:{round:4,progress:1},monsters:[]});
-  ScreenReaderController.updateDefeat(frames[0],260000,{clock:null,monsters:[]});
-  ScreenReaderController.updateDefeat(frames[0],260250,{clock:null,monsters:[]});
-  ScreenReaderMapBridge.apply({clock:{round:5,progress:1},monsters:[]});
-  ScreenReaderController.updateDefeat(frames[0],260500,{clock:null,monsters:[]});
-  return {kinds,unknown,first,count:ScreenReaderController.diagnostics().records.length};
- },cuts);
- for(const kind of result.kinds)expect(kind).toMatchObject({monsterId:'M0123',source:'start-cut'});
- expect(result.unknown).toBeNull();expect(result.first.records.some(r=>r.code==='start_cut'&&r.monsterId==='M0123')).toBe(true);expect(result.first.records.some(r=>r.code==='applied')).toBe(false);expect(result.count).toBeGreaterThan(100);
- await page.locator('#reader-toggle').click();await page.locator('#reader-details').evaluate(e=>e.open=true);await page.locator('#reader-defeat-diagnostics').evaluate(e=>e.open=true);
- await expect(page.locator('#reader-defeat-log')).toContainText('ラウンド 5');
- const download=page.waitForEvent('download');await page.locator('#reader-save-diagnostics').click();const file=await download;const path=test.info().outputPath('combat-diagnostics.json');await file.saveAs(path);
- const saved=JSON.parse(require('fs').readFileSync(path));expect(saved).toMatchObject({version:1,limit:10000,byteLimit:8388608,droppedRecords:0});expect(saved.records).toHaveLength(result.count);expect(JSON.stringify(saved)).not.toContain('data:image');expect(saved.records.every(r=>typeof r.at==='string'&&Number.isFinite(r.elapsedMs))).toBe(true);
- expect(saved.records.some(r=>r.round===4)).toBe(true);expect(saved.records.at(-1).round).toBe(5);expect(saved.records.every(r=>r.round===null||Number.isSafeInteger(r.round)&&r.round>0)).toBe(true);
- expect(saved.current).toMatchObject({map:'MAP0105',round:5,memory:[],pending:[],unresolved:[]});
- expect(await page.evaluate(()=>{const copy=ScreenReaderController.diagnostics();copy.current.memory.push({monsterId:'fake'});copy.records[0].code='fake';const next=ScreenReaderController.diagnostics();return next.current.memory.length===0&&next.records[0].code!=='fake';})).toBe(true);
- await page.locator('#reader-world-sync').uncheck();await expect(page.locator('#reader-defeat-stage')).toContainText('追跡をリセット');
- expect((await page.evaluate(()=>ScreenReaderController.diagnostics())).records.at(-1)).toMatchObject({code:'reset',message:'モンスター読取のON／OFF変更',round:5});
- expect((await page.evaluate(()=>ScreenReaderController.diagnostics())).current).toBeNull();
- await page.evaluate(()=>ScreenReaderMapBridge.resetForReader());
- expect((await page.evaluate(()=>ScreenReaderController.diagnostics())).records.at(-1).round).toBeNull();
- await expect(page.locator('#reader-defeat-log')).toContainText('ラウンド未判定');
-});
-
-test('08 autumn defeat timing: phase matrix with every individual already known',async({page})=>{
- test.setTimeout(90000);await open(page);const rows=[];for(let index=253;index<=273;index++)rows.push({index,image:require('fs').readFileSync(turnFramePath(index)).toString('base64')});
- const matrix=await page.evaluate(async rows=>{
-  const frames=[];for(const row of rows){const im=new Image();im.src='data:image/png;base64,'+row.image;await im.decode();frames.push({index:row.index,frame:ScreenReaderVision.normalize(im)});}
-  const observed=frames.map(({frame})=>ScreenReaderWorldVision.analyze(frame,{positions:true}));
-  const roster=[1,2,3].map(serial=>({monsterId:'M0123',serial,instanceId:serial,maxHp:8,seen:true,defeated:serial===1})).concat([{monsterId:'M0122',serial:1,instanceId:4,maxHp:19,seen:true,defeated:false}]);
-  const seed=[{monsterId:'M0123',serial:2,instanceId:2,currentHp:6,maxHp:8},{...observed[0].monsters.find(m=>m.monsterId==='M0123'),instanceId:3},{monsterId:'M0122',serial:1,instanceId:4,currentHp:19,maxHp:19}];
-  const output=[];for(const [stride,phase] of [[1,0],[2,0],[2,1],[5,0]]){
-   const tracker=ScreenReaderDefeatVision.createTracker(),monsters=structuredClone(roster),cues=[],events=[];tracker.step(frames[0].frame,63000,seed,{counts:{M0123:3,M0122:1},monsters});
-   for(let i=phase;i<frames.length;i+=stride){const {index,frame}=frames[i],world=observed[i],context={counts:{M0123:3,M0122:1},monsters,mapVisible:!!world.clock};const obs=world.monsters.map(o=>({...o,instanceId:monsters.find(m=>m.monsterId===o.monsterId&&m.serial===o.serial)?.instanceId}));const result=tracker.step(frame,index*250,obs,context);cues.push(...result);events.push(...tracker.diagnostics().events.map(e=>({index,...e})));for(const c of result)if(c.serial!==null){const m=monsters.find(m=>m.monsterId===c.monsterId&&m.serial===c.serial);if(m)m.defeated=true;}}
-   output.push({intervalMs:stride*250,phaseMs:phase*250,cues,events});
-  }return output;
- },rows);
- require('fs').mkdirSync('artifacts',{recursive:true});require('fs').writeFileSync(`artifacts/defeat-timing-${test.info().project.name||'chromium'}.json`,JSON.stringify(matrix,null,2));
- expect(matrix[0].cues.filter(c=>c.serial!==null).map(c=>[c.monsterId,c.serial])).toEqual([['M0123',3],['M0122',1]]);
- for(const row of matrix){expect(row.cues.filter(c=>c.serial!==null).every(c=>c.monsterId==='M0123'&&c.serial===3||c.monsterId==='M0122'&&c.serial===1)).toBe(true);expect(row.events.every(e=>Number.isInteger(e.index)&&typeof e.code==='string')).toBe(true);}
-});
-for(const [protocol,size] of [['http',{width:1440,height:900}],['file',{width:950,height:1200}]])test(`08 autumn defeat full turn: real controller keeps HP, four identities and the surviving owl (${protocol})`,async({page})=>{
- test.setTimeout(240000);await page.setViewportSize(size);
- if(protocol==='file')await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);else await open(page);
- await page.waitForFunction(()=>window.ScreenReaderCharacterBridge?.catalog().characters.length===36);
- await page.locator('#reader-toggle').click();await page.locator('#reader-file').setInputFiles({name:'turn-start.png',mimeType:'image/png',buffer:require('fs').readFileSync(turnFramePath(37))});await expect(page.locator('#reader-file')).toHaveValue('');
- await page.locator('#mp-map-select').evaluate(e=>{e.value='MAP0105';e.dispatchEvent(new Event('change',{bubbles:true}));});
- await page.locator('#mp-difficulty').evaluate(e=>{e.value='普通';e.dispatchEvent(new Event('change',{bubbles:true}));});
- await page.evaluate(()=>{
-  window.turnNow=1000;Object.defineProperty(performance,'now',{configurable:true,value:()=>turnNow});window.turnOriginalNormalize=ScreenReaderVision.normalize;
-  window.turnInput=document.createElement('canvas');turnInput.width=2560;turnInput.height=1440;ScreenReaderVision.normalize=(_source,area)=>turnOriginalNormalize(turnInput,area);
-  window.turnResult={checkpoints:{},defeats:[],diagnostics:[],last:''};
- });
- for(let index=37;index<=370;index++)await page.evaluate(async({index,image})=>{
-   const im=new Image();im.src='data:image/png;base64,'+image;await im.decode();turnInput.getContext('2d').drawImage(im,0,0);
-   turnNow=1000+index*250;await ScreenReaderController.read(true);
-   const {checkpoints,defeats,diagnostics}=turnResult;
-   const state=ScreenReaderMapBridge.snapshot(),text=document.getElementById('reader-defeat-result').textContent;
-   if(text!==turnResult.last&&text.startsWith('自動撃破'))defeats.push({index,text,record:ScreenReaderController.diagnostics().records.findLast(r=>r.code==='applied')});turnResult.last=text;
-   if(index===224||index===268)checkpoints[index]={...state,diagnostic:ScreenReaderController.diagnostics()};
-   if([58,68,224,268].includes(index))diagnostics.push({index,world:ScreenReaderWorldVision.analyze(turnOriginalNormalize(turnInput),{positions:true}),status:document.getElementById('reader-status').textContent,monitor:document.getElementById('reader-monitor-info').textContent});
- },{index,image:require('fs').readFileSync(turnFramePath(index)).toString('base64')});
- const result=await page.evaluate(()=>({...turnResult,state:ScreenReaderMapBridge.snapshot()}));
- require('fs').mkdirSync('artifacts',{recursive:true});require('fs').writeFileSync(`artifacts/full-turn-${test.info().project.name}-${protocol}.json`,JSON.stringify(result,null,2));
- expect(result.checkpoints[224].monsters.find(m=>m.monsterId==='M0123'&&m.serial===2)).toMatchObject({hp:6,defeated:false});
- expect(result.checkpoints[268].monsters.find(m=>m.monsterId==='M0122'&&m.serial===1)).toMatchObject({hp:5,defeated:false});
- const hpLog=result.checkpoints[268].diagnostic;
- expect(hpLog.current.memory.find(m=>m.monsterId==='M0122'&&m.serial===1)).toMatchObject({currentHp:5,maxHp:19,ageMs:expect.any(Number)});
- expect(hpLog.records.some(r=>r.code==='memory_updated'&&r.candidates.some(c=>c.monsterId==='M0122'&&c.serial===1&&c.currentHp===5))).toBe(true);
- expect(result.state.monsters.filter(m=>m.defeated).map(m=>[m.monsterId,m.serial]).sort()).toEqual([['M0122',1],['M0123',1],['M0123',2],['M0123',3]]);
- expect(result.defeats).toHaveLength(4);
- const worldRecords=result.checkpoints[268].diagnostic.records.filter(r=>r.code==='world_observation');expect(worldRecords.length).toBeGreaterThan(0);expect(worldRecords.some(r=>r.candidates.length>0)).toBe(true);expect(worldRecords.some(r=>Array.isArray(r.acceptedMonsters)&&r.applyResult!==null)).toBe(true);expect(worldRecords.every(r=>Number.isFinite(r.processingMs)&&r.processingMs>=0&&(r.intervalMs===null||Number.isFinite(r.intervalMs)))).toBe(true);
- expect(result.defeats.find(d=>d.text.includes('おもちゃの恐竜')).record.candidates[0]).toMatchObject({monsterId:'M0122',serial:1,lastSeenHp:5,maxHp:19});
- await page.locator('#reader-close').click();
- await page.locator('#roster-undo').click();expect((await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).monsters.find(m=>m.monsterId==='M0123'&&m.serial===2)?.defeated).toBe(false);
 });
 
 for(const protocol of ['http','file'])test(`08 autumn icon status: real stacks, turn counters and moved self icons (${protocol})`,async({page})=>{
@@ -845,7 +440,7 @@ for(const protocol of ['http','file'])test(`08 autumn icon status: real stacks, 
  await page.evaluate(()=>{ScreenReaderCharacterBridge.apply({selfId:'18',members:[]});document.getElementById('reader-world-sync').checked=true;});
  const scenes=[1,2,3,4].map(i=>require('fs').readFileSync(`tests/fixtures/screen-reader/status-icons/scene-${i}.png`).toString('base64'));
  const rows=await page.evaluate(async scenes=>{
-  const rows=[];for(const image of scenes){const im=new Image();im.src='data:image/png;base64,'+image;await im.decode();const frame=ScreenReaderVision.normalize(im),world=ScreenReaderWorldVision.analyze(frame,{positions:true});ScreenReaderMapBridge.apply(world,{allowDefeat:false});if(rows.length===3){const moved=document.createElement('canvas');moved.width=1536;moved.height=709;const mx=moved.getContext('2d'),patch=frame.popupFrame.getContext('2d').getImageData(0,470,100,150);mx.putImageData(patch,25,340);const shifted=ScreenReaderStatusIcons.analyze(moved).self.map(i=>[i.key,i.value]);if(JSON.stringify(shifted)!==JSON.stringify([['heal',6],['charge',3],['firewall',1],['attention',1]]))throw Error('Moved status icons were not read');const empty={members:[],chipIds:[],selfId:'18'};ScreenReaderController.stabilize(empty);const first=ScreenReaderController.updateStatusIcons(frame,world,'18',true);if(first.self.length)throw Error('Status accepted before two consecutive reads');ScreenReaderController.stabilize(empty);const second=ScreenReaderController.updateStatusIcons(frame,world,'18',true);if(second.self.length!==4)throw Error('Consecutive status confirmation failed');}
+  const rows=[];for(const image of scenes){const im=new Image();im.src='data:image/png;base64,'+image;await im.decode();const frame=ScreenReaderVision.normalize(im),world=ScreenReaderWorldVision.analyze(frame,{positions:true});ScreenReaderMapBridge.apply(world);if(rows.length===3){const moved=document.createElement('canvas');moved.width=1536;moved.height=709;const mx=moved.getContext('2d'),patch=frame.popupFrame.getContext('2d').getImageData(0,470,100,150);mx.putImageData(patch,25,340);const shifted=ScreenReaderStatusIcons.analyze(moved).self.map(i=>[i.key,i.value]);if(JSON.stringify(shifted)!==JSON.stringify([['heal',6],['charge',3],['firewall',1],['attention',1]]))throw Error('Moved status icons were not read');const empty={members:[],chipIds:[],selfId:'18'};ScreenReaderController.stabilize(empty);const first=ScreenReaderController.updateStatusIcons(frame,world,'18',true);if(first.self.length)throw Error('Status accepted before two consecutive reads');ScreenReaderController.stabilize(empty);const second=ScreenReaderController.updateStatusIcons(frame,world,'18',true);if(second.self.length!==4)throw Error('Consecutive status confirmation failed');}
    const found=ScreenReaderController.updateStatusIcons(frame,world,'18',false);rows.push({self:found.self.map(i=>[i.key,i.value]),monsters:found.monsters.map(m=>[m.monsterId,m.serial,m.icons.map(i=>[i.key,i.value])]),readback:found.monsters.flatMap(m=>{const saved=ScreenReaderMapBridge.snapshot().monsters.find(e=>e.monsterId===m.monsterId&&e.serial===m.serial),card=saved&&document.querySelector('[data-instance-id="'+saved.instanceId+'"]');return m.icons.map(i=>card?.querySelector(({fate:'.roster-status-fateEchoStacks strong',energy:'.roster-status-energyStacks strong',mark:'.roster-name .roster-mark:not(.roster-character-status) strong'})[i.key])?.textContent);}),idempotent:ScreenReaderMapBridge.applyStatusIcons(found.monsters)});}
   const last=ScreenReaderCharacterBridge.applyStatusIcons('18',[{key:'heal',value:6},{key:'charge',value:3},{key:'firewall',value:1},{key:'attention',value:1}]);
   const wrongOwner=ScreenReaderCharacterBridge.applyStatusIcons('11',[{key:'heal',value:99}]);
@@ -868,7 +463,7 @@ for(const protocol of ['http','file'])test(`08 autumn icon status assets: anger 
   window.assetStatusFrames=[];for(const image of images){const im=new Image();im.src='data:image/png;base64,'+image;await im.decode();assetStatusFrames.push(ScreenReaderVision.normalize(im));}
   // Existing identities and label regions are inputs; this does not claim new name OCR.
   const monsters=[{monsterId:'M0122',serial:1,currentHp:14,maxHp:28,labelBox:[554,180,182,56]},{monsterId:'M0120',serial:null,currentHp:150,maxHp:150,labelBox:[991,178,163,58]}];
-  ScreenReaderMapBridge.apply({monsters},{allowDefeat:false});const before=ScreenReaderMapBridge.snapshot().monsters.find(m=>m.monsterId==='M0122'&&m.serial===1).attack;
+  ScreenReaderMapBridge.apply({monsters});const before=ScreenReaderMapBridge.snapshot().monsters.find(m=>m.monsterId==='M0122'&&m.serial===1).attack;
   const read=ScreenReaderController.updateStatusIcons(assetStatusFrames[0],{monsters},'24',false),after=ScreenReaderMapBridge.snapshot().monsters.find(m=>m.monsterId==='M0122'&&m.serial===1).attack;
   const weak=[...document.querySelectorAll('.roster-status-weakness button')].filter(b=>b.getAttribute('aria-pressed')==='true').length;
   const library=ScreenReaderStatusIcons.analyze(assetStatusFrames[1]);
@@ -938,82 +533,23 @@ for(const protocol of ['http','file'])test(`08 autumn icon status flags: presenc
 
 
 
-for(const protocol of ['http','file'])test(`08 autumn defeat battle HP: real READY pixels, unique ledger match and transition guards (${protocol})`,async({page})=>{
- test.setTimeout(90000);if(protocol==='file')await page.goto(require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href);else await open(page);
- const images={cut:require('fs').readFileSync(turnFramePath(93)).toString('base64'),battle:require('fs').readFileSync('tests/fixtures/screen-reader/defeat/autumn-owls-45-20261029/battle.png').toString('base64'),battle2:require('fs').readFileSync('tests/fixtures/screen-reader/defeat/autumn-owls-45-20261029/battle-hp2.png').toString('base64')};
- const sample=defeatManifest.samples.find(s=>s.id==='owl-1');
- for(const [i,name] of ['gray','beam'].entries())images[name]=(await defeatFrame(page,sample.snapshots[i+1],0,{capture:true})).split(',')[1];
- const result=await page.evaluate(async images=>{
-  const load=async src=>{const im=new Image();im.src='data:image/png;base64,'+src;await im.decode();return im;};
-  const cut=ScreenReaderVision.normalize(await load(images.cut));
-  const blank=()=>{const c=document.createElement('canvas');c.width=1536;c.height=710;c.getContext('2d').fillRect(0,0,1536,710);return {popupFrame:c};};
-  const stage=blank(),bx=stage.popupFrame.getContext('2d');bx.imageSmoothingEnabled=false;bx.drawImage(await load(images.battle),300,120,960,440);
-  const mask=(box)=>{const c=blank();c.popupFrame.getContext('2d').drawImage(stage.popupFrame,0,0);c.popupFrame.getContext('2d').fillRect(...box.map(v=>v*2));return c;};
-  const noReady=mask([150,243,500,35]),oneHp=mask([424,220,44,20]),noHeart=mask([425,221,19,18]);
-  noReady.popupFrame.getContext('2d').fillStyle='#c77828';noReady.popupFrame.getContext('2d').fillRect(300,486,1000,70);
-  const hp2=blank();hp2.popupFrame.getContext('2d').imageSmoothingEnabled=false;hp2.popupFrame.getContext('2d').drawImage(await load(images.battle2),300,120,960,440);
-  const p=ScreenReaderDefeatVision.pixels(stage),rows=ScreenReaderCombatVision.readHpPixels(p);
-  const output={rows,rows2:ScreenReaderCombatVision.readHpPixels(ScreenReaderDefeatVision.pixels(hp2)),ready:ScreenReaderCombatVision.readyPixels(p),noReady:ScreenReaderCombatVision.readyPixels(ScreenReaderDefeatVision.pixels(noReady)),heartMasked:ScreenReaderCombatVision.readHpPixels(ScreenReaderDefeatVision.pixels(noHeart)),modes:{}};
-  for(const mode of ['unique','unique-two','duplicate','missing-ledger','incomplete-roster','no-match','no-cut','no-ready','one-hp','late-ready','transition','roster-change','capture-gap','conflict']){
-   const tracker=ScreenReaderDefeatVision.createTracker(),roster=[1,2].map(serial=>({monsterId:'M0123',serial,instanceId:serial,maxHp:10,seen:true,defeated:false})),ctx={counts:{M0123:mode==='incomplete-roster'?3:2},monsters:roster,mapVisible:true},events=[];
-   const known=roster.map((o,i)=>({...o,currentHp:i===0||mode==='duplicate'?(mode==='unique-two'?2:mode==='no-match'?3:1):6}));
-   if(mode==='missing-ledger')roster.push({...roster[1],serial:3,instanceId:3});
-   const step=(frame,time,obs=[])=>{tracker.step(frame,time,obs,ctx);events.push(...tracker.diagnostics().events);};
-   step(blank(),100,mode==='transition'||mode==='roster-change'||mode==='capture-gap'?[known[0]]:known);
-   if(mode==='conflict')step(blank(),200,[known[1]]);
-   ctx.mapVisible=false;step(blank(),350);
-   if(mode==='conflict'){step(cut,600);step(stage,850);step(stage,1100);}
-   else {
-    step(blank(),1350);step(mode==='no-cut'?blank():cut,2350);
-    if(mode==='roster-change')roster[1].instanceId=20;
-    const start=mode==='capture-gap'?5000:3350,frame=mode==='no-ready'||mode==='late-ready'?noReady:mode==='one-hp'?oneHp:mode==='unique-two'?hp2:stage;
-    step(frame,start);step(frame,start+250);
-    if(mode==='late-ready'){step(noReady,start+1250);step(stage,start+1750);step(stage,start+2000);}
-   }
-   output.modes[mode]={events,battle:tracker.diagnostics().battle};
-  }
-  // Rebuild the registration-to-defeat path with the 3.151s gap from the
-  // diagnostic. Map observations are explicit; battle and gray/beam pixels are real.
-  const setup=()=>{ScreenReaderMapBridge.resetForReader();ScreenReaderMapBridge.configure({map:'MAP0105',difficulty:'狂気'});};
-  const clock={round:1,progress:1},owl=(serial,currentHp=10)=>({monsterId:'M0123',serial,currentHp,maxHp:10});
-  const read=(time,monsters)=>ScreenReaderController.stabilize({members:[],chipIds:[],world:{clock,monsters}},time).world;
-  const check=series=>{setup();return series.map(([time,monsters])=>read(time,monsters).monsters.length);};
-  const three=owl(3),zero={...three,currentHp:0};
-  output.guards={
-   expired:check([[1000,[three]],[2000,[]],[3000,[]],[4000,[]],[5001,[three]]]),
-   gap:check([[1000,[three]],[3000,[three]]]),
-   conflict:check([[1000,[three]],[1500,[{...three,maxHp:11}]],[2000,[three]]]),
-   duplicate:check([[1000,[three]],[1500,[three,three]],[2000,[three]]]),
-   zero:check([[1000,[three]],[1500,[zero]],[2000,[three]]])
-  };
-  setup();document.getElementById('reader-world-sync').checked=true;
-  const samples=[[1000,[owl(1,2)]],[1250,[owl(1,2)]],[1450,[three]],[1700,[owl(2,5)]],[1950,[owl(2,5)]],[2600,[]],[3400,[]],[4200,[]],[4601,[three]]];
-  const accepted=samples.map(([time,monsters])=>{
-   const accepted=read(time,monsters);ScreenReaderMapBridge.apply(accepted,{allowDefeat:false});
-   ScreenReaderController.updateDefeat(blank(),time,{clock,monsters});return accepted.monsters.map(o=>o.serial);
-  });
-  const roster=ScreenReaderMapBridge.defeatContext(),empty={clock:null,monsters:[]};
-  ScreenReaderController.updateDefeat(blank(),6000,empty);
-  ScreenReaderController.updateDefeat(cut,6800,empty);
-  ScreenReaderController.updateDefeat(hp2,7500,empty);ScreenReaderController.updateDefeat(hp2,7750,empty);
-  const battle=ScreenReaderController.diagnostics().current.battle;
-  const gray=ScreenReaderVision.normalize(await load(images.gray)),beam=ScreenReaderVision.normalize(await load(images.beam));
-  ScreenReaderController.updateDefeat(gray,8000,{clock,monsters:[]});ScreenReaderController.updateDefeat(beam,8500,{clock,monsters:[]});
-  const diag=ScreenReaderController.diagnostics();
-  output.integration={accepted,roster,battle,applied:diag.records.filter(r=>r.code==='applied'),defeated:ScreenReaderMapBridge.snapshot().monsters.filter(o=>o.defeated).map(o=>o.serial)};
-  return output;
- },images);
- expect(result.rows.map(r=>r.hp)).toEqual([12,1]);expect(result.rows2.map(r=>r.hp)).toEqual([12,2]);expect(result.ready).toBe(true);expect(result.noReady).toBe(false);expect(result.heartMasked.map(r=>r.hp)).toEqual([12]);
- for(const mode of ['unique','unique-two','conflict']){expect(result.modes[mode].events.some(e=>e.code==='battle_target_hp'),mode).toBe(true);expect(result.modes[mode].battle.candidates).toEqual([expect.objectContaining({serial:1,currentHp:mode==='unique-two'?2:1})]);}
- expect(result.modes.transition.events.some(e=>e.code==='cut_target')).toBe(true);expect(result.modes.transition.battle.candidates).toEqual([expect.objectContaining({serial:1})]);
- for(const mode of ['duplicate','missing-ledger','incomplete-roster','no-match','no-cut','no-ready','one-hp','late-ready','roster-change','capture-gap'])expect(result.modes[mode].battle?.candidates||[],mode).toEqual([]);
- expect(result.modes.conflict.events.some(e=>e.code==='battle_hp_conflict')).toBe(true);
- for(const [mode,reason] of [['duplicate','multiple-matches'],['missing-ledger','missing-hp'],['incomplete-roster','incomplete-roster'],['no-match','no-match']])expect(result.modes[mode].events).toContainEqual(expect.objectContaining({code:'battle_hp_ambiguous',reason}));
- expect(result.modes['incomplete-roster'].events).toContainEqual(expect.objectContaining({code:'battle_hp_ambiguous',expectedCount:3,rosterSerials:[1,2]}));
- for(const [mode,counts] of Object.entries(result.guards))expect(counts.every(n=>n===0),mode).toBe(true);
- expect(result.integration.accepted).toEqual([[],[1],[],[],[2],[],[],[],[3]]);
- expect(result.integration.roster).toMatchObject({counts:{M0123:3},monsters:[{serial:1,seen:true},{serial:2,seen:true},{serial:3,seen:true}]});
- expect(result.integration.battle).toMatchObject({hp:2,candidates:[{serial:1,currentHp:2}]});
- expect(result.integration.applied).toEqual([expect.objectContaining({association:'battle-hp',candidates:[expect.objectContaining({serial:1,lastSeenHp:2})]})]);
- expect(result.integration.defeated).toEqual([1]);
+
+for(const protocol of ['http','file'])test(`08 spawn HP only: no combat processing and observed progress grows existing owls once ${protocol}`,async({page})=>{
+ await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve('08_screen_reader/index.html')).href:'/08_screen_reader/');
+ await page.waitForFunction(()=>window.ScreenReaderMapBridge&&window.ScreenReaderController);
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');
+ expect(await page.evaluate(()=>({defeat:typeof ScreenReaderDefeatVision,combat:typeof ScreenReaderCombatVision,cut:typeof ScreenReaderCutReferences,applyDefeats:typeof ScreenReaderMapBridge.applyDefeats,tracker:typeof ScreenReaderController.updateDefeat}))).toEqual({defeat:'undefined',combat:'undefined',cut:'undefined',applyDefeats:'undefined',tracker:'undefined'});
+ await expect(page.locator('#reader-defeat-result,#reader-defeat-stage')).toHaveCount(0);
+ const observe=(round,progress,hp=4,extra=[])=>page.evaluate(o=>{ScreenReaderMapBridge.apply(o);return ScreenReaderMapBridge.snapshot();},{clock:{round,progress},monsters:[{monsterId:'M0123',serial:1,currentHp:hp,maxHp:8},...extra]});
+ let state=await observe(1,1);const base=state.monsters.find(m=>m.monsterId==='M0123').attack;
+ state=await observe(2,2);expect(state.monsters.find(m=>m.monsterId==='M0123').attack).toBe(base+1);
+ expect(await observe(2,2)).toEqual(state);
+ await page.locator('#roster-undo').click();expect((await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).monsters.find(m=>m.monsterId==='M0123').attack).toBe(base);
+ await observe(2,2);state=await observe(3,3,5);expect(state.monsters.find(m=>m.monsterId==='M0123').attack).toBe(base+1);
+ state=await observe(4,4,4,[{monsterId:'M0123',serial:2,currentHp:4,maxHp:8},{monsterId:'M0124',serial:1,currentHp:15,maxHp:15}]);
+ expect(state.monsters.find(m=>m.monsterId==='M0123'&&m.serial===1).attack).toBe(base+2);expect(state.monsters.find(m=>m.monsterId==='M0123'&&m.serial===2).attack).toBe(base);expect(state.monsters.find(m=>m.monsterId==='M0124')).toMatchObject({hp:15,defeated:false});
+ await page.locator('#turn-end').click();state=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());const manual=state.monsters.find(m=>m.monsterId==='M0123'&&m.serial===1).attack;
+ state=await observe(5,5);expect(state.monsters.find(m=>m.monsterId==='M0123'&&m.serial===1).attack).toBe(manual);
+ const before=state;await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[{monsterId:'M0123',serial:1,currentHp:0,maxHp:8}]}));expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(before);
+ await page.locator('#map-roster-list .roster-card[data-id="M0124"] .roster-remove').click();expect((await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).monsters.find(m=>m.monsterId==='M0124').defeated).toBe(true);
 });

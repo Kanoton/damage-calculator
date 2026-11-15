@@ -701,6 +701,7 @@
   updateChipListSelection();
   document.getElementById('chip-category-view').scrollTop=0;
  }
+ window.addEventListener('map-context-change',()=>{if(category==='マップ固有')renderChips();});
  mapPicker.addEventListener('change',()=>{currentOpponent=null;if(category==='マップ固有')renderChips();if(selectedCharacter){renderConditions();updateStats();}});
  clearCharacterAttackPhase=()=>{if(!selectedCharacter)return;state().phases??={attack:false,move:false};if(!state().phases.attack)return;state().phases.attack=false;renderConditions();updateStats();};
  applyCharacterTurnStartEffects=()=>{
@@ -735,6 +736,5 @@
   for(const rule of rules){if(!byChip.has(rule.chip_id))byChip.set(rule.chip_id,[]);byChip.get(rule.chip_id).push(rule);}
   renderImages(document.getElementById('character-image-list'),characters,'character_list','list_img');renderChips();
   const defaultCharacter=characters.find(row=>row.name==='ミミ');if(defaultCharacter&&!gameResetRequested)selectCharacter(defaultCharacter,false,false);
-  window.dispatchEvent(new CustomEvent('map-chip-catalog-change',{detail:chips}));
  });
 })();

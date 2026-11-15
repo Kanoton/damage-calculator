@@ -108,14 +108,14 @@ for(const protocol of ['http','file'])test('07 autumn data: map, four difficulti
 for(const protocol of ['http','file'])test('07 autumn completion: all events, building cards and status descriptions on '+protocol,async({page})=>{
  await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve(skillFolder+'/index.html')).href:`/${skillFolder}/`);
  await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');await page.locator('#mp-tab-map').click();
- const features=page.locator('#mp-map-features');await expect(features).toBeVisible();await expect(features.locator('article')).toHaveCount(11);
+ const features=page.locator('#mp-map-features');await expect(features).toBeVisible();await expect(features.locator('article')).toHaveCount(8);
  for(const name of ['疾走キノコ','仙果スターフルーツ','芳香ピーチ','金運の木','花咲くサボテン','電流タンポポ','みなぎる元気','ガオーの注目'])await expect(features.getByRole('img',{name,exact:true})).toBeVisible();
- await expect.poll(()=>features.locator('img').evaluateAll(images=>images.length===11&&images.every(image=>image.complete&&image.naturalWidth>0))).toBe(true);
+ await expect.poll(()=>features.locator('img').evaluateAll(images=>images.length===8&&images.every(image=>image.complete&&image.naturalWidth>0))).toBe(true);
  await expect(features.locator('[data-feature-name="植物建築ショップ"]')).toHaveCount(0);
  await expect(features.locator('a')).toHaveCount(0);
  const cards=features.locator('.mp-feature-section').first().locator('img');
  for(const image of await cards.all())expect(await image.evaluate(im=>im.parentElement.tagName==='H3'&&im.getBoundingClientRect().width===24&&im.getBoundingClientRect().height===24)).toBe(true);
- expect(await features.evaluate(el=>{const mission=document.querySelector('.mp-mission-section'),event=document.querySelector('.mp-event-section'),[card,chips,status]=el.querySelectorAll('.mp-feature-section'),gap=(a,b)=>b.getBoundingClientRect().top-a.getBoundingClientRect().bottom;const gaps=[gap(mission,event),gap(event,card),gap(card,chips),gap(chips,status)];return gaps.every(n=>Math.abs(n-26)<0.1);})).toBe(true);
+ expect(await features.evaluate(el=>{const mission=document.querySelector('.mp-mission-section'),event=document.querySelector('.mp-event-section'),[card,status]=el.querySelectorAll('.mp-feature-section'),gap=(a,b)=>b.getBoundingClientRect().top-a.getBoundingClientRect().bottom;const gaps=[gap(mission,event),gap(event,card),gap(card,status)];return gaps.every(n=>Math.abs(n-26)<0.1);})).toBe(true);
  for(const [index,name] of ['疾走キノコ','仙果スターフルーツ','芳香ピーチ','金運の木','花咲くサボテン','電流タンポポ'].entries())await expect(features.locator(`[data-feature-name="${name}"] img`)).toHaveAttribute('src',new RegExp(`UT_HandCard_${21026+index}\\.png$`));
  for(const [name,file] of [['みなぎる元気','1071_01'],['ガオーの注目','1071_02']]){
   const heading=features.locator(`[data-feature-name="${name}"] h3`),icon=heading.locator('img');
@@ -131,7 +131,7 @@ for(const protocol of ['http','file'])test('07 autumn completion: all events, bu
   const event=page.getByRole('button',{name:'3 のイベントを実行',exact:true});await event.hover();await expect(page.locator('#mp-event-image-layer img')).toHaveAttribute('src',/Autumn_Normal_03\.png$/);await event.click();await expect(page.locator('#map-roster-list .roster-card')).toHaveCount(7);
   await expect(page.locator('#map-roster-list')).toContainText('キッズガオー');
  }
- await page.locator('#mp-map-select').selectOption('MAP0001');await expect(features).toBeVisible();await expect(features.locator('[data-feature-kind="chip"] article')).toHaveCount(3);await expect(features.locator('[data-feature-kind="card"],[data-feature-kind="keyword"]')).toHaveCount(0);
+ await page.locator('#mp-map-select').selectOption('MAP0001');await expect(features).toBeHidden();await expect(features.locator('article')).toHaveCount(0);
 });
 
 for(const protocol of ['http','file'])test('07 chip update: Whetstone includes exactly half HP on '+protocol,async({page})=>{
@@ -1633,11 +1633,23 @@ for(const protocol of ['http','file'])test(`map reference chips and roster toolt
  await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve(skillFolder+'/index.html')).href:`/${skillFolder}/`);
  await page.locator('.role-tab[data-role="map"]').click();const pick=page.locator('#mp-map-select'),ids=await pick.locator('option').evaluateAll(options=>options.map(o=>o.value).filter(Boolean));
  for(const id of ids){
-  await pick.selectOption(id);await page.locator('#mp-tab-map').click();const features=page.locator('#mp-map-features'),chips=features.locator('[data-feature-kind="chip"]'),expected=rows.filter(row=>row.category.split('|').includes(id));
-  await expect(chips.locator('article')).toHaveCount(expected.length);
-  for(const row of expected){const article=chips.locator(`[data-chip-id="${row.id}"]`);await expect(article.locator('h3')).toHaveText(row.name);await expect(article.locator('p')).toHaveText(row.effect);await expect(article.locator('a')).toHaveCount(0);await expect.poll(()=>article.locator('h3 img').evaluate((im,file)=>im.complete&&im.naturalWidth>0&&decodeURIComponent(im.getAttribute('src'))==='../images/chip_icon/'+file,row.images).catch(()=>false)).toBe(true);}
+  await pick.selectOption(id);await page.locator('#mp-tab-map').click();const features=page.locator('#mp-map-features'),expected=rows.filter(row=>row.category.split('|').includes(id));
+  await expect(features.locator('[data-feature-kind="chip"]')).toHaveCount(0);
+  await page.locator('.role-tab[data-role="character"]').click();await selectChipCategory(page,'マップ固有');const chips=page.locator('#chip-image-list .chip-select');await expect(chips).toHaveCount(expected.length);
+  for(const row of expected){const chip=page.locator(`#chip-image-list .chip-select[data-id="${row.id}"]`);await expect(chip).toHaveAttribute('data-name',row.name);await expect(chip).toHaveAttribute('aria-label',row.name+'：'+row.effect+'。取得する');await expect.poll(()=>chip.locator('img').evaluate(im=>im.complete&&im.naturalWidth>0)).toBe(true);}
+  await page.locator('.role-tab[data-role="map"]').click();
   await page.locator('#mp-tab-monsters').click();const source=page.locator('#mp-monster-list .mp-monster').first();await source.click();const card=page.locator('#map-roster-list .roster-card').first(),tip=page.locator('#monster-tooltip');
   await card.hover();await expect(tip).toBeHidden();await card.locator('.roster-select').focus();await expect(tip).toBeHidden();await expect(card).not.toHaveAttribute('aria-describedby','monster-tooltip');
   if(skillFolder==='08_screen_reader'){await source.hover();await expect(tip).toBeVisible();await source.focus();await expect(tip).toBeVisible();await page.keyboard.press('Escape');await card.hover();await expect(tip).toBeHidden();}
  }
+});
+
+for(const protocol of ['http','file'])test(`map chip acquisition follows reader configured map ${skillFolder} ${protocol}`,async({page})=>{
+ test.skip(skillFolder!=='08_screen_reader','Reader auto configuration belongs to 08.');
+ await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve(skillFolder+'/index.html')).href:`/${skillFolder}/`);
+ await page.waitForFunction(()=>window.ScreenReaderCharacterBridge?.catalog().chips.length>0);
+ await page.evaluate(()=>ScreenReaderMapBridge.resetForReader());
+ await page.locator('.role-tab[data-role="character"]').click();await selectChipCategory(page,'マップ固有');await expect(page.locator('#chip-image-list .chip-select')).toHaveCount(0);
+ await page.evaluate(()=>ScreenReaderMapBridge.configure({map:'MAP0105',difficulty:'普通'}));
+ await expect(page.locator('#chip-image-list .chip-select')).toHaveCount(3);for(const id of ['171','172','173'])await expect(page.locator(`.chip-select[data-id="${id}"]`)).toBeVisible();
 });
