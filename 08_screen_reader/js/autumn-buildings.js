@@ -54,7 +54,7 @@ function createAutumnBuildingEditor({root,beforeChange,onInteraction,onChange}){
   if(mapId!=='MAP0105'||!slots.length||!result||result.mapId!==mapId||result.difficulty!==JSON.parse(context||'[]')[1]||!Array.isArray(result.placements))return rejected;
   if(result.placements.length<1||result.placements.length>16)return {...rejected,reason:'invalid-count'};
   // A view must anchor the location, the type, and two independent frames.
-  if(result.viewVerified!==true||result.frameCount<2||result.confidence<.95)return rejected;
+  if(result.viewVerified!==true||!Number.isInteger(result.frameCount)||result.frameCount<2||!Number.isFinite(result.confidence)||result.confidence<.95||!Array.isArray(result.observationIds)||result.observationIds.length<2||new Set(result.observationIds).size<2||result.observationIds.some(id=>typeof id!=='string'||!id||id.length>128))return rejected;
   const seen=new Set();
   for(const placement of result.placements){
    if(!placement||typeof placement.slotId!=='string'||seen.has(placement.slotId)||!validPlacement(placement.slotId,placement.name)||
