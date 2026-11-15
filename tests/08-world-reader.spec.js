@@ -139,7 +139,7 @@ test('08 world: visible monitor diagnostics distinguish disabled reading and pre
  await open(page);await page.locator('#reader-toggle').click();
  await expect(page.locator('#reader-monitor-info')).toContainText('OFF');
  await expect(page.locator('#reader-monitor-info')).toContainText('29種類');
- await expect(page.locator('#reader-monitor-info')).toContainText('出現・HP更新のみ');
+ await expect(page.locator('#reader-monitor-info')).toContainText('自動撃破なし');
  await expect(page.locator('#reader-interval')).toHaveValue('250');
  await expect(page.locator('#reader-world-sync')).toBeVisible();
  const before=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());
