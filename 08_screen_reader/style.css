@@ -1726,3 +1726,22 @@ dialog[data-inline-pad] .skill-entry-row>[data-cancel]{min-width:72px;align-self
 .monster-skill-tooltip:focus-visible{outline:2px solid #b89224;outline-offset:2px}
 #reader-observation-log{max-height:190px;overflow:auto;overflow-wrap:anywhere;padding-left:1.6em;font-size:12px}
 #reader-observation-log li{margin:.4em 0}
+
+/* Manual plant frames track the contained map image, without changing its size. */
+#mp-building-layer{position:absolute;pointer-events:none;line-height:normal}
+#mp-building-layer[hidden],#mp-caliburn[hidden]{display:none}
+#map-draft .mp-building-slot{position:absolute;transform:translate(-50%,-50%);aspect-ratio:1;padding:0;border:1px dashed #687c89;border-radius:5px;background:transparent;pointer-events:auto;min-width:0;line-height:1}
+#map-draft .mp-building-slot[data-card]:not([data-card=""]){border-style:solid;border-color:#43885a}
+#map-draft .mp-building-slot:focus-visible{outline:3px solid #ba7b12;outline-offset:2px}
+#map-draft .mp-map .mp-building-slot img{max-height:none;pointer-events:none;object-fit:contain}
+#map-draft .mp-map .mp-building-tile{position:absolute;width:56.25%;height:56.25%;left:50%;top:50%;transform:translate(-50%,-50%)}
+#map-draft .mp-map .mp-building-plant{position:absolute;width:50%;height:50%;right:-8%;bottom:-8%;background:white;border:1px solid #43885a;border-radius:4px}
+.mp-building-plus{position:absolute;right:-8%;bottom:-8%;border-radius:50%;background:white;color:#476450;font-size:clamp(9px,1vw,13px);line-height:1;padding:1px}
+#mp-caliburn{margin-top:26px}#mp-caliburn progress{width:100%;accent-color:#43885a}
+#mp-caliburn h3{font-size:14px}.mp-caliburn-effect[data-unlocked="true"]{border-left:3px solid #43885a;padding-left:8px}.mp-building-hint{font-size:12px}
+#mp-building-picker{width:min(660px,90vw);max-height:85vh;box-sizing:border-box;overflow:auto;border:1px solid #71917d;border-radius:8px;padding:18px;background:white;color:#172d20;line-height:1.5}
+#mp-building-picker::backdrop{background:#0007}.mp-building-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.mp-building-choice{display:grid;grid-template-columns:36px 1fr;gap:6px;text-align:left;padding:10px;background:white;color:inherit;border:1px solid #b8cdbf;border-radius:6px;cursor:pointer}
+.mp-building-choice[aria-pressed="true"]{border:2px solid #43885a}.mp-building-choice img{width:36px;height:36px;object-fit:contain}.mp-building-choice span{grid-column:1/-1;font-size:12px}
+.mp-building-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}.mp-building-actions button{padding:6px 14px}
+@media(max-width:480px){.mp-building-choices{grid-template-columns:1fr}}
