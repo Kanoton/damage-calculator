@@ -564,3 +564,15 @@ test('08 world: recorded video labels emergency bunny spawn and damaged HP keep 
  }
  const before=await page.evaluate(()=>ScreenReaderMapBridge.snapshot());await page.evaluate(()=>ScreenReaderMapBridge.apply({monsters:[]}));expect(await page.evaluate(()=>ScreenReaderMapBridge.snapshot())).toEqual(before);
 });
+
+test('08 autumn icon status: Souri real gold counter wine and sword blessing update known controls',async({page})=>{
+ await open(page);await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');
+ const png=require('fs').readFileSync('tests/fixtures/screen-reader/status-icons/souri-real.png').toString('base64');
+ const result=await page.evaluate(async png=>{
+  ScreenReaderCharacterBridge.apply({selfId:'30',members:[]});const im=new Image();im.src='data:image/png;base64,'+png;await im.decode();const frame=ScreenReaderVision.normalize(im),icons=ScreenReaderStatusIcons.analyze(frame).self;
+  const applied=ScreenReaderController.updateStatusIcons(frame,{monsters:[]},'30',false),state=window.captureCharacterAbilityState();
+  const repeated=ScreenReaderCharacterBridge.applyStatusIcons('30',icons),over=ScreenReaderCharacterBridge.applyStatusIcons('30',[{key:'goldScale',value:5}]),conflict=ScreenReaderCharacterBridge.applyStatusIcons('30',[{key:'goldScale',value:3},{key:'souriAwake',value:1}]);
+  const awake=ScreenReaderCharacterBridge.applyStatusIcons('30',[{key:'souriAwake',value:1}]);return {icons:icons.map(i=>[i.key,i.value]),updated:applied.updatedSelf,state,repeated,over,conflict,awake};
+ },png);
+ expect(result.icons).toEqual(expect.arrayContaining([['goldScale',3],['counter',6],['gourdWine',1],['swordBlessing',1]]));expect(result.state.numbers['蒼鯉の金鱗']).toBe(3);expect(result.state.numbers['反撃']).toBe(6);expect(result.state.numbers['ひょうたん酒（残りターン）']).toBe(1);expect(result.state.modes['聖剣の加護']).toBe(1);expect(result.repeated).toBe(0);expect(result.over).toBe(0);expect(result.conflict).toBe(0);expect(result.awake).toBe(1);
+});

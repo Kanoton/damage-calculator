@@ -1653,3 +1653,13 @@ for(const protocol of ['http','file'])test(`map chip acquisition follows reader 
  await page.evaluate(()=>ScreenReaderMapBridge.configure({map:'MAP0105',difficulty:'普通'}));
  await expect(page.locator('#chip-image-list .chip-select')).toHaveCount(3);for(const id of ['171','172','173'])await expect(page.locator(`.chip-select[data-id="${id}"]`)).toBeVisible();
 });
+
+for(const protocol of ['http','file'])test(`Souri gold scales wine and autumn mission additions ${skillFolder} ${protocol}`,async({page})=>{
+ await page.goto(protocol==='file'?require('url').pathToFileURL(require('path').resolve(skillFolder+'/index.html')).href:`/${skillFolder}/`);await selectCharacter(page,'30');
+ const gold=page.getByRole('spinbutton',{name:'蒼鯉の金鱗の数',exact:true}),wine=page.getByRole('spinbutton',{name:'ひょうたん酒（残りターン）の数',exact:true}),counter=page.getByRole('spinbutton',{name:'反撃の数',exact:true}),atk=page.locator('#selected-character-atk'),def=page.locator('#selected-character-def');
+ await gold.fill('3');await gold.press('Enter');await expect(def).toHaveValue('4');await expect(atk).toHaveValue('1');await gold.fill('4');await gold.press('Enter');await expect(def).toHaveValue('5');await expect(atk).toHaveValue('5');await expect(page.getByRole('button',{name:'蒼鯉の金鱗を増やす'}).locator('img')).toHaveAttribute('src',/UT_Buff_130_Awake.png$/);
+ await wine.fill('2');await wine.press('Enter');await expect(atk).toHaveValue('8');await page.locator('#turn-end').click();await expect(wine).toHaveValue('1');await expect(atk).toHaveValue('8');await page.locator('#turn-end').click();await expect(wine).toHaveValue('0');await expect(atk).toHaveValue('5');
+ await counter.fill('2');await counter.press('Enter');await page.locator('#selected-character-skill').click();await expect(counter).toHaveValue('3');
+ await page.locator('.role-tab[data-role="map"]').click();await page.locator('#mp-map-select').selectOption('MAP0105');await page.locator('#mp-tab-map').click();const missions=page.locator('#mp-mission-body');await expect(missions.locator('tr')).toHaveCount(6);for(const text of ['目覚ましフクロウを撃破','植物建築を6個建てる','植物建築を10個建てる','聖剣の加護','聖剣の英雄'])await expect(missions).toContainText(text);
+ await page.locator('.role-tab[data-role="character"]').click();await page.getByRole('button',{name:/^聖剣の加護：オフ/}).click();await expect(atk).toHaveValue('7');await expect(page.locator('#damageReduce2')).toHaveValue('2');await page.getByRole('button',{name:/^聖剣の英雄：オフ/}).click();await expect(atk).toHaveValue('7');
+});

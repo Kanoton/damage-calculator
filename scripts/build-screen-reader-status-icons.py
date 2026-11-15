@@ -26,6 +26,18 @@ def build():
   refs.append(dict(key=name,scope=scope,corner=corner,points=points,rgb=rgb,source='images/'+file))
   if name=='realSelf':refs[-1]['strictFrame']=True
   if name in ('dollMaking','finishedDoll'):refs[-1]['competesWith']='finishedDoll' if name=='dollMaking' else 'dollMaking'
+ # Souri/map additions are separate from the existing derived fixture sheets.
+ for name,corner,file in [('goldScale','bottom','UT_Buff_130_1.png'),('souriAwake',None,'UT_Buff_130_Awake.png'),('counter','bottom','UT_Buff_Counter.png'),('gourdWine','top','UT_Buff_AttackUp.png'),('swordBlessing','top','UT_Buff_Build_30000_01.png'),('swordHero','top','UT_Buff_Build_30000_02.png')]:
+  asset=Image.open(ROOT/'images/UT_Buff'/file).convert('RGBA');asset=asset.crop(asset.getbbox()).resize((30,30),Image.Resampling.BILINEAR)
+  im=Image.new('RGBA',(34,34),'white');im.alpha_composite(asset,(2,2));im=im.convert('RGB')
+  points=[(x,y) for y in range(1,7) for x in range(1,7) if not (x<2 and y>5 or x>5 and y<2)]
+  refs.append(dict(key=name,scope='self',corner=corner,points=points,rgb=[v for x,y in points for v in im.getpixel((int((x+.5)*34/8),int((y+.5)*34/8)))],source='images/UT_Buff/'+file))
+ # Captured variants preserve the visible icon art and its actual count corner.
+ real=Image.open(ROOT/'tests/fixtures/screen-reader/status-icons/souri-real.png').convert('RGB')
+ for key,corner,box,sizes in [('counter','bottom',(89,704,55,55),[32,33,34,35,36]),('gourdWine','top',(89,857,55,55),[32,33,34,35,36]),('swordBlessing','top',(14,940,46,46),[27,28,29,30])]:
+  x,y,w,h=box;im=real.crop((x,y,x+w,y+h)).resize((34,34),Image.Resampling.BILINEAR)
+  points=[(x,y) for y in range(1,7) for x in range(1,7) if not (x<2 and y>5 or x>5 and y<2)]
+  refs.append(dict(key=key,scope='self',corner=corner,sizes=sizes,points=points,rgb=[v for x,y in points for v in im.getpixel((int((x+.5)*34/8),int((y+.5)*34/8)))],source='status-icons/souri-real.png'))
  digits=[]
  for number in ['1','6']:
   im=Image.open(ROOT/('tests/fixtures/screen-reader/status-icons/digit-'+number+'.png')).convert('L');im=im.crop(im.getbbox())

@@ -1,4 +1,4 @@
-group,effect_key,input_kind,icon_file,map_id,atk,def,move,damage_reduce,condition
+﻿group,effect_key,input_kind,icon_file,map_id,atk,def,move,damage_reduce,condition
 スタック,コイン,number,UT_Buff/Coin.png
 スタック,マーク,number,UT_Buff/UT_Buff_Lock.png
 スタック,ヒール,number,UT_Buff/UT_Buff_Heal.png
@@ -56,3 +56,8 @@ group,effect_key,input_kind,icon_file,map_id,atk,def,move,damage_reduce,conditio
 キャラクター固有,人形制作,number,UT_Buff/UT_Buff_305_1.png
 キャラクター固有,人形完成,checkbox,UT_Buff/UT_Buff_305_Awake.png
 キャラクター固有,親友を守る,checkbox,UT_Buff/UT_Platform_306.png
+キャラクター固有,蒼鯉の金鱗,number,UT_Buff/UT_Buff_130_1.png
+キャラクター固有,酔いに咲く金龍姫,checkbox,UT_Buff/UT_Buff_130_Awake.png
+キャラクター固有,ひょうたん酒（残りターン）,number,UT_Buff/UT_Buff_AttackUp.png
+マップ固有,聖剣の加護,checkbox,UT_Buff/UT_Buff_Build_30000_01.png,MAP0105,2,0,0,2
+マップ固有,聖剣の英雄,checkbox,UT_Buff/UT_Buff_Build_30000_02.png,MAP0105,0,0,0,0
