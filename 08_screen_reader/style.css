@@ -1738,7 +1738,7 @@ dialog[data-inline-pad] .skill-entry-row>[data-cancel]{min-width:72px;align-self
 #map-draft .mp-map .mp-building-plant{position:absolute;width:50%;height:50%;right:-8%;bottom:-8%;background:white;border:1px solid #43885a;border-radius:4px}
 .mp-building-plus{position:absolute;right:-8%;bottom:-8%;border-radius:50%;background:white;color:#476450;font-size:clamp(9px,1vw,13px);line-height:1;padding:1px}
 #mp-caliburn{margin-top:26px}#mp-caliburn progress{width:100%;accent-color:#43885a}
-#mp-caliburn h3{font-size:14px}.mp-caliburn-effect[data-unlocked="true"]{border-left:3px solid #43885a;padding-left:8px}.mp-building-hint{font-size:12px}
+#mp-caliburn h3{font-size:14px;display:flex;align-items:center;gap:6px}#mp-caliburn .mp-feature-icon{width:24px;height:24px;object-fit:contain;flex:none}.mp-caliburn-effect[data-unlocked="true"]{border-left:3px solid #43885a;padding-left:8px}.mp-building-hint{font-size:12px}
 #mp-building-picker{width:min(660px,90vw);max-height:85vh;box-sizing:border-box;overflow:auto;border:1px solid #71917d;border-radius:8px;padding:18px;background:white;color:#172d20;line-height:1.5}
 #mp-building-picker::backdrop{background:#0007}.mp-building-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .mp-building-choice{display:grid;grid-template-columns:36px 1fr;gap:6px;text-align:left;padding:10px;background:white;color:inherit;border:1px solid #b8cdbf;border-radius:6px;cursor:pointer}

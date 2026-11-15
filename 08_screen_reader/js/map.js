@@ -12,7 +12,7 @@ const eventPreview=createEventMapPreview(document.getElementById('mp-map-image')
  const img=new Image();img.onload=()=>resolve(url);img.onerror=()=>resolve(null);img.src=url;
 }));
 root.addEventListener('keydown',event=>{if(event.key==='Escape')eventPreview.reset();});
-const buildingEditor=createAutumnBuildingEditor({root,beforeChange:()=>window.rememberCharacterSkillActivation?.()});
+const buildingEditor=createAutumnBuildingEditor({root,beforeChange:()=>window.rememberCharacterSkillActivation?.(),onInteraction:()=>eventPreview.reset()});
 window.captureAutumnBuildings=()=>buildingEditor.snapshot();
 window.restoreAutumnBuildings=value=>buildingEditor.restore(value);
 window.addEventListener('new-game-reset',()=>buildingEditor.reset());
@@ -456,7 +456,7 @@ function renderMapInformation(){
  fill('mp-event-body','mp-event-empty',groupedEvents,['進捗','内容']);
  const body=document.getElementById('mp-event-body');
  [...body.children].forEach((tr,i)=>{const group=groupedEvents[i];tr.dataset.eventKey=eventKey(group);const button=document.createElement('button');button.type='button';button.className='mp-event-button';button.textContent=group['内容'];button.setAttribute('aria-label',group['進捗']+' のイベントを実行');tr.children[1].replaceChildren(button);tr.addEventListener('click',()=>executeEvent(group));
- const files=eventImageFiles(group);if(files.length){tr.classList.add('mp-event-has-image');tr.title='マウスを乗せると出現位置を表示';let pointerInside=false;const show=()=>eventPreview.show(files,(data.maps[pick.value]?.name||'')+'：'+group['進捗']+' の出現位置');tr.addEventListener('mouseenter',()=>{pointerInside=true;show();});tr.addEventListener('mouseleave',()=>{pointerInside=false;eventPreview.reset();});tr.addEventListener('focusin',event=>{if(event.target.matches(':focus-visible'))show();});tr.addEventListener('focusout',event=>{if(!tr.contains(event.relatedTarget)&&!pointerInside)eventPreview.reset();});}});
+ const files=eventImageFiles(group);if(files.length){tr.classList.add('mp-event-has-image');tr.title='マウスを乗せると出現位置を表示';let pointerInside=false;const show=()=>{if(buildingEditor.allowsPreview())eventPreview.show(files,(data.maps[pick.value]?.name||'')+'：'+group['進捗']+' の出現位置');};tr.addEventListener('mouseenter',()=>{pointerInside=true;show();});tr.addEventListener('mouseleave',()=>{pointerInside=false;eventPreview.reset();});tr.addEventListener('focusin',event=>{if(event.target.matches(':focus-visible'))show();});tr.addEventListener('focusout',event=>{if(!tr.contains(event.relatedTarget)&&!pointerInside)eventPreview.reset();});}});
  eventError.textContent='';updateEventRows();
 }
 

@@ -1,16 +1,16 @@
 // Manual plant placement. Coordinates and card effects come from the map CSVs.
-function createAutumnBuildingEditor({root,beforeChange}){
+function createAutumnBuildingEditor({root,beforeChange,onInteraction}){
  const stage=root.querySelector('.mp-map-stage'),image=root.querySelector('#mp-map-image'),eventLayer=root.querySelector('#mp-event-image-layer'),section=root.querySelector('#mp-caliburn');
  const layer=document.createElement('div');layer.id='mp-building-layer';layer.hidden=true;stage.append(layer);
  const dialog=document.createElement('dialog');dialog.id='mp-building-picker';dialog.setAttribute('aria-labelledby','mp-building-picker-title');
  const title=document.createElement('h2');title.id='mp-building-picker-title';const choices=document.createElement('div');choices.className='mp-building-choices';
  const actions=document.createElement('div');actions.className='mp-building-actions';const remove=document.createElement('button');remove.type='button';remove.textContent='撤去';const cancel=document.createElement('button');cancel.type='button';cancel.textContent='キャンセル';actions.append(remove,cancel);dialog.append(title,choices,actions);document.body.append(dialog);
- let contexts={},context='',mapId='',slots=[],features=[],selected=null;
+ let contexts={},context='',mapId='',slots=[],features=[],selected=null,previewGuard=false;
  const current=()=>contexts[context]||{};
  const cards=()=>features.filter(row=>row.map_id===mapId&&row.kind==='card');
  const validPlacement=(slot,name)=>slots.some(row=>row.slot_id===slot)&&cards().some(row=>row.name===name);
  const count=()=>Object.entries(current()).filter(([slot,name])=>validPlacement(slot,name)).length;
- function close(){if(dialog.open)dialog.close();selected=null;}
+ function close(){if(dialog.open){previewGuard=true;dialog.close();onInteraction();requestAnimationFrame(onInteraction);}selected=null;}
  function layout(){
   layer.hidden=!slots.length||image.hidden||!eventLayer.hidden||image.style.visibility==='hidden';
   if(layer.hidden||!image.naturalWidth||!image.naturalHeight)return;
@@ -42,16 +42,17 @@ function createAutumnBuildingEditor({root,beforeChange}){
   beforeChange();contexts[context]??={};if(name)contexts[context][slot]=name;else delete contexts[context][slot];close();render();layer.querySelector('[data-slot="'+slot+'"]')?.focus();
  }
  function open(slot,index){
-  selected=slot;title.textContent='建築可能マス'+(index+1)+'の植物建築';choices.replaceChildren();
+  previewGuard=true;onInteraction();selected=slot;title.textContent='建築可能マス'+(index+1)+'の植物建築';choices.replaceChildren();
   for(const row of cards()){
    const button=document.createElement('button');button.type='button';button.className='mp-building-choice';button.dataset.card=row.name;button.setAttribute('aria-label',row.name+'を配置');button.setAttribute('aria-pressed',String(current()[slot]===row.name));
    const name=document.createElement('strong');name.textContent=row.name;const text=document.createElement('span');text.textContent=row.description+' 設置後：'+row.building_effect;button.append(icon(row,row.name,''),name,text);button.addEventListener('click',()=>place(row.name));choices.append(button);
   }remove.disabled=!current()[slot];dialog.showModal();
  }
- remove.addEventListener('click',()=>place(''));cancel.addEventListener('click',close);dialog.addEventListener('close',()=>{selected=null;});
+ remove.addEventListener('click',()=>place(''));cancel.addEventListener('click',close);dialog.addEventListener('close',()=>{if(!dialog.open){selected=null;previewGuard=true;onInteraction();requestAnimationFrame(onInteraction);}});document.addEventListener('pointermove',()=>{if(!dialog.open)previewGuard=false;},{passive:true});
  image.addEventListener('load',layout);new ResizeObserver(layout).observe(stage);new ResizeObserver(layout).observe(image);new MutationObserver(layout).observe(eventLayer,{attributes:true,attributeFilter:['hidden']});
  return {
   update(value){const next=JSON.stringify([value.mapId,value.difficulty]);if(context!==next)close();context=next;mapId=value.mapId;slots=(value.slots||[]).filter(row=>row.map_id===mapId);features=value.features||[];render();},
+  allowsPreview:()=>!dialog.open&&!previewGuard,
   snapshot:()=>JSON.parse(JSON.stringify(contexts)),
   restore(value){contexts=value&&typeof value==='object'?JSON.parse(JSON.stringify(value)):{};close();render();},
   reset(){contexts={};close();render();}
