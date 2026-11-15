@@ -47,5 +47,25 @@ class PlantResearchTests(unittest.TestCase):
         self.assertEqual(audit['accepted'],0)
 
 
+    def test_game_holdout_rejects_leaked_same_game_duplicate(self):
+        a=np.zeros(720,dtype=np.float32);a[0]=1
+        b=np.zeros(720,dtype=np.float32);b[1]=1
+        rows=[{'plant':'電流タンポポ','game':'play-A','vector':a},
+              {'plant':'電流タンポポ','game':'play-A','vector':a.copy()},
+              {'plant':'芳香ピーチ','game':'play-B','vector':b}]
+        crop_audit=module.evaluate(rows)
+        self.assertGreater(crop_audit['accepted'],0)
+        game_audit=module.evaluate_by_game(rows)
+        self.assertEqual(game_audit['accepted'],0)
+
+    def test_game_holdout_requires_independent_games(self):
+        a=np.zeros(720,dtype=np.float32)
+        with self.assertRaises(ValueError):
+            module.evaluate_by_game([{'plant':'x','game':'one','vector':a}])
+        with self.assertRaises(ValueError):
+            module.evaluate_by_game([{'plant':'x','vector':a},
+                                     {'plant':'y','game':'two','vector':a}])
+
+
 if __name__=='__main__':
     unittest.main()
