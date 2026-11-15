@@ -2,6 +2,14 @@
 
 Last updated: 2026-11-15 (Japan)
 
+## 2026-11-15：進捗イベント資料のモンスター画像2倍・青枠除外・緑枠強調
+
+- 基準main `09887a74d8`（PR #284）。利用者の指定は資料専用：イベント図のモンスター図を旧最大86pxから最大172pxへ拡大し、建物用の青枠をイベント図だけ除き、出現マスの緑枠を7pxに太くする。通常の基本マップ・ゲーム内表示・正本CSV・旧イベント画像は変更しない。
+- 元の `images/Map/Layout_Autumn_Forest.png` と承認済み `production/Autumn_Map_Base.png`、青枠差分マスク、既存 `event_spawn_locations.csv`・`topology.json` を参照。マスや接続線の描き直しはせず、位置情報も変更しない。アイコンの置き場所はマス本体・接続線・他アイコンとの非重複を検証して選ぶ。
+- 新規 `scripts/render-autumn-event-reference.py` は資料専用 `production/event-reference-2x/` に4進捗の図と座標layout.jsonを作成。 `scripts/render-autumn-summary.py` は11月版まとめの縦横01ページだけこの図を参照。02ページの情報構成は維持し、全4難易度×縦横各2枚＝16枚を再生成。
+- GitHub Actions `autumn-event-reference-2x.yml` のrun #43723513784でPython構文、4イベント図、14モンスター図の配置、PNG寸法、まとめ16枚の生成・hash更新が成功し、生成画像を専用ブランチへコミット。作成結果のイベント図4枚と普通の縦長01ページを目視確認。CIの実行結果は該当PRを参照。
+- 次の編集では、マップの一般画像へ青枠除外や拡大を適用しない。制作スクリプトの `event-reference-2x` を先に作り、それから11月版まとめを生成すること。資料だけの表示調整でゲームデータを変更しない。
+
 ## 2026-11-15：秋幻の森のまとめ資料更新
 
 - 基準main 7a0aa6b。制作資料の最新版はproduction/summaries/20261115。4難易度×縦長2・横長2の16枚。追加情報の可読性のため横長も2枚へ分割。旧日付画像は履歴で保持。
