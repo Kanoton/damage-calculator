@@ -114,7 +114,7 @@ for(const protocol of ['http','file'])test('07 autumn completion: all events, bu
  await expect(features.locator('[data-feature-name="植物建築ショップ"]')).toHaveCount(0);
  await expect(features.locator('a')).toHaveCount(0);
  const cards=features.locator('.mp-feature-section').first().locator('img');
- for(const image of await cards.all())expect(await image.evaluate(im=>Math.abs(im.getBoundingClientRect().width-45)<0.1)).toBe(true);
+ for(const image of await cards.all())expect(await image.evaluate(im=>{const card=im.closest('article'),style=getComputedStyle(card),width=card.clientWidth-parseFloat(style.paddingLeft)-parseFloat(style.paddingRight);return Math.abs(im.getBoundingClientRect().width-Math.min(45,width*.25))<0.1;})).toBe(true);
  expect(await features.evaluate(el=>{const mission=document.querySelector('.mp-mission-section'),event=document.querySelector('.mp-event-section'),[card,status]=el.querySelectorAll('.mp-feature-section'),gap=(a,b)=>b.getBoundingClientRect().top-a.getBoundingClientRect().bottom;const gaps=[gap(mission,event),gap(event,card),gap(card,status)];return gaps.every(n=>Math.abs(n-26)<0.1);})).toBe(true);
  for(const [index,name] of ['疾走キノコ','仙果スターフルーツ','芳香ピーチ','金運の木','花咲くサボテン','電流タンポポ'].entries())await expect(features.locator(`[data-feature-name="${name}"] img`)).toHaveAttribute('src',new RegExp(`UT_HandCard_${21026+index}\\.png$`));
  for(const [name,file] of [['みなぎる元気','1071_01'],['ガオーの注目','1071_02']]){
