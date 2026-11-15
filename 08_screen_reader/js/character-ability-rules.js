@@ -1,6 +1,11 @@
 // ===== キャラクター固有能力ルール =====
 const CHARACTER_ABILITY_RULES={
- '30':{activeSkills:[{key:'active',label:'酒を酌み交わして',cooldown:3,effects:[]}]},
+ '30':{
+  activeSkills:[{key:'active',label:'酒を酌み交わして',cooldown:3,effects:[{type:'modify_control',key:'反撃',delta:1}]}],
+  controls:[{key:'蒼鯉の金鱗',type:'number',min:0,max:4,iconAtMax:'酔いに咲く金龍姫'},{key:'反撃',type:'number',min:0},{key:'ひょうたん酒（残りターン）',type:'number',min:0,max:2}],
+  modifiers:[{target:'def',formula:'per_stack',source:'蒼鯉の金鱗',value:1},{target:'atk',formula:'per_stack',source:'蒼鯉の金鱗',value:1,when:{key:'蒼鯉の金鱗',min:4}},{target:'atk',formula:'fixed',value:3,when:{key:'ひょうたん酒（残りターン）',min:1}}],
+  turnEnd:[{key:'ひょうたん酒（残りターン）',delta:-1,min:0}]
+ },
  '10':{
   activeSkills:[{key:'active',label:"食べ放題",cooldown:3,effects:[]}],
   controls:[{key:'反撃',type:'toggle'},{key:'このターンに受けたダメージ',type:'number',min:0}],
