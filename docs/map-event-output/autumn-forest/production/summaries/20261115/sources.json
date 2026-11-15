@@ -1,0 +1,83 @@
+{
+  "source_commit": "7a0aa6bbace3529e41a6d7572bcbafc9753ffad0",
+  "input_sha256": {
+    "csv/monster_stats.csv": "89f489b9a5b9d12a99b57dc920db76977113f9d8ad4d5f295169f0454e5bd7a7",
+    "csv/monster_skills.csv": "b8d16d50e896dd2c060145f5da330d39ff21cf9dd5da2d0b80cb72f15df537ec",
+    "csv/map_event.csv": "060b113d3e673137b0a58bd47c8bc82126fc04258ad44820d448aaec5a8c8701",
+    "csv/map_mission.csv": "61c2a102014b2aaf8c7d35969a17dff7442bbc8cd98278146198e9a2f49031ad",
+    "csv/map_features.csv": "0bafeefaffcd828dfc332e21b36d69c46e17e199c12c65b8ae9ea2610853ecd4",
+    "csv/map_building_slots.csv": "3cdfe71ccd6715338fb25ceffc54292d42f4e3b6387a2469f2c9603b117d791d",
+    "csv/chip_list.csv": "f358bf0a8ef153e01b6d2c62f77986186c00c1daf25d81ba98721f14a2ba33e0",
+    "images/Map/Layout_Autumn_Forest.png": "c4fdadb346d46332bef04c71dc4689cc47008de32fe59d9ba0292e14c09f3fe2",
+    "images/MapEvent/Autumn_Normal_01.png": "b9ee0e4a6d0ef1bc1eb0283c1b0de5c2bd82609d9fd70ea04f565879c1152ef1",
+    "images/MapEvent/Autumn_Normal_03.png": "7f4fea6c3b5fd69929807f68064b2bb6ef615d58de32e8dbd383fe9ab808ca5e",
+    "images/MapEvent/Autumn_Normal_07.png": "5db88dc18ce88fd93d66900750accb0c7d1fff60f28805b1da1baef9c3a62a9f",
+    "images/MapEvent/Autumn_Normal_10.png": "9969b9da5cb315022184ef5dd82e80087bc6e9fdd91a0d82a9ed5398c6356fc4"
+  },
+  "images": [
+    {
+      "file": "Landscape/Autumn_Forest_Hard_WQHD_01_20261115.png",
+      "sha256": "f262ae0942d40f44f99f6ab83f00dc90eed7b54f55c2da1a63328adbfa390b81"
+    },
+    {
+      "file": "Landscape/Autumn_Forest_Hard_WQHD_02_20261115.png",
+      "sha256": "c3f11db1b83f337379f515f37675884e79a9f7e37b11228e6253e02793c928fd"
+    },
+    {
+      "file": "Landscape/Autumn_Forest_Insanity_WQHD_01_20261115.png",
+      "sha256": "1f6d1e1879bc659c8e8d23fa3910cf79a76c28336c563eca7369573001d12eb6"
+    },
+    {
+      "file": "Landscape/Autumn_Forest_Insanity_WQHD_02_20261115.png",
+      "sha256": "fe328527809b62abadcd1cb855d9f6f1ff4cd4b41e824e0c4986d02b9d59ed83"
+    },
+    {
+      "file": "Landscape/Autumn_Forest_Nightmare_WQHD_01_20261115.png",
+      "sha256": "241b075f73e9a2289bc86e99d4fb7ad176376e48de18087eecc097bb7366138f"
+    },
+    {
+      "file": "Landscape/Autumn_Forest_Nightmare_WQHD_02_20261115.png",
+      "sha256": "560e3e2596d2a9d12674fe9c93f8aef72ad1d2ee2754a4f0df1138d39ec43ba9"
+    },
+    {
+      "file": "Landscape/Autumn_Forest_Normal_WQHD_01_20261115.png",
+      "sha256": "ed8deb14bde0124cf9056778e7ebf268ab222ffec0ad358bb4183f2e4328cc3b"
+    },
+    {
+      "file": "Landscape/Autumn_Forest_Normal_WQHD_02_20261115.png",
+      "sha256": "396d5fc6f35ee846cf8bd28b849795318b7a0476abd9381212ae03bdb96969ea"
+    },
+    {
+      "file": "Vertical/Autumn_Forest_Hard_Summary_01_20261115.png",
+      "sha256": "3c37a433fc7558dd061c8478793071f52586dc2d8f5eac7b23014061d073bb42"
+    },
+    {
+      "file": "Vertical/Autumn_Forest_Hard_Summary_02_20261115.png",
+      "sha256": "9b5a84e253ba4e4b90be85478323edf79f529428d08b71bd11d977a784730648"
+    },
+    {
+      "file": "Vertical/Autumn_Forest_Insanity_Summary_01_20261115.png",
+      "sha256": "f6811187a112f7dfeaf37e6dd5d0106fbef4185b81dc2b283ecab4a66b22acc9"
+    },
+    {
+      "file": "Vertical/Autumn_Forest_Insanity_Summary_02_20261115.png",
+      "sha256": "e23b6f230003507d68c2274168b303a99cc4ab74de2c7da78870de964730b3dc"
+    },
+    {
+      "file": "Vertical/Autumn_Forest_Nightmare_Summary_01_20261115.png",
+      "sha256": "19e440c6f79ab7be28e7a94102122e52f4b0e78bb4b70bf4ba69e2fbddae7485"
+    },
+    {
+      "file": "Vertical/Autumn_Forest_Nightmare_Summary_02_20261115.png",
+      "sha256": "45e9fd4a751dec8450b025f848cdf74edc038098094ee9dcfc7919f9f0e9d08e"
+    },
+    {
+      "file": "Vertical/Autumn_Forest_Normal_Summary_01_20261115.png",
+      "sha256": "09589f7f72334430cd9951654f83620c8e7361d738be5971001a6b2ee4be9b8b"
+    },
+    {
+      "file": "Vertical/Autumn_Forest_Normal_Summary_02_20261115.png",
+      "sha256": "541424cb0ffacecb9e36a1d64b728fab820bea8629b692afc39e6342f584db19"
+    }
+  ]
+}
