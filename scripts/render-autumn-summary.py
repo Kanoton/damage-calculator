@@ -1,5 +1,5 @@
 """Render current autumn map reference sheets from canonical CSVs and approved maps.
-No app code/data is changed. Output: four difficulties, two portrait + one WQHD each.
+No app code/data is changed. Output: four difficulties, two portrait + two WQHD each.
 """
 import argparse,csv,json,re,subprocess,zipfile
 from pathlib import Path
@@ -18,6 +18,7 @@ EVENTS=[r for r in rows('map_event.csv') if r['map_id']=='MAP0105']
 CARDS=[r for r in FEATURES if r['kind']=='card'];KEYWORDS=[r for r in FEATURES if r['kind']=='keyword'];CALIBURN=[r for r in FEATURES if r['kind']=='caliburn']
 TOKENS={r['name']:(ROOT/'images'/r['image'],'#7546a6' if r['name']=='みなぎる元気' else '#246b9b') for r in KEYWORDS}
 CACHE={}
+EVENT_REFS=ROOT/'docs/map-event-output/autumn-forest/production/event-reference-2x'
 def font(size,bold=False):
  key=(size,bold)
  if key not in CACHE:CACHE[key]=ImageFont.truetype(BOLD if bold else REG,size)
@@ -147,7 +148,7 @@ def portrait(diff,slug,out):
  for i,step in enumerate([1,3,7,10]):
   xx=80+(i%2)*1060;yy=1715+(i//2)*760
   s.box(xx,yy,1020,730);s.text('進捗 '+str(step),xx+25,yy+15,950,34,True,GREEN)
-  s.image(ROOT/f'images/MapEvent/Autumn_Normal_{step:02}.png',xx+80,yy+75,860,630)
+  s.image(EVENT_REFS/f'Autumn_Event_{step:02}_Reference_2x.png',xx+80,yy+75,860,630)
  s.save(out/'Vertical'/f'Autumn_Forest_{slug}_Summary_01_20261115.png')
  s=Sheet(2240,3329,'秋幻の森  ｜  '+diff,'植物建築カード・固有チップ・モンスター   /   2026.11.15 更新   /   2・2')
  s.heading('マップ固有カード',80,220,2080,40)
@@ -168,7 +169,7 @@ def landscape(diff,slug,out):
  s.heading('イベント出現位置',1600,225,880,30)
  for i,step in enumerate([1,3,7,10]):
   xx=1600+(i%2)*440;yy=290+(i//2)*510
-  s.text('進捗 '+str(step),xx+15,yy,400,26,True,GREEN);s.image(ROOT/f'images/MapEvent/Autumn_Normal_{step:02}.png',xx,yy+48,420,440)
+  s.text('進捗 '+str(step),xx+15,yy,400,26,True,GREEN);s.image(EVENT_REFS/f'Autumn_Event_{step:02}_Reference_2x.png',xx,yy+48,420,440)
  s.save(out/'Landscape'/f'Autumn_Forest_{slug}_WQHD_01_20261115.png')
  s=Sheet(2560,1440,'秋幻の森  ｜  '+diff,'2026.11.15 更新   /   カード・チップ・モンスター')
  s.heading('植物建築カード',65,225,720,30)
