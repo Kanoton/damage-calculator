@@ -12,7 +12,7 @@ const eventPreview=createEventMapPreview(document.getElementById('mp-map-image')
  const img=new Image();img.onload=()=>resolve(url);img.onerror=()=>resolve(null);img.src=url;
 }));
 root.addEventListener('keydown',event=>{if(event.key==='Escape')eventPreview.reset();});
-const buildingEditor=createAutumnBuildingEditor({root,beforeChange:()=>window.rememberCharacterSkillActivation?.(),onInteraction:()=>eventPreview.reset()});
+const buildingEditor=createAutumnBuildingEditor({root,beforeChange:()=>window.rememberCharacterSkillActivation?.(),onInteraction:()=>eventPreview.reset(),onChange:()=>document.querySelectorAll('#mp-mission-body tr').forEach(updateMissionRow)});
 window.captureAutumnBuildings=()=>buildingEditor.snapshot();
 window.restoreAutumnBuildings=value=>buildingEditor.restore(value);
 window.addEventListener('new-game-reset',()=>buildingEditor.reset());
@@ -389,8 +389,8 @@ renderRoster();
 
 function selectMonster(id){selected=id;list.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.id===id)));status.textContent='';}
 
-function updateMissionRow(tr){updateMissionCounterRow(tr,missionCounters);}
-function attachMissionCounter(tr,row){attachMissionCounterRow(tr,row,difficulty.value,missionCounters,rememberRoster,()=>{rosterUndo.disabled=false;});}
+function updateMissionRow(tr){if(tr.dataset.buildingMission==='true'){const max=Number(tr.dataset.maximum),remaining=Math.max(0,max-buildingEditor.count());tr.children[0].textContent=remaining+' / '+max;tr.classList.toggle('mp-mission-done',remaining===0);return;}updateMissionCounterRow(tr,missionCounters);}
+function attachMissionCounter(tr,row){if(row.map_id==='MAP0105'&&!row.monster_id&&row['内容']==='建物を8個建てる'){tr.dataset.buildingMission='true';tr.dataset.maximum=row['カウンタ'];tr.title='マップ上の植物建築数に連動';tr.children[0].setAttribute('aria-live','polite');updateMissionRow(tr);return;}attachMissionCounterRow(tr,row,difficulty.value,missionCounters,rememberRoster,()=>{rosterUndo.disabled=false;});}
 
 document.getElementById('mp-mission-reset').addEventListener('click',()=>{
  const rows=routeRows(data.missions);if(!rows.some(row=>missionCounters.has(missionCounterKey(row,difficulty.value))&&missionCounters.get(missionCounterKey(row,difficulty.value))!==Number(row['カウンタ'])))return;
