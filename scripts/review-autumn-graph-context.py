@@ -54,6 +54,69 @@ def shortest_context(topology, slot_id, max_length=7):
                        'manual evidence can invalidate this path')}
 
 
+
+def match_observed_graph_path(topology, observed_types, changed_nodes=None):
+    """Conservatively match human-verified screen symbols to a graph path.
+
+    changed_nodes lists node IDs whose tile symbol may have changed (for
+    example I12 Event->Shop). They are NOT silently assumed to match their
+    original type; any candidate path touching one is held for review.
+    """
+    if not isinstance(observed_types,list) or not 2<=len(observed_types)<=8 or any(
+            not isinstance(kind,str) or not kind.strip() for kind in observed_types):
+        raise ValueError('Expected 2..8 nonempty observed tile symbols')
+    nodes={n['id']:n for n in topology['nodes']}
+    changed=set(changed_nodes or [])
+    if not changed.issubset(nodes):
+        raise ValueError('Unknown changed node')
+    adj={node:set() for node in nodes}
+    edge_status={}
+    for e in topology['edges']:
+        a,b=e['a'],e['b']
+        if a not in nodes or b not in nodes or a==b:
+            continue
+        adj[a].add(b)
+        adj[b].add(a)
+        edge_status[frozenset((a,b))]=e.get('status','unknown')
+    matches=[]
+    def walk(path):
+        if len(path)==len(observed_types):
+            matches.append({'node_ids':list(path),
+                'edge_statuses':[edge_status[frozenset((a,b))]
+                                 for a,b in zip(path,path[1:])]})
+            return
+        for neighbor in sorted(adj[path[-1]]):
+            if neighbor in path or neighbor in changed:
+                continue
+            if nodes[neighbor]['type']==observed_types[len(path)]:
+                walk(path+[neighbor])
+    for start in sorted(nodes):
+        if start not in changed and nodes[start]['type']==observed_types[0]:
+            walk([start])
+    # Changed tile nodes may have ANY visible icon. A path that touches one
+    # can masquerade as a unique match; fail closed rather than claiming
+    # uniqueness from outdated topology types.
+    def potentially_matches_changed():
+        def possible_walk(path):
+            if len(path)==len(observed_types):
+                return True
+            for neighbor in adj[path[-1]]:
+                if neighbor not in path and (neighbor in changed or
+                      nodes[neighbor]['type']==observed_types[len(path)]):
+                    if possible_walk(path+[neighbor]):
+                        return True
+            return False
+        return any((start in changed or nodes[start]['type']==observed_types[0])
+                   and possible_walk([start]) for start in nodes)
+    if changed and potentially_matches_changed():
+        return {'status':'abstain','reason':'changed-tile-may-alias-path',
+                'confirmed_matches':matches}
+    status=('unique-graph-path-candidate-only' if len(matches)==1 else
+            'ambiguous-graph-path' if matches else 'no-matching-graph-path')
+    return {'status':status,'matches':matches,
+            'note':'Visual tile types and graph edges require independent verification'}
+
+
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--topology',type=Path,required=True)
