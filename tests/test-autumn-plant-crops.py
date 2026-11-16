@@ -83,5 +83,39 @@ class PlantResearchTests(unittest.TestCase):
                                      {'plant':'y','game':'two','vector':a}])
 
 
+    def test_empty_pot_competing_with_plant_abstains(self):
+        a=np.zeros(720,dtype=np.float32);a[0]=1
+        b=np.zeros(720,dtype=np.float32);b[1]=1
+        empty=a.copy()
+        refs=[{'plant':'電流タンポポ','vector':a},
+              {'plant':'芳香ピーチ','vector':b},
+              {'plant':module.EMPTY_LABEL,'vector':empty}]
+        result=module.predict(a,refs)
+        self.assertIsNone(result['plant'])
+        self.assertEqual(result['reason'],'empty-or-ambiguous')
+
+    def test_distant_empty_does_not_prevent_plant_candidate(self):
+        a=np.zeros(720,dtype=np.float32);a[0]=1
+        b=np.zeros(720,dtype=np.float32);b[1]=1
+        empty=np.zeros(720,dtype=np.float32);empty[2]=1
+        refs=[{'plant':'電流タンポポ','vector':a},
+              {'plant':'芳香ピーチ','vector':b},
+              {'plant':module.EMPTY_LABEL,'vector':empty}]
+        result=module.predict(a,refs)
+        self.assertEqual(result['plant'],'電流タンポポ')
+
+    def test_empty_negative_holdout_must_not_train_on_same_game(self):
+        a=np.zeros(720,dtype=np.float32);a[0]=1
+        b=np.zeros(720,dtype=np.float32);b[1]=1
+        c=np.zeros(720,dtype=np.float32);c[2]=1
+        rows=[{'plant':module.EMPTY_LABEL,'game':'A','vector':a},
+              {'plant':'電流タンポポ','game':'B','vector':a.copy()},
+              {'plant':'芳香ピーチ','game':'B','vector':b},
+              {'plant':'花咲くサボテン','game':'A','vector':c}]
+        audit=module.evaluate_by_game(rows)
+        self.assertGreaterEqual(audit['false_accepted'],1)
+        self.assertTrue(any(x['expected']==module.EMPTY_LABEL and x['correct'] is False
+                            for x in audit['results']))
+
 if __name__=='__main__':
     unittest.main()
