@@ -9,8 +9,8 @@ m=importlib.util.module_from_spec(spec)
 spec.loader.exec_module(m)
 
 # Screen coordinates from a manually reviewed single replay, not a saved screenshot.
-REF={'O31':{'x':165.6,'y':148},'O32':{'x':224.4,'y':111.7},
-     'O33':{'x':275.0,'y':80.8}}
+REF={'O31':{'x':130.0,'y':130},'O32':{'x':188.0,'y':96.0},
+     'O33':{'x':239.0,'y':65.0}}
 IDENTITY=[[1,0,0],[0,1,0]]
 
 
@@ -23,8 +23,8 @@ class FixedRowTests(unittest.TestCase):
         self.assertLess(r['max_residual_px'],6)
 
     def test_observed_three_slots_independent_of_detection_order(self):
-        proposals=[{'x':275.2,'y':80.9},{'x':165.8,'y':147.9},
-                   {'x':226.0,'y':112.3}]
+        proposals=[{'x':239.2,'y':65.2},{'x':130.2,'y':129.9},
+                   {'x':189.0,'y':96.3}]
         r=m.match_known_row(REF,proposals,IDENTITY)
         self.assertEqual(r['status'],'three-known-slots-candidate-only',r)
         self.assertEqual([x['proposal_index'] for x in r['observations']],[1,2,0])
@@ -36,8 +36,8 @@ class FixedRowTests(unittest.TestCase):
         self.assertEqual(r['status'],'three-known-slots-candidate-only',r)
 
     def test_reverse_slope_other_row_and_missing_pots_abstain(self):
-        other=[{'x':234.5,'y':65.4},{'x':280.4,'y':91.6},
-               {'x':338.7,'y':125.6}]
+        other=[{'x':250.0,'y':50.0},{'x':295.0,'y':75.0},
+               {'x':340.0,'y':100.0}]
         self.assertEqual(m.match_known_row(REF,other,IDENTITY)['status'],'abstain')
         self.assertNotEqual(m.fit_verified_row(dict(zip(m.ANCHOR_IDS,other)))['status'],
                             'calibrated-row-only')
