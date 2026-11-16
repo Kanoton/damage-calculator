@@ -55,18 +55,23 @@ def shortest_context(topology, slot_id, max_length=7):
 
 
 
-def match_observed_graph_path(topology, observed_types, changed_nodes=None):
+def match_observed_graph_path(topology, observed_types, changed_nodes=None, verified_replacements=None):
     """Conservatively match human-verified screen symbols to a graph path.
 
-    changed_nodes lists node IDs whose tile symbol may have changed (for
-    example I12 Event->Shop). They are NOT silently assumed to match their
-    original type; any candidate path touching one is held for review.
+    changed_nodes is a list of IDs with unknown current symbols. Verified
+    replacements (e.g. {'I12':'Shop'}) use their known current symbols.
+    Unverified changes can alias ANY visible symbol and must fail closed.
     """
     if not isinstance(observed_types,list) or not 2<=len(observed_types)<=8 or any(
             not isinstance(kind,str) or not kind.strip() for kind in observed_types):
         raise ValueError('Expected 2..8 nonempty observed tile symbols')
     nodes={n['id']:n for n in topology['nodes']}
     changed=set(changed_nodes or [])
+    replacements=verified_replacements or {}
+    if (not isinstance(replacements,dict) or
+            any(not isinstance(v,str) or not v.strip() for v in replacements.values())):
+        raise ValueError('Verified replacements require nonempty tile types')
+    changed.update(replacements)
     if not changed.issubset(nodes):
         raise ValueError('Unknown changed node')
     adj={node:set() for node in nodes}
@@ -93,21 +98,23 @@ def match_observed_graph_path(topology, observed_types, changed_nodes=None):
     for start in sorted(nodes):
         if start not in changed and nodes[start]['type']==observed_types[0]:
             walk([start])
-    # Changed tile nodes may have ANY visible icon. A path that touches one
-    # can masquerade as a unique match; fail closed rather than claiming
-    # uniqueness from outdated topology types.
+    # A changed tile with no verified current symbol may match ANY icon.
+    # A verified replacement (e.g. I12=Shop) may only match its new symbol.
+    # Enumerate possible paths conservatively to avoid obsolete matches.
     def potentially_matches_changed():
+        def can_be(node, index):
+            if node in replacements:
+                return replacements[node]==observed_types[index]
+            return node in changed or nodes[node]['type']==observed_types[index]
         def possible_walk(path):
             if len(path)==len(observed_types):
                 return True
             for neighbor in adj[path[-1]]:
-                if neighbor not in path and (neighbor in changed or
-                      nodes[neighbor]['type']==observed_types[len(path)]):
+                if neighbor not in path and can_be(neighbor,len(path)):
                     if possible_walk(path+[neighbor]):
                         return True
             return False
-        return any((start in changed or nodes[start]['type']==observed_types[0])
-                   and possible_walk([start]) for start in nodes)
+        return any(can_be(start,0) and possible_walk([start]) and for start in nodes)
     if changed and potentially_matches_changed():
         return {'status':'abstain','reason':'changed-tile-may-alias-path',
                 'confirmed_matches':matches}
