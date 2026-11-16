@@ -53,6 +53,10 @@ def predict(vector, references, exclude=None, max_distance=MAX_DISTANCE, margin=
     ranked = sorted(scores.items(), key=lambda item: item[1])
     if not ranked:
         return {'plant': None, 'reason': 'no-references'}
+    # A single reference class cannot establish a margin against another species.
+    # This occurs naturally in leave-one-game-out evaluation.
+    if len(ranked) < 2:
+        return {'plant': None, 'reason': 'insufficient-reference-classes'}
     name, best = ranked[0]
     gap = ranked[1][1]-best if len(ranked) > 1 else float('inf')
     if best > max_distance:
