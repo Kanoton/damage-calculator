@@ -13,6 +13,8 @@ on:
     paths:
       - 'scripts/review-autumn-building-replay.py'
       - 'tests/test-autumn-building-replay.py'
+      - 'scripts/review-autumn-plant-crops.py'
+      - 'tests/test-autumn-plant-crops.py'
       - '.github/workflows/autumn-building-replay-review.yml'
 
 permissions:
