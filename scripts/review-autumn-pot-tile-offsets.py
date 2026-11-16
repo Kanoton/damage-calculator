@@ -37,6 +37,13 @@ def associate(five_result,visible_symbols,water_pots):
         return {'status':'abstain','reason':'not-three-visible-water-pots'}
     if not isinstance(visible_symbols,list):
         return {'status':'abstain','reason':'bad-symbol-input'}
+    # Do not silently take the first occurrence when the screen contains
+    # duplicate/unknown symbols. This association is valid only for a
+    # single unambiguous five-symbol observation set.
+    if (len(visible_symbols)!=len(five.KINDS) or
+            any(not isinstance(p,dict) for p in visible_symbols) or
+            sorted(p.get('tile_kind_candidate') for p in visible_symbols)!=sorted(five.KINDS)):
+        return {'status':'abstain','reason':'ambiguous-or-incomplete-symbols'}
     try:
         icon=np.asarray([[next(p for p in visible_symbols
                                if p['tile_kind_candidate']==kind)[axis]
