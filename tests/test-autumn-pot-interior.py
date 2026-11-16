@@ -51,5 +51,42 @@ class PotInteriorTests(unittest.TestCase):
                 module.audit([{'file': '../private_frame.png', 'cx': 120, 'cy': 120}], Path(root))
 
 
+    def test_stability_gate_abstains_when_water_is_offset_sensitive(self):
+        with tempfile.TemporaryDirectory() as root:
+            path = Path(root) / 'frame.png'
+            frame = np.zeros((288, 512, 3), dtype=np.uint8)
+            # Place a cyan patch just large enough at the nominal location;
+            # the shifted ROI exposes black pixels and must abstain.
+            frame[120-54+49:120-54+73, 120-48+26:120-48+70] = (60, 190, 240)
+            Image.fromarray(frame).save(path)
+            base = module.inspect(module.crop(path, 120, 120))
+            self.assertEqual(base['decision'], 'empty-like-veto')
+            gate = module.inspect_stability(path, 120, 120, radius=4)
+            self.assertEqual(gate['decision'], 'unknown')
+            self.assertLess(gate['min_water_ratio'], module.MIN_WATER_RATIO)
+            self.assertGreater(gate['max_water_ratio'], gate['min_water_ratio'])
+
+    def test_stability_gate_rejects_invalid_radius_and_unsafe_crop(self):
+        with tempfile.TemporaryDirectory() as root:
+            path = Path(root) / 'frame.png'
+            Image.new('RGB', (512, 288), (60, 190, 240)).save(path)
+            with self.assertRaises(ValueError):
+                module.inspect_stability(path, 120, 120, radius=-1)
+            with self.assertRaises(ValueError):
+                module.inspect_stability(path, 120, 120, radius=True)
+            with self.assertRaises(ValueError):
+                module.inspect_stability(path, 48, 54, radius=4)
+
+    def test_stability_audit_discloses_false_veto_and_hides_file(self):
+        with tempfile.TemporaryDirectory() as root:
+            path = Path(root) / 'private.png'
+            Image.new('RGB', (512, 288), (60, 190, 240)).save(path)
+            rows = [{'file': path.name, 'cx': 120, 'cy': 120, 'expected': '__empty__'},
+                    {'file': path.name, 'cx': 240, 'cy': 120, 'expected': 'unknown-plant'}]
+            report = module.stability_audit(rows, Path(root), radius=4)
+            self.assertEqual(report['empty_vetoed'], 1)
+            self.assertEqual(report['occupied_wrongly_vetoed'], 1)
+            self.assertNotIn(path.name, str(report))
+
 if __name__ == '__main__':
     unittest.main()
