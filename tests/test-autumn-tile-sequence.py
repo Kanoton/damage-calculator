@@ -11,13 +11,13 @@ spec.loader.exec_module(m)
 TYPES={'O02':'TeleportPoint','O03':'MoveAgain','O04':'Event',
        'O05':'Monster','O06':'Damage','O18':'MoveAgain',
        'O17':'Event','O16':'Monster','O15':'Damage','O19':'3rd',
-       'O23':'Event','O24':'Monster','O25':'Damage',
+       'O22':'Shop','O23':'Event','O24':'Monster','O25':'Damage',
        'O31':'Event','O32':'Monster','O33':'Damage'}
 TOPOLOGY={'nodes':[{'id':k,'type':v} for k,v in TYPES.items()],
  'edges':[{'a':a,'b':b,'status':'layout_inferred'} for a,b in [
  ('O02','O03'),('O03','O04'),('O04','O05'),('O05','O06'),
  ('O19','O18'),('O18','O17'),('O17','O16'),('O16','O15'),
- ('O23','O24'),('O24','O25'),('O31','O32'),('O32','O33')]]}
+ ('O22','O23'),('O23','O24'),('O24','O25'),('O31','O32'),('O32','O33')]]}
 
 
 class SequenceTests(unittest.TestCase):
@@ -56,6 +56,18 @@ class SequenceTests(unittest.TestCase):
             m.match_type_path(TOPOLOGY,['Monster',None])
         self.assertEqual(m.match_type_path(TOPOLOGY,['Shop','Shop'])['status'],
                          'no-matching-path')
+
+
+    def test_minimal_outer_context_reports_only_topology_evidence(self):
+        right=m.shortest_outer_context(TOPOLOGY,'O04')
+        self.assertEqual(right['status'],'unique-context-candidate-only')
+        self.assertLessEqual(right['length'],4)
+        left=m.shortest_outer_context(TOPOLOGY,'O25')
+        self.assertEqual(left['length'],4)
+        self.assertEqual(m.shortest_outer_context(TOPOLOGY,'I04')['status'],
+                         'unsupported-inner-or-unknown-slot')
+        with self.assertRaises(ValueError):
+            m.shortest_outer_context(TOPOLOGY,'O04',max_window=1)
 
 
 if __name__=='__main__':
