@@ -44,6 +44,20 @@ class PotOffsetTests(unittest.TestCase):
     def test_view_or_unknown_glyph_does_not_infer(self):
         self.assertEqual(m.associate(PATH,SYMBOLS[:2],POTS)['status'],'abstain')
 
+    def test_duplicate_or_unknown_icon_cannot_reuse_first_match(self):
+        duplicate=SYMBOLS+[dict(SYMBOLS[0],x=400)]
+        self.assertEqual(m.associate(PATH,duplicate,POTS)['reason'],
+                         'ambiguous-or-incomplete-symbols')
+        unknown=SYMBOLS+[{'tile_kind_candidate':'unknown-red-tile',
+                          'x':320,'y':150}]
+        self.assertEqual(m.associate(PATH,unknown,POTS)['status'],'abstain')
+        with_other_types=SYMBOLS+[
+            {'tile_kind_candidate':'TeleportPoint','x':111,'y':73},
+            {'tile_kind_candidate':'MoveAgain','x':143,'y':97}]
+        self.assertEqual(m.associate(PATH,with_other_types,POTS)['status'],
+                         'provisional-three-pot-slot-association-only')
+
+
 
 if __name__=='__main__':
     unittest.main()
