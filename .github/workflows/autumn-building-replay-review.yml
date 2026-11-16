@@ -15,6 +15,8 @@ on:
       - 'tests/test-autumn-pot-temporal.py'
       - 'scripts/review-autumn-camera-transition.py'
       - 'tests/test-autumn-camera-transition.py'
+      - 'scripts/review-autumn-pot-track-session.py'
+      - 'tests/test-autumn-pot-track-session.py'
       - '.github/workflows/autumn-building-replay-review.yml'
   push:
     branches: [main]
@@ -37,10 +39,11 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install 'numpy>=2.0,<3' 'opencv-python-headless==4.12.0.88' 'Pillow==12.3.0'
-      - run: python -m py_compile scripts/review-autumn-building-replay.py tests/test-autumn-building-replay.py scripts/review-autumn-plant-crops.py tests/test-autumn-plant-crops.py scripts/review-autumn-pot-interior.py tests/test-autumn-pot-interior.py scripts/review-autumn-pot-rim.py tests/test-autumn-pot-rim.py scripts/review-autumn-pot-temporal.py tests/test-autumn-pot-temporal.py scripts/review-autumn-camera-transition.py tests/test-autumn-camera-transition.py
+      - run: python -m py_compile scripts/review-autumn-building-replay.py tests/test-autumn-building-replay.py scripts/review-autumn-plant-crops.py tests/test-autumn-plant-crops.py scripts/review-autumn-pot-interior.py tests/test-autumn-pot-interior.py scripts/review-autumn-pot-rim.py tests/test-autumn-pot-rim.py scripts/review-autumn-pot-temporal.py tests/test-autumn-pot-temporal.py scripts/review-autumn-camera-transition.py tests/test-autumn-camera-transition.py scripts/review-autumn-pot-track-session.py tests/test-autumn-pot-track-session.py
       - run: python tests/test-autumn-building-replay.py -v
       - run: python tests/test-autumn-plant-crops.py -v
       - run: python tests/test-autumn-pot-interior.py -v
       - run: python tests/test-autumn-pot-rim.py -v
       - run: python tests/test-autumn-pot-temporal.py -v
       - run: python tests/test-autumn-camera-transition.py -v
+      - run: python tests/test-autumn-pot-track-session.py -v
