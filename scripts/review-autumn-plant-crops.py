@@ -19,6 +19,7 @@ RADIUS = (48, 54, 48, 42)
 BINS = (18, 8)
 MAX_DISTANCE = 1.35
 MIN_MARGIN = .16
+EMPTY_LABEL = '__empty__'  # Never emitted as a recognized building.
 
 
 def descriptor(rgb):
@@ -44,11 +45,15 @@ def crop(path, cx, cy):
 
 def predict(vector, references, exclude=None, max_distance=MAX_DISTANCE, margin=MIN_MARGIN):
     scores = {}
+    nearest_empty = float('inf')
     for i, sample in enumerate(references):
         if i == exclude:
             continue
         distance = float(np.linalg.norm(vector - sample['vector']))
         key = sample['plant']
+        if key == EMPTY_LABEL:
+            nearest_empty = min(nearest_empty, distance)
+            continue
         scores[key] = min(scores.get(key, float('inf')), distance)
     ranked = sorted(scores.items(), key=lambda item: item[1])
     if not ranked:
@@ -59,6 +64,11 @@ def predict(vector, references, exclude=None, max_distance=MAX_DISTANCE, margin=
         return {'plant': None, 'reason': 'insufficient-reference-classes'}
     name, best = ranked[0]
     gap = ranked[1][1]-best if len(ranked) > 1 else float('inf')
+    # If an empty pot is as plausible as the closest plant, never emit a plant.
+    if nearest_empty <= best + margin:
+        return {'plant': None, 'reason': 'empty-or-ambiguous',
+                'nearest': name, 'distance': round(best, 4),
+                'empty_distance': round(nearest_empty, 4)}
     if best > max_distance:
         return {'plant': None, 'reason': 'unfamiliar-appearance',
                 'nearest': name, 'distance': round(best, 4), 'margin': round(gap, 4)}
@@ -112,6 +122,8 @@ def main():
     rows = json.loads(args.manifest.read_text(encoding='utf-8'))['samples']
     references = []
     for row in rows:
+        if row['plant'] != EMPTY_LABEL and (not isinstance(row['plant'], str) or not row['plant'].strip()):
+            raise ValueError('Plant must be a nonempty name or __empty__')
         if not isinstance(row['cx'], int) or not isinstance(row['cy'], int):
             raise ValueError('Centers must be integers')
         if Path(row['file']).name != row['file']:
