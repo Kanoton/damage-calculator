@@ -114,8 +114,25 @@ class PlantResearchTests(unittest.TestCase):
               {'plant':'花咲くサボテン','game':'A','vector':c}]
         audit=module.evaluate_by_game(rows)
         self.assertGreaterEqual(audit['false_accepted'],1)
+        self.assertEqual(audit['empty_samples'],1)
+        self.assertEqual(audit['empty_false_accepted'],1)
+        self.assertEqual(audit['empty_abstained'],0)
         self.assertTrue(any(x['expected']==module.EMPTY_LABEL and x['correct'] is False
                             for x in audit['results']))
+    def test_empty_crop_abstentions_reported_separately(self):
+        a=np.zeros(720,dtype=np.float32);a[0]=1
+        b=np.zeros(720,dtype=np.float32);b[1]=1
+        refs=[{'plant':module.EMPTY_LABEL,'game':'A','vector':a},
+              {'plant':'電流タンポポ','game':'B','vector':b},
+              {'plant':'芳香ピーチ','game':'B','vector':a}]
+        # Use game holdout to ensure no frame leakage.
+        audit=module.evaluate_by_game(refs)
+        self.assertEqual(audit['empty_samples'],1)
+        self.assertEqual(audit['empty_false_accepted'] + audit['empty_abstained'],1)
+        self.assertEqual(audit['false_accepted'],
+                         sum(x['correct'] is False for x in audit['results']))
+
+
 
 if __name__=='__main__':
     unittest.main()
