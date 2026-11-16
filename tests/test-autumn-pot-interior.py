@@ -57,7 +57,7 @@ class PotInteriorTests(unittest.TestCase):
             frame = np.zeros((288, 512, 3), dtype=np.uint8)
             # Place a cyan patch just large enough at the nominal location;
             # the shifted ROI exposes black pixels and must abstain.
-            frame[120-54+49:120-54+73, 120-48+26:120-48+70] = (60, 190, 240)
+            frame[120-54+61:120-54+73, 120-48+26:120-48+70] = (60, 190, 240)
             Image.fromarray(frame).save(path)
             base = module.inspect(module.crop(path, 120, 120))
             self.assertEqual(base['decision'], 'empty-like-veto')
