@@ -58,9 +58,17 @@ class GraphTests(unittest.TestCase):
         r=m.match_observed_graph_path(T,['Damage','Event'],['I12'])
         self.assertEqual(r['status'],'abstain',r)
         self.assertEqual(r['reason'],'changed-tile-may-alias-path')
-        # A different path, not adjacent to I12, can still be assessed.
+        # Unknown changes must fail closed even if the original path is elsewhere.
         r=m.match_observed_graph_path(T,['Heal','Monster','Damage'],['I12'])
+        self.assertEqual(r['status'],'abstain',r)
+        # Once the replacement icon is visually confirmed, unrelated paths work.
+        r=m.match_observed_graph_path(T,['Heal','Monster','Damage'],
+                                      verified_replacements={'I12':'Shop'})
         self.assertEqual(r['status'],'unique-graph-path-candidate-only',r)
+        # The confirmed shop symbol must never be treated as old Event.
+        r=m.match_observed_graph_path(T,['Damage','Event'],
+                                      verified_replacements={'I12':'Shop'})
+        self.assertEqual(r['status'],'no-matching-graph-path',r)
 
     def test_ambiguous_and_invalid_observations(self):
         r=m.match_observed_graph_path(T,['Monster','Damage'])
