@@ -47,5 +47,29 @@ class GraphTests(unittest.TestCase):
         self.assertNotEqual(before.get('tile_types'),after.get('tile_types'))
 
 
+    def test_observed_inner_path_unique_when_types_unchanged(self):
+        r=m.match_observed_graph_path(T,['Heal','Monster','Damage'])
+        self.assertEqual(r['status'],'unique-graph-path-candidate-only',r)
+        self.assertEqual(r['matches'][0]['node_ids'],['I03','I04','I05'])
+
+    def test_changed_i12_abstains_instead_of_trusting_old_event(self):
+        # I12 can become Shop; even an otherwise unique initial pattern
+        # cannot be trusted if the changed node can mimic a visible type.
+        r=m.match_observed_graph_path(T,['Damage','Event'],['I12'])
+        self.assertEqual(r['status'],'abstain',r)
+        self.assertEqual(r['reason'],'changed-tile-may-alias-path')
+        # A different path, not adjacent to I12, can still be assessed.
+        r=m.match_observed_graph_path(T,['Heal','Monster','Damage'],['I12'])
+        self.assertEqual(r['status'],'unique-graph-path-candidate-only',r)
+
+    def test_ambiguous_and_invalid_observations(self):
+        r=m.match_observed_graph_path(T,['Monster','Damage'])
+        self.assertEqual(r['status'],'ambiguous-graph-path',r)
+        with self.assertRaises(ValueError):
+            m.match_observed_graph_path(T,['Damage'])
+        with self.assertRaises(ValueError):
+            m.match_observed_graph_path(T,['Damage','Event'],['UNKNOWN'])
+
+
 if __name__=='__main__':
     unittest.main()
