@@ -66,9 +66,11 @@ def run(frames):
         if delta <= 0 or delta < MIN_DELTA_MS or delta > MAX_GAP_MS:
             reason = 'timestamp-regression-or-duplicate' if delta <= 0 else (
                 'insufficient-time-separation' if delta < MIN_DELTA_MS else 'gap-too-large')
-        elif frame.get('continuity', {}).get('status') != 'same-view-candidate':
+        elif (not isinstance(frame.get('continuity'), dict)
+              or frame['continuity'].get('status') != 'same-view-candidate'):
             reason = 'unverified-board-continuity'
-        elif frame.get('tracking', {}).get('abstained') is not False:
+        elif (not isinstance(frame.get('tracking'), dict)
+              or frame['tracking'].get('abstained') is not False):
             reason = 'unverified-rim-correspondences'
         else:
             pairs = _clean_matches(frame['tracking'].get('matched'))
