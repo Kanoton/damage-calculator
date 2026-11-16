@@ -56,72 +56,67 @@ def shortest_context(topology, slot_id, max_length=7):
 
 
 def match_observed_graph_path(topology, observed_types, changed_nodes=None, verified_replacements=None):
-    """Conservatively match human-verified screen symbols to a graph path.
+    """Match manual icon sequences, with conservative dynamic-tile evidence.
 
-    changed_nodes is a list of IDs with unknown current symbols. Verified
-    replacements (e.g. {'I12':'Shop'}) use their known current symbols.
-    Unverified changes can alias ANY visible symbol and must fail closed.
+    changed_nodes lists IDs whose *current* icon is unknown; these are
+    wildcard possibilities but can never be confirmed. A verified replacement
+    such as {'I12': 'Shop'} replaces the original icon for this observation.
+    No game image is read; graph connections are not independently verified.
     """
-    if not isinstance(observed_types,list) or not 2<=len(observed_types)<=8 or any(
-            not isinstance(kind,str) or not kind.strip() for kind in observed_types):
+    if not isinstance(observed_types, list) or not 2 <= len(observed_types) <= 8 or any(
+            not isinstance(kind, str) or not kind.strip() for kind in observed_types):
         raise ValueError('Expected 2..8 nonempty observed tile symbols')
-    nodes={n['id']:n for n in topology['nodes']}
-    changed=set(changed_nodes or [])
-    replacements=verified_replacements or {}
-    if (not isinstance(replacements,dict) or
-            any(not isinstance(v,str) or not v.strip() for v in replacements.values())):
+    nodes = {n['id']: n for n in topology['nodes']}
+    unknown = set(changed_nodes or [])
+    replacements = verified_replacements or {}
+    if (not isinstance(replacements, dict) or
+            any(not isinstance(value, str) or not value.strip()
+                for value in replacements.values())):
         raise ValueError('Verified replacements require nonempty tile types')
-    changed.update(replacements)
-    if not changed.issubset(nodes):
-        raise ValueError('Unknown changed node')
-    adj={node:set() for node in nodes}
-    edge_status={}
-    for e in topology['edges']:
-        a,b=e['a'],e['b']
-        if a not in nodes or b not in nodes or a==b:
+    if (not unknown.issubset(nodes) or not set(replacements).issubset(nodes)
+            or unknown.intersection(replacements)):
+        raise ValueError('Unknown or contradictory changed node')
+    adj = {node: set() for node in nodes}
+    edge_status = {}
+    for edge in topology['edges']:
+        a, b = edge['a'], edge['b']
+        if a not in nodes or b not in nodes or a == b:
             continue
         adj[a].add(b)
         adj[b].add(a)
-        edge_status[frozenset((a,b))]=e.get('status','unknown')
-    matches=[]
+        edge_status[frozenset((a, b))] = edge.get('status', 'unknown')
+
+    def type_can_match(node, index):
+        if node in unknown:
+            return True
+        return replacements.get(node, nodes[node]['type']) == observed_types[index]
+
+    possibilities = []
     def walk(path):
-        if len(path)==len(observed_types):
-            matches.append({'node_ids':list(path),
-                'edge_statuses':[edge_status[frozenset((a,b))]
-                                 for a,b in zip(path,path[1:])]})
+        if len(path) == len(observed_types):
+            possibilities.append({'node_ids': list(path),
+                'edge_statuses': [edge_status[frozenset((a, b))]
+                                  for a, b in zip(path, path[1:])],
+                'unknown_changed_symbol': any(node in unknown for node in path)})
             return
         for neighbor in sorted(adj[path[-1]]):
-            if neighbor in path or neighbor in changed:
-                continue
-            if nodes[neighbor]['type']==observed_types[len(path)]:
-                walk(path+[neighbor])
+            if neighbor not in path and type_can_match(neighbor, len(path)):
+                walk(path + [neighbor])
+
     for start in sorted(nodes):
-        if start not in changed and nodes[start]['type']==observed_types[0]:
+        if type_can_match(start, 0):
             walk([start])
-    # A changed tile with no verified current symbol may match ANY icon.
-    # A verified replacement (e.g. I12=Shop) may only match its new symbol.
-    # Enumerate possible paths conservatively to avoid obsolete matches.
-    def potentially_matches_changed():
-        def can_be(node, index):
-            if node in replacements:
-                return replacements[node]==observed_types[index]
-            return node in changed or nodes[node]['type']==observed_types[index]
-        def possible_walk(path):
-            if len(path)==len(observed_types):
-                return True
-            for neighbor in adj[path[-1]]:
-                if neighbor not in path and can_be(neighbor,len(path)):
-                    if possible_walk(path+[neighbor]):
-                        return True
-            return False
-        return any(can_be(start,0) and possible_walk([start]) and for start in nodes)
-    if changed and potentially_matches_changed():
-        return {'status':'abstain','reason':'changed-tile-may-alias-path',
-                'confirmed_matches':matches}
-    status=('unique-graph-path-candidate-only' if len(matches)==1 else
-            'ambiguous-graph-path' if matches else 'no-matching-graph-path')
-    return {'status':status,'matches':matches,
-            'note':'Visual tile types and graph edges require independent verification'}
+    if any(path['unknown_changed_symbol'] for path in possibilities):
+        return {'status': 'abstain', 'reason': 'changed-tile-may-alias-path',
+                'confirmed_matches': [p for p in possibilities
+                                      if not p['unknown_changed_symbol']]}
+    matches = [{'node_ids': p['node_ids'], 'edge_statuses': p['edge_statuses']}
+               for p in possibilities]
+    status = ('unique-graph-path-candidate-only' if len(matches) == 1 else
+              'ambiguous-graph-path' if matches else 'no-matching-graph-path')
+    return {'status': status, 'matches': matches,
+            'note': 'Visual tile types and graph edges require independent verification'}
+
 
 
 def main():
