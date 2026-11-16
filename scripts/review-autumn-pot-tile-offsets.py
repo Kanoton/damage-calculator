@@ -39,10 +39,13 @@ def associate(five_result,visible_symbols,water_pots):
         return {'status':'abstain','reason':'bad-symbol-input'}
     # Do not silently take the first occurrence when the screen contains
     # duplicate/unknown symbols. This association is valid only for a
-    # single unambiguous five-symbol observation set.
-    if (len(visible_symbols)!=len(five.KINDS) or
-            any(not isinstance(p,dict) for p in visible_symbols) or
-            sorted(p.get('tile_kind_candidate') for p in visible_symbols)!=sorted(five.KINDS)):
+    # unique required Event/Monster/Damage observations.
+    required=('Event','Monster','Damage')
+    if (any(not isinstance(p,dict) for p in visible_symbols) or
+            any(sum(p.get('tile_kind_candidate')==kind
+                    for p in visible_symbols)!=1 for kind in required) or
+            any(str(p.get('tile_kind_candidate','')).startswith('unknown-')
+                for p in visible_symbols)):
         return {'status':'abstain','reason':'ambiguous-or-incomplete-symbols'}
     try:
         icon=np.asarray([[next(p for p in visible_symbols
