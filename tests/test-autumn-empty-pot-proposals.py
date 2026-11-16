@@ -41,5 +41,12 @@ class EmptyProposalTests(unittest.TestCase):
         canvas=np.full((288,512,3),(255,190,50),np.uint8)
         self.assertEqual(m.propose(canvas),[])
 
+    def test_magenta_icon_veto_rejects_blue_tile_on_brown_ground(self):
+        image=frame(pots=[(170,145)])
+        cv2.ellipse(image,(170,145),(12,8),0,0,360,(210,50,230),-1)
+        self.assertEqual(m.propose(image),[])
+        clean=frame(pots=[(170,145)])
+        self.assertEqual(len(m.propose(clean)),1)
+
 
 if __name__=='__main__':unittest.main()
