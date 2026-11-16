@@ -1,0 +1,89 @@
+#!/usr/bin/env python3
+"""Offline pot-water diagnostic. Strong water may veto a plant candidate.
+Weak water is UNKNOWN, never evidence of an occupied pot. Research only.
+Input manifest: {"samples":[{"file":"frame.png","cx":123,"cy":100,
+"expected":"__empty__"}]}. Output excludes filenames and coordinates.
+Requires numpy, Pillow and opencv-python-headless.
+"""
+import argparse
+import json
+from pathlib import Path
+import cv2
+import numpy as np
+from PIL import Image
+
+VIEW = (512, 288)
+RADIUS = (48, 54, 48, 42)
+WATER_ROI = (26, 70, 49, 73)
+MIN_WATER_RATIO = 0.38  # Exploratory cutoff selected on seven same-game crops.
+EMPTY_LABEL = '__empty__'
+
+
+def crop(path, cx, cy):
+    if (not isinstance(cx, int) or isinstance(cx, bool) or
+            not isinstance(cy, int) or isinstance(cy, bool)):
+        raise ValueError('Integer center required')
+    l, t, r, b = RADIUS
+    if cx-l < 0 or cy-t < 0 or cx+r > VIEW[0] or cy+b > VIEW[1]:
+        raise ValueError('Crop outside image')
+    with Image.open(path) as src:
+        rgb = src.convert('RGB').resize(VIEW, Image.Resampling.BILINEAR)
+        return np.asarray(rgb.crop((cx-l, cy-t, cx+r, cy+b)))
+
+
+def water_ratio(rgb):
+    if rgb.shape != (96, 96, 3):
+        raise ValueError('Expected 96x96 RGB crop')
+    x1, x2, y1, y2 = WATER_ROI
+    hsv = cv2.cvtColor(rgb[y1:y2, x1:x2], cv2.COLOR_RGB2HSV)
+    water = (hsv[:, :, 0] >= 80) & (hsv[:, :, 0] <= 105) & (hsv[:, :, 1] > 75)
+    return float(water.mean())
+
+
+def inspect(rgb, threshold=MIN_WATER_RATIO):
+    score = water_ratio(rgb)
+    return {'decision': 'empty-like-veto' if score >= threshold else 'unknown',
+            'water_ratio': round(score, 4)}
+
+
+def audit(rows, images_dir):
+    if not isinstance(rows, list):
+        raise ValueError('samples must be an array')
+    results = []
+    for i, row in enumerate(rows):
+        name = row['file']
+        if not isinstance(name, str) or Path(name).name != name or name in ('.', '..'):
+            raise ValueError('Only filenames in images-dir are allowed')
+        expected = row.get('expected')
+        if expected is not None and (not isinstance(expected, str) or not expected.strip()):
+            raise ValueError('Invalid label')
+        result = inspect(crop(images_dir / name, row['cx'], row['cy']))
+        results.append({'sample': i, 'expected': expected, **result})
+    empty = [x for x in results if x['expected'] == EMPTY_LABEL]
+    occupied = [x for x in results if x['expected'] not in (EMPTY_LABEL, None)]
+    return {'samples': len(results), 'empty_labeled': len(empty),
+            'occupied_labeled': len(occupied),
+            'empty_vetoed': sum(x['decision']=='empty-like-veto' for x in empty),
+            'occupied_wrongly_vetoed': sum(x['decision']=='empty-like-veto' for x in occupied),
+            'unknown_label': len(results)-len(empty)-len(occupied),
+            'note': ('Exploratory same-game crop observations; cutoff not validated '
+                     'on independent plays. Non-veto is UNKNOWN, not occupied.'),
+            'results': results}
+
+
+def main():
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument('--manifest', type=Path, required=True)
+    p.add_argument('--images-dir', type=Path, required=True)
+    p.add_argument('--output', type=Path, required=True)
+    args = p.parse_args()
+    rows = json.loads(args.manifest.read_text(encoding='utf-8'))['samples']
+    report = audit(rows, args.images_dir)
+    args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+    print(json.dumps({key: report[key] for key in
+          ('samples', 'empty_labeled', 'occupied_labeled',
+           'empty_vetoed', 'occupied_wrongly_vetoed')}, ensure_ascii=False))
+
+
+if __name__ == '__main__':
+    main()
