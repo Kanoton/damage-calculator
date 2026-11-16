@@ -67,5 +67,17 @@ class SessionTests(unittest.TestCase):
         self.assertNotIn('slot_id', str(report).lower())
 
 
+    def test_malformed_gate_metadata_abstains_without_exception(self):
+        bad_board = f(1500)
+        bad_board['continuity'] = None
+        bad_rim = f(2100)
+        bad_rim['tracking'] = None
+        result = m.run([f(1000), bad_board, bad_rim, f(2700)])
+        self.assertEqual(result['events'][1]['reason'], 'unverified-board-continuity')
+        self.assertEqual(result['events'][2]['reason'], 'unverified-rim-correspondences')
+        self.assertEqual(result['events'][3]['status'], 'collecting')
+        self.assertEqual(result['candidates'], 0)
+
+
 if __name__ == '__main__':
     unittest.main()
