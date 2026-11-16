@@ -2,6 +2,9 @@
 
 ## 2026-11-16：08秋幻植物建築・ゲーム単位の独立評価（PR #286、継続中）
 
+- 2026-11-16追加安全修正：プレイ単位holdoutで学習側が植物1種類しか残らない場合、比較対象がなく距離差が無限大になるため、従来は誤って候補採用し得た。`predict` は参照種2種類未満を `insufficient-reference-classes` で保留し、単独種とゲーム単位の回帰2件を追加（コミット `93c20ba`・`3ad6534`）。実画像精度は依然未検証。CI確認前は成功扱いにしない。
+
+
 - 研究用 `scripts/review-autumn-plant-crops.py` に `--evaluation game` を既定として追加。マニフェストの `game` は独立したプレイを識別する文字列で、同じプレイの全cropを学習参照から除外する。独立ゲームが2つ未満、game欠落時は例外とする。旧crop単位評価は `--evaluation crop` で明示実行できるが、近接フレーム漏洩の可能性がある。
 - `tests/test-autumn-plant-crops.py` に同一ゲーム内の重複cropがcrop単位評価で採用されてもゲーム単位では保留される回帰、およびゲームID不足の棄却を追加。正本CSV・画像・08本番認識器は変更しない。
 - コミット `77a6701`、`320ea90`、`cf00c3a`。最終 `cf00c3a` に対する Actions の研究用「Autumn building replay geometry research」run 43772143689、08 browser smoke run 43772143547、その他ブラウザ回帰は成功（明示実行専用の07 full checkはskipped）。
