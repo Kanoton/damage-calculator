@@ -15,6 +15,7 @@ import numpy as np
 SIZE = (512, 288)
 MIN_AREA, MAX_AREA = 480, 1650
 MIN_STUMP_RATIO = .34
+MAX_MAGENTA_ICON_RATIO = .04  # Exploratory guard for pink map-tile glyphs.
 
 
 def _stump_ratio(hsv, cx, cy):
@@ -25,6 +26,16 @@ def _stump_ratio(hsv, cx, cy):
     region = hsv[y1:y2, x1:x2]
     return float(((region[:,:,0] > 5) & (region[:,:,0] < 30) &
                   (region[:,:,1] > 55) & (region[:,:,2] > 60)).mean())
+
+
+def _magenta_icon_ratio(hsv, cx, cy):
+    x1,x2=max(0,cx-20),min(SIZE[0],cx+20)
+    y1,y2=max(0,cy-12),min(SIZE[1],cy+12)
+    region=hsv[y1:y2,x1:x2]
+    if region.shape[:2] != (24,40):
+        return 1.0  # Cannot prove icon-free center.
+    return float(((region[:,:,0]>=130)&(region[:,:,0]<=175)&
+                  (region[:,:,1]>=65)&(region[:,:,2]>=85)).mean())
 
 
 def propose(frame):
@@ -45,8 +56,14 @@ def propose(frame):
         stump=_stump_ratio(hsv,round(cx),round(cy))
         if stump < MIN_STUMP_RATIO:
             continue
+        # A glowing cyan map tile can also have brown ground beneath.
+        # Its central magenta icon must not be treated as empty-pot water.
+        magenta=_magenta_icon_ratio(hsv,round(cx),round(cy))
+        if magenta > MAX_MAGENTA_ICON_RATIO:
+            continue
         results.append({'x':round(cx,1),'y':round(cy,1),
                         'cyan_area':area,'stump_ratio':round(stump,4),
+                        'magenta_icon_ratio':round(magenta,4),
                         'status':'water-pot-looking-candidate-only'})
     return sorted(results,key=lambda r:(r['y'],r['x']))
 
