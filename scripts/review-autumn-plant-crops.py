@@ -95,10 +95,14 @@ def evaluate_by_game(references):
 
 
 def summarize(results, note):
+    empty = [x for x in results if x['expected'] == EMPTY_LABEL]
     return {'samples': len(results),
             'accepted': sum(x['plant'] is not None for x in results),
             'correct_accepted': sum(x['correct'] is True for x in results),
             'false_accepted': sum(x['correct'] is False for x in results),
+            'empty_samples': len(empty),
+            'empty_false_accepted': sum(x['plant'] is not None for x in empty),
+            'empty_abstained': sum(x['plant'] is None for x in empty),
             'reasons': dict(Counter(x['reason'] for x in results)),
             'results': results, 'note': note}
 
@@ -132,7 +136,7 @@ def main():
         references.append({'plant': row['plant'], 'game': row.get('game'), 'vector': descriptor(image)})
     audit = evaluate_by_game(references) if args.evaluation == 'game' else evaluate(references)
     args.output.write_text(json.dumps(audit, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
-    print(json.dumps({key: audit[key] for key in ('samples','accepted','correct_accepted','false_accepted','reasons')}, ensure_ascii=False))
+    print(json.dumps({key: audit[key] for key in ('samples','accepted','correct_accepted','false_accepted','empty_samples','empty_false_accepted','empty_abstained','reasons')}, ensure_ascii=False))
     if audit['false_accepted']:
         print('WARNING: accepted false positives; results must remain research-only')
 
