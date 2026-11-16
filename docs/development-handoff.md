@@ -1,5 +1,13 @@
 # Development Handoff
 
+## 2026-11-17：分岐後の引き継ぎ確認と重複記号の保留ガード
+
+- Primary / Kanoton接続でmainのAGENTS.md、WORKING_GUIDE.md、development-handoff、Draft PR #286と最新CIを再確認。mainは7f50532、作業ブランチはfeat/08-autumn-building-screen-recognitionで継続し、新しい世代フォルダを作らない。
+- `scripts/review-autumn-pot-tile-offsets.py` の `associate` は従来 `next(...)` でEvent/Monster/Damageの最初の候補を採用していた。呼び出し側が不整合な観測集合を渡した場合、重複記号を見落とし得るため、各必須記号が**ちょうど1つ**かつ未知記号なしの場合のみ候補鉢を返すガードを追加。既存の3記号単体入力と5記号入力の両方を維持。
+- 合成回帰でEvent重複・未知赤記号の保留と、正常な5記号入力の後方互換を確認する試験を追加。研究器はあくまで `provisional-three-pot-slot-association-only`、本番適用禁止。ゲーム画面の正解付き精度、植物6種、16マスの完全なID割当は未検証。
+- 08本番・正本CSV・手動建築は変更せず、PR #286をDraft・未マージに維持。CI結果は当該コミットのActionsで確認する。
+
+
 ## 2026-11-17：実画面の「転送→移動→？→敵→雷」5マスと外側3空鉢を仮対応（研究のみ）
 
 - `scripts/review-autumn-blue-tile-symbols.py` を追加。青い円盤の中央にピンク/白の絵柄がある場合のみ、ピンク優勢の移動マス（MoveAgain）と、ピンクが少なく青緑が強い転送マス（TeleportPoint）の候補を分類する。単なる青い水・空鉢は採用しない。旧2リプレイの一部で転送マスらしい候補も抽出できたが、調整に同じ素材を使っているため独立精度保証ではない。合成テスト4件を研究CIへ追加。
