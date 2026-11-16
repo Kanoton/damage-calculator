@@ -58,9 +58,9 @@ class GraphTests(unittest.TestCase):
         r=m.match_observed_graph_path(T,['Damage','Event'],['I12'])
         self.assertEqual(r['status'],'abstain',r)
         self.assertEqual(r['reason'],'changed-tile-may-alias-path')
-        # Unknown changes must fail closed even if the original path is elsewhere.
+        # A changed tile outside every matching path cannot alias this sequence.
         r=m.match_observed_graph_path(T,['Heal','Monster','Damage'],['I12'])
-        self.assertEqual(r['status'],'abstain',r)
+        self.assertEqual(r['status'],'unique-graph-path-candidate-only',r)
         # Once the replacement icon is visually confirmed, unrelated paths work.
         r=m.match_observed_graph_path(T,['Heal','Monster','Damage'],
                                       verified_replacements={'I12':'Shop'})
