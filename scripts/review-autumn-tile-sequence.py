@@ -39,6 +39,47 @@ def match_type_path(topology, observed):
             'note':'Tile symbols must be visually reviewed; topology connections may be provisional. No direct pot ID or occupancy confirmation.'}
 
 
+
+def shortest_outer_context(topology, slot_id, max_window=8):
+    """Shortest unique contiguous icon-type sequence containing an outer slot.
+
+    This identifies which surrounding icons to CHECK, not a slot or image
+    detector. Inner/branching slots require separate topology handling.
+    """
+    outer=['O'+str(i).zfill(2) for i in range(1,39)]
+    if slot_id not in outer:
+        return {'status':'unsupported-inner-or-unknown-slot'}
+    if type(max_window) is not int or not 2<=max_window<=12:
+        raise ValueError('max_window must be 2..12')
+    nodes={x['id']:x for x in topology['nodes']}
+    edges={frozenset((x['a'],x['b'])) for x in topology['edges']}
+    if slot_id not in nodes:
+        return {'status':'missing-slot-node'}
+    options=[]
+    for size in range(2,max_window+1):
+        for start in range(38):
+            for direction in (-1,1):
+                path=[outer[(start+direction*i)%38] for i in range(size)]
+                if slot_id not in path or any(node not in nodes for node in path):
+                    continue
+                if any(frozenset((a,b)) not in edges for a,b in zip(path,path[1:])):
+                    continue
+                kinds=[nodes[node]['type'] for node in path]
+                result=match_type_path(topology,kinds)
+                if (result['status']=='unique-topology-candidate-only'
+                        and result['matches'][0]['node_ids']==path):
+                    options.append({'size':size,'path':path,'types':kinds})
+        if options:
+            break
+    if not options:
+        return {'status':'no-unique-window-within-limit'}
+    options.sort(key=lambda item:(item['path'].index(slot_id),item['path']))
+    best=options[0]
+    return {'status':'unique-context-candidate-only','slot_id':slot_id,
+            'length':best['size'],'node_ids':best['path'],'types':best['types'],
+            'note':'Topology-only context; screen icon detection and edge evidence are separate'}
+
+
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--topology',type=Path,required=True)
