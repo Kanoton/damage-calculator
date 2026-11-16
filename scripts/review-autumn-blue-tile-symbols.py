@@ -39,8 +39,12 @@ def propose(frame):
         turquoise=float(((H>=75)&(H<=96)&(S>50)&(V>100)).mean())
         if pink<.04 or white<.12:
             continue
-        kind=('MoveAgain' if pink>=.12 else
-              'TeleportPoint' if pink<.12 and turquoise>=.14 else
+        # In a later gameplay sample a TeleportPoint had a relatively
+        # large pink glyph; use its strong turquoise arrow first, not
+        # the pink fraction alone. Unknown combinations still abstain.
+        kind=('TeleportPoint' if ((turquoise>=.20 and turquoise>pink*1.2) or
+                                  (pink<.12 and turquoise>=.14)) else
+              'MoveAgain' if pink>=.12 and turquoise<.20 else
               'unknown-blue-tile')
         results.append({'x':round(float(cx),1),'y':round(float(cy),1),
                         'tile_kind_candidate':kind,
