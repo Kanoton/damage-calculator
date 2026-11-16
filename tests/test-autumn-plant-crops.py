@@ -58,6 +58,22 @@ class PlantResearchTests(unittest.TestCase):
         game_audit=module.evaluate_by_game(rows)
         self.assertEqual(game_audit['accepted'],0)
 
+    def test_one_reference_species_must_abstain(self):
+        a=np.zeros(720,dtype=np.float32);a[0]=1
+        refs=[{'plant':'電流タンポポ','vector':a}]
+        result=module.predict(a,refs)
+        self.assertIsNone(result['plant'])
+        self.assertEqual(result['reason'],'insufficient-reference-classes')
+
+    def test_game_holdout_with_only_one_reference_species_abstains(self):
+        a=np.zeros(720,dtype=np.float32);a[0]=1
+        b=np.zeros(720,dtype=np.float32);b[1]=1
+        rows=[{'plant':'電流タンポポ','game':'A','vector':a},
+              {'plant':'芳香ピーチ','game':'B','vector':b}]
+        audit=module.evaluate_by_game(rows)
+        self.assertEqual(audit['accepted'],0)
+        self.assertEqual(audit['reasons']['insufficient-reference-classes'],2)
+
     def test_game_holdout_requires_independent_games(self):
         a=np.zeros(720,dtype=np.float32)
         with self.assertRaises(ValueError):
