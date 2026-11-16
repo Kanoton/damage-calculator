@@ -1,5 +1,14 @@
 # Development Handoff
 
+## 2026-11-16：08秋幻植物建築・ゲーム単位の独立評価（PR #286、継続中）
+
+- 研究用 `scripts/review-autumn-plant-crops.py` に `--evaluation game` を既定として追加。マニフェストの `game` は独立したプレイを識別する文字列で、同じプレイの全cropを学習参照から除外する。独立ゲームが2つ未満、game欠落時は例外とする。旧crop単位評価は `--evaluation crop` で明示実行できるが、近接フレーム漏洩の可能性がある。
+- `tests/test-autumn-plant-crops.py` に同一ゲーム内の重複cropがcrop単位評価で採用されてもゲーム単位では保留される回帰、およびゲームID不足の棄却を追加。正本CSV・画像・08本番認識器は変更しない。
+- コミット `77a6701`、`320ea90`、`cf00c3a`。最終 `cf00c3a` に対する Actions の研究用「Autumn building replay geometry research」run 43772143689、08 browser smoke run 43772143547、その他ブラウザ回帰は成功（明示実行専用の07 full checkはskipped）。
+- ゲーム単位の**実画像**精度は未評価。旧12cropの3採用・誤採用0件はゲーム単位の成績として使用しない。既存2本のリプレイでゲームごとの正解crop・空鉢・遮蔽・視点をラベル付けし、プレイ間holdoutを実測する必要がある。元動画・人物名入り画面・非匿名manifestはGitHubへ入れない。
+- 08の `applyRecognized` は検証済み候補だけの追加APIであり、動画から位置・植物種類を自動確定する本番検出器は未接続。三点非共線ランドマーク、独立フレーム、種類の独立確認が揃わない限り登録禁止。PR #286はdraftを維持し、精度検証後にレビューする。
+
+
 Last updated: 2026-11-16 (Japan)
 
 ## 2026-11-16：植物画像6種類の研究用分類・保留判定（PR #286継続）
