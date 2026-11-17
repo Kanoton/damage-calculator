@@ -71,7 +71,7 @@ class ReviewSheetTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             path = Path(d) / 'cyan-structure.png'
             frame = np.zeros((288, 512, 3), dtype=np.uint8)
-            cv2.ellipse(frame, (230, 120), (27, 20), 0, 0, 360,
+            cv2.ellipse(frame, (230, 120), (24, 16), 0, 0, 360,
                         (230, 210, 90), -1)
             self.assertTrue(cv2.imwrite(str(path), frame))
             _, result = m.review([path])
