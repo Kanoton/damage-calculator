@@ -46,6 +46,7 @@ def sample(video,topology,step_s=0.5,max_frames=200):
         suitable=[]
         observed_frame_indices=set()
         duplicate_frame_indices=0
+        failed_frame_indices=[]
         for i in range(min(max_frames,int(math.ceil(duration/step_s)))):
             requested=i*step_s
             if requested>=duration:
@@ -59,11 +60,13 @@ def sample(video,topology,step_s=0.5,max_frames=200):
                 continue
             observed_frame_indices.add(target_index)
             if not cap.set(cv2.CAP_PROP_POS_FRAMES,target_index):
+                failed_frame_indices.append(target_index)
                 frames.append({'time_s':round(requested,3),'status':'abstain',
                                'reason':'video-frame-seek-failed'})
                 continue
             ok,frame=cap.read()
             if not ok or frame is None:
+                failed_frame_indices.append(target_index)
                 frames.append({'time_s':round(requested,3),'status':'abstain',
                                'reason':'frame-decode-failed'})
                 continue
@@ -76,7 +79,9 @@ def sample(video,topology,step_s=0.5,max_frames=200):
             else:
                 suitable.append({'time_s':round(target_index/fps,3),'result':result})
             frames.append(entry)
-        if len(suitable)<2:
+        if failed_frame_indices:
+            verdict={'status':'abstain','reason':'sampled-frame-unreadable'}
+        elif len(suitable)<2:
             verdict={'status':'abstain','reason':'not-enough-independent-positive-frames'}
         else:
             # Compare all independently positive frames; never cherry-pick the
@@ -85,6 +90,11 @@ def sample(video,topology,step_s=0.5,max_frames=200):
         return {'status':verdict['status'],'verdict':verdict,
                 'frames_sampled':len(frames),'suitable_frames':len(suitable),
                 'duplicate_frame_indices':duplicate_frame_indices,
+                'unreadable_frame_indices':failed_frame_indices,
+                'video_duration_seconds_estimate':round(duration,3),
+                'sampled_through_seconds_estimate':(frames[-1]['time_s'] if frames else None),
+                'full_video_covered':bool(frames and
+                    (frames[-1]['time_s']+step_s>=duration-1/fps)),
                 'frame_audit':frames,
                 'caution':'Research only; selected replay, no ground-truth IDs or plant labels',
                 'production_application':'forbidden'}
