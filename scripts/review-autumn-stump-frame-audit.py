@@ -66,7 +66,7 @@ def analyze(frame):
         raise ValueError('Expected 512x288 BGR frame')
     stumps = pots.propose(frame)
     tiles = tile_centers(frame)
-    paired = sides.assess(stumps, tiles)
+    # Cyan water inside an empty pot also passes the broad blue-tile mask.\n    # A pot cannot simultaneously be its own neighboring map tile.\n    tiles = [tile for tile in tiles if not any(\n        (tile['x']-stump['x'])**2 + (tile['y']-stump['y'])**2 < 20**2\n        for stump in stumps)]\n    paired = sides.assess(stumps, tiles)
     return {
         'status': paired['status'],
         'water_stump_candidates': len(stumps),
