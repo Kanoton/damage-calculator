@@ -161,9 +161,18 @@ def horizontal_edge_profiles(frame, points):
             for c in range(a+7, min(a+27, len(row_support)))
         ]
         score, upper, lower = max(pairs, default=(0.0, 0, 0))
+        # An alternate larger separation exposes spurious adjacent edge rows.
+        # Both scores are diagnostics; neither is calibrated for acceptance.
+        separated_pairs = [
+            min(row_support[a], row_support[c])
+            for a in range(2, 34)
+            for c in range(a+12, min(a+27, len(row_support)))
+        ]
+        separated_score = max(separated_pairs, default=0.0)
         result.append({
             'x': x, 'y': y,
             'horizontal_double_edge_score': round(float(score), 4),
+            'horizontal_separated_12px_score': round(float(separated_score), 4),
             'upper_edge_y': y0+upper,
             'lower_edge_y': y0+lower,
             'edge_band_separation_px': lower-upper,
