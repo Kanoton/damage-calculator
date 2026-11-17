@@ -105,6 +105,27 @@ class BaseTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             m.annotate_cyan_tile_conflicts([], [], float('nan'))
 
+    def test_edge_geometry_detects_two_strong_horizontal_bands(self):
+        frame = np.full((288,512,3), 70, np.uint8)
+        cv2.rectangle(frame, (170,105), (230,110), (240,240,240), -1)
+        cv2.rectangle(frame, (170,123), (230,128), (240,240,240), -1)
+        point = {'x': 200, 'y': 137}
+        profile = m.horizontal_edge_profiles(frame, [point])[0]
+        self.assertEqual(profile['status'], 'unverified-edge-geometry-profile')
+        self.assertGreater(profile['horizontal_double_edge_score'], 0.1)
+        self.assertGreaterEqual(profile['edge_band_separation_px'], 7)
+        self.assertLessEqual(profile['edge_band_separation_px'], 26)
+
+    def test_flat_edges_and_out_of_bounds_do_not_verify_stumps(self):
+        frame = np.zeros((288,512,3), np.uint8)
+        result = m.horizontal_edge_profiles(
+            frame, [{'x': 200, 'y': 130}, {'x': 15, 'y': 10}])
+        self.assertEqual(result[0]['horizontal_double_edge_score'], 0)
+        self.assertEqual(result[1]['status'], 'edge-window-out-of-bounds')
+        self.assertNotIn('verified_stump', result[0])
+        with self.assertRaises(ValueError):
+            m.horizontal_edge_profiles(np.zeros((120,512,3),np.uint8), [])
+
     def test_no_occupancy_inference(self):
         frame = np.zeros((288,512,3),dtype=np.uint8)
         result = m.compare(frame, [{'x':180,'y':90}])
