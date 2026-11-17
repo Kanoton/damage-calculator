@@ -68,7 +68,7 @@ class BaseTests(unittest.TestCase):
     def test_cyan_structural_hint_without_empty_water(self):
         frame = np.zeros((288, 512, 3), dtype=np.uint8)
         # Cyan flower-like structure, no brown base or empty water bowl.
-        cv2.ellipse(frame, (230, 120), (27, 20), 0, 0, 360,
+        cv2.ellipse(frame, (230, 120), (24, 16), 0, 0, 360,
                     (230, 210, 90), -1)
         hints = m.cyan_structure_base_proposals(frame)
         self.assertGreaterEqual(len(hints), 1)
