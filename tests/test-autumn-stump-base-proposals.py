@@ -44,6 +44,27 @@ class BaseTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             m.exclude_tile_overlaps([], [], 0)
 
+    def test_pale_platform_without_blue_water(self):
+        frame = np.zeros((288, 512, 3), dtype=np.uint8)
+        cv2.rectangle(frame, (200, 115), (250, 143), (175, 204, 244), -1)
+        candidates = m.pale_platform_proposals(frame)
+        self.assertGreaterEqual(len(candidates), 1)
+        self.assertEqual(candidates[0]['surrounding_water_ratio'], 0.0)
+        self.assertEqual(candidates[0]['status'], 'pale-platform-looking-unverified')
+
+    def test_pale_platform_water_context_is_optional(self):
+        frame = np.zeros((288, 512, 3), dtype=np.uint8)
+        cv2.rectangle(frame, (180, 85), (275, 169), (100, 130, 70), -1)
+        cv2.rectangle(frame, (200, 110), (247, 143), (175, 204, 244), -1)
+        candidates = m.pale_platform_proposals(frame)
+        self.assertGreaterEqual(len(candidates), 1)
+        self.assertGreater(candidates[0]['surrounding_water_ratio'], 0.0)
+        self.assertFalse(m.compare(frame, [])['planted_stumps_verified'])
+
+    def test_pale_platform_input_guard(self):
+        with self.assertRaises(ValueError):
+            m.pale_platform_proposals(np.zeros((50, 50, 3), dtype=np.uint8))
+
     def test_no_occupancy_inference(self):
         frame = np.zeros((288,512,3),dtype=np.uint8)
         result = m.compare(frame, [{'x':180,'y':90}])
