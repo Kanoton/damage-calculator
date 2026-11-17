@@ -5,6 +5,7 @@ This intentionally has high false-positive risk on autumn terrain. It must
 remain a separate diagnostic channel, not merged into confirmed pot positions.
 """
 import argparse
+import importlib.util
 import json
 from pathlib import Path
 
@@ -86,7 +87,12 @@ def main():
         raise ValueError('Cannot decode image')
     if frame.shape[:2] != (288, 512):
         frame = cv2.resize(frame, SIZE, interpolation=cv2.INTER_AREA)
-    result = compare(frame, [])
+    spec = importlib.util.spec_from_file_location(
+        'stump_base_tile_context',
+        Path(__file__).resolve().parent / 'review-autumn-stump-frame-audit.py')
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    result = compare(frame, [], module.tile_centers(frame))
     args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2)
                            + chr(10), encoding='utf-8')
     print(json.dumps({'base_candidate_count': result['base_candidate_count']}))
