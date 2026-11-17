@@ -1,5 +1,12 @@
 # Development Handoff
 
+## 2026-11-17：3鉢のフレーム間幾何照合（研究のみ）
+
+- `scripts/review-autumn-pot-cross-frame.py` を追加。別時刻のフレームごとに既存 `review-autumn-pot-tile-offsets.py` が**独立に**出した3鉢の仮対応JSONを受け、画面上の移動量が3鉢で共通か、鉢間の相対距離が維持されるかを検査する。現時点では純平行移動を近似し、最大残差9px、鉢間距離変化9pxを超えると保留。固定角度・固定ズームであっても視差/盤面投影があり得るため、これをゲームの一般法則とは断定しない。
+- 0.2秒未満の近接フレーム、フレーム単位の非一意判定、異常値、スロット候補の重複、`production_application=forbidden` 以外の入力は保留。合成テスト4件と研究CIを追加。整合しても `cross-frame-geometry-consistent-proposal-only`、`slot_ids_verified=false`、植物種不明、本番反映禁止。
+- これは**フレーム間の独立観測を評価する仕組みの実装**であり、別ゲームで3鉢が実際に再検出されたことや、正解付き精度を証明するものではない。実動画から複数の適格なフレームJSONを取得して適用することが次の検証。既存手動建築、正本CSV、08本番コードは変更せず、Draft PR #286で継続。
+
+
 ## 2026-11-17：分岐後の引き継ぎ確認と重複記号の保留ガード
 
 - Primary / Kanoton接続でmainのAGENTS.md、WORKING_GUIDE.md、development-handoff、Draft PR #286と最新CIを再確認。mainは7f50532、作業ブランチはfeat/08-autumn-building-screen-recognitionで継続し、新しい世代フォルダを作らない。
