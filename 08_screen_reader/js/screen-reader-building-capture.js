@@ -17,41 +17,57 @@
   return [h,mx===0?0:d/mx*255,mx*255];
  }
  function candidates(image){
-  // The known research thresholds have poor field precision and recall.
-  // Expose ALL matches only as clues, never as automatic placement votes.
-  const {data,width,height}=image,mask=new Uint8Array(width*height);
+  // Keep pale and cyan HSV components separate: their union merges distinct
+  // map tiles and vegetation into misleading oversized "objects".
+  // Neither channel proves stump/plant/slot identity.
+  const {data,width,height}=image;
+  if(width!==512||height!==288||!data||data.length!==width*height*4)
+   throw Error('Expected a 512x288 RGBA capture');
+  const pale=new Uint8Array(width*height),cyan=new Uint8Array(width*height);
   for(let y=0;y<height;y++)for(let x=0;x<width;x++){
    const i=y*width+x,p=i*4,h=hsv(data[p],data[p+1],data[p+2]);
-   if((h[0]>=3&&h[0]<=29&&h[1]>=30&&h[1]<=155&&h[2]>=130)||
-      (h[0]>=75&&h[0]<=105&&h[1]>=75&&h[2]>=85))mask[i]=1;
+   if(h[0]>=3&&h[0]<=29&&h[1]>=30&&h[1]<=155&&h[2]>=130)pale[i]=1;
+   if(h[0]>=75&&h[0]<=105&&h[1]>=75&&h[2]>=85)cyan[i]=1;
   }
-  const seen=new Uint8Array(mask.length),q=new Int32Array(mask.length),out=[];
-  for(let y=40;y<height-20;y++)for(let x=80;x<width-30;x++){
-   const start=y*width+x;if(!mask[start]||seen[start])continue;
-   let head=0,tail=1;q[0]=start;seen[start]=1;
-   let area=0,sx=0,sy=0,minx=width,maxx=0,miny=height,maxy=0;
-   while(head<tail){
-    const p=q[head++],px=p%width,py=(p/width)|0;
-    area++;sx+=px;sy+=py;
-    minx=Math.min(minx,px);maxx=Math.max(maxx,px);
-    miny=Math.min(miny,py);maxy=Math.max(maxy,py);
-    for(const n of [px>0?p-1:-1,px<width-1?p+1:-1,py>0?p-width:-1,py<height-1?p+width:-1]){
-     if(n>=0&&mask[n]&&!seen[n]){seen[n]=1;q[tail++]=n;}
+  const extract=(mask,kind)=>{
+   const seen=new Uint8Array(mask.length),q=new Int32Array(mask.length),out=[];
+   for(let y=0;y<height;y++)for(let x=0;x<width;x++){
+    const start=y*width+x;if(!mask[start]||seen[start])continue;
+    let head=0,tail=1;q[0]=start;seen[start]=1;
+    let area=0,sx=0,sy=0,minx=width,maxx=0,miny=height,maxy=0;
+    while(head<tail){
+     const index=q[head++],px=index%width,py=(index/width)|0;
+     area++;sx+=px;sy+=py;
+     minx=Math.min(minx,px);maxx=Math.max(maxx,px);
+     miny=Math.min(miny,py);maxy=Math.max(maxy,py);
+     for(const n of [px>0?index-1:-1,px<width-1?index+1:-1,
+                      py>0?index-width:-1,py<height-1?index+width:-1]){
+      if(n>=0&&mask[n]&&!seen[n]){seen[n]=1;q[tail++]=n;}
+     }
     }
+    const w=maxx-minx+1,h=maxy-miny+1,cx=sx/area,cy=sy/area;
+    if(area>=140&&area<=2800&&w>=25&&w<=105&&h>=14&&h<=85&&
+       cx>80&&cx<470&&cy>50&&cy<240)
+     out.push({x:cx,y:cy,area,kind});
    }
-   const w=maxx-minx+1,h=maxy-miny+1,cx=sx/area,cy=sy/area;
-   if(area>=140&&area<=2800&&w>=25&&w<=105&&h>=14&&h<=85&&
-      cx>80&&cx<470&&cy>50&&cy<240)out.push({x:cx,y:cy,area});
-  }
-  return out.sort((a,b)=>a.y-b.y).slice(0,80);
+   return out.sort((a,b)=>a.y-b.y);
+  };
+  const a=extract(pale,'pale'),b=extract(cyan,'cyan');
+  // For visualization only. Never suppress or interpret a candidate as a
+  // verified stump based on ranking, count, or overlap.
+  return [...a.slice(0,40).map((p,i)=>({...p,id:'T'+(i+1)})),
+          ...b.slice(0,40).map((p,i)=>({...p,id:'S'+(i+1)}))];
  }
+
  function render(){
   if(!captured)return;
   ctx.putImageData(captured.image,0,0);
   ctx.lineWidth=2;
   captured.points.forEach((p,i)=>{
-   ctx.beginPath();ctx.strokeStyle='#ffcc33';ctx.arc(p.x,p.y,7,0,Math.PI*2);ctx.stroke();
-   ctx.fillStyle='#1c1c1c';ctx.font='12px sans-serif';ctx.fillText('C'+(i+1),p.x+7,p.y-6);
+   ctx.beginPath();ctx.strokeStyle=p.kind==='pale'?'#ffd44a':'#45e5d3';
+   ctx.arc(p.x,p.y,7,0,Math.PI*2);ctx.stroke();
+   ctx.fillStyle='#15222c';ctx.font='bold 12px sans-serif';
+   ctx.fillText(p.id,p.x+7,p.y-6);
   });
   if(captured.click){
    const {x,y}=captured.click;ctx.strokeStyle='#1aff5b';ctx.lineWidth=3;
@@ -83,8 +99,10 @@
    ...options.cards.map(v=>new Option(v.name,v.name)));
   confirm.checked=false;review.hidden=false;review.open=true;render();
   selection.textContent='画像上の台座をクリックして位置を確認してください。';
-  status.textContent='1枚を取得。色・輪郭の参考候補'+captured.points.length+
-   '件（未確認）。黄色Cは切り株の証拠ではありません。';
+  const tanCount=captured.points.filter(p=>p.kind==='pale').length;
+  const cyanCount=captured.points.filter(p=>p.kind==='cyan').length;
+  status.textContent='1枚を取得。淡色T候補'+tanCount+'件、青緑S候補'+cyanCount+
+   '件（すべて未確認）。候補は切り株・建築の証拠ではありません。';
  }
  canvas.addEventListener('click',event=>{
   if(!captured)return;
@@ -92,9 +110,9 @@
   const x=(event.clientX-r.left)*512/r.width,y=(event.clientY-r.top)*288/r.height;
   if(!Number.isFinite(x)||!Number.isFinite(y))return;
   captured.click={x,y};confirm.checked=false;render();
-  const near=captured.points.map((p,i)=>({i,d:Math.hypot(p.x-x,p.y-y)}))
+  const near=captured.points.map(p=>({id:p.id,d:Math.hypot(p.x-x,p.y-y)}))
    .sort((a,b)=>a.d-b.d)[0];
-  selection.textContent=(near&&near.d<16?'参考候補C'+(near.i+1)+'付近。':'任意の位置。')+
+  selection.textContent=(near&&near.d<16?'参考候補'+near.id+'付近。':'任意の位置。')+
    ' 画面上の位置だけではO/IマスIDを確定できません。';
  });
  slot.addEventListener('change',()=>{confirm.checked=false;});
