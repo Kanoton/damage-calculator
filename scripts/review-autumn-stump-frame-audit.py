@@ -96,8 +96,7 @@ def main():
         raise ValueError('Cannot decode image')
     report = analyze(frame)
     args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2)
-                           + '
-', encoding='utf-8')
+                           + '\n', encoding='utf-8')
     print(json.dumps({'stumps': report['water_stump_candidates'],
                       'tiles': report['color_tile_candidates'],
                       'pairs': len(report['local_side_matches'])}))
