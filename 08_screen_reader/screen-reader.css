@@ -47,3 +47,11 @@
 #reader-building-review select{max-width:210px}
 #reader-building-selection{min-height:1.3em;color:#394868;font-size:12px}
 #reader-building-status{min-height:1.4em;white-space:normal}
+
+
+/* Single-capture map cross-check. The dot is a manual CSV location, not vision. */
+#reader-building-map-check[hidden]{display:none}
+#reader-building-map-preview{position:relative;width:min(100%,260px);height:auto}
+#reader-building-map-image{display:block;width:100%;height:auto;object-fit:contain}
+#reader-building-map-pin{position:absolute;display:block;width:13px;height:13px;border-radius:50%;background:#e12d38;border:2px solid white;box-shadow:0 0 0 2px #a20e1c;transform:translate(-50%,-50%);pointer-events:none}
+#reader-building-map-label{font-size:12px;font-weight:600;margin:4px 0}
