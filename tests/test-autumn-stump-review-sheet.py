@@ -63,6 +63,7 @@ class ReviewSheetTests(unittest.TestCase):
             candidates = result['images'][0]['pale_platform_candidates']
             self.assertGreaterEqual(len(candidates), 1)
             self.assertEqual(candidates[0]['candidate_id'], 'T1')
+            self.assertIn('horizontal_double_edge_score', candidates[0])
             self.assertEqual(candidates[0]['human_label'], 'unreviewed')
             self.assertFalse(result['slot_ids_verified'])
             self.assertEqual(sheet.shape, (288, 1024, 3))
@@ -78,6 +79,7 @@ class ReviewSheetTests(unittest.TestCase):
             hints = result['images'][0]['cyan_structure_hints']
             self.assertGreaterEqual(len(hints), 1)
             self.assertEqual(hints[0]['candidate_id'], 'S1')
+            self.assertIn('horizontal_double_edge_score', hints[0])
             self.assertEqual(hints[0]['human_label'], 'unreviewed')
             self.assertFalse(result['slot_ids_verified'])
 
