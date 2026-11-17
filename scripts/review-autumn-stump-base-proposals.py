@@ -105,6 +105,30 @@ def cyan_structure_base_proposals(frame):
     return sorted(results, key=lambda v: (v['y'], v['x']))
 
 
+def annotate_cyan_tile_conflicts(hints, tile_centers, radius=23):
+    """Flag cyan source structures overlapping mutable colored map tiles.
+
+    Compare the source center, NOT the speculative base point shifted +16px.
+    A flag is not a rejection: real cyan pot rims can also be broad blue tile
+    proposals. Keep all hints visible to human reviewers.
+    """
+    if not np.isfinite(radius) or radius <= 0:
+        raise ValueError('radius must be finite and positive')
+    result = []
+    for hint in hints:
+        source_x = hint['cyan_structure_x']
+        source_y = hint['cyan_structure_y']
+        conflicting = [
+            i for i, tile in enumerate(tile_centers)
+            if (source_x-tile['x'])**2 + (source_y-tile['y'])**2 < radius**2
+        ]
+        result.append({**hint,
+                       'colored_tile_overlap': bool(conflicting),
+                       'overlapping_tile_indices': conflicting,
+                       'human_label': 'unreviewed'})
+    return result
+
+
 def exclude_tile_overlaps(base_candidates, tile_centers, radius=24):
     """Separate nearby colored tile bodies; retain raw proposals for review.
 
@@ -131,13 +155,16 @@ def compare(frame, water_proposals, tile_centers=None):
     """
     bases = propose(frame)
     pale = pale_platform_proposals(frame)
-    cyan_structure = cyan_structure_base_proposals(frame)
+    cyan_structure = annotate_cyan_tile_conflicts(
+        cyan_structure_base_proposals(frame), tile_centers or [])
     kept, overlaps = exclude_tile_overlaps(bases, tile_centers or [])
     return {'brown_base_candidates': bases,
             'pale_platform_candidates': pale,
             'pale_platform_candidate_count': len(pale),
             'cyan_structure_base_hints': cyan_structure,
             'cyan_structure_base_hint_count': len(cyan_structure),
+            'cyan_structure_tile_overlap_count': sum(
+                hint['colored_tile_overlap'] for hint in cyan_structure),
             'non_tile_overlap_candidates': kept,
             'tile_overlap_candidates': overlaps,
             'water_anchor_count': len(water_proposals),
