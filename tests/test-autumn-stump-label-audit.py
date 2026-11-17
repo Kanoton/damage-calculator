@@ -47,6 +47,36 @@ class LabelAuditTests(unittest.TestCase):
                          {0, 1})
         self.assertIsNone(report['precision'])
 
+    def test_multi_view_partial_labels_do_not_claim_precision(self):
+        scenes = [
+            {'image': 'camera_a.png', 'candidates': [{'x': 100, 'y': 100}],
+             'annotations': {'positive_centers': [{'x': 100, 'y': 100}],
+                             'exhaustive': True}},
+            {'image': 'camera_b.png', 'candidates': [],
+             'annotations': {'positive_centers': [{'x': 200, 'y': 140}],
+                             'exhaustive': False}}
+        ]
+        r = m.audit_many(scenes)
+        self.assertEqual(r['scene_count'], 2)
+        self.assertEqual(r['matched_positive_count'], 1)
+        self.assertEqual(r['missed_labeled_positives'], 1)
+        self.assertEqual(r['positive_recall_on_labeled_points'], 0.5)
+        self.assertIsNone(r['precision'])
+        self.assertIsNone(r['false_positive_count'])
+        with self.assertRaises(ValueError):
+            m.audit_many(scenes + [scenes[0]])
+
+    def test_multi_view_exhaustive_precision_requires_all_complete(self):
+        scenes = [
+            {'image': 'a.png',
+             'candidates': [{'x': 10, 'y': 10}, {'x': 50, 'y': 20}],
+             'annotations': {'positive_centers': [{'x': 10, 'y': 10}],
+                             'exhaustive': True}}
+        ]
+        r = m.audit_many(scenes)
+        self.assertEqual(r['false_positive_count'], 1)
+        self.assertEqual(r['precision'], 0.5)
+
     def test_invalid_inputs_rejected(self):
         with self.assertRaises(ValueError):
             m.audit([], {}, 20)
