@@ -65,6 +65,25 @@ class BaseTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             m.pale_platform_proposals(np.zeros((50, 50, 3), dtype=np.uint8))
 
+    def test_cyan_structural_hint_without_empty_water(self):
+        frame = np.zeros((288, 512, 3), dtype=np.uint8)
+        # Cyan flower-like structure, no brown base or empty water bowl.
+        cv2.ellipse(frame, (230, 120), (27, 20), 0, 0, 360,
+                    (230, 210, 90), -1)
+        hints = m.cyan_structure_base_proposals(frame)
+        self.assertGreaterEqual(len(hints), 1)
+        self.assertEqual(hints[0]['status'],
+                         'cyan-structure-base-hint-unverified')
+        self.assertGreater(hints[0]['y'], hints[0]['cyan_structure_y'])
+        self.assertFalse(m.compare(frame, [])['planted_stumps_verified'])
+
+    def test_cyan_structural_blank_and_input_validation(self):
+        self.assertEqual(m.cyan_structure_base_proposals(
+            np.zeros((288, 512, 3), dtype=np.uint8)), [])
+        with self.assertRaises(ValueError):
+            m.cyan_structure_base_proposals(
+                np.zeros((120, 512, 3), dtype=np.uint8))
+
     def test_no_occupancy_inference(self):
         frame = np.zeros((288,512,3),dtype=np.uint8)
         result = m.compare(frame, [{'x':180,'y':90}])
