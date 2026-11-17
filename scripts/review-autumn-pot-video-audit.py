@@ -10,6 +10,7 @@ import argparse
 import importlib.util
 import json
 import math
+from collections import Counter
 from pathlib import Path
 
 import cv2
@@ -47,6 +48,9 @@ def sample(video,topology,step_s=0.5,max_frames=200):
         observed_frame_indices=set()
         duplicate_frame_indices=0
         failed_frame_indices=[]
+        candidate_presence=Counter()
+        candidate_totals=Counter()
+        five_kind_complete_frames=0
         for i in range(min(max_frames,int(math.ceil(duration/step_s)))):
             requested=i*step_s
             if requested>=duration:
@@ -71,8 +75,25 @@ def sample(video,topology,step_s=0.5,max_frames=200):
                                'reason':'frame-decode-failed'})
                 continue
             resized=cv2.resize(frame,(512,288),interpolation=cv2.INTER_AREA)
-            result=offsets.analyze(resized,topology)
+            # Diagnostic candidates share the exact detector implementations
+            # used by analyze; report only counts, never raw gameplay pixels.
+            symbols=(offsets.five.blue.propose(resized)+
+                     offsets.five.event.propose(resized)+
+                     offsets.five.red.propose(resized))
+            pot_candidates=offsets.pots.propose(resized)
+            counts=Counter(p['tile_kind_candidate'] for p in symbols)
+            counts['pot']=len(pot_candidates)
+            for kind,n in counts.items():
+                candidate_totals[kind]+=n
+                if n: candidate_presence[kind]+=1
+            required=offsets.five.KINDS
+            if (all(counts[kind]==1 for kind in required) and
+                not any(kind.startswith('unknown-') for kind in counts)):
+                five_kind_complete_frames+=1
+            result=offsets.associate(offsets.five.assess(symbols,topology),
+                                     symbols,pot_candidates)
             entry={'time_s':round(target_index/fps,3),'frame_index':target_index,
+                   'candidate_counts':dict(counts),
                    'status':result['status']}
             if result['status']=='abstain':
                 entry['reason']=result.get('reason','unspecified')
@@ -95,6 +116,9 @@ def sample(video,topology,step_s=0.5,max_frames=200):
                 'sampled_through_seconds_estimate':(frames[-1]['time_s'] if frames else None),
                 'full_video_covered':bool(frames and
                     (frames[-1]['time_s']+step_s>=duration-1/fps)),
+                'five_kind_complete_frames':five_kind_complete_frames,
+                'candidate_presence_frames':dict(candidate_presence),
+                'candidate_totals':dict(candidate_totals),
                 'frame_audit':frames,
                 'caution':'Research only; selected replay, no ground-truth IDs or plant labels',
                 'production_application':'forbidden'}
