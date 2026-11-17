@@ -90,8 +90,7 @@ def sample(video,topology,step_s=0.5,max_frames=200):
             if (all(counts[kind]==1 for kind in required) and
                 not any(kind.startswith('unknown-') for kind in counts)):
                 five_kind_complete_frames+=1
-            result=offsets.associate(offsets.five.assess(symbols,topology),
-                                     symbols,pot_candidates)
+            result=offsets.analyze(resized,topology)
             entry={'time_s':round(target_index/fps,3),'frame_index':target_index,
                    'candidate_counts':dict(counts),
                    'status':result['status']}
