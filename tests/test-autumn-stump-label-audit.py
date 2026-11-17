@@ -34,6 +34,19 @@ class LabelAuditTests(unittest.TestCase):
         self.assertEqual(r['matched_positive_count'], 1)
         self.assertEqual(r['missed_labeled_positives'], 1)
 
+    def test_competing_candidates_maximize_recall_not_greedy(self):
+        # Label A is slightly closer to C1 but can also match C2.
+        # Label B can only match C1. Greedy would incorrectly return one.
+        candidates = [{'x': 0, 'y': 0}, {'x': 9, 'y': 0}]
+        labels = {'positive_centers': [
+            {'x': 2, 'y': 0}, {'x': -2, 'y': 0}], 'exhaustive': False}
+        report = m.audit(candidates, labels, max_distance=9.0)
+        self.assertEqual(report['matched_positive_count'], 2)
+        self.assertEqual(report['missed_labeled_positives'], 0)
+        self.assertEqual({m['candidate_index'] for m in report['matches']},
+                         {0, 1})
+        self.assertIsNone(report['precision'])
+
     def test_invalid_inputs_rejected(self):
         with self.assertRaises(ValueError):
             m.audit([], {}, 20)
