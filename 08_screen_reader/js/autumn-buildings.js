@@ -72,6 +72,31 @@ function createAutumnBuildingEditor({root,beforeChange,onInteraction,onChange}){
   render();
   return {added:allowed.length,unchanged,skipped:conflicts.length,reason:conflicts.length?'partial-conflict':'applied'};
  }
+ // Explicit single-capture human review is independent from automated recognition.
+ // Never trust an O/I slot or plant name guessed from an unverified color blob.
+ function applyManuallyReviewed(result){
+  const rejected={added:0,unchanged:0,skipped:1,reason:'manual-review-required'};
+  if(mapId!=='MAP0105'||!slots.length||!result||
+     result.mode!=='single-capture-human-review'||result.humanConfirmed!==true||
+     result.mapId!==mapId||result.difficulty!==JSON.parse(context||'[]')[1]||
+     typeof result.slotId!=='string'||typeof result.name!=='string'||
+     !validPlacement(result.slotId,result.name))return rejected;
+  if(current()[result.slotId]){
+   return {added:0,unchanged:Number(current()[result.slotId]===result.name),
+           skipped:Number(current()[result.slotId]!==result.name),
+           reason:current()[result.slotId]===result.name?'unchanged':'manual-conflict'};
+  }
+  beforeChange();contexts[context]??={};contexts[context][result.slotId]=result.name;
+  render();
+  return {added:1,unchanged:0,skipped:0,reason:'manually-confirmed'};
+ }
+ function manualReviewOptions(){
+  let difficulty='';
+  try{difficulty=JSON.parse(context||'[]')[1]||'';}catch{return {mapId,difficulty,slots:[],cards:[]};}
+  return {mapId,difficulty,
+   slots:slots.map((row,index)=>({slotId:row.slot_id,label:'建築可能マス'+(index+1)+' ('+row.slot_id+')'})),
+   cards:cards().map(row=>({name:row.name}))};
+ }
  function open(slot,index){
   previewGuard=true;onInteraction();selected=slot;title.textContent='建築可能マス'+(index+1)+'の植物建築';choices.replaceChildren();
   for(const row of cards()){
@@ -86,6 +111,8 @@ function createAutumnBuildingEditor({root,beforeChange,onInteraction,onChange}){
   update(value){const next=JSON.stringify([value.mapId,value.difficulty]);if(context!==next)close();context=next;mapId=value.mapId;slots=(value.slots||[]).filter(row=>row.map_id===mapId);features=value.features||[];render();},
   count:()=>count(),
   applyRecognized,
+  applyManuallyReviewed,
+  manualReviewOptions,
   allowsPreview:()=>!dialog.open&&!previewGuard,
   snapshot:()=>JSON.parse(JSON.stringify(contexts)),
   restore(value){contexts=value&&typeof value==='object'?JSON.parse(JSON.stringify(value)):{};close();render();},
