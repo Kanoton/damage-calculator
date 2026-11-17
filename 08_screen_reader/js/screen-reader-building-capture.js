@@ -7,6 +7,8 @@
  const status=$('reader-building-status'),slot=$('reader-building-slot'),plant=$('reader-building-plant');
  const review=$('reader-building-review'),confirm=$('reader-building-confirm'),clear=$('reader-building-clear');
  const selection=$('reader-building-selection');
+ const mapCheck=$('reader-building-map-check'),mapImage=$('reader-building-map-image');
+ const mapPin=$('reader-building-map-pin'),mapLabel=$('reader-building-map-label');
  let captured=null;
 
  function hsv(r,g,b){
@@ -74,8 +76,23 @@
    ctx.beginPath();ctx.moveTo(x-11,y);ctx.lineTo(x+11,y);ctx.moveTo(x,y-11);ctx.lineTo(x,y+11);ctx.stroke();
   }
  }
+ function mapPreview(){
+  mapCheck.hidden=true;
+  if(!captured||!slot.value)return;
+  const s=captured.options.slots.find(v=>v.slotId===slot.value);
+  if(!s||!Number.isFinite(s.mapPlantX)||!Number.isFinite(s.mapPlantY)||
+     !Number.isFinite(s.mapWidth)||!Number.isFinite(s.mapHeight)||
+     s.mapWidth<=0||s.mapHeight<=0||
+     s.mapPlantX<0||s.mapPlantY<0||s.mapPlantX>s.mapWidth||s.mapPlantY>s.mapHeight||
+     !captured.mapSrc)return;
+  mapImage.src=captured.mapSrc;
+  mapPin.style.left=(s.mapPlantX/s.mapWidth*100)+'%';
+  mapPin.style.top=(s.mapPlantY/s.mapHeight*100)+'%';
+  mapLabel.textContent=s.label+'（赤い印が建築位置）';
+  mapCheck.hidden=false;
+ }
  function reset(message){
-  captured=null;review.hidden=true;confirm.checked=false;
+  captured=null;review.hidden=true;confirm.checked=false;mapCheck.hidden=true;mapImage.removeAttribute('src');
   slot.replaceChildren(new Option('マスを選択',''));plant.replaceChildren(new Option('植物を選択',''));
   status.textContent=message||'取得した画像はありません。';selection.textContent='';
  }
@@ -92,12 +109,13 @@
   ctx.clearRect(0,0,512,288);
   ctx.drawImage(source,0,0,512,288);
   const image=ctx.getImageData(0,0,512,288);
-  captured={image,options,points:candidates(image),click:null};
+  const mapSrc=document.getElementById('mp-map-image')?.currentSrc||'';
+  captured={image,options,points:candidates(image),click:null,mapSrc};
   slot.replaceChildren(new Option('マスを選択',''),
    ...options.slots.map(v=>new Option(v.label,v.slotId)));
   plant.replaceChildren(new Option('植物を選択',''),
    ...options.cards.map(v=>new Option(v.name,v.name)));
-  confirm.checked=false;review.hidden=false;review.open=true;render();
+  confirm.checked=false;review.hidden=false;review.open=true;mapPreview();render();
   selection.textContent='画像上の台座をクリックして位置を確認してください。';
   const tanCount=captured.points.filter(p=>p.kind==='pale').length;
   const cyanCount=captured.points.filter(p=>p.kind==='cyan').length;
@@ -115,7 +133,7 @@
   selection.textContent=(near&&near.d<16?'参考候補'+near.id+'付近。':'任意の位置。')+
    ' 画面上の位置だけではO/IマスIDを確定できません。';
  });
- slot.addEventListener('change',()=>{confirm.checked=false;});
+ slot.addEventListener('change',()=>{confirm.checked=false;mapPreview();});
  plant.addEventListener('change',()=>{confirm.checked=false;});
  clear.addEventListener('click',()=>reset('取得画像を破棄しました。'));
  $('reader-building-apply').addEventListener('click',()=>{
@@ -124,7 +142,8 @@
   }
   const bridge=window.ScreenReaderBuildingBridge,context=bridge?.context();
   if(context?.mapId!==captured.options.mapId||
-     context?.difficulty!==captured.options.difficulty){
+     context?.difficulty!==captured.options.difficulty||
+     (document.getElementById('mp-map-image')?.currentSrc||'')!==captured.mapSrc){
    reset('マップまたは難易度が変わったので取得結果を破棄しました。');return;
   }
   const result=bridge.applyManuallyReviewed({
@@ -138,7 +157,7 @@
    '更新を保留しました：'+result.reason;
   confirm.checked=false;
   // Each individual application needs a fresh explicit capture + review.
-  if(result.added===1){captured=null;ctx.clearRect(0,0,512,288);selection.textContent='続けて反映するときは、もう一度「建築情報を取得」を押してください。';}
+  if(result.added===1){captured=null;mapCheck.hidden=true;ctx.clearRect(0,0,512,288);selection.textContent='続けて反映するときは、もう一度「建築情報を取得」を押してください。';}
  });
  window.addEventListener('new-game-reset',()=>reset('新しいゲームのため取得画像を破棄しました。'));
  window.ScreenReaderBuildingCapture={capture,reset,analyzeImage:candidates};
