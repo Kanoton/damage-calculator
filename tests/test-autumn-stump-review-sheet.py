@@ -39,6 +39,20 @@ class ReviewSheetTests(unittest.TestCase):
         self.assertGreater(np.count_nonzero(marked), 0)
         self.assertEqual(np.count_nonzero(original), 0)
 
+    def test_brown_candidate_review_ids_are_not_slot_ids(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / 'brown.png'
+            frame = np.zeros((288, 512, 3), dtype=np.uint8)
+            cv2.rectangle(frame, (180,110), (216,130), (60,100,155), -1)
+            self.assertTrue(cv2.imwrite(str(path), frame))
+            sheet, result = m.review([path])
+            candidates = result['images'][0]['brown_candidates']
+            self.assertGreaterEqual(len(candidates), 1)
+            self.assertEqual(candidates[0]['candidate_id'], 'B1')
+            self.assertEqual(candidates[0]['human_label'], 'unreviewed')
+            self.assertFalse(result['slot_ids_verified'])
+            self.assertEqual(sheet.shape, (288, 1024, 3))
+
     def test_no_images_or_unreadable_image_fail(self):
         with self.assertRaises(ValueError):
             m.review([])
