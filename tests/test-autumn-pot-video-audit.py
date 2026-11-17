@@ -96,7 +96,35 @@ class ReplayAuditTests(unittest.TestCase):
         self.assertEqual(result['verdict']['reason'],
                          'not-enough-independent-positive-frames')
         self.assertEqual(analyze.call_count,0)
+        self.assertEqual(result['verdict']['reason'],'sampled-frame-unreadable')
 
+
+    def test_missing_middle_frame_blocks_false_positive(self):
+        video=FakeVideo()
+        reads=0
+        def sometimes_unreadable():
+            nonlocal reads
+            reads+=1
+            if reads==2:
+                return False,None
+            return True,np.zeros((288,512,3),dtype=np.uint8)
+        video.read=sometimes_unreadable
+        with patch.object(m.cv2,'VideoCapture',return_value=video),patch.object(
+                m.offsets,'analyze',side_effect=positive):
+            result=m.sample('unused.mp4',{},step_s=1,max_frames=3)
+        self.assertEqual(result['suitable_frames'],2)
+        self.assertEqual(result['status'],'abstain')
+        self.assertEqual(result['verdict']['reason'],'sampled-frame-unreadable')
+        self.assertEqual(result['unreadable_frame_indices'],[10])
+
+    def test_sampling_limit_is_disclosed_not_full_video(self):
+        video=FakeVideo()
+        with patch.object(m.cv2,'VideoCapture',return_value=video),patch.object(
+                m.offsets,'analyze',side_effect=positive):
+            result=m.sample('unused.mp4',{},step_s=1,max_frames=2)
+        self.assertFalse(result['full_video_covered'])
+        self.assertEqual(result['video_duration_seconds_estimate'],4.0)
+        self.assertEqual(result['sampled_through_seconds_estimate'],1.0)
 
 
 if __name__=='__main__':
