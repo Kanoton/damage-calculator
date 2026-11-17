@@ -73,6 +73,38 @@ def pale_platform_proposals(frame):
     return sorted(candidates, key=lambda c: (c['y'], c['x']))
 
 
+def cyan_structure_base_proposals(frame):
+    """Experimental base-location hints from cyan *structure*, not empty water.
+
+    Plants, map icons, and terrain can also contain cyan. The 16px downward
+    offset is a local screenshot probe, NOT validated geometry across cameras.
+    This is an independent research channel; never fuse as a confirmed stump.
+    """
+    if not isinstance(frame, np.ndarray) or frame.shape != (288, 512, 3):
+        raise ValueError('Expected 512x288 BGR frame')
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    cyan = cv2.inRange(hsv, (75, 75, 85), (105, 255, 255))
+    closed = cv2.morphologyEx(
+        cyan, cv2.MORPH_CLOSE,
+        cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9)))
+    count, _, stats, centers = cv2.connectedComponentsWithStats(closed)
+    results = []
+    for i in range(1, count):
+        x, y, w, h, area = map(int, stats[i])
+        cx, cy = map(float, centers[i])
+        if not (350 < area < 1700 and 32 < w < 85 and 24 < h < 62
+                and 100 < cx < 460 and 50 < cy < 205):
+            continue
+        results.append({
+            'x': round(cx, 1), 'y': round(cy+16, 1),
+            'cyan_structure_x': round(cx, 1),
+            'cyan_structure_y': round(cy, 1),
+            'area': area, 'width': w, 'height': h,
+            'status': 'cyan-structure-base-hint-unverified'
+        })
+    return sorted(results, key=lambda v: (v['y'], v['x']))
+
+
 def exclude_tile_overlaps(base_candidates, tile_centers, radius=24):
     """Separate nearby colored tile bodies; retain raw proposals for review.
 
@@ -99,10 +131,13 @@ def compare(frame, water_proposals, tile_centers=None):
     """
     bases = propose(frame)
     pale = pale_platform_proposals(frame)
+    cyan_structure = cyan_structure_base_proposals(frame)
     kept, overlaps = exclude_tile_overlaps(bases, tile_centers or [])
     return {'brown_base_candidates': bases,
             'pale_platform_candidates': pale,
             'pale_platform_candidate_count': len(pale),
+            'cyan_structure_base_hints': cyan_structure,
+            'cyan_structure_base_hint_count': len(cyan_structure),
             'non_tile_overlap_candidates': kept,
             'tile_overlap_candidates': overlaps,
             'water_anchor_count': len(water_proposals),
