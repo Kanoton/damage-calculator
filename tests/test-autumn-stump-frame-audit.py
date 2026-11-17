@@ -39,6 +39,17 @@ class StumpFrameTests(unittest.TestCase):
         self.assertFalse(report['slot_ids_verified'])
         self.assertEqual(report['plant_type'], 'unknown')
 
+    def test_water_pot_is_not_its_own_tile(self):
+        frame = np.zeros((288, 512, 3), dtype=np.uint8)
+        with patch.object(m.pots, 'propose',
+                          return_value=[{'x': 180, 'y': 100}]), patch.object(
+                m, 'tile_centers',
+                return_value=[{'x': 180, 'y': 100},
+                              {'x': 230, 'y': 108}]):
+            report = m.analyze(frame)
+        self.assertEqual(report['color_tile_candidates'], 1)
+        self.assertEqual(report['local_side_matches'][0]['tile_index'], 0)
+
     def test_invalid_frame_rejected(self):
         with self.assertRaises(ValueError):
             m.analyze(np.zeros((100, 100, 3), dtype=np.uint8))
