@@ -109,3 +109,43 @@ test('08: building capture refuses non-autumn maps and camera-snapshot stale con
  await expect(page.locator('#reader-building-status')).toContainText('破棄');
  expect(await page.evaluate(()=>window.ScreenReaderBuildingBridge.snapshot())).toEqual({});
 });
+
+
+for(const protocol of ['http','file'])test('08: separate pale and cyan screenshot clues and invalidate on image change '+protocol,async({page})=>{
+ await page.goto(protocol==='file'?pathToFileURL(path.resolve('08_screen_reader/index.html')).href:'/08_screen_reader/');
+ await page.locator('#mp-map-select').selectOption('MAP0105');
+ await page.waitForFunction(()=>window.ScreenReaderBuildingBridge?.manualReviewOptions().slots.length>0);
+ await page.locator('#reader-toggle').click();
+ const clues=await page.evaluate(()=>{
+  const c=document.createElement('canvas');c.width=512;c.height=288;
+  const g=c.getContext('2d');
+  g.fillStyle='rgb(30,30,30)';g.fillRect(0,0,512,288);
+  g.fillStyle='rgb(220,184,139)';g.fillRect(185,113,40,32);
+  g.fillStyle='rgb(45,176,196)';g.fillRect(225,113,40,32);
+  const candidates=window.ScreenReaderBuildingCapture.analyzeImage(
+   g.getImageData(0,0,512,288));
+  window.ScreenReaderBuildingCapture.capture(c);
+  return candidates.map(v=>({id:v.id,kind:v.kind}));
+ });
+ expect(clues.some(v=>v.kind==='pale'&&v.id==='T1')).toBeTruthy();
+ expect(clues.some(v=>v.kind==='cyan'&&v.id==='S1')).toBeTruthy();
+ await expect(page.locator('#reader-building-status')).toContainText('淡色T候補');
+ await expect(page.locator('#reader-building-status')).toContainText('青緑S候補');
+ await page.locator('#reader-building-frame').click({position:{x:210,y:125}});
+ await page.locator('#reader-building-slot').selectOption('O04');
+ await page.locator('#reader-building-plant').selectOption('芳香ピーチ');
+ await page.locator('#reader-building-confirm').check();
+ const before=await page.evaluate(()=>JSON.stringify(window.ScreenReaderBuildingBridge.snapshot()));
+ // The old screenshot cannot be applied after a different independent image.
+ const png=await page.evaluate(()=>{
+  const c=document.createElement('canvas');c.width=32;c.height=32;
+  return c.toDataURL('image/png');
+ });
+ await page.locator('#reader-file').setInputFiles({
+  name:'new-source.png',mimeType:'image/png',
+  buffer:Buffer.from(png.split(',')[1],'base64')
+ });
+ await expect(page.locator('#reader-building-review')).toBeHidden();
+ await expect(page.locator('#reader-building-status')).toContainText('画像を切り替えた');
+ expect(await page.evaluate(()=>JSON.stringify(window.ScreenReaderBuildingBridge.snapshot()))).toBe(before);
+});
