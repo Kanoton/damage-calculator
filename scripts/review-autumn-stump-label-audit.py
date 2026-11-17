@@ -31,22 +31,41 @@ def audit(candidates, annotations, max_distance=20.0):
                 isinstance(point.get(k), (int, float)) and
                 math.isfinite(point[k]) for k in ('x', 'y')):
             raise ValueError('Invalid candidate or label coordinates')
-    distances = sorted(
-        (math.hypot(p['x']-t['x'], p['y']-t['y']), i, j)
-        for i, p in enumerate(positives)
-        for j, t in enumerate(candidates))
-    assigned_positives, assigned_candidates = set(), set()
-    matches = []
-    for distance, i, j in distances:
-        if distance > max_distance:
-            break
-        if i not in assigned_positives and j not in assigned_candidates:
-            assigned_positives.add(i)
-            assigned_candidates.add(j)
-            matches.append({'label_index': i, 'candidate_index': j,
-                            'distance': round(distance, 2)})
+    # Maximum-cardinality bipartite matching. A greedy nearest-first choice
+    # can strand a label which has only one viable candidate.
+    edges = []
+    for positive in positives:
+        nearby = sorted(
+            (math.hypot(positive['x']-candidate['x'],
+                        positive['y']-candidate['y']), j)
+            for j, candidate in enumerate(candidates))
+        edges.append([(j, distance) for distance, j in nearby
+                      if distance <= max_distance])
+    candidate_to_label = {}
+
+    def assign(label_index, seen):
+        for candidate_index, _ in edges[label_index]:
+            if candidate_index in seen:
+                continue
+            seen.add(candidate_index)
+            previous = candidate_to_label.get(candidate_index)
+            if previous is None or assign(previous, seen):
+                candidate_to_label[candidate_index] = label_index
+                return True
+        return False
+
+    for label_index in sorted(range(len(positives)),
+                              key=lambda i: (len(edges[i]), i)):
+        assign(label_index, set())
+    matches = sorted(
+        [{'label_index': label_index, 'candidate_index': candidate_index,
+          'distance': round(math.hypot(
+              positives[label_index]['x']-candidates[candidate_index]['x'],
+              positives[label_index]['y']-candidates[candidate_index]['y']), 2)}
+         for candidate_index, label_index in candidate_to_label.items()],
+        key=lambda match: match['label_index'])
     complete = annotations.get('exhaustive', False) is True
-    unmatched = len(candidates)-len(assigned_candidates)
+    unmatched = len(candidates)-len(candidate_to_label)
     return {
         'status': 'complete-label-evaluation' if complete else 'partial-label-evaluation',
         'labeled_positive_count': len(positives),
