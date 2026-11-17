@@ -66,7 +66,12 @@ def analyze(frame):
         raise ValueError('Expected 512x288 BGR frame')
     stumps = pots.propose(frame)
     tiles = tile_centers(frame)
-    # Cyan water inside an empty pot also passes the broad blue-tile mask.\n    # A pot cannot simultaneously be its own neighboring map tile.\n    tiles = [tile for tile in tiles if not any(\n        (tile['x']-stump['x'])**2 + (tile['y']-stump['y'])**2 < 20**2\n        for stump in stumps)]\n    paired = sides.assess(stumps, tiles)
+    # Cyan water inside an empty pot also passes the broad blue-tile mask.
+    # A pot cannot simultaneously be its own neighboring map tile.
+    tiles = [tile for tile in tiles if not any(
+        (tile['x']-stump['x'])**2 + (tile['y']-stump['y'])**2 < 20**2
+        for stump in stumps)]
+    paired = sides.assess(stumps, tiles)
     return {
         'status': paired['status'],
         'water_stump_candidates': len(stumps),
@@ -91,7 +96,8 @@ def main():
         raise ValueError('Cannot decode image')
     report = analyze(frame)
     args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2)
-                           + '\n', encoding='utf-8')
+                           + '
+', encoding='utf-8')
     print(json.dumps({'stumps': report['water_stump_candidates'],
                       'tiles': report['color_tile_candidates'],
                       'pairs': len(report['local_side_matches'])}))
