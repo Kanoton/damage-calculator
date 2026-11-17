@@ -94,7 +94,9 @@ function createAutumnBuildingEditor({root,beforeChange,onInteraction,onChange}){
   let difficulty='';
   try{difficulty=JSON.parse(context||'[]')[1]||'';}catch{return {mapId,difficulty,slots:[],cards:[]};}
   return {mapId,difficulty,
-   slots:slots.map((row,index)=>({slotId:row.slot_id,label:'建築可能マス'+(index+1)+' ('+row.slot_id+')'})),
+   slots:slots.map((row,index)=>({slotId:row.slot_id,label:'建築可能マス'+(index+1)+' ('+row.slot_id+')',
+    mapPlantX:Number(row.plant_x),mapPlantY:Number(row.plant_y),
+    mapWidth:Number(row.map_width),mapHeight:Number(row.map_height)})),
    cards:cards().map(row=>({name:row.name}))};
  }
  function open(slot,index){
