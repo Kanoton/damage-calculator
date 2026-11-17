@@ -68,6 +68,19 @@ class VideoAuditTests(unittest.TestCase):
         self.assertEqual(report['unreadable_indices'], [2])
         self.assertEqual(report['status'], 'incomplete-or-unreadable')
 
+    def test_contiguous_positive_runs_are_not_unique_object_counts(self):
+        rows = [
+            {'index': 0, 'status': 'local-side-proposals-only', 'local_pair_count': 2},
+            {'index': 30, 'status': 'local-side-proposals-only', 'local_pair_count': 1},
+            {'index': 60, 'status': 'abstain', 'local_pair_count': 0},
+            {'index': 90, 'status': 'local-side-proposals-only', 'local_pair_count': 1},
+            {'index': 120, 'status': 'unreadable'}
+        ]
+        self.assertEqual(m.contiguous_runs(rows, 'local_pair_count'), [
+            {'start_index': 0, 'end_index': 30, 'sample_count': 2},
+            {'start_index': 90, 'end_index': 90, 'sample_count': 1}
+        ])
+
     def test_invalid_sampling_rejected(self):
         for seconds in (0, float('nan'), -1):
             with self.assertRaises(ValueError):
