@@ -84,6 +84,53 @@ def audit(candidates, annotations, max_distance=20.0):
     }
 
 
+def audit_many(scenes, max_distance=20.0):
+    """Aggregate different camera scenes without double-counting same image.
+
+    Input: [{image: relative filename, candidates: [...],
+             annotations: {positive_centers: [...], exhaustive: bool}}].
+    For incomplete annotations, aggregate precision/false-positive stay unknown.
+    """
+    if not isinstance(scenes, list) or not scenes:
+        raise ValueError('At least one scene required')
+    reports, seen_names = [], set()
+    for scene in scenes:
+        if not isinstance(scene, dict) or not isinstance(scene.get('image'), str):
+            raise ValueError('Scene image name required')
+        name = scene['image']
+        if not name or name in seen_names:
+            raise ValueError('Empty or duplicate scene image name')
+        seen_names.add(name)
+        report = audit(scene.get('candidates'), scene.get('annotations'),
+                       max_distance=max_distance)
+        reports.append({'image': name, 'audit': report})
+    all_exhaustive = all(
+        scene['audit']['status'] == 'complete-label-evaluation'
+        for scene in reports)
+    positives = sum(scene['audit']['labeled_positive_count']
+                    for scene in reports)
+    matches = sum(scene['audit']['matched_positive_count']
+                  for scene in reports)
+    candidates = sum(scene['audit']['candidate_count']
+                     for scene in reports)
+    return {
+        'status': ('complete-label-evaluation' if all_exhaustive
+                   else 'partial-label-evaluation'),
+        'scene_count': len(reports),
+        'labeled_positive_count': positives,
+        'matched_positive_count': matches,
+        'missed_labeled_positives': positives-matches,
+        'candidate_count': candidates,
+        'positive_recall_on_labeled_points':
+            round(matches/positives, 4) if positives else None,
+        'precision': (round(matches/candidates, 4) if candidates else None)
+                     if all_exhaustive else None,
+        'false_positive_count': (candidates-matches) if all_exhaustive else None,
+        'scenes': reports, 'slot_ids_verified': False,
+        'production_application': 'forbidden'
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--image', type=Path, required=True)
