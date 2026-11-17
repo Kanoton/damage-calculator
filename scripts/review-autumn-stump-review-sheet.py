@@ -98,6 +98,8 @@ def review(images):
                           'colored_tile_overlap': p['colored_tile_overlap'],
                           'horizontal_double_edge_score':
                           bases['cyan_hint_edge_profiles'][i].get('horizontal_double_edge_score'),
+                          'horizontal_separated_12px_score':
+                          bases['cyan_hint_edge_profiles'][i].get('horizontal_separated_12px_score'),
                           'human_label': 'unreviewed'}
                          for i, p in enumerate(bases['cyan_structure_base_hints'])],
                      'pale_platform_candidates': [
@@ -106,6 +108,8 @@ def review(images):
                           p['surrounding_water_ratio'],
                           'horizontal_double_edge_score':
                           bases['pale_edge_profiles'][i].get('horizontal_double_edge_score'),
+                          'horizontal_separated_12px_score':
+                          bases['pale_edge_profiles'][i].get('horizontal_separated_12px_score'),
                           'human_label': 'unreviewed'}
                          for i, p in enumerate(bases['pale_platform_candidates'])],
                      'brown_candidates': [
