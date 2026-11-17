@@ -107,8 +107,8 @@ def track(frames, anchors=None):
         for item in frame.get('building_evidence', []):
             local = mapping.get(item['pair_index'])
             if (local is not None and slots[local] is not None and
-                    item['human_reviewed'] is True and item['state'] == 'built'):
-                observations[local].append(frame_index)
+                    item['human_reviewed'] is True and item['state'] != 'unknown'):
+                observations[local].append((frame_index, item['state']))
         rows.append({'frame_index': frame_index, 'status': status,
                      'reason': reason,
                      'tracked': [{'pair_index': i, 'temporary_track_id': local,
@@ -116,12 +116,18 @@ def track(frames, anchors=None):
                                  for i, local in sorted(mapping.items())]})
     pending = []
     for local, indices in observations.items():
-        if len(indices) >= 2:
+        built = [index for index, state in indices if state == 'built']
+        empty = [index for index, state in indices if state == 'empty']
+        if len(built) >= 2 and not empty:
             pending.append({'slot_id': slots[local],
                             'temporary_track_id': local,
-                            'supporting_frame_indices': indices,
+                            'supporting_frame_indices': built,
                             'status': 'human-review-only-not-applied'})
+    conflicting = [slots[local] for local, records in observations.items()
+                   if any(state == 'built' for _, state in records) and
+                   any(state == 'empty' for _, state in records)]
     return {'frames': rows, 'human_verified_anchor_count': len(anchor_map),
+            'conflicting_reviewed_build_states': conflicting,
             'pending_build_review': pending,
             'camera_tracking_disconnected': disconnection,
             'slot_ids_verified_automatically': False,
