@@ -152,6 +152,6 @@ for(const protocol of ['http','file'])test('08: separate pale and cyan screensho
   buffer:Buffer.from(png.split(',')[1],'base64')
  });
  await expect(page.locator('#reader-building-review')).toBeHidden();
- await expect(page.locator('#reader-building-status')).toContainText('画像を切り替えた');
+ await expect(page.locator('#reader-building-status')).toContainText('取得画像を破棄');
  expect(await page.evaluate(()=>JSON.stringify(window.ScreenReaderBuildingBridge.snapshot()))).toBe(before);
 });
