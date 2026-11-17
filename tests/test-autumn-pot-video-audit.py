@@ -124,6 +124,25 @@ class ReplayAuditTests(unittest.TestCase):
         self.assertEqual(result['video_duration_seconds_estimate'],4.0)
         self.assertEqual(result['sampled_through_seconds_estimate'],1.0)
 
+    def test_diagnostic_counts_match_detector_and_never_expose_pixels(self):
+        video=FakeVideo()
+        symbols=[{'tile_kind_candidate':kind,'x':i*40+100,'y':i*20+50}
+                 for i,kind in enumerate(m.offsets.five.KINDS)]
+        with patch.object(m.cv2,'VideoCapture',return_value=video),patch.object(
+                m.offsets.five.blue,'propose',return_value=symbols[:2]),patch.object(
+                m.offsets.five.event,'propose',return_value=symbols[2:3]),patch.object(
+                m.offsets.five.red,'propose',return_value=symbols[3:]),patch.object(
+                m.offsets.pots,'propose',return_value=[]),patch.object(
+                m.offsets.five,'assess',return_value={'status':'abstain'}),patch.object(
+                m.offsets,'associate',return_value={'status':'abstain','reason':'no-pots'}):
+            result=m.sample('unused.mp4',{},step_s=1,max_frames=2)
+        self.assertEqual(result['five_kind_complete_frames'],2)
+        self.assertEqual(result['candidate_presence_frames']['TeleportPoint'],2)
+        self.assertEqual(result['candidate_totals']['Damage'],2)
+        self.assertEqual(result['frame_audit'][0]['candidate_counts']['pot'],0)
+        self.assertNotIn('pixels',str(result))
+        self.assertEqual(result['production_application'],'forbidden')
+
 
 if __name__=='__main__':
     unittest.main()
