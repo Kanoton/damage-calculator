@@ -24,7 +24,8 @@ base_audit = importlib.util.module_from_spec(base_spec)
 base_spec.loader.exec_module(base_audit)
 
 
-def annotate(frame, report, base_candidates=None, pale_candidates=None):
+def annotate(frame, report, base_candidates=None, pale_candidates=None,
+             cyan_structure_hints=None):
     if not isinstance(frame, np.ndarray) or frame.shape != (288, 512, 3):
         raise ValueError('Expected 512x288 BGR frame')
     out = frame.copy()
@@ -44,6 +45,15 @@ def annotate(frame, report, base_candidates=None, pale_candidates=None):
                     cv2.FONT_HERSHEY_SIMPLEX, .38, (0, 0, 0), 2)
         cv2.putText(out, 'T'+str(i+1), (x+8, y-10),
                     cv2.FONT_HERSHEY_SIMPLEX, .38, (255, 255, 0), 1)
+    # Green S# hints are cyan structural colors, not verified stump bases.
+    for i, candidate in enumerate(cyan_structure_hints or []):
+        x, y = round(candidate['x']), round(candidate['y'])
+        cv2.drawMarker(out, (x, y), (0, 255, 0),
+                       cv2.MARKER_DIAMOND, 16, 2)
+        cv2.putText(out, 'S'+str(i+1), (x+6, y+13),
+                    cv2.FONT_HERSHEY_SIMPLEX, .38, (0, 0, 0), 2)
+        cv2.putText(out, 'S'+str(i+1), (x+6, y+13),
+                    cv2.FONT_HERSHEY_SIMPLEX, .38, (0, 255, 0), 1)
     # Anonymous pairs have original centers. Never assign canonical slot IDs.
     for i, pair in enumerate(report['anonymous_pairs']):
         stump = (round(pair['stump']['x']), round(pair['stump']['y']))
@@ -70,7 +80,8 @@ def review(images):
         report = frame_audit.analyze(frame)
         bases = base_audit.compare(frame, [], frame_audit.tile_centers(frame))
         marked = annotate(frame, report, bases['brown_base_candidates'],
-                          bases['pale_platform_candidates'])
+                          bases['pale_platform_candidates'],
+                          bases['cyan_structure_base_hints'])
         cv2.rectangle(marked, (0, 0), (512, 21), (0, 0, 0), -1)
         cv2.putText(marked, 'Image '+str(len(rows)+1)+' / candidate pairs: '+
                     str(len(report['anonymous_pairs'])), (6, 15),
@@ -81,6 +92,10 @@ def review(images):
                      'water_stump_candidates': report['water_stump_candidates'],
                      'color_tile_candidates': report['color_tile_candidates'],
                      'anonymous_pairs': report['anonymous_pairs'],
+                     'cyan_structure_hints': [
+                         {'candidate_id': 'S'+str(i+1), 'x': p['x'],
+                          'y': p['y'], 'human_label': 'unreviewed'}
+                         for i, p in enumerate(bases['cyan_structure_base_hints'])],
                      'pale_platform_candidates': [
                          {'candidate_id': 'T'+str(i+1), 'x': p['x'],
                           'y': p['y'], 'surrounding_water_ratio':
@@ -105,7 +120,7 @@ def review(images):
         'images': rows, 'manual_verified': False,
         'slot_ids_verified': False, 'plant_type': 'unknown',
         'production_application': 'forbidden',
-        'legend': 'Yellow circle = water-stump candidate; purple = tile candidate; white line = local side pairing; orange B# = brown shape; cyan T# = tan platform shape (all unreviewed). P# and B# are local-only, not map IDs.'
+        'legend': 'Yellow circle = water-stump candidate; purple = tile candidate; white line = local side pairing; orange B# = brown shape; cyan T# = tan platform shape; green S# = cyan structural hint (all unreviewed). P# and B# are local-only, not map IDs.'
     }
 
 
