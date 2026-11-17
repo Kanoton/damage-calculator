@@ -75,6 +75,29 @@ class ReplayAuditTests(unittest.TestCase):
         self.assertEqual(result['status'],'abstain')
         self.assertEqual(result['verdict']['reason'],'geometry-changed-or-mismatched-pots')
 
+    def test_low_fps_duplicate_indices_are_not_independent_evidence(self):
+        video=FakeVideo()
+        original_get=video.get
+        video.get=lambda code: 1 if code==cv2.CAP_PROP_FPS else original_get(code)
+        with patch.object(m.cv2,'VideoCapture',return_value=video),patch.object(
+                m.offsets,'analyze',side_effect=positive) as analyze:
+            result=m.sample('unused.mp4',{},step_s=0.2,max_frames=5)
+        self.assertGreater(result['duplicate_frame_indices'],0)
+        self.assertEqual(result['suitable_frames'],2)
+        self.assertEqual(analyze.call_count,2)
+
+    def test_seek_failure_is_abstained_without_analysis(self):
+        video=FakeVideo()
+        video.set=lambda code,value: False
+        with patch.object(m.cv2,'VideoCapture',return_value=video),patch.object(
+                m.offsets,'analyze',side_effect=positive) as analyze:
+            result=m.sample('unused.mp4',{},step_s=1,max_frames=3)
+        self.assertEqual(result['suitable_frames'],0)
+        self.assertEqual(result['verdict']['reason'],
+                         'not-enough-independent-positive-frames')
+        self.assertEqual(analyze.call_count,0)
+
+
 
 if __name__=='__main__':
     unittest.main()
