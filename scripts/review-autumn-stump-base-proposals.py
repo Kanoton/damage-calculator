@@ -37,6 +37,42 @@ def propose(frame):
     return sorted(candidates, key=lambda v: (v['y'], v['x']))
 
 
+
+def pale_platform_proposals(frame):
+    """Water-independent tan platform-body candidates, separate from brown mask.
+
+    The surrounding-water ratio is evidence about context, not a requirement
+    for detection and not a proof of stump identity. The shape can also be
+    produced by map icons and terrain.
+    """
+    if not isinstance(frame, np.ndarray) or frame.shape != (288, 512, 3):
+        raise ValueError('Expected 512x288 BGR frame')
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    tan = cv2.inRange(hsv, (3, 30, 130), (29, 155, 255))
+    count, _, stats, centers = cv2.connectedComponentsWithStats(tan)
+    candidates = []
+    for i in range(1, count):
+        x, y, w, h, area = map(int, stats[i])
+        cx, cy = map(float, centers[i])
+        if not (140 < area < 2800 and 25 < w < 105 and 14 < h < 85
+                and 80 < cx < 470 and 60 < cy < 240):
+            continue
+        pad = 15
+        x0, x1 = max(0, x-pad), min(512, x+w+pad)
+        y0, y1 = max(0, y-pad), min(288, y+h+pad)
+        region = hsv[y0:y1, x0:x1]
+        neighborhood = np.ones(region.shape[:2], dtype=bool)
+        neighborhood[y-y0:y+h-y0, x-x0:x+w-x0] = False
+        water = ((region[:,:,0] >= 70) & (region[:,:,0] <= 110)
+                 & (region[:,:,1] >= 30) & (region[:,:,2] >= 50))
+        ratio = float(water[neighborhood].mean()) if neighborhood.any() else 0.0
+        candidates.append({'x': round(cx, 1), 'y': round(cy, 1),
+                           'area': area, 'width': w, 'height': h,
+                           'surrounding_water_ratio': round(ratio, 3),
+                           'status': 'pale-platform-looking-unverified'})
+    return sorted(candidates, key=lambda c: (c['y'], c['x']))
+
+
 def exclude_tile_overlaps(base_candidates, tile_centers, radius=24):
     """Separate nearby colored tile bodies; retain raw proposals for review.
 
@@ -62,8 +98,11 @@ def compare(frame, water_proposals, tile_centers=None):
     No spatial overlap is asserted as a match: water center is above the base.
     """
     bases = propose(frame)
+    pale = pale_platform_proposals(frame)
     kept, overlaps = exclude_tile_overlaps(bases, tile_centers or [])
     return {'brown_base_candidates': bases,
+            'pale_platform_candidates': pale,
+            'pale_platform_candidate_count': len(pale),
             'non_tile_overlap_candidates': kept,
             'tile_overlap_candidates': overlaps,
             'water_anchor_count': len(water_proposals),
