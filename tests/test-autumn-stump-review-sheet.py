@@ -67,6 +67,20 @@ class ReviewSheetTests(unittest.TestCase):
             self.assertFalse(result['slot_ids_verified'])
             self.assertEqual(sheet.shape, (288, 1024, 3))
 
+    def test_cyan_structure_hint_is_separate_unreviewed_channel(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / 'cyan-structure.png'
+            frame = np.zeros((288, 512, 3), dtype=np.uint8)
+            cv2.ellipse(frame, (230, 120), (27, 20), 0, 0, 360,
+                        (230, 210, 90), -1)
+            self.assertTrue(cv2.imwrite(str(path), frame))
+            _, result = m.review([path])
+            hints = result['images'][0]['cyan_structure_hints']
+            self.assertGreaterEqual(len(hints), 1)
+            self.assertEqual(hints[0]['candidate_id'], 'S1')
+            self.assertEqual(hints[0]['human_label'], 'unreviewed')
+            self.assertFalse(result['slot_ids_verified'])
+
     def test_no_images_or_unreadable_image_fail(self):
         with self.assertRaises(ValueError):
             m.review([])
