@@ -129,6 +129,49 @@ def annotate_cyan_tile_conflicts(hints, tile_centers, radius=23):
     return result
 
 
+
+def horizontal_edge_profiles(frame, points):
+    """Local upper/lower edge-band diagnostics around candidate base centers.
+
+    Unlike color masks, Sobel uses luminance contrast. A high response does
+    NOT prove stump geometry: map tiles, rocks, and UI can also have edges.
+    Never use the score alone to set occupancy or canonical IDs.
+    """
+    if not isinstance(frame, np.ndarray) or frame.shape != (288, 512, 3):
+        raise ValueError('Expected 512x288 BGR frame')
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    smooth = cv2.GaussianBlur(gray, (3, 3), 0)
+    dy = np.abs(cv2.Sobel(smooth, cv2.CV_32F, 0, 1, ksize=3))
+    result = []
+    for point in points:
+        x, y = int(round(point['x'])), int(round(point['y']))
+        x0, x1, y0, y1 = x-27, x+28, y-32, y+14
+        if x0 < 0 or x1 > 512 or y0 < 0 or y1 > 288:
+            result.append({'x': x, 'y': y, 'status': 'edge-window-out-of-bounds'})
+            continue
+        patch = dy[y0:y1, x0:x1]
+        threshold = max(45.0, float(np.percentile(patch, 75)))
+        row_support = (patch > threshold).mean(axis=1)
+        row_support = np.convolve(row_support, np.ones(3)/3, mode='same')
+        # Restrict peaks to the upper side of the approximate base center.
+        # There is no calibration proof for the 7..26 pixel separation.
+        pairs = [
+            (min(row_support[a], row_support[c]), a, c)
+            for a in range(2, 34)
+            for c in range(a+7, min(a+27, len(row_support)))
+        ]
+        score, upper, lower = max(pairs, default=(0.0, 0, 0))
+        result.append({
+            'x': x, 'y': y,
+            'horizontal_double_edge_score': round(float(score), 4),
+            'upper_edge_y': y0+upper,
+            'lower_edge_y': y0+lower,
+            'edge_band_separation_px': lower-upper,
+            'status': 'unverified-edge-geometry-profile'
+        })
+    return result
+
+
 def exclude_tile_overlaps(base_candidates, tile_centers, radius=24):
     """Separate nearby colored tile bodies; retain raw proposals for review.
 
@@ -159,6 +202,8 @@ def compare(frame, water_proposals, tile_centers=None):
         cyan_structure_base_proposals(frame), tile_centers or [])
     kept, overlaps = exclude_tile_overlaps(bases, tile_centers or [])
     return {'brown_base_candidates': bases,
+            'pale_edge_profiles': horizontal_edge_profiles(frame, pale),
+            'cyan_hint_edge_profiles': horizontal_edge_profiles(frame, cyan_structure),
             'pale_platform_candidates': pale,
             'pale_platform_candidate_count': len(pale),
             'cyan_structure_base_hints': cyan_structure,
