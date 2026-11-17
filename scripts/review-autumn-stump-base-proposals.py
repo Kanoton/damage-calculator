@@ -36,15 +36,39 @@ def propose(frame):
     return sorted(candidates, key=lambda v: (v['y'], v['x']))
 
 
-def compare(frame, water_proposals):
+def exclude_tile_overlaps(base_candidates, tile_centers, radius=24):
+    """Separate nearby colored tile bodies; retain raw proposals for review.
+
+    Exclusion is diagnostic triage, not proof of false detection:
+    genuine stump pixels can be near a colored tile in perspective.
+    """
+    if radius <= 0:
+        raise ValueError('radius must be positive')
+    filtered, overlaps = [], []
+    for candidate in base_candidates:
+        if any((candidate['x']-tile['x'])**2
+               + (candidate['y']-tile['y'])**2 < radius**2
+               for tile in tile_centers):
+            overlaps.append(candidate)
+        else:
+            filtered.append(candidate)
+    return filtered, overlaps
+
+
+def compare(frame, water_proposals, tile_centers=None):
     """Show independent base detections alongside water-derived anchors.
 
     No spatial overlap is asserted as a match: water center is above the base.
     """
     bases = propose(frame)
+    kept, overlaps = exclude_tile_overlaps(bases, tile_centers or [])
     return {'brown_base_candidates': bases,
+            'non_tile_overlap_candidates': kept,
+            'tile_overlap_candidates': overlaps,
             'water_anchor_count': len(water_proposals),
             'base_candidate_count': len(bases),
+            'non_tile_overlap_count': len(kept),
+            'tile_overlap_count': len(overlaps),
             'planted_stumps_verified': False,
             'slot_ids_verified': False,
             'production_application': 'forbidden',
