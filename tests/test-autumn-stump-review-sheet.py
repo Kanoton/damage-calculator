@@ -53,6 +53,20 @@ class ReviewSheetTests(unittest.TestCase):
             self.assertFalse(result['slot_ids_verified'])
             self.assertEqual(sheet.shape, (288, 1024, 3))
 
+    def test_tan_platform_review_remains_unverified(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / 'pale.png'
+            frame = np.zeros((288, 512, 3), dtype=np.uint8)
+            cv2.rectangle(frame, (200, 115), (250, 143), (175, 204, 244), -1)
+            self.assertTrue(cv2.imwrite(str(path), frame))
+            sheet, result = m.review([path])
+            candidates = result['images'][0]['pale_platform_candidates']
+            self.assertGreaterEqual(len(candidates), 1)
+            self.assertEqual(candidates[0]['candidate_id'], 'T1')
+            self.assertEqual(candidates[0]['human_label'], 'unreviewed')
+            self.assertFalse(result['slot_ids_verified'])
+            self.assertEqual(sheet.shape, (288, 1024, 3))
+
     def test_no_images_or_unreadable_image_fail(self):
         with self.assertRaises(ValueError):
             m.review([])
