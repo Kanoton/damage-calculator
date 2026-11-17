@@ -84,6 +84,27 @@ class BaseTests(unittest.TestCase):
             m.cyan_structure_base_proposals(
                 np.zeros((120, 512, 3), dtype=np.uint8))
 
+    def test_cyan_tile_conflict_is_warning_not_rejection(self):
+        hint = {'x': 230, 'y': 136,
+                'cyan_structure_x': 230, 'cyan_structure_y': 120,
+                'status': 'cyan-structure-base-hint-unverified'}
+        results = m.annotate_cyan_tile_conflicts(
+            [hint], [{'x': 231, 'y': 121}])
+        self.assertEqual(len(results), 1)
+        self.assertTrue(results[0]['colored_tile_overlap'])
+        self.assertEqual(results[0]['overlapping_tile_indices'], [0])
+        self.assertEqual(results[0]['human_label'], 'unreviewed')
+        self.assertEqual(hint['status'], 'cyan-structure-base-hint-unverified')
+        safe = m.annotate_cyan_tile_conflicts(
+            [hint], [{'x': 231, 'y': 140}])
+        self.assertTrue(safe[0]['colored_tile_overlap'])
+        # Source-center comparison means the predicted y+16 is not used.
+        far = m.annotate_cyan_tile_conflicts(
+            [hint], [{'x': 230, 'y': 147}], radius=20)
+        self.assertFalse(far[0]['colored_tile_overlap'])
+        with self.assertRaises(ValueError):
+            m.annotate_cyan_tile_conflicts([], [], float('nan'))
+
     def test_no_occupancy_inference(self):
         frame = np.zeros((288,512,3),dtype=np.uint8)
         result = m.compare(frame, [{'x':180,'y':90}])
