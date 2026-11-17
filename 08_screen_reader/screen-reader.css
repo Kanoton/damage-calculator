@@ -35,3 +35,15 @@
 .reader-field[data-state="preview"] small{color:#51458f}
 .reader-field-pair{display:inline-flex;align-items:flex-start;gap:4px}
 .reader-held-name{margin-top:3px;white-space:normal}
+
+
+/* User-triggered, local-only building screenshot review. */
+#reader-building-review{border:1px solid #bfc7d8;border-radius:8px;padding:8px;margin:8px 0;background:#f8f9fd;color:#25283a}
+#reader-building-review[hidden]{display:none}
+#reader-building-review summary{cursor:pointer;font-weight:700}
+#reader-building-frame{display:block;width:min(100%,700px);height:auto;aspect-ratio:16/9;object-fit:contain;cursor:crosshair;border:1px solid #758098;background:#141b28;border-radius:4px;touch-action:manipulation}
+#reader-building-frame:focus-visible{outline:3px solid #1876d2}
+#reader-building-review label{display:inline-flex;align-items:center;gap:5px;flex-wrap:wrap}
+#reader-building-review select{max-width:210px}
+#reader-building-selection{min-height:1.3em;color:#394868;font-size:12px}
+#reader-building-status{min-height:1.4em;white-space:normal}
