@@ -44,12 +44,24 @@ def sample(video,topology,step_s=0.5,max_frames=200):
         duration=count/fps
         frames=[]
         suitable=[]
+        observed_frame_indices=set()
+        duplicate_frame_indices=0
         for i in range(min(max_frames,int(math.ceil(duration/step_s)))):
             requested=i*step_s
             if requested>=duration:
                 break
             # Frame index avoids codec-specific CAP_PROP_POS_MSEC seeking behavior.
-            cap.set(cv2.CAP_PROP_POS_FRAMES,int(round(requested*fps)))
+            target_index=int(round(requested*fps))
+            if target_index in observed_frame_indices:
+                duplicate_frame_indices+=1
+                frames.append({'time_s':round(requested,3),'status':'abstain',
+                               'reason':'duplicate-video-frame-index'})
+                continue
+            observed_frame_indices.add(target_index)
+            if not cap.set(cv2.CAP_PROP_POS_FRAMES,target_index):
+                frames.append({'time_s':round(requested,3),'status':'abstain',
+                               'reason':'video-frame-seek-failed'})
+                continue
             ok,frame=cap.read()
             if not ok or frame is None:
                 frames.append({'time_s':round(requested,3),'status':'abstain',
@@ -57,11 +69,12 @@ def sample(video,topology,step_s=0.5,max_frames=200):
                 continue
             resized=cv2.resize(frame,(512,288),interpolation=cv2.INTER_AREA)
             result=offsets.analyze(resized,topology)
-            entry={'time_s':round(requested,3),'status':result['status']}
+            entry={'time_s':round(target_index/fps,3),'frame_index':target_index,
+                   'status':result['status']}
             if result['status']=='abstain':
                 entry['reason']=result.get('reason','unspecified')
             else:
-                suitable.append({'time_s':round(requested,3),'result':result})
+                suitable.append({'time_s':round(target_index/fps,3),'result':result})
             frames.append(entry)
         if len(suitable)<2:
             verdict={'status':'abstain','reason':'not-enough-independent-positive-frames'}
@@ -71,6 +84,7 @@ def sample(video,topology,step_s=0.5,max_frames=200):
             verdict=cross.assess(suitable)
         return {'status':verdict['status'],'verdict':verdict,
                 'frames_sampled':len(frames),'suitable_frames':len(suitable),
+                'duplicate_frame_indices':duplicate_frame_indices,
                 'frame_audit':frames,
                 'caution':'Research only; selected replay, no ground-truth IDs or plant labels',
                 'production_application':'forbidden'}
