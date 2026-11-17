@@ -28,6 +28,22 @@ class BaseTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             m.propose(np.zeros((100,100,3),dtype=np.uint8))
 
+    def test_tile_overlap_is_separated_but_raw_preserved(self):
+        frame = np.zeros((288,512,3), dtype=np.uint8)
+        cv2.rectangle(frame, (180,110), (216,130), (60,100,155), -1)
+        baseline = m.compare(frame, [])
+        self.assertGreater(baseline['base_candidate_count'], 0)
+        p = baseline['brown_base_candidates'][0]
+        report = m.compare(frame, [], [{'x': p['x'], 'y': p['y']}])
+        self.assertEqual(report['tile_overlap_count'], 1)
+        self.assertEqual(report['non_tile_overlap_count'], 0)
+        self.assertEqual(report['base_candidate_count'], 1)
+        self.assertFalse(report['planted_stumps_verified'])
+
+    def test_tile_overlap_radius_guard(self):
+        with self.assertRaises(ValueError):
+            m.exclude_tile_overlaps([], [], 0)
+
     def test_no_occupancy_inference(self):
         frame = np.zeros((288,512,3),dtype=np.uint8)
         result = m.compare(frame, [{'x':180,'y':90}])
