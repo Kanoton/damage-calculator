@@ -93,8 +93,6 @@ class ReplayAuditTests(unittest.TestCase):
                 m.offsets,'analyze',side_effect=positive) as analyze:
             result=m.sample('unused.mp4',{},step_s=1,max_frames=3)
         self.assertEqual(result['suitable_frames'],0)
-        self.assertEqual(result['verdict']['reason'],
-                         'not-enough-independent-positive-frames')
         self.assertEqual(analyze.call_count,0)
         self.assertEqual(result['verdict']['reason'],'sampled-frame-unreadable')
 
