@@ -18,12 +18,24 @@ spec = importlib.util.spec_from_file_location(
     'review_sheet_frame', HERE / 'review-autumn-stump-frame-audit.py')
 frame_audit = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(frame_audit)
+base_spec = importlib.util.spec_from_file_location(
+    'review_sheet_base', HERE / 'review-autumn-stump-base-proposals.py')
+base_audit = importlib.util.module_from_spec(base_spec)
+base_spec.loader.exec_module(base_audit)
 
 
-def annotate(frame, report):
+def annotate(frame, report, base_candidates=None):
     if not isinstance(frame, np.ndarray) or frame.shape != (288, 512, 3):
         raise ValueError('Expected 512x288 BGR frame')
     out = frame.copy()
+    # Orange B# markers are independently detected brown blobs, not verified stumps.
+    for i, candidate in enumerate(base_candidates or []):
+        x, y = round(candidate['x']), round(candidate['y'])
+        cv2.circle(out, (x, y), 6, (0, 165, 255), 2)
+        cv2.putText(out, 'B'+str(i+1), (x+5, y+10),
+                    cv2.FONT_HERSHEY_SIMPLEX, .36, (0, 0, 0), 2)
+        cv2.putText(out, 'B'+str(i+1), (x+5, y+10),
+                    cv2.FONT_HERSHEY_SIMPLEX, .36, (0, 165, 255), 1)
     # Anonymous pairs have original centers. Never assign canonical slot IDs.
     for i, pair in enumerate(report['anonymous_pairs']):
         stump = (round(pair['stump']['x']), round(pair['stump']['y']))
@@ -48,7 +60,8 @@ def review(images):
             raise ValueError('Cannot decode '+str(path))
         frame = cv2.resize(frame, (512, 288), interpolation=cv2.INTER_AREA)
         report = frame_audit.analyze(frame)
-        marked = annotate(frame, report)
+        bases = base_audit.compare(frame, [], frame_audit.tile_centers(frame))
+        marked = annotate(frame, report, bases['brown_base_candidates'])
         cv2.rectangle(marked, (0, 0), (512, 21), (0, 0, 0), -1)
         cv2.putText(marked, 'Image '+str(len(rows)+1)+' / candidate pairs: '+
                     str(len(report['anonymous_pairs'])), (6, 15),
@@ -59,6 +72,13 @@ def review(images):
                      'water_stump_candidates': report['water_stump_candidates'],
                      'color_tile_candidates': report['color_tile_candidates'],
                      'anonymous_pairs': report['anonymous_pairs'],
+                     'brown_candidates': [
+                         {'candidate_id': 'B'+str(i+1), 'x': p['x'], 'y': p['y'],
+                          'tile_overlap': any(
+                              p['x'] == q['x'] and p['y'] == q['y']
+                              for q in bases['tile_overlap_candidates']),
+                          'human_label': 'unreviewed'}
+                         for i, p in enumerate(bases['brown_base_candidates'])],
                      'manual_verified': False})
     cols = 2
     grid = np.zeros((((len(frames)+cols-1)//cols)*288, cols*512, 3),
@@ -70,7 +90,7 @@ def review(images):
         'images': rows, 'manual_verified': False,
         'slot_ids_verified': False, 'plant_type': 'unknown',
         'production_application': 'forbidden',
-        'legend': 'Yellow circle = water-stump candidate; purple = tile candidate; white line = local side pairing. P# is local-only, not map ID.'
+        'legend': 'Yellow circle = water-stump candidate; purple = tile candidate; white line = local side pairing; orange B# = brown shape candidate (human_label unreviewed). P# and B# are local-only, not map IDs.'
     }
 
 
