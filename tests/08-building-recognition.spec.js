@@ -46,3 +46,66 @@ for(const protocol of ['http','file'])test('08: guarded building vision applicat
  expect(result.labels).toContain('O04:芳香ピーチ');
  expect(result.labels).toContain('I12:金運の木');
 });
+
+for(const protocol of ['http','file'])test('08: building capture review needs explicit human selection and preserves prior building '+protocol,async({page})=>{
+ await page.goto(protocol==='file'?pathToFileURL(path.resolve('08_screen_reader/index.html')).href:'/08_screen_reader/');
+ await page.locator('#mp-map-select').selectOption('MAP0105');
+ await page.waitForFunction(()=>window.ScreenReaderBuildingBridge?.manualReviewOptions().slots.length>0);
+ await page.locator('#reader-toggle').click();
+ const capture=()=>page.evaluate(()=>{
+  const canvas=document.createElement('canvas');canvas.width=512;canvas.height=288;
+  const ctx=canvas.getContext('2d');ctx.fillStyle='#222f30';ctx.fillRect(0,0,512,288);
+  ctx.fillStyle='#d5c395';ctx.fillRect(180,120,45,25);
+  window.ScreenReaderBuildingCapture.capture(canvas);
+ });
+ await expect(page.locator('#reader-building-capture')).toBeDisabled();
+ await capture();
+ await expect(page.locator('#reader-building-review')).toBeVisible();
+ await expect(page.locator('#reader-building-status')).toContainText('1枚を取得');
+ await expect(page.locator('#reader-building-apply')).toBeVisible();
+ await page.locator('#reader-building-frame').click({position:{x:210,y:140}});
+ await page.locator('#reader-building-slot').selectOption('O04');
+ await page.locator('#reader-building-plant').selectOption('芳香ピーチ');
+ const before=await page.evaluate(()=>JSON.stringify(window.ScreenReaderBuildingBridge.snapshot()));
+ await page.locator('#reader-building-apply').click();
+ expect(await page.evaluate(()=>JSON.stringify(window.ScreenReaderBuildingBridge.snapshot()))).toBe(before);
+ await expect(page.locator('#reader-building-status')).toContainText('チェックしてください');
+ await page.locator('#reader-building-confirm').check();
+ await page.locator('#reader-building-apply').click();
+ await expect(page.locator('#reader-building-status')).toContainText('1マスを更新');
+ await expect(page.locator('#mp-building-layer [data-slot="O04"]')).toHaveAttribute('data-card','芳香ピーチ');
+ await capture();
+ await page.locator('#reader-building-frame').click({position:{x:210,y:140}});
+ await page.locator('#reader-building-slot').selectOption('O04');
+ await page.locator('#reader-building-plant').selectOption('電流タンポポ');
+ await page.locator('#reader-building-confirm').check();
+ await page.locator('#reader-building-apply').click();
+ await expect(page.locator('#reader-building-status')).toContainText('上書き');
+ await expect(page.locator('#mp-building-layer [data-slot="O04"]')).toHaveAttribute('data-card','芳香ピーチ');
+ await page.locator('#reader-building-clear').click();
+ await expect(page.locator('#reader-building-review')).toBeHidden();
+});
+
+test('08: building capture refuses non-autumn maps and camera-snapshot stale context',async({page})=>{
+ await page.goto('/08_screen_reader/');
+ await page.locator('#reader-toggle').click();
+ const capture=()=>page.evaluate(()=>{
+  const c=document.createElement('canvas');c.width=512;c.height=288;
+  c.getContext('2d').fillRect(0,0,512,288);
+  window.ScreenReaderBuildingCapture.capture(c);
+ });
+ await capture();
+ await expect(page.locator('#reader-building-review')).toBeHidden();
+ await expect(page.locator('#reader-building-status')).toContainText('秋幻の森');
+ await page.locator('#mp-map-select').selectOption('MAP0105');
+ await page.waitForFunction(()=>window.ScreenReaderBuildingBridge?.manualReviewOptions().slots.length>0);
+ await capture();
+ await page.locator('#reader-building-frame').click({position:{x:210,y:140}});
+ await page.locator('#reader-building-slot').selectOption('O04');
+ await page.locator('#reader-building-plant').selectOption('芳香ピーチ');
+ await page.locator('#reader-building-confirm').check();
+ await page.locator('#mp-map-select').selectOption({index:0});
+ await page.locator('#reader-building-apply').click();
+ await expect(page.locator('#reader-building-status')).toContainText('破棄');
+ expect(await page.evaluate(()=>window.ScreenReaderBuildingBridge.snapshot())).toEqual({});
+});
