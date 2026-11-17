@@ -16,6 +16,8 @@ const buildingEditor=createAutumnBuildingEditor({root,beforeChange:()=>window.re
 window.ScreenReaderBuildingBridge={
  context:()=>({mapId:pick.value,difficulty:difficulty.value}),
  apply:result=>buildingEditor.applyRecognized(result),
+ manualReviewOptions:()=>buildingEditor.manualReviewOptions(),
+ applyManuallyReviewed:result=>buildingEditor.applyManuallyReviewed(result),
  snapshot:()=>buildingEditor.snapshot()
 };
 window.captureAutumnBuildings=()=>buildingEditor.snapshot();
