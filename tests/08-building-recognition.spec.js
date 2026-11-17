@@ -115,6 +115,7 @@ for(const protocol of ['http','file'])test('08: separate pale and cyan screensho
  await page.goto(protocol==='file'?pathToFileURL(path.resolve('08_screen_reader/index.html')).href:'/08_screen_reader/');
  await page.locator('#mp-map-select').selectOption('MAP0105');
  await page.waitForFunction(()=>window.ScreenReaderBuildingBridge?.manualReviewOptions().slots.length>0);
+ await page.waitForFunction(()=>document.getElementById('mp-map-image')?.naturalWidth>0);
  await page.locator('#reader-toggle').click();
  const clues=await page.evaluate(()=>{
   const c=document.createElement('canvas');c.width=512;c.height=288;
@@ -133,6 +134,11 @@ for(const protocol of ['http','file'])test('08: separate pale and cyan screensho
  await expect(page.locator('#reader-building-status')).toContainText('青緑S候補');
  await page.locator('#reader-building-frame').click({position:{x:210,y:125}});
  await page.locator('#reader-building-slot').selectOption('O04');
+ await expect(page.locator('#reader-building-map-check')).toBeVisible();
+ await expect(page.locator('#reader-building-map-label')).toContainText('O04');
+ const marker=await page.locator('#reader-building-map-pin').evaluate(el=>({left:parseFloat(el.style.left),top:parseFloat(el.style.top)}));
+ expect(marker.left).toBeGreaterThan(0);expect(marker.left).toBeLessThan(100);
+ expect(marker.top).toBeGreaterThan(0);expect(marker.top).toBeLessThan(100);
  await page.locator('#reader-building-plant').selectOption('芳香ピーチ');
  await page.locator('#reader-building-confirm').check();
  const before=await page.evaluate(()=>JSON.stringify(window.ScreenReaderBuildingBridge.snapshot()));
