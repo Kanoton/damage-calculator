@@ -120,7 +120,7 @@
    '更新を保留しました：'+result.reason;
   confirm.checked=false;
   // Each individual application needs a fresh explicit capture + review.
-  if(result.added===1){captured=null;review.hidden=true;}
+  if(result.added===1){captured=null;ctx.clearRect(0,0,512,288);selection.textContent='続けて反映するときは、もう一度「建築情報を取得」を押してください。';}
  });
  window.addEventListener('new-game-reset',()=>reset('新しいゲームのため取得画像を破棄しました。'));
  window.ScreenReaderBuildingCapture={capture,reset,analyzeImage:candidates};
