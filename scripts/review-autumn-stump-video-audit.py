@@ -19,6 +19,25 @@ frame_audit = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(frame_audit)
 
 
+def contiguous_runs(frames, field):
+    """Group adjacent positive sampled frames, never claim distinct objects."""
+    runs = []
+    current = None
+    for item in frames:
+        positive = item.get('status') != 'unreadable' and item.get(field, 0) > 0
+        if not positive:
+            current = None
+            continue
+        if current is None:
+            current = {'start_index': item['index'], 'end_index': item['index'],
+                       'sample_count': 1}
+            runs.append(current)
+        else:
+            current['end_index'] = item['index']
+            current['sample_count'] += 1
+    return runs
+
+
 def audit(video, interval_seconds=1.0, max_frames=150, capture_factory=None):
     if not (math.isfinite(interval_seconds) and interval_seconds > 0
             and isinstance(max_frames, int) and 1 <= max_frames <= 10000):
@@ -84,11 +103,14 @@ def audit(video, interval_seconds=1.0, max_frames=150, capture_factory=None):
                 f.get('local_pair_count', 0) > 0 for f in frames),
             'local_pair_proposals': sum(f.get('local_pair_count', 0) for f in frames),
             'frames': frames,
+            'stump_positive_runs': contiguous_runs(frames, 'water_stump_candidates'),
+            'local_pair_positive_runs': contiguous_runs(frames, 'local_pair_count'),
             'slot_ids_verified': False,
             'plant_type': 'unknown',
             'production_application': 'forbidden',
             'caution': ('Unlabeled color and water-pot proposals, not verified '
-                        'matches. Camera continuity and planted stumps untested.')
+                        'matches. Consecutive positive samples may be the same object; '
+                        'camera continuity and planted stumps untested.')
         }
     finally:
         cap.release()
