@@ -81,7 +81,7 @@
    ...options.slots.map(v=>new Option(v.label,v.slotId)));
   plant.replaceChildren(new Option('植物を選択',''),
    ...options.cards.map(v=>new Option(v.name,v.name)));
-  confirm.checked=false;review.hidden=false;render();
+  confirm.checked=false;review.hidden=false;review.open=true;render();
   selection.textContent='画像上の台座をクリックして位置を確認してください。';
   status.textContent='1枚を取得。色・輪郭の参考候補'+captured.points.length+
    '件（未確認）。黄色Cは切り株の証拠ではありません。';
