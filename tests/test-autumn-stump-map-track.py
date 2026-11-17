@@ -79,6 +79,18 @@ class TrackTests(unittest.TestCase):
                       'human_verified': True}])
         self.assertEqual(report['pending_build_review'], [])
 
+    def test_contradictory_reviewed_build_and_empty_blocks_proposal(self):
+        a, b, c = frame(120, 'built'), frame(130, 'empty'), frame(140, 'built')
+        b.update({'camera_verified': True,
+                  'affine_from_previous': [[1, 0, 10], [0, 1, 0]]})
+        c.update({'camera_verified': True,
+                  'affine_from_previous': [[1, 0, 10], [0, 1, 0]]})
+        report = m.track(
+            [a, b, c], [{'pair_index': 0, 'slot_id': 'O7',
+                         'human_verified': True}])
+        self.assertEqual(report['pending_build_review'], [])
+        self.assertEqual(report['conflicting_reviewed_build_states'], ['O7'])
+
     def test_slot_collision_or_unverified_anchor_rejected(self):
         a = {'pairs': [pair(120, 100), pair(220, 100)]}
         for anchors in (
