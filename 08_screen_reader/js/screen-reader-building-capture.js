@@ -115,7 +115,7 @@
    slotId:slot.value,name:plant.value
   });
   status.textContent=result.added===1?'確認した1マスを更新しました。':
-   result.reason==='manual-conflict'?'既存の建築情報と異なるため変更しませんでした。':
+   result.reason==='manual-conflict'?'既存の建築情報と異なるため上書きせず、変更しませんでした。':
    result.reason==='unchanged'?'すでに同じ建築が登録されています。':
    '更新を保留しました：'+result.reason;
   confirm.checked=false;
