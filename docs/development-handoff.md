@@ -1,5 +1,10 @@
 # Development Handoff
 
+### CI追加修正（同日）
+
+- `2f4129bf` の改行一括置換は、JSON出力の `+'\\n'` まで実改行に変えてしまい、`SyntaxError: unterminated string literal` が発生。`19bfe19f` で当該文字列リテラルを復旧。以後は改行トークンを無差別置換せず、CIの構文検査と対象回帰を確認する。最新CIの完了確認は必要。
+
+
 ### CI修正（同日）
 
 - 研究CIの `test-autumn-stump-frame-audit.py` で `NameError: paired is not defined` が発生。原因は鉢水面の重複除去を追加した際、実改行ではなく文字列 `\\n` を挿入し、後続の `paired = sides.assess(...)` までコメント化されたこと。`2f4129bf` で実改行へ修正。修正後のCI結果を別途確認すること。
