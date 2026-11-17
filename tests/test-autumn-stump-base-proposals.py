@@ -113,6 +113,8 @@ class BaseTests(unittest.TestCase):
         profile = m.horizontal_edge_profiles(frame, [point])[0]
         self.assertEqual(profile['status'], 'unverified-edge-geometry-profile')
         self.assertGreater(profile['horizontal_double_edge_score'], 0.1)
+        self.assertLessEqual(profile['horizontal_separated_12px_score'],
+                             profile['horizontal_double_edge_score'])
         self.assertGreaterEqual(profile['edge_band_separation_px'], 7)
         self.assertLessEqual(profile['edge_band_separation_px'], 26)
 
