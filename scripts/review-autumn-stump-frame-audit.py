@@ -72,11 +72,18 @@ def analyze(frame):
         (tile['x']-stump['x'])**2 + (tile['y']-stump['y'])**2 < 20**2
         for stump in stumps)]
     paired = sides.assess(stumps, tiles)
+    local_pairs = [{'stump': {'x': stumps[m['stump_index']]['x'],
+                               'y': stumps[m['stump_index']]['y']},
+                    'tile': {'x': tiles[m['tile_index']]['x'],
+                             'y': tiles[m['tile_index']]['y']},
+                    'tile_side_of_stump': m['tile_side_of_stump']}
+                   for m in paired.get('matches', [])]
     return {
         'status': paired['status'],
         'water_stump_candidates': len(stumps),
         'color_tile_candidates': len(tiles),
         'local_side_matches': paired.get('matches', []),
+        'anonymous_pairs': local_pairs,
         'slot_ids_verified': False,
         'plant_type': 'unknown',
         'production_application': 'forbidden',
