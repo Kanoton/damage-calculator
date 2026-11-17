@@ -94,7 +94,9 @@ def review(images):
                      'anonymous_pairs': report['anonymous_pairs'],
                      'cyan_structure_hints': [
                          {'candidate_id': 'S'+str(i+1), 'x': p['x'],
-                          'y': p['y'], 'human_label': 'unreviewed'}
+                          'y': p['y'],
+                          'colored_tile_overlap': p['colored_tile_overlap'],
+                          'human_label': 'unreviewed'}
                          for i, p in enumerate(bases['cyan_structure_base_hints'])],
                      'pale_platform_candidates': [
                          {'candidate_id': 'T'+str(i+1), 'x': p['x'],
@@ -120,7 +122,7 @@ def review(images):
         'images': rows, 'manual_verified': False,
         'slot_ids_verified': False, 'plant_type': 'unknown',
         'production_application': 'forbidden',
-        'legend': 'Yellow circle = water-stump candidate; purple = tile candidate; white line = local side pairing; orange B# = brown shape; cyan T# = tan platform shape; green S# = cyan structural hint (all unreviewed). P# and B# are local-only, not map IDs.'
+        'legend': 'Yellow circle = water-stump candidate; purple = tile candidate; white line = local side pairing; orange B# = brown shape; cyan T# = tan platform shape; green S# = cyan structural hint (colored_tile_overlap is a warning only; all unreviewed). P# and B# are local-only, not map IDs.'
     }
 
 
