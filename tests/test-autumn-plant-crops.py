@@ -58,6 +58,30 @@ class PlantResearchTests(unittest.TestCase):
         game_audit=module.evaluate_by_game(rows)
         self.assertEqual(game_audit['accepted'],0)
 
+    def test_frame_holdout_prevents_same_screenshot_leakage(self):
+        a=np.zeros(720,dtype=np.float32);a[0]=1
+        b=np.zeros(720,dtype=np.float32);b[1]=1
+        rows=[{'plant':'電流タンポポ','frame':'image-A','game':'play-one','vector':a},
+              {'plant':'電流タンポポ','frame':'image-A','game':'play-one','vector':a.copy()},
+              {'plant':'芳香ピーチ','frame':'image-B','game':'play-one','vector':b}]
+        self.assertGreater(module.evaluate(rows)['accepted'],0)
+        audit=module.evaluate_by_frame(rows)
+        self.assertEqual(audit['accepted'],0)
+        self.assertIn('NOT independent-game accuracy',audit['note'])
+        # Screenshots do not constitute independent games.
+        with self.assertRaises(ValueError):
+            module.evaluate_by_game(rows)
+
+    def test_frame_holdout_requires_distinct_named_frames(self):
+        a=np.zeros(720,dtype=np.float32)
+        with self.assertRaises(ValueError):
+            module.evaluate_by_frame([{'plant':'a','frame':'only','vector':a}])
+        with self.assertRaises(ValueError):
+            module.evaluate_by_frame([{'plant':'a','frame':'A','vector':a},
+                                      {'plant':'b','vector':a}])
+        with self.assertRaises(ValueError):
+            module.evaluate_by_group([], 'other')
+
     def test_one_reference_species_must_abstain(self):
         a=np.zeros(720,dtype=np.float32);a[0]=1
         refs=[{'plant':'電流タンポポ','vector':a}]
