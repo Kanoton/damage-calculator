@@ -1,5 +1,13 @@
 # Development Handoff
 
+## 2026-11-20：CI復旧確認・建築取得画像の破棄時にcanvasも消去（PR #286 Draft）
+
+- 前回head `70adbe78` のGitHub Actionsで、08 screen reader browser smoke、共通browser smoke、07 mobile/wide/skill、Autumn building research がすべてsuccess。07 explicitly requested full checkは意図どおりskipped。
+- `ScreenReaderBuildingCapture.reset` は取得画像の参照を捨ててレビューを隠していたが、canvasの描画ピクセル自体は残っていた。取得結果の明示破棄・マップ変更・難易度変更・共有停止等のresetで `clearRect` を行い、表示外の描画バッファも消去するよう修正。
+- `tests/08-building-recognition.spec.js` のHTTP/file両テストに、取得画像破棄後のcanvas全RGBA値が0になる回帰を追加。ブラウザCIの最終結果が出るまでは今回の変更をsuccess扱いしない。
+- 実画面の6種植物自動分類・O/Iマス自動照合は未完成。PRはDraft、未マージを維持。
+
+
 ## 2026-11-20：CIで検出した建築レビュー旧テストの操作順修正（PR #286 Draft）
 
 - 前回head `ed29ae0e` のGitHub Actionsでは07 skill/wide/mobileと建築研究CIは成功、08 smokeと共通browser smokeは失敗。両失敗は `tests/08-building-recognition.spec.js` の旧「別マップ選択後に反映ボタンを押す」操作が30秒timeoutした同一テスト。これはマップ変更時に撮影結果を即時破棄してレビューを隠す新しい仕様と矛盾するため。
