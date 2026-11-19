@@ -124,6 +124,8 @@ def main():
     p.add_argument('--output', type=Path, required=True)
     p.add_argument('--stability-radius', type=int, default=None,
                    help='Opt-in perturbation gate; e.g. 4 (research only)')
+    p.add_argument('--fail-on-false-veto', action='store_true',
+                   help='Return status 2 if any labeled occupied pot is vetoed; diagnostic only')
     args = p.parse_args()
     rows = json.loads(args.manifest.read_text(encoding='utf-8'))['samples']
     report = (stability_audit(rows, args.images_dir, args.stability_radius)
@@ -132,6 +134,9 @@ def main():
     print(json.dumps({key: report[key] for key in
           ('samples', 'empty_labeled', 'occupied_labeled',
            'empty_vetoed', 'occupied_wrongly_vetoed')}, ensure_ascii=False))
+    if args.fail_on_false_veto and report['occupied_wrongly_vetoed'] > 0:
+        print('FAIL: occupied pot(s) were incorrectly vetoed; research-only, not safe to deploy.')
+        raise SystemExit(2)
 
 
 if __name__ == '__main__':
