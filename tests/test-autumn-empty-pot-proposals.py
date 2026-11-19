@@ -2,6 +2,10 @@
 import importlib.util
 from pathlib import Path
 import unittest
+import tempfile
+import subprocess
+import sys
+import json
 import cv2
 import numpy as np
 
@@ -47,6 +51,44 @@ class EmptyProposalTests(unittest.TestCase):
         self.assertEqual(m.propose(image),[])
         clean=frame(pots=[(170,145)])
         self.assertEqual(len(m.propose(clean)),1)
+
+
+    def test_labeled_audit_reports_false_empty_and_does_not_expose_labels(self):
+        proposals=[{'x':160,'y':145},{'x':225,'y':110},{'x':300,'y':80}]
+        labels=[{'cx':160,'cy':145,'expected':'occupied'},
+                {'cx':225,'cy':110,'expected':'__empty__'}]
+        result=m.audit_labeled(proposals,labels)
+        self.assertEqual(result['matched_occupied_wrong_proposals'],1)
+        self.assertEqual(result['matched_empty'],1)
+        self.assertEqual(result['unmatched_proposals_unknown'],1)
+        self.assertNotIn('160',str(result))
+        self.assertNotIn('225',str(result))
+        with self.assertRaises(ValueError):
+            m.audit_labeled(proposals,[{'cx':True,'cy':145,'expected':'occupied'}])
+
+    def test_strict_cli_returns_2_for_occupied_proposal(self):
+        with tempfile.TemporaryDirectory() as root:
+            directory=Path(root)
+            image=directory/'private-frame.png'
+            cv2.imwrite(str(image),frame(pots=[(170,145)]))
+            labels=directory/'private-labels.json'
+            labels.write_text(json.dumps({'samples':[{'cx':170,'cy':145,'expected':'occupied'}]}),
+                              encoding='utf-8')
+            output=directory/'audit.json'
+            cmd=[sys.executable,str(SCRIPT),'--image',str(image),'--output',str(output),
+                 '--audit-labels',str(labels),'--fail-on-occupied-proposal']
+            result=subprocess.run(cmd,capture_output=True,text=True,check=False)
+            self.assertEqual(result.returncode,2,result.stderr)
+            report=json.loads(output.read_text(encoding='utf-8'))
+            self.assertEqual(report['audit']['matched_occupied_wrong_proposals'],1)
+            self.assertNotIn('private-frame',result.stdout)
+            self.assertNotIn('private-labels',result.stdout)
+            labels.write_text(json.dumps({'samples':[{'cx':170,'cy':145,'expected':'__empty__'}]}),
+                              encoding='utf-8')
+            result=subprocess.run(cmd,capture_output=True,text=True,check=False)
+            self.assertEqual(result.returncode,0,result.stderr)
+            self.assertEqual(json.loads(output.read_text(encoding='utf-8'))
+                             ['audit']['matched_occupied_wrong_proposals'],0)
 
 
 if __name__=='__main__':unittest.main()
