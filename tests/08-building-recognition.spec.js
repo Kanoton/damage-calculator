@@ -183,3 +183,34 @@ for(const protocol of ['http','file'])test('08: building capture safely rejects 
  expect(result.emptyStatus).toContain('読み込まれていません');
  expect(result.validShown).toBeTruthy();
 });
+
+for(const protocol of ['http','file'])test('08: building snapshot is discarded on map round-trip and difficulty changes '+protocol,async({page})=>{
+ await page.goto(protocol==='file'?pathToFileURL(path.resolve('08_screen_reader/index.html')).href:'/08_screen_reader/');
+ await page.locator('#mp-map-select').selectOption('MAP0105');
+ await page.waitForFunction(()=>window.ScreenReaderBuildingBridge?.manualReviewOptions().slots.length>0);
+ await page.locator('#reader-toggle').click();
+ const capture=()=>page.evaluate(()=>{
+  const c=document.createElement('canvas');c.width=512;c.height=288;
+  c.getContext('2d').fillRect(0,0,512,288);
+  window.ScreenReaderBuildingCapture.capture(c);
+ });
+ const before=await page.evaluate(()=>JSON.stringify(window.ScreenReaderBuildingBridge.snapshot()));
+ await capture();
+ await expect(page.locator('#reader-building-review')).toBeVisible();
+ await page.locator('#reader-building-frame').click({position:{x:210,y:140}});
+ await page.locator('#reader-building-slot').selectOption('O04');
+ await page.locator('#reader-building-plant').selectOption('芳香ピーチ');
+ await page.locator('#reader-building-confirm').check();
+ await page.locator('#mp-map-select').selectOption({index:0});
+ await page.locator('#mp-map-select').selectOption('MAP0105');
+ await expect(page.locator('#reader-building-review')).toBeHidden();
+ await expect(page.locator('#reader-building-status')).toContainText('破棄');
+ await page.locator('#reader-building-apply').click({force:true});
+ expect(await page.evaluate(()=>JSON.stringify(window.ScreenReaderBuildingBridge.snapshot()))).toBe(before);
+ await capture();
+ await expect(page.locator('#reader-building-review')).toBeVisible();
+ await page.locator('#mp-difficulty').selectOption('困難');
+ await expect(page.locator('#reader-building-review')).toBeHidden();
+ await expect(page.locator('#reader-building-status')).toContainText('破棄');
+ expect(await page.evaluate(()=>JSON.stringify(window.ScreenReaderBuildingBridge.snapshot()))).toBe(before);
+});
