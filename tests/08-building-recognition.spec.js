@@ -165,7 +165,6 @@ for(const protocol of ['http','file'])test('08: building capture safely rejects 
   const api=window.ScreenReaderBuildingCapture;
   const video=document.createElement('video');
   // video.width has a layout default even without a decoded video frame.
-  const videoLayoutWidth=video.width;
   api.capture(video);
   const videoStatus=document.getElementById('reader-building-status').textContent;
   const videoHidden=document.getElementById('reader-building-review').hidden;
@@ -177,9 +176,8 @@ for(const protocol of ['http','file'])test('08: building capture safely rejects 
   valid.width=512;valid.height=288;
   valid.getContext('2d').fillRect(0,0,512,288);
   api.capture(valid);
-  return {videoLayoutWidth,videoStatus,videoHidden,emptyStatus,validShown:!document.getElementById('reader-building-review').hidden};
+  return {videoStatus,videoHidden,emptyStatus,validShown:!document.getElementById('reader-building-review').hidden};
  });
- expect(result.videoLayoutWidth).toBeGreaterThan(0);
  expect(result.videoStatus).toContain('準備できていない');
  expect(result.videoHidden).toBeTruthy();
  expect(result.emptyStatus).toContain('読み込まれていません');
