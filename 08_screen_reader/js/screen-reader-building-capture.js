@@ -178,7 +178,11 @@
    '更新を保留しました：'+result.reason;
   confirm.checked=false;
   // Each individual application needs a fresh explicit capture + review.
-  if(result.added===1){captured=null;mapCheck.hidden=true;ctx.clearRect(0,0,512,288);selection.textContent='続けて反映するときは、もう一度「建築情報を取得」を押してください。';}
+  if(result.added===1){
+   // A successfully applied one-shot review must not leave reusable slot,
+   // plant, confirmation, or screenshot data in the form.
+   reset('確認した1マスを更新しました。続けるには再取得してください。');
+  }
  });
  window.addEventListener('new-game-reset',()=>reset('新しいゲームのため取得画像を破棄しました。'));
  window.ScreenReaderBuildingCapture={capture,reset,analyzeImage:candidates};
