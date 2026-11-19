@@ -84,6 +84,12 @@ for(const protocol of ['http','file'])test('08: building capture review needs ex
  await expect(page.locator('#mp-building-layer [data-slot="O04"]')).toHaveAttribute('data-card','芳香ピーチ');
  await page.locator('#reader-building-clear').click();
  await expect(page.locator('#reader-building-review')).toBeHidden();
+ const cleared=await page.evaluate(()=>{
+  const canvas=document.getElementById('reader-building-frame');
+  const data=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
+  return data.every(value=>value===0);
+ });
+ expect(cleared).toBeTruthy();
 });
 
 test('08: building capture refuses non-autumn maps and camera-snapshot stale context',async({page})=>{
