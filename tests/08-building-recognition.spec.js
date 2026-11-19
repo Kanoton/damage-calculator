@@ -105,8 +105,11 @@ test('08: building capture refuses non-autumn maps and camera-snapshot stale con
  await page.locator('#reader-building-plant').selectOption('芳香ピーチ');
  await page.locator('#reader-building-confirm').check();
  await page.locator('#mp-map-select').selectOption({index:0});
- await page.locator('#reader-building-apply').click();
+ // Switching maps immediately invalidates the capture and hides the form.
+ await expect(page.locator('#reader-building-review')).toBeHidden();
  await expect(page.locator('#reader-building-status')).toContainText('破棄');
+ // Even a programmatic stale click cannot apply the old selection.
+ await page.evaluate(()=>document.getElementById('reader-building-apply').click());
  expect(await page.evaluate(()=>window.ScreenReaderBuildingBridge.snapshot())).toEqual({});
 });
 
