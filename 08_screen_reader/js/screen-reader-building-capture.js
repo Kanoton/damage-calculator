@@ -92,7 +92,10 @@
   mapCheck.hidden=false;
  }
  function reset(message){
-  captured=null;review.hidden=true;confirm.checked=false;mapCheck.hidden=true;mapImage.removeAttribute('src');
+  // Discard both the captured ImageData and pixels still painted on canvas.
+  // Hiding the review alone leaves the old frame in the canvas backing store.
+  captured=null;ctx.clearRect(0,0,canvas.width,canvas.height);
+  review.hidden=true;confirm.checked=false;mapCheck.hidden=true;mapImage.removeAttribute('src');
   slot.replaceChildren(new Option('マスを選択',''));plant.replaceChildren(new Option('植物を選択',''));
   status.textContent=message||'取得した画像はありません。';selection.textContent='';
  }
