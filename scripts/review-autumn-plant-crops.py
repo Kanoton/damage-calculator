@@ -80,18 +80,33 @@ def predict(vector, references, exclude=None, max_distance=MAX_DISTANCE, margin=
 
 
 
-def evaluate_by_game(references):
-    """Hold out every crop from the same game to prevent frame leakage."""
-    groups = {sample.get('game') for sample in references}
+def evaluate_by_group(references, field):
+    """Hold out every crop from the same group. A frame is NOT a game."""
+    if field not in ('game', 'frame'):
+        raise ValueError('Unsupported group field')
+    groups = {sample.get(field) for sample in references}
     if len(groups) < 2 or any(not isinstance(g, str) or not g.strip() for g in groups):
-        raise ValueError('At least two named independent games are required')
+        raise ValueError('At least two named ' + field + ' groups are required')
     results = []
     for i, sample in enumerate(references):
-        training = [ref for ref in references if ref['game'] != sample['game']]
+        training = [ref for ref in references if ref[field] != sample[field]]
         decision = predict(sample['vector'], training)
         results.append({'sample': i, 'expected': sample['plant'], **decision,
                         'correct': decision['plant'] == sample['plant'] if decision['plant'] else None})
-    return summarize(results, 'Leave-one-game-out; game IDs must identify independent plays.')
+    note = ('Leave-one-game-out; game IDs must identify independent plays.'
+            if field == 'game' else
+            'Leave-one-frame-out; same-game frames still leak and results are NOT independent-game accuracy.')
+    return summarize(results, note)
+
+
+def evaluate_by_game(references):
+    """Hold out every crop from the same independent game."""
+    return evaluate_by_group(references, 'game')
+
+
+def evaluate_by_frame(references):
+    """Diagnostic only: leave one screenshot out without claiming game independence."""
+    return evaluate_by_group(references, 'frame')
 
 
 def summarize(results, note):
@@ -121,7 +136,7 @@ def main():
     parser.add_argument('--manifest', type=Path, required=True)
     parser.add_argument('--images-dir', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
-    parser.add_argument('--evaluation', choices=['crop', 'game'], default='game')
+    parser.add_argument('--evaluation', choices=['crop', 'frame', 'game'], default='game')
     args = parser.parse_args()
     rows = json.loads(args.manifest.read_text(encoding='utf-8'))['samples']
     references = []
@@ -133,8 +148,10 @@ def main():
         if Path(row['file']).name != row['file']:
             raise ValueError('Only filenames in images-dir are allowed')
         image = crop(args.images_dir / row['file'], row['cx'], row['cy'])
-        references.append({'plant': row['plant'], 'game': row.get('game'), 'vector': descriptor(image)})
-    audit = evaluate_by_game(references) if args.evaluation == 'game' else evaluate(references)
+        references.append({'plant': row['plant'], 'game': row.get('game'),
+                           'frame': row.get('frame'), 'vector': descriptor(image)})
+    audit = (evaluate_by_game(references) if args.evaluation == 'game' else
+             evaluate_by_frame(references) if args.evaluation == 'frame' else evaluate(references))
     args.output.write_text(json.dumps(audit, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
     print(json.dumps({key: audit[key] for key in ('samples','accepted','correct_accepted','false_accepted','empty_samples','empty_false_accepted','empty_abstained','reasons')}, ensure_ascii=False))
     if audit['false_accepted']:
