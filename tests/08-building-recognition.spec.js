@@ -205,7 +205,7 @@ for(const protocol of ['http','file'])test('08: building snapshot is discarded o
  await page.locator('#mp-map-select').selectOption('MAP0105');
  await expect(page.locator('#reader-building-review')).toBeHidden();
  await expect(page.locator('#reader-building-status')).toContainText('破棄');
- await page.locator('#reader-building-apply').click({force:true});
+ await page.evaluate(()=>document.getElementById('reader-building-apply').click());
  expect(await page.evaluate(()=>JSON.stringify(window.ScreenReaderBuildingBridge.snapshot()))).toBe(before);
  await capture();
  await expect(page.locator('#reader-building-review')).toBeVisible();
