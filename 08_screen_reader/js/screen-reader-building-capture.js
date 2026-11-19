@@ -147,6 +147,13 @@
  slot.addEventListener('change',()=>{confirm.checked=false;mapPreview();});
  plant.addEventListener('change',()=>{confirm.checked=false;});
  clear.addEventListener('click',()=>reset('取得画像を破棄しました。'));
+ // Invalidate as soon as the map context changes, including away-and-back.
+ // Comparing only the final map/difficulty at apply time misses this case.
+ for(const id of ['mp-map-select','mp-difficulty']){
+  $(id)?.addEventListener('change',()=>{
+   if(captured)reset('マップまたは難易度が切り替わったため取得画像を破棄しました。');
+  });
+ }
  $('reader-building-apply').addEventListener('click',()=>{
   if(!captured||!captured.click||!slot.value||!plant.value||!confirm.checked){
    status.textContent='画像上の台座位置・マス番号・植物種類を確認し、チェックしてください。';return;
