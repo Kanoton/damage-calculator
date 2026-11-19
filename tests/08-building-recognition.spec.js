@@ -155,3 +155,33 @@ for(const protocol of ['http','file'])test('08: separate pale and cyan screensho
  await expect(page.locator('#reader-building-status')).toContainText('取得画像を破棄');
  expect(await page.evaluate(()=>JSON.stringify(window.ScreenReaderBuildingBridge.snapshot()))).toBe(before);
 });
+
+for(const protocol of ['http','file'])test('08: building capture safely rejects unready video and invalid images '+protocol,async({page})=>{
+ await page.goto(protocol==='file'?pathToFileURL(path.resolve('08_screen_reader/index.html')).href:'/08_screen_reader/');
+ await page.locator('#mp-map-select').selectOption('MAP0105');
+ await page.waitForFunction(()=>window.ScreenReaderBuildingBridge?.manualReviewOptions().slots.length>0);
+ await page.locator('#reader-toggle').click();
+ const result=await page.evaluate(()=>{
+  const api=window.ScreenReaderBuildingCapture;
+  const video=document.createElement('video');
+  // video.width has a layout default even without a decoded video frame.
+  const videoLayoutWidth=video.width;
+  api.capture(video);
+  const videoStatus=document.getElementById('reader-building-status').textContent;
+  const videoHidden=document.getElementById('reader-building-review').hidden;
+  const empty=document.createElement('canvas');
+  empty.width=0;empty.height=0;
+  api.capture(empty);
+  const emptyStatus=document.getElementById('reader-building-status').textContent;
+  const valid=document.createElement('canvas');
+  valid.width=512;valid.height=288;
+  valid.getContext('2d').fillRect(0,0,512,288);
+  api.capture(valid);
+  return {videoLayoutWidth,videoStatus,videoHidden,emptyStatus,validShown:!document.getElementById('reader-building-review').hidden};
+ });
+ expect(result.videoLayoutWidth).toBeGreaterThan(0);
+ expect(result.videoStatus).toContain('準備できていない');
+ expect(result.videoHidden).toBeTruthy();
+ expect(result.emptyStatus).toContain('読み込まれていません');
+ expect(result.validShown).toBeTruthy();
+});
