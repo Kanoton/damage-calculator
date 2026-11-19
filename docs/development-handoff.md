@@ -1,5 +1,13 @@
 # Development Handoff
 
+## 2026-11-20：建築1マス反映成功後のレビューを完全終了（PR #286 Draft）
+
+- 前回head `06c5a761` のActionsは07 wide/mobileとAutumn building research成功、08/共通browser/07 skillは確認時点で実行中。全成功とは扱わない。
+- 以前は建築を1マス反映したあと `captured=null` とcanvas消去だけで、確認フォームが開いたまま・選択マス/植物/チェック状態が残っていた。反映成功時に共通 `reset` を呼び、画像、描画バッファ、選択値、チェック、プレビューを破棄し、レビューを閉じる。成功メッセージは維持。
+- HTTP/fileの建築レビュー回帰テストに、成功後のレビュー非表示、選択値とチェックの初期化、古いボタンの再クリックが状態を変えないことを追加。新しい1マスの反映には明示的な再取得が必要。
+- PRはDraft、未マージ。実ゲームの6種分類・16マス自動照合は未検証のため自動反映へ接続しない。
+
+
 ## 2026-11-20：CI復旧確認・建築取得画像の破棄時にcanvasも消去（PR #286 Draft）
 
 - 前回head `70adbe78` のGitHub Actionsで、08 screen reader browser smoke、共通browser smoke、07 mobile/wide/skill、Autumn building research がすべてsuccess。07 explicitly requested full checkは意図どおりskipped。
