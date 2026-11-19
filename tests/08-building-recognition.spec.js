@@ -74,6 +74,13 @@ for(const protocol of ['http','file'])test('08: building capture review needs ex
  await page.locator('#reader-building-apply').click();
  await expect(page.locator('#reader-building-status')).toContainText('1マスを更新');
  await expect(page.locator('#mp-building-layer [data-slot="O04"]')).toHaveAttribute('data-card','芳香ピーチ');
+ await expect(page.locator('#reader-building-review')).toBeHidden();
+ await expect(page.locator('#reader-building-slot')).toHaveValue('');
+ await expect(page.locator('#reader-building-plant')).toHaveValue('');
+ await expect(page.locator('#reader-building-confirm')).not.toBeChecked();
+ const applied=await page.evaluate(()=>JSON.stringify(window.ScreenReaderBuildingBridge.snapshot()));
+ await page.evaluate(()=>document.getElementById('reader-building-apply').click());
+ expect(await page.evaluate(()=>JSON.stringify(window.ScreenReaderBuildingBridge.snapshot()))).toBe(applied);
  await capture();
  await page.locator('#reader-building-frame').click({position:{x:210,y:140}});
  await page.locator('#reader-building-slot').selectOption('O04');
