@@ -68,19 +68,71 @@ def propose(frame):
     return sorted(results,key=lambda r:(r['y'],r['x']))
 
 
+def audit_labeled(proposals, labels, radius=18):
+    """Research-only matching against locally reviewed labels.
+
+    Only close, one-to-one matched proposals are scored. Unmatched detections
+    are unknown, NOT automatically false positives; unlabeled pots may exist.
+    Source paths, labels' coordinates and screenshot identities are not output.
+    """
+    if not isinstance(labels, list) or not isinstance(radius, int) or radius < 1:
+        raise ValueError('Expected label list and positive matching radius')
+    for item in labels:
+        if (not isinstance(item, dict) or
+            item.get('expected') not in ('__empty__', 'occupied') or
+            any(not isinstance(item.get(k), int) or isinstance(item.get(k), bool)
+                for k in ('cx', 'cy'))):
+            raise ValueError('Expected manual cx/cy and __empty__/occupied label')
+    edges = sorted(
+        (float(np.hypot(float(p['x'])-label['cx'], float(p['y'])-label['cy'])), i, j)
+        for i, p in enumerate(proposals) for j, label in enumerate(labels)
+        if np.hypot(float(p['x'])-label['cx'], float(p['y'])-label['cy']) <= radius
+    )
+    used_proposals, used_labels = set(), set()
+    matched_empty = matched_occupied = 0
+    for _, i, j in edges:
+        if i in used_proposals or j in used_labels:
+            continue
+        used_proposals.add(i)
+        used_labels.add(j)
+        if labels[j]['expected'] == '__empty__':
+            matched_empty += 1
+        else:
+            matched_occupied += 1
+    return {'labeled_empty': sum(x['expected']=='__empty__' for x in labels),
+            'labeled_occupied': sum(x['expected']=='occupied' for x in labels),
+            'matched_empty': matched_empty, 'matched_occupied_wrong_proposals': matched_occupied,
+            'unmatched_proposals_unknown': len(proposals)-len(used_proposals),
+            'match_radius_px': radius,
+            'note': ('Manually selected partial labels only; unmatched proposals are '
+                     'unknown and results are NOT independent-game accuracy.')}
+
+
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--image',type=Path,required=True)
     p.add_argument('--output',type=Path,required=True)
+    p.add_argument('--audit-labels',type=Path,
+                   help='Optional private JSON: {"samples":[{"cx":123,"cy":100,"expected":"occupied"}]}')
+    p.add_argument('--fail-on-occupied-proposal',action='store_true',
+                   help='Fail if any labeled occupied pot gets an empty-pot proposal')
     args=p.parse_args()
+    if args.fail_on_occupied_proposal and args.audit_labels is None:
+        p.error('--fail-on-occupied-proposal requires --audit-labels')
     frame=cv2.imread(str(args.image))
     if frame is None or (frame.shape[1],frame.shape[0])!=SIZE:
         raise ValueError('Image must be already resized to 512x288')
     proposals=propose(frame)
     result={'count':len(proposals),'proposals':proposals,
             'note':'Uncalibrated water+stump proposals. No slot or occupancy confirmation.'}
+    if args.audit_labels is not None:
+        labels=json.loads(args.audit_labels.read_text(encoding='utf-8'))['samples']
+        result['audit']=audit_labeled(proposals,labels)
     args.output.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
-    print(json.dumps({'count':result['count']}))
+    print(json.dumps({'count':result['count'],
+                      'audit':result.get('audit')},ensure_ascii=False))
+    if args.fail_on_occupied_proposal and result['audit']['matched_occupied_wrong_proposals']:
+        raise SystemExit(2)
 
 
 if __name__=='__main__':
