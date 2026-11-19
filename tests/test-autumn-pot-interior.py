@@ -3,6 +3,9 @@ import importlib.util
 from pathlib import Path
 import tempfile
 import unittest
+import subprocess
+import sys
+import json
 import numpy as np
 from PIL import Image
 
@@ -87,6 +90,32 @@ class PotInteriorTests(unittest.TestCase):
             self.assertEqual(report['empty_vetoed'], 1)
             self.assertEqual(report['occupied_wrongly_vetoed'], 1)
             self.assertNotIn(path.name, str(report))
+
+    def test_strict_cli_fails_for_occupied_false_veto(self):
+        with tempfile.TemporaryDirectory() as root:
+            directory = Path(root)
+            # Cyan remains visible in a genuinely occupied pot, so water
+            # detection alone must not be treated as proof of emptiness.
+            Image.new('RGB', (512, 288), (60, 190, 240)).save(directory / 'private.png')
+            manifest = directory / 'private-manifest.json'
+            output = directory / 'audit.json'
+            samples = [{'file': 'private.png', 'cx': 120, 'cy': 120,
+                        'expected': '花咲くサボテン'}]
+            manifest.write_text(json.dumps({'samples': samples}), encoding='utf-8')
+            command = [sys.executable, str(SCRIPT), '--manifest', str(manifest),
+                       '--images-dir', str(directory), '--output', str(output),
+                       '--fail-on-false-veto']
+            result = subprocess.run(command, capture_output=True, text=True, check=False)
+            self.assertEqual(result.returncode, 2)
+            self.assertEqual(json.loads(output.read_text(encoding='utf-8'))
+                             ['occupied_wrongly_vetoed'], 1)
+            self.assertNotIn('private.png', result.stdout)
+            samples[0]['expected'] = '__empty__'
+            manifest.write_text(json.dumps({'samples': samples}), encoding='utf-8')
+            result = subprocess.run(command, capture_output=True, text=True, check=False)
+            self.assertEqual(result.returncode, 0)
+            self.assertEqual(json.loads(output.read_text(encoding='utf-8'))
+                             ['occupied_wrongly_vetoed'], 0)
 
 if __name__ == '__main__':
     unittest.main()
