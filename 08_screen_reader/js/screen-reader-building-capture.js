@@ -97,8 +97,13 @@
   status.textContent=message||'取得した画像はありません。';selection.textContent='';
  }
  function capture(source){
-  if(!source||!(source.videoWidth||source.naturalWidth||source.width)){
-   reset('画面共有または画像の読み込みが必要です。');return;
+  // A <video> has default element width even before a usable frame exists.
+  // Never fall back to that layout width when videoWidth/videoHeight are zero.
+  const videoSource=source?.tagName?.toLowerCase()==='video';
+  const sourceWidth=videoSource?source.videoWidth:(source?.naturalWidth||source?.width);
+  const sourceHeight=videoSource?source.videoHeight:(source?.naturalHeight||source?.height);
+  if(!Number.isFinite(sourceWidth)||!Number.isFinite(sourceHeight)||sourceWidth<=0||sourceHeight<=0){
+   reset('画面共有の映像が準備できていないか、画像が読み込まれていません。');return;
   }
   const bridge=window.ScreenReaderBuildingBridge;
   const options=bridge?.manualReviewOptions?.();
@@ -106,9 +111,15 @@
    reset('秋幻の森（MAP0105）を選択してから取得してください。');return;
   }
   // Take the snapshot only on the explicit button press, not during auto-read.
-  ctx.clearRect(0,0,512,288);
-  ctx.drawImage(source,0,0,512,288);
-  const image=ctx.getImageData(0,0,512,288);
+  let image;
+  try{
+   ctx.clearRect(0,0,512,288);
+   ctx.drawImage(source,0,0,512,288);
+   image=ctx.getImageData(0,0,512,288);
+  }catch(error){
+   // A stream can end or lose its frame between dimension check and draw.
+   reset('映像を取得できませんでした。画面共有を確認してから再取得してください。');return;
+  }
   const mapSrc=document.getElementById('mp-map-image')?.currentSrc||'';
   captured={image,options,points:candidates(image),click:null,mapSrc};
   slot.replaceChildren(new Option('マスを選択',''),
