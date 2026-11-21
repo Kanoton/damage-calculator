@@ -55,6 +55,16 @@ def _validate_frame(frame):
         raise ValueError('Each frame must supply pairs')
     if not all(_valid_pair(pair) for pair in frame['pairs']):
         raise ValueError('Invalid pair geometry')
+    # A repeated still image is not a second observation. Legacy untimed
+    # frames remain useful for tracking, but cannot support build reviews.
+    identity = frame.get('observation_id')
+    time_ms = frame.get('observed_at_ms')
+    if identity is not None and (not isinstance(identity, str) or not identity.strip()):
+        raise ValueError('Invalid observation ID')
+    if time_ms is not None and (isinstance(time_ms, bool) or
+            not isinstance(time_ms, (int, float)) or
+            not math.isfinite(time_ms) or time_ms < 0):
+        raise ValueError('Invalid observation time')
     evidence = frame.get('building_evidence', [])
     if not isinstance(evidence, list):
         raise ValueError('building_evidence must be a list')
@@ -75,8 +85,22 @@ def track(frames, anchors=None):
     """Track candidate identity; never mutate a map or auto-approve buildings."""
     if not isinstance(frames, list) or not frames:
         raise ValueError('At least one frame required')
+    seen_ids = set()
+    last_time = None
     for frame in frames:
         _validate_frame(frame)
+        identity = frame.get('observation_id')
+        time_ms = frame.get('observed_at_ms')
+        # Duplicate identifiers, even at later timestamps, cannot prove
+        # independent frames. Reject these instead of silently counting.
+        if identity is not None:
+            if identity in seen_ids:
+                raise ValueError('Duplicate observation ID')
+            seen_ids.add(identity)
+        if time_ms is not None:
+            if last_time is not None and time_ms <= last_time:
+                raise ValueError('Observation times must increase')
+            last_time = time_ms
     anchors = [] if anchors is None else anchors
     if not isinstance(anchors, list):
         raise ValueError('anchors must be a list')
@@ -132,7 +156,16 @@ def track(frames, anchors=None):
     for local, indices in observations.items():
         built = [index for index, state in indices if state == 'built']
         empty = [index for index, state in indices if state == 'empty']
-        if len(built) >= 2 and not empty:
+        # Count only truly different observations. Two mentions of the
+        # same screenshot, or observations only milliseconds apart, must not
+        # qualify as a supported building review.
+        eligible = [(index, frames[index]['observed_at_ms'])
+                    for index in built
+                    if isinstance(frames[index].get('observation_id'), str)
+                    and isinstance(frames[index].get('observed_at_ms'), (int, float))]
+        independent = (len(eligible) >= 2 and
+                       eligible[-1][1] - eligible[0][1] >= 300)
+        if independent and not empty:
             pending.append({'slot_id': slots[local],
                             'temporary_track_id': local,
                             'supporting_frame_indices': built,
@@ -149,7 +182,8 @@ def track(frames, anchors=None):
             'production_application': 'forbidden',
             'caveat': ('Only externally human-anchored slot IDs propagate through '
                        'verified two-center camera continuity. Explicit reviewed '
-                       'building evidence is not a building classifier.')}
+                       'building evidence is not a building classifier. Two observations '
+                       'must have distinct IDs and timestamps at least 300ms apart.')}
 
 
 def main():
