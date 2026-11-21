@@ -16,8 +16,12 @@ def pair(x, y):
             'tile_side_of_stump': 'right'}
 
 
-def frame(x, built=None, verified=True):
+def frame(x, built=None, verified=True, observation_id=None, time_ms=None):
     row = {'pairs': [pair(x, 100)], 'building_evidence': []}
+    if observation_id is not None:
+        row['observation_id'] = observation_id
+    if time_ms is not None:
+        row['observed_at_ms'] = time_ms
     if built is not None:
         row['building_evidence'] = [
             {'pair_index': 0, 'state': built, 'human_reviewed': verified}]
@@ -26,7 +30,8 @@ def frame(x, built=None, verified=True):
 
 class TrackTests(unittest.TestCase):
     def test_camera_translation_retains_human_slot_and_two_reviewed_built_frames(self):
-        a, b = frame(120, 'built'), frame(130, 'built')
+        a, b = (frame(120, 'built', observation_id='frame-a', time_ms=1000),
+                frame(130, 'built', observation_id='frame-b', time_ms=1450))
         b.update({'camera_verified': True,
                   'affine_from_previous': [[1, 0, 10], [0, 1, 0]]})
         report = m.track(
@@ -39,6 +44,34 @@ class TrackTests(unittest.TestCase):
         self.assertEqual(report['pending_build_review'][0]['slot_id'], 'O04')
         self.assertFalse(report['building_state_applied'])
         self.assertEqual(report['production_application'], 'forbidden')
+
+    def test_duplicate_or_unstamped_frames_never_support_review(self):
+        a, b = frame(120, 'built'), frame(130, 'built')
+        b.update({'camera_verified': True,
+                  'affine_from_previous': [[1, 0, 10], [0, 1, 0]]})
+        anchor=[{'pair_index': 0, 'slot_id': 'I12', 'human_verified': True}]
+        self.assertEqual(m.track([a,b],anchor)['pending_build_review'],[])
+        a['observation_id'],a['observed_at_ms']='capture-a',1000
+        b['observation_id'],b['observed_at_ms']='capture-b',1100
+        self.assertEqual(m.track([a,b],anchor)['pending_build_review'],[])
+        b['observed_at_ms']=1300
+        self.assertEqual(len(m.track([a,b],anchor)['pending_build_review']),1)
+        b['observation_id']='capture-a'
+        with self.assertRaisesRegex(ValueError,'Duplicate observation ID'):
+            m.track([a,b],anchor)
+        b['observation_id']='capture-b'
+        b['observed_at_ms']=1000
+        with self.assertRaisesRegex(ValueError,'times must increase'):
+            m.track([a,b],anchor)
+
+    def test_invalid_observation_metadata_rejected(self):
+        for key,value in [('observation_id',''),('observation_id',123),
+                          ('observed_at_ms',True),('observed_at_ms',float('nan')),
+                          ('observed_at_ms',-5)]:
+            scene=frame(120,'built')
+            scene[key]=value
+            with self.subTest(key=key,value=value),self.assertRaises(ValueError):
+                m.track([scene])
 
     def test_no_manual_anchor_no_slot_proposal_even_when_built_twice(self):
         a, b = frame(120, 'built'), frame(130, 'built')
