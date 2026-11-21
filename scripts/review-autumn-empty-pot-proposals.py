@@ -88,6 +88,15 @@ def audit_labeled(proposals, labels, radius=18):
         for i, p in enumerate(proposals) for j, label in enumerate(labels)
         if np.hypot(float(p['x'])-label['cx'], float(p['y'])-label['cy']) <= radius
     )
+    # Greedy one-to-one matching is useful for a diagnostic count, but is
+    # insufficient as a safety gate: a proposal can be closer to an empty
+    # label while also lying within the radius of a labeled occupied pot.
+    # Inspect *all* nearby labels before consuming any match.
+    nearby = {i: set() for i in range(len(proposals))}
+    for _, i, j in edges:
+        nearby[i].add(labels[j]['expected'])
+    occupied_near_proposals = sum('occupied' in classes for classes in nearby.values())
+    ambiguous_proposals = sum(len(classes) > 1 for classes in nearby.values())
     used_proposals, used_labels = set(), set()
     matched_empty = matched_occupied = 0
     for _, i, j in edges:
@@ -102,6 +111,8 @@ def audit_labeled(proposals, labels, radius=18):
     return {'labeled_empty': sum(x['expected']=='__empty__' for x in labels),
             'labeled_occupied': sum(x['expected']=='occupied' for x in labels),
             'matched_empty': matched_empty, 'matched_occupied_wrong_proposals': matched_occupied,
+            'occupied_near_proposals': occupied_near_proposals,
+            'ambiguous_proposals': ambiguous_proposals,
             'unmatched_proposals_unknown': len(proposals)-len(used_proposals),
             'match_radius_px': radius,
             'note': ('Manually selected partial labels only; unmatched proposals are '
@@ -131,7 +142,8 @@ def main():
     args.output.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print(json.dumps({'count':result['count'],
                       'audit':result.get('audit')},ensure_ascii=False))
-    if args.fail_on_occupied_proposal and result['audit']['matched_occupied_wrong_proposals']:
+    # Do not let a closer empty label hide an occupied label in the radius.
+    if args.fail_on_occupied_proposal and result['audit']['occupied_near_proposals']:
         raise SystemExit(2)
 
 
