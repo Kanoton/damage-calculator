@@ -251,10 +251,10 @@
    monitorInfo((observation.world?'今回 '+observation.world.monsters.length+'体 ／ '+(automatic?'確認済み '+accepted.world.monsters.length+'体':'手動読取')+' ／ '+(!$('apply').checked?'確認のみ ／ ':worldSkipped?'反映保留 '+worldSkipped+'件 ／ ':''):'')+timing());
    const names=observation.members.filter(m=>m.id).length;
    status((automatic?'自動読取':'画面読取')+'：'+names+'人を判定／チップ '+result.added+'件追加。'+(!observation.selfId?' 自キャラが未判定の場合は「自キャラ」を指定してください。':''));
-  }catch(error){status('読み取れませんでした：'+error.message);}finally{busy=false;$('read').disabled=!rawSource;}
+  }catch(error){status('読み取れませんでした：'+error.message);}finally{busy=false;$('read').disabled=!rawSource;$('building-capture').disabled=!rawSource;}
  }
  function schedule(){clearTimeout(timer);if(!$('auto').checked||!stream)return;const elapsed=readStarted===null?0:performance.now()-readStarted;timer=setTimeout(async()=>{await read(true);schedule();},Math.max(16,interval()-elapsed));}
- function stop(){resetObservation('画面共有を停止');generation++;clearTimeout(timer);timer=null;readStarted=null;stable.clear();lastHash=null;sameFrames=0;$('auto').checked=false;$('auto').disabled=true;$('stop').disabled=true;if(stream){for(const t of stream.getTracks())t.stop();stream=null;}video.srcObject=null;rawSource=null;$('read').disabled=true;status('画面共有を停止しました。反映済みの情報は保持しています。');}
+ function stop(){window.ScreenReaderBuildingCapture?.reset('共有を停止したため建築の取得画像を破棄しました。');resetObservation('画面共有を停止');generation++;clearTimeout(timer);timer=null;readStarted=null;stable.clear();lastHash=null;sameFrames=0;$('auto').checked=false;$('auto').disabled=true;$('stop').disabled=true;if(stream){for(const t of stream.getTracks())t.stop();stream=null;}video.srcObject=null;rawSource=null;$('read').disabled=true;$('building-capture').disabled=true;status('画面共有を停止しました。反映済みの情報は保持しています。');}
  $('connect').addEventListener('click',async()=>{
   if(!navigator.mediaDevices?.getDisplayMedia){status('このブラウザでは画面共有を開始できません。HTTPSまたはlocalhostで、PC版Chrome／Edgeを使用してください。画像読取も利用できます。');return;}
   let selected;
@@ -263,15 +263,16 @@
    const request=navigator.mediaDevices.getDisplayMedia({video:{displaySurface:'window',frameRate:{ideal:5,max:10}},audio:false});selected=await request;
    stop();readerSession=false;stream=selected;const token=generation;video.srcObject=stream;
    stream.getVideoTracks()[0].addEventListener('ended',()=>{if(stream===selected)stop();});await video.play();if(token!==generation)return;
-   rawSource=video;$('read').disabled=false;$('auto').disabled=false;$('stop').disabled=false;
+   rawSource=video;$('read').disabled=false;$('building-capture').disabled=false;$('auto').disabled=false;$('stop').disabled=false;
    status('ゲーム画面を共有中です。「画面読取」または「自動読取」を選んでください。');
   }catch(error){if(selected&&stream!==selected)selected.getTracks().forEach(t=>t.stop());status(error.name==='NotAllowedError'?'画面共有がキャンセルされました。':'画面共有を開始できませんでした：'+error.message);}
  });
  $('stop').addEventListener('click',stop);$('read').addEventListener('click',()=>{$('details').open=true;read();});
+ $('building-capture').addEventListener('click',()=>{const source=stream?video:rawSource;window.ScreenReaderBuildingCapture?.capture(source);});
  $('auto').addEventListener('change',()=>{stable.clear();sameFrames=0;lastHash=null;if($('auto').checked){status('自動読取を開始しました。安定して判定できた情報を更新します。');read(true).then(schedule);}else{clearTimeout(timer);status('自動読取を停止しました。画面共有は継続中です。');}});
  async function loadImage(file){
-  if(!file?.type.startsWith('image/'))return;resetObservation('独立した画像へ切替');stable.clear();if(stream)stop();generation++;const token=generation,url=URL.createObjectURL(file);
-  try{const im=new Image();im.src=url;await im.decode();if(token!==generation)return;rawSource=im;$('read').disabled=false;$('details').open=true;await read();}catch(error){status('画像を開けませんでした：'+error.message);}finally{URL.revokeObjectURL(url);$('file').value='';}
+  if(!file?.type.startsWith('image/'))return;window.ScreenReaderBuildingCapture?.reset('画像を切り替えたため建築の取得画像を破棄しました。');resetObservation('独立した画像へ切替');stable.clear();if(stream)stop();generation++;const token=generation,url=URL.createObjectURL(file);
+  try{const im=new Image();im.src=url;await im.decode();if(token!==generation)return;rawSource=im;$('read').disabled=false;$('building-capture').disabled=false;$('details').open=true;await read();}catch(error){status('画像を開けませんでした：'+error.message);}finally{URL.revokeObjectURL(url);$('file').value='';}
  }
  $('file').addEventListener('change',()=>loadImage($('file').files[0]));
  document.addEventListener('paste',event=>{const file=[...(event.clipboardData?.items||[])].find(i=>i.type.startsWith('image/'))?.getAsFile();if(file){event.preventDefault();loadImage(file);}});
@@ -298,7 +299,7 @@
  preview.addEventListener('pointermove',event=>{if(!selectionStart||!frame)return;const p=point(event);ctx.drawImage(frame,0,0);ctx.strokeStyle='#b8ff44';ctx.lineWidth=4;ctx.strokeRect(selectionStart.x*1536,selectionStart.y*709,(p.x-selectionStart.x)*1536,(p.y-selectionStart.y)*709);});
  preview.addEventListener('pointerup',event=>{if(!selectionStart)return;const p=point(event),a=area||{x:0,y:0,w:1,h:1},next={x:a.x+Math.min(p.x,selectionStart.x)*a.w,y:a.y+Math.min(p.y,selectionStart.y)*a.h,w:Math.abs(p.x-selectionStart.x)*a.w,h:Math.abs(p.y-selectionStart.y)*a.h};selectionStart=null;selecting=false;preview.classList.remove('is-selecting');if(isArea(next)){area=next;generation++;stable.clear();lastHash=null;sameFrames=0;save();read();}else{ctx.drawImage(frame,0,0);status('範囲が小さすぎます。もう一度指定してください。');}});
  preview.addEventListener('pointercancel',()=>{selectionStart=null;selecting=false;preview.classList.remove('is-selecting');if(frame)ctx.drawImage(frame,0,0);});
- $('area-reset').addEventListener('click',()=>{area=null;resetObservation('読取範囲を戻す');generation++;stable.clear();lastHash=null;sameFrames=0;save();if(rawSource)read();});
+ $('area-reset').addEventListener('click',()=>{window.ScreenReaderBuildingCapture?.reset('画像の範囲変更により建築の取得画像を破棄しました。');area=null;resetObservation('読取範囲を戻す');generation++;stable.clear();lastHash=null;sameFrames=0;save();if(rawSource)read();});
  $('learn-kind').addEventListener('change',updateLearningOptions);
  $('learn').addEventListener('click',()=>{if(!frame||!catalog)return;const [kind,index]=$('learn-kind').value.split(':'),id=$('learn-id').value,ref=vision.learn(frame,kind,id,kind.startsWith('chip-')?Number($('learn-slot').value):Number(index)),list=kind.startsWith('chip-')?custom.chips:custom.characters;if(custom.characters.length+custom.chips.length>=500){status('見本は最大500件です。');return;}if(!list.some(r=>r.id===ref.id&&r.kind===ref.kind&&r.data===ref.data))list.push(ref);generation++;stable.clear();sameFrames=0;lastHash=null;save();read();});
  $('export').addEventListener('click',()=>{const url=URL.createObjectURL(new Blob([JSON.stringify({version:1,...custom,area},null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='screen-reader-profile.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});

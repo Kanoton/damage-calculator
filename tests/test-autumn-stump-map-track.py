@@ -1,0 +1,169 @@
+#!/usr/bin/env python3
+"""Research-only tests: no automatic map IDs or production writes."""
+import importlib.util
+import unittest
+from pathlib import Path
+
+p = Path(__file__).resolve().parents[1] / 'scripts/review-autumn-stump-map-track.py'
+spec = importlib.util.spec_from_file_location('stump_map_track', p)
+m = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(m)
+
+
+def pair(x, y):
+    return {'stump': {'x': x, 'y': y},
+            'tile': {'x': x+46, 'y': y+4},
+            'tile_side_of_stump': 'right'}
+
+
+def frame(x, built=None, verified=True, observation_id=None, time_ms=None):
+    row = {'pairs': [pair(x, 100)], 'building_evidence': []}
+    if observation_id is not None:
+        row['observation_id'] = observation_id
+    if time_ms is not None:
+        row['observed_at_ms'] = time_ms
+    if built is not None:
+        row['building_evidence'] = [
+            {'pair_index': 0, 'state': built, 'human_reviewed': verified}]
+    return row
+
+
+class TrackTests(unittest.TestCase):
+    def test_camera_translation_retains_human_slot_and_two_reviewed_built_frames(self):
+        a, b = (frame(120, 'built', observation_id='frame-a', time_ms=1000),
+                frame(130, 'built', observation_id='frame-b', time_ms=1450))
+        b.update({'camera_verified': True,
+                  'affine_from_previous': [[1, 0, 10], [0, 1, 0]]})
+        report = m.track(
+            [a, b], [{'pair_index': 0, 'slot_id': 'O04',
+                      'human_verified': True}])
+        self.assertEqual(
+            report['frames'][1]['tracked'][0]['slot_id_if_human_anchored'],
+            'O04')
+        self.assertEqual(len(report['pending_build_review']), 1)
+        self.assertEqual(report['pending_build_review'][0]['slot_id'], 'O04')
+        self.assertFalse(report['building_state_applied'])
+        self.assertEqual(report['production_application'], 'forbidden')
+
+    def test_duplicate_or_unstamped_frames_never_support_review(self):
+        a, b = frame(120, 'built'), frame(130, 'built')
+        b.update({'camera_verified': True,
+                  'affine_from_previous': [[1, 0, 10], [0, 1, 0]]})
+        anchor=[{'pair_index': 0, 'slot_id': 'I12', 'human_verified': True}]
+        self.assertEqual(m.track([a,b],anchor)['pending_build_review'],[])
+        a['observation_id'],a['observed_at_ms']='capture-a',1000
+        b['observation_id'],b['observed_at_ms']='capture-b',1100
+        self.assertEqual(m.track([a,b],anchor)['pending_build_review'],[])
+        b['observed_at_ms']=1300
+        self.assertEqual(len(m.track([a,b],anchor)['pending_build_review']),1)
+        b['observation_id']='capture-a'
+        with self.assertRaisesRegex(ValueError,'Duplicate observation ID'):
+            m.track([a,b],anchor)
+        b['observation_id']='capture-b'
+        b['observed_at_ms']=1000
+        with self.assertRaisesRegex(ValueError,'times must increase'):
+            m.track([a,b],anchor)
+
+    def test_invalid_observation_metadata_rejected(self):
+        for key,value in [('observation_id',''),('observation_id',123),
+                          ('observed_at_ms',True),('observed_at_ms',float('nan')),
+                          ('observed_at_ms',-5)]:
+            scene=frame(120,'built')
+            scene[key]=value
+            with self.subTest(key=key,value=value),self.assertRaises(ValueError):
+                m.track([scene])
+
+    def test_no_manual_anchor_no_slot_proposal_even_when_built_twice(self):
+        a, b = frame(120, 'built'), frame(130, 'built')
+        b.update({'camera_verified': True,
+                  'affine_from_previous': [[1, 0, 10], [0, 1, 0]]})
+        report = m.track([a, b])
+        self.assertEqual(report['pending_build_review'], [])
+        self.assertIsNone(
+            report['frames'][1]['tracked'][0]['slot_id_if_human_anchored'])
+
+    def test_bad_camera_does_not_propagate_or_invent_identity(self):
+        a, b = frame(120, 'built'), frame(130, 'built')
+        b.update({'camera_verified': False,
+                  'affine_from_previous': [[1, 0, 10], [0, 1, 0]]})
+        report = m.track(
+            [a, b], [{'pair_index': 0, 'slot_id': 'O04',
+                      'human_verified': True}])
+        self.assertTrue(report['camera_tracking_disconnected'])
+        self.assertEqual(report['frames'][1]['tracked'], [])
+        self.assertEqual(report['pending_build_review'], [])
+
+    def test_missing_and_empty_do_not_revert_built(self):
+        a, b = frame(120, 'built'), frame(130, 'empty')
+        b.update({'camera_verified': True,
+                  'affine_from_previous': [[1, 0, 10], [0, 1, 0]]})
+        report = m.track(
+            [a, b], [{'pair_index': 0, 'slot_id': 'O04',
+                      'human_verified': True}])
+        self.assertFalse(report['building_state_applied'])
+        self.assertEqual(report['pending_build_review'], [])
+
+    def test_unreviewed_evidence_never_counts(self):
+        a, b = frame(120, 'built', False), frame(130, 'built')
+        b.update({'camera_verified': True,
+                  'affine_from_previous': [[1, 0, 10], [0, 1, 0]]})
+        report = m.track(
+            [a, b], [{'pair_index': 0, 'slot_id': 'O04',
+                      'human_verified': True}])
+        self.assertEqual(report['pending_build_review'], [])
+
+    def test_contradictory_reviewed_build_and_empty_blocks_proposal(self):
+        a, b, c = frame(120, 'built'), frame(130, 'empty'), frame(140, 'built')
+        b.update({'camera_verified': True,
+                  'affine_from_previous': [[1, 0, 10], [0, 1, 0]]})
+        c.update({'camera_verified': True,
+                  'affine_from_previous': [[1, 0, 10], [0, 1, 0]]})
+        report = m.track(
+            [a, b, c], [{'pair_index': 0, 'slot_id': 'O04',
+                         'human_verified': True}])
+        self.assertEqual(report['pending_build_review'], [])
+        self.assertEqual(report['conflicting_reviewed_build_states'], ['O04'])
+
+    def test_slot_collision_or_unverified_anchor_rejected(self):
+        a = {'pairs': [pair(120, 100), pair(220, 100)]}
+        for anchors in (
+                [{'pair_index': 0, 'slot_id': 'O04',
+                  'human_verified': False}],
+                [{'pair_index': 0, 'slot_id': 'O07',
+                  'human_verified': True}],
+                [{'pair_index': 0, 'slot_id': 'O04',
+                  'human_verified': True},
+                 {'pair_index': 1, 'slot_id': 'O04',
+                  'human_verified': True}]):
+            with self.assertRaises(ValueError):
+                m.track([a], anchors)
+
+    def test_actual_canonical_o_and_i_slots_are_accepted(self):
+        expected={'O04','O05','O06','O15','O16','O17',
+                  'O23','O24','O25','O31','O32','O33',
+                  'I04','I05','I11','I12'}
+        self.assertEqual(m.canonical_slots(),expected)
+        for slot in ('O17','O33','I04','I12'):
+            result=m.track([frame(120,'built')],
+                           [{'pair_index':0,'slot_id':slot,
+                             'human_verified':True}])
+            self.assertEqual(result['human_verified_anchor_count'],1)
+            self.assertEqual(result['frames'][0]['tracked'][0]
+                             ['slot_id_if_human_anchored'],slot)
+        for slot in ('O7','O1','O07','O34','I01','I13','O4'):
+            with self.assertRaises(ValueError):
+                m.track([frame(120,'built')],
+                        [{'pair_index':0,'slot_id':slot,'human_verified':True}])
+
+    def test_partial_visibility_abstains_instead_of_reassigning(self):
+        a = {'pairs': [pair(120, 100), pair(220, 100)]}
+        b = {'pairs': [pair(130, 100)], 'camera_verified': True,
+             'affine_from_previous': [[1, 0, 10], [0, 1, 0]]}
+        report = m.track(
+            [a, b], [{'pair_index': 0, 'slot_id': 'O04',
+                      'human_verified': True}])
+        self.assertEqual(report['frames'][1]['tracked'], [])
+
+
+if __name__ == '__main__':
+    unittest.main()
