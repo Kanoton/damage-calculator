@@ -66,6 +66,25 @@ class EmptyProposalTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             m.audit_labeled(proposals,[{'cx':True,'cy':145,'expected':'occupied'}])
 
+    def test_nearest_empty_does_not_hide_occupied_in_radius(self):
+        # The greedy diagnostic assigns this proposal to the nearer empty
+        # label; the strict safety gate must still notice the occupied pot.
+        proposals=[{'x':170.0,'y':145.0}]
+        labels=[{'cx':170,'cy':145,'expected':'__empty__'},
+                {'cx':181,'cy':145,'expected':'occupied'}]
+        report=m.audit_labeled(proposals,labels)
+        self.assertEqual(report['matched_empty'],1)
+        self.assertEqual(report['matched_occupied_wrong_proposals'],0)
+        self.assertEqual(report['occupied_near_proposals'],1)
+        self.assertEqual(report['ambiguous_proposals'],1)
+
+    def test_duplicate_nearby_occupied_labels_count_one_proposal(self):
+        report=m.audit_labeled([{'x':170.0,'y':145.0}],
+                               [{'cx':170,'cy':145,'expected':'occupied'},
+                                {'cx':171,'cy':145,'expected':'occupied'}])
+        self.assertEqual(report['occupied_near_proposals'],1)
+        self.assertEqual(report['ambiguous_proposals'],0)
+
     def test_strict_cli_returns_2_for_occupied_proposal(self):
         with tempfile.TemporaryDirectory() as root:
             directory=Path(root)
@@ -89,6 +108,18 @@ class EmptyProposalTests(unittest.TestCase):
             self.assertEqual(result.returncode,0,result.stderr)
             self.assertEqual(json.loads(output.read_text(encoding='utf-8'))
                              ['audit']['matched_occupied_wrong_proposals'],0)
+            # Adding an occupied label near the same proposal must fail,
+            # even if the exact empty label wins greedy nearest matching.
+            labels.write_text(json.dumps({'samples':[
+                {'cx':170,'cy':145,'expected':'__empty__'},
+                {'cx':181,'cy':145,'expected':'occupied'}]}),
+                encoding='utf-8')
+            result=subprocess.run(cmd,capture_output=True,text=True,check=False)
+            self.assertEqual(result.returncode,2,result.stderr)
+            audit=json.loads(output.read_text(encoding='utf-8'))['audit']
+            self.assertEqual(audit['matched_occupied_wrong_proposals'],0)
+            self.assertEqual(audit['occupied_near_proposals'],1)
+            self.assertEqual(audit['ambiguous_proposals'],1)
 
 
 if __name__=='__main__':unittest.main()
