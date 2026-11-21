@@ -8,12 +8,26 @@ item, not a production write. Missing frames, bad transforms, or disagreement
 abstain; previously seen occupancy is never erased by disappearance.
 """
 import argparse
+import csv
 import importlib.util
 import json
 import math
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+SLOTS_CSV = HERE.parent / 'csv/map_building_slots.csv'
+
+
+def canonical_slots(path=SLOTS_CSV):
+    """Load MAP0105's actual O/I slot identifiers; never invent O1..O16."""
+    with path.open(encoding='utf-8-sig', newline='') as handle:
+        ids = [row['slot_id'] for row in csv.DictReader(handle)
+               if row['map_id'] == 'MAP0105']
+    if len(ids) != 16 or len(set(ids)) != 16:
+        raise ValueError('Expected 16 unique canonical MAP0105 slots')
+    return frozenset(ids)
+
+
 
 
 def _load_temporal():
@@ -66,16 +80,16 @@ def track(frames, anchors=None):
     anchors = [] if anchors is None else anchors
     if not isinstance(anchors, list):
         raise ValueError('anchors must be a list')
+    valid_slots = canonical_slots()
     anchor_map, slot_set = {}, set()
     for anchor in anchors:
         if not isinstance(anchor, dict) or type(anchor.get('pair_index')) is not int:
             raise ValueError('Invalid anchor')
         idx, slot = anchor['pair_index'], anchor.get('slot_id')
         if (idx < 0 or idx >= len(frames[0]['pairs']) or idx in anchor_map
-                or not isinstance(slot, str) or slot not in
-                {f'O{i}' for i in range(1, 17)} or slot in slot_set
+                or not isinstance(slot, str) or slot not in valid_slots or slot in slot_set
                 or anchor.get('human_verified') is not True):
-            raise ValueError('Anchors require unique human-verified O1..O16')
+            raise ValueError('Anchors require unique human-verified MAP0105 O/I slots')
         anchor_map[idx] = slot
         slot_set.add(slot)
     temporal = _load_temporal()
