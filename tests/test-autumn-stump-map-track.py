@@ -22,7 +22,7 @@ REFERENCE = json.loads(
 transfer_script = p.parents[1] / 'scripts/review-autumn-confirmed-anchor-transfer.py'
 transfer_spec = importlib.util.spec_from_file_location('stump_transfer', transfer_script)
 transfer = importlib.util.module_from_spec(transfer_spec)
-transfer_spec.loader.exec_module(transfer_spec)
+transfer_spec.loader.exec_module(transfer)
 
 def reviewed_anchors():
     return {
