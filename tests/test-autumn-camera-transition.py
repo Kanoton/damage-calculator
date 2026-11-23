@@ -53,32 +53,36 @@ class CameraTransitionTests(unittest.TestCase):
 
     def test_reverse_failure_and_roundtrip_disagreement_abstain(self):
         image=board()
+        distinct=image.copy()
+        distinct[10,10]=[30,50,80]
         yes={'status':'same-view-candidate',
              'affine_2x3':[[1,0,10],[0,1,5]]}
         no={'status':'abstain','reason':'insufficient-matches'}
         with patch.object(module,'continuity',side_effect=[yes,no]):
-            result=module.bidirectional_continuity(image,image)
+            result=module.bidirectional_continuity(image,distinct)
         self.assertEqual(result['reason'],'reverse-not-verified')
         self.assertEqual(result['reverse_status'],'abstain')
         wrong={'status':'same-view-candidate',
                'affine_2x3':[[1,0,-4],[0,1,-5]]}
         with patch.object(module,'continuity',side_effect=[yes,wrong]):
-            result=module.bidirectional_continuity(image,image)
+            result=module.bidirectional_continuity(image,distinct)
         self.assertEqual(result['reason'],'inconsistent-roundtrip')
         self.assertGreater(result['max_roundtrip_error_px'],4)
 
     def test_bidirectional_strict_invalid_matrices_and_threshold(self):
         image=board()
+        distinct=image.copy()
+        distinct[10,10]=[30,50,80]
         yes={'status':'same-view-candidate',
              'affine_2x3':[[1,0,0],[0,1,0]]}
         malformed={'status':'same-view-candidate',
                    'affine_2x3':[[1,0],[0,1]]}
         with patch.object(module,'continuity',side_effect=[yes,malformed]):
-            result=module.bidirectional_continuity(image,image)
+            result=module.bidirectional_continuity(image,distinct)
         self.assertEqual(result['reason'],'invalid-camera-matrix')
         for threshold in (True,0,float('nan'),float('inf')):
             with self.assertRaises(ValueError):
-                module.bidirectional_continuity(image,image,threshold)
+                module.bidirectional_continuity(image,distinct,threshold)
 
     def test_unrelated_board_abstains(self):
         answer = module.continuity(board(1), board(2))
