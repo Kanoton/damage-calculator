@@ -2,6 +2,7 @@
 import importlib.util
 from pathlib import Path
 import unittest
+from unittest.mock import patch
 import cv2
 import numpy as np
 
@@ -30,6 +31,42 @@ class CameraTransitionTests(unittest.TestCase):
         answer = module.continuity(a, b)
         self.assertEqual(answer['status'], 'same-view-candidate', answer)
         self.assertGreaterEqual(answer['regions_before'], 3)
+
+    def test_bidirectional_identity_matches_only_as_research_candidate(self):
+        result=module.bidirectional_continuity(board(),board().copy())
+        self.assertEqual(result['status'],'same-view-candidate',result)
+        self.assertEqual(result['max_roundtrip_error_px'],0)
+        self.assertFalse(result['slot_ids_verified'])
+        self.assertEqual(result['production_application'],'forbidden')
+
+    def test_reverse_failure_and_roundtrip_disagreement_abstain(self):
+        image=board()
+        yes={'status':'same-view-candidate',
+             'affine_2x3':[[1,0,10],[0,1,5]]}
+        no={'status':'abstain','reason':'insufficient-matches'}
+        with patch.object(module,'continuity',side_effect=[yes,no]):
+            result=module.bidirectional_continuity(image,image)
+        self.assertEqual(result['reason'],'reverse-not-verified')
+        self.assertEqual(result['reverse_status'],'abstain')
+        wrong={'status':'same-view-candidate',
+               'affine_2x3':[[1,0,-4],[0,1,-5]]}
+        with patch.object(module,'continuity',side_effect=[yes,wrong]):
+            result=module.bidirectional_continuity(image,image)
+        self.assertEqual(result['reason'],'inconsistent-roundtrip')
+        self.assertGreater(result['max_roundtrip_error_px'],4)
+
+    def test_bidirectional_strict_invalid_matrices_and_threshold(self):
+        image=board()
+        yes={'status':'same-view-candidate',
+             'affine_2x3':[[1,0,0],[0,1,0]]}
+        malformed={'status':'same-view-candidate',
+                   'affine_2x3':[[1,0],[0,1]]}
+        with patch.object(module,'continuity',side_effect=[yes,malformed]):
+            result=module.bidirectional_continuity(image,image)
+        self.assertEqual(result['reason'],'invalid-camera-matrix')
+        for threshold in (True,0,float('nan'),float('inf')):
+            with self.assertRaises(ValueError):
+                module.bidirectional_continuity(image,image,threshold)
 
     def test_unrelated_board_abstains(self):
         answer = module.continuity(board(1), board(2))
