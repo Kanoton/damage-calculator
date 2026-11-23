@@ -11,6 +11,15 @@ m = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(m)
 
 
+audit_script = p.parents[1] / 'scripts/review-autumn-confirmed-slot-sets.py'
+audit_spec = importlib.util.spec_from_file_location('stump_confirmed_sets', audit_script)
+scene_audit = importlib.util.module_from_spec(audit_spec)
+audit_spec.loader.exec_module(scene_audit)
+REFERENCE = json.loads(
+    (p.parents[1] / 'docs/research/autumn-map0105-13-screen-slot-confirmations.json')
+    .read_text(encoding='utf-8'))
+
+
 def pair(x, y):
     return {'stump': {'x': x, 'y': y},
             'tile': {'x': x+46, 'y': y+4},
@@ -167,6 +176,45 @@ class TrackTests(unittest.TestCase):
                             if i!=3))
         self.assertTrue(all('cx' not in str(row) and 'cy' not in str(row)
                             for row in scenes))
+
+    def test_confirmed_scene_sets_audit_is_not_per_stump_verification(self):
+        predictions = [
+            {'image_number':'04','candidate_slot_ids':['O17','O16','O15']},
+            {'image_number':'09','candidate_slot_ids':['O17','O16','O15']},
+        ]
+        result = scene_audit.audit(predictions, REFERENCE, m.canonical_slots())
+        self.assertEqual(result['scene_sets_exact'],2)
+        self.assertEqual(result['scenes_not_scored'],11)
+        self.assertFalse(result['pixel_positions_verified'])
+        self.assertFalse(result['slot_ids_verified_automatically'])
+        self.assertEqual(result['production_application'],'forbidden')
+        self.assertTrue(all(not row['per_stump_correspondence_verified']
+                            for row in result['results']))
+
+    def test_confirmed_set_audit_exposes_wrong_or_missing_slots(self):
+        predictions = [
+            {'image_number':'04','candidate_slot_ids':['O17','O16','I12']},
+            {'image_number':'05','candidate_slot_ids':['O24','O25']},
+        ]
+        result = scene_audit.audit(predictions, REFERENCE, m.canonical_slots())
+        self.assertEqual(result['extra_slot_mentions'],1)
+        self.assertEqual(result['missing_slot_mentions'],2)
+        self.assertEqual(result['results'][0]['extra_slot_ids'],['I12'])
+        self.assertEqual(result['results'][0]['missing_slot_ids'],['O15'])
+        self.assertEqual(result['results'][1]['missing_slot_ids'],['O23'])
+        self.assertEqual(result['scene_sets_exact'],0)
+
+    def test_confirmed_set_audit_rejects_phantom_duplicate_and_unlisted_images(self):
+        rows = [
+            [{'image_number':'04','candidate_slot_ids':['O07']}],
+            [{'image_number':'04','candidate_slot_ids':['O17','O17']}],
+            [{'image_number':'99','candidate_slot_ids':[]}],
+            [{'image_number':'04','candidate_slot_ids':[]},
+             {'image_number':'04','candidate_slot_ids':[]}],
+        ]
+        for predictions in rows:
+            with self.subTest(rows=predictions), self.assertRaises(ValueError):
+                scene_audit.audit(predictions, REFERENCE, m.canonical_slots())
 
     def test_actual_canonical_o_and_i_slots_are_accepted(self):
         expected={'O04','O05','O06','O15','O16','O17',
