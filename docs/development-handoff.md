@@ -1,5 +1,13 @@
 # Development Handoff
 
+## 2026-11-24：投影した04番A/B/Cとターゲットの匿名台座候補を別経路で突き合わせる（PR #286 Draft）
+
+- 前回head `e681180b` の研究、08、共通、07横長/モバイル/スキルCIはすべてsuccess。明示要求時のみの全量テストは予定どおりskipped。
+- `scripts/review-autumn-confirmed-anchor-transfer.py` に `cross_check_candidates` を追加。ユーザー確認済み04番の3台座を別画像に投影できたとき、**転送先の画像から独立に検出した匿名の水面＋切り株・タイル側候補**（`review-autumn-stump-frame-audit.py`）と照合する。15px以内、次点候補と5px以上差、一候補に二つの投影を重ねない条件を満たす3件がなければ、欠落・競合・一対多対応として保留。投影元もターゲット検出も研究候補であり、背景や植物を誤認しうるため、一致しても結果は `anonymous-candidate-cross-check-only` / `target_pixel_verified=false` / `production_application=forbidden`。
+- CLIはカメラ幾何・確認済みマス集合を通過したときのみ、ターゲット画像の独立台座候補をローカルで再検出し `anonymous_candidate_cross_check` に診断を付記する。正本CSV、UI、植物・建築自動反映は変更せず、元画像や非公開画素座標はGitHubへ置かない。
+- 合成回帰テストを `tests/test-autumn-stump-map-track.py` に追加：投影3件と独立候補3件の一意対応、検出欠落、競合候補、同じ候補の取り合い、視点ゲート棄却、無効座標を検証。13枚の実画像について前回厳格なカメラゲートが04→09/11/13で通らなかったため、**今の実画像で転送先のスロット識別が成功したという実績はまだない**。条件緩和で無理に採用しない。PR Draft・未マージ。
+
+
 ## 2026-11-23：04番A/B/C確認済みアンカーからの安全側の画像間投影（PR #286 Draft）
 
 - 前回head `eef9c811` の秋幻研究、08、共通、07のブラウザCIはすべてsuccess。明示要求限定全量テストはskipped。
