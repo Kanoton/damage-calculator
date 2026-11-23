@@ -1,0 +1,118 @@
+{
+  "map_id": "MAP0105",
+  "source": "User-confirmed image-number to canonical building-slot associations (2026-11-23)",
+  "purpose": "research-only slot-presence supervision; not plant/empty status, pixel centers, or automatic placement",
+  "order_policy": "listed_slot_ids preserve the user's sequence; only image 04 has separately confirmed A/B/C individual marker correspondences. Never infer x/y order from other lists.",
+  "screenshots": [
+    {
+      "image_number": "01",
+      "listed_slot_ids": [
+        "I04",
+        "I05"
+      ]
+    },
+    {
+      "image_number": "02",
+      "listed_slot_ids": [
+        "O31",
+        "O32",
+        "O33"
+      ]
+    },
+    {
+      "image_number": "03",
+      "listed_slot_ids": [
+        "O04",
+        "O05",
+        "O06"
+      ]
+    },
+    {
+      "image_number": "04",
+      "listed_slot_ids": [
+        "O17",
+        "O16",
+        "O15"
+      ],
+      "marker_to_slot": {
+        "A": "O17",
+        "B": "O16",
+        "C": "O15"
+      }
+    },
+    {
+      "image_number": "05",
+      "listed_slot_ids": [
+        "O23",
+        "O24",
+        "O25"
+      ],
+      "partial_visibility": [
+        "O23"
+      ]
+    },
+    {
+      "image_number": "06",
+      "listed_slot_ids": [
+        "O23",
+        "O24",
+        "O25"
+      ]
+    },
+    {
+      "image_number": "07",
+      "listed_slot_ids": [
+        "I11",
+        "I12"
+      ]
+    },
+    {
+      "image_number": "08",
+      "listed_slot_ids": [
+        "O23",
+        "O24",
+        "O25"
+      ]
+    },
+    {
+      "image_number": "09",
+      "listed_slot_ids": [
+        "O15",
+        "O16",
+        "O17"
+      ]
+    },
+    {
+      "image_number": "10",
+      "listed_slot_ids": [
+        "O23",
+        "O24",
+        "O25"
+      ]
+    },
+    {
+      "image_number": "11",
+      "listed_slot_ids": [
+        "O15",
+        "O16",
+        "O17"
+      ]
+    },
+    {
+      "image_number": "12",
+      "listed_slot_ids": [
+        "O23",
+        "O24",
+        "O25"
+      ]
+    },
+    {
+      "image_number": "13",
+      "listed_slot_ids": [
+        "O15",
+        "O16",
+        "O17"
+      ]
+    }
+  ]
+}
