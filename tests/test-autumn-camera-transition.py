@@ -33,11 +33,23 @@ class CameraTransitionTests(unittest.TestCase):
         self.assertGreaterEqual(answer['regions_before'], 3)
 
     def test_bidirectional_identity_matches_only_as_research_candidate(self):
-        result=module.bidirectional_continuity(board(),board().copy())
+        first=board()
+        second=first.copy()
+        second[10, 10]=[30, 50, 80]  # Distinct pixels outside the matching ROI.
+        result=module.bidirectional_continuity(first,second)
         self.assertEqual(result['status'],'same-view-candidate',result)
         self.assertEqual(result['max_roundtrip_error_px'],0)
         self.assertFalse(result['slot_ids_verified'])
         self.assertEqual(result['production_application'],'forbidden')
+
+    def test_identical_screenshots_are_not_independent_transfer_evidence(self):
+        image=board()
+        report=module.bidirectional_continuity(image,image.copy())
+        self.assertEqual(report['status'],'abstain')
+        self.assertEqual(report['reason'],'identical-frames-not-independent')
+        self.assertEqual(report['forward_status'],'not-checked')
+        self.assertEqual(report['reverse_status'],'not-checked')
+        self.assertEqual(report['production_application'],'forbidden')
 
     def test_reverse_failure_and_roundtrip_disagreement_abstain(self):
         image=board()
