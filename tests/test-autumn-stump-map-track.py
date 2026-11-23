@@ -316,6 +316,29 @@ class TrackTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 transfer.cross_check_candidates(projection,bad)
 
+    def test_cross_check_rejects_tampered_projection_metadata(self):
+        projection=transfer.evaluate(reviewed_anchors(),'11',camera_ok(),REFERENCE)
+        centers=[{'x':230,'y':200},{'x':286,'y':153},{'x':342,'y':107}]
+        for tamper,value in (
+                ('slot_id_hypothesis','O15'),
+                ('marker','B'),
+                ('target_pixel_verified',True),
+                ('x',float('nan')),
+                ('x',True),
+                ('y',1000)):
+            altered={**projection,'projections':[dict(row) for row in projection['projections']]}
+            altered['projections'][0][tamper]=value
+            with self.subTest(tamper=tamper,value=value):
+                result=transfer.cross_check_candidates(altered,centers)
+                self.assertEqual(result['status'],'abstain')
+                self.assertEqual(result['reason'],'invalid-projection-evidence')
+                self.assertEqual(result['matches'],[])
+        altered={**projection,'projections':[dict(row) for row in projection['projections']]}
+        altered['projections'][2]=None
+        self.assertEqual(
+            transfer.cross_check_candidates(altered,centers)['reason'],
+            'invalid-projection-evidence')
+
     def test_actual_canonical_o_and_i_slots_are_accepted(self):
         expected={'O04','O05','O06','O15','O16','O17',
                   'O23','O24','O25','O31','O32','O33',
