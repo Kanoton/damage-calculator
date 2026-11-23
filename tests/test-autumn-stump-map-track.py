@@ -19,6 +19,24 @@ REFERENCE = json.loads(
     (p.parents[1] / 'docs/research/autumn-map0105-13-screen-slot-confirmations.json')
     .read_text(encoding='utf-8'))
 
+transfer_script = p.parents[1] / 'scripts/review-autumn-confirmed-anchor-transfer.py'
+transfer_spec = importlib.util.spec_from_file_location('stump_transfer', transfer_script)
+transfer = importlib.util.module_from_spec(transfer_spec)
+transfer_spec.loader.exec_module(transfer_spec)
+
+def reviewed_anchors():
+    return {
+        'A': {'slot_id':'O17','x':225,'y':204,'human_verified':True},
+        'B': {'slot_id':'O16','x':281,'y':157,'human_verified':True},
+        'C': {'slot_id':'O15','x':337,'y':111,'human_verified':True},
+    }
+
+
+def camera_ok():
+    return {'status':'same-view-candidate',
+            'affine_2x3':[[1,0,5],[0,1,-4]]}
+
+
 
 def pair(x, y):
     return {'stump': {'x': x, 'y': y},
@@ -215,6 +233,52 @@ class TrackTests(unittest.TestCase):
         for predictions in rows:
             with self.subTest(rows=predictions), self.assertRaises(ValueError):
                 scene_audit.audit(predictions, REFERENCE, m.canonical_slots())
+
+    def test_confirmed_anchor_projection_remains_unverified(self):
+        result=transfer.evaluate(reviewed_anchors(),'11',camera_ok(),REFERENCE)
+        self.assertEqual(result['status'],'hypotheses-for-human-review-only')
+        self.assertEqual([p['slot_id_hypothesis'] for p in result['projections']],
+                         ['O17','O16','O15'])
+        self.assertEqual([(p['x'],p['y']) for p in result['projections']],
+                         [(230.0,200.0),(286.0,153.0),(342.0,107.0)])
+        self.assertFalse(result['slot_ids_verified_automatically'])
+        self.assertFalse(any(p['target_pixel_verified'] for p in result['projections']))
+        self.assertEqual(result['production_application'],'forbidden')
+
+    def test_anchor_transfer_abstains_on_unverified_camera_or_different_group(self):
+        cases=[
+            ('11',{'status':'abstain'},'camera-continuity-not-verified'),
+            ('03',camera_ok(),'different-or-incomplete-slot-group'),
+            ('04',camera_ok(),'source-is-target-not-independent'),
+            ('13',{'status':'same-view-candidate',
+                   'affine_2x3':[[1,0,300],[0,1,0]]},
+             'projection-outside-reviewed-board'),
+            ('09',{'status':'same-view-candidate',
+                   'affine_2x3':[[1.5,0,0],[0,1.5,0]]},
+             'unsafe-camera-scale-or-skew'),
+            ('11',{'status':'same-view-candidate','affine_2x3':[[1,0],[0,1]]},
+             'invalid-camera-matrix'),
+        ]
+        for number,camera,reason in cases:
+            with self.subTest(number=number,reason=reason):
+                result=transfer.evaluate(reviewed_anchors(),number,camera,REFERENCE)
+                self.assertEqual(result['status'],'abstain')
+                self.assertEqual(result['reason'],reason)
+                self.assertEqual(result['projections'],[])
+
+    def test_anchor_transfer_rejects_unverified_or_swapped_marker(self):
+        for modifier in ('swapped','unverified','out-of-bounds','missing'):
+            anchors=reviewed_anchors()
+            if modifier=='swapped':
+                anchors['A']['slot_id']='O15'
+            elif modifier=='unverified':
+                anchors['B']['human_verified']=False
+            elif modifier=='out-of-bounds':
+                anchors['C']['x']=float('nan')
+            else:
+                anchors.pop('A')
+            with self.subTest(modifier=modifier),self.assertRaises(ValueError):
+                transfer.evaluate(anchors,'11',camera_ok(),REFERENCE)
 
     def test_actual_canonical_o_and_i_slots_are_accepted(self):
         expected={'O04','O05','O06','O15','O16','O17',
