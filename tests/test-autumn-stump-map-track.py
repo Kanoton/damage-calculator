@@ -322,6 +322,7 @@ class TrackTests(unittest.TestCase):
         for tamper,value in (
                 ('slot_id_hypothesis','O15'),
                 ('marker','B'),
+                ('marker',['B']),
                 ('target_pixel_verified',True),
                 ('x',float('nan')),
                 ('x',True),
