@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Research-only tests: no automatic map IDs or production writes."""
 import importlib.util
+import json
 import unittest
 from pathlib import Path
 
@@ -137,6 +138,35 @@ class TrackTests(unittest.TestCase):
                   'human_verified': True}]):
             with self.assertRaises(ValueError):
                 m.track([a], anchors)
+
+    def test_user_confirmed_13_screenshot_slot_groups_match_canonical_csv(self):
+        # IDs only: do not store user screenshots or infer on-screen order.
+        data_path = p.parents[1] / 'docs/research/autumn-map0105-13-screen-slot-confirmations.json'
+        data = json.loads(data_path.read_text(encoding='utf-8'))
+        self.assertEqual(data['map_id'], 'MAP0105')
+        scenes = data['screenshots']
+        self.assertEqual([row['image_number'] for row in scenes],
+                         [f'{i:02d}' for i in range(1, 14)])
+        expected = [
+            ['I04','I05'], ['O31','O32','O33'], ['O04','O05','O06'],
+            ['O17','O16','O15'], ['O23','O24','O25'],
+            ['O23','O24','O25'], ['I11','I12'], ['O23','O24','O25'],
+            ['O15','O16','O17'], ['O23','O24','O25'],
+            ['O15','O16','O17'], ['O23','O24','O25'],
+            ['O15','O16','O17']
+        ]
+        self.assertEqual([row['listed_slot_ids'] for row in scenes], expected)
+        self.assertEqual(sum(map(len, expected)), 37)
+        canonical = m.canonical_slots()
+        self.assertEqual({slot for group in expected for slot in group}, canonical)
+        self.assertTrue(all(len(group)==len(set(group)) for group in expected))
+        self.assertEqual(scenes[3]['marker_to_slot'],
+                         {'A':'O17','B':'O16','C':'O15'})
+        self.assertEqual(scenes[4]['partial_visibility'], ['O23'])
+        self.assertTrue(all('marker_to_slot' not in row for i,row in enumerate(scenes)
+                            if i!=3))
+        self.assertTrue(all('cx' not in str(row) and 'cy' not in str(row)
+                            for row in scenes))
 
     def test_actual_canonical_o_and_i_slots_are_accepted(self):
         expected={'O04','O05','O06','O15','O16','O17',
