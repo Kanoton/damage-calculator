@@ -1,5 +1,13 @@
 # Development Handoff
 
+## 2026-11-24：投影候補のID取り違え・破損データに対する検証強化（PR #286 Draft）
+
+- 前回head `69f57bf1` の研究、07 wide/mobile/skill、共通browser CIはsuccess。08 smokeは今回の確認時点でin_progressだったので、全完了と見なさない。
+- `scripts/review-autumn-confirmed-anchor-transfer.py` の `cross_check_candidates` は、`status=hypotheses-for-human-review-only` の入力について、個々の`projections`のマーカー・スロット・座標の整合性を十分確認せず、独立匿名候補と一致すると研究結果に渡せる状態だった。研究用であり本番登録は無効だが、検証結果の汚染を防ぐためA=O17/B=O16/C=O15の3件一意性、未確認フラグ、有限な画面内座標を個別に検査する。改変・重複・破損があれば`invalid-projection-evidence`で保留、`matches=[]`を維持。
+- `tests/test-autumn-stump-map-track.py` にスロット交換、マーカー重複と非文字列、勝手な検証済みフラグ、NaN/真偽値/画面外座標、破損行の各合成回帰を追加。独立した実ゲームの認識精度を測ったわけではなく、UI・CSV・マップ状態は一切変更しない。追加したCLIガードとテストはGitHubへ反映。最終CIを確認するまで今回の変更は成功扱いしない。
+- 画像04以外の台座ピクセルへの正解ID付与は引き続き未検証。PR Draft、未マージ。カメラ連続性のある動画と人が確認した数箇所のマスを入手できれば実画像における一意性を再評価できる。
+
+
 ## 2026-11-24：台座アンカー投影のカメラ整合性を往復照合（PR #286 Draft）
 
 - 前回head `580c9b85` の秋幻研究と07 wide/mobileのCIはsuccess。08・共通ブラウザ・07 skillは最初の確認時点でin_progressであり、今回の変更のテスト成否とは区別する。
