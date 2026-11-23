@@ -1,5 +1,13 @@
 # Development Handoff
 
+## 2026-11-24：台座アンカー投影のカメラ整合性を往復照合（PR #286 Draft）
+
+- 前回head `580c9b85` の秋幻研究と07 wide/mobileのCIはsuccess。08・共通ブラウザ・07 skillは最初の確認時点でin_progressであり、今回の変更のテスト成否とは区別する。
+- `scripts/review-autumn-camera-transition.py` に研究用 `bidirectional_continuity` を追加。04→転送先のORB特徴点照合に加え、転送先→04の逆方向も既存の厳格条件を通過する必要がある。両方向の2×3アフィンを盤面の3×3サンプル点に適用し、最大往復位置誤差が4pxを超えれば `inconsistent-roundtrip` として保留。逆方向棄却・異常行列・不正閾値も保留/拒否し、同一方向だけの特徴点偶然一致では投影しない。
+- `scripts/review-autumn-confirmed-anchor-transfer.py` の実画像読み込みCLIで、従来の片方向 `continuity` から往復 `bidirectional_continuity` に変更。結果は従来どおり研究用の `slot_id_hypothesis`・`target_pixel_verified=false`、転送先の台座候補との一意性照合も引き続き行う。ブラウザやMAP0105正本CSV・自動建築登録への接続なし。
+- 合成画像の同一盤面、逆方向失敗、往復不一致、行列の形不正、閾値異常を `tests/test-autumn-camera-transition.py` に追加。これは**誤対応を抑えるための判定強化**で、既存13画像での自動認識精度の向上実績ではない。画像・私用注釈・個人情報はGitHubに保存しない。PRはDraft、未マージ、最終CI未確認。
+
+
 ## 2026-11-24：投影した04番A/B/Cとターゲットの匿名台座候補を別経路で突き合わせる（PR #286 Draft）
 
 - 前回head `e681180b` の研究、08、共通、07横長/モバイル/スキルCIはすべてsuccess。明示要求時のみの全量テストは予定どおりskipped。
