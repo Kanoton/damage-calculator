@@ -174,7 +174,7 @@ def main():
     if one is None or two is None or one.shape != (288, 512, 3) or two.shape != one.shape:
         raise ValueError('Inputs must be decoded 512x288 BGR frames')
     result = evaluate(json.loads(args.private_anchors.read_text(encoding='utf-8')),
-                      args.target_image_number, _camera_module().continuity(one, two),
+                      args.target_image_number, _camera_module().bidirectional_continuity(one, two),
                       json.loads(LABELS.read_text(encoding='utf-8')))
     # Independent color/water-based stump proposals are noisy and can miss
     # planted pots. Only record an anonymous cross-check, never approve IDs.
