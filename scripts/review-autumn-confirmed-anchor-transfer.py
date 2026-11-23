@@ -148,7 +148,7 @@ def cross_check_candidates(projection_result, detected_centers, radius=15,
             return {**base, 'reason': 'invalid-projection-evidence'}
         marker = row.get('marker')
         x, y = row.get('x'), row.get('y')
-        if (marker not in expected or marker in seen or
+        if (not isinstance(marker, str) or marker not in expected or marker in seen or
                 row.get('slot_id_hypothesis') != expected.get(marker) or
                 row.get('target_pixel_verified') is not False or
                 isinstance(x, bool) or isinstance(y, bool) or
