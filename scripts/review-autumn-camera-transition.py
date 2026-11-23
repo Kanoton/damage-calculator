@@ -80,6 +80,13 @@ def bidirectional_continuity(first, second, max_roundtrip_px=4.0):
             not isinstance(max_roundtrip_px, (int, float)) or
             not np.isfinite(max_roundtrip_px) or max_roundtrip_px <= 0):
         raise ValueError('Invalid roundtrip threshold')
+    # Re-submitting an identical still as a second "view" is not independent
+    # evidence of a second screenshot, even when ORB geometry is perfect.
+    if (isinstance(first, np.ndarray) and isinstance(second, np.ndarray)
+            and first.shape == second.shape and np.array_equal(first, second)):
+        return {'status': 'abstain', 'reason': 'identical-frames-not-independent',
+                'slot_ids_verified': False, 'production_application': 'forbidden',
+                'forward_status': 'not-checked', 'reverse_status': 'not-checked'}
     forward = continuity(first, second)
     base = {'status': 'abstain', 'reason': 'forward-not-verified',
             'slot_ids_verified': False, 'production_application': 'forbidden',
