@@ -1,5 +1,14 @@
 # Development Handoff
 
+## 2026-11-23：13画像の正解集合に対する安全なマス候補監査器（PR #286 Draft）
+
+- 13画像のユーザー確認済み正解マス集合を使い、`scripts/review-autumn-confirmed-slot-sets.py` を追加。研究器が各画像について提案する `candidate_slot_ids` を、`docs/research/autumn-map0105-13-screen-slot-confirmations.json` の画像別正解集合と比較する。マス一覧は正本 `csv/map_building_slots.csv` のMAP0105・16スロットと照合し、存在しないO/I番号、同一画像の二重提出、同一画像内のスロット重複は拒否。候補の余分なマス・不足したマス・完全一致した画像数を匿名集計。
+- `--fail-on-extra-slot` は画像の**正解集合にないマスIDの予測を1件でも出した場合に終了コード2**とする研究用ガード。対象画像の正解一覧を全て当てても**各台座のピクセル位置からどのIDが出たかの証明にはならない**ため、全結果の`per_stump_correspondence_verified`・`pixel_positions_verified`・`slot_ids_verified_automatically`はfalse、`production_application=forbidden`。植物6種・建築有無も未確認。
+- 既存の研究CI対象 `tests/test-autumn-stump-map-track.py` に合成候補の正解集合一致、存在しない画像とIDの拒否、見切れO23の欠落集計、正解集合だけで各台座IDを確定しないことの回帰を追加。画像・個人名・各台座の座標はGitHubへ保存せず、元スクリーンショットはローカル研究のみに使用。
+- 同じ13枚をローカルで縮小して暫定ORB部分アフィン照合（04→09/11/13）を試行。09は22良好対応のうちRANSAC幾何一致6点、11は241中88点、13は123中48点。**ランドマークの正解マスIDや個々の台座位置まで検証しておらず、11・13の一致数も正しいO/I割当の証拠ではない**。04以外のマスID集合は本人確認済みでも、列挙順から左右・画面位置への機械的割当は行わない。
+- PR #286 Draft・未マージ。実画像の個々のマス位置と分類の独立検証が必要。新コミットのCIを確認するまで今回のテストを成功と扱わない。
+
+
 ## 2026-11-23：ユーザー確認済み・実画像13枚のO/I建築マス対応表（PR #286 Draft）
 
 - ユーザーが画像番号01〜13と正本 `csv/map_building_slots.csv` の建築マスIDをすべて直接確認。対応は `docs/research/autumn-map0105-13-screen-slot-confirmations.json` に、**画像番号とマスIDのみ**記録した。13画像・延べ37マス観測・16種類の正本スロットすべてを網羅（37は重複観測を含む）。元画像、プレイヤー名、ゲーム状態、各鉢のピクセル位置はGitHubへ保存しない。
