@@ -47,6 +47,58 @@ function createAutumnBuildingEditor({root,beforeChange,onInteraction,onChange}){
   const old=current()[slot]||'';if(old===name){close();return;}
   beforeChange();contexts[context]??={};if(name)contexts[context][slot]=name;else delete contexts[context][slot];close();render();layer.querySelector('[data-slot="'+slot+'"]')?.focus();
  }
+ // Screen-reader writes must be independently verified and must never erase a manual placement.
+ // Missing or obstructed plants are unknown, not evidence of an empty slot.
+ function applyRecognized(result){
+  const rejected={added:0,unchanged:0,skipped:0,reason:'unverified'};
+  if(mapId!=='MAP0105'||!slots.length||!result||result.mapId!==mapId||result.difficulty!==JSON.parse(context||'[]')[1]||!Array.isArray(result.placements))return rejected;
+  if(result.placements.length<1||result.placements.length>16)return {...rejected,reason:'invalid-count'};
+  // A view must anchor the location, the type, and two independent frames.
+  if(result.viewVerified!==true||result.viewAmbiguous===true||!Array.isArray(result.landmarkClasses)||new Set(result.landmarkClasses).size<3||result.landmarkClasses.some(id=>typeof id!=='string'||!id||id.length>64)||!Number.isFinite(result.geometryResidualPx)||result.geometryResidualPx<0||result.geometryResidualPx>10||!Number.isInteger(result.frameCount)||result.frameCount<2||!Number.isFinite(result.confidence)||result.confidence<.95||!Array.isArray(result.observationIds)||result.observationIds.length<2||new Set(result.observationIds).size<2||result.observationIds.some(id=>typeof id!=='string'||!id||id.length>128))return rejected;
+  const seen=new Set();
+  for(const placement of result.placements){
+   if(!placement||typeof placement.slotId!=='string'||seen.has(placement.slotId)||!validPlacement(placement.slotId,placement.name)||
+      placement.locationVerified!==true||placement.typeVerified!==true||!Number.isFinite(placement.confidence)||placement.confidence<.95){
+    return {...rejected,reason:'ambiguous-placement'};
+   }
+   seen.add(placement.slotId);
+  }
+  const allowed=result.placements.filter(item=>!current()[item.slotId]);
+  const conflicts=result.placements.filter(item=>current()[item.slotId]&&current()[item.slotId]!==item.name);
+  const unchanged=result.placements.length-allowed.length-conflicts.length;
+  if(!allowed.length)return {added:0,unchanged,skipped:conflicts.length,reason:conflicts.length?'manual-conflict':'unchanged'};
+  beforeChange();contexts[context]??={};
+  for(const item of allowed)contexts[context][item.slotId]=item.name;
+  render();
+  return {added:allowed.length,unchanged,skipped:conflicts.length,reason:conflicts.length?'partial-conflict':'applied'};
+ }
+ // Explicit single-capture human review is independent from automated recognition.
+ // Never trust an O/I slot or plant name guessed from an unverified color blob.
+ function applyManuallyReviewed(result){
+  const rejected={added:0,unchanged:0,skipped:1,reason:'manual-review-required'};
+  if(mapId!=='MAP0105'||!slots.length||!result||
+     result.mode!=='single-capture-human-review'||result.humanConfirmed!==true||
+     result.mapId!==mapId||result.difficulty!==JSON.parse(context||'[]')[1]||
+     typeof result.slotId!=='string'||typeof result.name!=='string'||
+     !validPlacement(result.slotId,result.name))return rejected;
+  if(current()[result.slotId]){
+   return {added:0,unchanged:Number(current()[result.slotId]===result.name),
+           skipped:Number(current()[result.slotId]!==result.name),
+           reason:current()[result.slotId]===result.name?'unchanged':'manual-conflict'};
+  }
+  beforeChange();contexts[context]??={};contexts[context][result.slotId]=result.name;
+  render();
+  return {added:1,unchanged:0,skipped:0,reason:'manually-confirmed'};
+ }
+ function manualReviewOptions(){
+  let difficulty='';
+  try{difficulty=JSON.parse(context||'[]')[1]||'';}catch{return {mapId,difficulty,slots:[],cards:[]};}
+  return {mapId,difficulty,
+   slots:slots.map((row,index)=>({slotId:row.slot_id,label:'建築可能マス'+(index+1)+' ('+row.slot_id+')',
+    mapPlantX:Number(row.plant_x),mapPlantY:Number(row.plant_y),
+    mapWidth:Number(row.map_width),mapHeight:Number(row.map_height)})),
+   cards:cards().map(row=>({name:row.name}))};
+ }
  function open(slot,index){
   previewGuard=true;onInteraction();selected=slot;title.textContent='建築可能マス'+(index+1)+'の植物建築';choices.replaceChildren();
   for(const row of cards()){
@@ -60,6 +112,9 @@ function createAutumnBuildingEditor({root,beforeChange,onInteraction,onChange}){
  return {
   update(value){const next=JSON.stringify([value.mapId,value.difficulty]);if(context!==next)close();context=next;mapId=value.mapId;slots=(value.slots||[]).filter(row=>row.map_id===mapId);features=value.features||[];render();},
   count:()=>count(),
+  applyRecognized,
+  applyManuallyReviewed,
+  manualReviewOptions,
   allowsPreview:()=>!dialog.open&&!previewGuard,
   snapshot:()=>JSON.parse(JSON.stringify(contexts)),
   restore(value){contexts=value&&typeof value==='object'?JSON.parse(JSON.stringify(value)):{};close();render();},

@@ -1,0 +1,40 @@
+{
+  "reference_resolution": [
+    960,
+    540
+  ],
+  "reference_note": "Use resized 960x540 screenshot 20261115230742_1.jpg; user image not committed",
+  "landmarks": {
+    "lightning": [
+      699,
+      283
+    ],
+    "blue_move": [
+      766,
+      231
+    ],
+    "red_monster": [
+      617,
+      374
+    ]
+  },
+  "required_pair": [
+    "lightning",
+    "blue_move",
+    "red_monster"
+  ],
+  "slots": {
+    "O31": [
+      365,
+      282
+    ],
+    "O32": [
+      480,
+      210
+    ],
+    "O33": [
+      570,
+      151
+    ]
+  }
+}

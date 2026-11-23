@@ -30,6 +30,7 @@
   <strong>画面読取 <small>試作</small></strong>
   <button id="reader-connect" type="button">ゲーム画面を指定</button>
   <button id="reader-read" type="button" disabled>画面読取</button>
+  <button id="reader-building-capture" type="button" disabled>建築情報を取得</button>
   <label><input id="reader-auto" type="checkbox" disabled>自動読取</label>
   <button id="reader-stop" type="button" disabled>共有停止</button>
   <label class="reader-file-button">画像を選ぶ<input id="reader-file" type="file" accept="image/*"></label>
@@ -37,6 +38,31 @@
  </div>
  <p class="reader-help">新しい共有画面の最初の読取で、以前のゲーム状態をすべてリセットします。以後の読取は続きとして更新します。</p>
  <p id="reader-status" role="status" aria-live="polite">ゲームのウィンドウを指定するか、画像を選択・貼り付けてください。</p>
+ <p id="reader-building-status" role="status" aria-live="polite">取得した画像はありません。</p>
+ <details id="reader-building-review" hidden>
+  <summary>建築情報の1画面確認（手動補助）</summary>
+  <p class="reader-help">「建築情報を取得」を押すと、現在共有中のゲーム画面を一度だけ撮影して淡色・青緑色の参考候補を別々に表示します。3Dの切り株や植物の種類・O/I番号を自動確定する機能ではありません。画像上の場所とマップの建築可能マス、植物を自分で照合した場合のみ、1マスずつ反映できます。</p>
+   <canvas id="reader-building-frame" width="512" height="288" tabindex="0" aria-label="取得したゲーム画面。建築場所をクリックして位置を確認"></canvas>
+  <p id="reader-building-selection" role="status"></p>
+  <div class="reader-settings">
+   <label>建築可能マス <select id="reader-building-slot"><option value="">マスを選択</option></select></label>
+   <label>設置した植物 <select id="reader-building-plant"><option value="">植物を選択</option></select></label>
+  </div>
+  <div id="reader-building-map-check" hidden>
+   <p class="reader-help">選択した建築マスの位置（現在のマップ図）。ゲーム画面の選択位置と見比べてください。</p>
+   <div id="reader-building-map-preview">
+    <img id="reader-building-map-image" alt="現在のマップ図" />
+    <span id="reader-building-map-pin" aria-hidden="true"></span>
+   </div>
+   <p id="reader-building-map-label" role="status"></p>
+  </div>
+  <label><input id="reader-building-confirm" type="checkbox"> 画像とマップを見比べ、上記マス・植物を自分で確認しました</label>
+  <div class="reader-settings">
+   <button id="reader-building-apply" type="button">確認した1マスを反映</button>
+   <button id="reader-building-clear" type="button">取得画像を破棄</button>
+  </div>
+  <p class="reader-help">未確認・画面外・遮蔽された建物は変更せず、すでに手動登録した建築とも競合時には上書きしません。取得画像はこの画面内でのみ保持し、送信・保存しません。</p>
+ </details>
  <div class="reader-settings">
   <label><input id="reader-world-sync" type="checkbox">選択中のマップへラウンド・進捗・モンスターHPを反映</label>
   <label>監視間隔 <select id="reader-interval"><option value="250" selected>0.25秒（高速）</option><option value="500">0.5秒</option><option value="1200">1.2秒（省負荷）</option></select></label>
@@ -612,5 +638,6 @@
 <script src="js/mini-character-mapping-data.js"></script>
 <script src="js/mini-character-mapping.js"></script>
 <script src="js/screen-reader.js"></script>
+<script src="js/screen-reader-building-capture.js"></script>
 </body>
 </html>
