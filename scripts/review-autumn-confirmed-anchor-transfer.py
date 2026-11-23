@@ -138,6 +138,26 @@ def cross_check_candidates(projection_result, detected_centers, radius=15,
     projections = projection_result.get('projections')
     if not isinstance(projections, list) or len(projections) != 3:
         return base
+    # A research projection is not trusted just because its status string
+    # says "hypotheses". Reject swapped/duplicated labels or bad coordinates
+    # before searching anonymous image detections.
+    expected = {'A': 'O17', 'B': 'O16', 'C': 'O15'}
+    seen = set()
+    for row in projections:
+        if not isinstance(row, dict):
+            return {**base, 'reason': 'invalid-projection-evidence'}
+        marker = row.get('marker')
+        x, y = row.get('x'), row.get('y')
+        if (marker not in expected or marker in seen or
+                row.get('slot_id_hypothesis') != expected.get(marker) or
+                row.get('target_pixel_verified') is not False or
+                isinstance(x, bool) or isinstance(y, bool) or
+                not isinstance(x, (int, float)) or
+                not isinstance(y, (int, float)) or
+                not math.isfinite(x) or not math.isfinite(y) or
+                not (90 <= x < 490 and 30 <= y < 224)):
+            return {**base, 'reason': 'invalid-projection-evidence'}
+        seen.add(marker)
     assignments = []
     for row in projections:
         target = np.asarray([row['x'], row['y']], dtype=float)
