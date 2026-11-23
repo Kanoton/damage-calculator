@@ -1,5 +1,12 @@
 # Development Handoff
 
+## 2026-11-24：投影研究の入力検証と同一静止画二重使用の拒否（PR #286 Draft）
+
+- 04番A/B/C画像間投影の研究経路で、`cross_check_candidates` が `status` だけで壊れた `projections` を信用しないよう検証を追加。3件の一意な `A=O17/B=O16/C=O15`、非検証フラグ `target_pixel_verified=false`、有限な盤面内座標を照合し、入れ替え・重複・非文字列・NaN・bool・画面外・壊れた行は `invalid-projection-evidence` で保留する。合成回帰を追加し、研究照合が誤ラベルを正解として数えないようにした。
+- `review-autumn-camera-transition.py` の研究用往復照合は、同一静止画のコピーを異なる撮影として使っても十分なORB特徴点から`same-view-candidate`になれた。投影の二画像がピクセル完全一致なら`identical-frames-not-independent`で保留する。**画像内容の非一致だけで独立プレイ・時間差を証明するものではない**。静止画が違うことと正しいマスを認識したことを混同しない。従来の片方向`continuity`とブラウザは変更せず、研究用`bidirectional_continuity`だけに適用。
+- `tests/test-autumn-camera-transition.py` に完全一致画像の棄却、わずかに異なる画像を既存の特徴点/幾何条件で候補に残す試験を追加。13枚の実画像の04→09/11/13は従来条件で保留済みで、今回の変更は独立した実画像の識別成功の証拠ではない。正本CSV、MAP状態、元画像を変更せず、PRはDraft・未マージ。新コミットのCIが完了するまでは変更成功を未確定とする。
+
+
 ## 2026-11-24：投影候補のID取り違え・破損データに対する検証強化（PR #286 Draft）
 
 - 前回head `69f57bf1` の研究、07 wide/mobile/skill、共通browser CIはsuccess。08 smokeは今回の確認時点でin_progressだったので、全完了と見なさない。
