@@ -101,6 +101,65 @@ def evaluate(anchors, target_number, camera_result, reference):
                 for i, marker in enumerate(('A', 'B', 'C'))]}
 
 
+
+def cross_check_candidates(projection_result, detected_centers, radius=15,
+                           separation=5):
+    """Audit projected stumps against independently detected *anonymous* centers.
+
+    Any ambiguity or missing detection abstains for the entire triplet.
+    These are candidate positions, not identity verification: a tile or water
+    pot can be falsely detected and planted stumps are often absent.
+    """
+    base = {'status': 'abstain', 'reason': 'unverified-projections',
+            'matches': [], 'slot_ids_verified_automatically': False,
+            'production_application': 'forbidden'}
+    if (not isinstance(radius, (int, float)) or isinstance(radius, bool) or
+            not math.isfinite(radius) or radius <= 0 or
+            not isinstance(separation, (int, float)) or isinstance(separation, bool) or
+            not math.isfinite(separation) or separation < 0):
+        raise ValueError('Invalid matching gates')
+    if not isinstance(detected_centers, list):
+        raise ValueError('Expected anonymous target centers')
+    points = []
+    for center in detected_centers:
+        if not isinstance(center, dict):
+            raise ValueError('Invalid target center')
+        x, y = center.get('x'), center.get('y')
+        if (isinstance(x, bool) or isinstance(y, bool) or
+                not isinstance(x, (int, float)) or
+                not isinstance(y, (int, float)) or
+                not all(math.isfinite(v) for v in (x, y)) or
+                not (0 <= x < VIEW[0] and 0 <= y < VIEW[1])):
+            raise ValueError('Invalid target center coordinates')
+        points.append(np.asarray([x, y], dtype=float))
+    if (not isinstance(projection_result, dict) or
+            projection_result.get('status') != 'hypotheses-for-human-review-only'):
+        return base
+    projections = projection_result.get('projections')
+    if not isinstance(projections, list) or len(projections) != 3:
+        return base
+    assignments = []
+    for row in projections:
+        target = np.asarray([row['x'], row['y']], dtype=float)
+        distances = sorted((float(np.linalg.norm(target-p)), j)
+                           for j, p in enumerate(points))
+        if not distances or distances[0][0] > radius:
+            return {**base, 'reason': 'missing-independent-stump-candidate'}
+        if len(distances) > 1 and distances[1][0]-distances[0][0] < separation:
+            return {**base, 'reason': 'ambiguous-nearby-stump-candidates'}
+        assignments.append((row['marker'], row['slot_id_hypothesis'],
+                            distances[0][1], round(distances[0][0], 2)))
+    if len({item[2] for item in assignments}) < 3:
+        return {**base, 'reason': 'conflicting-stump-candidate-assignment'}
+    return {**base, 'status': 'anonymous-candidate-cross-check-only',
+            'reason': 'three-unique-candidates-not-verified-slot-ids',
+            'matches': [
+                {'marker': marker, 'slot_id_hypothesis': slot,
+                 'candidate_index': index, 'distance_px': dist,
+                 'target_pixel_verified': False}
+                for marker, slot, index, dist in assignments]}
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--source', type=Path, required=True)
