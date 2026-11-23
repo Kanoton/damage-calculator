@@ -176,6 +176,18 @@ def main():
     result = evaluate(json.loads(args.private_anchors.read_text(encoding='utf-8')),
                       args.target_image_number, _camera_module().continuity(one, two),
                       json.loads(LABELS.read_text(encoding='utf-8')))
+    # Independent color/water-based stump proposals are noisy and can miss
+    # planted pots. Only record an anonymous cross-check, never approve IDs.
+    if result['status'] == 'hypotheses-for-human-review-only':
+        spec = importlib.util.spec_from_file_location(
+            'autumn_transfer_independent_stumps',
+            HERE / 'review-autumn-stump-frame-audit.py')
+        frame_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(frame_module)
+        anonymous = [pair['stump']
+                     for pair in frame_module.analyze(two)['anonymous_pairs']]
+        result['anonymous_candidate_cross_check'] = cross_check_candidates(
+            result, anonymous)
     args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2)+'\n',
                            encoding='utf-8')
     print(json.dumps({'status': result['status'], 'reason': result['reason'],
