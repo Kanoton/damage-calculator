@@ -280,6 +280,42 @@ class TrackTests(unittest.TestCase):
             with self.subTest(modifier=modifier),self.assertRaises(ValueError):
                 transfer.evaluate(anchors,'11',camera_ok(),REFERENCE)
 
+    def test_projected_stumps_require_independent_unique_target_candidates(self):
+        projection=transfer.evaluate(reviewed_anchors(),'11',camera_ok(),REFERENCE)
+        centers=[{'x':230,'y':200},{'x':286,'y':153},{'x':342,'y':107}]
+        verified=transfer.cross_check_candidates(projection,centers)
+        self.assertEqual(verified['status'],'anonymous-candidate-cross-check-only')
+        self.assertEqual([item['candidate_index'] for item in verified['matches']],
+                         [0,1,2])
+        self.assertFalse(verified['slot_ids_verified_automatically'])
+        self.assertTrue(all(not item['target_pixel_verified']
+                            for item in verified['matches']))
+        self.assertEqual(verified['production_application'],'forbidden')
+
+    def test_candidate_cross_check_rejects_missing_competing_and_shared_centers(self):
+        projection=transfer.evaluate(reviewed_anchors(),'11',camera_ok(),REFERENCE)
+        centers=[{'x':230,'y':200},{'x':286,'y':153},{'x':342,'y':107}]
+        missing=transfer.cross_check_candidates(projection,centers[:2])
+        self.assertEqual(missing['reason'],'missing-independent-stump-candidate')
+        competing=transfer.cross_check_candidates(projection,
+                                                   centers+[{'x':231,'y':201}])
+        self.assertEqual(competing['reason'],'ambiguous-nearby-stump-candidates')
+        # Construct two close projections that attempt to consume one detected
+        # candidate: no candidate is allowed to support more than one marker.
+        shared=dict(projection)
+        shared['projections']=[dict(p) for p in projection['projections']]
+        shared['projections'][1]['x']=232
+        shared['projections'][1]['y']=200
+        conflict=transfer.cross_check_candidates(shared,centers)
+        self.assertEqual(conflict['reason'],'conflicting-stump-candidate-assignment')
+        abstain=transfer.cross_check_candidates(
+            {'status':'abstain','projections':[]},centers)
+        self.assertEqual(abstain['status'],'abstain')
+        for bad in ([{'x':float('nan'),'y':100}],
+                    [{'x':True,'y':100}]):
+            with self.assertRaises(ValueError):
+                transfer.cross_check_candidates(projection,bad)
+
     def test_actual_canonical_o_and_i_slots_are_accepted(self):
         expected={'O04','O05','O06','O15','O16','O17',
                   'O23','O24','O25','O31','O32','O33',
